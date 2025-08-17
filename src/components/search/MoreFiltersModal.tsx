@@ -81,26 +81,18 @@ export const MoreFiltersModal = ({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] bg-background border-border">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border">
-          <DialogTitle className="text-xl font-semibold text-foreground">
+          <DialogTitle className="text-2xl font-semibold text-foreground">
             Advanced Filter Options
           </DialogTitle>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={onClose}
-            className="hover:bg-muted/50"
-          >
-            <X className="h-4 w-4" />
-          </Button>
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 py-4 space-y-8">
           {/* Property Type Section */}
           <div>
-            <h3 className="text-lg font-medium text-foreground mb-4">Property Type</h3>
-            <div className="space-y-3">
+            <h3 className="text-xl font-medium text-foreground mb-6">Property Type</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {propertyTypeOptions.map((type) => (
-                <div key={type.value} className="flex items-center space-x-3">
+                <div key={type.value} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/30">
                   <Checkbox
                     id={`type-${type.value}`}
                     checked={filters.propertyTypes.includes(type.value)}
@@ -110,7 +102,7 @@ export const MoreFiltersModal = ({
                   />
                   <label 
                     htmlFor={`type-${type.value}`}
-                    className="text-sm text-foreground cursor-pointer"
+                    className="text-base text-foreground cursor-pointer font-medium"
                   >
                     {type.label}
                   </label>
@@ -121,10 +113,10 @@ export const MoreFiltersModal = ({
 
           {/* Amenities Section */}
           <div>
-            <h3 className="text-lg font-medium text-foreground mb-4">Amenities</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <h3 className="text-xl font-medium text-foreground mb-6">Amenities</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {amenityOptions.map((amenity) => (
-                <div key={amenity.value} className="flex items-center space-x-3">
+                <div key={amenity.value} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/30">
                   <Checkbox
                     id={`amenity-${amenity.value}`}
                     checked={filters.amenities.includes(amenity.value)}
@@ -134,7 +126,7 @@ export const MoreFiltersModal = ({
                   />
                   <label 
                     htmlFor={`amenity-${amenity.value}`}
-                    className="text-sm text-foreground cursor-pointer"
+                    className="text-base text-foreground cursor-pointer font-medium"
                   >
                     {amenity.label}
                   </label>
@@ -145,17 +137,17 @@ export const MoreFiltersModal = ({
 
           {/* Bathrooms Section */}
           <div>
-            <h3 className="text-lg font-medium text-foreground mb-4">Bathrooms</h3>
+            <h3 className="text-xl font-medium text-foreground mb-6">Bathrooms</h3>
             <Select 
               value={filters.bathrooms || "Any"} 
               onValueChange={(value) => onFiltersChange({ bathrooms: value })}
             >
-              <SelectTrigger className="w-full md:w-48 bg-background border-input">
+              <SelectTrigger className="w-full md:w-48 bg-background border-input text-base h-12">
                 <SelectValue placeholder="Any" />
               </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
+              <SelectContent className="bg-popover border-border z-50">
                 {bathroomOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50">
+                  <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50 text-base py-3">
                     {option.label} {option.label !== 'Any' ? 'Bathroom' + (option.label !== '1+' ? 's' : '') : ''}
                   </SelectItem>
                 ))}
@@ -165,14 +157,14 @@ export const MoreFiltersModal = ({
 
           {/* Availability Section */}
           <div>
-            <h3 className="text-lg font-medium text-foreground mb-4">Availability</h3>
+            <h3 className="text-xl font-medium text-foreground mb-6">Availability</h3>
             <div>
-              <label className="text-sm text-muted-foreground mb-2 block">Available From</label>
+              <label className="text-base text-muted-foreground mb-3 block font-medium">Available From</label>
               <Popover open={dateOpen} onOpenChange={setDateOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className="w-full md:w-64 justify-start text-left font-normal bg-background hover:bg-muted/50 border-input"
+                    className="w-full md:w-64 justify-start text-left font-normal bg-background hover:bg-muted/50 border-input h-12 text-base"
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {filters.availableFrom ? (
@@ -182,7 +174,7 @@ export const MoreFiltersModal = ({
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-popover border-border" align="start">
+                <PopoverContent className="w-auto p-0 bg-popover border-border z-50" align="start">
                   <Calendar
                     mode="single"
                     selected={filters.availableFrom}
@@ -201,15 +193,15 @@ export const MoreFiltersModal = ({
         </div>
 
         {/* Fixed Bottom Actions */}
-        <div className="flex justify-between items-center pt-4 border-t border-border bg-background">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex justify-between items-center pt-6 border-t border-border bg-background">
+          <div className="text-base text-muted-foreground font-medium">
             {getActiveFiltersCount()} filter{getActiveFiltersCount() !== 1 ? 's' : ''} applied
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-4">
             <Button 
               variant="outline" 
               onClick={onClearFilters}
-              className="hover:bg-muted/50"
+              className="hover:bg-muted/50 text-base px-6 py-3"
             >
               Clear All
             </Button>
@@ -218,7 +210,7 @@ export const MoreFiltersModal = ({
                 onApplyFilters();
                 onClose();
               }}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground text-base px-8 py-3"
             >
               Apply Filters
             </Button>

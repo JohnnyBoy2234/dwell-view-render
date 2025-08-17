@@ -130,7 +130,7 @@ export default function Properties() {
                 className="lg:w-32"
               >
                 <Filter className="h-4 w-4 mr-2" />
-                Filters
+                Advanced
               </Button>
             </div>
           </CardContent>

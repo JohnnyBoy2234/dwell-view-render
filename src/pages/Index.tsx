@@ -55,6 +55,20 @@ const Index = () => {
     if (filters.maxPrice && filters.maxPrice !== "") params.set("maxPrice", filters.maxPrice);
     if (filters.bedrooms && filters.bedrooms !== "Any") params.set("bedrooms", filters.bedrooms);
 
+    // Include advanced filters
+    if (advancedFilters.propertyTypes.length > 0) {
+      params.set("propertyTypes", advancedFilters.propertyTypes.join(','));
+    }
+    if (advancedFilters.amenities.length > 0) {
+      params.set("amenities", advancedFilters.amenities.join(','));
+    }
+    if (advancedFilters.bathrooms !== "Any") {
+      params.set("bathrooms", advancedFilters.bathrooms);
+    }
+    if (advancedFilters.availableFrom) {
+      params.set("availableFrom", advancedFilters.availableFrom.toISOString().split('T')[0]);
+    }
+
     const query = params.toString();
     console.debug("navigate /properties with query:", query, "filters:", filters);
     navigate(`/properties${query ? `?${query}` : ""}`);

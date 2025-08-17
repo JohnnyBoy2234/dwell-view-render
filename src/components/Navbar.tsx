@@ -8,6 +8,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUserProperties } from "@/hooks/useUserProperties";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useNotifications } from "@/hooks/useNotifications";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 const Navbar = () => {
   const location = useLocation();
@@ -63,7 +64,6 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
-                  <Button variant="outline" asChild><Link to="/list-property">List Property</Link></Button>
                   {isLandlord && hasProperties ? (
                     <Button variant="ghost" size="sm" asChild><Link to="/dashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Rental Manager</Link></Button>
                   ) : !isLandlord ? (
@@ -76,12 +76,31 @@ const Navbar = () => {
                       </Link>
                     </Button>
                   )}
-                  <DropdownMenu>{/* Notifications Menu */}</DropdownMenu>
-                  <DropdownMenu>{/* User Menu */}</DropdownMenu>
+                  <NotificationBell />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm">
+                        <User className="h-4 w-4 mr-2" />
+                        {user.email?.split('@')[0]}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="bg-background border-border z-50" align="end">
+                      <DropdownMenuItem asChild>
+                        <Link to={isLandlord ? "/dashboard" : "/tenant-dashboard"} className="cursor-pointer">
+                          <LayoutDashboard className="h-4 w-4 mr-2" />
+                          Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={signOut} className="cursor-pointer">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign Out
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               ) : (
                 <>
-                  <Button variant="outline" asChild><Link to="/list-property">List Property</Link></Button>
                   <Button asChild><Link to="/auth">Sign In</Link></Button>
                 </>
               )}
@@ -154,7 +173,6 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <Button variant="outline" className="w-full" asChild><Link to="/list-property">List Property</Link></Button>
                   <Button className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/auth">Sign In</Link></Button>
                 </>
               )}

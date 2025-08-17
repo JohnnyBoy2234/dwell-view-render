@@ -30,8 +30,18 @@ export function TenantSidebar() {
 
   const handleNavigation = (item: typeof tenantItems[0]) => {
     if (item.scrollTo) {
-      const el = document.getElementById(item.scrollTo);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      // For scroll items, ensure we're on the tenant dashboard first
+      if (currentPath !== '/tenant-dashboard') {
+        navigate('/tenant-dashboard');
+        // Use setTimeout to ensure the page has loaded before scrolling
+        setTimeout(() => {
+          const el = document.getElementById(item.scrollTo!);
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const el = document.getElementById(item.scrollTo);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
     } else {
       navigate(item.url);
     }
@@ -61,11 +71,11 @@ export function TenantSidebar() {
                   <SidebarMenuButton 
                     asChild
                     isActive={isActive(item.url) || (item.scrollTo && currentPath.includes('tenant-dashboard'))}
-                    className={
-                      isActive(item.url) || (item.scrollTo && currentPath.includes('tenant-dashboard'))
-                        ? "bg-gradient-to-r from-success-green to-success-green-glow hover:from-success-green-dark hover:to-success-green text-white shadow-soft" 
-                        : "hover:bg-ocean-blue/10 hover:text-ocean-blue-dark"
-                    }
+                     className={
+                       (isActive(item.url) && !item.scrollTo) || (item.scrollTo && currentPath === '/tenant-dashboard')
+                         ? "bg-gradient-to-r from-success-green to-success-green-glow hover:from-success-green-dark hover:to-success-green text-white shadow-soft" 
+                         : "hover:bg-ocean-blue/10 hover:text-ocean-blue-dark"
+                     }
                   >
                     <button 
                       onClick={() => handleNavigation(item)}

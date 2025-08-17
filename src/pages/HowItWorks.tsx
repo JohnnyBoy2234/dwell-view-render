@@ -64,13 +64,13 @@ const HowItWorks = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/20 to-ocean-blue/5">
       {/* Hero Section */}
-      <section className="py-12 sm:py-16 lg:py-20">
+      <section className="py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
               How SwiftRent Works
             </h1>
-            <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 sm:mb-12">
+            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-10 sm:mb-16 leading-relaxed">
               Connecting landlords and tenants directly with no agents, zero commission, and full control
             </p>
           </div>
@@ -122,24 +122,24 @@ const HowItWorks = () => {
                     <div className={`w-8 h-8 bg-gradient-to-br ${activeIconColors[index]} rounded-full flex items-center justify-center flex-shrink-0 shadow-soft`}>
                       {step.icon}
                     </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-base sm:text-lg mb-2">{step.title}</h3>
-                      <p className="text-sm sm:text-base text-muted-foreground mb-3">{step.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {step.badges.map((badge, i) => <Badge variant="secondary" className="text-xs" key={i}>{badge}</Badge>)}
-                      </div>
-                    </div>
+                     <div className="flex-1">
+                       <h3 className="font-semibold text-lg sm:text-xl mb-3">{step.title}</h3>
+                       <p className="text-base sm:text-lg text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
+                       <div className="flex flex-wrap gap-2">
+                         {step.badges.map((badge, i) => <Badge variant="secondary" className="text-sm" key={i}>{badge}</Badge>)}
+                       </div>
+                     </div>
                   </div>
                 ))}
                 
-                <div className="pt-4 border-t">
-                  <Link to={activeData.cta.link}>
-                    <Button className={`w-full text-white shadow-soft ${isTenant ? 'bg-ocean-blue hover:bg-ocean-blue-dark' : 'bg-success-green hover:bg-success-green-dark'}`}>
-                      {activeData.cta.text}
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
+                 <div className="pt-4 border-t">
+                   <Link to={isTenant ? "/properties" : "/list-property"}>
+                     <Button className={`w-full text-white shadow-soft ${isTenant ? 'bg-ocean-blue hover:bg-ocean-blue-dark' : 'bg-success-green hover:bg-success-green-dark'}`}>
+                       {activeData.cta.text}
+                       <ArrowRight className="h-4 w-4 ml-2" />
+                     </Button>
+                   </Link>
+                 </div>
               </CardContent>
             </Card>
           </div>
@@ -159,14 +159,14 @@ const HowItWorks = () => {
           <p className="text-lg sm:text-xl mb-8 text-white/90 max-w-3xl mx-auto">
             Join thousands of satisfied customers who found their perfect rental match through SwiftRent
           </p>
-          <div className="flex justify-center">
-            <Link to={activeData.cta.link}>
-              <Button size="lg" variant="secondary" className="w-full">
-                {isTenant ? <Home className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}
-                {activeData.cta.text}
-              </Button>
-            </Link>
-          </div>
+           <div className="flex justify-center">
+             <Link to={isTenant ? "/properties" : "/list-property"}>
+               <Button size="lg" variant="secondary" className="w-full">
+                 {isTenant ? <Home className="h-5 w-5 mr-2" /> : <Users className="h-5 w-5 mr-2" />}
+                 {activeData.cta.text}
+               </Button>
+             </Link>
+           </div>
         </div>
       </section>
     </div>

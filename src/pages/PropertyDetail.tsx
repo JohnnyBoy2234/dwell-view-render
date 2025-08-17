@@ -313,7 +313,7 @@ export default function PropertyDetail() {
     if (!property) return;
 
     const shareData = {
-      title: "Check out this property on EasyRent",
+      title: "Check out this property on SwiftRent",
       text: `${property.location} - R${property.price.toLocaleString()} per month. See more details here:`,
       url: window.location.href
     };
