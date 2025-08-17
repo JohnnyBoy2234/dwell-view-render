@@ -52,6 +52,18 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				'ocean-blue': 'hsl(var(--ocean-blue))',
+				'ocean-blue-dark': 'hsl(var(--ocean-blue-dark))',
+				'ocean-blue-light': 'hsl(var(--ocean-blue-light))',
+				'ocean-blue-glow': 'hsl(var(--ocean-blue-glow))',
+				'earth-warm': 'hsl(var(--earth-warm))',
+				'earth-warm-dark': 'hsl(var(--earth-warm-dark))',
+				'earth-light': 'hsl(var(--earth-light))',
+				'earth-muted': 'hsl(var(--earth-muted))',
+				'success-green': 'hsl(var(--success-green))',
+				'success-green-dark': 'hsl(var(--success-green-dark))',
+				'success-green-light': 'hsl(var(--success-green-light))',
+				'success-green-glow': 'hsl(var(--success-green-glow))',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
