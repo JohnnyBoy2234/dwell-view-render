@@ -257,8 +257,20 @@ const getPriceLabel = (): ReactNode => {
                         {option.label}
                       </Button>;
                     })}
-                  </div>
-                </div>
+                   </div>
+                   
+                   {/* Apply button for property types */}
+                   <div className="mt-3">
+                     <Button 
+                       variant="default" 
+                       size="sm" 
+                       className="w-full bg-primary text-primary-foreground"
+                       onClick={() => onSearch()}
+                     >
+                       Apply Property Types
+                     </Button>
+                   </div>
+                 </div>
  
                 {/* Price - mobile: use native selects to avoid popover issues */}
                 <div>
