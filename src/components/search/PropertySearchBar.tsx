@@ -195,7 +195,7 @@ const getPriceLabel = (): ReactNode => {
       onSearch();
     }
   };
-  return <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 w-full max-w-4xl mx-auto">
+  return <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 w-full max-w-4xl mx-auto">
       {/* Location Search - Top Section */}
       <div className="p-3 sm:p-4 border-b border-gray-200">
         <div onKeyDown={handleKeyPress}>
@@ -461,83 +461,97 @@ const getPriceLabel = (): ReactNode => {
               </PopoverContent>
             </Popover>
 
-            {/* More Filters Dropdown */}
-            <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="h-10 px-3 flex-1 min-w-[130px] bg-white hover:bg-primary hover:text-white text-foreground border-input text-sm">
-                  <SlidersHorizontal className="h-3 w-3 mr-1" />
-                  More Filters
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80 p-4 bg-white border border-border z-50" align="start">
-                <div className="space-y-6">
-                  {/* Amenities Section */}
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-3">Amenities</h4>
-                    <div className="space-y-2">
-                      {[
-                        { value: "Pet Friendly", label: "Pet Friendly" },
-                        { value: "Furnished", label: "Furnished" },
-                        { value: "Garden", label: "Garden" },
-                        { value: "Parking Available", label: "Parking Available" },
-                        { value: "Fibre Ready", label: "Fibre Ready" }
-                      ].map((amenity) => (
-                        <div key={amenity.value} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`amenity-${amenity.value}`}
-                            checked={filters.amenities?.includes(amenity.value) || false}
-                            onCheckedChange={(checked) => {
-                              const newAmenities = checked
-                                ? [...(filters.amenities || []), amenity.value]
-                                : (filters.amenities || []).filter(a => a !== amenity.value);
-                              onFiltersChange({ amenities: newAmenities });
-                            }}
-                          />
-                          <label 
-                            htmlFor={`amenity-${amenity.value}`}
-                            className="text-sm text-foreground cursor-pointer"
-                          >
-                            {amenity.label}
-                          </label>
-                        </div>
-                      ))}
+            {/* More Filters Button */}
+            <Button 
+              variant="outline" 
+              className="h-10 px-3 flex-1 min-w-[130px] bg-white hover:bg-primary hover:text-white text-foreground border-input text-sm"
+              onClick={() => setMoreFiltersOpen(!moreFiltersOpen)}
+            >
+              <SlidersHorizontal className="h-3 w-3 mr-1" />
+              More Filters
+              <ChevronDown className="h-3 w-3 ml-1" />
+            </Button>
+
+            {/* Search Button */}
+            <Button size="sm" className="h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-sm sm:ml-auto" onClick={onSearch}>
+              <Search className="h-4 w-4 mr-1" />
+              Search
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* More Filters Dropdown - appears below the main search bar */}
+      {moreFiltersOpen && !isMobile && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-border rounded-lg shadow-lg z-50 max-w-4xl mx-auto">
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Amenities Section */}
+              <div>
+                <h3 className="text-lg font-medium text-foreground mb-4">Amenities</h3>
+                <div className="space-y-3">
+                  {[
+                    { value: "Pet Friendly", label: "Pet Friendly" },
+                    { value: "Furnished", label: "Furnished" },
+                    { value: "Garden", label: "Garden" },
+                    { value: "Parking Available", label: "Parking Available" },
+                    { value: "Fibre Ready", label: "Fibre Ready" }
+                  ].map((amenity) => (
+                    <div key={amenity.value} className="flex items-center space-x-3 p-2 border border-border rounded-lg hover:bg-muted/30">
+                      <Checkbox
+                        id={`amenity-${amenity.value}`}
+                        checked={filters.amenities?.includes(amenity.value) || false}
+                        onCheckedChange={(checked) => {
+                          const currentAmenities = filters.amenities || [];
+                          const newAmenities = checked
+                            ? [...currentAmenities, amenity.value]
+                            : currentAmenities.filter(a => a !== amenity.value);
+                          onFiltersChange({ amenities: newAmenities });
+                        }}
+                      />
+                      <label 
+                        htmlFor={`amenity-${amenity.value}`}
+                        className="text-sm text-foreground cursor-pointer font-medium"
+                      >
+                        {amenity.label}
+                      </label>
                     </div>
-                  </div>
+                  ))}
+                </div>
+              </div>
 
-                  {/* Bathrooms Section */}
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-3">Bathrooms</h4>
-                    <Select 
-                      value={filters.bathrooms || "Any"} 
-                      onValueChange={(value) => onFiltersChange({ bathrooms: value })}
-                    >
-                      <SelectTrigger className="w-full bg-white border-input text-sm h-10">
-                        <SelectValue placeholder="Any" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white border-border z-50">
-                        {[
-                          { value: "Any", label: "Any" },
-                          { value: "1", label: "1+" },
-                          { value: "2", label: "2+" },
-                          { value: "3", label: "3+" },
-                          { value: "4", label: "4+" }
-                        ].map((option) => (
-                          <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50 text-sm">
-                            {option.label} {option.label !== 'Any' ? 'Bathroom' + (option.label !== '1+' ? 's' : '') : ''}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+              {/* Right Column */}
+              <div className="space-y-6">
+                {/* Bathrooms Section */}
+                <div>
+                  <h3 className="text-lg font-medium text-foreground mb-4">Bathrooms</h3>
+                  <Select 
+                    value={filters.bathrooms || "Any"} 
+                    onValueChange={(value) => onFiltersChange({ bathrooms: value })}
+                  >
+                    <SelectTrigger className="w-48 bg-background border-input text-sm h-10">
+                      <SelectValue placeholder="Any" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover border-border z-50">
+                      {bathroomOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50 text-sm py-2">
+                          {option.label === 'Any' ? 'Any' : `${option.label} Bathroom${option.label !== '1' ? 's' : ''}`}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-                  {/* Availability Section */}
+                {/* Availability Section */}
+                <div>
+                  <h3 className="text-lg font-medium text-foreground mb-4">Availability</h3>
                   <div>
-                    <h4 className="text-sm font-medium text-foreground mb-3">Available From</h4>
+                    <label className="text-sm text-muted-foreground mb-2 block font-medium">Available From</label>
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button
                           variant="outline"
-                          className="w-full justify-start text-left font-normal bg-white hover:bg-muted/50 border-input h-10 text-sm"
+                          className="w-56 justify-start text-left font-normal bg-background hover:bg-muted/50 border-input h-10 text-sm"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {filters.availableFrom ? (
@@ -547,7 +561,7 @@ const getPriceLabel = (): ReactNode => {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-white border-border z-50" align="start">
+                      <PopoverContent className="w-auto p-0 bg-popover border-border z-50" align="start">
                         <Calendar
                           mode="single"
                           selected={filters.availableFrom}
@@ -559,27 +573,41 @@ const getPriceLabel = (): ReactNode => {
                       </PopoverContent>
                     </Popover>
                   </div>
-
-                  {/* Apply button */}
-                  <div className="pt-2 border-t border-border">
-                    <Button 
-                      variant="default" 
-                      size="sm" 
-                      className="w-full bg-primary text-primary-foreground"
-                      onClick={() => setMoreFiltersOpen(false)}
-                    >
-                      Apply
-                    </Button>
-                  </div>
                 </div>
-              </PopoverContent>
-            </Popover>
+              </div>
+            </div>
 
-            {/* Search Button */}
-            <Button size="sm" className="h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-sm sm:ml-auto" onClick={onSearch}>
-              <Search className="h-4 w-4 mr-1" />
-              Search
-            </Button>
+            {/* Bottom Actions */}
+            <div className="flex justify-between items-center pt-6 border-t border-border mt-6">
+              <div className="text-sm text-muted-foreground font-medium">
+                {((filters.amenities?.length || 0) + 
+                 (filters.bathrooms !== "Any" && filters.bathrooms ? 1 : 0) +
+                 (filters.availableFrom ? 1 : 0))} filter{((filters.amenities?.length || 0) + 
+                 (filters.bathrooms !== "Any" && filters.bathrooms ? 1 : 0) +
+                 (filters.availableFrom ? 1 : 0)) !== 1 ? 's' : ''} applied
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    onFiltersChange({
+                      amenities: [],
+                      bathrooms: 'Any',
+                      availableFrom: null
+                    });
+                  }}
+                  className="hover:bg-muted/50 text-sm px-4 py-2"
+                >
+                  Clear All
+                </Button>
+                <Button 
+                  onClick={() => setMoreFiltersOpen(false)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground text-sm px-6 py-2"
+                >
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       )}
