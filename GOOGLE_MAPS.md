@@ -34,30 +34,20 @@ https://*.lovableproject.com/* (for Lovable preview)
 
 ## Step 4: Configure in SwiftRent
 
-### Development
-1. Copy `.env.example` to `.env.local`
-2. Add your API key:
-```bash
-GOOGLE_MAPS_API_KEY=your_api_key_here
-```
+### Current Implementation
+The API key is already configured in the code. SwiftRent uses Google's official `@googlemaps/js-api-loader` package for proper async loading.
 
-### Production
-Add the API key to your hosting environment variables:
-- Vercel: Add to Environment Variables in project settings
-- Netlify: Add to Environment Variables in site settings
-- Other hosts: Follow their environment variable documentation
+### Key Features Implemented
+- Uses the new `PlaceAutocompleteElement` (replaces deprecated Autocomplete)
+- Restricted to South Africa (`country: 'za'`)
+- Focuses on real-world addresses (`types: ['geocode']`)
+- Async loading with proper error handling
+- Mobile-optimized styling that matches SwiftRent theme
 
-## Step 5: Update the API Key in Code
-
-In `src/components/ui/enhanced-address-autocomplete.tsx`, replace the placeholder key:
-
-```typescript
-// Replace this line:
-const apiKey = 'AIzaSyBGFQJi_ZnLyM-9LN4CNSUFYy1MwkGlwF0';
-
-// With:
-const apiKey = process.env.GOOGLE_MAPS_API_KEY || 'your_fallback_key';
-```
+### Integration Points
+- **Homepage Hero**: Location search in main search bar
+- **Property Search**: All location inputs use Google autocomplete
+- **Property Listing**: Address input when listing properties
 
 ## Features Enabled
 

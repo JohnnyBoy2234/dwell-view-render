@@ -45,7 +45,7 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
 
         // Use the official Google Maps JS API Loader for proper async loading
         const loader = new Loader({
-          apiKey: 'AIzaSyD3O517GFrpVdcapL4PXKA_6FDo14IpcCk',
+          apiKey: 'AIzaSyC_a8w6Cm-PlyJ2eSpXyyp6VeyFkl-CcMI',
           version: 'weekly',
           libraries: ['places']
         });
@@ -71,7 +71,7 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       const autocompleteElement = new window.google.maps.places.PlaceAutocompleteElement({
         componentRestrictions: { country: 'za' }, // Restrict to South Africa
         fields: ['address_components', 'formatted_address', 'geometry', 'place_id'],
-        types: ['(regions)']
+        types: ['geocode'] // Real-world addresses like cities, suburbs, streets
       });
 
       // Style the autocomplete element
