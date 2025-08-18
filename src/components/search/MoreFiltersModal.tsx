@@ -9,7 +9,6 @@ import { CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 
 interface AdvancedFilters {
-  propertyTypes: string[];
   amenities: string[];
   bathrooms: string;
   availableFrom: Date | null;
@@ -34,11 +33,6 @@ export const MoreFiltersModal = ({
 }: MoreFiltersModalProps) => {
   const [dateOpen, setDateOpen] = useState(false);
 
-  const propertyTypeOptions = [
-    { value: "House", label: "House" },
-    { value: "Apartment", label: "Apartment / Flat" },
-    { value: "Townhouse", label: "Townhouse" }
-  ];
 
   const amenityOptions = [
     { value: "Pet Friendly", label: "Pet Friendly" },
@@ -56,12 +50,6 @@ export const MoreFiltersModal = ({
     { value: "4", label: "4+" }
   ];
 
-  const handlePropertyTypeChange = (type: string, checked: boolean) => {
-    const newTypes = checked 
-      ? [...filters.propertyTypes, type]
-      : filters.propertyTypes.filter(t => t !== type);
-    onFiltersChange({ propertyTypes: newTypes });
-  };
 
   const handleAmenityChange = (amenity: string, checked: boolean) => {
     const newAmenities = checked
@@ -71,8 +59,7 @@ export const MoreFiltersModal = ({
   };
 
   const getActiveFiltersCount = () => {
-    return filters.propertyTypes.length + 
-           filters.amenities.length + 
+    return filters.amenities.length + 
            (filters.bathrooms !== "Any" && filters.bathrooms ? 1 : 0) +
            (filters.availableFrom ? 1 : 0);
   };
@@ -87,30 +74,6 @@ export const MoreFiltersModal = ({
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 py-4 space-y-8">
-          {/* Property Type Section */}
-          <div>
-            <h3 className="text-xl font-medium text-foreground mb-6">Property Type</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {propertyTypeOptions.map((type) => (
-                <div key={type.value} className="flex items-center space-x-3 p-3 border border-border rounded-lg hover:bg-muted/30">
-                  <Checkbox
-                    id={`type-${type.value}`}
-                    checked={filters.propertyTypes.includes(type.value)}
-                    onCheckedChange={(checked) => 
-                      handlePropertyTypeChange(type.value, !!checked)
-                    }
-                  />
-                  <label 
-                    htmlFor={`type-${type.value}`}
-                    className="text-base text-foreground cursor-pointer font-medium"
-                  >
-                    {type.label}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* Amenities Section */}
           <div>
             <h3 className="text-xl font-medium text-foreground mb-6">Amenities</h3>

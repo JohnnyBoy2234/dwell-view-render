@@ -3,9 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Calendar } from "@/components/ui/calendar";
 import PriceDropdown from "../ui/pricedropdown";
 import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
-import { ChevronDown, SlidersHorizontal, Search, X } from "lucide-react";
+import { ChevronDown, SlidersHorizontal, Search, X, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
 interface SearchFilters {
   location: string;
@@ -13,6 +17,9 @@ interface SearchFilters {
   minPrice: string;
   maxPrice: string;
   bedrooms: string;
+  amenities?: string[];
+  bathrooms?: string;
+  availableFrom?: Date | null;
 }
 interface PropertySearchBarProps {
   filters: SearchFilters;
@@ -29,6 +36,7 @@ export const PropertySearchBar = ({
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
   const [bedroomsOpen, setBedroomsOpen] = useState(false);
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
   
@@ -453,11 +461,119 @@ const getPriceLabel = (): ReactNode => {
               </PopoverContent>
             </Popover>
 
-            {/* More Filters Button */}
-            <Button variant="outline" className="h-10 px-3 flex-1 min-w-[130px] bg-white hover:bg-primary hover:text-white text-foreground border-input text-sm" onClick={onMoreFiltersClick}>
-              <SlidersHorizontal className="h-3 w-3 mr-1" />
-              More Filters
-            </Button>
+            {/* More Filters Dropdown */}
+            <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="h-10 px-3 flex-1 min-w-[130px] bg-white hover:bg-primary hover:text-white text-foreground border-input text-sm">
+                  <SlidersHorizontal className="h-3 w-3 mr-1" />
+                  More Filters
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 bg-white border border-border z-50" align="start">
+                <div className="space-y-6">
+                  {/* Amenities Section */}
+                  <div>
+                    <h4 className="text-sm font-medium text-foreground mb-3">Amenities</h4>
+                    <div className="space-y-2">
+                      {[
+                        { value: "Pet Friendly", label: "Pet Friendly" },
+                        { value: "Furnished", label: "Furnished" },
+                        { value: "Garden", label: "Garden" },
+                        { value: "Parking Available", label: "Parking Available" },
+                        { value: "Fibre Ready", label: "Fibre Ready" }
+                      ].map((amenity) => (
+                        <div key={amenity.value} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`amenity-${amenity.value}`}
+                            checked={filters.amenities?.includes(amenity.value) || false}
+                            onCheckedChange={(checked) => {
+                              const newAmenities = checked
+                                ? [...(filters.amenities || []), amenity.value]
+                                : (filters.amenities || []).filter(a => a !== amenity.value);
+                              onFiltersChange({ amenities: newAmenities });
+                            }}
+                          />
+                          <label 
+                            htmlFor={`amenity-${amenity.value}`}
+                            className="text-sm text-foreground cursor-pointer"
+                          >
+                            {amenity.label}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bathrooms Section */}
+                  <div>
+                    <h4 className="text-sm font-medium text-foreground mb-3">Bathrooms</h4>
+                    <Select 
+                      value={filters.bathrooms || "Any"} 
+                      onValueChange={(value) => onFiltersChange({ bathrooms: value })}
+                    >
+                      <SelectTrigger className="w-full bg-white border-input text-sm h-10">
+                        <SelectValue placeholder="Any" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white border-border z-50">
+                        {[
+                          { value: "Any", label: "Any" },
+                          { value: "1", label: "1+" },
+                          { value: "2", label: "2+" },
+                          { value: "3", label: "3+" },
+                          { value: "4", label: "4+" }
+                        ].map((option) => (
+                          <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50 text-sm">
+                            {option.label} {option.label !== 'Any' ? 'Bathroom' + (option.label !== '1+' ? 's' : '') : ''}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Availability Section */}
+                  <div>
+                    <h4 className="text-sm font-medium text-foreground mb-3">Available From</h4>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal bg-white hover:bg-muted/50 border-input h-10 text-sm"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {filters.availableFrom ? (
+                            format(filters.availableFrom, "PPP")
+                          ) : (
+                            <span>Any date</span>
+                          )}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-white border-border z-50" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={filters.availableFrom}
+                          onSelect={(date) => onFiltersChange({ availableFrom: date || null })}
+                          initialFocus
+                          className="p-3"
+                          disabled={(date) => date < new Date()}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
+                  {/* Apply button */}
+                  <div className="pt-2 border-t border-border">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="w-full bg-primary text-primary-foreground"
+                      onClick={() => setMoreFiltersOpen(false)}
+                    >
+                      Apply
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
 
             {/* Search Button */}
             <Button size="sm" className="h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-sm sm:ml-auto" onClick={onSearch}>
