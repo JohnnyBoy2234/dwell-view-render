@@ -70,7 +70,6 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       // Use the new PlaceAutocompleteElement
       const autocompleteElement = new window.google.maps.places.PlaceAutocompleteElement({
         componentRestrictions: { country: 'za' }, // Restrict to South Africa
-        fields: ['address_components', 'formatted_address', 'geometry', 'place_id'],
         types: ['geocode'] // Real-world addresses like cities, suburbs, streets
       });
 
@@ -87,7 +86,7 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       // Listen for place selection
       autocompleteElement.addEventListener('gmp-placeselect', (event: any) => {
         const place = event.place;
-        if (place.formattedAddress) {
+        if (place?.formattedAddress) {
           onChange(place.formattedAddress);
           onPlaceSelect?.(place);
         }
