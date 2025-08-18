@@ -405,6 +405,21 @@ const getPriceLabel = (): ReactNode => {
                       {option.label}
                     </Button>;
                   })}
+                  
+                  {/* Apply button for desktop property types */}
+                  <div className="mt-2 pt-2 border-t border-border">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="w-full bg-primary text-primary-foreground"
+                      onClick={() => {
+                        onSearch();
+                        setPropertyTypeOpen(false);
+                      }}
+                    >
+                      Apply
+                    </Button>
+                  </div>
                 </div>
               </PopoverContent>
             </Popover>
