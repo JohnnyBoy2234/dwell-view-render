@@ -64,7 +64,7 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
 
       // Load the script
       const script = document.createElement('script');
-      const apiKey = 'AIzaSyBGFQJi_ZnLyM-9LN4CNSUFYy1MwkGlwF0'; // Replace with your actual API key
+      const apiKey = 'AIzaSyD3O517GFrpVdcapL4PXKA_6FDo14IpcCk';
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`;
       script.async = true;
       script.defer = true;
