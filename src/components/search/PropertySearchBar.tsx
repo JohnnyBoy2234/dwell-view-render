@@ -265,7 +265,7 @@ const getPriceLabel = (): ReactNode => {
                        variant="default" 
                        size="sm" 
                        className="w-full bg-primary text-primary-foreground"
-                       onClick={() => onSearch()}
+                       onClick={() => setFiltersSheetOpen(false)}
                      >
                        Apply Property Types
                      </Button>
@@ -413,7 +413,6 @@ const getPriceLabel = (): ReactNode => {
                       size="sm" 
                       className="w-full bg-primary text-primary-foreground"
                       onClick={() => {
-                        onSearch();
                         setPropertyTypeOpen(false);
                       }}
                     >

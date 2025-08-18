@@ -46,11 +46,12 @@ const Index = () => {
   const applyFilters = () => {
     const params = new URLSearchParams();
 
-    // include location if set (trimmed)
+    // include location if set (trimmed) - Properties page expects 'search' not 'location'
     const loc = filters.location?.trim();
-    if (loc) params.set("location", loc);
+    if (loc) params.set("search", loc);
 
-    if (filters.propertyType && filters.propertyType !== "Any") params.set("propertyType", filters.propertyType);
+    // Properties page expects 'type' not 'propertyType'
+    if (filters.propertyType && filters.propertyType !== "Any") params.set("type", filters.propertyType);
     if (filters.minPrice && filters.minPrice !== "") params.set("minPrice", filters.minPrice);
     if (filters.maxPrice && filters.maxPrice !== "") params.set("maxPrice", filters.maxPrice);
     if (filters.bedrooms && filters.bedrooms !== "Any") params.set("bedrooms", filters.bedrooms);
