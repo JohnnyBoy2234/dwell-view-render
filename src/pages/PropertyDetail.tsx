@@ -378,7 +378,7 @@ export default function PropertyDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
-      <div className="container mx-auto p-6 max-w-6xl">
+      <div className="container mx-auto p-4 md:p-6 max-w-6xl">
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="outline" onClick={() => navigate('/properties')}>
@@ -386,10 +386,6 @@ export default function PropertyDetail() {
             Back to Properties
           </Button>
           <div className="flex-1" />
-          <Button variant="outline" size="sm" onClick={toggleLike}>
-            <Heart className={`h-4 w-4 mr-2 ${isLiked ? 'fill-current text-red-500' : ''}`} />
-            {isLiked ? 'Saved' : 'Save'}
-          </Button>
           <Button variant="outline" size="sm" onClick={handleShare}>
             <Share2 className="h-4 w-4 mr-2" />
             Share
@@ -456,7 +452,9 @@ export default function PropertyDetail() {
                     <CardTitle>Property Description</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">{property.description}</p>
+                    <div className="max-w-none px-2 md:px-0">
+                      <p className="text-muted-foreground leading-relaxed break-words">{property.description}</p>
+                    </div>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
                       <div className="text-center p-4 bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 border border-ocean-blue/20 rounded-lg shadow-sm">

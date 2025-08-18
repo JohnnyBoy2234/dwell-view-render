@@ -69,13 +69,13 @@ export const PropertySearchBar = ({
     label: "Any"
   }, {
     value: "1",
-    label: "1+"
+    label: "1"
   }, {
     value: "2",
-    label: "2+"
+    label: "2"
   }, {
     value: "3",
-    label: "3+"
+    label: "3"
   }, {
     value: "4",
     label: "4+"
@@ -85,29 +85,34 @@ export const PropertySearchBar = ({
     label: "Any"
   }, {
     value: "1",
-    label: "1+"
+    label: "1"
   }, {
     value: "2",
-    label: "2+"
+    label: "2"
   }, {
     value: "3",
-    label: "3+"
+    label: "3"
   }, {
     value: "4",
     label: "4+"
   }];
-  // Mobile-friendly price options (string values match pricedropdown)
+  // Realistic rental price options like Property24
   const priceOptions = [
     { value: "", label: "Any" },
+    { value: "2000", label: "R 2 000" },
+    { value: "3000", label: "R 3 000" },
+    { value: "4000", label: "R 4 000" },
     { value: "5000", label: "R 5 000" },
+    { value: "6000", label: "R 6 000" },
+    { value: "8000", label: "R 8 000" },
     { value: "10000", label: "R 10 000" },
+    { value: "12000", label: "R 12 000" },
+    { value: "15000", label: "R 15 000" },
+    { value: "20000", label: "R 20 000" },
     { value: "25000", label: "R 25 000" },
+    { value: "30000", label: "R 30 000" },
+    { value: "40000", label: "R 40 000" },
     { value: "50000", label: "R 50 000" },
-    { value: "100000", label: "R 100 000" },
-    { value: "250000", label: "R 250 000" },
-    { value: "500000", label: "R 500 000" },
-    { value: "750000", label: "R 750 000" },
-    { value: "1000000", label: "R 1 000 000" },
   ];
   const getPropertyTypeLabel = () => {
     const selectedTypes = filters.propertyType ? filters.propertyType.split(',').filter(type => type !== "Any" && type.trim() !== "") : [];
@@ -185,7 +190,7 @@ const getPriceLabel = (): ReactNode => {
     if (hasSelection) {
       return <div className="flex flex-col items-start">
           <span className="text-xs text-slate-300">Bedrooms</span>
-          <span className="text-sm font-normal">{filters.bedrooms}+</span>
+          <span className="text-sm font-normal">{filters.bedrooms === "4" ? "4+" : filters.bedrooms}</span>
         </div>;
     }
     return "Bedrooms";
@@ -196,7 +201,7 @@ const getPriceLabel = (): ReactNode => {
     if (hasSelection) {
       return <div className="flex flex-col items-start">
           <span className="text-xs text-slate-300">Bathrooms</span>
-          <span className="text-sm font-normal">{filters.bathrooms}+</span>
+          <span className="text-sm font-normal">{filters.bathrooms === "4" ? "4+" : filters.bathrooms}</span>
         </div>;
     }
     return "Bathrooms";
@@ -217,15 +222,15 @@ const getPriceLabel = (): ReactNode => {
       onSearch();
     }
   };
-  return <div className="relative bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl border border-white/20 w-full max-w-4xl mx-auto">
+  return <div className="relative bg-white backdrop-blur-sm rounded-2xl shadow-2xl border border-ocean-blue/20 w-full max-w-4xl mx-auto">
       {/* Location Search - Top Section */}
-      <div className="p-3 sm:p-4 border-b border-gray-200">
+      <div className="p-3 sm:p-4 border-b border-ocean-blue/10">
         <div onKeyDown={handleKeyPress}>
           <AddressAutocomplete 
             value={filters.location} 
             onChange={value => onFiltersChange({ location: value })} 
             placeholder="Search city or suburb..." 
-            className="h-12 sm:h-10 text-base sm:text-sm border-0 focus-visible:ring-2 focus-visible:ring-primary text-foreground bg-white w-full" 
+            className="h-12 sm:h-10 text-base sm:text-sm border-0 focus-visible:ring-2 focus-visible:ring-ocean-blue text-foreground bg-white w-full" 
           />
         </div>
       </div>
@@ -234,11 +239,11 @@ const getPriceLabel = (): ReactNode => {
       {isMobile ? (
         <>
           <div className="p-3 sm:p-4 flex gap-2 items-center">
-            <Button variant="outline" className="flex-1 h-12 justify-center" onClick={() => setFiltersSheetOpen(true)}>
+            <Button variant="outline" className="flex-1 h-12 justify-center bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-ocean-blue font-medium" onClick={() => setFiltersSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               Filters
             </Button>
-            <Button size="sm" className="h-12 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm" onClick={onSearch}>
+            <Button size="sm" className="h-12 px-4 bg-ocean-blue hover:bg-ocean-blue-dark text-white text-sm font-medium" onClick={onSearch}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
@@ -363,32 +368,32 @@ const getPriceLabel = (): ReactNode => {
                    <div className="text-xs text-slate-400 mb-2">Bedrooms</div>
                    <div className="flex gap-2">
                      {bedroomOptions.map(option => (
-                       <Button
-                         key={option.value}
-                         variant={filters.bedrooms === option.value ? "secondary" : "outline"}
-                         className={`flex-1 py-3 ${filters.bedrooms === option.value ? 'bg-primary text-white' : ''}`}
-                         onClick={() => onFiltersChange({ bedrooms: option.value })}
-                       >
-                         {option.label === 'Any' ? 'Any' : `${option.label}+`}
-                       </Button>
+                        <Button
+                          key={option.value}
+                          variant={filters.bedrooms === option.value ? "secondary" : "outline"}
+                          className={`flex-1 py-3 ${filters.bedrooms === option.value ? 'bg-ocean-blue text-white' : 'bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-ocean-blue'}`}
+                          onClick={() => onFiltersChange({ bedrooms: option.value })}
+                        >
+                          {option.label === 'Any' ? 'Any' : option.label === '4' ? '4+' : option.label}
+                        </Button>
                      ))}
                    </div>
                  </div>
 
                 <div>
-                  <Button variant="outline" className="w-full py-3" onClick={(e) => { e.stopPropagation(); setFiltersSheetOpen(false); onMoreFiltersClick(); }}>
-                    More Filters
-                  </Button>
+                <Button variant="outline" className="w-full py-3 bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-ocean-blue font-medium" onClick={(e) => { e.stopPropagation(); setFiltersSheetOpen(false); onMoreFiltersClick(); }}>
+                  More Filters
+                </Button>
                 </div>
               </div>
 
               <div className="mt-6 flex gap-2">
-                <Button className="flex-1" onClick={() => {
+                <Button variant="outline" className="flex-1 border-ocean-blue/30 text-ocean-blue hover:bg-ocean-blue hover:text-white" onClick={() => {
                   onFiltersChange({ propertyType: "Any", minPrice: "", maxPrice: "", bedrooms: "Any" });
                 }}>
                   Reset
                 </Button>
-                <Button className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground" onClick={() => { setFiltersSheetOpen(false); onSearch(); }}>
+                <Button className="flex-1 bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => { setFiltersSheetOpen(false); onSearch(); }}>
                   Apply
                 </Button>
               </div>
@@ -401,7 +406,7 @@ const getPriceLabel = (): ReactNode => {
             {/* Property Type Dropdown */}
             <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-primary hover:text-white border-input text-sm ${filters.propertyType !== "Any" && filters.propertyType ? 'bg-primary text-white' : 'text-foreground'}`}>
+                <Button variant="outline" className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-sm ${filters.propertyType !== "Any" && filters.propertyType ? 'bg-ocean-blue text-white' : 'text-ocean-blue'}`}>
                   <span className="truncate w-full">{getPropertyTypeLabel()}</span>
                   <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
                 </Button>
@@ -464,7 +469,7 @@ const getPriceLabel = (): ReactNode => {
             {/* Bedrooms Dropdown */}
             <Popover open={bedroomsOpen} onOpenChange={setBedroomsOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-primary hover:text-white border-input text-sm ${filters.bedrooms !== "Any" && filters.bedrooms ? 'bg-primary text-white' : 'text-foreground'}`}>
+                <Button variant="outline" className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-sm ${filters.bedrooms !== "Any" && filters.bedrooms ? 'bg-ocean-blue text-white' : 'text-ocean-blue'}`}>
                   <span className="truncate w-full">{getBedroomsLabel()}</span>
                   <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
                 </Button>

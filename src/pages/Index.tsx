@@ -70,6 +70,7 @@ const Index = () => {
       params.set("availableFrom", advancedFilters.availableFrom.toISOString().split('T')[0]);
     }
 
+    // Only navigate if there are filters to apply, otherwise show no results message
     const query = params.toString();
     console.debug("navigate /properties with query:", query, "filters:", filters);
     navigate(`/properties${query ? `?${query}` : ""}`);
@@ -205,8 +206,8 @@ const Index = () => {
             </p>
             
             {/* Toggle Switch - visible on mobile */}
-            <div className="flex items-center justify-center space-x-4 mb-8 lg:hidden">
-              <Label htmlFor="user-type-toggle" className={`font-medium transition-colors ${isTenant ? 'text-primary' : 'text-muted-foreground'}`}>
+            <div className="flex items-center justify-center space-x-6 mb-8 lg:hidden">
+              <Label htmlFor="user-type-toggle" className={`text-lg font-semibold transition-colors ${isTenant ? 'text-ocean-blue' : 'text-muted-foreground'}`}>
                 For Tenants
               </Label>
               <Switch
@@ -215,7 +216,7 @@ const Index = () => {
                 onCheckedChange={(checked) => setUserType(checked ? 'landlord' : 'tenant')}
                 aria-label="Toggle between tenant and landlord view"
               />
-              <Label htmlFor="user-type-toggle" className={`font-medium transition-colors ${!isTenant ? 'text-primary' : 'text-muted-foreground'}`}>
+              <Label htmlFor="user-type-toggle" className={`text-lg font-semibold transition-colors ${!isTenant ? 'text-ocean-blue' : 'text-muted-foreground'}`}>
                 For Landlords
               </Label>
             </div>

@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import PropertyCard from '@/components/PropertyCard';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { usePropertySearch } from '@/hooks/usePropertySearch';
+import { NoResultsMessage } from '@/components/search/NoResultsMessage';
+import { useNavigate } from 'react-router-dom';
 
 interface Property {
   id: string;
@@ -41,6 +43,7 @@ const amenitiesList = [
 ];
 
 export default function Properties() {
+  const navigate = useNavigate();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -244,16 +247,10 @@ export default function Properties() {
 
         {/* Property Grid - Mobile responsive */}
         {filteredProperties.length === 0 ? (
-          <Card className="p-8 lg:p-12 text-center">
-            <Home className="h-12 w-12 lg:h-16 lg:w-16 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg lg:text-xl font-semibold mb-2">No properties found</h3>
-            <p className="text-sm lg:text-base text-muted-foreground mb-4">
-              Try adjusting your search criteria or browse all available properties.
-            </p>
-            <Button onClick={clearFilters} size="sm">
-              Show All Properties
-            </Button>
-          </Card>
+          <NoResultsMessage 
+            onClearFilters={clearFilters}
+            onShowAllProperties={() => navigate('/properties')}
+          />
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
             {filteredProperties.map((property) => (

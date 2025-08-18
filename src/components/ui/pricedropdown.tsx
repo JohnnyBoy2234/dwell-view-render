@@ -14,15 +14,20 @@ interface SearchFilters {
 
 const propertyPrice = [
   { value: "any", label: "Any" },
+  { value: "2000", label: "R 2 000" },
+  { value: "3000", label: "R 3 000" },
+  { value: "4000", label: "R 4 000" },
   { value: "5000", label: "R 5 000" },
+  { value: "6000", label: "R 6 000" },
+  { value: "8000", label: "R 8 000" },
   { value: "10000", label: "R 10 000" },
+  { value: "12000", label: "R 12 000" },
+  { value: "15000", label: "R 15 000" },
+  { value: "20000", label: "R 20 000" },
   { value: "25000", label: "R 25 000" },
+  { value: "30000", label: "R 30 000" },
+  { value: "40000", label: "R 40 000" },
   { value: "50000", label: "R 50 000" },
-  { value: "100000", label: "R 100 000" },
-  { value: "250000", label: "R 250 000" },
-  { value: "500000", label: "R 500 000" },
-  { value: "750000", label: "R 750 000" },
-  { value: "1000000", label: "R 1 000 000" },
 ];
 
 interface PriceDropdownProps {
@@ -81,7 +86,7 @@ const PriceDropdown: FC<PriceDropdownProps> = ({ filters, onFiltersChange, price
             e.stopPropagation();
             setPriceOpen(!priceOpen);
           }}
-          className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-primary hover:text-white border-input text-sm ${((filters.minPrice && filters.minPrice !== "") || (filters.maxPrice && filters.maxPrice !== "")) ? 'bg-primary text-white' : 'text-foreground'}`}
+          className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-sm ${((filters.minPrice && filters.minPrice !== "") || (filters.maxPrice && filters.maxPrice !== "")) ? 'bg-ocean-blue text-white' : 'text-ocean-blue'}`}
         >
           <span className="truncate w-full">{getPriceLabel()}</span>
           <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
@@ -154,7 +159,7 @@ const PriceDropdown: FC<PriceDropdownProps> = ({ filters, onFiltersChange, price
           </div>
 
           <div className="flex justify-end">
-            <Button type="button" size="sm" onClick={(e) => { e.stopPropagation(); setPriceOpen(false); }} className="bg-primary hover:bg-primary/90 text-sm">
+            <Button type="button" size="sm" onClick={(e) => { e.stopPropagation(); setPriceOpen(false); }} className="bg-ocean-blue hover:bg-ocean-blue-dark text-white text-sm">
               Apply
             </Button>
           </div>
