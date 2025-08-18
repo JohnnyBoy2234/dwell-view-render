@@ -33,6 +33,8 @@ const Index = () => {
     amenities: [] as string[],
     bathrooms: "Any" as string,
     availableFrom: null as Date | null,
+    minPrice: "" as string,
+    maxPrice: "" as string,
   });
 
   // No results state for hero section
@@ -172,7 +174,9 @@ const Index = () => {
                   propertyTypes: [],
                   amenities: [],
                   bathrooms: "Any",
-                  availableFrom: null
+                  availableFrom: null,
+                  minPrice: "",
+                  maxPrice: ""
                 });
                 setFilters({
                   location: "",
@@ -205,7 +209,9 @@ const Index = () => {
                           propertyTypes: [],
                           amenities: [],
                           bathrooms: "Any",
-                          availableFrom: null
+                          availableFrom: null,
+                          minPrice: "",
+                          maxPrice: ""
                         });
                         setShowNoResults(false);
                       }}
