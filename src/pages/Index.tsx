@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { EnhancedAddressAutocomplete } from "@/components/ui/enhanced-address-autocomplete";
 import PropertyCard from "@/components/PropertyCard";
 import { PropertySearchBar } from "@/components/search/PropertySearchBar";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";

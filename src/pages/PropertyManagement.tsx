@@ -219,39 +219,77 @@ export default function PropertyManagement() {
         </div>
       </div>
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - Mobile-First Responsive */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* Mobile: Horizontal scrollable tabs */}
+        <div className="md:hidden">
+          <TabsList className="inline-flex h-12 items-center justify-start rounded-lg bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft p-1 overflow-x-auto w-full scrollbar-hide">
+            <div className="flex space-x-1 min-w-max px-1">
+              <TabsTrigger value="overview" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Home className="h-3 w-3" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="listing" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <List className="h-3 w-3" />
+                Listing
+              </TabsTrigger>
+              <TabsTrigger value="viewings" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Calendar className="h-3 w-3" />
+                Viewing
+              </TabsTrigger>
+              <TabsTrigger value="applications" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Users className="h-3 w-3" />
+                Apps
+              </TabsTrigger>
+              <TabsTrigger value="leases" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <FileText className="h-3 w-3" />
+                Leases
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <CreditCard className="h-3 w-3" />
+                Payments
+              </TabsTrigger>
+              <TabsTrigger value="maintenance" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Wrench className="h-3 w-3" />
+                Maintenance
+              </TabsTrigger>
+            </div>
+          </TabsList>
+        </div>
 
-  <TabsList className="grid w-full grid-cols-7 bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft sm:grid-cols-1 sm:overflow-x-auto sm:whitespace-nowrap sm:space-x-2">
-    <TabsTrigger value="overview" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <Home className="h-4 w-4" />
-      Overview
-    </TabsTrigger>
-    <TabsTrigger value="listing" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <List className="h-4 w-4" />
-      Listings
-    </TabsTrigger>
-    <TabsTrigger value="viewings" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <Calendar className="h-4 w-4" />
-      Viewing
-    </TabsTrigger>
-    <TabsTrigger value="applications" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <Users className="h-4 w-4" />
-      Applications
-    </TabsTrigger>
-    <TabsTrigger value="leases" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <FileText className="h-4 w-4" />
-      Leases
-    </TabsTrigger>
-    <TabsTrigger value="payments" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <CreditCard className="h-4 w-4" />
-      Payments
-    </TabsTrigger>
-    <TabsTrigger value="maintenance" className="flex items-center gap-2 px-2 py-1 text-sm sm:text-base">
-      <Wrench className="h-4 w-4" />
-      Maintenance
-    </TabsTrigger>
-  </TabsList>
+        {/* Desktop: Grid layout */}
+        <div className="hidden md:block">
+          <TabsList className="grid w-full grid-cols-7 bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft h-12">
+            <TabsTrigger value="overview" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <Home className="h-4 w-4" />
+              <span className="hidden lg:inline">Overview</span>
+            </TabsTrigger>
+            <TabsTrigger value="listing" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <List className="h-4 w-4" />
+              <span className="hidden lg:inline">Listing</span>
+            </TabsTrigger>
+            <TabsTrigger value="viewings" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <Calendar className="h-4 w-4" />
+              <span className="hidden lg:inline">Viewing</span>
+            </TabsTrigger>
+            <TabsTrigger value="applications" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <Users className="h-4 w-4" />
+              <span className="hidden lg:inline">Applications</span>
+            </TabsTrigger>
+            <TabsTrigger value="leases" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <FileText className="h-4 w-4" />
+              <span className="hidden lg:inline">Leases</span>
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden lg:inline">Payments</span>
+            </TabsTrigger>
+            <TabsTrigger value="maintenance" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <Wrench className="h-4 w-4" />
+              <span className="hidden lg:inline">Maintenance</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">

@@ -280,16 +280,20 @@ export default function Dashboard() {
           </Button>
         </div>
 
-        {/* Properties Table - Mobile responsive */}
+        {/* Properties Management - Mobile responsive */}
         {propertiesWithCounts.length === 0 ? (
-          <Card>
-            <CardHeader>
-              <CardTitle>No Properties Yet</CardTitle>
-              <CardDescription>Get started by adding your first property</CardDescription>
+          <Card className="shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-earth-light/20">
+            <CardHeader className="text-center">
+              <CardTitle className="text-xl sm:text-2xl">No Properties Yet</CardTitle>
+              <CardDescription className="text-base">Get started by adding your first property</CardDescription>
             </CardHeader>
-            <CardContent className="text-center py-8">
-              <Button onClick={() => navigate('/dashboard/add-property')} className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
+            <CardContent className="text-center py-6 sm:py-8">
+              <Button 
+                onClick={() => navigate('/dashboard/add-property')} 
+                className="flex items-center gap-2 bg-ocean-blue hover:bg-ocean-blue-dark text-white px-6 py-3 text-base"
+                size="lg"
+              >
+                <Plus className="h-5 w-5" />
                 Add Your First Property
               </Button>
             </CardContent>
@@ -377,23 +381,24 @@ export default function Dashboard() {
               </Table>
             </Card>
 
-            {/* Mobile Card View */}
+            {/* Mobile Card View - Enhanced */}
             <div className="space-y-4 lg:hidden">
               {filteredProperties.map((property) => (
                 <Card 
                   key={property.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
+                  className="cursor-pointer hover:shadow-lg transition-all duration-200 shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-earth-light/10"
                   onClick={() => navigate(`/manage-property/${property.id}`)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-3">
+                  <CardContent className="p-4 sm:p-5">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="w-10 h-10 bg-gradient-to-br from-orange-400 to-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                          <Home className="w-5 h-5 text-white" />
+                        <div className="w-12 h-12 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center flex-shrink-0 shadow-soft">
+                          <Home className="w-6 h-6 text-white" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <div className="font-medium truncate">{property.title}</div>
-                          <div className="flex flex-wrap gap-2 mt-1">
+                          <div className="font-semibold truncate text-base">{property.title}</div>
+                          <div className="text-sm text-muted-foreground truncate">{property.location || 'Location not specified'}</div>
+                          <div className="flex flex-wrap gap-2 mt-2">
                             <Badge variant={getStatusBadgeVariant(getPropertyStatus(property))} className="text-xs">
                               {getPropertyStatus(property)}
                             </Badge>
@@ -403,6 +408,7 @@ export default function Dashboard() {
                       <Button 
                         variant="ghost" 
                         size="sm"
+                        className="flex-shrink-0 h-10 w-10 p-0 hover:bg-ocean-blue/10"
                         onClick={(e) => {
                           e.stopPropagation();
                           navigate(`/manage-property/${property.id}`);
@@ -412,35 +418,36 @@ export default function Dashboard() {
                       </Button>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Rent:</span>
-                        <div className="font-medium">
+                    <div className="grid grid-cols-1 gap-3 text-sm">
+                      <div className="flex justify-between items-center p-3 bg-gradient-to-r from-background to-earth-light/40 rounded-lg">
+                        <span className="text-muted-foreground font-medium">Monthly Rent:</span>
+                        <div className="font-semibold text-base">
                           {property.status === 'available' ? (
-                            `R${property.price.toLocaleString()}`
+                            <span className="text-ocean-blue">R{property.price.toLocaleString()}</span>
                           ) : (
-                            '-'
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </div>
                       </div>
-                      <div>
-                        <span className="text-muted-foreground">Interest:</span>
-                        <div className="font-medium">
-                          {property.inquiriesCount} inquiries
-                        </div>
-                        <div className="text-muted-foreground text-xs">
-                          {property.applicationsCount} applications
+                      
+                      <div className="flex justify-between items-center p-3 bg-gradient-to-r from-background to-success-green/10 rounded-lg">
+                        <span className="text-muted-foreground font-medium">Interest:</span>
+                        <div className="text-right">
+                          <div className="font-semibold">{property.inquiriesCount} inquiries</div>
+                          <div className="text-xs text-muted-foreground">{property.applicationsCount} applications</div>
                         </div>
                       </div>
                     </div>
                     
                     {property.activeTenancy?.lease_status && (
-                      <div className="mt-3 pt-3 border-t">
-                        <span className="text-muted-foreground text-sm">Lease: </span>
-                        <Badge variant="outline" className="text-xs">
-                          {property.activeTenancy.lease_status === 'signed' ? 'Active' : 
-                           property.activeTenancy.lease_status === 'pending' ? 'Pending' : 'Draft'}
-                        </Badge>
+                      <div className="mt-4 pt-3 border-t border-border/50">
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground text-sm font-medium">Current Lease:</span>
+                          <Badge variant="outline" className="text-xs">
+                            {property.activeTenancy.lease_status === 'signed' ? 'Active' : 
+                             property.activeTenancy.lease_status === 'pending' ? 'Pending' : 'Draft'}
+                          </Badge>
+                        </div>
                       </div>
                     )}
                   </CardContent>

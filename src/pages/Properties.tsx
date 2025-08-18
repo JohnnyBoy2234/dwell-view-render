@@ -14,6 +14,7 @@ import PropertyCard from '@/components/PropertyCard';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { usePropertySearch } from '@/hooks/usePropertySearch';
 import { NoResultsMessage } from '@/components/search/NoResultsMessage';
+import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
 import { useNavigate } from 'react-router-dom';
 
 interface Property {
@@ -304,31 +305,13 @@ export default function Properties() {
           )}
         </div>
 
-        {/* Property Grid - Mobile responsive */}
-        {filteredProperties.length === 0 ? (
-          <NoResultsMessage 
-            onClearFilters={clearFilters}
-            onShowAllProperties={() => navigate('/properties')}
-          />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-            {filteredProperties.map((property) => (
-              <PropertyCard
-                key={property.id}
-                id={property.id}
-                title={property.title}
-                location={property.location}
-                price={property.price}
-                beds={property.bedrooms}
-                baths={property.bathrooms}
-                parking={property.parking_spaces}
-                image={property.images?.[0] || `https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?w=500&h=300&fit=crop`}
-                type={property.property_type}
-                featured={property.featured}
-              />
-            ))}
-          </div>
-        )}
+        {/* Property Grid - Enhanced Responsive */}
+        <ResponsivePropertyGrid 
+          properties={filteredProperties}
+          loading={loading}
+          onClearFilters={clearFilters}
+          onShowAllProperties={() => navigate('/properties')}
+        />
       </div>
     </div>
   );

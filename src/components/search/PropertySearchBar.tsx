@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import PriceDropdown from "../ui/pricedropdown";
-import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
+import { EnhancedAddressAutocomplete } from "@/components/ui/enhanced-address-autocomplete";
 import { ChevronDown, SlidersHorizontal, Search, X, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -226,7 +226,7 @@ const getPriceLabel = (): ReactNode => {
       {/* Location Search - Top Section */}
       <div className="p-3 sm:p-4 border-b border-ocean-blue/10">
         <div onKeyDown={handleKeyPress}>
-          <AddressAutocomplete 
+          <EnhancedAddressAutocomplete 
             value={filters.location} 
             onChange={value => onFiltersChange({ location: value })} 
             placeholder="Search city or suburb..." 
