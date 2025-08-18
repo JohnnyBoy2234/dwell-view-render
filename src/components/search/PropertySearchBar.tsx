@@ -190,6 +190,28 @@ const getPriceLabel = (): ReactNode => {
     }
     return "Bedrooms";
   };
+
+  const getBathroomsLabel = () => {
+    const hasSelection = filters.bathrooms !== "Any" && filters.bathrooms;
+    if (hasSelection) {
+      return <div className="flex flex-col items-start">
+          <span className="text-xs text-slate-300">Bathrooms</span>
+          <span className="text-sm font-normal">{filters.bathrooms}+</span>
+        </div>;
+    }
+    return "Bathrooms";
+  };
+
+  const getAvailableFromLabel = () => {
+    const hasSelection = filters.availableFrom;
+    if (hasSelection) {
+      return <div className="flex flex-col items-start">
+          <span className="text-xs text-slate-300">Available From</span>
+          <span className="text-sm font-normal">{format(filters.availableFrom, "MMM dd")}</span>
+        </div>;
+    }
+    return "Available From";
+  };
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       onSearch();
@@ -464,7 +486,7 @@ const getPriceLabel = (): ReactNode => {
             {/* More Filters Button */}
             <Button 
               variant="outline" 
-              className="h-10 px-3 flex-1 min-w-[130px] bg-white hover:bg-primary hover:text-white text-foreground border-input text-sm"
+              className={`h-10 px-3 flex-1 min-w-[130px] bg-white hover:bg-primary hover:text-white text-foreground border-input text-sm ${moreFiltersOpen ? 'bg-primary text-white' : ''}`}
               onClick={() => setMoreFiltersOpen(!moreFiltersOpen)}
             >
               <SlidersHorizontal className="h-3 w-3 mr-1" />
@@ -522,39 +544,43 @@ const getPriceLabel = (): ReactNode => {
 
               {/* Bathrooms Section */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">Bathrooms</h4>
-                <Select 
-                  value={filters.bathrooms || "Any"} 
-                  onValueChange={(value) => onFiltersChange({ bathrooms: value })}
-                >
-                  <SelectTrigger className="w-full bg-white border-input text-sm h-9">
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-border z-50">
-                    {bathroomOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50 text-sm py-2">
-                        {option.label === 'Any' ? 'Any' : `${option.label}+`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={`h-10 px-3 w-full justify-start text-left bg-white hover:bg-primary hover:text-white border-input text-sm ${filters.bathrooms !== "Any" && filters.bathrooms ? 'bg-primary text-white' : 'text-foreground'}`}>
+                      <span className="truncate w-full">{getBathroomsLabel()}</span>
+                      <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2 bg-white border border-border z-50" align="start">
+                    <div className="space-y-1">
+                      {bathroomOptions.map(option => (
+                        <Button 
+                          key={option.value} 
+                          variant="ghost" 
+                          size="sm" 
+                          className="w-full justify-start hover:bg-primary hover:text-white text-sm text-gray-950"
+                          onClick={() => {
+                            onFiltersChange({ bathrooms: option.value });
+                          }}
+                        >
+                          {option.label === 'Any' ? 'Any' : `${option.label}+ Bathroom${option.label !== '1' ? 's' : ''}`}
+                        </Button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               </div>
 
-              {/* Availability Section */}
+              {/* Available From Section */}
               <div>
-                <h4 className="text-sm font-medium text-foreground mb-3">Available From</h4>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full justify-start text-left font-normal bg-white hover:bg-muted/50 border-input h-9 text-sm"
+                      className={`h-10 px-3 w-full justify-start text-left bg-white hover:bg-primary hover:text-white border-input text-sm ${filters.availableFrom ? 'bg-primary text-white' : 'text-foreground'}`}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {filters.availableFrom ? (
-                        format(filters.availableFrom, "MMM dd")
-                      ) : (
-                        <span>Any date</span>
-                      )}
+                      <span className="truncate w-full">{getAvailableFromLabel()}</span>
+                      <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 bg-white border-border z-50" align="start">
