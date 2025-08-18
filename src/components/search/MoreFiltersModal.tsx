@@ -13,8 +13,6 @@ interface AdvancedFilters {
   amenities: string[];
   bathrooms: string;
   availableFrom: Date | null;
-  minPrice: string;
-  maxPrice: string;
 }
 
 interface MoreFiltersModalProps {
@@ -53,23 +51,6 @@ export const MoreFiltersModal = ({
     { value: "4", label: "4+" }
   ];
 
-  const priceOptions = [
-    { value: "", label: "Any" },
-    { value: "5000", label: "R5,000" },
-    { value: "10000", label: "R10,000" },
-    { value: "15000", label: "R15,000" },
-    { value: "20000", label: "R20,000" },
-    { value: "25000", label: "R25,000" },
-    { value: "30000", label: "R30,000" },
-    { value: "35000", label: "R35,000" },
-    { value: "40000", label: "R40,000" },
-    { value: "50000", label: "R50,000" },
-    { value: "60000", label: "R60,000" },
-    { value: "70000", label: "R70,000" },
-    { value: "80000", label: "R80,000" },
-    { value: "90000", label: "R90,000" },
-    { value: "100000", label: "R100,000+" }
-  ];
 
   const handleAmenityChange = (amenity: string) => {
     const newAmenities = filters.amenities.includes(amenity)
@@ -81,9 +62,7 @@ export const MoreFiltersModal = ({
   const getActiveFiltersCount = () => {
     return filters.amenities.length + 
            (filters.bathrooms !== "Any" && filters.bathrooms ? 1 : 0) +
-           (filters.availableFrom ? 1 : 0) +
-           (filters.minPrice && filters.minPrice !== "" ? 1 : 0) +
-           (filters.maxPrice && filters.maxPrice !== "" ? 1 : 0);
+           (filters.availableFrom ? 1 : 0);
   };
 
   return (
@@ -96,57 +75,6 @@ export const MoreFiltersModal = ({
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 py-4 space-y-8">{/* Make scrollable on mobile */}
-          {/* Price Range Section */}
-          <div>
-            <h3 className="text-xl font-medium text-foreground mb-6">Price Range</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Min</label>
-                <select
-                  value={filters.minPrice || ""}
-                  onChange={(e) => {
-                    const newMin = e.target.value;
-                    const minNum = Number.parseInt(newMin || "0", 10) || 0;
-                    const currentMaxNum = Number.parseInt(filters.maxPrice || "0", 10) || 0;
-                    if (filters.maxPrice && newMin && minNum > currentMaxNum) {
-                      onFiltersChange({ minPrice: newMin, maxPrice: newMin });
-                    } else {
-                      onFiltersChange({ minPrice: newMin });
-                    }
-                  }}
-                  className="w-full h-10 rounded-md border border-input px-3 text-sm bg-background"
-                >
-                  {priceOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-muted-foreground mb-1 block">Max</label>
-                <select
-                  value={filters.maxPrice || ""}
-                  onChange={(e) => {
-                    const newMax = e.target.value;
-                    const minNum = Number.parseInt(filters.minPrice || "0", 10) || 0;
-                    const newMaxNum = Number.parseInt(newMax || "0", 10) || 0;
-                    if (newMax && newMaxNum < minNum) {
-                      onFiltersChange({ minPrice: newMax, maxPrice: newMax });
-                    } else {
-                      onFiltersChange({ maxPrice: newMax });
-                    }
-                  }}
-                  className="w-full h-10 rounded-md border border-input px-3 text-sm bg-background"
-                >
-                  {priceOptions
-                    .filter(opt => {
-                      if (!filters.minPrice || filters.minPrice === "") return true;
-                      if (!opt.value) return true;
-                      return Number.parseInt(opt.value, 10) >= (Number.parseInt(filters.minPrice || "0", 10) || 0);
-                    })
-                    .map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                </select>
-              </div>
-            </div>
-          </div>
-
           {/* Amenities Section */}
           <div>
             <h3 className="text-xl font-medium text-foreground mb-6">Amenities</h3>

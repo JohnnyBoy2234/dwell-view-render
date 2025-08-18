@@ -149,14 +149,73 @@ export default function Properties() {
               <CardContent className="space-y-6">
                 {/* Price Range */}
                 <div className="space-y-3">
-                  <Label>Price Range: R{filters.priceRange[0].toLocaleString()} - R{filters.priceRange[1].toLocaleString()}</Label>
-                  <Slider
-                    value={filters.priceRange}
-                    onValueChange={(value) => updateFilters({ priceRange: value as [number, number] })}
-                    max={100000}
-                    step={1000}
-                    className="w-full"
-                  />
+                  <Label>Price Range</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+                      <select
+                        value={filters.priceRange[0] === 0 ? "" : filters.priceRange[0].toString()}
+                        onChange={(e) => {
+                          const newMin = e.target.value ? parseInt(e.target.value) : 0;
+                          const currentMax = filters.priceRange[1];
+                          if (newMin > currentMax) {
+                            updateFilters({ priceRange: [newMin, newMin] as [number, number] });
+                          } else {
+                            updateFilters({ priceRange: [newMin, currentMax] as [number, number] });
+                          }
+                        }}
+                        className="w-full h-10 rounded-md border border-input px-3 text-sm bg-background"
+                      >
+                        <option value="">Any</option>
+                        <option value="5000">R5,000</option>
+                        <option value="10000">R10,000</option>
+                        <option value="15000">R15,000</option>
+                        <option value="20000">R20,000</option>
+                        <option value="25000">R25,000</option>
+                        <option value="30000">R30,000</option>
+                        <option value="35000">R35,000</option>
+                        <option value="40000">R40,000</option>
+                        <option value="50000">R50,000</option>
+                        <option value="60000">R60,000</option>
+                        <option value="70000">R70,000</option>
+                        <option value="80000">R80,000</option>
+                        <option value="90000">R90,000</option>
+                        <option value="100000">R100,000+</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+                      <select
+                        value={filters.priceRange[1] === 100000 ? "" : filters.priceRange[1].toString()}
+                        onChange={(e) => {
+                          const newMax = e.target.value ? parseInt(e.target.value) : 100000;
+                          const currentMin = filters.priceRange[0];
+                          if (newMax < currentMin) {
+                            updateFilters({ priceRange: [newMax, newMax] as [number, number] });
+                          } else {
+                            updateFilters({ priceRange: [currentMin, newMax] as [number, number] });
+                          }
+                        }}
+                        className="w-full h-10 rounded-md border border-input px-3 text-sm bg-background"
+                      >
+                        <option value="">Any</option>
+                        <option value="5000">R5,000</option>
+                        <option value="10000">R10,000</option>
+                        <option value="15000">R15,000</option>
+                        <option value="20000">R20,000</option>
+                        <option value="25000">R25,000</option>
+                        <option value="30000">R30,000</option>
+                        <option value="35000">R35,000</option>
+                        <option value="40000">R40,000</option>
+                        <option value="50000">R50,000</option>
+                        <option value="60000">R60,000</option>
+                        <option value="70000">R70,000</option>
+                        <option value="80000">R80,000</option>
+                        <option value="90000">R90,000</option>
+                        <option value="100000">R100,000+</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Bedrooms & Bathrooms */}
