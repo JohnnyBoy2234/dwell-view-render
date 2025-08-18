@@ -156,3 +156,103 @@ All colors MUST be HSL.
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Enhanced dropdown and popover styling for visibility */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Google Places Autocomplete styling overrides */
+.pac-container {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+  z-index: 9999 !important;
+  margin-top: 4px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  font-family: inherit !important;
+}
+
+.pac-item {
+  color: hsl(var(--foreground)) !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.pac-item:hover,
+.pac-item.pac-item-selected {
+  background-color: hsl(var(--accent) / 0.1) !important;
+}
+
+.pac-item:last-child {
+  border-bottom: none !important;
+}
+
+.pac-item-query {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 500 !important;
+}
+
+.pac-matched {
+  color: hsl(var(--ocean-blue)) !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure all Select dropdowns have proper styling */
+[data-radix-select-content] {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+  z-index: 9999 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+[data-radix-select-item] {
+  color: hsl(var(--foreground)) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: hsl(var(--accent) / 0.1) !important;
+}
+
+/* Ensure Popover content is visible and properly styled */
+[data-radix-popover-content] {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+  z-index: 9999 !important;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 768px) {
+  /* Prevent zoom on iOS when focusing inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  
+  /* Enhanced touch targets */
+  button, [role="button"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  /* Improved dropdown spacing on mobile */
+  .pac-container {
+    margin-top: 8px !important;
+  }
+  
+  [data-radix-select-content] {
+    margin-top: 4px !important;
+  }
+}

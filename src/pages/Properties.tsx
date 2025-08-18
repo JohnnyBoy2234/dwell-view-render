@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Search, Filter, Home } from 'lucide-react';
+import { EnhancedAddressAutocomplete } from '@/components/ui/enhanced-address-autocomplete';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PropertyCard from '@/components/PropertyCard';
@@ -105,37 +106,53 @@ export default function Properties() {
           </p>
         </div>
 
-        {/* Search Bar */}
+        {/* Enhanced Search Bar with Google Places Autocomplete */}
         <Card className="mb-6 shadow-medium border-ocean-blue/20 bg-gradient-to-r from-white to-earth-light/30">
-          <CardContent className="p-6">
-            <div className="flex flex-col lg:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search by location or property name..."
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col gap-4">
+              {/* Location Search with Google Places Autocomplete */}
+              <div className="flex-1">
+                <EnhancedAddressAutocomplete
                   value={filters.searchTerm}
-                  onChange={(e) => updateFilters({ searchTerm: e.target.value })}
-                  className="pl-10"
+                  onChange={(value) => updateFilters({ searchTerm: value })}
+                  placeholder="Search by location (city, suburb, street)..."
+                  className="h-12 text-base border-ocean-blue/30 focus:border-ocean-blue focus:ring-ocean-blue bg-white text-foreground"
                 />
               </div>
-              <Select value={filters.propertyType} onValueChange={(value) => updateFilters({ propertyType: value })}>
-                <SelectTrigger className="lg:w-48">
-                  <SelectValue placeholder="Property Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {propertyTypes.map(type => (
-                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button
-                variant="outline"
-                onClick={() => setFiltersOpen(!filtersOpen)}
-                className="lg:w-32"
-              >
-                <Filter className="h-4 w-4 mr-2" />
-                Advanced
-              </Button>
+              
+              {/* Filters Row */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Select value={filters.propertyType} onValueChange={(value) => updateFilters({ propertyType: value })}>
+                  <SelectTrigger className="flex-1 sm:max-w-48 h-12 border-ocean-blue/30 focus:border-ocean-blue focus:ring-ocean-blue">
+                    <SelectValue placeholder="Property Type" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border z-50">
+                    {propertyTypes.map(type => (
+                      <SelectItem key={type} value={type} className="hover:bg-accent">{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => setFiltersOpen(!filtersOpen)}
+                  className="h-12 px-6 border-ocean-blue/30 text-ocean-blue hover:bg-ocean-blue hover:text-white transition-colors"
+                >
+                  <Filter className="h-4 w-4 mr-2" />
+                  {filtersOpen ? 'Hide Filters' : 'More Filters'}
+                </Button>
+                
+                {/* Clear Filters Button */}
+                {(filters.searchTerm || filters.propertyType !== 'All' || filters.selectedAmenities.length > 0) && (
+                  <Button
+                    variant="ghost"
+                    onClick={clearFilters}
+                    className="h-12 px-6 text-muted-foreground hover:text-foreground"
+                  >
+                    Clear All
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>

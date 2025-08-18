@@ -73,9 +73,20 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
         types: ['geocode'] // Real-world addresses like cities, suburbs, streets
       });
 
-      // Style the autocomplete element
-      autocompleteElement.className = 'w-full h-10 px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border border-input bg-background pl-10 pr-10 rounded-md';
+      // Apply comprehensive styling for theme consistency and visibility
+      const baseClasses = 'w-full px-3 py-2 text-base md:text-sm font-medium bg-background text-foreground border border-input rounded-md transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean-blue focus:border-ocean-blue hover:border-ocean-blue/50 disabled:cursor-not-allowed disabled:opacity-50';
+      const heightClass = className?.includes('h-12') ? 'h-12' : 'h-10';
+      const paddingClass = className?.includes('pl-10') ? 'pl-10' : 'px-3';
+      
+      autocompleteElement.className = `${baseClasses} ${heightClass} ${paddingClass}`;
       autocompleteElement.placeholder = placeholder;
+      
+      // Apply additional inline styles for better visibility and mobile optimization
+      autocompleteElement.style.fontSize = window.innerWidth < 768 ? '16px' : '14px'; // Prevent zoom on iOS
+      autocompleteElement.style.color = 'hsl(var(--foreground))';
+      autocompleteElement.style.backgroundColor = 'hsl(var(--background))';
+      autocompleteElement.style.borderColor = 'hsl(var(--input))';
+      autocompleteElement.style.zIndex = '10';
 
       // Clear the container and add the autocomplete element
       containerRef.current.innerHTML = '';
@@ -91,6 +102,44 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
           onPlaceSelect?.(place);
         }
       });
+
+      // Style the autocomplete dropdown for better visibility and theme consistency
+      const observer = new MutationObserver(() => {
+        const dropdown = document.querySelector('.pac-container');
+        if (dropdown) {
+          dropdown.setAttribute('style', `
+            background: hsl(var(--popover)) !important;
+            border: 1px solid hsl(var(--border)) !important;
+            border-radius: 8px !important;
+            box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+            z-index: 9999 !important;
+            margin-top: 4px !important;
+            max-height: 300px !important;
+            overflow-y: auto !important;
+          `);
+          
+          const items = dropdown.querySelectorAll('.pac-item');
+          items.forEach((item: any) => {
+            item.style.color = 'hsl(var(--foreground))';
+            item.style.padding = '12px 16px';
+            item.style.borderBottom = '1px solid hsl(var(--border))';
+            item.style.fontSize = '14px';
+            item.style.fontWeight = '400';
+            
+            item.addEventListener('mouseenter', () => {
+              item.style.backgroundColor = 'hsl(var(--accent) / 0.1)';
+            });
+            
+            item.addEventListener('mouseleave', () => {
+              item.style.backgroundColor = 'transparent';
+            });
+          });
+          
+          observer.disconnect();
+        }
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
 
       return () => {
         if (containerRef.current) {
@@ -141,7 +190,10 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
 
   return (
     <div className="relative">
-      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+      <MapPin className={cn(
+        "absolute left-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none",
+        className?.includes('h-12') ? 'top-4' : 'top-3'
+      )} />
       <div ref={containerRef} className="w-full" />
     </div>
   );
