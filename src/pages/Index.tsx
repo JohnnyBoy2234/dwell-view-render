@@ -35,11 +35,15 @@ const Index = () => {
     availableFrom: null as Date | null,
   });
 
+  // No results state for hero section
+  const [showNoResults, setShowNoResults] = useState(false);
+
   const isTenant = userType === 'tenant';
 
   // merge partial updates coming from PropertySearchBar
   const onFiltersChange = (patch: Partial<typeof filters>) => {
     setFilters(prev => ({ ...prev, ...patch }));
+    setShowNoResults(false); // Clear no results when filters change
   };
 
   // build query and navigate to /properties so the Properties page can read filters from the URL
@@ -77,6 +81,8 @@ const Index = () => {
   };
 
   const handleSearch = () => {
+    // Clear any previous no results state
+    setShowNoResults(false);
     // ensure latest filters (including location) are used
     applyFilters();
   };
@@ -177,6 +183,46 @@ const Index = () => {
                 });
               }}
             />
+            
+            {/* No Results Message in Hero Section */}
+            {showNoResults && (
+              <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-white mb-2">No properties match your filters</h3>
+                  <p className="text-white/80 mb-4">Try adjusting your search criteria or browse all available properties.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setFilters({
+                          location: "",
+                          propertyType: "Any",
+                          minPrice: "",
+                          maxPrice: "",
+                          bedrooms: "Any",
+                        });
+                        setAdvancedFilters({
+                          propertyTypes: [],
+                          amenities: [],
+                          bathrooms: "Any",
+                          availableFrom: null
+                        });
+                        setShowNoResults(false);
+                      }}
+                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue"
+                    >
+                      Clear Filters
+                    </Button>
+                    <Button 
+                      onClick={() => navigate('/properties')}
+                      className="bg-white text-ocean-blue hover:bg-white/90"
+                    >
+                      Browse All Properties
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <div className="mt-8 flex flex-wrap justify-center gap-6 text-white/90">
               <div className="flex items-center">
