@@ -314,24 +314,24 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
           ) : (
             <div className="grid gap-3">
               {leads.map((lead) => (
-                <div key={lead.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <div className="font-medium">{lead.tenant_profile?.display_name || 'Tenant'}</div>
+                <div key={lead.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{lead.tenant_profile?.display_name || 'Tenant'}</div>
                     <div className="text-xs text-muted-foreground">
                       Last message {lead.last_message_at ? format(new Date(lead.last_message_at), 'MMM dd, yyyy') : 'N/A'}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2">
                     {invitesByTenant[lead.tenant_id]?.status === 'invited' ? (
-                      <Badge variant="secondary">Invited to Apply</Badge>
+                      <Badge variant="secondary" className="text-center">Invited to Apply</Badge>
                     ) : invitesByTenant[lead.tenant_id]?.status === 'used' ? (
-                      <Badge>Application Submitted</Badge>
+                      <Badge className="text-center">Application Submitted</Badge>
                     ) : (
-                      <Button size="sm" onClick={() => handleInvite(lead.tenant_id, lead.id)}>
+                      <Button size="sm" onClick={() => handleInvite(lead.tenant_id, lead.id)} className="w-full sm:w-auto">
                         Invite to Apply
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" onClick={() => window.open(`/messages?c=${lead.id}`, '_self')}>
+                    <Button variant="outline" size="sm" onClick={() => window.open(`/messages?c=${lead.id}`, '_self')} className="w-full sm:w-auto">
                       <Eye className="h-4 w-4 mr-2" /> View Chat
                     </Button>
                   </div>
@@ -392,101 +392,105 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
 
                   return (
                     <Card key={application.id} className="border-l-4 border-l-primary/20">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="p-2 bg-primary/10 rounded-full">
-                                <User className="h-4 w-4 text-primary" />
-                              </div>
-                              <div>
-                                <h4 className="font-semibold">{tenantName}</h4>
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                  <Calendar className="h-3 w-3" />
-                                  Applied {format(new Date(application.created_at), 'MMM dd, yyyy')}
-                                </div>
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col gap-4">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
+                              <User className="h-4 w-4 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold truncate">{tenantName}</h4>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Calendar className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">Applied {format(new Date(application.created_at), 'MMM dd, yyyy')}</span>
                               </div>
                             </div>
-                            
-                            <div className="flex items-center gap-2 mb-3">
-                              <Badge variant={getStatusBadgeVariant(application.status)}>
-                                {application.status.toUpperCase()}
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={getStatusBadgeVariant(application.status)}>
+                              {application.status.toUpperCase()}
+                            </Badge>
+                            {application.screening_profile?.is_complete && (
+                              <Badge variant="outline">
+                                <FileText className="h-3 w-3 mr-1" />
+                                <span className="hidden sm:inline">Screening Complete</span>
+                                <span className="sm:hidden">Complete</span>
                               </Badge>
-                              {application.screening_profile?.is_complete && (
-                                <Badge variant="outline">
-                                  <FileText className="h-3 w-3 mr-1" />
-                                  Screening Complete
+                            )}
+                          </div>
+
+                          <div className="flex flex-col gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => setSelectedApplication(application)}
+                                    className="w-full sm:w-auto justify-center"
+                                  >
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+                                  <DialogHeader>
+                                    <DialogTitle className="text-left">Application Details - {tenantName}</DialogTitle>
+                                    <DialogDescription className="text-left">
+                                      Review the complete application and screening information
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  {selectedApplication && renderApplicationDetails(selectedApplication)}
+                                </DialogContent>
+                              </Dialog>
+
+                              {application.status === 'pending' && (
+                                <div className="flex flex-col sm:flex-row gap-2">
+                                  <Button 
+                                    onClick={() => handleAcceptApplication(application)}
+                                    className="bg-green-600 hover:bg-green-700 w-full sm:w-auto justify-center"
+                                    size="sm"
+                                  >
+                                    <Check className="h-4 w-4 mr-2" />
+                                    <span className="hidden sm:inline">Accept & Start Lease</span>
+                                    <span className="sm:hidden">Accept</span>
+                                  </Button>
+                                  <Button
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => handleDeclineApplication(application.id)}
+                                    className="text-red-600 border-red-200 hover:bg-red-50 w-full sm:w-auto justify-center"
+                                  >
+                                    <X className="h-4 w-4 mr-2" />
+                                    Decline
+                                  </Button>
+                                </div>
+                              )}
+                              
+                              {application.status === 'accepted' && (
+                                <Button 
+                                  onClick={() => {
+                                    const tenantName = application.screening_profile 
+                                      ? `${application.screening_profile.first_name} ${application.screening_profile.last_name}`
+                                      : application.tenant_profile?.display_name || 'Tenant';
+                                    onStartLease(application.tenant_id, tenantName);
+                                  }}
+                                  className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto justify-center"
+                                  size="sm"
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  <span className="hidden sm:inline">Create Lease</span>
+                                  <span className="sm:hidden">Lease</span>
+                                </Button>
+                              )}
+
+                              {application.status === 'declined' && (
+                                <Badge variant="destructive" className="w-full sm:w-auto text-center">
+                                  Application Declined
                                 </Badge>
                               )}
                             </div>
-                          </div>
-
-                          <div className="flex items-center gap-2">
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => setSelectedApplication(application)}
-                                >
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  View Details
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="max-w-2xl">
-                                <DialogHeader>
-                                  <DialogTitle>Application Details - {tenantName}</DialogTitle>
-                                  <DialogDescription>
-                                    Review the complete application and screening information
-                                  </DialogDescription>
-                                </DialogHeader>
-                                {selectedApplication && renderApplicationDetails(selectedApplication)}
-                              </DialogContent>
-                            </Dialog>
-
-                            {application.status === 'pending' && (
-                              <>
-                                <Button 
-                                  onClick={() => handleAcceptApplication(application)}
-                                  className="bg-green-600 hover:bg-green-700"
-                                  size="sm"
-                                >
-                                  <Check className="h-4 w-4 mr-2" />
-                                  Accept & Start Lease
-                                </Button>
-                                <Button
-                                  variant="outline" 
-                                  size="sm"
-                                  onClick={() => handleDeclineApplication(application.id)}
-                                  className="text-red-600 border-red-200 hover:bg-red-50"
-                                >
-                                  <X className="h-4 w-4 mr-2" />
-                                  Decline
-                                </Button>
-                              </>
-                            )}
-                            
-                            {application.status === 'accepted' && (
-                              <Button 
-                                onClick={() => {
-                                  const tenantName = application.screening_profile 
-                                    ? `${application.screening_profile.first_name} ${application.screening_profile.last_name}`
-                                    : application.tenant_profile?.display_name || 'Tenant';
-                                  onStartLease(application.tenant_id, tenantName);
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700"
-                                size="sm"
-                              >
-                                <FileText className="h-4 w-4 mr-2" />
-                                Create Lease
-                              </Button>
-                            )}
-
-                            {application.status === 'declined' && (
-                              <Badge variant="destructive">
-                                Application Declined
-                              </Badge>
-                            )}
                           </div>
                         </div>
                       </CardContent>

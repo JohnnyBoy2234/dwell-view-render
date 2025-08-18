@@ -222,15 +222,15 @@ const getPriceLabel = (): ReactNode => {
       onSearch();
     }
   };
-  return <div className="relative bg-white backdrop-blur-sm rounded-2xl shadow-2xl border border-ocean-blue/20 w-full max-w-4xl mx-auto">
+  return <div className="relative bg-white backdrop-blur-sm rounded-2xl shadow-2xl border border-ocean-blue/20 w-full max-w-4xl mx-auto overflow-hidden">
       {/* Location Search - Top Section */}
-      <div className="p-3 sm:p-4 border-b border-ocean-blue/10">
+      <div className="p-4 border-b border-ocean-blue/10">
         <div onKeyDown={handleKeyPress}>
           <EnhancedAddressAutocomplete 
             value={filters.location} 
             onChange={value => onFiltersChange({ location: value })} 
             placeholder="Search city or suburb..." 
-            className="h-12 sm:h-10 text-base sm:text-sm border-0 focus-visible:ring-2 focus-visible:ring-ocean-blue text-foreground bg-white w-full" 
+            className="h-12 text-base border-0 focus-visible:ring-2 focus-visible:ring-ocean-blue text-foreground bg-white w-full rounded-lg" 
           />
         </div>
       </div>
