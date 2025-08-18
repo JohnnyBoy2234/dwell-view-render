@@ -256,9 +256,6 @@ const getPriceLabel = (): ReactNode => {
                   <div className="text-lg font-medium">Filters</div>
                   <div className="text-sm text-slate-400">Refine your search</div>
                 </div>
-                <Button variant="ghost" onClick={() => setFiltersSheetOpen(false)}>
-                  <X />
-                </Button>
               </div>
 
               <div className="space-y-4 overflow-auto pr-2">
