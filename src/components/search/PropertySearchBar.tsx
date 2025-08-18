@@ -271,8 +271,8 @@ const getPriceLabel = (): ReactNode => {
                       const isSelected = selectedTypes.includes(option.value);
                       return <Button
                         key={option.value}
-                        variant={isSelected ? "secondary" : "outline"}
-                        className={`w-full py-3 text-left ${isSelected ? 'bg-primary text-white' : ''}`}
+                        variant={isSelected ? "default" : "outline"}
+                        className={`w-full py-3 text-left ${isSelected ? 'bg-ocean-blue text-white border-ocean-blue' : 'bg-white text-foreground border-ocean-blue/30 hover:bg-ocean-blue/10'}`}
                         onClick={() => {
                           if (option.value === "Any") {
                             onFiltersChange({ propertyType: "Any" });

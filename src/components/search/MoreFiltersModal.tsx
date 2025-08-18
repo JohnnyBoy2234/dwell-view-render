@@ -66,14 +66,14 @@ export const MoreFiltersModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] bg-background border-border">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden bg-background border-border flex flex-col">
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border shrink-0">
           <DialogTitle className="text-2xl font-semibold text-foreground">
             Advanced Filter Options
           </DialogTitle>
         </DialogHeader>
 
-        <div className="overflow-y-auto flex-1 py-4 space-y-8">
+        <div className="overflow-y-auto flex-1 py-4 space-y-8">{/* Make scrollable on mobile */}
           {/* Amenities Section */}
           <div>
             <h3 className="text-xl font-medium text-foreground mb-6">Amenities</h3>
@@ -143,7 +143,7 @@ export const MoreFiltersModal = ({
                     selected={filters.availableFrom}
                     onSelect={(date) => {
                       onFiltersChange({ availableFrom: date || null });
-                      setDateOpen(false);
+                      setDateOpen(false); // Auto-close calendar after selection
                     }}
                     initialFocus
                     className="p-3 pointer-events-auto"
@@ -156,7 +156,7 @@ export const MoreFiltersModal = ({
         </div>
 
         {/* Fixed Bottom Actions */}
-        <div className="flex justify-between items-center pt-6 border-t border-border bg-background">
+        <div className="flex justify-between items-center pt-6 border-t border-border bg-background shrink-0">{/* Fixed footer */}
           <div className="text-base text-muted-foreground font-medium">
             {getActiveFiltersCount()} filter{getActiveFiltersCount() !== 1 ? 's' : ''} applied
           </div>
