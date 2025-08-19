@@ -130,11 +130,27 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
             max-width: 500px !important;
           `;
           
-          // Hide Google branding
-          const logoElements = dropdown.querySelectorAll('.pac-logo, .pac-logo:after');
-          logoElements.forEach((logo: any) => {
-            logo.style.display = 'none !important';
-          });
+          // Hide Google branding completely
+          const style = document.createElement('style');
+          style.textContent = `
+            .pac-logo, 
+            .pac-logo:after, 
+            .pac-logo:before,
+            [title*="Powered by Google"],
+            .pac-container [title*="Powered by Google"],
+            .pac-container .pac-logo,
+            .pac-container a[href*="maps.google.com"] {
+              display: none !important;
+              visibility: hidden !important;
+              height: 0 !important;
+              width: 0 !important;
+              opacity: 0 !important;
+            }
+            .pac-container {
+              margin-top: 0 !important;
+            }
+          `;
+          document.head.appendChild(style);
           
           const items = dropdown.querySelectorAll('.pac-item');
           items.forEach((item: any, index: number) => {

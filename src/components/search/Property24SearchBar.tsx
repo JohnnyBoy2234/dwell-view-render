@@ -54,7 +54,7 @@ export const Property24SearchBar = ({
   ];
 
   const priceOptions = [
-    { value: "", label: "Any" },
+    { value: "any", label: "Any" },
     { value: "2000", label: "R 2,000" },
     { value: "3000", label: "R 3,000" },
     { value: "4000", label: "R 4,000" },
