@@ -87,15 +87,11 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
     if (!isLoaded || !containerRef.current || disabled || hasError) return;
 
     try {
-      console.log('Creating PlaceAutocompleteElement with updated config...');
-      
-      // Create the new PlaceAutocompleteElement with only supported properties
+      // Create the new PlaceAutocompleteElement
       const autocomplete = new window.google.maps.places.PlaceAutocompleteElement({
         componentRestrictions: { country: 'za' },
-        types: ['geocode']
+        fields: ['formattedAddress', 'geometry', 'name', 'placeId']
       });
-      
-      console.log('PlaceAutocompleteElement created successfully');
 
       autocompleteRef.current = autocomplete;
 
@@ -122,10 +118,8 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
       // Event listeners
       autocomplete.addEventListener('gmp-placeselect', (event: any) => {
-        console.log('Place selected from autocomplete:', event.place);
         const place = event.place;
         if (place && place.formattedAddress) {
-          console.log('Updating search term with:', place.formattedAddress);
           onChange(place.formattedAddress);
           onPlaceSelect?.(place);
         }

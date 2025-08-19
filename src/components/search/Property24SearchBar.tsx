@@ -162,12 +162,12 @@ export const Property24SearchBar = ({
 
   // Handle place selection from Google Places
   const handlePlaceSelect = (place: any) => {
-    if (place.formattedAddress) {
+    if (place.formatted_address) {
       // Force immediate update and prevent any race conditions
-      onFiltersChange({ searchTerm: place.formattedAddress });
+      onFiltersChange({ searchTerm: place.formatted_address });
       // Force a re-render to ensure UI updates
       setTimeout(() => {
-        onFiltersChange({ searchTerm: place.formattedAddress });
+        onFiltersChange({ searchTerm: place.formatted_address });
       }, 50);
     }
   };
