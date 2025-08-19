@@ -130,6 +130,12 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
             max-width: 500px !important;
           `;
           
+          // Hide Google branding
+          const logoElements = dropdown.querySelectorAll('.pac-logo, .pac-logo:after');
+          logoElements.forEach((logo: any) => {
+            logo.style.display = 'none !important';
+          });
+          
           const items = dropdown.querySelectorAll('.pac-item');
           items.forEach((item: any, index: number) => {
             item.style.cssText = `

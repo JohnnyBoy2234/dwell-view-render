@@ -122,6 +122,7 @@ const Index = () => {
               filters={filters}
               onFiltersChange={onFiltersChange}
               onSearch={handleSearch}
+              onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
             />
 
             <MoreFiltersModal

@@ -13,13 +13,15 @@ interface Property24SearchBarProps {
   onFiltersChange: (filters: Partial<PropertySearchFilters>) => void;
   onSearch: () => void;
   className?: string;
+  onMoreFiltersOpen?: () => void;
 }
 
 export const Property24SearchBar = ({
   filters,
   onFiltersChange,
   onSearch,
-  className
+  className,
+  onMoreFiltersOpen
 }: Property24SearchBarProps) => {
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
@@ -388,8 +390,8 @@ export const Property24SearchBar = ({
                 <Button 
                   className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white mt-6"
                   onClick={() => {
-                    onSearch(); // Execute search first
-                    setFiltersSheetOpen(false); // Then close sheet
+                    setFiltersSheetOpen(false); // Close sheet first
+                    setTimeout(() => onSearch(), 100); // Then execute search with small delay
                   }}
                 >
                   Apply Filters & Search
@@ -529,6 +531,18 @@ export const Property24SearchBar = ({
               </div>
             </PopoverContent>
           </Popover>
+
+          {/* More Filters Button */}
+          {onMoreFiltersOpen && (
+            <Button 
+              variant="outline" 
+              className="property24-filter-button"
+              onClick={onMoreFiltersOpen}
+            >
+              <SlidersHorizontal className="h-4 w-4 mr-2" />
+              More Filters
+            </Button>
+          )}
 
           {/* Search Button */}
           <Button 
