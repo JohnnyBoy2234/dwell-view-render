@@ -237,9 +237,10 @@ export function ViewingSlotsManager({ propertyId }: ViewingSlotsManagerProps) {
 
         <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="h-12 px-4 text-sm md:text-base">
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Viewing Slot
+              <span className="hidden sm:inline">Add Viewing Slot</span>
+              <span className="sm:hidden">Add Viewing</span>
             </Button>
           </DialogTrigger>
           <DialogContent>

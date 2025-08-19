@@ -146,8 +146,12 @@ export const Property24SearchBar = ({
   // Handle place selection from Google Places
   const handlePlaceSelect = (place: any) => {
     if (place.formatted_address) {
-      // Immediately update with the selected place address
+      // Force immediate update and prevent any race conditions
       onFiltersChange({ searchTerm: place.formatted_address });
+      // Force a re-render to ensure UI updates
+      setTimeout(() => {
+        onFiltersChange({ searchTerm: place.formatted_address });
+      }, 50);
     }
   };
 
@@ -338,6 +342,27 @@ export const Property24SearchBar = ({
                             : 'hover:bg-ocean-blue/10'
                         }`}
                         onClick={() => onFiltersChange({ bedrooms: option.value })}
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Bathrooms - Added to mobile filters */}
+                <div>
+                  <label className="text-sm font-medium mb-3 block">Bathrooms</label>
+                  <div className="flex gap-2">
+                    {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
+                      <Button
+                        key={option.value}
+                        variant={filters.bathrooms === option.value ? "default" : "outline"}
+                        className={`flex-1 ${
+                          filters.bathrooms === option.value 
+                            ? 'bg-ocean-blue text-white' 
+                            : 'hover:bg-ocean-blue/10'
+                        }`}
+                        onClick={() => onFiltersChange({ bathrooms: option.value })}
                       >
                         {option.label}
                       </Button>

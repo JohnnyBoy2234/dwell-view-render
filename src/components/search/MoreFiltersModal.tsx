@@ -92,25 +92,7 @@ export const MoreFiltersModal = ({
             </div>
           </div>
 
-          {/* Bathrooms Section */}
-          <div>
-            <h3 className="text-xl font-medium text-foreground mb-6">Bathrooms</h3>
-            <Select 
-              value={filters.bathrooms || "Any"} 
-              onValueChange={(value) => onFiltersChange({ bathrooms: value })}
-            >
-              <SelectTrigger className="w-full md:w-48 bg-background border-input text-base h-12">
-                <SelectValue placeholder="Any" />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border z-50">
-                {bathroomOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value} className="hover:bg-muted/50 text-base py-3">
-                    {option.label} {option.label !== 'Any' ? 'Bathroom' + (option.label !== '1+' ? 's' : '') : ''}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Remove Bathrooms Section - moved to main filters */}
 
           {/* Availability Section */}
           <div>

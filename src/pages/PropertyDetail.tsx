@@ -440,10 +440,9 @@ export default function PropertyDetail() {
 
             {/* Property Details */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 bg-gradient-to-r from-ocean-blue/10 to-earth-warm/10 border border-ocean-blue/20">
+              <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-ocean-blue/10 to-earth-warm/10 border border-ocean-blue/20">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="features">Features</TabsTrigger>
-                <TabsTrigger value="location">Location</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview">

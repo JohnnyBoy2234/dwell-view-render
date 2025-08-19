@@ -76,7 +76,8 @@ const App = () => (
             <Route path="/tenant-dashboard" element={<RouteGuard><TenantDashboard /></RouteGuard>} />
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
             <Route path="/landlord-lease-signing/:tenancyId" element={<RouteGuard><LandlordLeaseSigningPage /></RouteGuard>} />
-            <Route path="/dashboard/add-property" element={<RouteGuard><AddProperty /></RouteGuard>} />
+            <Route path="/dashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
+            <Route path="/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/list-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />

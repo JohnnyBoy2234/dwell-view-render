@@ -101,12 +101,14 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           // Call place select callback immediately to set the correct value
           onPlaceSelect?.(place);
           
-          // Use longer timeout to prevent any race conditions
+          // Use much longer timeout to completely prevent race conditions
           setTimeout(() => {
             setIsSelectingPlace(false);
-            // Ensure the correct value is set one more time
-            onChange(place.formatted_address);
-          }, 300);
+            // Force final consistency check
+            if (inputRef.current && inputRef.current.value === place.formatted_address) {
+              onChange(place.formatted_address);
+            }
+          }, 2000);
         }
       });
 
