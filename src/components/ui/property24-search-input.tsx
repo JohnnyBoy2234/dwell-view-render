@@ -36,7 +36,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
     const loadGoogleMapsAPI = async () => {
       try {
-        if (window.google?.maps?.places?.PlaceAutocompleteElement) {
+        if (window.google && window.google.maps && window.google.maps.places) {
           if (isMounted) {
             setIsLoaded(true);
             setIsLoading(false);
@@ -44,7 +44,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           return;
         }
 
-        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        const apiKey = 'AIzaSyC_a8w6Cm-PlyJ2eSpXyyp6VeyFkl-CcMI';
         if (!apiKey) {
           console.error('Google Maps API key is not configured');
           if (isMounted) {
@@ -151,7 +151,48 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         }
       });
 
+      // Style the autocomplete dropdown suggestions
+      const observer = new MutationObserver(() => {
+        const dropdowns = document.querySelectorAll('gmp-place-autocomplete-element, .pac-container');
+        dropdowns.forEach((dropdown) => {
+          if (dropdown instanceof HTMLElement) {
+            dropdown.style.backgroundColor = 'hsl(var(--background))';
+            dropdown.style.border = '1px solid hsl(var(--border))';
+            dropdown.style.borderRadius = '8px';
+            dropdown.style.color = 'hsl(var(--foreground))';
+            dropdown.style.fontSize = '14px';
+            dropdown.style.boxShadow = '0 4px 12px hsl(var(--shadow) / 0.15)';
+            dropdown.style.zIndex = '9999';
+          }
+          
+          const suggestions = dropdown.querySelectorAll('.pac-item, [role="option"]');
+          suggestions.forEach((suggestion) => {
+            if (suggestion instanceof HTMLElement) {
+              suggestion.style.backgroundColor = 'hsl(var(--background))';
+              suggestion.style.color = 'hsl(var(--foreground))';
+              suggestion.style.padding = '12px 16px';
+              suggestion.style.borderBottom = '1px solid hsl(var(--border))';
+              suggestion.style.cursor = 'pointer';
+              
+              suggestion.addEventListener('mouseenter', () => {
+                suggestion.style.backgroundColor = 'hsl(var(--muted))';
+              });
+              
+              suggestion.addEventListener('mouseleave', () => {
+                suggestion.style.backgroundColor = 'hsl(var(--background))';
+              });
+            }
+          });
+        });
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
       return () => {
+        observer.disconnect();
         if (autocompleteRef.current) {
           autocompleteRef.current.removeEventListener('input', () => {});
           autocompleteRef.current.removeEventListener('gmp-placeselect', () => {});
