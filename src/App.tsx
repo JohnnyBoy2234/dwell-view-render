@@ -50,24 +50,10 @@ const App = () => (
             <Route path="/admin/documents" element={<RouteGuard><DocumentReview /></RouteGuard>} />
 
             {/* Routes with Navbar */}
-            <Route
-              element={
-                <>
-                  <Navbar />
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/properties" element={<RouteGuard><Properties /></RouteGuard>} />
-                    <Route path="/how-it-works" element={<HowItWorks />} />
-                    <Route path="/about" element={<About />} />
-                  </Routes>
-                </>
-              }
-            >
-              <Route path="/" />
-              <Route path="/properties" />
-              <Route path="/how-it-works" />
-              <Route path="/about" />
-            </Route>
+            <Route path="/" element={<><Navbar /><Index /></>} />
+            <Route path="/properties" element={<><Navbar /><RouteGuard><Properties /></RouteGuard></>} />
+            <Route path="/how-it-works" element={<><Navbar /><HowItWorks /></>} />
+            <Route path="/about" element={<><Navbar /><About /></>} />
 
             {/* Routes without Navbar */}
             <Route path="/auth" element={<Auth />} />
