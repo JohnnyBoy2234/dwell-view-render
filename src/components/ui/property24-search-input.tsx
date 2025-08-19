@@ -93,8 +93,6 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         types: ['geocode']
       });
 
-      autocompleteRef.current = autocomplete;
-
       // Apply Property24 styling
       autocomplete.style.width = '100%';
       autocomplete.style.height = '52px';
@@ -111,24 +109,18 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
       // Set placeholder
       autocomplete.placeholder = placeholder;
 
-      // Set initial value if provided
+      // Set initial value only if not empty
       if (value) {
         autocomplete.value = value;
       }
 
+      // Clear the container and add the autocomplete element
+      containerRef.current.innerHTML = '';
+      containerRef.current.appendChild(autocomplete);
+
+      autocompleteRef.current = autocomplete;
+
       // Event listeners
-      autocomplete.addEventListener('gmp-placeselect', (event: any) => {
-        const place = event.place;
-        if (place && place.formattedAddress) {
-          onChange(place.formattedAddress);
-          onPlaceSelect?.(place);
-        }
-      });
-
-      autocomplete.addEventListener('input', (event: any) => {
-        onChange(event.target.value);
-      });
-
       autocomplete.addEventListener('focus', () => {
         setIsFocused(true);
         autocomplete.style.borderColor = 'hsl(var(--ocean-blue))';
@@ -141,20 +133,35 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         autocomplete.style.boxShadow = 'none';
       });
 
+      autocomplete.addEventListener('input', (event: any) => {
+        onChange(event.target.value);
+      });
+
+      autocomplete.addEventListener('gmp-placeselect', (event: any) => {
+        const place = event.place;
+        if (place?.formattedAddress) {
+          onChange(place.formattedAddress);
+          onPlaceSelect?.(place);
+        }
+      });
+
       autocomplete.addEventListener('keydown', (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
           autocomplete.blur();
         }
       });
 
-      // Mount the autocomplete element
-      containerRef.current.appendChild(autocomplete);
-
       return () => {
-        if (autocompleteRef.current && containerRef.current?.contains(autocompleteRef.current)) {
-          containerRef.current.removeChild(autocompleteRef.current);
+        if (autocompleteRef.current) {
+          autocompleteRef.current.removeEventListener('input', () => {});
+          autocompleteRef.current.removeEventListener('gmp-placeselect', () => {});
+          autocompleteRef.current.removeEventListener('focus', () => {});
+          autocompleteRef.current.removeEventListener('blur', () => {});
+          autocompleteRef.current.removeEventListener('keydown', () => {});
         }
-        autocompleteRef.current = null;
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+        }
       };
     } catch (error) {
       console.error('Error initializing Google Places Autocomplete:', error);
