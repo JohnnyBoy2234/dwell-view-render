@@ -23,7 +23,8 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
   onClear,
   disabled = false
 }) => {
-  const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const autocompleteRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -35,7 +36,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
     const loadGoogleMapsAPI = async () => {
       try {
-        if (window.google?.maps?.places) {
+        if (window.google?.maps?.places?.PlaceAutocompleteElement) {
           if (isMounted) {
             setIsLoaded(true);
             setIsLoading(false);
@@ -53,7 +54,6 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           return;
         }
 
-        console.log('Loading Google Maps API...');
         const loader = new Loader({
           apiKey: apiKey,
           version: 'weekly',
@@ -61,7 +61,6 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         });
 
         await loader.load();
-        console.log('Google Maps API loaded successfully');
         
         if (isMounted) {
           setIsLoaded(true);
@@ -85,79 +84,97 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
   // Initialize autocomplete when ready
   useEffect(() => {
-    if (!isLoaded || !inputRef.current || disabled) return;
-
-    let autocomplete: any = null;
+    if (!isLoaded || !containerRef.current || disabled || hasError) return;
 
     try {
-      console.log('Initializing Google Places Autocomplete...');
-      
-      autocomplete = new window.google.maps.places.Autocomplete(inputRef.current, {
-        types: ['geocode'],
+      // Create the new PlaceAutocompleteElement
+      const autocomplete = new window.google.maps.places.PlaceAutocompleteElement({
         componentRestrictions: { country: 'za' },
-        fields: ['formatted_address', 'geometry', 'name', 'place_id']
+        fields: ['formattedAddress', 'geometry', 'name', 'placeId']
       });
 
-      // Listen for place selection
-      autocomplete.addListener('place_changed', () => {
-        const place = autocomplete!.getPlace();
-        console.log('Place selected:', place);
-        
-        if (place && place.formatted_address) {
-          onChange(place.formatted_address);
+      autocompleteRef.current = autocomplete;
+
+      // Apply Property24 styling
+      autocomplete.style.width = '100%';
+      autocomplete.style.height = '52px';
+      autocomplete.style.border = '1px solid hsl(var(--border))';
+      autocomplete.style.borderRadius = '8px';
+      autocomplete.style.backgroundColor = 'hsl(var(--background))';
+      autocomplete.style.color = 'hsl(var(--foreground))';
+      autocomplete.style.fontSize = '14px';
+      autocomplete.style.paddingLeft = '48px';
+      autocomplete.style.paddingRight = '48px';
+      autocomplete.style.outline = 'none';
+      autocomplete.style.transition = 'all 0.2s ease-in-out';
+
+      // Set placeholder
+      autocomplete.placeholder = placeholder;
+
+      // Set initial value if provided
+      if (value) {
+        autocomplete.value = value;
+      }
+
+      // Event listeners
+      autocomplete.addEventListener('gmp-placeselect', (event: any) => {
+        const place = event.place;
+        if (place && place.formattedAddress) {
+          onChange(place.formattedAddress);
           onPlaceSelect?.(place);
         }
       });
 
-      // Simple dropdown styling
-      const observer = new MutationObserver(() => {
-        const dropdown = document.querySelector('.pac-container') as HTMLElement;
-        if (dropdown && !dropdown.hasAttribute('data-styled')) {
-          dropdown.setAttribute('data-styled', 'true');
-          dropdown.style.zIndex = '10000';
-          dropdown.style.borderRadius = '8px';
-          dropdown.style.border = '1px solid hsl(var(--border))';
-          dropdown.style.backgroundColor = 'hsl(var(--background))';
+      autocomplete.addEventListener('input', (event: any) => {
+        onChange(event.target.value);
+      });
+
+      autocomplete.addEventListener('focus', () => {
+        setIsFocused(true);
+        autocomplete.style.borderColor = 'hsl(var(--ocean-blue))';
+        autocomplete.style.boxShadow = '0 0 0 2px hsl(var(--ocean-blue) / 0.2)';
+      });
+
+      autocomplete.addEventListener('blur', () => {
+        setIsFocused(false);
+        autocomplete.style.borderColor = 'hsl(var(--border))';
+        autocomplete.style.boxShadow = 'none';
+      });
+
+      autocomplete.addEventListener('keydown', (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          autocomplete.blur();
         }
       });
 
-      observer.observe(document.body, { childList: true, subtree: true });
+      // Mount the autocomplete element
+      containerRef.current.appendChild(autocomplete);
 
       return () => {
-        if (autocomplete) {
-          window.google.maps.event.clearInstanceListeners(autocomplete);
+        if (autocompleteRef.current && containerRef.current?.contains(autocompleteRef.current)) {
+          containerRef.current.removeChild(autocompleteRef.current);
         }
-        observer.disconnect();
+        autocompleteRef.current = null;
       };
     } catch (error) {
       console.error('Error initializing Google Places Autocomplete:', error);
       setHasError(true);
     }
-  }, [isLoaded, onChange, onPlaceSelect, disabled]);
+  }, [isLoaded, onChange, onPlaceSelect, disabled, hasError, placeholder]);
+
+  // Sync external value changes with autocomplete
+  useEffect(() => {
+    if (autocompleteRef.current && autocompleteRef.current.value !== value) {
+      autocompleteRef.current.value = value;
+    }
+  }, [value]);
 
   const handleClear = () => {
     onChange('');
     onClear?.();
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-  };
-
-  const handleFocus = () => {
-    setIsFocused(true);
-  };
-
-  const handleBlur = () => {
-    setIsFocused(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      inputRef.current?.blur();
+    if (autocompleteRef.current) {
+      autocompleteRef.current.value = '';
+      autocompleteRef.current.focus();
     }
   };
 
@@ -181,14 +198,13 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
       <div className="relative group">
         <MapPin className="absolute left-4 top-4 h-5 w-5 text-ocean-blue/60 z-10" />
         <Input
-          ref={inputRef}
           type="text"
           placeholder={placeholder}
           value={value}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onKeyDown={(e) => e.key === 'Escape' && e.currentTarget.blur()}
           disabled={disabled}
           className={cn("property24-search-input pl-12 pr-12", className, {
             'property24-search-input-focused': isFocused
@@ -214,24 +230,9 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         "absolute left-4 top-4 h-5 w-5 text-ocean-blue/60 z-10 pointer-events-none transition-colors",
         isFocused && "text-ocean-blue"
       )} />
-      <Input
-        ref={inputRef}
-        type="text"
-        placeholder={placeholder}
-        value={value}
-        onChange={handleInputChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        disabled={disabled}
-        autoComplete="off"
-        className={cn(
-          "property24-search-input pl-12 pr-12",
-          className,
-          {
-            'property24-search-input-focused': isFocused
-          }
-        )}
+      <div 
+        ref={containerRef}
+        className={cn("property24-search-input", className)}
       />
       {value && (
         <button
