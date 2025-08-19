@@ -146,6 +146,7 @@ export const Property24SearchBar = ({
   // Handle place selection from Google Places
   const handlePlaceSelect = (place: any) => {
     if (place.formatted_address) {
+      // Immediately update with the selected place address
       onFiltersChange({ searchTerm: place.formatted_address });
     }
   };

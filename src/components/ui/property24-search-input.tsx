@@ -93,15 +93,20 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           setIsSelectingPlace(true);
           setIsTyping(false);
           
-          // Update input directly and call callbacks
+          // Update input directly first
           if (inputRef.current) {
             inputRef.current.value = place.formatted_address;
           }
-          onChange(place.formatted_address);
+          
+          // Call place select callback immediately to set the correct value
           onPlaceSelect?.(place);
           
-          // Reset selecting state after a brief delay
-          setTimeout(() => setIsSelectingPlace(false), 100);
+          // Use longer timeout to prevent any race conditions
+          setTimeout(() => {
+            setIsSelectingPlace(false);
+            // Ensure the correct value is set one more time
+            onChange(place.formatted_address);
+          }, 300);
         }
       });
 
