@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { EnhancedAddressAutocomplete } from "@/components/ui/enhanced-address-autocomplete";
 import PropertyCard from "@/components/PropertyCard";
-import { PropertySearchBar } from "@/components/search/PropertySearchBar";
+import { Property24SearchBar } from "@/components/search/Property24SearchBar";
+import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { Search, Home, Shield, Users, Star, ArrowRight, CheckCircle } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -18,14 +19,8 @@ const Index = () => {
   const [userType, setUserType] = useState('tenant'); // 'tenant' or 'landlord'
   const navigate = useNavigate();
 
-  // Unified filters object used by PropertySearchBar and the rest of the page
-  const [filters, setFilters] = useState({
-    location: "",
-    propertyType: "Any",
-    minPrice: "",
-    maxPrice: "",
-    bedrooms: "Any",
-  });
+  // Use the unified search filters hook
+  const { filters, updateFilters, executeSearch } = usePropertySearchFilters();
 
   // Advanced filters state
   const [advancedFilters, setAdvancedFilters] = useState({
@@ -40,44 +35,15 @@ const Index = () => {
 
   const isTenant = userType === 'tenant';
 
-  // merge partial updates coming from PropertySearchBar
+  // merge partial updates coming from Property24SearchBar
   const onFiltersChange = (patch: Partial<typeof filters>) => {
-    setFilters(prev => ({ ...prev, ...patch }));
+    updateFilters(patch);
     setShowNoResults(false); // Clear no results when filters change
   };
 
-  // build query and navigate to /properties so the Properties page can read filters from the URL
+  // Execute search using the hook
   const applyFilters = () => {
-    const params = new URLSearchParams();
-
-    // include location if set (trimmed) - Properties page expects 'search' not 'location'
-    const loc = filters.location?.trim();
-    if (loc) params.set("search", loc);
-
-    // Properties page expects 'type' not 'propertyType'
-    if (filters.propertyType && filters.propertyType !== "Any") params.set("type", filters.propertyType);
-    if (filters.minPrice && filters.minPrice !== "") params.set("minPrice", filters.minPrice);
-    if (filters.maxPrice && filters.maxPrice !== "") params.set("maxPrice", filters.maxPrice);
-    if (filters.bedrooms && filters.bedrooms !== "Any") params.set("bedrooms", filters.bedrooms);
-
-    // Include advanced filters
-    if (advancedFilters.propertyTypes.length > 0) {
-      params.set("propertyTypes", advancedFilters.propertyTypes.join(','));
-    }
-    if (advancedFilters.amenities.length > 0) {
-      params.set("amenities", advancedFilters.amenities.join(','));
-    }
-    if (advancedFilters.bathrooms !== "Any") {
-      params.set("bathrooms", advancedFilters.bathrooms);
-    }
-    if (advancedFilters.availableFrom) {
-      params.set("availableFrom", advancedFilters.availableFrom.toISOString().split('T')[0]);
-    }
-
-    // Only navigate if there are filters to apply, otherwise show no results message
-    const query = params.toString();
-    console.debug("navigate /properties with query:", query, "filters:", filters);
-    navigate(`/properties${query ? `?${query}` : ""}`);
+    executeSearch();
   };
 
   const handleSearch = () => {
@@ -152,10 +118,9 @@ const Index = () => {
             </p>
             
             {/* Property24-style Search Bar */}
-            <PropertySearchBar
+            <Property24SearchBar
               filters={filters}
               onFiltersChange={onFiltersChange}
-              onMoreFiltersClick={() => setMoreFiltersOpen(true)}
               onSearch={handleSearch}
             />
 
@@ -174,12 +139,16 @@ const Index = () => {
                   bathrooms: "Any",
                   availableFrom: null
                 });
-                setFilters({
+                updateFilters({
                   location: "",
                   propertyType: "Any",
                   minPrice: "",
                   maxPrice: "",
                   bedrooms: "Any",
+                  bathrooms: "Any",
+                  propertyTypes: [],
+                  amenities: [],
+                  availableFrom: null
                 });
               }}
             />
@@ -194,12 +163,16 @@ const Index = () => {
                     <Button 
                       variant="outline" 
                       onClick={() => {
-                        setFilters({
+                        updateFilters({
                           location: "",
                           propertyType: "Any",
                           minPrice: "",
                           maxPrice: "",
                           bedrooms: "Any",
+                          bathrooms: "Any",
+                          propertyTypes: [],
+                          amenities: [],
+                          availableFrom: null
                         });
                         setAdvancedFilters({
                           propertyTypes: [],

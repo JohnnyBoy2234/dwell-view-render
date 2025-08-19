@@ -4,6 +4,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 export interface PropertySearchFilters {
   // Main search bar filters
   location: string;
+  propertyType: string;
   minPrice: string;
   maxPrice: string;
   bedrooms: string;
@@ -17,6 +18,7 @@ export interface PropertySearchFilters {
 
 const defaultFilters: PropertySearchFilters = {
   location: '',
+  propertyType: 'Any',
   minPrice: '',
   maxPrice: '',
   bedrooms: 'Any',
@@ -33,7 +35,8 @@ export function usePropertySearchFilters() {
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState<PropertySearchFilters>(() => {
     return {
-      location: searchParams.get('location') || '',
+      location: searchParams.get('location') || searchParams.get('search') || '',
+      propertyType: searchParams.get('propertyType') || searchParams.get('type') || 'Any',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
       bedrooms: searchParams.get('bedrooms') || 'Any',
@@ -71,6 +74,10 @@ export function usePropertySearchFilters() {
       params.set('maxPrice', filters.maxPrice);
     }
     
+    if (filters.propertyType !== 'Any') {
+      params.set('propertyType', filters.propertyType);
+    }
+    
     if (filters.bedrooms !== 'Any') {
       params.set('bedrooms', filters.bedrooms);
     }
@@ -99,6 +106,7 @@ export function usePropertySearchFilters() {
   const hasActiveFilters = () => {
     return (
       filters.location.trim() !== '' ||
+      filters.propertyType !== 'Any' ||
       (filters.minPrice && filters.minPrice !== '0') ||
       filters.maxPrice !== '' ||
       filters.bedrooms !== 'Any' ||

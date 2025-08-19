@@ -249,6 +249,16 @@ All colors MUST be HSL.
   line-height: 1.5;
 }
 
+.property24-search-input-focused {
+  border-color: hsl(var(--ocean-blue));
+  box-shadow: 0 0 0 4px hsl(var(--ocean-blue) / 0.12), 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+}
+
+.property24-search-input-typing {
+  border-color: hsl(var(--ocean-blue));
+  box-shadow: 0 0 0 4px hsl(var(--ocean-blue) / 0.12), 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+}
+
 .property24-search-input::placeholder {
   color: hsl(var(--muted-foreground));
   font-weight: 400;
