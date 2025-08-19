@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Input } from '@/components/ui/input';
-import { MapPin, Loader2 } from 'lucide-react';
+import { MapPin, Loader2, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EnhancedAddressAutocompleteProps {
@@ -10,6 +10,7 @@ interface EnhancedAddressAutocompleteProps {
   onPlaceSelect?: (place: any) => void;
   placeholder?: string;
   className?: string;
+  onClear?: () => void;
 }
 
 // Augment the global Window interface
@@ -24,7 +25,8 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
   onChange,
   onPlaceSelect,
   placeholder = "Enter location...",
-  className
+  className,
+  onClear
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
@@ -32,6 +34,7 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const loadGoogleMapsAPI = async () => {
@@ -63,6 +66,14 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
     loadGoogleMapsAPI();
   }, []);
 
+  const handleClear = () => {
+    onChange('');
+    onClear?.();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   useEffect(() => {
     if (!isLoaded || !containerRef.current) return;
 
@@ -73,26 +84,37 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
         types: ['geocode'] // Real-world addresses like cities, suburbs, streets
       });
 
-      // Apply comprehensive styling for theme consistency and visibility
-      const baseClasses = 'w-full px-3 py-2 text-base md:text-sm font-medium bg-background text-foreground border border-input rounded-md transition-all duration-300 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ocean-blue focus:border-ocean-blue hover:border-ocean-blue/50 disabled:cursor-not-allowed disabled:opacity-50';
-      const heightClass = className?.includes('h-12') ? 'h-12' : 'h-10';
-      const paddingClass = className?.includes('pl-10') ? 'pl-10' : 'px-3';
-      
-      autocompleteElement.className = `${baseClasses} ${heightClass} ${paddingClass}`;
+      // Apply Property24-style classes
+      autocompleteElement.className = `property24-search-input w-full ${className || ''}`;
       autocompleteElement.placeholder = placeholder;
+      autocompleteElement.value = value;
       
-      // Apply additional inline styles for better visibility and mobile optimization
-      autocompleteElement.style.fontSize = window.innerWidth < 768 ? '16px' : '14px'; // Prevent zoom on iOS
+      // Apply additional inline styles for Property24 look
+      autocompleteElement.style.fontSize = window.innerWidth < 768 ? '16px' : '16px';
+      autocompleteElement.style.fontWeight = '400';
       autocompleteElement.style.color = 'hsl(var(--foreground))';
-      autocompleteElement.style.backgroundColor = 'hsl(var(--background))';
-      autocompleteElement.style.borderColor = 'hsl(var(--input))';
-      autocompleteElement.style.zIndex = '10';
+      autocompleteElement.style.backgroundColor = 'white';
+      autocompleteElement.style.borderColor = 'hsl(var(--border))';
+      autocompleteElement.style.borderWidth = '2px';
+      autocompleteElement.style.borderRadius = '16px';
+      autocompleteElement.style.height = '56px';
+      autocompleteElement.style.paddingLeft = '48px';
+      autocompleteElement.style.paddingRight = value ? '48px' : '16px';
 
       // Clear the container and add the autocomplete element
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(autocompleteElement);
 
       autocompleteRef.current = autocompleteElement;
+
+      // Focus and blur event handlers
+      autocompleteElement.addEventListener('focus', () => setIsFocused(true));
+      autocompleteElement.addEventListener('blur', () => setIsFocused(false));
+
+      // Listen for input changes
+      autocompleteElement.addEventListener('input', (event: any) => {
+        onChange(event.target.value);
+      });
 
       // Listen for place selection
       autocompleteElement.addEventListener('gmp-placeselect', (event: any) => {
@@ -103,45 +125,54 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
         }
       });
 
-      // Style the autocomplete dropdown for better visibility and theme consistency
+      // Style the autocomplete dropdown for Property24 look
       const observer = new MutationObserver(() => {
         const dropdown = document.querySelector('.pac-container');
-        if (dropdown) {
-          dropdown.setAttribute('style', `
-            background: hsl(var(--popover)) !important;
+        if (dropdown && !dropdown.hasAttribute('data-property24-styled')) {
+          dropdown.setAttribute('data-property24-styled', 'true');
+          (dropdown as HTMLElement).style.cssText = `
+            background: white !important;
             border: 1px solid hsl(var(--border)) !important;
-            border-radius: 8px !important;
-            box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
-            z-index: 9999 !important;
-            margin-top: 4px !important;
-            max-height: 300px !important;
-            overflow-y: auto !important;
-          `);
+            border-radius: 16px !important;
+            box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+            margin-top: 8px !important;
+            overflow: hidden !important;
+            z-index: 10000 !important;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+            min-width: 320px !important;
+            max-width: 500px !important;
+          `;
           
           const items = dropdown.querySelectorAll('.pac-item');
-          items.forEach((item: any) => {
-            item.style.color = 'hsl(var(--foreground))';
-            item.style.padding = '12px 16px';
-            item.style.borderBottom = '1px solid hsl(var(--border))';
-            item.style.fontSize = '14px';
-            item.style.fontWeight = '400';
+          items.forEach((item: any, index: number) => {
+            item.style.cssText = `
+              padding: 16px 20px !important;
+              border-bottom: ${index === items.length - 1 ? 'none' : '1px solid hsl(var(--border) / 0.5)'} !important;
+              font-size: 15px !important;
+              color: hsl(var(--foreground)) !important;
+              cursor: pointer !important;
+              transition: all 0.2s ease !important;
+              line-height: 1.4 !important;
+              font-weight: 400 !important;
+            `;
             
             item.addEventListener('mouseenter', () => {
-              item.style.backgroundColor = 'hsl(var(--accent) / 0.1)';
+              item.style.backgroundColor = 'hsl(var(--ocean-blue) / 0.06)';
+              item.style.color = 'hsl(var(--ocean-blue))';
             });
             
             item.addEventListener('mouseleave', () => {
               item.style.backgroundColor = 'transparent';
+              item.style.color = 'hsl(var(--foreground))';
             });
           });
-          
-          observer.disconnect();
         }
       });
       
       observer.observe(document.body, { childList: true, subtree: true });
 
       return () => {
+        observer.disconnect();
         if (containerRef.current) {
           containerRef.current.innerHTML = '';
         }
@@ -150,7 +181,7 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       console.warn('Error initializing Google Places Autocomplete:', error);
       setHasError(true);
     }
-  }, [isLoaded, onChange, onPlaceSelect, placeholder]);
+  }, [isLoaded, onChange, onPlaceSelect, placeholder, value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
@@ -159,16 +190,30 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
   if (hasError) {
     // Fallback to regular input if Google Maps fails to load
     return (
-      <div className="relative">
-        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+      <div className="relative group">
+        <MapPin className="absolute left-4 top-4 h-5 w-5 text-ocean-blue/60 z-10" />
         <Input
           ref={inputRef}
           type="text"
           placeholder={placeholder}
           value={value}
           onChange={handleInputChange}
-          className={cn("pl-10", className)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className={cn("property24-search-input pl-12 pr-12", className, {
+            'property24-search-input-focused': isFocused
+          })}
         />
+        {value && (
+          <button
+            onClick={handleClear}
+            className="absolute right-4 top-4 h-5 w-5 text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 z-10"
+            type="button"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
     );
   }
@@ -176,25 +221,34 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
   if (isLoading) {
     return (
       <div className="relative">
-        <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
-        <Loader2 className="absolute right-3 top-3 h-4 w-4 text-muted-foreground animate-spin z-10" />
+        <MapPin className="absolute left-4 top-4 h-5 w-5 text-ocean-blue/40 z-10" />
+        <Loader2 className="absolute right-4 top-4 h-5 w-5 text-ocean-blue/40 animate-spin z-10" />
         <Input
           type="text"
-          placeholder={placeholder}
+          placeholder="Loading Google Maps..."
           disabled
-          className={cn("pl-10 pr-10", className)}
+          className={cn("property24-search-input pl-12 pr-12", className)}
         />
       </div>
     );
   }
 
   return (
-    <div className="relative">
+    <div className="relative group">
       <MapPin className={cn(
-        "absolute left-3 h-4 w-4 text-muted-foreground z-10 pointer-events-none",
-        className?.includes('h-12') ? 'top-4' : 'top-3'
+        "absolute left-4 h-5 w-5 text-ocean-blue/60 z-10 pointer-events-none top-4"
       )} />
       <div ref={containerRef} className="w-full" />
+      {value && (
+        <button
+          onClick={handleClear}
+          className="absolute right-4 top-4 h-5 w-5 text-muted-foreground hover:text-foreground transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 z-10"
+          type="button"
+          aria-label="Clear search"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
     </div>
   );
 };

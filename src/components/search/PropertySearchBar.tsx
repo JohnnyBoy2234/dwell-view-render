@@ -11,6 +11,14 @@ import { EnhancedAddressAutocomplete } from "@/components/ui/enhanced-address-au
 import { ChevronDown, SlidersHorizontal, Search, X, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { useNavigate } from "react-router-dom";
+
+// Helper function to format price numbers
+const formatPrice = (value?: string | null): string => {
+  if (!value) return "";
+  const numberValue = parseInt(value, 10);
+  if (Number.isNaN(numberValue) || numberValue === 0) return "";
+  return new Intl.NumberFormat('en-ZA').format(numberValue);
+};
 interface SearchFilters {
   location: string;
   propertyType: string;
@@ -222,28 +230,90 @@ const getPriceLabel = (): ReactNode => {
       onSearch();
     }
   };
-  return <div className="relative bg-white backdrop-blur-sm rounded-2xl shadow-2xl border border-ocean-blue/20 w-full max-w-4xl mx-auto overflow-hidden">
+  return <div className="relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 w-full max-w-5xl mx-auto overflow-hidden">
       {/* Location Search - Top Section */}
-      <div className="p-4 border-b border-ocean-blue/10">
+      <div className="p-6 pb-4">
         <div onKeyDown={handleKeyPress}>
           <EnhancedAddressAutocomplete 
             value={filters.location} 
             onChange={value => onFiltersChange({ location: value })} 
-            placeholder="Search city or suburb..." 
-            className="h-12 text-base border-0 focus-visible:ring-2 focus-visible:ring-ocean-blue text-foreground bg-white w-full rounded-lg" 
+            placeholder="Search by city, suburb or street..." 
+            className="property24-search-input w-full" 
+            onClear={() => onFiltersChange({ location: "" })}
           />
         </div>
+        
+        {/* Active Filter Chips */}
+        {(filters.location || filters.propertyType !== "Any" || filters.minPrice || filters.maxPrice || filters.bedrooms !== "Any") && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {filters.location && (
+              <div className="filter-chip">
+                <span>{filters.location}</span>
+                <button 
+                  className="remove-button"
+                  onClick={() => onFiltersChange({ location: "" })}
+                  aria-label="Remove location filter"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            {filters.propertyType !== "Any" && filters.propertyType && (
+              <div className="filter-chip">
+                <span>{filters.propertyType}</span>
+                <button 
+                  className="remove-button"
+                  onClick={() => onFiltersChange({ propertyType: "Any" })}
+                  aria-label="Remove property type filter"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            {(filters.minPrice || filters.maxPrice) && (
+              <div className="filter-chip">
+                <span>
+                  {filters.minPrice && filters.maxPrice 
+                    ? `R${formatPrice(filters.minPrice)} - R${formatPrice(filters.maxPrice)}`
+                    : filters.minPrice 
+                      ? `From R${formatPrice(filters.minPrice)}`
+                      : `Up to R${formatPrice(filters.maxPrice)}`
+                  }
+                </span>
+                <button 
+                  className="remove-button"
+                  onClick={() => onFiltersChange({ minPrice: "", maxPrice: "" })}
+                  aria-label="Remove price filter"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+            {filters.bedrooms !== "Any" && filters.bedrooms && (
+              <div className="filter-chip">
+                <span>{filters.bedrooms === "4" ? "4+" : filters.bedrooms} bed{filters.bedrooms !== "1" ? "s" : ""}</span>
+                <button 
+                  className="remove-button"
+                  onClick={() => onFiltersChange({ bedrooms: "Any" })}
+                  aria-label="Remove bedroom filter"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Filters - Bottom Section (responsive) */}
       {isMobile ? (
         <>
-          <div className="p-3 sm:p-4 flex gap-2 items-center">
-            <Button variant="outline" className="flex-1 h-12 justify-center bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-ocean-blue font-medium" onClick={() => setFiltersSheetOpen(true)}>
+          <div className="px-6 pb-6 flex gap-3 items-center">
+            <Button variant="outline" className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white" onClick={() => setFiltersSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4 mr-2" />
-              Filters
+              All Filters
             </Button>
-            <Button size="sm" className="h-12 px-4 bg-ocean-blue hover:bg-ocean-blue-dark text-white text-sm font-medium" onClick={onSearch}>
+            <Button className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg" onClick={onSearch}>
               <Search className="h-4 w-4 mr-2" />
               Search
             </Button>
@@ -398,14 +468,14 @@ const getPriceLabel = (): ReactNode => {
           </Sheet>
         </>
       ) : (
-        <div className="p-3 sm:p-4">
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 items-stretch sm:items-center">
+        <div className="px-6 pb-6">
+          <div className="flex flex-wrap gap-3 items-center">
             {/* Property Type Dropdown */}
             <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={`h-10 px-3 flex-1 min-w-[130px] justify-start text-left bg-white hover:bg-ocean-blue hover:text-white border-ocean-blue/30 text-sm ${filters.propertyType !== "Any" && filters.propertyType ? 'bg-ocean-blue text-white' : 'text-ocean-blue'}`}>
-                  <span className="truncate w-full">{getPropertyTypeLabel()}</span>
-                  <ChevronDown className="h-3 w-3 ml-1 flex-shrink-0" />
+                <Button variant="outline" className={`property24-filter-button ${filters.propertyType !== "Any" && filters.propertyType ? 'active' : ''}`}>
+                  <span className="truncate">{getPropertyTypeLabel()}</span>
+                  <ChevronDown className="h-4 w-4 ml-1 flex-shrink-0" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-48 p-2 bg-white border border-border z-50" align="start">

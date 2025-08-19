@@ -106,29 +106,96 @@ export default function Properties() {
           </p>
         </div>
 
-        {/* Enhanced Search Bar with Google Places Autocomplete */}
-        <Card className="mb-6 shadow-medium border-ocean-blue/20 bg-gradient-to-r from-white to-earth-light/30">
-          <CardContent className="p-4 md:p-6">
+        {/* Property24-style Search Bar */}
+        <Card className="mb-6 shadow-2xl border-white/30 bg-white/95 backdrop-blur-sm rounded-3xl overflow-hidden">
+          <CardContent className="p-6">
             <div className="flex flex-col gap-4">
               {/* Location Search with Google Places Autocomplete */}
               <div className="flex-1">
                 <EnhancedAddressAutocomplete
                   value={filters.searchTerm}
                   onChange={(value) => updateFilters({ searchTerm: value })}
-                  placeholder="Search by location (city, suburb, street)..."
-                  className="h-12 text-base border-ocean-blue/30 focus:border-ocean-blue focus:ring-ocean-blue bg-white text-foreground"
+                  placeholder="Search by city, suburb or street..."
+                  className="property24-search-input w-full"
+                  onClear={() => updateFilters({ searchTerm: "" })}
                 />
               </div>
+              
+              {/* Active Filter Chips */}
+              {(filters.searchTerm || filters.propertyType !== 'All' || filters.selectedAmenities.length > 0 || filters.furnished || filters.petsAllowed) && (
+                <div className="flex flex-wrap gap-2">
+                  {filters.searchTerm && (
+                    <div className="filter-chip">
+                      <span>{filters.searchTerm}</span>
+                      <button 
+                        className="remove-button"
+                        onClick={() => updateFilters({ searchTerm: "" })}
+                        aria-label="Remove location filter"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  {filters.propertyType !== 'All' && (
+                    <div className="filter-chip">
+                      <span>{filters.propertyType}</span>
+                      <button 
+                        className="remove-button"
+                        onClick={() => updateFilters({ propertyType: "All" })}
+                        aria-label="Remove property type filter"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  {filters.furnished && (
+                    <div className="filter-chip">
+                      <span>Furnished</span>
+                      <button 
+                        className="remove-button"
+                        onClick={() => updateFilters({ furnished: false })}
+                        aria-label="Remove furnished filter"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  {filters.petsAllowed && (
+                    <div className="filter-chip">
+                      <span>Pet Friendly</span>
+                      <button 
+                        className="remove-button"
+                        onClick={() => updateFilters({ petsAllowed: false })}
+                        aria-label="Remove pet friendly filter"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                  {filters.selectedAmenities.map(amenity => (
+                    <div key={amenity} className="filter-chip">
+                      <span>{amenity}</span>
+                      <button 
+                        className="remove-button"
+                        onClick={() => toggleAmenity(amenity)}
+                        aria-label={`Remove ${amenity} filter`}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               
               {/* Filters Row */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Select value={filters.propertyType} onValueChange={(value) => updateFilters({ propertyType: value })}>
-                  <SelectTrigger className="flex-1 sm:max-w-48 h-12 border-ocean-blue/30 focus:border-ocean-blue focus:ring-ocean-blue">
+                  <SelectTrigger className="property24-filter-button flex-1 sm:max-w-48">
                     <SelectValue placeholder="Property Type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-popover border-border z-50">
+                  <SelectContent className="bg-popover border-border z-50 rounded-xl">
                     {propertyTypes.map(type => (
-                      <SelectItem key={type} value={type} className="hover:bg-accent">{type}</SelectItem>
+                      <SelectItem key={type} value={type} className="hover:bg-accent rounded-lg">{type}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -136,18 +203,18 @@ export default function Properties() {
                 <Button
                   variant="outline"
                   onClick={() => setFiltersOpen(!filtersOpen)}
-                  className="h-12 px-6 border-ocean-blue/30 text-ocean-blue hover:bg-ocean-blue hover:text-white transition-colors"
+                  className="property24-filter-button"
                 >
                   <Filter className="h-4 w-4 mr-2" />
                   {filtersOpen ? 'Hide Filters' : 'More Filters'}
                 </Button>
                 
                 {/* Clear Filters Button */}
-                {(filters.searchTerm || filters.propertyType !== 'All' || filters.selectedAmenities.length > 0) && (
+                {(filters.searchTerm || filters.propertyType !== 'All' || filters.selectedAmenities.length > 0 || filters.furnished || filters.petsAllowed) && (
                   <Button
                     variant="ghost"
                     onClick={clearFilters}
-                    className="h-12 px-6 text-muted-foreground hover:text-foreground"
+                    className="h-12 px-6 text-muted-foreground hover:text-foreground rounded-xl"
                   >
                     Clear All
                   </Button>
