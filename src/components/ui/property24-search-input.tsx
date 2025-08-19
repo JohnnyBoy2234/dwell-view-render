@@ -16,6 +16,7 @@ declare global {
         };
       };
     };
+    initGoogleMapsCallback?: () => void;
   }
 }
 
@@ -80,49 +81,74 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         // Check if script already exists
         const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
         if (existingScript) {
-          console.log('📜 Google Maps script already exists, waiting for load...');
-          
-          // Wait for existing script to load
-          const checkInterval = setInterval(() => {
-            if (window.google?.maps?.places) {
-              console.log('✅ Existing script loaded, creating service...');
-              placesService.current = new window.google.maps.places.AutocompleteService();
-              console.log('✅ AutocompleteService created successfully');
-              clearInterval(checkInterval);
-            }
-          }, 100);
-          
-          // Clear interval after 10 seconds to prevent infinite loop
-          setTimeout(() => clearInterval(checkInterval), 10000);
+          console.log('📜 Google Maps script already exists, waiting for places...');
+          await waitForGooglePlaces();
           return;
         }
 
-        console.log('📜 Loading Google Maps script...');
+        console.log('📜 Loading Google Maps script with callback...');
         
-        // Load Google Maps script
+        // Create unique callback name
+        const callbackName = `initGoogleMaps_${Date.now()}`;
+        
+        // Create callback function
+        window[callbackName as keyof Window] = () => {
+          console.log('🎯 Google Maps callback triggered');
+          waitForGooglePlaces().then(() => {
+            // Clean up the global callback
+            delete window[callbackName as keyof Window];
+          });
+        };
+        
+        // Load Google Maps script with callback
         const script = document.createElement('script');
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=${callbackName}`;
         script.async = true;
         script.defer = true;
         
-        script.onload = () => {
-          console.log('✅ Google Maps script loaded successfully');
-          if (window.google?.maps?.places) {
-            placesService.current = new window.google.maps.places.AutocompleteService();
-            console.log('✅ AutocompleteService created successfully');
-          } else {
-            console.error('❌ Google Maps places not available after script load');
-          }
-        };
-
         script.onerror = (error) => {
           console.error('❌ Failed to load Google Maps script:', error);
+          delete window[callbackName as keyof Window];
         };
 
         document.head.appendChild(script);
       } catch (error) {
         console.error('❌ Error initializing Google Places:', error);
       }
+    };
+
+    // Function to wait for Google Places to be available
+    const waitForGooglePlaces = async (): Promise<void> => {
+      return new Promise((resolve, reject) => {
+        console.log('⏳ Waiting for Google Places to be available...');
+        
+        let attempts = 0;
+        const maxAttempts = 100; // 10 seconds with 100ms intervals
+        
+        const checkInterval = setInterval(() => {
+          attempts++;
+          
+          if (window.google?.maps?.places?.AutocompleteService) {
+            console.log('✅ Google Places available! Creating service...');
+            clearInterval(checkInterval);
+            
+            try {
+              placesService.current = new window.google.maps.places.AutocompleteService();
+              console.log('✅ AutocompleteService created successfully');
+              resolve();
+            } catch (error) {
+              console.error('❌ Error creating AutocompleteService:', error);
+              reject(error);
+            }
+          } else if (attempts >= maxAttempts) {
+            console.error('❌ Timeout waiting for Google Places API');
+            clearInterval(checkInterval);
+            reject(new Error('Timeout waiting for Google Places API'));
+          } else {
+            console.log(`⏳ Still waiting... (attempt ${attempts}/${maxAttempts})`);
+          }
+        }, 100);
+      });
     };
 
     initializePlaces();
