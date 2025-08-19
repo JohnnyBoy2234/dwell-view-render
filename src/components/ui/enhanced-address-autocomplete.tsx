@@ -69,6 +69,10 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
   const handleClear = () => {
     onChange('');
     onClear?.();
+    // Clear the autocomplete element if it exists
+    if (autocompleteRef.current) {
+      autocompleteRef.current.value = '';
+    }
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -87,7 +91,11 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       // Apply Property24-style classes
       autocompleteElement.className = `property24-search-input w-full ${className || ''}`;
       autocompleteElement.placeholder = placeholder;
-      autocompleteElement.value = value;
+      
+      // Set initial value only if not empty
+      if (value) {
+        autocompleteElement.value = value;
+      }
       
       // Apply additional inline styles for Property24 look
       autocompleteElement.style.fontSize = window.innerWidth < 768 ? '16px' : '16px';
@@ -111,9 +119,10 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       autocompleteElement.addEventListener('focus', () => setIsFocused(true));
       autocompleteElement.addEventListener('blur', () => setIsFocused(false));
 
-      // Listen for input changes
+      // Listen for input changes - let the user type freely
       autocompleteElement.addEventListener('input', (event: any) => {
-        onChange(event.target.value);
+        const inputValue = event.target.value;
+        onChange(inputValue);
       });
 
       // Listen for place selection
@@ -173,6 +182,12 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
 
       return () => {
         observer.disconnect();
+        if (autocompleteRef.current) {
+          autocompleteRef.current.removeEventListener('input', () => {});
+          autocompleteRef.current.removeEventListener('gmp-placeselect', () => {});
+          autocompleteRef.current.removeEventListener('focus', () => {});
+          autocompleteRef.current.removeEventListener('blur', () => {});
+        }
         if (containerRef.current) {
           containerRef.current.innerHTML = '';
         }
@@ -181,7 +196,14 @@ export const EnhancedAddressAutocomplete: React.FC<EnhancedAddressAutocompletePr
       console.warn('Error initializing Google Places Autocomplete:', error);
       setHasError(true);
     }
-  }, [isLoaded, onChange, onPlaceSelect, placeholder, value]);
+  }, [isLoaded, onChange, onPlaceSelect, placeholder]);
+
+  // Sync external value changes to the autocomplete element
+  useEffect(() => {
+    if (autocompleteRef.current && autocompleteRef.current.value !== value) {
+      autocompleteRef.current.value = value;
+    }
+  }, [value]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
