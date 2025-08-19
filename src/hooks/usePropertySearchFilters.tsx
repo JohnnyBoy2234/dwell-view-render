@@ -62,7 +62,7 @@ export function usePropertySearchFilters() {
     const params = new URLSearchParams();
     
     // Only add non-empty/non-default values to URL
-    if (filters.searchTerm.trim()) {
+    if (filters.searchTerm && filters.searchTerm.trim()) {
       params.set('search', filters.searchTerm.trim());
     }
     
@@ -105,7 +105,7 @@ export function usePropertySearchFilters() {
   // Check if any filters are active (for showing clear button, etc.)
   const hasActiveFilters = () => {
     return (
-      filters.searchTerm.trim() !== '' ||
+      (filters.searchTerm && filters.searchTerm.trim() !== '') ||
       filters.propertyType !== 'Any' ||
       (filters.minPrice && filters.minPrice !== '0') ||
       filters.maxPrice !== '' ||
