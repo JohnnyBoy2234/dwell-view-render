@@ -402,13 +402,13 @@ export const Property24SearchBar = ({
         </>
       ) : (
         /* Desktop Filters */
-        <div className="px-6 pb-6 flex gap-3 items-center flex-wrap">
+        <div className="px-6 pb-6 flex gap-3 items-center flex-row">
           {/* Property Type */}
           <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" className="property24-filter-button">
                 {getPropertyTypeLabel()}
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <ChevronDown className="h-4 w-6 ml-2" />
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-64 p-4">
@@ -546,10 +546,10 @@ export const Property24SearchBar = ({
 
           {/* Search Button */}
           <Button 
-            className="h-12 px-8 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto"
+            className="h-12 px-4 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto"
             onClick={onSearch}
           >
-            <Search className="h-4 w-4 mr-2" />
+            <Search className="h-4 w-3 mr-2" />
             Search Properties
           </Button>
         </div>
