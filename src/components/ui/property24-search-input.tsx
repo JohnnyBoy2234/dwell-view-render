@@ -45,7 +45,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         if (!apiKey) {
-          console.error('Google Maps API key is not configured:', apiKey);
+          console.error('Google Maps API key is not configured');
           if (isMounted) {
             setHasError(true);
             setIsLoading(false);
@@ -147,17 +147,14 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
     onChange(e.target.value);
   };
 
-  // Handle focus
   const handleFocus = () => {
     setIsFocused(true);
   };
 
-  // Handle blur
   const handleBlur = () => {
     setIsFocused(false);
   };
 
-  // Handle keyboard events
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
       inputRef.current?.blur();
