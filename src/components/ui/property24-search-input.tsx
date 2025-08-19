@@ -44,8 +44,13 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           return;
         }
 
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) {
+          throw new Error('Google Maps API key is not configured');
+        }
+
         const loader = new Loader({
-          apiKey: 'AIzaSyC_a8w6Cm-PlyJ2eSpXyyp6VeyFkl-CcMI',
+          apiKey: apiKey,
           version: 'weekly',
           libraries: ['places']
         });
@@ -54,7 +59,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         setIsLoaded(true);
         setIsLoading(false);
       } catch (error) {
-        console.warn('Failed to load Google Maps API:', error);
+        console.error('Failed to load Google Maps API:', error);
         setHasError(true);
         setIsLoading(false);
       }
