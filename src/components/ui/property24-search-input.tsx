@@ -32,6 +32,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
   const [hasError, setHasError] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isSelectingPlace, setIsSelectingPlace] = useState(false);
 
   // Load Google Maps API
   useEffect(() => {
@@ -89,9 +90,18 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
       const placeChangedListener = autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace();
         if (place && place.formatted_address) {
+          setIsSelectingPlace(true);
           setIsTyping(false);
+          
+          // Update input directly and call callbacks
+          if (inputRef.current) {
+            inputRef.current.value = place.formatted_address;
+          }
           onChange(place.formatted_address);
           onPlaceSelect?.(place);
+          
+          // Reset selecting state after a brief delay
+          setTimeout(() => setIsSelectingPlace(false), 100);
         }
       });
 
@@ -155,6 +165,9 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Don't process input changes if we're in the middle of selecting a place
+    if (isSelectingPlace) return;
+    
     const newValue = e.target.value;
     setIsTyping(true);
     onChange(newValue);
