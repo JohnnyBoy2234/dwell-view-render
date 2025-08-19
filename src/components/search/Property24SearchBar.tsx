@@ -24,6 +24,7 @@ export const Property24SearchBar = ({
   const [propertyTypeOpen, setPropertyTypeOpen] = useState(false);
   const [priceOpen, setPriceOpen] = useState(false);
   const [bedroomsOpen, setBedroomsOpen] = useState(false);
+  const [bathroomsOpen, setBathroomsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
 
@@ -134,6 +135,20 @@ export const Property24SearchBar = ({
       );
     }
     return "Bedrooms";
+  };
+
+  // Get bathrooms label
+  const getBathroomsLabel = () => {
+    const hasSelection = filters.bathrooms !== "Any" && filters.bathrooms;
+    if (hasSelection) {
+      return (
+        <div className="flex flex-col items-start">
+          <span className="text-xs text-slate-400">Bathrooms</span>
+          <span className="text-sm font-normal">{filters.bathrooms === "4" ? "4+" : filters.bathrooms}</span>
+        </div>
+      );
+    }
+    return "Bathrooms";
   };
 
   // Handle keyboard events
@@ -373,8 +388,8 @@ export const Property24SearchBar = ({
                 <Button 
                   className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white mt-6"
                   onClick={() => {
-                    setFiltersSheetOpen(false);
-                    onSearch();
+                    onSearch(); // Execute search first
+                    setFiltersSheetOpen(false); // Then close sheet
                   }}
                 >
                   Apply Filters & Search
@@ -479,6 +494,33 @@ export const Property24SearchBar = ({
                     onClick={() => {
                       onFiltersChange({ bedrooms: option.value });
                       setBedroomsOpen(false);
+                    }}
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Bathrooms Filter - Added to desktop */}
+          <Popover open={bathroomsOpen} onOpenChange={setBathroomsOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="property24-filter-button">
+                {getBathroomsLabel()}
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-4">
+              <div className="space-y-2">
+                {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
+                  <Button
+                    key={option.value}
+                    variant={filters.bathrooms === option.value ? "default" : "ghost"}
+                    className="w-full justify-start"
+                    onClick={() => {
+                      onFiltersChange({ bathrooms: option.value });
+                      setBathroomsOpen(false);
                     }}
                   >
                     {option.label}

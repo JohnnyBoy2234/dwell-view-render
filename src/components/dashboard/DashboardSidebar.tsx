@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 const landlordItems = [
+  { title: 'Home', url: '/', icon: Home },
   { title: 'Properties', url: '/dashboard', icon: Home },
   { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'Payments', url: '/payments', icon: BarChart3 },
@@ -79,7 +80,7 @@ export function DashboardSidebar() {
         {isLandlord && (
           <div className="p-6 mt-auto">
             <Button 
-              onClick={() => navigate('/dashboard/add-property')} 
+              onClick={() => navigate('/list-property')} 
               className="w-full bg-gradient-to-r from-success-green to-success-green-glow hover:from-success-green-dark hover:to-success-green shadow-soft"
               size="sm"
             >

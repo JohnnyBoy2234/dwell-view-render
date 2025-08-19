@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 
 const tenantItems = [
+  { title: 'Home', url: '/', icon: Home },
   { title: 'Dashboard', url: '/tenant-dashboard', icon: Home },
   { title: 'Messages', url: '/tenant/messages', icon: MessageSquare },
   { title: 'My Leases', url: '#leases-section', icon: FileText, scrollTo: 'leases-section' },
