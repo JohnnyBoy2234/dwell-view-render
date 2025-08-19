@@ -5,33 +5,17 @@ import { cn } from '@/lib/utils';
 // Google Maps types
 declare global {
   interface Window {
-    google: {
-      maps: {
-        places: {
-          AutocompleteService: new () => google.maps.places.AutocompleteService;
-          PlacesService: new (element: HTMLElement) => google.maps.places.PlacesService;
+    google?: {
+      maps?: {
+        places?: {
+          AutocompleteService: any;
+          PlacesService: any;
           PlacesServiceStatus: {
             OK: string;
           };
         };
       };
     };
-  }
-}
-
-namespace google.maps.places {
-  interface AutocompleteService {
-    getPlacePredictions(
-      request: any,
-      callback: (results: any[] | null, status: string) => void
-    ): void;
-  }
-  
-  interface PlacesService {
-    getDetails(
-      request: { placeId: string },
-      callback: (place: any | null, status: string) => void
-    ): void;
   }
 }
 
@@ -69,24 +53,52 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const placesService = useRef<google.maps.places.AutocompleteService | null>(null);
+  const placesService = useRef<any>(null);
 
   // Initialize Google Places API
   useEffect(() => {
     const initializePlaces = async () => {
       try {
+        console.log('🔄 Initializing Google Places API...');
+        
         // Check if already loaded
         if (window.google?.maps?.places) {
+          console.log('✅ Google Maps API already loaded, creating service...');
           placesService.current = new window.google.maps.places.AutocompleteService();
+          console.log('✅ AutocompleteService created successfully');
           return;
         }
 
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        console.log('🔑 API Key found:', apiKey ? 'Yes' : 'No');
+        
         if (!apiKey) {
-          console.error('Google Maps API key not found');
+          console.error('❌ Google Maps API key not found in environment variables');
           return;
         }
 
+        // Check if script already exists
+        const existingScript = document.querySelector(`script[src*="maps.googleapis.com"]`);
+        if (existingScript) {
+          console.log('📜 Google Maps script already exists, waiting for load...');
+          
+          // Wait for existing script to load
+          const checkInterval = setInterval(() => {
+            if (window.google?.maps?.places) {
+              console.log('✅ Existing script loaded, creating service...');
+              placesService.current = new window.google.maps.places.AutocompleteService();
+              console.log('✅ AutocompleteService created successfully');
+              clearInterval(checkInterval);
+            }
+          }, 100);
+          
+          // Clear interval after 10 seconds to prevent infinite loop
+          setTimeout(() => clearInterval(checkInterval), 10000);
+          return;
+        }
+
+        console.log('📜 Loading Google Maps script...');
+        
         // Load Google Maps script
         const script = document.createElement('script');
         script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
@@ -94,21 +106,22 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         script.defer = true;
         
         script.onload = () => {
+          console.log('✅ Google Maps script loaded successfully');
           if (window.google?.maps?.places) {
             placesService.current = new window.google.maps.places.AutocompleteService();
+            console.log('✅ AutocompleteService created successfully');
+          } else {
+            console.error('❌ Google Maps places not available after script load');
           }
         };
 
-        script.onerror = () => {
-          console.error('Failed to load Google Maps script');
+        script.onerror = (error) => {
+          console.error('❌ Failed to load Google Maps script:', error);
         };
 
-        // Only add script if not already present
-        if (!document.querySelector(`script[src*="maps.googleapis.com"]`)) {
-          document.head.appendChild(script);
-        }
+        document.head.appendChild(script);
       } catch (error) {
-        console.error('Error initializing Google Places:', error);
+        console.error('❌ Error initializing Google Places:', error);
       }
     };
 
@@ -120,13 +133,30 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
     onChange(inputValue);
     setSelectedIndex(-1);
 
-    if (!inputValue.trim() || !placesService.current) {
+    console.log('🔍 Input changed:', inputValue);
+    console.log('🔍 Service available:', !!placesService.current);
+
+    if (!inputValue.trim()) {
+      console.log('🔍 Empty input, clearing suggestions');
       setSuggestions([]);
       setShowSuggestions(false);
       return;
     }
 
+    if (!placesService.current) {
+      console.log('⚠️ Places service not ready yet');
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (inputValue.length < 2) {
+      console.log('🔍 Input too short, waiting for more characters');
+      return;
+    }
+
     setIsLoading(true);
+    console.log('🔄 Fetching predictions for:', inputValue);
 
     try {
       const request = {
@@ -136,18 +166,21 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
       };
 
       placesService.current.getPlacePredictions(request, (results, status) => {
+        console.log('📍 Predictions response - Status:', status, 'Results count:', results?.length || 0);
         setIsLoading(false);
         
         if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+          console.log('✅ Setting suggestions:', results);
           setSuggestions(results);
           setShowSuggestions(true);
         } else {
+          console.log('❌ No valid results - Status:', status);
           setSuggestions([]);
           setShowSuggestions(false);
         }
       });
     } catch (error) {
-      console.error('Error fetching place predictions:', error);
+      console.error('❌ Error fetching place predictions:', error);
       setIsLoading(false);
       setSuggestions([]);
       setShowSuggestions(false);
