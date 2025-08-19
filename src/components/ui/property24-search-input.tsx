@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Input } from '@/components/ui/input';
-import { MapPin, Loader2, X } from 'lucide-react';
+import { MapPin, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Property24SearchInputProps {
@@ -28,7 +28,6 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
 
   // Load Google Maps API
   useEffect(() => {
@@ -36,7 +35,8 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
     const loadGoogleMapsAPI = async () => {
       try {
-        if (window.google && window.google.maps && window.google.maps.places) {
+        // Check if already loaded
+        if (window.google && window.google.maps && window.google.maps.places?.PlaceAutocompleteElement) {
           if (isMounted) {
             setIsLoaded(true);
             setIsLoading(false);
@@ -84,133 +84,163 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
 
   // Initialize autocomplete when ready
   useEffect(() => {
-    if (!isLoaded || !containerRef.current || disabled || hasError) return;
+    if (!isLoaded || !containerRef.current || disabled) return;
+
+    let autocomplete: any = null;
+    let observer: MutationObserver | null = null;
 
     try {
-      // Create the new PlaceAutocompleteElement
-      const autocomplete = new window.google.maps.places.PlaceAutocompleteElement({
+      // Create the PlaceAutocompleteElement
+      autocomplete = new window.google.maps.places.PlaceAutocompleteElement({
         componentRestrictions: { country: 'za' },
         types: ['geocode']
       });
 
-      // Apply Property24 styling
-      autocomplete.style.width = '100%';
-      autocomplete.style.height = '52px';
-      autocomplete.style.border = '1px solid hsl(var(--border))';
-      autocomplete.style.borderRadius = '8px';
-      autocomplete.style.backgroundColor = 'hsl(var(--background))';
-      autocomplete.style.color = 'hsl(var(--foreground))';
-      autocomplete.style.fontSize = '14px';
-      autocomplete.style.paddingLeft = '48px';
-      autocomplete.style.paddingRight = '48px';
-      autocomplete.style.outline = 'none';
-      autocomplete.style.transition = 'all 0.2s ease-in-out';
+      // Apply className first
+      if (className) {
+        autocomplete.className = className;
+      }
+
+      // Apply inline styles for Property24 design
+      autocomplete.style.cssText = `
+        width: 100%;
+        height: 52px;
+        border: 1px solid hsl(var(--border));
+        border-radius: 8px;
+        background-color: hsl(var(--background));
+        color: hsl(var(--foreground));
+        font-size: 14px;
+        padding-left: 48px;
+        padding-right: 48px;
+        outline: none;
+        transition: all 0.2s ease-in-out;
+        font-family: inherit;
+      `;
 
       // Set placeholder
       autocomplete.placeholder = placeholder;
 
-      // Set initial value only if not empty
+      // Set initial value if provided
       if (value) {
         autocomplete.value = value;
       }
 
-      // Clear the container and add the autocomplete element
+      // Clear container and append
       containerRef.current.innerHTML = '';
       containerRef.current.appendChild(autocomplete);
-
       autocompleteRef.current = autocomplete;
 
-      // Event listeners
-      autocomplete.addEventListener('focus', () => {
-        setIsFocused(true);
+      // Focus event
+      const handleFocus = () => {
         autocomplete.style.borderColor = 'hsl(var(--ocean-blue))';
         autocomplete.style.boxShadow = '0 0 0 2px hsl(var(--ocean-blue) / 0.2)';
-      });
+      };
 
-      autocomplete.addEventListener('blur', () => {
-        setIsFocused(false);
+      // Blur event
+      const handleBlur = () => {
         autocomplete.style.borderColor = 'hsl(var(--border))';
         autocomplete.style.boxShadow = 'none';
-      });
+      };
 
-      autocomplete.addEventListener('input', (event: any) => {
+      // Input event
+      const handleInput = (event: any) => {
         onChange(event.target.value);
-      });
+      };
 
-      autocomplete.addEventListener('gmp-placeselect', (event: any) => {
+      // Place select event
+      const handlePlaceSelect = (event: any) => {
         const place = event.place;
         if (place?.formattedAddress) {
           onChange(place.formattedAddress);
           onPlaceSelect?.(place);
         }
-      });
+      };
 
-      autocomplete.addEventListener('keydown', (event: KeyboardEvent) => {
+      // Keyboard events
+      const handleKeyDown = (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
           autocomplete.blur();
         }
-      });
+      };
 
-      // Style the autocomplete dropdown suggestions
-      const observer = new MutationObserver(() => {
-        const dropdowns = document.querySelectorAll('gmp-place-autocomplete-element, .pac-container');
-        dropdowns.forEach((dropdown) => {
-          if (dropdown instanceof HTMLElement) {
-            dropdown.style.backgroundColor = 'hsl(var(--background))';
-            dropdown.style.border = '1px solid hsl(var(--border))';
-            dropdown.style.borderRadius = '8px';
-            dropdown.style.color = 'hsl(var(--foreground))';
-            dropdown.style.fontSize = '14px';
-            dropdown.style.boxShadow = '0 4px 12px hsl(var(--shadow) / 0.15)';
-            dropdown.style.zIndex = '9999';
+      // Add event listeners
+      autocomplete.addEventListener('focus', handleFocus);
+      autocomplete.addEventListener('blur', handleBlur);
+      autocomplete.addEventListener('input', handleInput);
+      autocomplete.addEventListener('gmp-placeselect', handlePlaceSelect);
+      autocomplete.addEventListener('keydown', handleKeyDown);
+
+      // Style the dropdown suggestions using MutationObserver
+      observer = new MutationObserver(() => {
+        const containers = document.querySelectorAll('.pac-container');
+        containers.forEach((container) => {
+          if (container instanceof HTMLElement) {
+            container.style.cssText = `
+              background-color: hsl(var(--background));
+              border: 1px solid hsl(var(--border));
+              border-radius: 8px;
+              color: hsl(var(--foreground));
+              font-size: 14px;
+              box-shadow: 0 4px 12px hsl(var(--shadow) / 0.15);
+              z-index: 9999;
+              margin-top: 4px;
+            `;
           }
-          
-          const suggestions = dropdown.querySelectorAll('.pac-item, [role="option"]');
-          suggestions.forEach((suggestion) => {
-            if (suggestion instanceof HTMLElement) {
-              suggestion.style.backgroundColor = 'hsl(var(--background))';
-              suggestion.style.color = 'hsl(var(--foreground))';
-              suggestion.style.padding = '12px 16px';
-              suggestion.style.borderBottom = '1px solid hsl(var(--border))';
-              suggestion.style.cursor = 'pointer';
-              
-              suggestion.addEventListener('mouseenter', () => {
-                suggestion.style.backgroundColor = 'hsl(var(--muted))';
-              });
-              
-              suggestion.addEventListener('mouseleave', () => {
-                suggestion.style.backgroundColor = 'hsl(var(--background))';
-              });
+
+          const items = container.querySelectorAll('.pac-item');
+          items.forEach((item) => {
+            if (item instanceof HTMLElement) {
+              item.style.cssText = `
+                background-color: hsl(var(--background));
+                color: hsl(var(--foreground));
+                padding: 12px 16px;
+                border-bottom: 1px solid hsl(var(--border));
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+              `;
+
+              // Remove existing listeners to avoid duplicates
+              const handleMouseEnter = () => {
+                item.style.backgroundColor = 'hsl(var(--muted))';
+              };
+              const handleMouseLeave = () => {
+                item.style.backgroundColor = 'hsl(var(--background))';
+              };
+
+              item.addEventListener('mouseenter', handleMouseEnter);
+              item.addEventListener('mouseleave', handleMouseLeave);
             }
           });
         });
       });
 
+      // Start observing
       observer.observe(document.body, {
         childList: true,
         subtree: true
       });
 
-      return () => {
-        observer.disconnect();
-        if (autocompleteRef.current) {
-          autocompleteRef.current.removeEventListener('input', () => {});
-          autocompleteRef.current.removeEventListener('gmp-placeselect', () => {});
-          autocompleteRef.current.removeEventListener('focus', () => {});
-          autocompleteRef.current.removeEventListener('blur', () => {});
-          autocompleteRef.current.removeEventListener('keydown', () => {});
-        }
-        if (containerRef.current) {
-          containerRef.current.innerHTML = '';
-        }
-      };
     } catch (error) {
       console.error('Error initializing Google Places Autocomplete:', error);
       setHasError(true);
     }
-  }, [isLoaded, onChange, onPlaceSelect, disabled, hasError, placeholder]);
 
-  // Sync external value changes with autocomplete
+    // Cleanup function
+    return () => {
+      if (observer) {
+        observer.disconnect();
+      }
+      if (autocomplete) {
+        autocomplete.remove();
+      }
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+      autocompleteRef.current = null;
+    };
+  }, [isLoaded, onChange, onPlaceSelect, disabled, placeholder, className]);
+
+  // Sync external value changes
   useEffect(() => {
     if (autocompleteRef.current && autocompleteRef.current.value !== value) {
       autocompleteRef.current.value = value;
@@ -226,21 +256,6 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="relative">
-        <MapPin className="absolute left-4 top-4 h-5 w-5 text-ocean-blue/40 z-10" />
-        <Loader2 className="absolute right-4 top-4 h-5 w-5 text-ocean-blue/40 animate-spin z-10" />
-        <Input
-          type="text"
-          placeholder="Loading Google Maps..."
-          disabled
-          className={cn("property24-search-input pl-12 pr-12", className)}
-        />
-      </div>
-    );
-  }
-
   if (hasError) {
     return (
       <div className="relative group">
@@ -250,13 +265,8 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           placeholder={placeholder}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={(e) => e.key === 'Escape' && e.currentTarget.blur()}
           disabled={disabled}
-          className={cn("property24-search-input pl-12 pr-12", className, {
-            'property24-search-input-focused': isFocused
-          })}
+          className={cn("property24-search-input pl-12 pr-12", className)}
         />
         {value && (
           <button
@@ -272,16 +282,24 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
     );
   }
 
+  if (isLoading) {
+    return (
+      <div className="relative">
+        <MapPin className="absolute left-4 top-4 h-5 w-5 text-ocean-blue/40 z-10" />
+        <Input
+          type="text"
+          placeholder="Loading..."
+          disabled
+          className={cn("property24-search-input pl-12 pr-12", className)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="relative group">
-      <MapPin className={cn(
-        "absolute left-4 top-4 h-5 w-5 text-ocean-blue/60 z-10 pointer-events-none transition-colors",
-        isFocused && "text-ocean-blue"
-      )} />
-      <div 
-        ref={containerRef}
-        className={cn("property24-search-input", className)}
-      />
+      <MapPin className="absolute left-4 top-4 h-5 w-5 text-ocean-blue/60 z-10 pointer-events-none transition-colors" />
+      <div ref={containerRef} className="w-full" />
       {value && (
         <button
           onClick={handleClear}
