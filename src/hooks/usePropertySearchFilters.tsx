@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 
 export interface PropertySearchFilters {
   // Main search bar filters
-  location: string;
+  searchTerm: string;
   propertyType: string;
   minPrice: string;
   maxPrice: string;
@@ -17,7 +17,7 @@ export interface PropertySearchFilters {
 }
 
 const defaultFilters: PropertySearchFilters = {
-  location: '',
+  searchTerm: '',
   propertyType: 'Any',
   minPrice: '',
   maxPrice: '',
@@ -35,7 +35,7 @@ export function usePropertySearchFilters() {
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState<PropertySearchFilters>(() => {
     return {
-      location: searchParams.get('location') || searchParams.get('search') || '',
+      searchTerm: searchParams.get('search') || searchParams.get('location') || '',
       propertyType: searchParams.get('propertyType') || searchParams.get('type') || 'Any',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
@@ -62,8 +62,8 @@ export function usePropertySearchFilters() {
     const params = new URLSearchParams();
     
     // Only add non-empty/non-default values to URL
-    if (filters.location.trim()) {
-      params.set('location', filters.location.trim());
+    if (filters.searchTerm.trim()) {
+      params.set('search', filters.searchTerm.trim());
     }
     
     if (filters.minPrice && filters.minPrice !== '0') {
@@ -105,7 +105,7 @@ export function usePropertySearchFilters() {
   // Check if any filters are active (for showing clear button, etc.)
   const hasActiveFilters = () => {
     return (
-      filters.location.trim() !== '' ||
+      filters.searchTerm.trim() !== '' ||
       filters.propertyType !== 'Any' ||
       (filters.minPrice && filters.minPrice !== '0') ||
       filters.maxPrice !== '' ||

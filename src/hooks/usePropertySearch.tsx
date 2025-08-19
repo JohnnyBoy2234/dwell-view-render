@@ -66,11 +66,31 @@ export function usePropertySearch(properties: Property[]) {
 
   // Filter properties based on current filters
   const filteredProperties = properties.filter(property => {
-    // Search term filter (case-insensitive, partial matches)
-    if (filters.searchTerm && 
-        !property.title.toLowerCase().includes(filters.searchTerm.toLowerCase()) &&
-        !property.location.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
-      return false;
+    // Enhanced search term filter with intelligent location matching
+    if (filters.searchTerm) {
+      const searchTermLower = filters.searchTerm.toLowerCase().trim();
+      const propertyLocationLower = property.location.toLowerCase();
+      const propertyTitleLower = property.title.toLowerCase();
+      
+      // Check for exact matches first
+      if (propertyLocationLower.includes(searchTermLower) || 
+          propertyTitleLower.includes(searchTermLower)) {
+        // Continue to other filters
+      } else {
+        // Check for partial city/suburb matches
+        const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 2);
+        const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 2);
+        
+        const hasMatch = searchWords.some(searchWord => 
+          locationWords.some(locationWord => 
+            locationWord.includes(searchWord) || searchWord.includes(locationWord)
+          )
+        );
+        
+        if (!hasMatch) {
+          return false;
+        }
+      }
     }
 
     // Property type filter

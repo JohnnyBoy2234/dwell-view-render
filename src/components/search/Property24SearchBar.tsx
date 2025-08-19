@@ -146,13 +146,13 @@ export const Property24SearchBar = ({
   // Handle place selection from Google Places
   const handlePlaceSelect = (place: any) => {
     if (place.formatted_address) {
-      onFiltersChange({ location: place.formatted_address });
+      onFiltersChange({ searchTerm: place.formatted_address });
     }
   };
 
   // Active filter chips
   const renderActiveFilters = () => {
-    const hasActiveFilters = filters.location || 
+    const hasActiveFilters = filters.searchTerm || 
                              filters.propertyType !== "Any" || 
                              filters.minPrice || 
                              filters.maxPrice || 
@@ -162,12 +162,12 @@ export const Property24SearchBar = ({
 
     return (
       <div className="flex flex-wrap gap-2 mt-4">
-        {filters.location && (
+        {filters.searchTerm && (
           <div className="filter-chip">
-            <span>{filters.location}</span>
+            <span>{filters.searchTerm}</span>
             <button 
               className="remove-button"
-              onClick={() => onFiltersChange({ location: "" })}
+              onClick={() => onFiltersChange({ searchTerm: "" })}
               aria-label="Remove location filter"
             >
               ×
@@ -227,12 +227,12 @@ export const Property24SearchBar = ({
       <div className="p-6 pb-4">
         <div onKeyDown={handleKeyPress}>
           <Property24SearchInput 
-            value={filters.location} 
-            onChange={(value) => onFiltersChange({ location: value })} 
+            value={filters.searchTerm} 
+            onChange={(value) => onFiltersChange({ searchTerm: value })} 
             onPlaceSelect={handlePlaceSelect}
             placeholder="Search by city, suburb or street..." 
             className="property24-search-input w-full" 
-            onClear={() => onFiltersChange({ location: "" })}
+            onClear={() => onFiltersChange({ searchTerm: "" })}
           />
         </div>
         

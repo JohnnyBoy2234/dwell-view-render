@@ -140,7 +140,7 @@ const Index = () => {
                   availableFrom: null
                 });
                 updateFilters({
-                  location: "",
+                  searchTerm: "",
                   propertyType: "Any",
                   minPrice: "",
                   maxPrice: "",
@@ -164,7 +164,7 @@ const Index = () => {
                       variant="outline" 
                       onClick={() => {
                         updateFilters({
-                          location: "",
+                          searchTerm: "",
                           propertyType: "Any",
                           minPrice: "",
                           maxPrice: "",
