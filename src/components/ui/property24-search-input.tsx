@@ -90,7 +90,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
       // Create the new PlaceAutocompleteElement
       const autocomplete = new window.google.maps.places.PlaceAutocompleteElement({
         componentRestrictions: { country: 'za' },
-        fields: ['formattedAddress', 'geometry', 'name', 'placeId']
+        types: ['geocode']
       });
 
       autocompleteRef.current = autocomplete;
