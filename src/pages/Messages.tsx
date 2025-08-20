@@ -25,6 +25,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { NavLink, useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
 
 export default function Messages() {
   const { user, isLandlord } = useAuth();
@@ -268,8 +269,17 @@ export default function Messages() {
                             </div>
                           </div>
                         ) : (
-                          <div className="space-y-4 py-4">
-                            {messages.map((message) => {
+                      <div className="space-y-4 py-4">
+                        {/* Viewing Slot Notification */}
+                        {!isLandlord && selectedConversation && (
+                          <ViewingSlotNotification
+                            propertyId={selectedConversation.property_id}
+                            landlordId={selectedConversation.landlord_id}
+                            propertyTitle={selectedConversation.properties?.title || 'Property'}
+                          />
+                        )}
+                        
+                        {messages.map((message) => {
                               const isSender = message.sender_id === user.id;
                               const isRead = isMessageRead(message);
                               

@@ -50,102 +50,126 @@ export default function TenantDashboard() {
   }, [user, isLandlord, navigate]);
 
   const handleViewLease = (tenancyId: string) => {
-    navigate(`/lease-signing/${tenancyId}`);
+    navigate(`/tenant/lease-signing/${tenancyId}`);
   };
 
   const handleDownloadLease = async (leaseRef: string, propertyTitle: string) => {
     try {
-      if (!leaseRef) return;
+      let downloadUrl: string;
+      
       if (leaseRef.startsWith('http')) {
-        const link = document.createElement('a');
-        link.href = leaseRef;
-        link.download = `Lease_Agreement_${propertyTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        return;
+        downloadUrl = leaseRef;
+      } else {
+        const { data, error } = await supabase.storage
+          .from('leases')
+          .createSignedUrl(leaseRef, 3600);
+        
+        if (error) throw error;
+        downloadUrl = data.signedUrl;
       }
-      const { data, error } = await supabase.storage
-        .from('lease-documents')
-        .download(leaseRef);
-      if (error) throw error;
-      const blob = new Blob([data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Lease_Agreement_${propertyTitle.replace(/[^a-z0-9]/gi, '_')}.pdf`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error('Download failed', e);
+      
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = `${propertyTitle}_lease.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download started",
+        description: "Your lease document is being downloaded.",
+      });
+    } catch (error) {
+      console.error('Error downloading lease:', error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "Could not download the lease document. Please try again.",
+      });
     }
   };
 
-  const handleNotificationClick = (notification: any) => {
-    markAsRead(notification.id);
+  const handleNotificationClick = async (notification: any) => {
+    await markAsRead(notification.id);
+    
     if (notification.type === 'lease_ready') {
-      navigate(`/lease-signing/${notification.tenancyId}`);
+      const propertyMatch = notification.data?.tenancy_id;
+      if (propertyMatch) {
+        navigate(`/tenant/lease-signing/${propertyMatch}`);
+      }
+    } else if (notification.type === 'viewing_confirmed') {
+      navigate('/tenant/messages');
     }
   };
 
   const getLeaseStatusBadge = (status: string) => {
     switch (status) {
-      case 'awaiting_tenant_signature':
-        return <Badge variant="secondary">Awaiting Your Signature</Badge>;
-      case 'awaiting_landlord_signature':
-        return <Badge variant="outline">Awaiting Landlord Signature</Badge>;
-      case 'completed':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active & Signed</Badge>;
+      case 'pending_signature':
+        return <Badge className="bg-orange-500 hover:bg-orange-600">Signature Required</Badge>;
+      case 'signed':
+        return <Badge className="bg-green-500 hover:bg-green-600">Signed</Badge>;
+      case 'active':
+        return <Badge className="bg-blue-500 hover:bg-blue-600">Active</Badge>;
+      case 'expired':
+        return <Badge variant="destructive">Expired</Badge>;
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="secondary">{status}</Badge>;
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-      </div>
+      <TenantLayout title="Dashboard">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      </TenantLayout>
     );
   }
 
   return (
     <TenantLayout title="Dashboard">
-      <div className="space-y-6">{/* Content moved from main div */}
+      <div className="space-y-8">
+        {/* Welcome Section */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-950/20 dark:to-indigo-950/30 rounded-xl p-6 border border-blue-200 dark:border-blue-800">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2 bg-blue-500 rounded-lg">
+              <Home className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900 dark:text-blue-100">
+                Welcome back!
+              </h1>
+              <p className="text-blue-700 dark:text-blue-300">
+                Manage your rental applications and stay connected
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Notifications Section */}
         {notifications.length > 0 && (
-          <div className="mb-6">
-            <h2 className="text-lg lg:text-xl font-semibold mb-4 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5 text-orange-500" />
-              Action Required
-            </h2>
-            <div className="space-y-3">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Bell className="h-5 w-5 text-orange-600" />
+              </div>
+              <h2 className="text-xl font-bold">Action Required</h2>
+              <Badge className="bg-orange-500 hover:bg-orange-600">{notifications.length}</Badge>
+            </div>
+            <div className="grid gap-4">
               {notifications.map((notification) => (
                 <Alert 
                   key={notification.id} 
-                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${!notification.isRead ? 'border-orange-200 bg-orange-50' : ''}`}
+                  className="cursor-pointer hover:bg-orange-50 dark:hover:bg-orange-950/20 transition-all duration-200 border-orange-200 dark:border-orange-800 bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10"
                   onClick={() => handleNotificationClick(notification)}
                 >
-                  <Bell className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex-1">
-                        <p className="font-medium">{notification.title}</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {notification.message} from {notification.landlordName}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Property: {notification.propertyAddress}
-                        </p>
-                      </div>
-                      <Button size="sm" className="shrink-0">
-                        View Lease
-                      </Button>
-                    </div>
+                  <AlertCircle className="h-5 w-5 text-orange-600" />
+                  <AlertDescription className="flex items-start justify-between">
+                    <span className="font-medium text-orange-900 dark:text-orange-100">{notification.message}</span>
+                    <Badge variant="outline" className="ml-2 border-orange-300 text-orange-700">
+                      {format(new Date((notification as any).createdAt || (notification as any).created_at), 'MMM d')}
+                    </Badge>
                   </AlertDescription>
                 </Alert>
               ))}
@@ -153,75 +177,60 @@ export default function TenantDashboard() {
           </div>
         )}
 
-        {/* Pending Leases Section */}
-        <div className="mb-6" id="leases-section">
-          <h2 className="text-lg lg:text-xl font-semibold mb-4">Pending Lease Actions</h2>
-          {pendingLeases.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-6 lg:py-8">
-                <CheckCircle className="h-10 w-10 lg:h-12 lg:w-12 text-green-500 mx-auto mb-4" />
-                <h3 className="font-semibold mb-2">All caught up!</h3>
-                <p className="text-sm lg:text-base text-muted-foreground">No pending lease signatures at this time.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {pendingLeases.map((lease) => (
-                <Card key={lease.id} className="border-l-4 border-l-earth-warm bg-gradient-to-r from-white to-earth-light/30 shadow-medium">
+        {/* Pending Lease Actions */}
+        {pendingLeases.length > 0 && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <FileText className="h-5 w-5 text-blue-600" />
+              </div>
+              <h2 className="text-xl font-bold">Lease Actions</h2>
+              <Badge className="bg-blue-500 hover:bg-blue-600">{pendingLeases.length}</Badge>
+            </div>
+            <div className="grid gap-4">
+              {pendingLeases.map((tenancy) => (
+                <Card key={tenancy.id} className="hover:shadow-lg transition-all duration-200 border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/10 dark:to-indigo-950/10">
                   <CardHeader className="pb-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg">{lease.property_title}</CardTitle>
-                        <CardDescription className="text-sm">{lease.property_location}</CardDescription>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="text-lg text-blue-900 dark:text-blue-100">{(tenancy as any).properties?.title || 'Property'}</CardTitle>
+                        <CardDescription className="flex items-center gap-1 mt-1 text-blue-700 dark:text-blue-300">
+                          <Home className="h-4 w-4" />
+                          {(tenancy as any).properties?.location || 'Location not available'}
+                        </CardDescription>
                       </div>
-                      {getLeaseStatusBadge(lease.lease_status)}
+                      {getLeaseStatusBadge(tenancy.lease_status)}
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Monthly Rent</p>
-                        <p className="font-semibold">R{lease.monthly_rent.toLocaleString()}</p>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="text-sm text-blue-800 dark:text-blue-200">
+                        <div className="flex items-center gap-2 p-3 bg-white/50 dark:bg-blue-950/30 rounded-lg">
+                          <DollarSign className="h-4 w-4 text-green-600" />
+                          <span className="font-semibold">Monthly Rent: R{tenancy.monthly_rent?.toLocaleString()}</span>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Security Deposit</p>
-                        <p className="font-semibold">R{lease.security_deposit.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Lease Start</p>
-                        <p className="font-semibold">{format(new Date(lease.start_date), 'MMM dd, yyyy')}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t">
-                      <p className="text-sm text-muted-foreground">
-                        From: {lease.landlord_name} • Created: {format(new Date(lease.created_at), 'MMM dd, yyyy')}
-                      </p>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        {lease.lease_status === 'completed' ? (
-                          <>
-                            <Button
-                              size="sm"
-                              onClick={() => handleDownloadLease((lease as any).lease_document_path || lease.lease_document_url!, lease.property_title)}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              Download PDF
-                            </Button>
-                            <Button size="sm">
-                              <span className="hidden sm:inline">Make First Payment & Security Deposit</span>
-                              <span className="sm:hidden">Make Payment</span>
-                            </Button>
-                          </>
-                        ) : lease.lease_status === 'awaiting_tenant_signature' ? (
-                          <Button size="sm" onClick={() => handleViewLease(lease.id)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Review & Sign
+                      
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm"
+                          onClick={() => handleViewLease(tenancy.id)}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          {tenancy.lease_status === 'pending_signature' ? 'Sign Lease' : 'View Details'}
+                        </Button>
+                        
+                        {tenancy.lease_document_url && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDownloadLease(tenancy.lease_document_url!, (tenancy as any).properties?.title || 'lease')}
+                            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
                           </Button>
-                        ) : (
-                          <div className="text-sm text-muted-foreground">
-                            Awaiting landlord signature
-                          </div>
                         )}
                       </div>
                     </div>
@@ -229,63 +238,55 @@ export default function TenantDashboard() {
                 </Card>
               ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Signed Leases */}
-        <div className="mb-6">
-          <SignedLeasesList role="tenant" />
-        </div>
+        <SignedLeasesList role="tenant" />
 
-        {/* My Applications */}
+        {/* Applications Section */}
         <TenantApplicationsSection />
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Home className="h-5 w-5" />
-                Browse Properties
-              </CardTitle>
-              <CardDescription className="text-sm">Find your next rental home</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => navigate('/properties')} className="w-full" size="sm">
-                View Available Properties
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <MessageSquare className="h-5 w-5" />
-                Messages
-              </CardTitle>
-              <CardDescription className="text-sm">Communicate with landlords</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button onClick={() => navigate('/tenant/messages')} variant="outline" className="w-full" size="sm">
-                Open Messages
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <FileText className="h-5 w-5" />
-                My Profile
-              </CardTitle>
-              <CardDescription className="text-sm">Update your tenant profile</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button variant="outline" className="w-full" size="sm">
-                Edit Profile
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 rounded-lg">
+              <Home className="h-5 w-5 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold">Quick Actions</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button 
+              variant="outline" 
+              className="p-6 h-auto flex-col gap-3 hover:bg-green-50 dark:hover:bg-green-950/20 transition-all duration-200 border-green-200 dark:border-green-800 group"
+              onClick={() => navigate('/tenant/properties')}
+            >
+              <div className="p-3 bg-green-100 dark:bg-green-900/50 rounded-lg group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
+                <Home className="h-6 w-6 text-green-600" />
+              </div>
+              <span className="font-semibold text-green-900 dark:text-green-100">Browse Properties</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-6 h-auto flex-col gap-3 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all duration-200 border-blue-200 dark:border-blue-800 group"
+              onClick={() => navigate('/tenant/messages')}
+            >
+              <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
+                <MessageSquare className="h-6 w-6 text-blue-600" />
+              </div>
+              <span className="font-semibold text-blue-900 dark:text-blue-100">Messages</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              className="p-6 h-auto flex-col gap-3 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-all duration-200 border-purple-200 dark:border-purple-800 group"
+              onClick={() => navigate('/tenant/profile')}
+            >
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/50 rounded-lg group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
+                <Bell className="h-6 w-6 text-purple-600" />
+              </div>
+              <span className="font-semibold text-purple-900 dark:text-purple-100">Profile</span>
+            </Button>
+          </div>
         </div>
       </div>
     </TenantLayout>

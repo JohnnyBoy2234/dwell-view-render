@@ -14,6 +14,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isLandlord: boolean;
+  redirectAfterAuth: (path: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLandlord, setIsLandlord] = useState(false);
+  const [returnToPath, setReturnToPath] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -154,6 +156,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
 
+  const redirectAfterAuth = (path: string) => {
+    setReturnToPath(path);
+  };
+
   const signOut = async () => {
     await supabase.auth.signOut();
   };
@@ -169,7 +175,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithProvider,
     resetPassword,
     signOut,
-    isLandlord
+    isLandlord,
+    redirectAfterAuth
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -29,6 +29,9 @@ export default function StartConversation({
 
   const handleStartConversation = async () => {
     if (!user) {
+      // Store current page to return after auth
+      const currentPath = window.location.pathname;
+      sessionStorage.setItem('returnTo', currentPath);
       navigate('/auth');
       return;
     }
@@ -53,7 +56,7 @@ export default function StartConversation({
       );
 
       if (conversation) {
-        navigate('/messages');
+        navigate(`/tenant/messages?c=${conversation.id}`);
         toast({
           title: "Conversation started",
           description: `You can now message about ${propertyTitle}`

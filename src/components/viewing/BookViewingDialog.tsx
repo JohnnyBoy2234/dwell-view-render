@@ -80,7 +80,7 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -163,8 +163,8 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
                   </p>
                 </div>
               ) : (
-                <>
-                  <div className="space-y-2 max-h-[60vh] overflow-y-auto pr-2">
+                  <>
+                    <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-2">
                     {availableSlots.map((slot) => (
                       <button
                         key={slot.id}

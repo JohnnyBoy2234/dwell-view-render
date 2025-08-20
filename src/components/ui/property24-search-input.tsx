@@ -1,25 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import '@/types/google-maps';
 
-// Google Maps types
-declare global {
-  interface Window {
-    google?: {
-      maps?: {
-        places?: {
-          AutocompleteService: any;
-          PlacesService: any;
-          PlacesServiceStatus: {
-            OK: string;
-          };
-        };
-      };
-    };
-    initGoogleMapsCallback?: () => void;
-  }
-}
-
+// Google Maps types imported from types file
 interface Property24SearchInputProps {
   value: string;
   onChange: (value: string) => void;
@@ -92,11 +76,11 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         const callbackName = `initGoogleMaps_${Date.now()}`;
         
         // Create callback function
-        window[callbackName as keyof Window] = () => {
+        (window as any)[callbackName] = () => {
           console.log('🎯 Google Maps callback triggered');
           waitForGooglePlaces().then(() => {
             // Clean up the global callback
-            delete window[callbackName as keyof Window];
+            delete (window as any)[callbackName];
           });
         };
         
@@ -108,7 +92,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
         
         script.onerror = (error) => {
           console.error('❌ Failed to load Google Maps script:', error);
-          delete window[callbackName as keyof Window];
+          delete (window as any)[callbackName];
         };
 
         document.head.appendChild(script);

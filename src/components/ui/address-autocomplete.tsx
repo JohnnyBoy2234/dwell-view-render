@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { MapPin } from 'lucide-react';
+import '@/types/google-maps';
 
 interface AddressAutocompleteProps {
   value: string;
@@ -8,13 +9,6 @@ interface AddressAutocompleteProps {
   placeholder?: string;
   className?: string;
   onPlaceSelect?: (place: any) => void;
-}
-
-declare global {
-  interface Window {
-    google: any;
-    initGoogleMaps: () => void;
-  }
 }
 
 export function AddressAutocomplete({
