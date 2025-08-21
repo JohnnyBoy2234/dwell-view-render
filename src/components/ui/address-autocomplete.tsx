@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { MapPin } from 'lucide-react';
-import '@/types/google-maps';
 
 interface AddressAutocompleteProps {
   value: string;
