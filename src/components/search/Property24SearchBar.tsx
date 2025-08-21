@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Property24SearchInput } from "@/components/ui/property24-search-input";
-import { ChevronDown, SlidersHorizontal, Search, X } from "lucide-react";
+import { ChevronDown, SlidersHorizontal, Search } from "lucide-react";
 import { PropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +71,6 @@ export const Property24SearchBar = ({
     { value: "50000", label: "R 50,000" }
   ];
 
-  // Format price for display
   const formatPrice = (value?: string | null): string => {
     if (!value) return "";
     const numberValue = parseInt(value, 10);
@@ -79,7 +78,6 @@ export const Property24SearchBar = ({
     return new Intl.NumberFormat('en-ZA').format(numberValue);
   };
 
-  // Get property type label
   const getPropertyTypeLabel = () => {
     if (filters.propertyType && filters.propertyType !== "Any") {
       return (
@@ -92,12 +90,11 @@ export const Property24SearchBar = ({
     return "Property Type";
   };
 
-  // Get price label
   const getPriceLabel = () => {
     const min = formatPrice(filters.minPrice);
     const max = formatPrice(filters.maxPrice);
-    const hasMinSelection = filters.minPrice && filters.minPrice !== "";
-    const hasMaxSelection = filters.maxPrice && filters.maxPrice !== "";
+    const hasMinSelection = !!(filters.minPrice && filters.minPrice !== "");
+    const hasMaxSelection = !!(filters.maxPrice && filters.maxPrice !== "");
 
     let priceRangeText = "Any";
 
@@ -125,9 +122,8 @@ export const Property24SearchBar = ({
     );
   };
 
-  // Get bedrooms label
   const getBedroomsLabel = () => {
-    const hasSelection = filters.bedrooms !== "Any" && filters.bedrooms;
+    const hasSelection = filters.bedrooms !== "Any" && !!filters.bedrooms;
     if (hasSelection) {
       return (
         <div className="flex flex-col items-start">
@@ -139,9 +135,8 @@ export const Property24SearchBar = ({
     return "Bedrooms";
   };
 
-  // Get bathrooms label
   const getBathroomsLabel = () => {
-    const hasSelection = filters.bathrooms !== "Any" && filters.bathrooms;
+    const hasSelection = filters.bathrooms !== "Any" && !!filters.bathrooms;
     if (hasSelection) {
       return (
         <div className="flex flex-col items-start">
@@ -153,32 +148,26 @@ export const Property24SearchBar = ({
     return "Bathrooms";
   };
 
-  // Handle keyboard events
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       onSearch();
     }
   };
 
-  // Handle place selection from Google Places
   const handlePlaceSelect = (place: any) => {
-    if (place.formattedAddress) {
-      // Force immediate update and prevent any race conditions
+    if (place?.formattedAddress) {
       onFiltersChange({ searchTerm: place.formattedAddress });
-      // Force a re-render to ensure UI updates
-      setTimeout(() => {
-        onFiltersChange({ searchTerm: place.formattedAddress });
-      }, 50);
+      // minor debounce to ensure any upstream handlers run
+      setTimeout(() => onFiltersChange({ searchTerm: place.formattedAddress }), 50);
     }
   };
 
-  // Active filter chips
   const renderActiveFilters = () => {
-    const hasActiveFilters = filters.searchTerm || 
-                             filters.propertyType !== "Any" || 
-                             filters.minPrice || 
-                             filters.maxPrice || 
-                             filters.bedrooms !== "Any";
+    const hasActiveFilters = !!(filters.searchTerm ||
+      (filters.propertyType && filters.propertyType !== "Any") ||
+      (filters.minPrice && filters.minPrice !== "") ||
+      (filters.maxPrice && filters.maxPrice !== "") ||
+      (filters.bedrooms && filters.bedrooms !== "Any"));
 
     if (!hasActiveFilters) return null;
 
@@ -187,7 +176,7 @@ export const Property24SearchBar = ({
         {filters.searchTerm && (
           <div className="filter-chip">
             <span>{filters.searchTerm}</span>
-            <button 
+            <button
               className="remove-button"
               onClick={() => onFiltersChange({ searchTerm: "" })}
               aria-label="Remove location filter"
@@ -196,10 +185,10 @@ export const Property24SearchBar = ({
             </button>
           </div>
         )}
-        {filters.propertyType !== "Any" && filters.propertyType && (
+        {filters.propertyType && filters.propertyType !== "Any" && (
           <div className="filter-chip">
             <span>{filters.propertyType}</span>
-            <button 
+            <button
               className="remove-button"
               onClick={() => onFiltersChange({ propertyType: "Any" })}
               aria-label="Remove property type filter"
@@ -211,14 +200,14 @@ export const Property24SearchBar = ({
         {(filters.minPrice || filters.maxPrice) && (
           <div className="filter-chip">
             <span>
-              {filters.minPrice && filters.maxPrice 
+              {filters.minPrice && filters.maxPrice
                 ? `R${formatPrice(filters.minPrice)} - R${formatPrice(filters.maxPrice)}`
-                : filters.minPrice 
+                : filters.minPrice
                   ? `From R${formatPrice(filters.minPrice)}`
                   : `Up to R${formatPrice(filters.maxPrice)}`
               }
             </span>
-            <button 
+            <button
               className="remove-button"
               onClick={() => onFiltersChange({ minPrice: "", maxPrice: "" })}
               aria-label="Remove price filter"
@@ -227,10 +216,10 @@ export const Property24SearchBar = ({
             </button>
           </div>
         )}
-        {filters.bedrooms !== "Any" && filters.bedrooms && (
+        {filters.bedrooms && filters.bedrooms !== "Any" && (
           <div className="filter-chip">
             <span>{filters.bedrooms === "4" ? "4+" : filters.bedrooms} bed{filters.bedrooms !== "1" ? "s" : ""}</span>
-            <button 
+            <button
               className="remove-button"
               onClick={() => onFiltersChange({ bedrooms: "Any" })}
               aria-label="Remove bedroom filter"
@@ -245,37 +234,34 @@ export const Property24SearchBar = ({
 
   return (
     <div className={cn("relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 w-full max-w-5xl mx-auto overflow-hidden", className)}>
-      {/* Location Search - Top Section */}
       <div className="p-6 pb-4">
         <div onKeyDown={handleKeyPress}>
-          <Property24SearchInput 
-            value={filters.searchTerm} 
-            onChange={(value) => onFiltersChange({ searchTerm: value })} 
+          <Property24SearchInput
+            value={filters.searchTerm}
+            onChange={(value) => onFiltersChange({ searchTerm: value })}
             onPlaceSelect={handlePlaceSelect}
-            placeholder="Search by city, suburb or street..." 
-            className="property24-search-input w-full" 
+            placeholder="Search by city, suburb or street..."
+            className="property24-search-input w-full"
             onClear={() => onFiltersChange({ searchTerm: "" })}
           />
         </div>
-        
-        {/* Active Filter Chips */}
+
         {renderActiveFilters()}
       </div>
 
-      {/* Filters - Bottom Section (responsive) */}
       {isMobile ? (
         <>
           <div className="px-6 pb-6 flex gap-3 items-center">
-            <Button 
-              variant="outline" 
-              className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white" 
+            <Button
+              variant="outline"
+              className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white"
               onClick={() => setFiltersSheetOpen(true)}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               All Filters
             </Button>
-            <Button 
-              className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg" 
+            <Button
+              className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg"
               onClick={onSearch}
             >
               <Search className="h-4 w-4 mr-2" />
@@ -283,15 +269,13 @@ export const Property24SearchBar = ({
             </Button>
           </div>
 
-          {/* Mobile Sheet */}
           <Sheet open={filtersSheetOpen} onOpenChange={setFiltersSheetOpen}>
             <SheetContent className="w-full h-full p-6 bg-white">
-              <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
-              </SheetHeader>
-              
+                <SheetHeader>
+                  <SheetTitle>Filters</SheetTitle>
+                </SheetHeader>
+
               <div className="space-y-6 mt-6 overflow-auto">
-                {/* Property Type */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">Property Type</label>
                   <div className="grid grid-cols-2 gap-2">
@@ -299,11 +283,7 @@ export const Property24SearchBar = ({
                       <Button
                         key={option.value}
                         variant={filters.propertyType === option.value ? "default" : "outline"}
-                        className={`w-full py-3 ${
-                          filters.propertyType === option.value 
-                            ? 'bg-ocean-blue text-white border-ocean-blue' 
-                            : 'bg-white text-foreground border-ocean-blue/30 hover:bg-ocean-blue/10'
-                        }`}
+                        className={`w-full py-3 ${filters.propertyType === option.value ? 'bg-ocean-blue text-white border-ocean-blue' : 'bg-white text-foreground border-ocean-blue/30 hover:bg-ocean-blue/10'}`}
                         onClick={() => onFiltersChange({ propertyType: option.value })}
                       >
                         {option.label}
@@ -312,7 +292,6 @@ export const Property24SearchBar = ({
                   </div>
                 </div>
 
-                {/* Price Range */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">Price Range</label>
                   <div className="grid grid-cols-2 gap-3">
@@ -345,7 +324,6 @@ export const Property24SearchBar = ({
                   </div>
                 </div>
 
-                {/* Bedrooms */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">Bedrooms</label>
                   <div className="flex gap-2">
@@ -353,11 +331,7 @@ export const Property24SearchBar = ({
                       <Button
                         key={option.value}
                         variant={filters.bedrooms === option.value ? "default" : "outline"}
-                        className={`flex-1 ${
-                          filters.bedrooms === option.value 
-                            ? 'bg-ocean-blue text-white' 
-                            : 'hover:bg-ocean-blue/10'
-                        }`}
+                        className={`flex-1 ${filters.bedrooms === option.value ? 'bg-ocean-blue text-white' : 'hover:bg-ocean-blue/10'}`}
                         onClick={() => onFiltersChange({ bedrooms: option.value })}
                       >
                         {option.label}
@@ -366,7 +340,6 @@ export const Property24SearchBar = ({
                   </div>
                 </div>
 
-                {/* Bathrooms - Added to mobile filters */}
                 <div>
                   <label className="text-sm font-medium mb-3 block">Bathrooms</label>
                   <div className="flex gap-2">
@@ -374,11 +347,7 @@ export const Property24SearchBar = ({
                       <Button
                         key={option.value}
                         variant={filters.bathrooms === option.value ? "default" : "outline"}
-                        className={`flex-1 ${
-                          filters.bathrooms === option.value 
-                            ? 'bg-ocean-blue text-white' 
-                            : 'hover:bg-ocean-blue/10'
-                        }`}
+                        className={`flex-1 ${filters.bathrooms === option.value ? 'bg-ocean-blue text-white' : 'hover:bg-ocean-blue/10'}`}
                         onClick={() => onFiltersChange({ bathrooms: option.value })}
                       >
                         {option.label}
@@ -387,11 +356,11 @@ export const Property24SearchBar = ({
                   </div>
                 </div>
 
-                <Button 
+                <Button
                   className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white mt-6"
                   onClick={() => {
-                    setFiltersSheetOpen(false); // Close sheet first
-                    setTimeout(() => onSearch(), 100); // Then execute search with small delay
+                    setFiltersSheetOpen(false);
+                    setTimeout(() => onSearch(), 100);
                   }}
                 >
                   Apply Filters & Search
@@ -401,12 +370,10 @@ export const Property24SearchBar = ({
           </Sheet>
         </>
       ) : (
-        /* Desktop Filters */
         <div className="px-6 pb-6 flex gap-3 items-center flex-row">
-          {/* Property Type */}
           <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button">
+              <Button variant="outline" className="property24-filter-button" aria-expanded={propertyTypeOpen}>
                 {getPropertyTypeLabel()}
                 <ChevronDown className="h-4 w-6 ml-2" />
               </Button>
@@ -430,10 +397,9 @@ export const Property24SearchBar = ({
             </PopoverContent>
           </Popover>
 
-          {/* Price */}
           <Popover open={priceOpen} onOpenChange={setPriceOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button">
+              <Button variant="outline" className="property24-filter-button" aria-expanded={priceOpen}>
                 {getPriceLabel()}
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
@@ -468,7 +434,7 @@ export const Property24SearchBar = ({
                     </Select>
                   </div>
                 </div>
-                <Button 
+                <Button
                   className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white"
                   onClick={() => setPriceOpen(false)}
                 >
@@ -478,10 +444,9 @@ export const Property24SearchBar = ({
             </PopoverContent>
           </Popover>
 
-          {/* Bedrooms */}
           <Popover open={bedroomsOpen} onOpenChange={setBedroomsOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button">
+              <Button variant="outline" className="property24-filter-button" aria-expanded={bedroomsOpen}>
                 {getBedroomsLabel()}
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
@@ -505,10 +470,9 @@ export const Property24SearchBar = ({
             </PopoverContent>
           </Popover>
 
-          {/* Bathrooms Filter - Added to desktop */}
           <Popover open={bathroomsOpen} onOpenChange={setBathroomsOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button">
+              <Button variant="outline" className="property24-filter-button" aria-expanded={bathroomsOpen}>
                 {getBathroomsLabel()}
                 <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
@@ -532,10 +496,9 @@ export const Property24SearchBar = ({
             </PopoverContent>
           </Popover>
 
-          {/* More Filters Button */}
           {onMoreFiltersOpen && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="property24-filter-button"
               onClick={onMoreFiltersOpen}
             >
@@ -544,8 +507,7 @@ export const Property24SearchBar = ({
             </Button>
           )}
 
-          {/* Search Button */}
-          <Button 
+          <Button
             className="h-12 px-4 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto"
             onClick={onSearch}
           >

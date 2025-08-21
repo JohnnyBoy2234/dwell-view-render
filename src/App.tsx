@@ -1,8 +1,8 @@
-import React from "react";
+import from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useQueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
@@ -32,8 +32,10 @@ import ApplicationDetail from "./pages/ApplicationDetail";
 import RentalApplication from "./pages/RentalApplication";
 import ResetPassword from "./pages/ResetPassword";
 import TenantMessages from "./pages/TenantMessages";
+import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
+import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 
-const queryClient = new QueryClient();
+const queryClient = useQueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -58,8 +60,8 @@ const App = () => (
             {/* Routes without Navbar */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<RouteGuard><Dashboard /></RouteGuard>} />
-            <Route path="/tenant-dashboard" element={<RouteGuard><TenantDashboard /></RouteGuard>} />
+            <Route path="/tenant-dashboard" element={<EnhancedTenantDashboard />} />
+            <Route path="/dashboard" element={<EnhancedLandlordDashboard />} />
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
             <Route path="/landlord-lease-signing/:tenancyId" element={<RouteGuard><LandlordLeaseSigningPage /></RouteGuard>} />
             <Route path="/dashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
