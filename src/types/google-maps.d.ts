@@ -1,4 +1,4 @@
-// Unified Google Maps type declarations
+// Google Maps API type declarations
 declare global {
   interface Window {
     google?: {

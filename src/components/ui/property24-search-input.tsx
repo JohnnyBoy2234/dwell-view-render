@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import '@/types/google-maps';
 
 // Google Maps types imported from types file
 interface Property24SearchInputProps {
