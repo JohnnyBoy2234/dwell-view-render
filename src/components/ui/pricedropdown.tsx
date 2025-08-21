@@ -1,4 +1,5 @@
-import React, { useMemo, type FC } from "react";
+import * as React from 'react';
+import { useMemo, type FC } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { User, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';

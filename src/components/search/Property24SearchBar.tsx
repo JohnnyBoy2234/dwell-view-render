@@ -271,9 +271,9 @@ export const Property24SearchBar = ({
 
           <Sheet open={filtersSheetOpen} onOpenChange={setFiltersSheetOpen}>
             <SheetContent className="w-full h-full p-6 bg-white">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
+              <SheetHeader>
+                <SheetTitle title="Filters" />
+              </SheetHeader>
 
               <div className="space-y-6 mt-6 overflow-auto">
                 <div>

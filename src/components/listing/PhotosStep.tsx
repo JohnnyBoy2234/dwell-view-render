@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import * as React from 'react';
+import { useRef } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';

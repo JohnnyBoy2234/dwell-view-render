@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Eye, Calendar, ArrowRight, Plus } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';

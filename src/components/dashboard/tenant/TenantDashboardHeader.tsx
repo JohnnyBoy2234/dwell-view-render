@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { NotificationBadge } from '@/components/ui/notification-badge';

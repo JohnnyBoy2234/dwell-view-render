@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
