@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TenantDashboardHeader } from '@/components/dashboard/tenant/TenantDashboardHeader';
+import { TenantDashboardHeader } from '../components/dashboard/tenant/TenantDashboardHeader';
 import { RentDueCard } from '@/components/dashboard/tenant/RentDueCard';
 import { MessagesCard } from '@/components/dashboard/tenant/MessagesCard';
 import { ViewingCard } from '@/components/dashboard/tenant/ViewingCard';

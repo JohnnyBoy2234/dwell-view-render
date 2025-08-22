@@ -617,34 +617,9 @@ export default function PropertyDetail() {
                     <Mail className="h-4 w-4 mr-2" />
                     Sign In to Message Landlord
                   </Button>
-                )}
-
-                
+                )} 
               </CardContent>
             </Card>
-
-
-            {/* Sign In Prompt for Non-Authenticated Users */}
-            {!user && (
-              <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-ocean-blue/5 border-earth-warm/30 shadow-elegant">
-                <CardHeader>
-                  <CardTitle>Get Started</CardTitle>
-                <CardDescription>Sign in to message the landlord or book a viewing</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-center space-y-3">
-                    <p className="text-muted-foreground">Sign in to contact the landlord or book a viewing for this property</p>
-                    <Button 
-                      className="w-full" 
-                      onClick={() => navigate('/auth')}
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Sign In to Get Started
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Property Owner Notice */}
             {user && property.landlord_id === user.id && (
