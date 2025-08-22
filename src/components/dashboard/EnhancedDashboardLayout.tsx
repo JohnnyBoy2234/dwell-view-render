@@ -1,0 +1,154 @@
+import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { UnifiedSidebar } from './UnifiedSidebar';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
+import { Bell, LogOut, Menu, AlertTriangle } from 'lucide-react';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useTenantNotifications } from '@/hooks/useTenantNotifications';
+import { Badge } from '@/components/ui/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Link } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+
+interface EnhancedDashboardLayoutProps {
+  children: React.ReactNode;
+  title: string;
+  actions?: React.ReactNode;
+}
+
+function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
+  return (
+    <div className="flex items-center justify-center min-h-[400px] p-8">
+      <div className="text-center max-w-md">
+        <div className="w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-4">
+          <AlertTriangle className="w-8 h-8 text-destructive" />
+        </div>
+        <h2 className="text-xl font-semibold mb-2">Something went wrong</h2>
+        <p className="text-muted-foreground mb-4">
+          We encountered an error while loading this section. Please try again.
+        </p>
+        <Button onClick={resetErrorBoundary} variant="outline">
+          Try Again
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export function EnhancedDashboardLayout({ children, title, actions }: EnhancedDashboardLayoutProps) {
+  const { signOut, isLandlord } = useAuth();
+  
+  // Use the appropriate notifications hook based on user role
+  const landlordHook = useNotifications();
+  const tenantHook = useTenantNotifications();
+  
+  const { notifications, unreadCount, markAsRead } = isLandlord ? landlordHook : tenantHook;
+  const userRole = isLandlord ? 'landlord' : 'tenant';
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
+        <UnifiedSidebar userRole={userRole} />
+        
+        <div className="flex-1 flex flex-col">
+          {/* Enhanced Header */}
+          <header className="h-16 flex items-center border-b bg-background/95 backdrop-blur-sm sticky top-0 z-40 px-4 lg:px-6">
+            <SidebarTrigger className="lg:hidden mr-4">
+              <Menu className="h-5 w-5" />
+            </SidebarTrigger>
+            
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title}</h1>
+                <div className="hidden sm:block">
+                  <Badge variant="secondary" className="text-xs">
+                    {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2 lg:gap-4">
+              {/* Notifications Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="relative">
+                    <Bell className="h-5 w-5" />
+                    {unreadCount > 0 && (
+                      <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-destructive text-destructive-foreground">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </Badge>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-80 p-0">
+                  <div className="px-4 py-3 border-b border-border">
+                    <p className="text-sm font-medium">Notifications</p>
+                    {unreadCount > 0 && (
+                      <p className="text-xs text-muted-foreground">{unreadCount} unread</p>
+                    )}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      No notifications yet
+                    </div>
+                  ) : (
+                    <div className="max-h-96 overflow-auto">
+                      {notifications.slice(0, 8).map((notification) => (
+                        <DropdownMenuItem key={notification.id} asChild>
+                          <Link
+                            to={notification.link_url || '#'}
+                            className={`block w-full text-left px-4 py-3 border-b border-border/50 last:border-b-0 ${
+                              notification.is_read ? 'opacity-70' : 'bg-muted/30'
+                            }`}
+                            onClick={() => markAsRead(notification.id)}
+                          >
+                            <div className="text-sm leading-snug mb-1">{notification.message}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {new Date(notification.created_at).toLocaleString()}
+                            </div>
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              {/* Custom Actions */}
+              {actions}
+              
+              {/* Sign Out Button */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={signOut}
+                className="hidden sm:flex"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                <span className="hidden md:inline">Sign Out</span>
+              </Button>
+              
+              {/* Mobile Sign Out */}
+              <Button 
+                variant="outline" 
+                size="icon"
+                onClick={signOut}
+                className="sm:hidden"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
+            </div>
+          </header>
+          
+          {/* Main Content with Error Boundary */}
+          <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
+            <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
+              {children}
+            </ErrorBoundary>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
