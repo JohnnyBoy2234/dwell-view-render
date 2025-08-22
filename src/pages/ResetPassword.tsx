@@ -56,18 +56,45 @@ export default function ResetPassword() {
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if we have the required tokens for password reset
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
+    // Handle Supabase auth callback for password reset
+    const handleAuthCallback = async () => {
+      const { data, error } = await supabase.auth.getSession();
+      
+      // Check if we have a valid session from the reset link
+      if (error || !data.session) {
+        // Try to get session from URL hash (Supabase auth callback)
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        const type = hashParams.get('type');
+        
+        if (type === 'recovery' && accessToken && refreshToken) {
+          // Set the session with the tokens from the URL
+          const { error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
+          });
+          
+          if (sessionError) {
+            toast({
+              variant: "destructive",
+              title: "Invalid reset link",
+              description: "This password reset link is invalid or has expired."
+            });
+            navigate('/auth');
+          }
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Invalid reset link",
+            description: "This password reset link is invalid or has expired."
+          });
+          navigate('/auth');
+        }
+      }
+    };
     
-    if (!accessToken || !refreshToken) {
-      toast({
-        variant: "destructive",
-        title: "Invalid reset link",
-        description: "This password reset link is invalid or has expired."
-      });
-      navigate('/auth');
-    }
+    handleAuthCallback();
   }, [searchParams, navigate, toast]);
 
   // Real-time password validation
