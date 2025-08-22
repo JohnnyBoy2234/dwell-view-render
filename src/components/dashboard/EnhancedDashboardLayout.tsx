@@ -48,14 +48,14 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const userRole = isLandlord ? 'landlord' : 'tenant';
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
         <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
-          <header className="h-16 flex items-center border-b bg-background/95 backdrop-blur-sm sticky top-0 z-40 px-4 lg:px-6">
-            <SidebarTrigger className="lg:hidden mr-4">
+          <header className="h-16 flex items-center border-b bg-background/95 backdrop-blur-sm sticky top-0 z-40 px-3 sm:px-4 lg:px-6">
+            <SidebarTrigger className="md:hidden mr-3">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
             
@@ -70,14 +70,14 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
               </div>
             </div>
             
-            <div className="flex items-center gap-2 lg:gap-4">
-              {/* Notifications Dropdown */}
+            <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+              {/* Notifications */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <Bell className="h-5 w-5" />
+                  <Button variant="ghost" size="sm" className="relative p-2">
+                    <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                     {unreadCount > 0 && (
-                      <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center bg-destructive text-destructive-foreground">
+                      <Badge className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-xs bg-destructive text-destructive-foreground">
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </Badge>
                     )}
@@ -125,26 +125,15 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                 variant="outline" 
                 size="sm"
                 onClick={signOut}
-                className="hidden sm:flex"
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                <span className="hidden md:inline">Sign Out</span>
-              </Button>
-              
-              {/* Mobile Sign Out */}
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={signOut}
-                className="sm:hidden"
-              >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </div>
           </header>
           
           {/* Main Content with Error Boundary */}
-          <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
+          <main className="flex-1 p-3 sm:p-4 lg:p-6 overflow-x-hidden">
             {children}
           </main>
         </div>
