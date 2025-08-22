@@ -33,7 +33,7 @@ const tenantItems: SidebarItem[] = [
 ];
 
 const landlordItems: SidebarItem[] = [
-  { title: 'Dashboard', url: '/dashboard', icon: Home },
+  { title: 'Rental Manager', url: '/dashboard', icon: Home },
   { title: 'Properties', url: '/manage-properties', icon: Building },
   { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'Applications', url: '/applications', icon: FileText },
@@ -80,7 +80,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   };
 
   return (
-    <Sidebar className="border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium">
+    <Sidebar className="border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium" side="left" variant="sidebar">
       <SidebarContent>
         {/* Logo */}
         <div className="p-6 border-b">
