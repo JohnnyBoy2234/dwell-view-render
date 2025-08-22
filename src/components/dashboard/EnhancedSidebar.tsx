@@ -84,12 +84,15 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
       <SidebarContent>
         {/* Logo */}
         <div className="p-6 border-b">
-          <div className="flex items-center gap-2">
+          <button 
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
             <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
             {!collapsed && <h1 className="text-xl font-bold">SwiftRent</h1>}
-          </div>
+          </button>
         </div>
 
         <SidebarGroup>

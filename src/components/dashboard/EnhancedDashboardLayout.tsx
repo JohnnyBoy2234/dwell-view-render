@@ -49,7 +49,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
         <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
         
         <div className="flex-1 flex flex-col">
