@@ -50,38 +50,21 @@ export default function EnhancedTenantDashboard() {
   const renderTabContent = () => {
     switch (currentTab) {
       case '/tenant-messages':
-        return <MessagesTab />;
+        // Navigate to the actual messages page instead of showing MessagesTab
+        navigate('/tenant-messages');
+        return null;
       case '/properties':
         return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Building className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Browse Properties</h2>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Property Search</h3>
-                <p className="text-muted-foreground mb-4">Browse available rental properties</p>
-                <Button onClick={() => navigate('/properties')}>View All Properties</Button>
-              </CardContent>
-            </Card>
+          <div className="text-center py-8">
+            <h2 className="text-2xl font-bold mb-4">Properties</h2>
+            <p className="text-muted-foreground">Browse available rental properties</p>
           </div>
         );
       case '/tenant-applications':
         return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <FileText className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">My Applications</h2>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center">
-                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Application History</h3>
-                <p className="text-muted-foreground">Track your rental applications</p>
-              </CardContent>
-            </Card>
+          <div className="text-center py-8">
+            <h2 className="text-2xl font-bold mb-4">Applications</h2>
+            <p className="text-muted-foreground">Track your rental applications</p>
           </div>
         );
       case '/maintenance':

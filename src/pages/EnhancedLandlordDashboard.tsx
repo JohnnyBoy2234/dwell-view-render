@@ -144,7 +144,9 @@ export default function EnhancedLandlordDashboard() {
   const renderTabContent = () => {
     switch (currentTab) {
       case '/messages':
-        return <MessagesTab />;
+        // Navigate to the actual messages page instead of showing MessagesTab
+        navigate('/messages');
+        return null;
       case '/manage-properties':
         return renderPropertiesTab();
       case '/applications':

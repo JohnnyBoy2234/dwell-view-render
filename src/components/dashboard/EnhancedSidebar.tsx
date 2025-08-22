@@ -91,7 +91,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
             <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
-            {!collapsed && <h1 className="text-xl font-bold">SwiftRent</h1>}
+<h1 className="text-xl font-bold">SwiftRent</h1>
           </button>
         </div>
 
@@ -118,9 +118,9 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
                     >
                       <div className="flex items-center gap-3">
                         <item.icon className="w-5 h-5 flex-shrink-0" />
-                        {!collapsed && <span>{item.title}</span>}
+                        <span>{item.title}</span>
                       </div>
-                      {!collapsed && item.badge && item.badge > 0 && (
+                      {item.badge && item.badge > 0 && (
                         <Badge className="bg-earth-warm text-white border-white text-xs">
                           {item.badge > 99 ? '99+' : item.badge}
                         </Badge>
