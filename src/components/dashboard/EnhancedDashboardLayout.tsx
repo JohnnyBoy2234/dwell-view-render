@@ -48,7 +48,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const userRole = isLandlord ? 'landlord' : 'tenant';
 
   return (
-    <SidebarProvider defaultOpen={false}>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
         <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
         

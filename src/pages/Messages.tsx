@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { NavLink, useSearchParams } from 'react-router-dom';
-import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
+import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
 
 export default function Messages() {
@@ -114,7 +114,7 @@ export default function Messages() {
   // Render with responsive layout for landlords, without for tenants
   if (isLandlord) {
     return (
-      <DashboardLayout title="Messages">
+      <EnhancedDashboardLayout title="Messages">
         <div className="flex items-center gap-4 mb-6">
           <div className="flex items-center gap-2">
             <MessageCircle className="h-6 w-6 text-primary" />
@@ -357,7 +357,7 @@ export default function Messages() {
             )}
           </div>
         </div>
-      </DashboardLayout>
+      </EnhancedDashboardLayout>
     );
   }
 
