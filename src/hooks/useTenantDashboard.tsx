@@ -49,7 +49,8 @@ export function useTenantDashboard() {
           monthly_rent,
           end_date,
           security_deposit,
-          properties!inner (
+          property_id,
+          properties (
             id,
             title,
             location,
@@ -122,7 +123,8 @@ export function useTenantDashboard() {
           start_time,
           end_time,
           status,
-          properties!inner (
+          property_id,
+          properties (
             title,
             location
           )

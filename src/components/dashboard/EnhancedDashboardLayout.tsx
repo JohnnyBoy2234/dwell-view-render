@@ -1,5 +1,5 @@
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { UnifiedSidebar } from './UnifiedSidebar';
+import { EnhancedSidebar } from './EnhancedSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Bell, LogOut, Menu, AlertTriangle } from 'lucide-react';
@@ -8,12 +8,14 @@ import { useTenantNotifications } from '@/hooks/useTenantNotifications';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
-import { ErrorBoundary } from 'react-error-boundary';
+import { Component, ReactNode } from 'react';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
   title: string;
   actions?: React.ReactNode;
+  currentTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
@@ -35,7 +37,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export function EnhancedDashboardLayout({ children, title, actions }: EnhancedDashboardLayoutProps) {
+export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange }: EnhancedDashboardLayoutProps) {
   const { signOut, isLandlord } = useAuth();
   
   // Use the appropriate notifications hook based on user role
@@ -46,11 +48,11 @@ export function EnhancedDashboardLayout({ children, title, actions }: EnhancedDa
   const userRole = isLandlord ? 'landlord' : 'tenant';
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
-        <UnifiedSidebar userRole={userRole} />
+        <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
         
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col ml-0 md:ml-64">
           {/* Enhanced Header */}
           <header className="h-16 flex items-center border-b bg-background/95 backdrop-blur-sm sticky top-0 z-40 px-4 lg:px-6">
             <SidebarTrigger className="lg:hidden mr-4">
@@ -143,9 +145,7 @@ export function EnhancedDashboardLayout({ children, title, actions }: EnhancedDa
           
           {/* Main Content with Error Boundary */}
           <main className="flex-1 p-4 lg:p-6 overflow-x-hidden">
-            <ErrorBoundary FallbackComponent={ErrorFallback} onReset={() => window.location.reload()}>
-              {children}
-            </ErrorBoundary>
+            {children}
           </main>
         </div>
       </div>

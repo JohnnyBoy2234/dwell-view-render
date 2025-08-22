@@ -12,8 +12,6 @@ import Properties from "./pages/Properties";
 import HowItWorks from "./pages/HowItWorks";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
-import TenantDashboard from "./pages/TenantDashboard";
 import LeaseSigningPage from "./pages/LeaseSigningPage";
 import LandlordLeaseSigningPage from "./pages/LandlordLeaseSigningPage";
 import AddProperty from "./pages/AddProperty";
