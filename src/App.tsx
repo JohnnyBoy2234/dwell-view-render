@@ -34,7 +34,6 @@ import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
-import { Dice1 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
