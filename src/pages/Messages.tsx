@@ -570,8 +570,9 @@ return (
                 </ScrollArea>
               </CardContent>
             </Card>
+            
           </div>
-
+                
           {/* Chat Window */}
           <div className={`${!showConversations ? 'block' : 'hidden lg:block'} lg:col-span-2`}>
             {selectedConversation ? (
