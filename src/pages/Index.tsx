@@ -102,10 +102,10 @@ const landlordData = {
     description: "List your property and connect with quality tenants without paying agent commissions."
   },
   steps: [
-    { icon: <Building2 className="h-4 w-4 text-white" />, title: "List Your Property", description: "Create detailed listings with professional photos and comprehensive property information.", badges: ["Easy Setup", "Photo Upload", "Rich Descriptions"] },
-    { icon: <Mail className="h-4 w-4 text-white" />, title: "Receive Applications", description: "Get applications directly from interested tenants with all their information organized.", badges: ["Direct Contact", "Organized Inbox", "Quick Reviews"] },
-    { icon: <Shield className="h-4 w-4 text-white" />, title: "Screen & Verify", description: "Access tenant screening tools and background checks to make informed decisions.", badges: ["Credit Checks", "References", "Employment Verification"] },
-    { icon: <DollarSign className="h-4 w-4 text-white" />, title: "Manage & Collect", description: "Use our property management tools and online rent collection system.", badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"] }
+    { icon: <Building2 className="h-4 w-4 text-white" />, title: "List Your Property", description: "Create a professional listing in minutes with photos, details, and your rental price.", badges: ["Easy Setup", "Photo Upload", "Rich Descriptions"] },
+    { icon: <Mail className="h-4 w-4 text-white" />, title: "Book Viewings", description: "Chat directly with tenants and schedule viewings at times that suit you.", badges: ["Direct Contact", "Scheduling", "No Agents"] },
+    { icon: <Shield className="h-4 w-4 text-white" />, title: "Recieve Applications", description: "Get organized applications online, review instantly, and screen tenants with confidence.", badges: ["Easy Applications", "Screening", "Fast Processing"] },
+    { icon: <DollarSign className="h-4 w-4 text-white" />, title: "Manage & Collect", description: "Collect rent online with secure payments and track everything in one place.", badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"] }
   ],
   cta: {
     text: "List Your Property",
