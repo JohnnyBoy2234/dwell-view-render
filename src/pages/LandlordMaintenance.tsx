@@ -125,7 +125,7 @@ export default function LandlordMaintenance() {
             </div>
           ) : (
             requests.map((req) => (
-
+              <Card key={req.id}>
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
@@ -139,7 +139,6 @@ export default function LandlordMaintenance() {
                         {new Date(req.created_at).toLocaleDateString()}
                       </div>
                     </div>
-
                   </div>
                   <div className="flex items-center gap-2">
                     <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>
