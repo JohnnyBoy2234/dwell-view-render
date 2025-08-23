@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
+
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -32,8 +31,7 @@ interface SupabaseMaintenanceRequest {
 export default function LandlordMaintenance() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
-  const { data: unread } = useUnreadCounts();
+
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -127,7 +125,7 @@ export default function LandlordMaintenance() {
             </div>
           ) : (
             requests.map((req) => (
-              <Card key={req.id} className="border cursor-pointer" onClick={()=>navigate(`/dashboard/maintenance/${req.id}`)}>
+
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between">
                     <div>
@@ -141,10 +139,7 @@ export default function LandlordMaintenance() {
                         {new Date(req.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={getStatusBadge(req.status)}>{req.status.replace('_', ' ')}</Badge>
-                      {unread?.[req.id] > 0 && (<Badge variant="destructive">{unread[req.id]}</Badge>)}
-                    </div>
+
                   </div>
                   <div className="flex items-center gap-2">
                     <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>
