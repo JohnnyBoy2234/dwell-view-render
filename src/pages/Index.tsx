@@ -205,7 +205,56 @@ const Index = () => {
     tenant: ['from-ocean-blue to-ocean-blue-light', 'from-earth-warm to-earth-warm-dark', 'from-success-green to-success-green-glow', 'from-purple-500 to-purple-600'],
     landlord: ['from-success-green to-success-green-glow', 'from-earth-warm to-earth-warm-dark', 'from-ocean-blue to-ocean-blue-light', 'from-purple-500 to-purple-600']
   };
-  const activeIconColors = isTenant ? iconColors.tenant : iconColors.landlord;
+
+  const renderHowItWorksCard = (data: typeof tenantData, tenantView: boolean) => {
+    const colors = tenantView ? iconColors.tenant : iconColors.landlord;
+    return (
+      <Card className={`shadow-strong overflow-hidden transition-all duration-500 animate-fade-in ${tenantView ? 'border-ocean-blue/20 bg-gradient-to-br from-white via-white to-ocean-blue/5' : 'border-success-green/20 bg-gradient-to-br from-white via-white to-success-green/5'}`}>
+        <CardHeader className={`pb-6 ${tenantView ? 'bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/5' : 'bg-gradient-to-r from-success-green/10 to-success-green/5'}`}>
+          <div className="flex items-center gap-3 mb-2">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-soft ${tenantView ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-light' : 'bg-gradient-to-br from-success-green to-success-green-glow'}`}>
+              {data.header.icon}
+            </div>
+            <div>
+              <CardTitle className={`text-xl sm:text-2xl ${tenantView ? 'text-ocean-blue-dark' : 'text-success-green-dark'}`}>{data.header.title}</CardTitle>
+              <Badge variant="outline" className="mt-1 text-xs">{data.header.subtitle}</Badge>
+            </div>
+          </div>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            {data.header.description}
+          </p>
+        </CardHeader>
+
+        <CardContent className="p-6 sm:p-8 space-y-6">
+          {data.steps.map((step, index) => (
+            <div className="flex gap-4" key={index}>
+              <div className={`w-8 h-8 bg-gradient-to-br ${colors[index]} rounded-full flex items-center justify-center flex-shrink-0 shadow-soft`}>
+                {step.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg sm:text-xl mb-3">{step.title}</h3>
+                <p className="text-base sm:text-lg text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
+                <div className="flex flex-wrap gap-2">
+                  {step.badges.map((badge, i) => (
+                    <Badge variant="secondary" className="text-sm" key={i}>{badge}</Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <div className="pt-4 border-t">
+            <Link to={data.cta.link}>
+              <Button className={`w-full text-white shadow-soft ${tenantView ? 'bg-ocean-blue hover:bg-ocean-blue-dark' : 'bg-success-green hover:bg-success-green-dark'}`}>
+                {data.cta.text}
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -340,8 +389,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* --- NEW: Toggle Switch Section --- */}
-      <section className="pb-12">
+      {/* Toggle Switch Section - mobile only */}
+      <section className="pb-12 md:hidden">
         <div className="flex items-center justify-center space-x-4">
           <Label htmlFor="user-type-toggle" className={`font-medium transition-colors ${isTenant ? 'text-primary' : 'text-muted-foreground'}`}>
             For Tenants
@@ -358,53 +407,20 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Main Content - Now a single centered column */}
+      {/* Main Content */}
       <section className="pb-8 sm:pb-12 lg:pb-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
-            {/* --- DYNAMIC CONTENT CARD --- */}
-            <Card key={userType} className={`shadow-strong overflow-hidden transition-all duration-500 animate-fade-in ${isTenant ? 'border-ocean-blue/20 bg-gradient-to-br from-white via-white to-ocean-blue/5' : 'border-success-green/20 bg-gradient-to-br from-white via-white to-success-green/5'}`}>
-              <CardHeader className={`pb-6 ${isTenant ? 'bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/5' : 'bg-gradient-to-r from-success-green/10 to-success-green/5'}`}>
-                <div className="flex items-center gap-3 mb-2">
-                  <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-soft ${isTenant ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-light' : 'bg-gradient-to-br from-success-green to-success-green-glow'}`}>
-                    {activeData.header.icon}
-                  </div>
-                  <div>
-                    <CardTitle className={`text-xl sm:text-2xl ${isTenant ? 'text-ocean-blue-dark' : 'text-success-green-dark'}`}>{activeData.header.title}</CardTitle>
-                    <Badge variant="outline" className="mt-1 text-xs">{activeData.header.subtitle}</Badge>
-                  </div>
-                </div>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  {activeData.header.description}
-                </p>
-              </CardHeader>
-              
-              <CardContent className="p-6 sm:p-8 space-y-6">
-                {activeData.steps.map((step, index) => (
-                  <div className="flex gap-4" key={index}>
-                    <div className={`w-8 h-8 bg-gradient-to-br ${activeIconColors[index]} rounded-full flex items-center justify-center flex-shrink-0 shadow-soft`}>
-                      {step.icon}
-                    </div>
-                     <div className="flex-1">
-                       <h3 className="font-semibold text-lg sm:text-xl mb-3">{step.title}</h3>
-                       <p className="text-base sm:text-lg text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
-                       <div className="flex flex-wrap gap-2">
-                         {step.badges.map((badge, i) => <Badge variant="secondary" className="text-sm" key={i}>{badge}</Badge>)}
-                       </div>
-                     </div>
-                  </div>
-                ))}
-                
-                 <div className="pt-4 border-t">
-                   <Link to={isTenant ? "/properties" : "/list-property"}>
-                     <Button className={`w-full text-white shadow-soft ${isTenant ? 'bg-ocean-blue hover:bg-ocean-blue-dark' : 'bg-success-green hover:bg-success-green-dark'}`}>
-                       {activeData.cta.text}
-                       <ArrowRight className="h-4 w-4 ml-2" />
-                     </Button>
-                   </Link>
-                 </div>
-              </CardContent>
-            </Card>
+            {/* Mobile view - single card */}
+            <div className="md:hidden">
+              {renderHowItWorksCard(activeData, isTenant)}
+            </div>
+
+            {/* Desktop view - two cards side by side */}
+            <div className="hidden md:grid md:grid-cols-2 md:gap-8">
+              {renderHowItWorksCard(tenantData, true)}
+              {renderHowItWorksCard(landlordData, false)}
+            </div>
           </div>
         </div>
       </section>
