@@ -1,5 +1,4 @@
 import * as React from "react";
-import {Helmet} from "react-helmet";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,12 +9,10 @@ import { RouteGuard } from "@/components/RouteGuard";
 import Navbar from "./components/Navbar";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
-import HowItWorks from "./pages/HowItWorks";
 import About from "./pages/About";
 import Auth from "./pages/Auth";
 import LeaseSigningPage from "./pages/LeaseSigningPage";
 import LandlordLeaseSigningPage from "./pages/LandlordLeaseSigningPage";
-import AddProperty from "./pages/AddProperty";
 import ListProperty from "./pages/ListProperty";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
@@ -34,16 +31,10 @@ import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
-import { Dice1 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 const App = () => (
-  <>
-  <Helmet>
-    <title>Find Your Dream Home | Explore Properties, Filters, and More</title>
-    <meta name="description" content="Browse our extensive property listings, filter by your needs, and gain insights into the market. Find your perfect home today and start living your dream!" key="description"/>
-  </Helmet>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -60,7 +51,6 @@ const App = () => (
             {/* Routes with Navbar */}
             <Route path="/" element={<><Navbar /><Index /></>} />
             <Route path="/properties" element={<><Navbar /><RouteGuard><Properties /></RouteGuard></>} />
-            <Route path="/how-it-works" element={<><Navbar /><HowItWorks /></>} />
             <Route path="/about" element={<><Navbar /><About /></>} />
 
             {/* Routes without Navbar */}
@@ -92,8 +82,6 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-  
-  </>
 );
 
 export default App;

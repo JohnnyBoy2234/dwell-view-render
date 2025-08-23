@@ -32,9 +32,7 @@ const statusColors = {
 export default function TenantMaintenance() {
   const { user } = useAuth();
   const { recentMaintenance, loading, tenantProperty, refetch } = useTenantDashboard();
-  const navigate = useNavigate();
-  const { data: unread } = useUnreadCounts();
-  const { data: responses } = useTenantResponses();
+
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newRequest, setNewRequest] = useState({
