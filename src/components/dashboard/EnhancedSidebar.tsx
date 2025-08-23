@@ -1,4 +1,4 @@
-import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building } from 'lucide-react';
+import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -28,7 +28,7 @@ const tenantItems: SidebarItem[] = [
   { title: 'Messages', url: '/tenant-messages', icon: MessageSquare },
   { title: 'Properties', url: '/properties', icon: Building },
   { title: 'Applications', url: '/tenant-applications', icon: FileText },
-  { title: 'Maintenance', url: '/maintenance', icon: Settings },
+  { title: 'Maintenance', url: '/tenant-dashboard/maintenance', icon: Settings },
   { title: 'Profile', url: '/tenant-profile', icon: User },
 ];
 
@@ -39,6 +39,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Applications', url: '/applications', icon: FileText },
   { title: 'Tenants', url: '/tenants', icon: Users },
   { title: 'Payments', url: '/payments', icon: DollarSign },
+  { title: 'Maintenance', url: '/dashboard/maintenance', icon: Wrench },
   { title: 'Reports', url: '/reports', icon: BarChart3 },
 ];
 

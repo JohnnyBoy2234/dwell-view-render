@@ -157,6 +157,9 @@ export default function EnhancedLandlordDashboard() {
         return renderPaymentsTab();
       case '/reports':
         return renderReportsTab();
+      case '/dashboard/maintenance':
+        navigate('/dashboard/maintenance');
+        return null;
       default:
         return renderDashboardContent();
     }
