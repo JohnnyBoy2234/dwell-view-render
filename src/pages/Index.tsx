@@ -1,18 +1,79 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { EnhancedAddressAutocomplete } from "@/components/ui/enhanced-address-autocomplete";
-import PropertyCard from "@/components/PropertyCard";
+import {
+  Button,
+} from "@/components/ui/button";
+
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+import {
+  Input,
+} from "@/components/ui/input";
+
+import {
+  EnhancedAddressAutocomplete,
+} from "@/components/ui/enhanced-address-autocomplete";
+
+import {
+  Badge,
+} from "@/components/ui/badge";
+
+import {
+  Switch,
+} from "@/components/ui/switch";
+
+import {
+  Label,
+} from "@/components/ui/label";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
+  Slider,
+} from "@/components/ui/slider";
+
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
-import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
-import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
-import { Search, Home, Shield, Users, Star, ArrowRight, CheckCircle } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+import {MoreFiltersModal} from "@/components/search/MoreFiltersModal";
+
+import PropertyCard from "@/components/PropertyCard";
+
+import {
+  usePropertySearchFilters,
+} from "@/hooks/usePropertySearchFilters";
+
+import {
+  Search,
+  Home,
+  Shield,
+  Users,
+  Star,
+  ArrowRight,
+  CheckCircle,
+  MessageSquare,
+  Calendar,
+  FileText,
+  DollarSign,
+  Mail,
+  Building2,
+} from "lucide-react";
+
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  useState,
+} from "react";
 
 const Index = () => {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
@@ -162,7 +223,7 @@ const Index = () => {
                   <p className="text-white/80 mb-4">Try adjusting your search criteria or browse all available properties.</p>
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
                     <Button 
-                      variant="outline" 
+                      variant="outline"  
                       onClick={() => {
                         updateFilters({
                           searchTerm: "",

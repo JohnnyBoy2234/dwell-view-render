@@ -1,4 +1,5 @@
 import * as React from "react";
+import {Helmet} from "react-helmet";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,10 +34,16 @@ import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
+import { Dice1 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <>
+  <Helmet>
+    <title>Find Your Dream Home | Explore Properties, Filters, and More</title>
+    <meta name="description" content="Browse our extensive property listings, filter by your needs, and gain insights into the market. Find your perfect home today and start living your dream!" key="description"/>
+  </Helmet>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -85,6 +92,8 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
+  
+  </>
 );
 
 export default App;
