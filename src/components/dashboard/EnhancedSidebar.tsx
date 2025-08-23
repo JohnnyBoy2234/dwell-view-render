@@ -1,4 +1,4 @@
-import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building } from 'lucide-react';
+import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';

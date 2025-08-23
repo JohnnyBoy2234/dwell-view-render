@@ -17,6 +17,16 @@ interface MaintenanceRequest {
   property_title: string;
 }
 
+interface SupabaseMaintenanceRequest {
+  id: string;
+  title: string;
+  description: string;
+  status: 'submitted' | 'in_progress' | 'completed' | 'cancelled';
+  priority: 'low' | 'medium' | 'high';
+  created_at: string;
+  properties: { title?: string } | null;
+}
+
 export default function LandlordMaintenance() {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -37,7 +47,7 @@ export default function LandlordMaintenance() {
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      const transformed = (data || []).map((req: any) => ({
+      const transformed = ((data as SupabaseMaintenanceRequest[] | null) ?? []).map((req) => ({
         id: req.id,
         title: req.title,
         description: req.description,
