@@ -45,6 +45,7 @@ import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import {MoreFiltersModal} from "@/components/search/MoreFiltersModal";
 
 import PropertyCard from "@/components/PropertyCard";
+import { BenefitsSlider } from "@/components/BenefitsSlider";
 
 import {
   usePropertySearchFilters,
@@ -452,6 +453,8 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      <BenefitsSlider />
 
       {/* Stats Section */}
       <section className="py-16 bg-background">
