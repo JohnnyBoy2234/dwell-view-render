@@ -345,3 +345,17 @@ All colors MUST be HSL.
     min-width: 100px;
   }
 }
+
+.benefits-swiper .swiper-button-next,
+.benefits-swiper .swiper-button-prev {
+  color: hsl(221 83% 53%);
+}
+
+.benefits-swiper .swiper-pagination-bullet {
+  background-color: hsl(0 0% 80%);
+  opacity: 1;
+}
+
+.benefits-swiper .swiper-pagination-bullet-active {
+  background-color: hsl(142 76% 36%);
+}
