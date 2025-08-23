@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const priorityColors = {
   low: 'bg-success-green text-white',
@@ -25,7 +27,8 @@ const statusColors = {
 };
 
 export default function TenantMaintenance() {
-  const { recentMaintenance, loading } = useTenantDashboard();
+  const { user } = useAuth();
+  const { recentMaintenance, loading, tenantProperty, refetch } = useTenantDashboard();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newRequest, setNewRequest] = useState({
@@ -45,16 +48,52 @@ export default function TenantMaintenance() {
       return;
     }
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Request Submitted",
-      description: "Your maintenance request has been submitted successfully.",
-    });
-    
-    setIsCreateDialogOpen(false);
-    setNewRequest({ title: '', description: '', priority: 'medium', category: '' });
+    try {
+      if (!user || !tenantProperty) {
+        throw new Error('Missing tenancy information');
+      }
+
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from('tenancies')
+        .select('landlord_id')
+        .eq('tenant_id', user.id)
+        .eq('property_id', tenantProperty.id)
+        .eq('status', 'active')
+        .single();
+
+      if (tenancyError) throw tenancyError;
+
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .insert({
+          title: newRequest.title,
+          description: newRequest.description,
+          priority: newRequest.priority,
+          category: newRequest.category,
+          status: 'submitted',
+          tenant_id: user.id,
+          landlord_id: tenancy?.landlord_id,
+          property_id: tenantProperty.id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Request Submitted",
+        description: "Your maintenance request has been submitted successfully.",
+      });
+
+      setIsCreateDialogOpen(false);
+      setNewRequest({ title: '', description: '', priority: 'medium', category: '' });
+      refetch();
+    } catch (error) {
+      console.error('Error submitting maintenance request:', error);
+      toast({
+        title: 'Submission Failed',
+        description: 'Unable to submit maintenance request. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
