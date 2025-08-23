@@ -132,7 +132,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => window.location.href = '/maintenance/new'}
+              onClick={() => window.location.href = '/tenant-dashboard/maintenance'}
               className="border-earth-warm text-earth-warm hover:bg-earth-warm/10"
             >
               Report Issue

@@ -111,7 +111,7 @@ export function MaintenanceCard({ recentMaintenance }: MaintenanceCardProps) {
                 variant="outline" 
                 size="sm"
                 className="border-success-green text-success-green hover:bg-success-green/10"
-                onClick={() => navigate('/maintenance/new')}
+                onClick={() => navigate('/tenant-dashboard/maintenance')}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -125,7 +125,7 @@ export function MaintenanceCard({ recentMaintenance }: MaintenanceCardProps) {
               variant="ghost" 
               size="sm"
               className="text-success-green hover:bg-success-green/10"
-              onClick={() => navigate('/maintenance/new')}
+              onClick={() => navigate('/tenant-dashboard/maintenance')}
             >
               <Plus className="h-4 w-4 mr-1" />
               Report Issue

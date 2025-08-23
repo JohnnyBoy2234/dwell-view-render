@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
+import { useTenantResponses } from '@/hooks/maintenance/useTenantResponses';
 import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 const priorityColors = {
   low: 'bg-success-green text-white',
@@ -25,7 +30,11 @@ const statusColors = {
 };
 
 export default function TenantMaintenance() {
-  const { recentMaintenance, loading } = useTenantDashboard();
+  const { user } = useAuth();
+  const { recentMaintenance, loading, tenantProperty, refetch } = useTenantDashboard();
+  const navigate = useNavigate();
+  const { data: unread } = useUnreadCounts();
+  const { data: responses } = useTenantResponses();
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newRequest, setNewRequest] = useState({
@@ -45,16 +54,52 @@ export default function TenantMaintenance() {
       return;
     }
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    toast({
-      title: "Request Submitted",
-      description: "Your maintenance request has been submitted successfully.",
-    });
-    
-    setIsCreateDialogOpen(false);
-    setNewRequest({ title: '', description: '', priority: 'medium', category: '' });
+    try {
+      if (!user || !tenantProperty) {
+        throw new Error('Missing tenancy information');
+      }
+
+      const { data: tenancy, error: tenancyError } = await supabase
+        .from('tenancies')
+        .select('landlord_id')
+        .eq('tenant_id', user.id)
+        .eq('property_id', tenantProperty.id)
+        .eq('status', 'active')
+        .single();
+
+      if (tenancyError) throw tenancyError;
+
+      const { error } = await supabase
+        .from('maintenance_requests')
+        .insert({
+          title: newRequest.title,
+          description: newRequest.description,
+          priority: newRequest.priority,
+          category: newRequest.category,
+          status: 'submitted',
+          tenant_id: user.id,
+          landlord_id: tenancy?.landlord_id,
+          property_id: tenantProperty.id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Request Submitted",
+        description: "Your maintenance request has been submitted successfully.",
+      });
+
+      setIsCreateDialogOpen(false);
+      setNewRequest({ title: '', description: '', priority: 'medium', category: '' });
+      refetch();
+    } catch (error) {
+      console.error('Error submitting maintenance request:', error);
+      toast({
+        title: 'Submission Failed',
+        description: 'Unable to submit maintenance request. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   if (loading) {
@@ -228,6 +273,14 @@ export default function TenantMaintenance() {
         </Card>
       </div>
 
+      {responses && responses.length > 0 && (
+        <Card className="cursor-pointer" onClick={() => navigate("/tenant-dashboard/maintenance/responses")} >
+          <CardContent className="p-4">
+            <p>You have {responses.length} responses</p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Maintenance Requests List */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Your Requests</h2>
@@ -251,7 +304,7 @@ export default function TenantMaintenance() {
         ) : (
           <div className="grid gap-4">
             {recentMaintenance.map((request) => (
-              <Card key={request.id} className="hover:shadow-medium transition-all duration-200">
+              <Card key={request.id} className="hover:shadow-medium transition-all duration-200 cursor-pointer" onClick={()=>navigate(`/tenant-dashboard/maintenance/${request.id}`)}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
@@ -267,6 +320,7 @@ export default function TenantMaintenance() {
                       <Badge className={statusColors[request.status]}>
                         {request.status.replace('_', ' ')}
                       </Badge>
+                      {unread?.[request.id] > 0 && (<Badge variant="destructive">{unread[request.id]}</Badge>)}
                     </div>
                   </div>
                 </CardHeader>
@@ -276,9 +330,6 @@ export default function TenantMaintenance() {
                       <Wrench className="h-4 w-4" />
                       <span>Request #{request.id.slice(0, 8)}</span>
                     </div>
-                    <Button variant="outline" size="sm">
-                      View Details
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
