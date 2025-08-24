@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Wrench, Building } from 'lucide-react';
 
 interface MaintenanceRequest {
@@ -31,6 +33,7 @@ interface SupabaseMaintenanceRequest {
 export default function LandlordMaintenance() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,6 +142,9 @@ export default function LandlordMaintenance() {
                         {new Date(req.created_at).toLocaleDateString()}
                       </div>
                     </div>
+                    <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}>
+                      Respond
+                    </Button>
                   </div>
                   <div className="flex items-center gap-2">
                     <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>
