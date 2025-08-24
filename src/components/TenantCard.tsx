@@ -1,149 +1,118 @@
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import { Search, Eye, CalendarCheck, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Search, Eye, CalendarCheck, FileText, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 import React from "react";
 
+const tenantData = {
+  header: {
+    icon: <Search className="h-5 w-5 sm:h-6 sm:w-6 text-white" />,
+    title: "For Tenants",
+    subtitle: "Find Your Home",
+    description:
+      "Follow four simple steps to rent with confidence on SwiftRent.",
+  },
+  steps: [
+    {
+      icon: <Search className="h-4 w-4 text-white" />,
+      title: "Search & Discover",
+      description:
+        "Browse available listings on SwiftRent with full property details, photos, and transparent rental terms.",
+      badges: ["No Hidden Fees", "Full Details", "Photo Gallery"],
+    },
+    {
+      icon: <Eye className="h-4 w-4 text-white" />,
+      title: "Request to View",
+      description:
+        "Send viewing requests directly to landlords with secure ID verification for safety.",
+      badges: ["ID Verified", "Direct Contact", "24hr Verification"],
+    },
+    {
+      icon: <CalendarCheck className="h-4 w-4 text-white" />,
+      title: "Confirm Viewing",
+      description:
+        "The landlord sets available times, you confirm a slot, and SwiftRent handles reminders.",
+      badges: ["Easy Scheduling", "Auto Reminders", "Flexible Times"],
+    },
+    {
+      icon: <FileText className="h-4 w-4 text-white" />,
+      title: "Submit Documents",
+      description:
+        "Complete your rental application with guided document submission and instant landlord review.",
+      badges: ["Guided Process", "Standard Documents", "Quick Review"],
+    },
+  ],
+  cta: {
+    text: "Browse Properties",
+    link: "/properties",
+  },
+};
+
+const tenantColors = [
+  "from-ocean-blue to-ocean-blue-light",
+  "from-earth-warm to-earth-warm-dark", 
+  "from-success-green to-success-green-glow",
+  "from-purple-500 to-purple-600",
+];
+
 const TenantCard: React.FC = () => {
+  const data = tenantData;
+  const colors = tenantColors;
+  
   return (
-    <Card
-      data-testid="tenant-card"
-      className="max-w-xl mx-auto bg-white border border-[#e5e7eb] rounded-2xl shadow-sm"
-    >
-      <CardHeader className="space-y-2">
-        <CardTitle>
-          <h3 className="text-xl font-bold text-[hsl(var(--sr-ink))]">For Tenants</h3>
-        </CardTitle>
-        <p className="text-sm text-[hsl(var(--sr-muted))]">
-          Follow four simple steps to rent with confidence on SwiftRent.
+    <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-ocean-blue/20 bg-gradient-to-br from-white via-white to-ocean-blue/5">
+      <CardHeader className="pb-6 bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/5">
+        <div className="mb-2 flex items-center gap-3">
+          <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-blue to-ocean-blue-light sm:h-12 sm:w-12">
+            {data.header.icon}
+          </div>
+          <div>
+            <CardTitle className="text-xl text-ocean-blue-dark sm:text-2xl">
+              {data.header.title}
+            </CardTitle>
+            <Badge variant="outline" className="mt-1 text-xs">
+              {data.header.subtitle}
+            </Badge>
+          </div>
+        </div>
+        <p className="text-sm text-muted-foreground sm:text-base">
+          {data.header.description}
         </p>
       </CardHeader>
-      <CardContent className="space-y-0">
-        <ol>
-          <li
-            data-testid="tenant-step-1"
-            className="flex gap-4"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--sr-blue)/0.1)] font-semibold text-[hsl(var(--sr-blue))]">
-              1
-            </span>
-            <div className="flex-1">
-              <h4 className="flex items-center gap-2 font-semibold text-[hsl(var(--sr-ink))]">
-                <Search
-                  className="h-6 w-6 text-[hsl(var(--sr-blue))]"
-                  aria-hidden="true"
-                />
-                Search &amp; Discover
-              </h4>
-              <ul className="mt-2 ml-5 list-disc space-y-1 text-[hsl(var(--sr-muted))]">
-                <li>Browse available listings on SwiftRent.</li>
-                <li>View full property details, photos, and rental terms.</li>
-                <li>No hidden agent fees — everything is transparent.</li>
-              </ul>
+      <CardContent className="space-y-6 p-6 sm:p-8">
+        {data.steps.map((step, index) => (
+          <div className="flex gap-4" key={index}>
+            <div
+              className={`shadow-soft flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]}`}
+            >
+              {step.icon}
             </div>
-          </li>
-
-          <li
-            data-testid="tenant-step-2"
-            className="mt-6 flex gap-4 border-t border-[#e5e7eb] pt-6"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--sr-blue)/0.1)] font-semibold text-[hsl(var(--sr-blue))]">
-              2
-            </span>
             <div className="flex-1">
-              <h4 className="flex flex-wrap items-center gap-2 font-semibold text-[hsl(var(--sr-ink))]">
-                <Eye
-                  className="h-6 w-6 text-[hsl(var(--sr-blue))]"
-                  aria-hidden="true"
-                />
-                <span>Request to View</span>
-                <span className="text-sm font-normal">(with ID Verification)</span>
-                <span
-                  data-testid="tenant-id-verified-chip"
-                  aria-label="ID Verified"
-                  className="ml-2 rounded-full bg-[hsl(var(--sr-green)/0.1)] px-2 py-0.5 text-xs font-medium text-[hsl(var(--sr-green))]"
-                >
-                  ID Verified
-                </span>
-              </h4>
-              <ul className="mt-2 ml-5 list-disc space-y-1 text-[hsl(var(--sr-muted))]">
-                <li>
-                  Choose the property you’d like to view and send a request
-                  directly to the landlord.
-                </li>
-                <li>
-                  To verify your identity, you must take a photo of your ID next
-                  to your face and submit it securely.
-                </li>
-                <li>Verification will not take longer than 24 hours.</li>
-                <li>
-                  Only verified requests are passed on to landlords — ensuring
-                  safety for both sides.
-                </li>
-              </ul>
-              <p className="mt-2 text-xs text-[hsl(var(--sr-muted))]">
-                Your ID image is encrypted in transit and deleted after
-                verification.
+              <h3 className="mb-3 text-lg font-semibold sm:text-xl">
+                {step.title}
+              </h3>
+              <p className="mb-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                {step.description}
               </p>
+              <div className="flex flex-wrap gap-2">
+                {step.badges.map((badge, i) => (
+                  <Badge variant="secondary" className="text-sm" key={i}>
+                    {badge}
+                  </Badge>
+                ))}
+              </div>
             </div>
-          </li>
-
-          <li
-            data-testid="tenant-step-3"
-            className="mt-6 flex gap-4 border-t border-[#e5e7eb] pt-6"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--sr-blue)/0.1)] font-semibold text-[hsl(var(--sr-blue))]">
-              3
-            </span>
-            <div className="flex-1">
-              <h4 className="flex items-center gap-2 font-semibold text-[hsl(var(--sr-ink))]">
-                <CalendarCheck
-                  className="h-6 w-6 text-[hsl(var(--sr-blue))]"
-                  aria-hidden="true"
-                />
-                Confirm Landlord Viewing Time
-              </h4>
-              <ul className="mt-2 ml-5 list-disc space-y-1 text-[hsl(var(--sr-muted))]">
-                <li>The landlord sets the available viewing times.</li>
-                <li>You confirm one of the available slots.</li>
-                <li>
-                  SwiftRent sends confirmations and reminders automatically.
-                </li>
-              </ul>
-            </div>
-          </li>
-
-          <li
-            data-testid="tenant-step-4"
-            className="mt-6 flex gap-4 border-t border-[#e5e7eb] pt-6"
-          >
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[hsl(var(--sr-blue)/0.1)] font-semibold text-[hsl(var(--sr-blue))]">
-              4
-            </span>
-            <div className="flex-1">
-              <h4 className="flex items-center gap-2 font-semibold text-[hsl(var(--sr-ink))]">
-                <FileText
-                  className="h-6 w-6 text-[hsl(var(--sr-blue))]"
-                  aria-hidden="true"
-                />
-                Submit All Standard Documents
-              </h4>
-              <ul className="mt-2 ml-5 list-disc space-y-1 text-[hsl(var(--sr-muted))]">
-                <li>
-                  After viewing, you will be asked to submit all the standard
-                  rental documents (proof of income, references, bank
-                  statements, etc.).
-                </li>
-                <li>
-                  SwiftRent will guide you step-by-step through the process to
-                  ensure nothing is missed.
-                </li>
-                <li>
-                  Once submitted, your application goes directly to the landlord
-                  for review.
-                </li>
-              </ul>
-            </div>
-          </li>
-        </ol>
+          </div>
+        ))}
+        <div className="border-t pt-4">
+          <Link to={data.cta.link}>
+            <Button className="w-full bg-ocean-blue text-white shadow-soft hover:bg-ocean-blue-dark">
+              {data.cta.text}
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
       </CardContent>
     </Card>
   );
