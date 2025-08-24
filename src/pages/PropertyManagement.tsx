@@ -516,9 +516,18 @@ export default function PropertyManagement() {
                               </Badge>
                             </div>
                           </div>
-                          <Badge variant="outline">
-                            {request.status.replace('_', ' ')}
-                          </Badge>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge variant="outline">
+                              {request.status.replace('_', ' ')}
+                            </Badge>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/dashboard/maintenance/${request.id}`)}
+                            >
+                              Respond
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
