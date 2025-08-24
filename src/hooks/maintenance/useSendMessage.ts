@@ -1,9 +1,18 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { MaintenanceMessage } from '@/types/maintenance';
+import { useAuth } from '@/hooks/useAuth';
+import type { MaintenanceMessage, Role } from '@/types/maintenance';
 
-async function sendMessage(ticketId: string, body: string, files: File[]): Promise<MaintenanceMessage> {
+async function sendMessage(
+  ticketId: string,
+  body: string,
+  files: File[],
+  senderUserId: string,
+  senderRole: Role
+): Promise<MaintenanceMessage> {
   const formData = new FormData();
   formData.append('body', body);
+  formData.append('senderUserId', senderUserId);
+  formData.append('senderRole', senderRole);
   files.forEach(f => formData.append('attachments', f));
   const res = await fetch(`/api/maintenance/tickets/${ticketId}/messages`, {
     method: 'POST',
@@ -15,16 +24,18 @@ async function sendMessage(ticketId: string, body: string, files: File[]): Promi
 
 export function useSendMessage(ticketId: string) {
   const qc = useQueryClient();
+  const { user, isLandlord } = useAuth();
   return useMutation({
-    mutationFn: ({ body, files }: { body: string; files: File[] }) => sendMessage(ticketId, body, files),
+    mutationFn: ({ body, files }: { body: string; files: File[] }) =>
+      sendMessage(ticketId, body, files, user?.id || '', isLandlord ? 'LANDLORD' : 'TENANT'),
     onMutate: async ({ body }) => {
       await qc.cancelQueries({ queryKey: ['maintenance-messages', ticketId] });
       const previous = qc.getQueryData<any>(['maintenance-messages', ticketId]);
       const optimistic: MaintenanceMessage = {
         id: `temp-${Date.now()}`,
         ticketId,
-        senderUserId: 'temp',
-        senderRole: 'TENANT',
+        senderUserId: user?.id || 'temp',
+        senderRole: isLandlord ? 'LANDLORD' : 'TENANT',
         recipientUserId: 'temp',
         body,
         createdAt: new Date().toISOString(),

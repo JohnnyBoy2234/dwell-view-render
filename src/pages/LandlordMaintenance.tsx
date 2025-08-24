@@ -27,7 +27,7 @@ interface SupabaseMaintenanceRequest {
   status: 'submitted' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high';
   created_at: string;
-  properties: { title?: string } | null;
+  property_id: string;
 }
 
 export default function LandlordMaintenance() {
@@ -48,18 +48,32 @@ export default function LandlordMaintenance() {
       setLoading(true);
       const { data, error } = await supabase
         .from('maintenance_requests')
-        .select('id, title, description, status, priority, created_at, properties(title)')
+        .select('id, title, description, status, priority, created_at, property_id')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      const transformed = ((data as SupabaseMaintenanceRequest[] | null) ?? []).map((req) => ({
+
+      const reqs = (data as SupabaseMaintenanceRequest[] | null) ?? [];
+      const propertyIds = reqs.map(r => r.property_id);
+      let propertiesMap: Record<string, string> = {};
+      if (propertyIds.length > 0) {
+        const { data: propsData } = await supabase
+          .from('properties')
+          .select('id, title')
+          .in('id', propertyIds);
+        propertiesMap = Object.fromEntries(
+          ((propsData as { id: string; title: string }[] | null) || []).map(p => [p.id, p.title])
+        );
+      }
+
+      const transformed = reqs.map((req) => ({
         id: req.id,
         title: req.title,
         description: req.description,
         status: req.status,
         priority: req.priority,
         created_at: req.created_at,
-        property_title: req.properties?.title || 'Unknown Property',
+        property_title: propertiesMap[req.property_id] || 'Unknown Property',
       }));
       setRequests(transformed);
     } catch (error) {
