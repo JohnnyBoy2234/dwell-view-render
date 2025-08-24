@@ -1,12 +1,18 @@
 import { useQuery } from '@tanstack/react-query';
-import type { TicketUnreadSummary } from '@/types/maintenance';
-
-async function fetchResponses(): Promise<TicketUnreadSummary[]> {
-  const res = await fetch('/api/maintenance/responses/unread');
-  if (!res.ok) throw new Error('failed');
-  return res.json();
-}
+import { useAuth } from '@/hooks/useAuth';
 
 export function useTenantResponses() {
-  return useQuery({ queryKey: ['tenant-maintenance-responses'], queryFn: fetchResponses });
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['tenant-maintenance-responses', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      
+      // For now, return empty array since we don't have messaging system implemented
+      // This can be extended when we add maintenance messaging
+      return [];
+    },
+    enabled: !!user,
+  });
 }

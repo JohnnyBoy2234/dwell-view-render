@@ -55,7 +55,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const { isLandlord } = useAuth();
   const { unreadCount } = useUnreadMessages();
   const { data: maintenanceUnread } = useUnreadCounts();
-  const maintenanceTotal = maintenanceUnread ? Object.values(maintenanceUnread).reduce((a,b)=>a+b,0) : 0;
+  const maintenanceTotal = maintenanceUnread ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0) : 0;
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
