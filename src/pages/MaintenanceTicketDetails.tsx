@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Wrench, Calendar, User, Building, DollarSign } from 'lucide-react';
 import { useState } from 'react';
 import type { MaintenanceRequest, MaintenanceStatus } from '@/types/maintenance';
+import { MaintenanceThread } from '@/components/maintenance/messaging/MaintenanceThread';
 
 const statusOptions: { value: MaintenanceStatus; label: string; description: string }[] = [
   { value: 'submitted', label: 'Submitted', description: 'Request has been submitted' },
@@ -63,7 +64,7 @@ export default function MaintenanceTicketDetails() {
         .single();
       
       if (error) throw error;
-      return data as MaintenanceRequest & { properties: any };
+      return data as MaintenanceRequest & { properties: { title?: string; location?: string; landlord_id?: string } };
     },
     enabled: !!ticketId && !!user,
   });
@@ -191,7 +192,7 @@ export default function MaintenanceTicketDetails() {
                   {ticket.description}
                 </p>
               </div>
-              
+
               {ticket.notes && (
                 <div>
                   <Label className="text-sm font-medium">Notes</Label>
@@ -200,6 +201,15 @@ export default function MaintenanceTicketDetails() {
                   </p>
                 </div>
               )}
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col h-[500px]">
+            <CardHeader>
+              <CardTitle>Messages</CardTitle>
+            </CardHeader>
+            <CardContent className="flex-1 p-0">
+              <MaintenanceThread ticketId={ticket.id} />
             </CardContent>
           </Card>
 
