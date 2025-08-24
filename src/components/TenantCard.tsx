@@ -80,24 +80,24 @@ const TenantCard: React.FC = () => {
           {data.header.description}
         </p>
       </CardHeader>
-      <CardContent className="space-y-6 p-6 sm:p-8">
+      <CardContent className="space-y-4 p-4 sm:p-6">
         {data.steps.map((step, index) => (
-          <div className="flex gap-4" key={index}>
+          <div className="flex gap-3" key={index}>
             <div
-              className={`shadow-soft flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]}`}
+              className={`shadow-soft flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]}`}
             >
               {step.icon}
             </div>
             <div className="flex-1">
-              <h3 className="mb-3 text-lg font-semibold sm:text-xl">
+              <h3 className="mb-2 text-base font-semibold sm:text-lg">
                 {step.title}
               </h3>
-              <p className="mb-4 text-base leading-relaxed text-muted-foreground sm:text-lg">
+              <p className="mb-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
                 {step.description}
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1">
                 {step.badges.map((badge, i) => (
-                  <Badge variant="secondary" className="text-sm" key={i}>
+                  <Badge variant="secondary" className="text-xs" key={i}>
                     {badge}
                   </Badge>
                 ))}
@@ -105,11 +105,11 @@ const TenantCard: React.FC = () => {
             </div>
           </div>
         ))}
-        <div className="border-t pt-4">
+        <div className="border-t pt-3">
           <Link to={data.cta.link}>
-            <Button className="w-full bg-ocean-blue text-white shadow-soft hover:bg-ocean-blue-dark">
+            <Button className="w-full bg-ocean-blue text-white shadow-soft hover:bg-ocean-blue-dark text-sm">
               {data.cta.text}
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-2 h-3 w-3" />
             </Button>
           </Link>
         </div>
