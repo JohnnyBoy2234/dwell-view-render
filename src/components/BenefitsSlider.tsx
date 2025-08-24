@@ -51,6 +51,7 @@ export function BenefitsSlider() {
         </p>
         <Swiper
           modules={[Navigation, Pagination, EffectFade]}
+          slidesPerView={3}
           navigation
           pagination={{ clickable: true }}
           effect="fade"

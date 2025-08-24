@@ -375,6 +375,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Benefits Slider Section */}
+      <BenefitsSlider />
+
       {/* How It Works Section */}
     <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/20 to-ocean-blue/5">
       <section className="py-16 sm:py-20 lg:py-24">
@@ -454,7 +457,6 @@ const Index = () => {
         </div>
       </section>
 
-      <BenefitsSlider />
 
       {/* Stats Section */}
       <section className="py-16 bg-background">
