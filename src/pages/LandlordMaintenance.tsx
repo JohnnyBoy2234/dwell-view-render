@@ -142,7 +142,11 @@ export default function LandlordMaintenance() {
                         {new Date(req.created_at).toLocaleDateString()}
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}
+                      className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
+                    >
                       Respond
                     </Button>
                   </div>

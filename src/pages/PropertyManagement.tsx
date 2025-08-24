@@ -521,9 +521,9 @@ export default function PropertyManagement() {
                               {request.status.replace('_', ' ')}
                             </Badge>
                             <Button
-                              variant="outline"
                               size="sm"
                               onClick={() => navigate(`/dashboard/maintenance/${request.id}`)}
+                              className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
                             >
                               Respond
                             </Button>
