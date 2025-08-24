@@ -9,7 +9,7 @@ const TenantCard: React.FC = () => {
       className="max-w-xl mx-auto bg-white border border-[#e5e7eb] rounded-2xl shadow-sm"
     >
       <CardHeader className="space-y-2">
-        <CardTitle asChild>
+        <CardTitle>
           <h3 className="text-xl font-bold text-[hsl(var(--sr-ink))]">For Tenants</h3>
         </CardTitle>
         <p className="text-sm text-[hsl(var(--sr-muted))]">

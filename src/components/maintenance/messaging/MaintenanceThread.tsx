@@ -17,7 +17,7 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
   const markRead = useMarkMessageRead();
 
   useEffect(() => {
-    const unread = data?.pages.flatMap(p => p.messages.filter(m => !m.readAt)) || [];
+    const unread = data?.pages.flatMap(p => (p as any).messages?.filter((m: any) => !m.readAt)) || [];
     unread.forEach(m => markRead.mutate(m.id));
   }, [data, markRead]);
 
@@ -28,9 +28,9 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {data?.pages.map((page) => (
+        {data?.pages.map((page: any) => (
           <div key={page.cursor}>
-            {page.messages.map(msg => (
+            {page.messages?.map((msg: any) => (
               <MessageBubble key={msg.id} message={msg} currentUserId={user?.id || ''} />
             ))}
           </div>

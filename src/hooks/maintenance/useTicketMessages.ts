@@ -18,7 +18,8 @@ async function fetchMessages(ticketId: string, cursor?: string): Promise<Message
 export function useTicketMessages(ticketId: string) {
   return useInfiniteQuery({
     queryKey: ['maintenance-messages', ticketId],
-    queryFn: ({ pageParam }) => fetchMessages(ticketId, pageParam),
-    getNextPageParam: (lastPage) => lastPage.cursor || undefined,
+    queryFn: ({ pageParam }) => fetchMessages(ticketId, pageParam as string),
+    getNextPageParam: (lastPage: MessagesResponse) => lastPage.cursor || undefined,
+    initialPageParam: undefined as string | undefined,
   });
 }

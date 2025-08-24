@@ -32,6 +32,9 @@ const statusColors = {
 export default function TenantMaintenance() {
   const { user } = useAuth();
   const { recentMaintenance, loading, tenantProperty, refetch } = useTenantDashboard();
+  const navigate = useNavigate();
+  const { data: unreadCounts } = useUnreadCounts();
+  const { data: responses } = useTenantResponses();
 
   const { toast } = useToast();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -318,7 +321,7 @@ export default function TenantMaintenance() {
                       <Badge className={statusColors[request.status]}>
                         {request.status.replace('_', ' ')}
                       </Badge>
-                      {unread?.[request.id] > 0 && (<Badge variant="destructive">{unread[request.id]}</Badge>)}
+                      {unreadCounts?.[request.id] > 0 && (<Badge variant="destructive">{unreadCounts[request.id]}</Badge>)}
                     </div>
                   </div>
                 </CardHeader>

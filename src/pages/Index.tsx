@@ -10,7 +10,7 @@ import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, Home } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
 
