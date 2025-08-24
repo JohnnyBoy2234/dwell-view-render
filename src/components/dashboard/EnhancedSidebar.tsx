@@ -1,4 +1,4 @@
-import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench } from 'lucide-react';
+import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench, type LucideIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 interface SidebarItem {
   title: string;
   url: string;
-  icon: any;
+  icon: LucideIcon;
   badge?: number;
 }
 
@@ -55,16 +55,23 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const { isLandlord } = useAuth();
   const { unreadCount } = useUnreadMessages();
   const { data: maintenanceUnread } = useUnreadCounts();
-  const maintenanceTotal = maintenanceUnread ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0) : 0;
+  const maintenanceTotal = maintenanceUnread
+    ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0)
+    : 0;
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 
   const items = isLandlord ? landlordItems : tenantItems;
   
-  // Add unread count to messages
-  const itemsWithBadges = items.map(item => ({
+  // Add unread count to messages and maintenance requests
+  const itemsWithBadges = items.map((item) => ({
     ...item,
-    badge: item.title === 'Messages' ? unreadCount : undefined
+    badge:
+      item.title === 'Messages'
+        ? unreadCount
+        : item.title === 'Maintenance'
+        ? maintenanceTotal
+        : undefined,
   }));
 
   const currentPath = location.pathname;

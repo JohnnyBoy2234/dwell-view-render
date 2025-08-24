@@ -65,6 +65,7 @@ export function useCreateMaintenanceRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['maintenance-unread-counts'] });
       toast({
         title: "Request submitted",
         description: "Your maintenance request has been submitted successfully.",
@@ -98,6 +99,7 @@ export function useUpdateMaintenanceRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['maintenance-unread-counts'] });
       toast({
         title: "Updated",
         description: "Maintenance request has been updated.",
