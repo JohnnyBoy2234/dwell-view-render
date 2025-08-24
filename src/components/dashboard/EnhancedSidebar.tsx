@@ -2,6 +2,7 @@ import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Ca
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import {
   Sidebar,
   SidebarContent,
@@ -53,6 +54,8 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const navigate = useNavigate();
   const { isLandlord } = useAuth();
   const { unreadCount } = useUnreadMessages();
+  const { data: maintenanceUnread } = useUnreadCounts();
+  const maintenanceTotal = maintenanceUnread ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0) : 0;
   const { state } = useSidebar();
   const collapsed = state === 'collapsed';
 

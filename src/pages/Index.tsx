@@ -1,45 +1,4 @@
-import {
-  Button,
-} from "@/components/ui/button";
-
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import {
-  Input,
-} from "@/components/ui/input";
-
-import {
-  EnhancedAddressAutocomplete,
-} from "@/components/ui/enhanced-address-autocomplete";
-
-import {
-  Badge,
-} from "@/components/ui/badge";
-
-import {
-  Switch,
-} from "@/components/ui/switch";
-
-import {
-  Label,
-} from "@/components/ui/label";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import {
-  Slider,
-} from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
 
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import {MoreFiltersModal} from "@/components/search/MoreFiltersModal";
@@ -51,72 +10,15 @@ import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import {
-  Search,
-  Home,
-  Shield,
-  Users,
-  Star,
-  ArrowRight,
-  CheckCircle,
-  MessageSquare,
-  Calendar,
-  FileText,
-  DollarSign,
-  Mail,
-  Building2,
-} from "lucide-react";
+import { ArrowRight, CheckCircle, Home } from "lucide-react";
 
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import {
-  useState,
-} from "react";
-
-const tenantData = {
-  header: {
-    icon: <Home className="h-5 w-5 sm:h-6 sm:w-6 text-white" />,
-    title: "For Tenants",
-    subtitle: "Find Your Home",
-    description: "Discover your perfect rental home with complete transparency and direct landlord contact."
-  },
-  steps: [
-    { icon: <Search className="h-4 w-4 text-white" />, title: "Search & Discover", description: "Browse thousands of verified properties with detailed photos, descriptions, and transparent pricing.", badges: ["Advanced Filters", "Interactive Maps", "Verified Listings"] },
-    { icon: <MessageSquare className="h-4 w-4 text-white" />, title: "Connect Directly", description: "Message landlords directly, book viewings, and ask questions without any intermediaries.", badges: ["Direct Messaging", "Quick Responses", "No Agents"] },
-    { icon: <Calendar className="h-4 w-4 text-white" />, title: "Schedule Viewings", description: "Book convenient viewing times and get instant confirmations from landlords.", badges: ["Online Booking", "Flexible Times", "Instant Confirmation"] },
-    { icon: <FileText className="h-4 w-4 text-white" />, title: "Apply & Sign", description: "Submit applications online and sign lease agreements digitally for a seamless process.", badges: ["Digital Applications", "E-Signatures", "Fast Processing"] }
-  ],
-  cta: {
-    text: "Start Your Search",
-    link: "/properties"
-  }
-};
-
-const landlordData = {
-  header: {
-    icon: <Users className="h-5 w-5 sm:h-6 sm:w-6 text-white" />,
-    title: "For Landlords",
-    subtitle: "List Your Property",
-    description: "List your property and connect with quality tenants without paying agent commissions."
-  },
-  steps: [
-    { icon: <Building2 className="h-4 w-4 text-white" />, title: "List Your Property", description: "Create a professional listing in minutes with photos, details, and your rental price.", badges: ["Easy Setup", "Photo Upload", "Rich Descriptions"] },
-    { icon: <Mail className="h-4 w-4 text-white" />, title: "Book Viewings", description: "Chat directly with tenants and schedule viewings at times that suit you.", badges: ["Direct Contact", "Scheduling", "No Agents"] },
-    { icon: <Shield className="h-4 w-4 text-white" />, title: "Recieve Applications", description: "Get organized applications online, review instantly, and screen tenants with confidence.", badges: ["Easy Applications", "Screening", "Fast Processing"] },
-    { icon: <DollarSign className="h-4 w-4 text-white" />, title: "Manage & Collect", description: "Collect rent online with secure payments and track everything in one place.", badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"] }
-  ],
-  cta: {
-    text: "List Your Property",
-    link: "/list-property"
-  }
-};
+import { useState } from "react";
+import HowItWorks from "@/components/HowItWorks";
 
 const Index = () => {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
-  const [userType, setUserType] = useState('tenant'); // 'tenant' or 'landlord'
   const navigate = useNavigate();
 
   // Use the unified search filters hook
@@ -132,8 +34,6 @@ const Index = () => {
 
   // No results state for hero section
   const [showNoResults, setShowNoResults] = useState(false);
-
-  const isTenant = userType === 'tenant';
 
   // merge partial updates coming from Property24SearchBar
   const onFiltersChange = (patch: Partial<typeof filters>) => {
@@ -198,64 +98,6 @@ const Index = () => {
       featured: true,
     },
   ];
-
-  const activeData = isTenant ? tenantData : landlordData;
-
-  // Define icon colors based on user type
-  const iconColors = {
-    tenant: ['from-ocean-blue to-ocean-blue-light', 'from-earth-warm to-earth-warm-dark', 'from-success-green to-success-green-glow', 'from-purple-500 to-purple-600'],
-    landlord: ['from-success-green to-success-green-glow', 'from-earth-warm to-earth-warm-dark', 'from-ocean-blue to-ocean-blue-light', 'from-purple-500 to-purple-600']
-  };
-
-  const renderHowItWorksCard = (data: typeof tenantData, tenantView: boolean) => {
-    const colors = tenantView ? iconColors.tenant : iconColors.landlord;
-    return (
-      <Card className={`shadow-strong overflow-hidden transition-all duration-500 animate-fade-in ${tenantView ? 'border-ocean-blue/20 bg-gradient-to-br from-white via-white to-ocean-blue/5' : 'border-success-green/20 bg-gradient-to-br from-white via-white to-success-green/5'}`}>
-        <CardHeader className={`pb-6 ${tenantView ? 'bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/5' : 'bg-gradient-to-r from-success-green/10 to-success-green/5'}`}>
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center shadow-soft ${tenantView ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-light' : 'bg-gradient-to-br from-success-green to-success-green-glow'}`}>
-              {data.header.icon}
-            </div>
-            <div>
-              <CardTitle className={`text-xl sm:text-2xl ${tenantView ? 'text-ocean-blue-dark' : 'text-success-green-dark'}`}>{data.header.title}</CardTitle>
-              <Badge variant="outline" className="mt-1 text-xs">{data.header.subtitle}</Badge>
-            </div>
-          </div>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            {data.header.description}
-          </p>
-        </CardHeader>
-
-        <CardContent className="p-6 sm:p-8 space-y-6">
-          {data.steps.map((step, index) => (
-            <div className="flex gap-4" key={index}>
-              <div className={`w-8 h-8 bg-gradient-to-br ${colors[index]} rounded-full flex items-center justify-center flex-shrink-0 shadow-soft`}>
-                {step.icon}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg sm:text-xl mb-3">{step.title}</h3>
-                <p className="text-base sm:text-lg text-muted-foreground mb-4 leading-relaxed">{step.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {step.badges.map((badge, i) => (
-                    <Badge variant="secondary" className="text-sm" key={i}>{badge}</Badge>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <div className="pt-4 border-t">
-            <Link to={data.cta.link}>
-              <Button className={`w-full text-white shadow-soft ${tenantView ? 'bg-ocean-blue hover:bg-ocean-blue-dark' : 'bg-success-green hover:bg-success-green-dark'}`}>
-                {data.cta.text}
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -379,56 +221,7 @@ const Index = () => {
       <BenefitsSlider />
 
       {/* How It Works Section */}
-    <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/20 to-ocean-blue/5">
-      <section className="py-16 sm:py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-2xl sm:text-3xl lg:text-5xl font-bold mb-6 sm:mb-8 bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
-              How SwiftRent Works
-            </h1>
-            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-10 sm:mb-16 leading-relaxed">
-              Connecting landlords and tenants directly with no agents, zero commission, and full control
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Toggle Switch Section - mobile only */}
-      <section className="pb-12 md:hidden">
-        <div className="flex items-center justify-center space-x-4">
-          <Label htmlFor="user-type-toggle" className={`font-medium transition-colors ${isTenant ? 'text-primary' : 'text-muted-foreground'}`}>
-            For Tenants
-          </Label>
-          <Switch
-            id="user-type-toggle"
-            checked={!isTenant}
-            onCheckedChange={(checked) => setUserType(checked ? 'landlord' : 'tenant')}
-            aria-label="Toggle between tenant and landlord view"
-          />
-          <Label htmlFor="user-type-toggle" className={`font-medium transition-colors ${!isTenant ? 'text-primary' : 'text-muted-foreground'}`}>
-            For Landlords
-          </Label>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="pb-8 sm:pb-12 lg:pb-16">
-        <div className="max-w-3xl md:max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative">
-            {/* Mobile view - single card */}
-            <div className="md:hidden">
-              {renderHowItWorksCard(activeData, isTenant)}
-            </div>
-
-            {/* Desktop view - two cards side by side */}
-            <div className="hidden md:grid md:grid-cols-2 md:gap-8">
-              {renderHowItWorksCard(tenantData, true)}
-              {renderHowItWorksCard(landlordData, false)}
-            </div>
-          </div>
-        </div>
-      </section>
-      </div>
+      <HowItWorks />
 
       {/* Featured Properties */}
       <section className="py-16 bg-background">

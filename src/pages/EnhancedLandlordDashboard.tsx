@@ -313,7 +313,7 @@ export default function EnhancedLandlordDashboard() {
             className="hover-scale cursor-pointer transition-all duration-300 shadow-soft hover:shadow-medium"
             onClick={() => navigate(`/manage-property/${property.id}`)}
           >
-            <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
+            <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-ocean-blue/[0.1] to-success-green/[0.1]">
               {property.images.length > 0 ? (
                 <img
                   src={property.images[0]}

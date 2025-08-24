@@ -155,7 +155,7 @@ export default function EnhancedTenantDashboard() {
         </div>
 
         {/* Quick Actions Section */}
-        <div className="mt-12 p-6 bg-gradient-to-r from-ocean-blue/10 to-success-green/10 rounded-xl border border-ocean-blue/20">
+        <div className="mt-12 p-6 bg-gradient-to-r from-ocean-blue/[0.1] to-success-green/[0.1] rounded-xl border border-ocean-blue/[0.2]">
           <h3 className="text-lg font-semibold text-ocean-blue mb-4">Quick Actions</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button 

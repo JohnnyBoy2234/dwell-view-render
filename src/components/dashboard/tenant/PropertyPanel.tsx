@@ -51,7 +51,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Property Image */}
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-ocean-blue/[0.1] to-success-green/[0.1]">
           {tenantProperty.images.length > 0 ? (
             <img
               src={tenantProperty.images[0]}

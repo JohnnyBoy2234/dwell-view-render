@@ -5,6 +5,7 @@ import Properties from '@/pages/Properties';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
 
+
 // Placeholder components for missing landlord pages
 function LandlordProperties() {
   return (
@@ -55,6 +56,7 @@ export default function LandlordDashboardRoutes() {
           <LandlordMaintenance />
         </EnhancedDashboardLayout>
       } />
+
     </Routes>
   );
 }
