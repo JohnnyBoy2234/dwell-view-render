@@ -5,7 +5,11 @@ import type { MaintenanceMessage, TicketUnreadSummary } from '../src/types/maint
 const app = new Hono();
 const messages: MaintenanceMessage[] = [];
 
-const bodySchema = z.object({ body: z.string().min(1).max(5000) });
+const bodySchema = z.object({
+  body: z.string().min(1).max(5000),
+  senderUserId: z.string().optional(),
+  senderRole: z.enum(['TENANT', 'LANDLORD', 'CONTRACTOR']).optional(),
+});
 
 app.get('/api/maintenance/tickets/:id/messages', (c) => {
   const ticketId = c.req.param('id');
@@ -22,17 +26,20 @@ app.get('/api/maintenance/tickets/:id/messages', (c) => {
 app.post('/api/maintenance/tickets/:id/messages', async (c) => {
   const ticketId = c.req.param('id');
   const form = await c.req.parseBody();
-  const result = bodySchema.safeParse({ body: form.body });
+  const result = bodySchema.safeParse(form);
   if (!result.success) {
     return c.json({ error: 'Invalid body' }, 400);
   }
+
+  const { body, senderUserId = 'anonymous', senderRole = 'TENANT' } = result.data;
+
   const msg: MaintenanceMessage = {
     id: Math.random().toString(36).slice(2),
     ticketId,
-    senderUserId: 'demo',
-    senderRole: 'TENANT',
-    recipientUserId: 'demo-recipient',
-    body: result.data.body as string,
+    senderUserId,
+    senderRole,
+    recipientUserId: senderRole === 'LANDLORD' ? 'tenant' : 'landlord',
+    body,
     createdAt: new Date().toISOString(),
   };
   messages.push(msg);
