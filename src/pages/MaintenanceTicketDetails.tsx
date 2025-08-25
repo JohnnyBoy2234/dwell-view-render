@@ -46,7 +46,7 @@ export default function MaintenanceTicketDetails() {
   const [contractorContact, setContractorContact] = useState('');
 
   const { data: ticket, isLoading, error } = useQuery({
-    queryKey: ['maintenance-request', ticketId, isLandlord],
+    queryKey: ['maintenance-request', ticketId],
     queryFn: async () => {
       if (!ticketId || !user) throw new Error('No ticket ID or user');
 
@@ -61,7 +61,6 @@ export default function MaintenanceTicketDetails() {
           )
         `)
         .eq('id', ticketId)
-        .eq(isLandlord ? 'landlord_id' : 'tenant_id', user.id)
         .maybeSingle();
 
       if (error) throw error;
