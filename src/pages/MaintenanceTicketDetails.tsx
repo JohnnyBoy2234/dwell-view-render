@@ -49,7 +49,7 @@ export default function MaintenanceTicketDetails() {
     queryKey: ['maintenance-request', ticketId],
     queryFn: async () => {
       if (!ticketId || !user) throw new Error('No ticket ID or user');
-      
+
       const { data, error } = await supabase
         .from('maintenance_requests')
         .select(`
@@ -61,10 +61,11 @@ export default function MaintenanceTicketDetails() {
           )
         `)
         .eq('id', ticketId)
-        .single();
-      
+        .eq(isLandlord ? 'landlord_id' : 'tenant_id', user.id)
+        .maybeSingle();
+
       if (error) throw error;
-      return data as MaintenanceRequest & { properties: { title?: string; location?: string; landlord_id?: string } };
+      return data as MaintenanceRequest & { properties: { title?: string; location?: string; landlord_id?: string } } | null;
     },
     enabled: !!ticketId && !!user,
   });
