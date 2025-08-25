@@ -1,15 +1,21 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-
-async function markRead(id: string) {
-  await fetch(`/api/maintenance/messages/${id}/read`, { method: 'PATCH' });
-}
+import { supabase } from '@/integrations/supabase/client';
 
 export function useMarkMessageRead() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: markRead,
-    onSuccess: (_data, id) => {
+    mutationFn: async (messageId: string) => {
+      const { error } = await supabase
+        .from('maintenance_messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('id', messageId);
+      
+      if (error) throw error;
+      return { success: true };
+    },
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['maintenance-messages'] });
+      qc.invalidateQueries({ queryKey: ['maintenance-unread-counts'] });
     },
   });
 }

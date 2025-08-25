@@ -41,13 +41,7 @@ export interface MaintenanceMessage {
   senderRole: Role;
   recipientUserId: string;
   body: string;
-  attachments?: Array<{
-    id: string;
-    url: string;
-    fileName: string;
-    mimeType: string;
-    sizeBytes: number;
-  }>;
+  attachments?: string[];
   createdAt: string;
   readAt?: string;
 }
