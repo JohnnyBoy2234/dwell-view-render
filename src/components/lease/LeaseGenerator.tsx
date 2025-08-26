@@ -6,6 +6,7 @@ import { FileText, Download, Signature, Clock, CheckCircle } from "lucide-react"
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { currentSigningProviderName } from "@/lib/signing";
 
 interface Tenancy {
   id: string;
@@ -83,16 +84,22 @@ export const LeaseGenerator = ({
   const generateLease = async () => {
     setGenerating(true);
     try {
-      // Call edge function to generate PDF lease
-      const { data, error } = await supabase.functions.invoke('generate-lease', {
-        body: { tenancyId: tenancy.id }
-      });
-
-      // Edge function will update lease_document_path and set status to awaiting_tenant_signature
-      // No direct status update here to avoid race conditions
-      if (error) throw error;
-
-      toast.success("Lease document generated successfully");
+      if (currentSigningProviderName === 'docusign') {
+        // Create DocuSign envelope for this tenancy
+        const { data, error } = await supabase.functions.invoke('create-docusign-envelope', {
+          body: { tenancyId: tenancy.id }
+        });
+        if (error) throw error;
+        if ((data as any)?.error) throw new Error((data as any).error);
+        toast.success("DocuSign envelope created");
+      } else {
+        // Legacy: generate PDF lease
+        const { error } = await supabase.functions.invoke('generate-lease', {
+          body: { tenancyId: tenancy.id }
+        });
+        if (error) throw error;
+        toast.success("Lease document generated successfully");
+      }
       onLeaseGenerated?.();
     } catch (error) {
       console.error('Error generating lease:', error);
@@ -254,7 +261,26 @@ export const LeaseGenerator = ({
 
           {canSignForUser && !isCompleted && (
             <Button 
-              onClick={onSigningRequested}
+              onClick={async () => {
+                try {
+                  if (currentSigningProviderName === 'docusign') {
+                    const role = isTenant ? 'tenant' : 'landlord';
+                    const { data, error } = await supabase.functions.invoke('get-docusign-recipient-view', {
+                      body: { tenancyId: tenancy.id, role }
+                    });
+                    if (error) throw error;
+                    if ((data as any)?.error) throw new Error((data as any).error);
+                    const url = (data as any)?.url;
+                    if (!url) throw new Error('No signing URL received');
+                    window.open(url, '_blank');
+                  } else {
+                    onSigningRequested?.();
+                  }
+                } catch (err) {
+                  console.error('Error initiating signing:', err);
+                  toast.error('Failed to initiate signing');
+                }
+              }}
               className="flex items-center gap-2"
             >
               <Signature className="h-4 w-4" />
