@@ -20,21 +20,21 @@ export function ManageTenantsTab({ property, activeTenancy }: ManageTenantsTabPr
     if (activeTenancy) {
       setLeaseDialogOpen(true);
     } else {
-      // Navigate to create tenancy first
-      navigate(`/dashboard/property/${property.id}/create-tenancy`);
+      // Navigate to the leases tab for this property
+      navigate(`/manage-property/${property.id}?tab=leases`);
     }
   };
 
   const handleViewPayments = () => {
-    navigate(`/dashboard/property/${property.id}/payments`);
+    navigate(`/manage-property/${property.id}?tab=payments`);
   };
 
   const handleViewMaintenance = () => {
-    navigate(`/dashboard/property/${property.id}/maintenance`);
+    navigate(`/manage-property/${property.id}?tab=maintenance`);
   };
 
   const handleViewDocuments = () => {
-    navigate(`/dashboard/property/${property.id}/documents`);
+    navigate(`/manage-property/${property.id}?tab=leases`);
   };
 
   const getLeaseStatusBadge = () => {

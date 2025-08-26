@@ -13,11 +13,11 @@ export function FindTenantsTab({ property, inquiriesCount, applicationsCount }: 
   };
 
   const handleViewInquiries = () => {
-    navigate(`/dashboard/property/${property.id}/inquiries`);
+    navigate(`/manage-property/${property.id}?tab=viewings`);
   };
 
   const handleViewApplications = () => {
-    navigate(`/dashboard/property/${property.id}/applications`);
+    navigate(`/manage-property/${property.id}?tab=applications`);
   };
 
   const handleViewMessages = () => {
