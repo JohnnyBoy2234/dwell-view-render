@@ -27,16 +27,13 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
         <div className="whitespace-pre-wrap break-words" dangerouslySetInnerHTML={{ __html: message.body }} />
         {message.attachments && message.attachments.length > 0 && (
           <div className="mt-2 space-y-1">
-            {message.attachments.map(att => (
-              <a
-                key={att.id}
-                href={att.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block text-xs underline"
+            {message.attachments.map((fileName, index) => (
+              <div
+                key={index}
+                className="block text-xs text-muted-foreground"
               >
-                {att.fileName}
-              </a>
+                📎 {fileName}
+              </div>
             ))}
           </div>
         )}

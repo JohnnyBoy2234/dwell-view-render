@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 import { Wrench, Building } from 'lucide-react';
 
 interface MaintenanceRequest {
@@ -25,12 +27,13 @@ interface SupabaseMaintenanceRequest {
   status: 'submitted' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high';
   created_at: string;
-  properties: { title?: string } | null;
+  property_id: string;
 }
 
 export default function LandlordMaintenance() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,18 +48,32 @@ export default function LandlordMaintenance() {
       setLoading(true);
       const { data, error } = await supabase
         .from('maintenance_requests')
-        .select('id, title, description, status, priority, created_at, properties(title)')
+        .select('id, title, description, status, priority, created_at, property_id')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      const transformed = ((data as SupabaseMaintenanceRequest[] | null) ?? []).map((req) => ({
+
+      const reqs = (data as SupabaseMaintenanceRequest[] | null) ?? [];
+      const propertyIds = reqs.map(r => r.property_id);
+      let propertiesMap: Record<string, string> = {};
+      if (propertyIds.length > 0) {
+        const { data: propsData } = await supabase
+          .from('properties')
+          .select('id, title')
+          .in('id', propertyIds);
+        propertiesMap = Object.fromEntries(
+          ((propsData as { id: string; title: string }[] | null) || []).map(p => [p.id, p.title])
+        );
+      }
+
+      const transformed = reqs.map((req) => ({
         id: req.id,
         title: req.title,
         description: req.description,
         status: req.status,
         priority: req.priority,
         created_at: req.created_at,
-        property_title: req.properties?.title || 'Unknown Property',
+        property_title: propertiesMap[req.property_id] || 'Unknown Property',
       }));
       setRequests(transformed);
     } catch (error) {
@@ -139,6 +156,13 @@ export default function LandlordMaintenance() {
                         {new Date(req.created_at).toLocaleDateString()}
                       </div>
                     </div>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}
+                      className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
+                    >
+                      Respond
+                    </Button>
                   </div>
                   <div className="flex items-center gap-2">
                     <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>

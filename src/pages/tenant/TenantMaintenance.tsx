@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@/hooks/maintenance/useMaintenanceRequests';
 import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import { useTenantResponses } from '@/hooks/maintenance/useTenantResponses';
 import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera } from 'lucide-react';
@@ -14,12 +15,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import type { Priority, Category } from '@/types/maintenance';
 
 const priorityColors = {
   low: 'bg-success-green text-white',
   medium: 'bg-earth-warm text-white',
   high: 'bg-destructive text-white',
+  emergency: 'bg-red-600 text-white',
 };
 
 const statusColors = {
@@ -31,76 +33,56 @@ const statusColors = {
 
 export default function TenantMaintenance() {
   const { user } = useAuth();
-  const { recentMaintenance, loading, tenantProperty, refetch } = useTenantDashboard();
-
+  const { tenantProperty } = useTenantDashboard();
+  const navigate = useNavigate();
+  const { data: unreadCounts } = useUnreadCounts();
+  const { data: responses } = useTenantResponses();
+  const { data: maintenanceRequests, isLoading } = useMaintenanceRequests();
+  const createMaintenance = useCreateMaintenanceRequest();
   const { toast } = useToast();
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [newRequest, setNewRequest] = useState({
-    title: '',
-    description: '',
-    priority: 'medium',
-    category: '',
-  });
 
-  const handleSubmitRequest = async () => {
-    if (!newRequest.title || !newRequest.description || !newRequest.category) {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [priority, setPriority] = useState<Priority>('medium');
+  const [category, setCategory] = useState<Category>('general');
+  const [photos, setPhotos] = useState<FileList | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!tenantProperty) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
+        title: "Error",
+        description: "No property found. Please contact support.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      if (!user || !tenantProperty) {
-        throw new Error('Missing tenancy information');
-      }
-
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from('tenancies')
-        .select('landlord_id')
-        .eq('tenant_id', user.id)
-        .eq('property_id', tenantProperty.id)
-        .eq('status', 'active')
-        .single();
-
-      if (tenancyError) throw tenancyError;
-
-      const { error } = await supabase
-        .from('maintenance_requests')
-        .insert({
-          title: newRequest.title,
-          description: newRequest.description,
-          priority: newRequest.priority,
-          category: newRequest.category,
-          status: 'submitted',
-          tenant_id: user.id,
-          landlord_id: tenancy?.landlord_id,
-          property_id: tenantProperty.id,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Request Submitted",
-        description: "Your maintenance request has been submitted successfully.",
+      await createMaintenance.mutateAsync({
+        property_id: tenantProperty.id,
+        title,
+        description,
+        priority,
+        category,
+        images: [], // TODO: Handle photo uploads
       });
 
+      // Reset form
+      setTitle('');
+      setDescription('');
+      setPriority('medium');
+      setCategory('general');
+      setPhotos(null);
       setIsCreateDialogOpen(false);
-      setNewRequest({ title: '', description: '', priority: 'medium', category: '' });
-      refetch();
     } catch (error) {
-      console.error('Error submitting maintenance request:', error);
-      toast({
-        title: 'Submission Failed',
-        description: 'Unable to submit maintenance request. Please try again.',
-        variant: 'destructive',
-      });
+      console.error('Error creating maintenance request:', error);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="h-8 bg-muted animate-pulse rounded"></div>
@@ -138,87 +120,85 @@ export default function TenantMaintenance() {
                 Describe the issue you're experiencing and we'll get it resolved as soon as possible.
               </DialogDescription>
             </DialogHeader>
-            <div className="space-y-4">
-              <div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
                 <Label htmlFor="title">Issue Title *</Label>
                 <Input
                   id="title"
                   placeholder="e.g., Leaky faucet in kitchen"
-                  value={newRequest.title}
-                  onChange={(e) => setNewRequest(prev => ({ ...prev, title: e.target.value }))}
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
                 />
               </div>
               
-              <div>
-                <Label htmlFor="category">Category *</Label>
-                <Select 
-                  value={newRequest.category} 
-                  onValueChange={(value) => setNewRequest(prev => ({ ...prev, category: value }))}
-                >
+              <div className="space-y-2">
+                <Label htmlFor="description">Description *</Label>
+                <Textarea
+                  id="description"
+                  placeholder="Please provide detailed information about the issue..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priority</Label>
+                <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="emergency">Emergency</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="plumbing">Plumbing</SelectItem>
                     <SelectItem value="electrical">Electrical</SelectItem>
-                    <SelectItem value="hvac">Heating/Cooling</SelectItem>
                     <SelectItem value="appliances">Appliances</SelectItem>
-                    <SelectItem value="general">General Repairs</SelectItem>
-                    <SelectItem value="cleaning">Cleaning</SelectItem>
-                    <SelectItem value="security">Security</SelectItem>
+                    <SelectItem value="pest">Pest Control</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div>
-                <Label htmlFor="priority">Priority</Label>
-                <Select 
-                  value={newRequest.priority} 
-                  onValueChange={(value) => setNewRequest(prev => ({ ...prev, priority: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low - Can wait a few days</SelectItem>
-                    <SelectItem value="medium">Medium - Should be fixed soon</SelectItem>
-                    <SelectItem value="high">High - Urgent repair needed</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Please provide detailed information about the issue, including when it started and any relevant details..."
-                  value={newRequest.description}
-                  onChange={(e) => setNewRequest(prev => ({ ...prev, description: e.target.value }))}
-                  rows={4}
+
+              <div className="space-y-2">
+                <Label htmlFor="photos">Photos (Optional)</Label>
+                <Input
+                  id="photos"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => setPhotos(e.target.files)}
                 />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Camera className="h-4 w-4" />
+                  <span>Upload photos to help us understand the issue better</span>
+                </div>
               </div>
-              
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Camera className="h-4 w-4" />
-                <span>Tip: Take photos to help us understand the issue better</span>
-              </div>
-              
-              <div className="flex gap-2 pt-4">
-                <Button 
-                  onClick={handleSubmitRequest}
-                  className="flex-1 bg-ocean-blue hover:bg-ocean-blue-dark"
-                >
-                  Submit Request
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsCreateDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-ocean-blue hover:bg-ocean-blue-dark"
+                disabled={createMaintenance.isPending}
+              >
+                {createMaintenance.isPending ? 'Submitting...' : 'Submit Request'}
+              </Button>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
@@ -230,8 +210,10 @@ export default function TenantMaintenance() {
             <div className="flex items-center gap-2">
               <Clock className="h-5 w-5 text-earth-warm" />
               <div>
-                <p className="text-sm text-muted-foreground">Pending</p>
-                <p className="text-xl font-bold">2</p>
+                <p className="text-sm text-muted-foreground">Submitted</p>
+                <p className="text-xl font-bold">
+                  {maintenanceRequests?.filter(r => r.status === 'submitted').length || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -242,7 +224,9 @@ export default function TenantMaintenance() {
               <Wrench className="h-5 w-5 text-ocean-blue" />
               <div>
                 <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-xl font-bold">1</p>
+                <p className="text-xl font-bold">
+                  {maintenanceRequests?.filter(r => r.status === 'in_progress').length || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -253,7 +237,9 @@ export default function TenantMaintenance() {
               <CheckCircle className="h-5 w-5 text-success-green" />
               <div>
                 <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-xl font-bold">8</p>
+                <p className="text-xl font-bold">
+                  {maintenanceRequests?.filter(r => r.status === 'completed').length || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -264,7 +250,9 @@ export default function TenantMaintenance() {
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <div>
                 <p className="text-sm text-muted-foreground">High Priority</p>
-                <p className="text-xl font-bold">0</p>
+                <p className="text-xl font-bold">
+                  {maintenanceRequests?.filter(r => r.priority === 'high' || r.priority === 'emergency').length || 0}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -282,7 +270,13 @@ export default function TenantMaintenance() {
       {/* Maintenance Requests List */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Your Requests</h2>
-        {recentMaintenance.length === 0 ? (
+        {isLoading ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <div className="animate-pulse">Loading your maintenance requests...</div>
+            </CardContent>
+          </Card>
+        ) : !maintenanceRequests || maintenanceRequests.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center">
               <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -301,8 +295,8 @@ export default function TenantMaintenance() {
           </Card>
         ) : (
           <div className="grid gap-4">
-            {recentMaintenance.map((request) => (
-              <Card key={request.id} className="hover:shadow-medium transition-all duration-200 cursor-pointer" onClick={()=>navigate(`/tenant-dashboard/maintenance/${request.id}`)}>
+            {maintenanceRequests.map((request) => (
+              <Card key={request.id} className="hover:shadow-medium transition-all duration-200 cursor-pointer" onClick={()=>navigate(`/maintenance/${request.id}`)}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div>
@@ -313,12 +307,11 @@ export default function TenantMaintenance() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge className={priorityColors[request.priority]}>
-                        {request.priority}
+                        {request.priority.toUpperCase()}
                       </Badge>
                       <Badge className={statusColors[request.status]}>
-                        {request.status.replace('_', ' ')}
+                        {request.status.replace('_', ' ').toUpperCase()}
                       </Badge>
-                      {unread?.[request.id] > 0 && (<Badge variant="destructive">{unread[request.id]}</Badge>)}
                     </div>
                   </div>
                 </CardHeader>
@@ -328,6 +321,9 @@ export default function TenantMaintenance() {
                       <Wrench className="h-4 w-4" />
                       <span>Request #{request.id.slice(0, 8)}</span>
                     </div>
+                    <span className="text-sm text-muted-foreground capitalize">
+                      {request.category}
+                    </span>
                   </div>
                 </CardContent>
               </Card>

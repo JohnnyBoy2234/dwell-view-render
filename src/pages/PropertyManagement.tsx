@@ -16,7 +16,8 @@ import {
   Users, 
   FileText, 
   CreditCard, 
-  Wrench, 
+  Wrench,
+  Package,
   ArrowLeft,
   ExternalLink,
   Mail,
@@ -32,6 +33,7 @@ import { LeaseSigningDialog } from '@/components/lease/LeaseSigningDialog';
 import { LeaseCreationWizard } from '@/components/lease/LeaseCreationWizard';
 import { ApplicationsTab } from '@/components/property/ApplicationsTab';
 import { PaymentsTab } from '@/components/property/PaymentsTab';
+import { InventoryTab } from '@/components/property/InventoryTab';
 import { ViewingSlotsManager } from '@/components/viewing/ViewingSlotsManager';
 
 interface MaintenanceRequest {
@@ -253,13 +255,17 @@ export default function PropertyManagement() {
                 <Wrench className="h-3 w-3" />
                 Maintenance
               </TabsTrigger>
+              <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+                <Package className="h-3 w-3" />
+                Inventory
+              </TabsTrigger>
             </div>
           </TabsList>
         </div>
 
         {/* Desktop: Grid layout */}
         <div className="hidden md:block">
-          <TabsList className="grid w-full grid-cols-7 bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft h-12">
+          <TabsList className="grid w-full grid-cols-8 bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft h-12">
             <TabsTrigger value="overview" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
               <Home className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
@@ -287,6 +293,10 @@ export default function PropertyManagement() {
             <TabsTrigger value="maintenance" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
               <Wrench className="h-4 w-4" />
               <span className="hidden lg:inline">Maintenance</span>
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <Package className="h-4 w-4" />
+              <span className="hidden lg:inline">Inventory</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -516,9 +526,18 @@ export default function PropertyManagement() {
                               </Badge>
                             </div>
                           </div>
-                          <Badge variant="outline">
-                            {request.status.replace('_', ' ')}
-                          </Badge>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge variant="outline">
+                              {request.status.replace('_', ' ')}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              onClick={() => navigate(`/dashboard/maintenance/${request.id}`)}
+                              className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
+                            >
+                              Respond
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -527,6 +546,11 @@ export default function PropertyManagement() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Inventory Tab */}
+        <TabsContent value="inventory" className="space-y-6">
+          <InventoryTab propertyId={property.id} />
         </TabsContent>
       </Tabs>
 

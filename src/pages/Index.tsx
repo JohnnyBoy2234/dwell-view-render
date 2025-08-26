@@ -10,7 +10,7 @@ import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import { ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight, CheckCircle, Home } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -217,6 +217,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Benefits Slider Section */}
+      <BenefitsSlider />
+
       {/* How It Works Section */}
       <HowItWorks />
 
@@ -247,7 +250,6 @@ const Index = () => {
         </div>
       </section>
 
-      <BenefitsSlider />
 
       {/* Stats Section */}
       <section className="py-16 bg-background">
