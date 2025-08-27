@@ -259,7 +259,7 @@ export default function EnhancedLandlordDashboard() {
         <MetricsGrid metrics={metrics} loading={metricsLoading} />
 
         {/* Properties Section */}
-        <Card className="shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-earth-light/20">
+        <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl text-ocean-blue">Your Properties</CardTitle>
@@ -273,9 +273,8 @@ export default function EnhancedLandlordDashboard() {
             {renderPropertiesGrid()}
           </CardContent>
         </Card>
-
         {/* Tenants Section */}
-        <Card className="shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-earth-light/20">
+        <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
           <CardHeader>
             <CardTitle className="text-xl text-ocean-blue flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -286,6 +285,7 @@ export default function EnhancedLandlordDashboard() {
             {renderTenantsGrid()}
           </CardContent>
         </Card>
+
       </div>
     );
   };
@@ -310,7 +310,7 @@ export default function EnhancedLandlordDashboard() {
         {properties.map((property) => (
           <Card 
             key={property.id}
-            className="hover-scale cursor-pointer transition-all duration-300 shadow-soft hover:shadow-medium"
+            className="cursor-pointer rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-pop motion-safe:focus-within:-translate-y-0.5 motion-safe:focus-within:shadow-pop"
             onClick={() => navigate(`/manage-property/${property.id}`)}
           >
             <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-ocean-blue/[0.1] to-success-green/[0.1]">
@@ -391,7 +391,7 @@ export default function EnhancedLandlordDashboard() {
         {tenants.map((tenant) => (
           <div 
             key={tenant.id}
-            className="flex items-center justify-between p-4 bg-gradient-to-r from-background to-earth-light/40 rounded-lg hover:shadow-soft transition-all duration-300"
+            className="flex items-center justify-between p-4 rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-pop"
           >
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-gradient-to-br from-success-green to-success-green-glow rounded-full flex items-center justify-center">
