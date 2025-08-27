@@ -538,7 +538,7 @@ export default function PropertyManagement() {
                             </Badge>
                             <Button
                               size="sm"
-                              onClick={() => navigate(`/dashboard/maintenance/${request.id}`)}
+                              onClick={() => navigate(`/maintenance/${request.id}`)}
                               className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
                             >
                               Respond
