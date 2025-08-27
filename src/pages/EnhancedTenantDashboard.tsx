@@ -58,7 +58,7 @@ export default function EnhancedTenantDashboard() {
     switch (currentTab) {
       case '/tenant-messages':
         // Navigate to the actual messages page instead of showing MessagesTab
-        navigate('/tenant-messages');
+        navigate('/tenant-dashboard/messages');
         return null;
       case '/properties':
         return (

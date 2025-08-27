@@ -13,22 +13,27 @@ export function StatCard({ label, value, icon, className, subText }: StatCardPro
   return (
     <div
       className={cn(
-        "rounded-2xl ring-1 ring-black/5 bg-white shadow-soft p-4",
-        "transition hover:-translate-y-[1px] hover:shadow-lg focus-within:ring-2 focus-within:ring-brand-blue/40",
+        // container
+        "rounded-2xl p-4 shadow-soft ring-1 ring-ocean-blue/10",
+        // subtle brand gradient background
+        "bg-gradient-to-br from-ocean-blue/[0.04] via-white to-success-green/[0.04]",
+        // motion and focus
+        "transition hover:-translate-y-[1px] hover:shadow-lg focus-within:ring-2 focus-within:ring-ocean-blue/30",
         className
       )}
       role="group"
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-medium text-brand-gray-700">{label}</div>
-          <div className="mt-1 text-xl font-semibold text-brand-gray-900">{value}</div>
+          <div className="text-sm font-medium text-brand.gray700">{label}</div>
+          <div className="mt-1 text-xl font-semibold text-brand.gray900">{value}</div>
           {subText && (
-            <div className="mt-1 text-xs text-brand-gray-500">{subText}</div>
+            <div className="mt-1 text-xs text-brand.gray500">{subText}</div>
           )}
         </div>
         {icon && (
-          <div className="h-10 w-10 shrink-0 rounded-xl bg-brand-blue/10 text-brand-blue grid place-content-center">
+          <div className="h-10 w-10 shrink-0 rounded-xl grid place-content-center \
+            bg-gradient-to-br from-ocean-blue/15 to-success-green/15 text-ocean-blue">
             {icon}
           </div>
         )}
