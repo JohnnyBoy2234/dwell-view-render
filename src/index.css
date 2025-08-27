@@ -95,6 +95,18 @@ All colors MUST be HSL.
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Brand hex tokens and gradient for glass UI (kept minimal, non-breaking) */
+    --brand-blue-600: #2563EB;
+    --brand-blue-700: #1D4ED8;
+    --brand-green-500: #10B981;
+    --brand-green-600: #059669;
+    --brand-gray-900: #0F172A;
+    --brand-gray-700: #334155;
+    --brand-gray-500: #64748B;
+    --brand-gray-200: #E5E7EB;
+    --brand-white: #FFFFFF;
+    --brand-gradient: linear-gradient(90deg,var(--brand-blue-600) 0%,var(--brand-green-500) 100%);
   }
 
   .dark {

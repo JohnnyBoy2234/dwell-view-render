@@ -13,7 +13,10 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, MessageSquare, Building, FileText, Settings, User } from 'lucide-react';
+import { Home, MessageSquare, Building, FileText, Settings, User, Calendar } from 'lucide-react';
+import GlassCard from '@/components/ui/GlassCard';
+import { StatCard } from '@/components/ui/StatCard';
+import { SectionHeader } from '@/components/ui/SectionHeader';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -107,10 +110,15 @@ export default function EnhancedTenantDashboard() {
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 relative">
+          {/* bg blobs */}
+          <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
+            <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
+            <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gradient-to-tr from-brand.green to-brand.blue blur-3xl opacity-10"></div>
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-muted animate-pulse h-64 rounded-lg"></div>
+              <div key={i} className="rounded-xl bg-white/50 backdrop-blur-sm animate-pulse h-40 shadow-soft"></div>
             ))}
           </div>
         </div>
@@ -118,14 +126,43 @@ export default function EnhancedTenantDashboard() {
     }
 
     return (
-      <div className="space-y-6">
-        <div className="mb-8">
+      <div className="space-y-6 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* bg blobs */}
+        <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
+          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
+          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gradient-to-tr from-brand.green to-brand.blue blur-3xl opacity-10"></div>
+        </div>
+        <div className="mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold text-ocean-blue mb-2">
             Welcome back!
           </h2>
           <p className="text-muted-foreground">
             Here's what's happening with your rental
           </p>
+        </div>
+
+        {/* KPI Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard
+            label="Unread Messages"
+            value={unreadCount ?? 0}
+            icon={<MessageSquare className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Upcoming Viewings"
+            value={(upcomingViewings?.length ?? 0).toString()}
+            icon={<Calendar className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Maintenance"
+            value={(recentMaintenance?.length ?? 0).toString()}
+            icon={<Settings className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Rent"
+            value={rentDue ? 'Due' : 'Clear'}
+            icon={<FileText className="h-5 w-5" />}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -155,38 +192,36 @@ export default function EnhancedTenantDashboard() {
         </div>
 
         {/* Quick Actions Section */}
-        <div className="mt-12 p-6 bg-gradient-to-r from-ocean-blue/[0.1] to-success-green/[0.1] rounded-xl border border-ocean-blue/[0.2]">
-          <h3 className="text-lg font-semibold text-ocean-blue mb-4">Quick Actions</h3>
+        <div className="mt-12">
+          <SectionHeader title="Quick Actions" className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <button 
-              onClick={() => navigate('/properties')}
-              className="p-4 bg-white rounded-lg shadow-soft hover:shadow-medium transition-all duration-300 hover-scale text-left group"
-            >
-              <div className="text-ocean-blue group-hover:text-ocean-blue-dark transition-colors">
+            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/properties') as any}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-brand.blue/10 text-brand.blue grid place-content-center mb-2">
+                  <Home className="h-5 w-5" />
+                </div>
                 <h4 className="font-semibold">Browse Properties</h4>
-                <p className="text-sm text-muted-foreground">Find your next home</p>
+                <p className="text-sm text-brand.gray500">Find your next home</p>
               </div>
-            </button>
-            
-            <button 
-              onClick={() => setCurrentTab('/tenant-messages')}
-              className="p-4 bg-white rounded-lg shadow-soft hover:shadow-medium transition-all duration-300 hover-scale text-left group"
-            >
-              <div className="text-success-green group-hover:text-success-green-dark transition-colors">
+            </GlassCard>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => setCurrentTab('/tenant-messages') as any}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-brand.green/10 text-brand.green grid place-content-center mb-2">
+                  <MessageSquare className="h-5 w-5" />
+                </div>
                 <h4 className="font-semibold">Messages</h4>
-                <p className="text-sm text-muted-foreground">Chat with landlords</p>
+                <p className="text-sm text-brand.gray500">Chat with landlords</p>
               </div>
-            </button>
-            
-            <button 
-              onClick={() => setCurrentTab('/maintenance')}
-              className="p-4 bg-white rounded-lg shadow-soft hover:shadow-medium transition-all duration-300 hover-scale text-left group"
-            >
-              <div className="text-earth-warm group-hover:text-earth-warm-dark transition-colors">
+            </GlassCard>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => setCurrentTab('/maintenance') as any}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-brand.blue/10 text-brand.blue grid place-content-center mb-2">
+                  <Settings className="h-5 w-5" />
+                </div>
                 <h4 className="font-semibold">Report Issue</h4>
-                <p className="text-sm text-muted-foreground">Submit maintenance request</p>
+                <p className="text-sm text-brand.gray500">Submit maintenance request</p>
               </div>
-            </button>
+            </GlassCard>
           </div>
         </div>
       </div>
