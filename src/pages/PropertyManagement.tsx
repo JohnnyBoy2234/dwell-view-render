@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -56,11 +56,17 @@ export default function PropertyManagement() {
   
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'overview');
   const [emailForInvite, setEmailForInvite] = useState('');
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
   const [showLeaseDialog, setShowLeaseDialog] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<{ id: string; name: string } | null>(null);
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams({ tab: value });
+  };
 
   useEffect(() => {
     if (!user || !isLandlord) {
@@ -222,7 +228,7 @@ export default function PropertyManagement() {
       </div>
 
       {/* Tabs Navigation - Mobile-First Responsive */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         {/* Mobile: Horizontal scrollable tabs */}
         <div className="md:hidden">
           <TabsList className="inline-flex h-12 items-center justify-start rounded-lg bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft p-1 overflow-x-auto w-full scrollbar-hide">
@@ -532,7 +538,7 @@ export default function PropertyManagement() {
                             </Badge>
                             <Button
                               size="sm"
-                              onClick={() => navigate(`/dashboard/maintenance/${request.id}`)}
+                              onClick={() => navigate(`/maintenance/${request.id}`)}
                               className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
                             >
                               Respond

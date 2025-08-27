@@ -31,6 +31,7 @@ import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
+import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,8 @@ const App = () => (
             <Route path="/tenant-dashboard/*" element={<RouteGuard><TenantDashboardRoutes /></RouteGuard>} />
             <Route path="/dashboard" element={<EnhancedLandlordDashboard />} />
             <Route path="/dashboard/*" element={<RouteGuard><LandlordDashboardRoutes /></RouteGuard>} />
+            {/* Standalone maintenance ticket route for cross-dashboard access */}
+            <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
             <Route path="/landlord-lease-signing/:tenancyId" element={<RouteGuard><LandlordLeaseSigningPage /></RouteGuard>} />
             <Route path="/dashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
