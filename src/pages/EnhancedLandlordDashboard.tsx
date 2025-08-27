@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { BUILD_TAG } from '@/version';
 
 interface PropertyWithTenant {
   id: string;
@@ -45,6 +46,9 @@ export default function EnhancedLandlordDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Visible in production console to verify current deployed build
+    // eslint-disable-next-line no-console
+    console.log('[EnhancedLandlordDashboard] Build:', BUILD_TAG);
     if (!user) {
       navigate('/auth');
       return;

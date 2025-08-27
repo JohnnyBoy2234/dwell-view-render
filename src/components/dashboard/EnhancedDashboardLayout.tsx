@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
 import { Component, ReactNode } from 'react';
+import { BUILD_TAG } from '@/version';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
@@ -65,6 +66,11 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                 <div className="hidden sm:block">
                   <Badge variant="secondary" className="text-xs">
                     {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
+                  </Badge>
+                </div>
+                <div className="hidden sm:block">
+                  <Badge variant="outline" className="text-[10px] ml-1">
+                    {BUILD_TAG}
                   </Badge>
                 </div>
               </div>

@@ -17,6 +17,7 @@ import { Home, MessageSquare, Building, FileText, Settings, User, Calendar } fro
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
+import { BUILD_TAG } from '@/version';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -33,6 +34,9 @@ export default function EnhancedTenantDashboard() {
   } = useTenantDashboard();
 
   useEffect(() => {
+    // Visible in production console to verify current deployed build
+    // eslint-disable-next-line no-console
+    console.log('[EnhancedTenantDashboard] Build:', BUILD_TAG);
     if (!user) {
       navigate('/auth');
       return;
