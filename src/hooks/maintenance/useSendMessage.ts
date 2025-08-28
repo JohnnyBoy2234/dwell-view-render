@@ -82,6 +82,7 @@ export function useSendMessage(ticketId: string) {
       }));
       return { previous };
     },
+    retry: 0,
     onError: (_err, _vars, context) => {
       qc.setQueryData(['maintenance-messages', ticketId], context?.previous);
     },

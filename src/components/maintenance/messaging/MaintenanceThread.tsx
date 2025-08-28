@@ -18,7 +18,10 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
 
   useEffect(() => {
     const unread = data?.pages.flatMap(p => (p as any).messages?.filter((m: any) => !m.readAt)) || [];
-    unread.forEach(m => markRead.mutate(m.id));
+    const ids = unread.map((m: any) => m.id);
+    if (ids.length > 0) {
+      markRead.mutate(ids);
+    }
   }, [data, markRead]);
 
   const handleSend = (body: string, files: File[]) => {

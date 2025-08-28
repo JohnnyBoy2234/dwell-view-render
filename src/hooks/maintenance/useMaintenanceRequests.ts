@@ -97,6 +97,7 @@ export function useUpdateMaintenanceRequest() {
       if (error) throw error;
       return data as MaintenanceRequest;
     },
+    retry: 0,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
       queryClient.invalidateQueries({ queryKey: ['maintenance-unread-counts'] });
