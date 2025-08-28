@@ -16,36 +16,24 @@ import { ArrowRight, CheckCircle, Home } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, useScroll, useTransform, useAnimation, AnimatePresence } from "framer-motion";
+import { motion, useScroll, useTransform, useAnimation, AnimatePresence, useViewportScroll } from "framer-motion";
 import HowItWorks from "@/components/HowItWorks";
 
 // Framer Motion variants for reusable animations
-import { Variants } from 'framer-motion';
-
-const fadeInUp: Variants = {
+const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: { 
     opacity: 1, 
     y: 0,
     transition: { 
-      type: "spring" as const,
+      type: "spring",
       stiffness: 100,
-      damping: 10
-    }
-  },
-  hover: {
-    y: -8,
-    scale: 1.02,
-    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-    transition: { 
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 15
+      damping: 20
     }
   }
 };
 
-const staggerContainer: Variants = {
+const staggerContainer = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -56,7 +44,7 @@ const staggerContainer: Variants = {
   }
 };
 
-const featureCardHover: Variants = {
+const featureCardHover = {
   hover: {
     y: -8,
     scale: 1.02,
@@ -69,11 +57,11 @@ const featureCardHover: Variants = {
   }
 };
 
-const buttonHover: Variants = {
+const buttonHover = {
   hover: { 
     scale: 1.05,
     transition: { 
-      type: "spring" as const,
+      type: "spring",
       stiffness: 400,
       damping: 10
     }
@@ -81,7 +69,7 @@ const buttonHover: Variants = {
   tap: { 
     scale: 0.98,
     transition: { 
-      type: "spring" as const,
+      type: "spring",
       stiffness: 1000,
       damping: 30
     }
@@ -149,7 +137,7 @@ function useMagnet(intensity = 12) {
 
 const Index = () => {
   // Scroll-linked animations
-  const { scrollYProgress } = useScroll();
+  const { scrollYProgress } = useViewportScroll();
   const y1 = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
   const y2 = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
   const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
@@ -195,10 +183,8 @@ const Index = () => {
     applyFilters();
   };
 
-  // Handle search when pressing Enter in the search input
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
-      e.preventDefault();
       handleSearch();
     }
   };
@@ -308,14 +294,13 @@ const Index = () => {
               className="max-w-xl mx-auto"
               variants={fadeInUp}
             >
-              <div onKeyDown={handleKeyDown}>
-                <Property24SearchBar
-                  filters={filters}
-                  onFiltersChange={onFiltersChange}
-                  onSearch={handleSearch}
-                  onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
-                />
-              </div>
+              <Property24SearchBar
+                filters={filters}
+                onFiltersChange={onFiltersChange}
+                onSearch={handleSearch}
+                onKeyPress={handleKeyPress}
+                onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
+              />
             </motion.div>
           </motion.div>
         </div>
@@ -428,6 +413,19 @@ const Index = () => {
                   const el = e.currentTarget;
                   el.style.setProperty('--rx', '0deg');
                   el.style.setProperty('--ry', '0deg');
+                }}
+                variants={{
+                  ...fadeInUp,
+                  hover: {
+                    y: -8,
+                    scale: 1.02,
+                    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+                    transition: { 
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 15
+                    }
+                  }
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/5 to-success-green/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
