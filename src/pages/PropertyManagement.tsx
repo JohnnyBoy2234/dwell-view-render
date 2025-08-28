@@ -199,7 +199,7 @@ export default function PropertyManagement() {
     <div className="relative container mx-auto p-6 space-y-6 bg-gradient-to-br from-ocean-blue/[0.03] via-background to-success-green/[0.05] min-h-screen overflow-hidden">
       {/* Background blobs */}
       <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-brand-blue to-brand-green blur-3xl opacity-20"></div>
         <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-success-green to-ocean-blue blur-3xl opacity-10"></div>
         <div className="ui-noise"></div>
       </div>
