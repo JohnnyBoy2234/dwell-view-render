@@ -15,66 +15,21 @@ import { ArrowRight, CheckCircle, Home } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import { motion, useScroll, useTransform, useAnimation, AnimatePresence, useViewportScroll } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
 
-// Framer Motion variants for reusable animations
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { 
-    opacity: 1, 
-    y: 0,
-    transition: { 
-      type: "spring",
-      stiffness: 100,
-      damping: 20
-    }
-  }
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-      delayChildren: 0.3
-    }
-  }
-};
-
-const featureCardHover = {
-  hover: {
-    y: -8,
-    scale: 1.02,
-    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-    transition: { 
-      type: "spring",
-      stiffness: 300,
-      damping: 15
-    }
-  }
-};
-
-const buttonHover = {
-  hover: { 
-    scale: 1.05,
-    transition: { 
-      type: "spring",
-      stiffness: 400,
-      damping: 10
-    }
-  },
-  tap: { 
-    scale: 0.98,
-    transition: { 
-      type: "spring",
-      stiffness: 1000,
-      damping: 30
-    }
-  }
-};
+// Lightweight utilities for homepage motion without new deps
+function useParallax() {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const onMouseMove = (e: React.MouseEvent) => {
+    const { currentTarget, clientX, clientY } = e;
+    const rect = (currentTarget as HTMLElement).getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width - 0.5) * 2; // -1..1
+    const y = ((clientY - rect.top) / rect.height - 0.5) * 2; // -1..1
+    setPos({ x, y });
+  };
+  return { pos, onMouseMove };
+}
 
 function AnimatedCounter({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -136,18 +91,6 @@ function useMagnet(intensity = 12) {
 }
 
 const Index = () => {
-  // Scroll-linked animations
-  const { scrollYProgress } = useViewportScroll();
-  const y1 = useTransform(scrollYProgress, [0, 0.5], [0, -100]);
-  const y2 = useTransform(scrollYProgress, [0, 0.5], [0, -50]);
-  const opacity = useTransform(scrollYProgress, [0, 0.1], [1, 0]);
-  
-  // Animation controls for staggered entrance
-  const controls = useAnimation();
-  
-  useEffect(() => {
-    controls.start("visible");
-  }, [controls]);
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -229,7 +172,7 @@ const Index = () => {
     },
   ];
 
-  // Removed unused parallax hook
+  const heroParallax = useParallax();
 
   const tilt = useTilt();
   const magnet = useMagnet();
@@ -237,74 +180,126 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       
-      {/* Hero Section with Scroll-Linked Parallax */}
-      <motion.section 
-        className="relative text-white overflow-hidden"
-        initial="hidden"
-        animate={controls}
-        variants={staggerContainer}
-      >
+      {/* Hero Section */}
+      <section className="relative text-white overflow-hidden">
         {/* Premium Gradient Overlay */}
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80"
-          style={{ y: y1 }}
-        />
-        
-        {/* Aurora blobs with parallax */}
-        <motion.div className="home-aurora" style={{ y: y2 }}>
-          <motion.div 
-            className="blob --1" 
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, ease: [0.2, 0.8, 0.2, 1] }}
-          />
-          <motion.div 
-            className="blob --2"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.2, ease: [0.2, 0.8, 0.2, 1] }}
-          />
-          <motion.div 
-            className="blob --3"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.4, ease: [0.2, 0.8, 0.2, 1] }}
-          />
-        </motion.div>
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 lg:py-40">
-          <motion.div 
-            className="text-center"
-            variants={staggerContainer}
+        <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
+        {/* Aurora blobs */}
+        <div className="home-aurora">
+          <div className="blob --1" />
+          <div className="blob --2" />
+          <div className="blob --3" />
+        </div>
+        {/* Subtle Pattern Overlay */}
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent via-white/5 to-transparent" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 min-h-[70vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center" onMouseMove={heroParallax.onMouseMove}>
+          <div
+            className="text-center max-w-5xl mx-auto w-full"
+            style={{
+              transform: `perspective(1200px) translate3d(${heroParallax.pos.x * 6}px, ${heroParallax.pos.y * 6}px, 0)`,
+              transition: 'transform 120ms ease-out',
+            }}
           >
-            <motion.h1 
-              className="text-4xl md:text-6xl font-bold mb-6 tracking-tight"
-              variants={fadeInUp}
-            >
-              <span className="block">Find Your Perfect</span>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100">Rental Home</span>
-            </motion.h1>
-            <motion.p 
-              className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-8"
-              variants={fadeInUp}
-            >
-              Discover thousands of rental properties across South Africa
-            </motion.p>
-            <motion.div 
-              className="max-w-xl mx-auto"
-              variants={fadeInUp}
-            >
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 mt-2 sm:mt-4 lg:mt-0 leading-tight reveal-up">
+              <span className="block">Renting the way</span>
+              <span className="block text-success-green">it should be</span>
+            </h1>
+            <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
+              Find your perfect rental home in South Africa — connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
+            </p>
+
+            {/* Property24-style Search Bar */}
+            <div className="reveal-up" style={{ animationDelay: '200ms' }}>
               <Property24SearchBar
                 filters={filters}
                 onFiltersChange={onFiltersChange}
                 onSearch={handleSearch}
-                onKeyPress={handleKeyPress}
                 onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
               />
-            </motion.div>
-          </motion.div>
+
+              <MoreFiltersModal
+                open={moreFiltersOpen}
+                onClose={() => setMoreFiltersOpen(false)}
+                filters={advancedFilters}
+                onFiltersChange={(newFilters) => {
+                  setAdvancedFilters(prev => ({ ...prev, ...newFilters }));
+                }}
+                onApplyFilters={applyFilters}
+                onClearFilters={() => {
+                  setAdvancedFilters({
+                    propertyTypes: [],
+                    amenities: [],
+                    bathrooms: "Any",
+                    availableFrom: null
+                  });
+                  updateFilters({
+                    searchTerm: "",
+                    propertyType: "Any",
+                    minPrice: "",
+                    maxPrice: "",
+                    bedrooms: "Any",
+                    bathrooms: "Any",
+                    propertyTypes: [],
+                    amenities: [],
+                    availableFrom: null
+                  });
+                }}
+              />
+            </div>
+
+            {/* No Results Message in Hero Section */}
+            {showNoResults && (
+              <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 reveal-up" style={{ animationDelay: '300ms' }}>
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-white mb-2">No properties match your filters</h3>
+                  <p className="text-white/80 mb-4">Try adjusting your search criteria or browse all available properties.</p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button 
+                      variant="outline"  
+                      onClick={() => {
+                        updateFilters({
+                          searchTerm: "",
+                          propertyType: "Any",
+                          minPrice: "",
+                          maxPrice: "",
+                          bedrooms: "Any",
+                          bathrooms: "Any",
+                          propertyTypes: [],
+                          amenities: [],
+                          availableFrom: null
+                        });
+                        setAdvancedFilters({
+                          propertyTypes: [],
+                          amenities: [],
+                          bathrooms: "Any",
+                          availableFrom: null
+                        });
+                        setShowNoResults(false);
+                      }}
+                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue"
+                    >
+                      Clear Filters
+                    </Button>
+                    <Button 
+                      onClick={() => navigate('/properties')}
+                      className="bg-white text-ocean-blue hover:bg-white/90"
+                    >
+                      Browse All Properties
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Trust bullets */}
+            <div className="mt-8 flex flex-wrap justify-center gap-6 text-white/90 reveal-up" style={{ animationDelay: '350ms' }}>
+              <div className="flex items-center"><CheckCircle className="h-5 w-5 mr-2" /><span>Direct Contact</span></div>
+              <div className="flex items-center"><CheckCircle className="h-5 w-5 mr-2" /><span>No Commission</span></div>
+              <div className="flex items-center"><CheckCircle className="h-5 w-5 mr-2" /><span>Verified Properties</span></div>
+            </div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Trusted by + value props marquee */}
       <section className="py-6 bg-background/60 border-t border-b border-border/50">
@@ -332,49 +327,37 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Why Choose SwiftRent - Animated Grid */}
-      <motion.section 
-        className="py-16 md:py-24 bg-background overflow-hidden"
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-100px" }}
-        variants={staggerContainer}
-      >
+      {/* Why Choose SwiftRent - Animated Feature Grid */}
+      <section className="py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
-            className="text-center mb-12"
-            variants={fadeInUp}
-          >
-            <h2 className="text-3xl font-bold mb-4">Why Choose SwiftRent?</h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              We're redefining the rental experience with modern technology and exceptional service.
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose SwiftRent</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              A streamlined experience for tenants and landlords, packed with powerful features and a premium feel.
             </p>
-          </motion.div>
-          
-          <motion.div 
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={staggerContainer}
-          >
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
-                title: 'Zero commission',
-                desc: 'No hidden fees, no surprise costs. What you see is what you pay.',
-                icon: '💰',
+                title: 'Lightning-fast search',
+                desc: 'Filter by location, budget, amenities and more with instant results.',
+                icon: '🔎',
               },
               {
-                title: 'Verified listings',
-                desc: 'Every property is vetted to ensure quality and accuracy.',
-                icon: '✅',
+                title: 'Direct tenant ↔ landlord',
+                desc: 'Chat in real-time with no middlemen or commission fees.',
+                icon: '💬',
               },
               {
-                title: '24/7 support',
-                desc: 'Our team is always here to help with any questions or issues.',
-                icon: '🛟',
+                title: 'Digital lease signing',
+                desc: 'Legally binding e-signatures with full audit trails.',
+                icon: '🖊️',
               },
               {
-                title: 'Digital contracts',
-                desc: 'Sign your lease online in minutes, no printing or scanning needed.',
-                icon: '📝',
+                title: 'Maintenance hub',
+                desc: 'Create, track and resolve maintenance issues with built-in messaging.',
+                icon: '🛠️',
               },
               {
                 title: 'Secure payments',
@@ -387,68 +370,22 @@ const Index = () => {
                 icon: '📊',
               },
             ].map((f, i) => (
-              <motion.div
+              <div
                 key={f.title}
-                className="relative feature-card rounded-xl border border-border bg-gradient-to-b from-background to-muted/40 p-6 overflow-hidden"
-                variants={fadeInUp}
-                whileHover="hover"
-                initial="hidden"
-                viewport={{ once: true }}
-                custom={i}
-                style={{ 
-                  transformStyle: "preserve-3d",
-                  willChange: "transform"
-                }}
-                onMouseMove={e => {
-                  const el = e.currentTarget;
-                  const rect = el.getBoundingClientRect();
-                  const px = (e.clientX - rect.left) / rect.width;
-                  const py = (e.clientY - rect.top) / rect.height;
-                  const rx = (0.5 - py) * 15;
-                  const ry = (px - 0.5) * 15;
-                  el.style.setProperty('--rx', `${rx}deg`);
-                  el.style.setProperty('--ry', `${ry}deg`);
-                }}
-                onMouseLeave={e => {
-                  const el = e.currentTarget;
-                  el.style.setProperty('--rx', '0deg');
-                  el.style.setProperty('--ry', '0deg');
-                }}
-                variants={{
-                  ...fadeInUp,
-                  hover: {
-                    y: -8,
-                    scale: 1.02,
-                    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-                    transition: { 
-                      type: "spring",
-                      stiffness: 300,
-                      damping: 15
-                    }
-                  }
-                }}
+                className="relative feature-card tilt-card tilt-reset rounded-xl border border-border bg-gradient-to-b from-background to-muted/40 p-6 reveal-up"
+                style={{ animationDelay: `${100 + i * 80}ms` }}
+                onMouseMove={tilt.onMove}
+                onMouseLeave={tilt.onLeave}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/5 to-success-green/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <motion.div 
-                    className="text-3xl mb-3 select-none inline-block"
-                    whileHover={{ 
-                      scale: 1.2,
-                      rotate: [0, 10, -10, 0],
-                      transition: { duration: 0.5 }
-                    }}
-                    aria-hidden
-                  >
-                    {f.icon}
-                  </motion.div>
-                  <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-                  <p className="text-muted-foreground">{f.desc}</p>
-                </div>
-              </motion.div>
+                <div className="feature-glow rounded-xl" />
+                <div className="text-3xl mb-3 select-none" aria-hidden>{f.icon}</div>
+                <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
+                <p className="text-muted-foreground">{f.desc}</p>
+              </div>
             ))}
-          </motion.div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* How It Works Section */}
       <HowItWorks />
@@ -505,145 +442,40 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section with Magnetic Buttons */}
-      <motion.section 
-        className="py-20 bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white relative overflow-hidden"
-        initial={{ opacity: 0, y: 50 }}
-        whileInView={{ 
-          opacity: 1, 
-          y: 0,
-          transition: { 
-            type: "spring",
-            stiffness: 60,
-            damping: 15
-          }
-        }}
-        viewport={{ once: true, margin: "-100px" }}
-      >
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"
-          animate={{
-            backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <motion.h2 
-            className="text-3xl font-bold mb-4"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ 
-              opacity: 1, 
-              y: 0,
-              transition: { 
-                delay: 0.2,
-                type: "spring",
-                stiffness: 100,
-                damping: 15
-              }
-            }}
-            viewport={{ once: true }}
-          >
-            Ready to Find Your Next Home?
-          </motion.h2>
-          <motion.p 
-            className="text-xl mb-8 text-white/90"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ 
-              opacity: 1, 
-              y: 0,
-              transition: { 
-                delay: 0.3,
-                type: "spring",
-                stiffness: 100,
-                damping: 15
-              }
-            }}
-            viewport={{ once: true }}
-          >
+      {/* CTA Section */}
+      <section className="py-20 bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-4">Ready to Find Your Next Home?</h2>
+          <p className="text-xl mb-8 text-white/90">
             Join thousands of satisfied customers who found their perfect rental through SwiftRent
-          </motion.p>
-          <motion.div 
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ 
-              opacity: 1, 
-              y: 0,
-              transition: { 
-                delay: 0.4,
-                type: "spring",
-                stiffness: 100,
-                damping: 15
-              }
-            }}
-            viewport={{ once: true }}
-          >
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <motion.div
-                whileHover="hover"
-                whileTap="tap"
-                variants={buttonHover}
-                className="relative overflow-hidden"
-              >
-                <Button 
-                  size="lg" 
-                  variant="secondary" 
-                  className="relative overflow-hidden"
+              <Button size="lg" variant="secondary" className="relative overflow-hidden">
+                <span
+                  className="magnet"
+                  onMouseMove={magnet.onMove}
+                  onMouseLeave={magnet.onLeave}
                 >
-                  <span
-                    className="magnet"
-                    onMouseMove={e => {
-                      const el = e.currentTarget;
-                      const rect = el.getBoundingClientRect();
-                      const dx = (e.clientX - (rect.left + rect.width / 2)) / 10;
-                      const dy = (e.clientY - (rect.top + rect.height / 2)) / 10;
-                      el.style.transform = `translate(${dx}px, ${dy}px)`;
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.transform = 'translate(0, 0)';
-                    }}
-                  >
-                    Browse Properties
-                  </span>
-                </Button>
-              </motion.div>
+                  Browse Properties
+                </span>
+              </Button>
             </Link>
             <Link to="/list-property">
-              <motion.div
-                whileHover="hover"
-                whileTap="tap"
-                variants={buttonHover}
-                className="relative overflow-hidden"
-              >
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="relative overflow-hidden text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-sm bg-white/10"
+              <Button size="lg" variant="outline" className="relative overflow-hidden text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-sm bg-white/10">
+                <span
+                  className="magnet"
+                  onMouseMove={magnet.onMove}
+                  onMouseLeave={magnet.onLeave}
                 >
-                  <span
-                    className="magnet"
-                    onMouseMove={e => {
-                      const el = e.currentTarget;
-                      const rect = el.getBoundingClientRect();
-                      const dx = (e.clientX - (rect.left + rect.width / 2)) / 10;
-                      const dy = (e.clientY - (rect.top + rect.height / 2)) / 10;
-                      el.style.transform = `translate(${dx}px, ${dy}px)`;
-                    }}
-                    onMouseLeave={e => {
-                      e.currentTarget.style.transform = 'translate(0, 0)';
-                    }}
-                  >
-                    List Your Property
-                  </span>
-                </Button>
-              </motion.div>
+                  List Your Property
+                </span>
+              </Button>
             </Link>
-          </motion.div>
+          </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* Footer */}
       <footer className="bg-muted py-12">
