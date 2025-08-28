@@ -151,7 +151,7 @@ export default function EnhancedLandlordDashboard() {
         // Navigate to the actual messages page instead of showing MessagesTab
         navigate('/dashboard/messages');
         return null;
-      case '/manage-properties':
+      case '/dashboard/properties':
         return renderPropertiesTab();
       case '/applications':
         return renderApplicationsTab();

@@ -35,7 +35,7 @@ const tenantItems: SidebarItem[] = [
 
 const landlordItems: SidebarItem[] = [
   { title: 'Rental Manager', url: '/dashboard', icon: Home },
-  { title: 'Properties', url: '/manage-properties', icon: Building },
+  { title: 'Properties', url: '/dashboard/properties', icon: Building },
   { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'Applications', url: '/applications', icon: FileText },
   { title: 'Tenants', url: '/tenants', icon: Users },
