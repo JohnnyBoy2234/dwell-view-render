@@ -196,7 +196,13 @@ export default function PropertyManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 bg-gradient-to-br from-background via-earth-light/20 to-success-green/5 min-h-screen">
+    <div className="relative container mx-auto p-6 space-y-6 bg-gradient-to-br from-ocean-blue/[0.03] via-background to-success-green/[0.05] min-h-screen overflow-hidden">
+      {/* Background blobs */}
+      <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
+        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-success-green to-ocean-blue blur-3xl opacity-10"></div>
+        <div className="ui-noise"></div>
+      </div>
       {/* Header */}
       <div className="flex items-center gap-4">
         <Button 
@@ -211,8 +217,8 @@ export default function PropertyManagement() {
       </div>
 
       {/* Property Header */}
-      <div className="flex items-start gap-4 p-6 bg-gradient-to-r from-white to-earth-light/40 rounded-2xl border border-ocean-blue/20 shadow-medium">
-        <div className="p-4 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl shadow-soft">
+      <div className="flex items-start gap-4 p-6 rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop">
+        <div className="p-4 rounded-2xl bg-gradient-to-br from-ocean-blue to-success-green text-white shadow-soft ring-1 ring-white/20">
           <Home className="h-8 w-8 text-white" />
         </div>
         <div className="flex-1">
@@ -231,39 +237,47 @@ export default function PropertyManagement() {
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         {/* Mobile: Horizontal scrollable tabs */}
         <div className="md:hidden">
-          <TabsList className="inline-flex h-12 items-center justify-start rounded-2xl bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-white/20 dark:border-white/10 ring-1 ring-black/5 shadow-soft p-1 overflow-x-auto w-full scrollbar-hide">
+          <TabsList className="inline-flex h-12 items-center justify-start rounded-2xl bg-gradient-to-r from-ocean-blue/10 via-background/60 to-success-green/10 dark:from-ocean-blue/10 dark:via-slate-900/50 dark:to-success-green/10 backdrop-blur-md border border-white/20 dark:border-white/10 ring-1 ring-black/5 shadow-soft p-1 overflow-x-auto w-full scrollbar-hide">
             <div className="flex space-x-1 min-w-max px-1">
-              <TabsTrigger value="overview" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="overview" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Home className="h-3 w-3" />
                 Overview
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="listing" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="listing" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <List className="h-3 w-3" />
                 Listing
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="viewings" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="viewings" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Calendar className="h-3 w-3" />
                 Viewing
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="applications" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="applications" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Users className="h-3 w-3" />
                 Apps
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="leases" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="leases" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <FileText className="h-3 w-3" />
                 Leases
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="payments" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="payments" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <CreditCard className="h-3 w-3" />
                 Payments
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="maintenance" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="maintenance" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Wrench className="h-3 w-3" />
                 Maintenance
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
-              <TabsTrigger value="inventory" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+              <TabsTrigger value="inventory" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
                 <Package className="h-3 w-3" />
                 Inventory
+                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
               </TabsTrigger>
             </div>
           </TabsList>
@@ -271,48 +285,56 @@ export default function PropertyManagement() {
 
         {/* Desktop: Grid layout */}
         <div className="hidden md:block">
-          <TabsList className="grid w-full grid-cols-8 h-12 rounded-2xl bg-white/60 dark:bg-slate-900/50 backdrop-blur-md border border-white/20 dark:border-white/10 ring-1 ring-black/5 shadow-soft">
-            <TabsTrigger value="overview" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+          <TabsList className="grid w-full grid-cols-8 h-12 rounded-2xl bg-gradient-to-r from-ocean-blue/10 via-background/60 to-success-green/10 dark:from-ocean-blue/10 dark:via-slate-900/50 dark:to-success-green/10 backdrop-blur-md border border-white/20 dark:border-white/10 ring-1 ring-black/5 shadow-soft">
+            <TabsTrigger value="overview" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
               <Home className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="listing" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="listing" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <List className="h-4 w-4" />
               <span className="hidden lg:inline">Listing</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="viewings" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="viewings" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Calendar className="h-4 w-4" />
               <span className="hidden lg:inline">Viewing</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="applications" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="applications" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Users className="h-4 w-4" />
               <span className="hidden lg:inline">Applications</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="leases" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="leases" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <FileText className="h-4 w-4" />
               <span className="hidden lg:inline">Leases</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="payments" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="payments" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Payments</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="maintenance" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="maintenance" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Wrench className="h-4 w-4" />
               <span className="hidden lg:inline">Maintenance</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="inventory" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Package className="h-4 w-4" />
               <span className="hidden lg:inline">Inventory</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
           </TabsList>
         </div>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
+        <TabsContent value="overview" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {/* Summary Cards */}
-              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
@@ -321,13 +343,13 @@ export default function PropertyManagement() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">Upcoming payments will appear here</p>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 border-transparent bg-gradient-to-r from-ocean-blue/10 to-success-green/10 hover:from-ocean-blue/20 hover:to-success-green/20">
                     Details <ExternalLink className="h-4 w-4" />
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
@@ -342,7 +364,7 @@ export default function PropertyManagement() {
                 </CardContent>
               </Card>
 
-              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <List className="h-5 w-5" />
@@ -360,7 +382,7 @@ export default function PropertyManagement() {
 
             {/* Next Steps Card */}
             <div>
-              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle>Next steps</CardTitle>
                   <CardDescription>Get your property ready for tenants</CardDescription>
@@ -389,7 +411,7 @@ export default function PropertyManagement() {
         </TabsContent>
 
         {/* Listing Tab */}
-        <TabsContent value="listing" className="space-y-6">
+        <TabsContent value="listing" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader>
               <CardTitle>Listing Status</CardTitle>
@@ -431,7 +453,7 @@ export default function PropertyManagement() {
         </TabsContent>
 
         {/* Applications Tab */}
-        <TabsContent value="applications" className="space-y-6">
+        <TabsContent value="applications" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ApplicationsTab 
             propertyId={property.id} 
             onStartLease={handleStartLease}
@@ -439,12 +461,12 @@ export default function PropertyManagement() {
         </TabsContent>
 
         {/* Viewings Tab */}
-        <TabsContent value="viewings" className="space-y-6">
+        <TabsContent value="viewings" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ViewingSlotsManager propertyId={property.id} />
         </TabsContent>
 
         {/* Leases Tab */}
-        <TabsContent value="leases" className="space-y-6">
+        <TabsContent value="leases" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
               <CardHeader>
@@ -469,7 +491,7 @@ export default function PropertyManagement() {
                 <p className="text-muted-foreground mb-4">
                   Create detailed property condition reports with photos and notes.
                 </p>
-                <Button variant="outline" className="w-full" disabled>
+                <Button variant="outline" className="w-full border-transparent bg-gradient-to-r from-ocean-blue/10 to-success-green/10" disabled>
                   Join waitlist
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">Coming soon</p>
@@ -479,12 +501,12 @@ export default function PropertyManagement() {
         </TabsContent>
 
         {/* Payments Tab */}
-        <TabsContent value="payments" className="space-y-6">
+        <TabsContent value="payments" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <PaymentsTab propertyId={property.id} />
         </TabsContent>
 
         {/* Maintenance Tab */}
-        <TabsContent value="maintenance" className="space-y-6">
+        <TabsContent value="maintenance" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader>
               <CardTitle>Maintenance Requests</CardTitle>
@@ -502,7 +524,7 @@ export default function PropertyManagement() {
               ) : (
                 <div className="space-y-4">
                   {maintenanceRequests.map((request) => (
-                    <Card key={request.id} className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+                    <Card key={request.id} className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -536,7 +558,7 @@ export default function PropertyManagement() {
                             <Button
                               size="sm"
                               onClick={() => navigate(`/maintenance/${request.id}`)}
-                              className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
+                              className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue/90 hover:to-success-green/90 text-white"
                             >
                               Respond
                             </Button>
@@ -552,7 +574,7 @@ export default function PropertyManagement() {
         </TabsContent>
 
         {/* Inventory Tab */}
-        <TabsContent value="inventory" className="space-y-6">
+        <TabsContent value="inventory" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <InventoryTab propertyId={property.id} />
         </TabsContent>
       </Tabs>
