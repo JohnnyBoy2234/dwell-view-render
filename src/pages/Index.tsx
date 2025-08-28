@@ -405,19 +405,7 @@ const Index = () => {
               <motion.div
                 key={f.title}
                 className="relative feature-card rounded-xl border border-border bg-gradient-to-b from-background to-muted/40 p-6 overflow-hidden"
-                variants={{
-                  ...fadeInUp,
-                  hover: {
-                    y: -8,
-                    scale: 1.02,
-                    boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
-                    transition: { 
-                      type: "spring" as const,
-                      stiffness: 300,
-                      damping: 15
-                    }
-                  }
-                }}
+                variants={fadeInUp}
                 whileHover="hover"
                 initial="hidden"
                 viewport={{ once: true }}
