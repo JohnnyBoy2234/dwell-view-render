@@ -35,7 +35,7 @@ const PropertyCard = ({
 
   return (
     <Card 
-      className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+      className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg"
       role="button"
       tabIndex={0}
       onClick={() => navigate(`/property/${id}`)}

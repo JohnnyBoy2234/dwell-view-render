@@ -178,7 +178,12 @@ const Index = () => {
   const magnet = useMagnet();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative">
+      {/* Floating background particles */}
+      <div className="bg-particles" />
+      
+      {/* Subtle gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-ocean-blue/[0.02] via-transparent to-success-green/[0.02] pointer-events-none z-[-1]" />
       
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden">
@@ -372,7 +377,7 @@ const Index = () => {
             ].map((f, i) => (
               <div
                 key={f.title}
-                className="relative feature-card tilt-card tilt-reset rounded-xl border border-border bg-gradient-to-b from-background to-muted/40 p-6 reveal-up"
+                className="relative feature-card tilt-card tilt-reset rounded-xl backdrop-blur-sm bg-white/80 dark:bg-black/20 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 p-6 reveal-up"
                 style={{ animationDelay: `${100 + i * 80}ms` }}
                 onMouseMove={tilt.onMove}
                 onMouseLeave={tilt.onLeave}
