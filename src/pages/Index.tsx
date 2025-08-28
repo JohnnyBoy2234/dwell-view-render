@@ -178,11 +178,10 @@ const Index = () => {
   const magnet = useMagnet();
 
   return (
-    <div className="min-h-screen bg-background relative">
+    <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Floating background particles */}
       <div className="bg-particles" />
       
-      {/* Subtle gradient overlay */}
       <div className="fixed inset-0 bg-gradient-to-br from-ocean-blue/[0.02] via-transparent to-success-green/[0.02] pointer-events-none z-[-1]" />
       
       {/* Hero Section */}
