@@ -36,12 +36,12 @@ const tenantItems: SidebarItem[] = [
 const landlordItems: SidebarItem[] = [
   { title: 'Rental Manager', url: '/dashboard', icon: Home },
   { title: 'Properties', url: '/dashboard/properties', icon: Building },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
-  { title: 'Applications', url: '/applications', icon: FileText },
-  { title: 'Tenants', url: '/tenants', icon: Users },
-  { title: 'Payments', url: '/payments', icon: DollarSign },
+  { title: 'Messages', url: '/dashboard/messages', icon: MessageSquare },
+  { title: 'Applications', url: '/dashboard/applications', icon: FileText },
+  { title: 'Tenants', url: '/dashboard/tenants', icon: Users },
+  { title: 'Payments', url: '/dashboard/payments', icon: DollarSign },
   { title: 'Maintenance', url: '/dashboard/maintenance', icon: Wrench },
-  { title: 'Reports', url: '/reports', icon: BarChart3 },
+  { title: 'Reports', url: '/dashboard/reports', icon: BarChart3 },
 ];
 
 interface EnhancedSidebarProps {

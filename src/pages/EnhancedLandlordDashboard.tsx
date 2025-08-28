@@ -147,19 +147,19 @@ export default function EnhancedLandlordDashboard() {
 
   const renderTabContent = () => {
     switch (currentTab) {
-      case '/messages':
+      case '/dashboard/messages':
         // Navigate to the actual messages page instead of showing MessagesTab
         navigate('/dashboard/messages');
         return null;
       case '/dashboard/properties':
         return renderPropertiesTab();
-      case '/applications':
+      case '/dashboard/applications':
         return renderApplicationsTab();
-      case '/tenants':
+      case '/dashboard/tenants':
         return renderTenantsTab();
-      case '/payments':
+      case '/dashboard/payments':
         return renderPaymentsTab();
-      case '/reports':
+      case '/dashboard/reports':
         return renderReportsTab();
       case '/dashboard/maintenance':
         navigate('/dashboard/maintenance');
@@ -353,13 +353,13 @@ export default function EnhancedLandlordDashboard() {
                   <div className="flex gap-1">
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/applications');
+                      setCurrentTab('/dashboard/applications');
                     }}>
                       <FileText className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/messages');
+                      setCurrentTab('/dashboard/messages');
                     }}>
                       <MessageSquare className="h-3 w-3" />
                     </Button>
