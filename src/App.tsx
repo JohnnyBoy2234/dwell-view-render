@@ -17,6 +17,7 @@ import ListProperty from "./pages/ListProperty";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
+import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -72,7 +73,7 @@ const App = () => (
             <Route path="/list-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
-            <Route path="/messages" element={<RouteGuard><Messages /></RouteGuard>} />
+            <Route path="/messages" element={<RouteGuard><EnhancedDashboardLayout title="Messages"><Messages /></EnhancedDashboardLayout></RouteGuard>} />
             <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
             <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
             <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />

@@ -79,6 +79,10 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
     if (currentTab && onTabChange) {
       return currentTab === path;
     }
+    // Only exact match for the dashboard root to avoid double-highlighting
+    if (path === '/dashboard') {
+      return currentPath === '/dashboard';
+    }
     return currentPath === path || currentPath.startsWith(path + '/');
   };
 
