@@ -302,6 +302,100 @@ export default function PropertyManagement() {
               </div>
             </CardContent>
           </Card>
+          {/* Applications */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Applications</CardTitle>
+                <CardDescription>Manage applicants</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('applications')}>View Applications</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('applications')}>Invite Tenant</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payments */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Payments</CardTitle>
+                <CardDescription>Collection & history</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('payments')}>Details</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('payments')}>Set Up</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Listing */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <List className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Listing</CardTitle>
+                <CardDescription>Advertise your property</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate(`/property/${property.id}`)}>View Listing</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => navigate('/list-property', { state: { editProperty: property } })}>Edit Listing</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Viewings */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Viewings</CardTitle>
+                <CardDescription>Manage slots</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('viewings')}>View Slots</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('viewings')}>New Slot</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inventory */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Package className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Inventory</CardTitle>
+                <CardDescription>Track items</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('inventory')}>Open Inventory</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('inventory')}>Add Item</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Desktop: Grid layout */}
@@ -350,8 +444,8 @@ export default function PropertyManagement() {
           </TabsList>
         </div>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Overview Tab (hidden on mobile) */}
+        <TabsContent value="overview" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {/* Summary Cards */}
@@ -431,8 +525,8 @@ export default function PropertyManagement() {
           </div>
         </TabsContent>
 
-        {/* Listing Tab */}
-        <TabsContent value="listing" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Listing Tab (hidden on mobile) */}
+        <TabsContent value="listing" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader>
               <CardTitle>Listing Status</CardTitle>
@@ -473,21 +567,21 @@ export default function PropertyManagement() {
           </Card>
         </TabsContent>
 
-        {/* Applications Tab */}
-        <TabsContent value="applications" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Applications Tab (hidden on mobile) */}
+        <TabsContent value="applications" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ApplicationsTab 
             propertyId={property.id} 
             onStartLease={handleStartLease}
           />
         </TabsContent>
 
-        {/* Viewings Tab */}
-        <TabsContent value="viewings" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Viewings Tab (hidden on mobile) */}
+        <TabsContent value="viewings" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ViewingSlotsManager propertyId={property.id} />
         </TabsContent>
 
-        {/* Leases Tab */}
-        <TabsContent value="leases" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Leases Tab (hidden on mobile) */}
+        <TabsContent value="leases" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
               <CardHeader>
@@ -521,13 +615,13 @@ export default function PropertyManagement() {
           </div>
         </TabsContent>
 
-        {/* Payments Tab */}
-        <TabsContent value="payments" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Payments Tab (hidden on mobile) */}
+        <TabsContent value="payments" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <PaymentsTab propertyId={property.id} />
         </TabsContent>
 
-        {/* Maintenance Tab */}
-        <TabsContent value="maintenance" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Maintenance Tab (hidden on mobile) */}
+        <TabsContent value="maintenance" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader>
               <CardTitle>Maintenance Requests</CardTitle>
@@ -594,8 +688,8 @@ export default function PropertyManagement() {
           </Card>
         </TabsContent>
 
-        {/* Inventory Tab */}
-        <TabsContent value="inventory" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+        {/* Inventory Tab (hidden on mobile) */}
+        <TabsContent value="inventory" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <InventoryTab propertyId={property.id} />
         </TabsContent>
       </Tabs>
