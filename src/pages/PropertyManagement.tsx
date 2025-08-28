@@ -196,91 +196,112 @@ export default function PropertyManagement() {
   }
 
   return (
-    <div className="relative container mx-auto p-6 space-y-6 bg-gradient-to-br from-ocean-blue/[0.03] via-background to-success-green/[0.05] min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-ocean-blue/[0.04] via-ocean-blue/[0.02] to-success-green/[0.05]">
       {/* Background blobs */}
       <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-brand-blue to-brand-green blur-3xl opacity-20"></div>
         <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-success-green to-ocean-blue blur-3xl opacity-10"></div>
         <div className="ui-noise"></div>
       </div>
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
-      </div>
-
-      {/* Property Header */}
-      <div className="flex items-start gap-4 p-6 rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop">
-        <div className="p-4 rounded-2xl bg-gradient-to-br from-ocean-blue to-success-green text-white shadow-soft ring-1 ring-white/20">
-          <Home className="h-8 w-8 text-white" />
+      {/* Content wrapper */}
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
         </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{property.title}</h1>
-          <p className="text-muted-foreground">{property.location}</p>
-          <div className="flex items-center gap-4 mt-2">
-            <Badge variant={getStatusBadgeVariant(property.status)}>
-              {property.status.toUpperCase()}
-            </Badge>
-            <span className="text-lg font-semibold">R{property.price.toLocaleString()}/month</span>
+        {/* Property Header */}
+        <div className="flex items-start gap-4 p-6 rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-ocean-blue to-success-green text-white shadow-soft ring-1 ring-white/20">
+            <Home className="h-8 w-8 text-white" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">{property.title}</h1>
+            <p className="text-muted-foreground">{property.location}</p>
+            <div className="flex items-center gap-4 mt-2">
+              <Badge variant={getStatusBadgeVariant(property.status)}>
+                {property.status.toUpperCase()}
+              </Badge>
+              <span className="text-lg font-semibold">R{property.price.toLocaleString()}/month</span>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Tabs Navigation - Mobile-First Responsive */}
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-        {/* Mobile: Horizontal scrollable tabs */}
-        <div className="md:hidden">
-          <TabsList className="inline-flex h-12 items-center justify-start rounded-2xl bg-gradient-to-r from-ocean-blue/10 via-background/60 to-success-green/10 dark:from-ocean-blue/10 dark:via-slate-900/50 dark:to-success-green/10 backdrop-blur-md border border-white/20 dark:border-white/10 ring-1 ring-black/5 shadow-soft p-1 overflow-x-auto w-full scrollbar-hide">
-            <div className="flex space-x-1 min-w-max px-1">
-              <TabsTrigger value="overview" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <Home className="h-3 w-3" />
-                Overview
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="listing" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <List className="h-3 w-3" />
-                Listing
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="viewings" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <Calendar className="h-3 w-3" />
-                Viewing
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="applications" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <Users className="h-3 w-3" />
-                Apps
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="leases" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <FileText className="h-3 w-3" />
-                Leases
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <CreditCard className="h-3 w-3" />
-                Payments
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="maintenance" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <Wrench className="h-3 w-3" />
-                Maintenance
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-              <TabsTrigger value="inventory" className="relative flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-                <Package className="h-3 w-3" />
-                Inventory
-                <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-              </TabsTrigger>
-            </div>
-          </TabsList>
+        {/* Mobile: Stacked dashboard cards (no slider) */}
+        <div className="md:hidden space-y-4">
+          {/* Lease Agreements */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Lease Agreements</CardTitle>
+                <CardDescription>Current Lease</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold truncate">{property.title}</div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>View</Button>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>Renew</Button>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>Share PDF</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Messages */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Mail className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Messages</CardTitle>
+                <CardDescription>Recent</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="rounded-2xl bg-muted p-3 text-sm text-foreground/80">Thanks for letting me know, I’ll arrange for someone to come by and fix it.</div>
+              <div className="rounded-2xl bg-gradient-to-r from-ocean-blue to-success-green text-white p-3 text-sm ml-auto w-fit">Thanks for letting me know, I’ll arrange for someone to come by and fix it.</div>
+              <div className="mt-2">
+                <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/messages')}>Open Messages</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Maintenance */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Wrench className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Maintenance</CardTitle>
+                <CardDescription>Active Request</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Progress value={40} className="h-2" />
+              <div className="flex items-center justify-between text-sm">
+                <div className="font-medium">Leaking sink</div>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/messages')}>Chat</Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('maintenance')}>View Requests</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('maintenance')}>New Request</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Desktop: Grid layout */}
@@ -596,6 +617,7 @@ export default function PropertyManagement() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }
