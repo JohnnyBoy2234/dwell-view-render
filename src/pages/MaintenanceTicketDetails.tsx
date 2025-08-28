@@ -50,22 +50,29 @@ export default function MaintenanceTicketDetails() {
     queryFn: async () => {
       if (!ticketId || !user) throw new Error('No ticket ID or user');
 
-      const { data, error } = await supabase
+      // 1) Fetch the maintenance request row with access filter
+      const { data: req, error: reqError } = await supabase
         .from('maintenance_requests')
-        .select(`
-          *,
-          properties:property_id (
-            title,
-            location,
-            landlord_id
-          )
-        `)
+        .select('*')
         .eq('id', ticketId)
         .or(`landlord_id.eq.${user.id},tenant_id.eq.${user.id}`)
         .maybeSingle();
 
-      if (error) throw error;
-      return data as MaintenanceRequest & { properties: { title?: string; location?: string; landlord_id?: string } } | null;
+      if (reqError) throw reqError;
+      if (!req) return null;
+
+      // 2) Fetch property details separately (avoid join issues under RLS)
+      let properties: { title?: string; location?: string; landlord_id?: string } | undefined = undefined;
+      if ((req as any).property_id) {
+        const { data: prop } = await supabase
+          .from('properties')
+          .select('title, location, landlord_id')
+          .eq('id', (req as any).property_id)
+          .maybeSingle();
+        if (prop) properties = prop as typeof properties;
+      }
+
+      return { ...(req as MaintenanceRequest), properties } as MaintenanceRequest & { properties: { title?: string; location?: string; landlord_id?: string } };
     },
     enabled: !!ticketId && !!user,
   });
@@ -106,6 +113,11 @@ export default function MaintenanceTicketDetails() {
   }
 
   if (error || !ticket) {
+    console.error('MaintenanceTicketDetails: fetch failed or empty', {
+      ticketId,
+      userId: user?.id,
+      error
+    });
     return (
       <div className="max-w-4xl mx-auto p-6">
         <Card>
@@ -114,6 +126,9 @@ export default function MaintenanceTicketDetails() {
             <p className="text-muted-foreground mb-4">
               The maintenance request you're looking for doesn't exist or you don't have access to it.
             </p>
+            {ticketId && (
+              <p className="text-xs text-muted-foreground mb-4">Ticket ID: {ticketId}</p>
+            )}
             <Button onClick={() => navigate(-1)} variant="outline">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back
@@ -124,26 +139,7 @@ export default function MaintenanceTicketDetails() {
     );
   }
 
-  // Check access permissions
-  const hasAccess = isLandlord ? ticket.landlord_id === user?.id : ticket.tenant_id === user?.id;
-  if (!hasAccess) {
-    return (
-      <div className="max-w-4xl mx-auto p-6">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <h3 className="text-lg font-semibold mb-2">Access denied</h3>
-            <p className="text-muted-foreground mb-4">
-              You don't have permission to view this maintenance request.
-            </p>
-            <Button onClick={() => navigate(-1)} variant="outline">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  // Access is enforced by Supabase RLS. If we have a row, the user has access.
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
