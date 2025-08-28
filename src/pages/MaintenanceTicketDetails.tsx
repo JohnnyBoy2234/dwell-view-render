@@ -61,6 +61,7 @@ export default function MaintenanceTicketDetails() {
           )
         `)
         .eq('id', ticketId)
+        .or(`landlord_id.eq.${user.id},tenant_id.eq.${user.id}`)
         .maybeSingle();
 
       if (error) throw error;

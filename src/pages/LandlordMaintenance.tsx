@@ -158,7 +158,7 @@ export default function LandlordMaintenance() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => navigate(`/maintenance/${req.id}`)}
+                      onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}
                       className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
                     >
                       Respond
