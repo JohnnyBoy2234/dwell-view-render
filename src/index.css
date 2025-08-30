@@ -247,6 +247,23 @@ All colors MUST be HSL.
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+  
+  /* Dark mode background */
+  .dark body {
+    background: linear-gradient(135deg, 
+      hsl(222 84% 6%) 0%, 
+      hsl(222 84% 4%) 25%, 
+      hsl(222 84% 3%) 50%, 
+      hsl(222 84% 4%) 75%, 
+      hsl(222 84% 6%) 100%
+    );
+  }
+
+  /* Remove the overpowering particle effects */
+  .bg-particles,
+  .bg-pattern {
+    display: none;
+  }
 }
 
 @layer base {
@@ -255,7 +272,46 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(135deg, 
+      hsl(var(--background)) 0%, 
+      hsl(210 40% 96%) 25%, 
+      hsl(210 40% 94%) 50%, 
+      hsl(210 40% 96%) 75%, 
+      hsl(var(--background)) 100%
+    );
+    min-height: 100vh;
+  }
+
+  /* Enhanced text contrast for better readability */
+  .text-foreground {
+    color: hsl(215 25% 10%) !important;
+  }
+  
+  .text-muted-foreground {
+    color: hsl(215 20% 40%) !important;
+  }
+  
+  /* Card backgrounds with better contrast */
+  .bg-card, [class*="bg-white"], [class*="bg-background"] {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Glass cards with enhanced readability */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+  
+  .glass-card * {
+    color: hsl(215 25% 10%) !important;
+  }
+  
+  .glass-card .text-muted-foreground {
+    color: hsl(215 20% 35%) !important;
   }
 }
 @keyframes fadeIn {
