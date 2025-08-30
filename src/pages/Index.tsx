@@ -333,60 +333,98 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Why Choose SwiftRent - Animated Feature Grid */}
-      <section className="py-20 bg-background">
+      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid */}
+      <section className="py-20 bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Choose SwiftRent</h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A streamlined experience for tenants and landlords, packed with powerful features and a premium feel.
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">From Listing to Lease, Made Easy</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {[
               {
-                title: 'Lightning-fast search',
-                desc: 'Filter by location, budget, amenities and more with instant results.',
-                icon: '🔎',
+                title: 'Tenant Applications and Screening',
+                desc: 'Online tenant application submission form capturing personal info, employment, rental history. Automated credit and background checks integration. Reference and employment verification. Risk assessment and scoring system for applicant suitability. Application status tracking and communication hub.',
+                icon: '👥',
+                gradient: 'from-blue-500/10 to-indigo-500/10',
+                border: 'border-blue-500/20',
+                iconBg: 'bg-blue-500/10',
               },
               {
-                title: 'Direct tenant ↔ landlord',
-                desc: 'Chat in real-time with no middlemen or commission fees.',
-                icon: '💬',
+                title: 'Viewings and Scheduling',
+                desc: 'Calendaring system for property viewings. Tenants and agents can book viewing times via shared calendar slots. Automated notifications and reminders sent to tenants and landlords. Viewing history and follow-up management.',
+                icon: '📅',
+                gradient: 'from-green-500/10 to-emerald-500/10',
+                border: 'border-green-500/20',
+                iconBg: 'bg-green-500/10',
               },
               {
-                title: 'Digital lease signing',
-                desc: 'Legally binding e-signatures with full audit trails.',
-                icon: '🖊️',
+                title: 'Compliance and LeasePack Management',
+                desc: 'Storage and easy retrieval of compliance certificates (electrical, safety, etc). Digital lease agreement signing and stamping. License, certification, and legal document management. Tenant access to lease documents and compliance info. Alerts for expiring certificates or renewal requirements.',
+                icon: '📋',
+                gradient: 'from-purple-500/10 to-violet-500/10',
+                border: 'border-purple-500/20',
+                iconBg: 'bg-purple-500/10',
               },
               {
-                title: 'Maintenance hub',
-                desc: 'Create, track and resolve maintenance issues with built-in messaging.',
-                icon: '🛠️',
+                title: 'Maintenance Management',
+                desc: 'Tenant maintenance request submission portal. Ticket management with tracking status (open, in progress, resolved). Coordination with maintenance teams and vendors. Maintenance cost tracking and history logs. Emergency maintenance alert system.',
+                icon: '🔧',
+                gradient: 'from-orange-500/10 to-red-500/10',
+                border: 'border-orange-500/20',
+                iconBg: 'bg-orange-500/10',
               },
               {
-                title: 'Secure payments',
-                desc: 'Modern rails and automated receipts for peace of mind.',
-                icon: '💳',
+                title: 'Property Portfolio Management',
+                desc: 'Comprehensive dashboard for managing multiple properties. Financial tracking with rent collection and expense monitoring. Tenant communication hub with integrated messaging. Document storage and organization system. Performance analytics and reporting tools.',
+                icon: '🏢',
+                gradient: 'from-cyan-500/10 to-teal-500/10',
+                border: 'border-cyan-500/20',
+                iconBg: 'bg-cyan-500/10',
               },
               {
-                title: 'Insights & reports',
-                desc: 'Track applications, tenants, and performance at a glance.',
-                icon: '📊',
+                title: 'Smart Notifications & Alerts',
+                desc: 'Real-time notifications for applications, maintenance requests, and lease renewals. Automated reminders for rent payments and document expiry. Customizable alert preferences for different user types. Multi-channel communication via email, SMS, and in-app notifications.',
+                icon: '🔔',
+                gradient: 'from-pink-500/10 to-rose-500/10',
+                border: 'border-pink-500/20',
+                iconBg: 'bg-pink-500/10',
               },
-            ].map((f, i) => (
+            ].map((feature, i) => (
               <div
-                key={f.title}
-                className="relative feature-card tilt-card tilt-reset rounded-xl backdrop-blur-sm bg-white/80 dark:bg-black/20 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 p-6 reveal-up"
-                style={{ animationDelay: `${100 + i * 80}ms` }}
-                onMouseMove={tilt.onMove}
-                onMouseLeave={tilt.onLeave}
+                key={feature.title}
+                className={`group relative p-8 rounded-2xl backdrop-blur-sm bg-gradient-to-br ${feature.gradient} border ${feature.border} shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] reveal-up`}
+                style={{ animationDelay: `${100 + i * 120}ms` }}
               >
-                <div className="feature-glow rounded-xl" />
-                <div className="text-3xl mb-3 select-none" aria-hidden>{f.icon}</div>
-                <h3 className="text-xl font-semibold mb-2">{f.title}</h3>
-                <p className="text-muted-foreground">{f.desc}</p>
+                {/* Glass effect overlay */}
+                <div className="absolute inset-0 rounded-2xl bg-white/5 backdrop-blur-sm" />
+                
+                {/* Animated border glow */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Content */}
+                <div className="relative z-10 flex gap-6">
+                  {/* Icon */}
+                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-300`}>
+                    {feature.icon}
+                  </div>
+                  
+                  {/* Text content */}
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-sm">
+                      {feature.desc}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Subtle inner glow */}
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               </div>
             ))}
           </div>
