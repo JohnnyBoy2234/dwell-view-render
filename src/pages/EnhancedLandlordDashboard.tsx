@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
+import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { MessagesTab } from '@/components/dashboard/MessagesTab';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign } from 'lucide-react';
+import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
@@ -40,6 +41,7 @@ export default function EnhancedLandlordDashboard() {
   const location = useLocation();
   const { toast } = useToast();
   const { loading: metricsLoading, metrics } = useLandlordMetrics();
+  const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications();
   const [currentTab, setCurrentTab] = useState('/enhancedlandlorddashboard');
   
   const [properties, setProperties] = useState<PropertyWithTenant[]>([]);
@@ -66,7 +68,12 @@ export default function EnhancedLandlordDashboard() {
     }
     
     fetchDashboardData();
-  }, [user, isLandlord, navigate, location.pathname]);
+    
+    // Fetch applications when on applications tab
+    if (path === '/enhancedlandlorddashboard/applications') {
+      fetchAllApplications();
+    }
+  }, [user, isLandlord, navigate, location.pathname, fetchAllApplications]);
 
   const fetchDashboardData = async () => {
     if (!user) return;
@@ -170,8 +177,7 @@ export default function EnhancedLandlordDashboard() {
       case '/enhancedlandlorddashboard/reports':
         return renderReportsTab();
       case '/enhancedlandlorddashboard/maintenance':
-        navigate('/enhancedlandlorddashboard/maintenance');
-        return null;
+        return renderMaintenanceTab();
       default:
         return renderDashboardContent();
     }
@@ -197,15 +203,123 @@ export default function EnhancedLandlordDashboard() {
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
         <FileText className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Applications</h2>
+        <h2 className="text-xl font-bold">Rental Applications</h2>
+        <Badge variant="secondary" className="ml-2">
+          {applications.length} applications
+        </Badge>
       </div>
-      <Card>
-        <CardContent className="p-8 text-center">
-          <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Rental Applications</h3>
-          <p className="text-muted-foreground">Manage tenant applications for your properties</p>
-        </CardContent>
-      </Card>
+      
+      {applicationsLoading ? (
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="bg-muted animate-pulse h-24 rounded-lg"></div>
+          ))}
+        </div>
+      ) : applications.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Applications Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              You haven't received any rental applications yet. Applications will appear here once tenants apply for your properties.
+            </p>
+            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+              <Building className="h-4 w-4 mr-2" />
+              View Properties
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {applications.map((application) => (
+            <Card key={application.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center">
+                        <User className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold">
+                          {application.tenant_profile?.display_name || 'Unknown Tenant'}
+                        </h4>
+                        <p className="text-sm text-muted-foreground">
+                          {application.properties?.title || 'Unknown Property'} • {application.properties?.location || 'Unknown Location'}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-4 w-4" />
+                        Applied {new Date(application.created_at).toLocaleDateString()}
+                      </span>
+                      <Badge 
+                        variant={application.status === 'pending' ? 'secondary' : application.status === 'accepted' ? 'default' : 'destructive'}
+                      >
+                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                      </Badge>
+                    </div>
+                    
+                    {application.screening_details && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">Income:</span>
+                          <p className="font-medium">R{application.screening_details.net_monthly_income?.toLocaleString() || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Employment:</span>
+                          <p className="font-medium">{application.screening_details.employment_status || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Job Title:</span>
+                          <p className="font-medium">{application.screening_details.job_title || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Company:</span>
+                          <p className="font-medium">{application.screening_details.company_name || 'N/A'}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex gap-2 ml-4">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/application/${application.id}`)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Details
+                    </Button>
+                    {application.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => updateApplicationStatus(application.id, 'accepted')}
+                          className="bg-success-green hover:bg-success-green-dark"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateApplicationStatus(application.id, 'declined')}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Decline
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 
@@ -246,6 +360,22 @@ export default function EnhancedLandlordDashboard() {
           <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">Financial Reports</h3>
           <p className="text-muted-foreground">View detailed analytics and financial reports</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  const renderMaintenanceTab = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Building className="h-6 w-6 text-ocean-blue" />
+        <h2 className="text-xl font-bold">Maintenance Requests</h2>
+      </div>
+      <Card>
+        <CardContent className="p-8 text-center">
+          <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Maintenance Management</h3>
+          <p className="text-muted-foreground">Track and manage maintenance requests from tenants</p>
         </CardContent>
       </Card>
     </div>

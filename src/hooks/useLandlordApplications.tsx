@@ -11,6 +11,12 @@ export interface ApplicationWithTenant {
   status: string;
   created_at: string;
   updated_at: string;
+  properties?: {
+    id: string;
+    title: string;
+    location: string;
+    images: string[];
+  };
   tenant_profile?: {
     display_name: string;
     user_id: string;
@@ -100,30 +106,98 @@ export const useLandlordApplications = (propertyId?: string) => {
               .from('documents')
               .select('id, document_type, file_path, file_type, status, uploaded_at')
               .eq('user_id', app.tenant_id)
+              .eq('application_id', app.id)
           ]);
 
-           return {
-             ...app,
-             tenant_profile: tenantProfile.data,
-             screening_profile: screeningProfile.data ? {
-               ...screeningProfile.data,
-               documents: Array.isArray(screeningProfile.data.documents) 
-                 ? screeningProfile.data.documents as Array<{type: string; url: string; name: string;}>
-                 : []
-             } : undefined,
-             screening_details: screeningDetails.data,
-             documents: documents.data || []
-           };
+          return {
+            ...app,
+            tenant_profile: tenantProfile,
+            screening_profile: screeningProfile,
+            screening_details: screeningDetails,
+            documents: documents?.data || []
+          };
         })
       );
 
       setApplications(applicationsWithProfiles);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching applications:', error);
       toast({
-        title: "Error",
-        description: "Failed to load applications",
         variant: "destructive",
+        title: "Error loading applications",
+        description: error.message
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to fetch all applications for a landlord across all properties
+  const fetchAllApplications = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // First get all applications for the landlord
+      const { data: applicationsData, error } = await supabase
+        .from('applications')
+        .select(`
+          *,
+          properties!inner (
+            id,
+            title,
+            location,
+            images
+          )
+        `)
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Then fetch related data for each application
+      const applicationsWithProfiles = await Promise.all(
+        (applicationsData || []).map(async (app) => {
+          const [tenantProfile, screeningProfile, screeningDetails, documents] = await Promise.all([
+            supabase
+              .from('profiles')
+              .select('display_name, user_id')
+              .eq('user_id', app.tenant_id)
+              .maybeSingle(),
+            supabase
+              .from('screening_profiles')
+              .select('first_name, last_name, is_complete, created_at, documents')
+              .eq('user_id', app.tenant_id)
+              .maybeSingle(),
+            supabase
+              .from('screening_details')
+              .select('full_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact, consent_given')
+              .eq('user_id', app.tenant_id)
+              .maybeSingle(),
+            supabase
+              .from('documents')
+              .select('id, document_type, file_path, file_type, status, uploaded_at')
+              .eq('user_id', app.tenant_id)
+              .eq('application_id', app.id)
+          ]);
+
+          return {
+            ...app,
+            tenant_profile: tenantProfile,
+            screening_profile: screeningProfile,
+            screening_details: screeningDetails,
+            documents: documents?.data || []
+          };
+        })
+      );
+
+      setApplications(applicationsWithProfiles);
+    } catch (error: any) {
+      console.error('Error fetching all applications:', error);
+      toast({
+        variant: "destructive",
+        title: "Error loading applications",
+        description: error.message
       });
     } finally {
       setLoading(false);
@@ -164,6 +238,7 @@ export const useLandlordApplications = (propertyId?: string) => {
     applications,
     loading,
     fetchApplications,
+    fetchAllApplications,
     updateApplicationStatus,
   };
 };
