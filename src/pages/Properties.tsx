@@ -41,6 +41,18 @@ export default function Properties() {
   const bedrooms = searchParams.get('bedrooms') || 'Any';
   const bathrooms = searchParams.get('bathrooms') || 'Any';
   
+  // Debug logging
+  useEffect(() => {
+    console.log('[Properties] URL Search Params:', {
+      searchTerm,
+      propertyType,
+      minPrice,
+      maxPrice,
+      bedrooms,
+      bathrooms
+    });
+  }, [searchTerm, propertyType, minPrice, maxPrice, bedrooms, bathrooms]);
+  
   // Filter properties based on search criteria
   const filteredProperties = properties.filter(property => {
     // Location search
@@ -48,18 +60,33 @@ export default function Properties() {
       const searchTermLower = searchTerm.toLowerCase().trim();
       const propertyLocationLower = property.location.toLowerCase();
       
+      console.log('[Properties] Filtering property:', {
+        propertyLocation: property.location,
+        searchTerm: searchTerm,
+        searchTermLower,
+        propertyLocationLower
+      });
+      
       // Split search terms and location into words
       const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 1);
       const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 1);
       
+      console.log('[Properties] Words comparison:', {
+        searchWords,
+        locationWords
+      });
+      
       // Check if ALL search words are present in the location
       const allSearchWordsFound = searchWords.every(searchWord => {
-        return locationWords.some(locationWord => 
-          locationWord.includes(searchWord) || searchWord.includes(searchWord)
+        const found = locationWords.some(locationWord => 
+          locationWord.includes(searchWord) || searchWord.includes(locationWord)
         );
+        console.log(`[Properties] Search word "${searchWord}" found: ${found}`);
+        return found;
       });
       
       if (!allSearchWordsFound) {
+        console.log('[Properties] Property filtered out - not all search words found');
         return false;
       }
       
@@ -70,6 +97,7 @@ export default function Properties() {
           locationWord.length >= searchTermLength + 2 && locationWord.includes(searchTermLower)
         );
         if (!hasSignificantMatch) {
+          console.log('[Properties] Property filtered out - short search term validation failed');
           return false;
         }
       }
@@ -81,9 +109,12 @@ export default function Properties() {
       if (isSearchingForCity) {
         const cityInLocation = commonCities.some(city => propertyLocationLower.includes(city));
         if (!cityInLocation) {
+          console.log('[Properties] Property filtered out - city validation failed');
           return false;
         }
       }
+      
+      console.log('[Properties] Property passed location filter');
     }
 
     // Property type filter
