@@ -178,13 +178,13 @@ const Index = () => {
   const magnet = useMagnet();
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 25%, #ecfdf5 50%, #fef3c7 75%, #f3e8ff 100%)' }}>
-      {/* Enhanced background layers - more visible */}
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #ff6b6b 0%, #4ecdc4 25%, #45b7d1 50%, #96ceb4 75%, #feca57 100%)' }}>
+      {/* Enhanced background layers - VERY visible */}
       <div className="bg-particles" />
       <div className="bg-pattern" />
       
-      {/* More visible gradient overlay */}
-      <div className="fixed inset-0 bg-gradient-to-br from-ocean-blue/[0.08] via-success-green/[0.06] to-earth-warm/[0.08] pointer-events-none z-[-1]" />
+      {/* Very visible gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/15 to-green-500/20 pointer-events-none z-[-1]" />
       
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden">
