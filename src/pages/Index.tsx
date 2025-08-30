@@ -11,7 +11,7 @@ import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import { ArrowRight, CheckCircle, Home } from "lucide-react";
+import { ArrowRight, CheckCircle, Home, Sparkles, Star, Zap } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -173,26 +173,45 @@ const Index = () => {
   ];
 
   const heroParallax = useParallax();
-
   const tilt = useTilt();
   const magnet = useMagnet();
 
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Navbar and content - no conflicting backgrounds */}
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 -z-10">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50" />
+        
+        {/* Floating Geometric Shapes */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse" />
+        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-blue-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-40 left-20 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }} />
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.03%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40" />
+        
+        {/* Animated Orbs */}
+        <div className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-32 right-32 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-20 right-20 w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '2.5s' }} />
+      </div>
       
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden">
         {/* Premium Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
-        {/* Aurora blobs */}
+        
+        {/* Enhanced Aurora blobs */}
         <div className="home-aurora">
           <div className="blob --1" />
           <div className="blob --2" />
           <div className="blob --3" />
         </div>
+        
         {/* Subtle Pattern Overlay */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent via-white/5 to-transparent" />
+        
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 min-h-[70vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center" onMouseMove={heroParallax.onMouseMove}>
           <div
             className="text-center max-w-5xl mx-auto w-full"
@@ -201,22 +220,30 @@ const Index = () => {
               transition: 'transform 120ms ease-out',
             }}
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 mt-2 sm:mt-4 lg:mt-0 leading-tight reveal-up">
-              <span className="block">Renting the way</span>
-              <span className="block text-success-green">it should be</span>
-            </h1>
+            {/* Enhanced Title with Icons */}
+            <div className="flex items-center justify-center gap-3 mb-4 reveal-up">
+              <Sparkles className="h-8 w-8 text-success-green animate-pulse" />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+                <span className="block">Renting the way</span>
+                <span className="block text-success-green">it should be</span>
+              </h1>
+              <Star className="h-8 w-8 text-success-green animate-pulse" style={{ animationDelay: '0.5s' }} />
+            </div>
+            
             <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
               Find your perfect rental home in South Africa — connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
             </p>
 
-            {/* Property24-style Search Bar */}
+            {/* Glass Search Bar */}
             <div className="reveal-up" style={{ animationDelay: '200ms' }}>
-              <Property24SearchBar
-                filters={filters}
-                onFiltersChange={onFiltersChange}
-                onSearch={handleSearch}
-                onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
-              />
+              <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-1 shadow-2xl">
+                <Property24SearchBar
+                  filters={filters}
+                  onFiltersChange={onFiltersChange}
+                  onSearch={handleSearch}
+                  onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
+                />
+              </div>
 
               <MoreFiltersModal
                 open={moreFiltersOpen}
@@ -250,7 +277,7 @@ const Index = () => {
 
             {/* No Results Message in Hero Section */}
             {showNoResults && (
-              <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20 reveal-up" style={{ animationDelay: '300ms' }}>
+              <div className="mt-6 p-4 backdrop-blur-xl bg-white/10 rounded-lg border border-white/20 reveal-up" style={{ animationDelay: '300ms' }}>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-white mb-2">No properties match your filters</h3>
                   <p className="text-white/80 mb-4">Try adjusting your search criteria or browse all available properties.</p>
@@ -277,7 +304,7 @@ const Index = () => {
                         });
                         setShowNoResults(false);
                       }}
-                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue"
+                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
                     >
                       Clear Filters
                     </Button>
@@ -292,18 +319,25 @@ const Index = () => {
               </div>
             )}
 
-            {/* Trust bullets */}
+            {/* Enhanced Trust bullets with glass effect */}
             <div className="mt-8 flex flex-wrap justify-center gap-6 text-white/90 reveal-up" style={{ animationDelay: '350ms' }}>
-              <div className="flex items-center"><CheckCircle className="h-5 w-5 mr-2" /><span>Direct Contact</span></div>
-              <div className="flex items-center"><CheckCircle className="h-5 w-5 mr-2" /><span>No Commission</span></div>
-              <div className="flex items-center"><CheckCircle className="h-5 w-5 mr-2" /><span>Verified Properties</span></div>
+              {[
+                { icon: CheckCircle, text: "Direct Contact", color: "from-blue-400 to-blue-600" },
+                { icon: CheckCircle, text: "No Commission", color: "from-emerald-400 to-emerald-600" },
+                { icon: CheckCircle, text: "Verified Properties", color: "from-purple-400 to-purple-600" }
+              ].map((item, i) => (
+                <div key={item.text} className="flex items-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-full px-4 py-2 hover:scale-105 transition-transform duration-300">
+                  <item.icon className="h-5 w-5 mr-2 text-white" />
+                  <span>{item.text}</span>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
       {/* Trusted by + value props marquee */}
-      <section className="py-6 bg-background/60 border-t border-b border-border/50">
+      <section className="py-6 backdrop-blur-xl bg-white/5 border-t border-b border-white/10">
         <div className="text-center text-sm text-muted-foreground mb-3">Trusted by renters and landlords across SA</div>
         <div className="home-marquee">
           <div className="home-marquee-track gap-8 px-4 sm:px-8">
@@ -318,7 +352,7 @@ const Index = () => {
                   'Verified Listings',
                   'Smart Search',
                 ].map((tag) => (
-                  <span key={`${loop}-${tag}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-muted text-foreground/80 border border-border">
+                  <span key={`${loop}-${tag}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl bg-white/10 text-foreground/80 border border-white/20 hover:bg-white/20 transition-colors duration-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-success-green" /> {tag}
                   </span>
                 ))}
@@ -328,8 +362,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid */}
-      <section className="py-20 bg-gradient-to-br from-background via-muted/30 to-background">
+      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid with Glass Cards */}
+      <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">From Listing to Lease, Made Easy</h2>
@@ -344,66 +378,68 @@ const Index = () => {
                 title: 'Tenant Applications and Screening',
                 desc: 'Online tenant application submission form capturing personal info, employment, rental history. Automated credit and background checks integration. Reference and employment verification. Risk assessment and scoring system for applicant suitability. Application status tracking and communication hub.',
                 icon: '👥',
-                gradient: 'from-blue-500/10 to-indigo-500/10',
-                border: 'border-blue-500/20',
-                iconBg: 'bg-blue-500/10',
+                gradient: 'from-blue-500/20 to-indigo-500/20',
+                border: 'border-blue-500/30',
+                iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
               },
               {
                 title: 'Viewings and Scheduling',
                 desc: 'Calendaring system for property viewings. Tenants and agents can book viewing times via shared calendar slots. Automated notifications and reminders sent to tenants and landlords. Viewing history and follow-up management.',
                 icon: '📅',
-                gradient: 'from-green-500/10 to-emerald-500/10',
-                border: 'border-green-500/20',
-                iconBg: 'bg-green-500/10',
+                gradient: 'from-green-500/20 to-emerald-500/20',
+                border: 'border-green-500/30',
+                iconBg: 'bg-gradient-to-br from-green-500 to-emerald-600',
               },
               {
                 title: 'Compliance and LeasePack Management',
                 desc: 'Storage and easy retrieval of compliance certificates (electrical, safety, etc). Digital lease agreement signing and stamping. License, certification, and legal document management. Tenant access to lease documents and compliance info. Alerts for expiring certificates or renewal requirements.',
                 icon: '📋',
-                gradient: 'from-purple-500/10 to-violet-500/10',
-                border: 'border-purple-500/20',
-                iconBg: 'bg-purple-500/10',
+                gradient: 'from-purple-500/20 to-violet-500/20',
+                border: 'border-purple-500/30',
+                iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600',
               },
               {
                 title: 'Maintenance Management',
                 desc: 'Tenant maintenance request submission portal. Ticket management with tracking status (open, in progress, resolved). Coordination with maintenance teams and vendors. Maintenance cost tracking and history logs. Emergency maintenance alert system.',
                 icon: '🔧',
-                gradient: 'from-orange-500/10 to-red-500/10',
-                border: 'border-orange-500/20',
-                iconBg: 'bg-orange-500/10',
+                gradient: 'from-orange-500/20 to-red-500/20',
+                border: 'border-orange-500/30',
+                iconBg: 'bg-gradient-to-br from-orange-500 to-red-600',
               },
               {
                 title: 'Property Portfolio Management',
                 desc: 'Comprehensive dashboard for managing multiple properties. Financial tracking with rent collection and expense monitoring. Tenant communication hub with integrated messaging. Document storage and organization system. Performance analytics and reporting tools.',
                 icon: '🏢',
-                gradient: 'from-cyan-500/10 to-teal-500/10',
-                border: 'border-cyan-500/20',
-                iconBg: 'bg-cyan-500/10',
+                gradient: 'from-cyan-500/20 to-teal-500/20',
+                border: 'border-cyan-500/30',
+                iconBg: 'bg-gradient-to-br from-cyan-500 to-teal-600',
               },
               {
                 title: 'Smart Notifications & Alerts',
                 desc: 'Real-time notifications for applications, maintenance requests, and lease renewals. Automated reminders for rent payments and document expiry. Customizable alert preferences for different user types. Multi-channel communication via email, SMS, and in-app notifications.',
                 icon: '🔔',
-                gradient: 'from-pink-500/10 to-rose-500/10',
-                border: 'border-pink-500/20',
-                iconBg: 'bg-pink-500/10',
+                gradient: 'from-pink-500/20 to-rose-500/20',
+                border: 'border-pink-500/30',
+                iconBg: 'bg-gradient-to-br from-pink-500 to-rose-600',
               },
             ].map((feature, i) => (
               <div
                 key={feature.title}
-                className={`group relative p-8 rounded-2xl backdrop-blur-sm bg-gradient-to-br ${feature.gradient} border ${feature.border} shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02] reveal-up`}
+                className={`group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] reveal-up hover:bg-white/20`}
                 style={{ animationDelay: `${100 + i * 120}ms` }}
+                onMouseMove={tilt.onMove}
+                onMouseLeave={tilt.onLeave}
               >
-                {/* Glass effect overlay */}
-                <div className="absolute inset-0 rounded-2xl bg-white/5 backdrop-blur-sm" />
+                {/* Enhanced glass effect overlay */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl" />
                 
                 {/* Animated border glow */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 {/* Content */}
                 <div className="relative z-10 flex gap-6">
-                  {/* Icon */}
-                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl transform group-hover:scale-110 transition-transform duration-300`}>
+                  {/* Enhanced Icon */}
+                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                     {feature.icon}
                   </div>
                   
@@ -429,8 +465,8 @@ const Index = () => {
       {/* How It Works Section */}
       <HowItWorks />
 
-      {/* Featured Properties */}
-      <section className="py-16 bg-background">
+      {/* Featured Properties with Glass Cards */}
+      <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-foreground mb-4">Featured Properties</h2>
@@ -441,13 +477,15 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
+              <div key={property.id} className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02]">
+                <PropertyCard {...property} />
+              </div>
             ))}
           </div>
           
           <div className="text-center">
             <Link to="/properties">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="backdrop-blur-xl bg-white/10 border-white/20 hover:bg-white/20 text-foreground">
                 View All Properties
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
@@ -456,32 +494,32 @@ const Index = () => {
         </div>
       </section>
 
-
-      {/* Stats Section with animated counters */}
-      <section className="py-16 bg-background">
+      {/* Stats Section with animated counters and glass cards */}
+      <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2"><AnimatedCounter to={5000} />+</div>
-              <div className="text-muted-foreground">Active Properties</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2"><AnimatedCounter to={15000} />+</div>
-              <div className="text-muted-foreground">Happy Tenants</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">98%</div>
-              <div className="text-muted-foreground">Success Rate</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-muted-foreground">Support</div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { number: 5000, label: "Active Properties", icon: Home },
+              { number: 15000, label: "Happy Tenants", icon: Star },
+              { number: 98, label: "Success Rate", icon: CheckCircle, suffix: "%" },
+              { number: 24, label: "Support", icon: Zap, suffix: "/7" }
+            ].map((stat, i) => (
+              <div key={stat.label} className="text-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <div className="text-4xl font-bold text-primary mb-2 flex items-center justify-center gap-2">
+                  {stat.icon && <stat.icon className="h-8 w-8 text-primary/60" />}
+                  <span>
+                    {stat.number !== 98 ? <AnimatedCounter to={stat.number} /> : stat.number}
+                    {stat.suffix}
+                  </span>
+                </div>
+                <div className="text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section with enhanced glass effects */}
       <section className="py-20 bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -491,7 +529,7 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <Button size="lg" variant="secondary" className="relative overflow-hidden">
+              <Button size="lg" variant="secondary" className="relative overflow-hidden backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/30">
                 <span
                   className="magnet"
                   onMouseMove={magnet.onMove}
@@ -502,7 +540,7 @@ const Index = () => {
               </Button>
             </Link>
             <Link to="/list-property">
-              <Button size="lg" variant="outline" className="relative overflow-hidden text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-sm bg-white/10">
+              <Button size="lg" variant="outline" className="relative overflow-hidden text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-xl bg-white/10">
                 <span
                   className="magnet"
                   onMouseMove={magnet.onMove}
@@ -516,8 +554,8 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-muted py-12">
+      {/* Footer with glass effect */}
+      <footer className="backdrop-blur-xl bg-white/5 border-t border-white/10 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -535,32 +573,32 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">For Tenants</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/properties" className="hover:text-primary">Browse Properties</Link></li>
-                <li><Link to="/how-it-works" className="hover:text-primary">How It Works</Link></li>
-                <li><a href="#" className="hover:text-primary">Rental Tips</a></li>
+                <li><Link to="/properties" className="hover:text-primary transition-colors duration-300">Browse Properties</Link></li>
+                <li><Link to="/how-it-works" className="hover:text-primary transition-colors duration-300">How It Works</Link></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Rental Tips</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">For Landlords</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">List Property</a></li>
-                <li><a href="#" className="hover:text-primary">Pricing Guide</a></li>
-                <li><a href="#" className="hover:text-primary">Landlord Resources</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">List Property</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Pricing Guide</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Landlord Resources</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/about" className="hover:text-primary">About Us</Link></li>
-                <li><a href="#" className="hover:text-primary">Contact</a></li>
-                <li><a href="#" className="hover:text-primary">Help Center</a></li>
+                <li><Link to="/about" className="hover:text-primary transition-colors duration-300">About Us</Link></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Contact</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Help Center</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+          <div className="border-t border-white/10 mt-8 pt-8 text-center text-muted-foreground">
             <p>&copy; 2024 SwiftRent. All rights reserved.</p>
           </div>
         </div>
