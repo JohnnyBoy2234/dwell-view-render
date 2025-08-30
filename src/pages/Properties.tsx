@@ -194,6 +194,7 @@ export default function Properties() {
   }
 
   console.log('[Properties] Rendering properties page with', filteredProperties.length, 'filtered properties');
+  console.log('[Properties] Current filters:', filters);
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/30 to-ocean-blue/5">
@@ -206,15 +207,38 @@ export default function Properties() {
           </p>
         </div>
 
-        {/* Search Interface */}
-        <div className="mb-8">
-          <div className="backdrop-blur-xl bg-white/95 rounded-2xl p-6 shadow-2xl border border-white/30">
-            <Property24SearchBar
-              filters={filters}
-              onFiltersChange={updateFilters}
-              onSearch={handleSearch}
-              onMoreFiltersOpen={() => {}}
+        {/* Search Interface - Simplified for debugging */}
+        <div className="mb-8 p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
+          <h3 className="text-lg font-semibold mb-4 text-gray-800">Search Properties</h3>
+          
+          {/* Simple search input */}
+          <div className="flex gap-4 mb-4">
+            <input
+              type="text"
+              placeholder="Search by location (e.g., Cape Town)"
+              value={filters.searchTerm || ''}
+              onChange={(e) => updateFilters({ searchTerm: e.target.value })}
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
             />
+            <Button 
+              onClick={handleSearch}
+              className="px-6 py-2 bg-ocean-blue text-white hover:bg-ocean-blue-dark"
+            >
+              Search
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleClearFilters}
+              className="px-6 py-2 border-ocean-blue text-ocean-blue hover:bg-ocean-blue/10"
+            >
+              Clear
+            </Button>
+          </div>
+          
+          {/* Debug info */}
+          <div className="text-sm text-gray-600">
+            <p>Search term: "{filters.searchTerm || 'none'}"</p>
+            <p>Filtered properties: {filteredProperties.length} of {properties.length}</p>
           </div>
         </div>
 
