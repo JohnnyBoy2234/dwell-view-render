@@ -3,11 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
 import { useNavigate } from 'react-router-dom';
-import { Property24SearchBar } from "@/components/search/Property24SearchBar";
-import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
-import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
-import { usePropertySearchFilters, PropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 
 interface Property {
   id: string;
@@ -35,91 +30,6 @@ export default function Properties() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   
-  // Use the correct search filters hook
-  const { filters, updateFilters, executeSearch, clearFilters } = usePropertySearchFilters();
-  
-  // Filter properties based on search criteria
-  const filteredProperties = properties.filter(property => {
-    // Location search
-    if (filters.searchTerm) {
-      const searchTermLower = filters.searchTerm.toLowerCase().trim();
-      const propertyLocationLower = property.location.toLowerCase();
-      
-      // Split search terms and location into words
-      const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 1);
-      const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 1);
-      
-      // Check if ALL search words are present in the location
-      const allSearchWordsFound = searchWords.every(searchWord => {
-        return locationWords.some(locationWord => 
-          locationWord.includes(searchWord) || searchWord.includes(locationWord)
-        );
-      });
-      
-      if (!allSearchWordsFound) {
-        return false;
-      }
-      
-      // Additional validation for short search terms
-      const searchTermLength = searchTermLower.length;
-      if (searchTermLength < 4) {
-        const hasSignificantMatch = locationWords.some(locationWord => 
-          locationWord.length >= searchTermLength + 2 && locationWord.includes(searchTermLower)
-        );
-        if (!hasSignificantMatch) {
-          return false;
-        }
-      }
-      
-      // City validation
-      const commonCities = ['cape town', 'johannesburg', 'pretoria', 'durban', 'port elizabeth', 'bloemfontein', 'kimberley', 'east london', 'nelspruit', 'polokwane'];
-      const isSearchingForCity = commonCities.some(city => searchTermLower.includes(city));
-      
-      if (isSearchingForCity) {
-        const cityInLocation = commonCities.some(city => propertyLocationLower.includes(city));
-        if (!cityInLocation) {
-          return false;
-        }
-      }
-    }
-
-    // Property type filter
-    if (filters.propertyType !== 'Any' && property.property_type !== filters.propertyType) {
-      return false;
-    }
-
-    // Price range filter
-    if (filters.minPrice && property.price < parseInt(filters.minPrice)) {
-      return false;
-    }
-    if (filters.maxPrice && property.price > parseInt(filters.maxPrice)) {
-      return false;
-    }
-
-    // Bedrooms filter
-    if (filters.bedrooms !== 'Any' && property.bedrooms !== parseInt(filters.bedrooms)) {
-      return false;
-    }
-
-    // Bathrooms filter
-    if (filters.bathrooms !== 'Any' && property.bathrooms !== parseInt(filters.bathrooms)) {
-      return false;
-    }
-
-    // Property types filter
-    if (filters.propertyTypes.length > 0 && !filters.propertyTypes.includes(property.property_type)) {
-      return false;
-    }
-
-    // Amenities filter
-    if (filters.amenities.length > 0 && 
-        !filters.amenities.every(amenity => property.amenities?.includes(amenity))) {
-      return false;
-    }
-
-    return true;
-  });
-
   useEffect(() => {
     console.log('[Properties] Component mounted, fetching properties...');
     fetchProperties();
@@ -158,14 +68,6 @@ export default function Properties() {
     }
   };
 
-  const handleSearch = () => {
-    executeSearch();
-  };
-
-  const handleClearFilters = () => {
-    clearFilters();
-  };
-
   if (loading) {
     console.log('[Properties] Rendering loading state...');
     return (
@@ -193,8 +95,7 @@ export default function Properties() {
     );
   }
 
-  console.log('[Properties] Rendering properties page with', filteredProperties.length, 'filtered properties');
-  console.log('[Properties] Current filters:', filters);
+  console.log('[Properties] Rendering properties page with', properties.length, 'properties');
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/30 to-ocean-blue/5">
@@ -207,122 +108,18 @@ export default function Properties() {
           </p>
         </div>
 
-        {/* Search Interface - Simplified for debugging */}
-        <div className="mb-8 p-6 bg-white rounded-2xl shadow-lg border border-gray-200">
-          <h3 className="text-lg font-semibold mb-4 text-gray-800">Search Properties</h3>
-          
-          {/* Simple search input */}
-          <div className="flex gap-4 mb-4">
-            <input
-              type="text"
-              placeholder="Search by location (e.g., Cape Town)"
-              value={filters.searchTerm || ''}
-              onChange={(e) => updateFilters({ searchTerm: e.target.value })}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
-            />
-            <Button 
-              onClick={handleSearch}
-              className="px-6 py-2 bg-ocean-blue text-white hover:bg-ocean-blue-dark"
-            >
-              Search
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={handleClearFilters}
-              className="px-6 py-2 border-ocean-blue text-ocean-blue hover:bg-ocean-blue/10"
-            >
-              Clear
-            </Button>
-          </div>
-          
-          {/* Debug info */}
-          <div className="text-sm text-gray-600">
-            <p>Search term: "{filters.searchTerm || 'none'}"</p>
-            <p>Filtered properties: {filteredProperties.length} of {properties.length}</p>
-          </div>
-        </div>
-
-        {/* Active Filters Display */}
-        {(filters.searchTerm || filters.propertyType !== "Any" || filters.minPrice || filters.maxPrice || filters.bedrooms !== "Any" || filters.bathrooms !== "Any" || filters.propertyTypes.length > 0 || filters.amenities.length > 0) && (
-          <div className="mb-6 p-4 bg-white/80 rounded-xl border border-ocean-blue/20">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-ocean-blue">Active Filters</h3>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleClearFilters}
-                className="text-ocean-blue hover:bg-ocean-blue/10"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Clear All
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {filters.searchTerm && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Location: {filters.searchTerm}
-                </div>
-              )}
-              {filters.propertyType !== "Any" && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Type: {filters.propertyType}
-                </div>
-              )}
-              {filters.minPrice && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Min: R{parseInt(filters.minPrice).toLocaleString()}
-                </div>
-              )}
-              {filters.maxPrice && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Max: R{parseInt(filters.maxPrice).toLocaleString()}
-                </div>
-              )}
-              {filters.bedrooms !== "Any" && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  {filters.bedrooms} Bedroom{filters.bedrooms !== "1" ? "s" : ""}
-                </div>
-              )}
-              {filters.bathrooms !== "Any" && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  {filters.bathrooms} Bathroom{filters.bathrooms !== "1" ? "s" : ""}
-                </div>
-              )}
-              {filters.propertyTypes.map((type, index) => (
-                <div key={index} className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Type: {type}
-                </div>
-              ))}
-              {filters.amenities.map((amenity, index) => (
-                <div key={index} className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  {amenity}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Results */}
         <div className="flex justify-between items-center mb-6">
           <p className="text-muted-foreground">
-            {filteredProperties.length} properties found
+            {properties.length} properties found
           </p>
-          {filteredProperties.length !== properties.length && (
-            <Button 
-              variant="outline" 
-              onClick={handleClearFilters}
-              className="text-ocean-blue border-ocean-blue/30 hover:bg-ocean-blue/10"
-            >
-              Show All Properties
-            </Button>
-          )}
         </div>
 
         {/* Property Grid - Enhanced Responsive */}
         <ResponsivePropertyGrid 
-          properties={filteredProperties}
+          properties={properties}
           loading={loading}
-          onClearFilters={handleClearFilters}
+          onClearFilters={() => {}}
           onShowAllProperties={() => navigate('/properties')}
         />
       </div>

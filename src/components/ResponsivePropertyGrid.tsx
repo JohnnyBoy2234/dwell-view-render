@@ -1,6 +1,7 @@
 import * as React from 'react';
 import PropertyCard from './PropertyCard';
 import { NoResultsMessage } from './search/NoResultsMessage';
+import { Home } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -47,10 +48,17 @@ export const ResponsivePropertyGrid: React.FC<ResponsivePropertyGridProps> = ({
 
   if (properties.length === 0) {
     return (
-      <NoResultsMessage 
-        onClearFilters={onClearFilters || (() => {})}
-        onShowAllProperties={onShowAllProperties || (() => {})}
-      />
+      <div className="text-center py-12">
+        <div className="max-w-md mx-auto">
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <Home className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold mb-2">No Properties Available</h3>
+          <p className="text-muted-foreground">
+            There are currently no properties available. Please check back later.
+          </p>
+        </div>
+      </div>
     );
   }
 
