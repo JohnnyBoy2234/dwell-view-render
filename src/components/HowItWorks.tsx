@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import TenantCard from "./TenantCard";
 import React from "react";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const landlordData = {
   header: {
@@ -136,39 +137,37 @@ const HowItWorks: React.FC = () => {
     <div className="bg-[hsl(var(--sr-bg))]">
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
-            <h2 className="mb-6 text-2xl font-bold text-[hsl(var(--sr-ink))] sm:text-3xl lg:text-5xl">
-              How SwiftRent Works
-            </h2>
-            <p className="mb-10 text-lg text-[hsl(var(--sr-muted))] sm:mb-16 sm:text-xl lg:text-2xl">
-              Connecting landlords and tenants directly with no agents, zero commission, and full control
-            </p>
-          </div>
+                  <SectionHeader
+          title="How SwiftRent Works"
+          subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
+          showTagline={true}
+          taglineVariant="eyebrow"
+        />
         </div>
 
         <div className="pb-12 md:hidden">
           <div className="flex items-center justify-center space-x-4">
             <Label
               htmlFor="user-type-toggle"
-              className={`font-medium transition-colors ${isTenant ? "text-[hsl(var(--sr-blue))]" : "text-[hsl(var(--sr-muted))]"}`}
+              className={`font-medium transition-colors ${!isTenant ? "text-[hsl(var(--sr-blue))]" : "text-[hsl(var(--sr-muted))]"}`}
             >
               For Tenants
             </Label>
             <Switch
               id="user-type-toggle"
-              checked={isTenant}
+              checked={!isTenant}
               onCheckedChange={() =>
                 setUserType(isTenant ? "landlord" : "tenant")
               }
               className={`transition-colors ${
-                isTenant
-                  ? "bg-[hsl(var(--sr-blue))]"
-                  : "bg-[hsl(var(--sr-green))]"
+                !isTenant
+                  ? "bg-[hsl(var(--sr-green))]"
+                  : "bg-[hsl(var(--sr-blue))]"
               }`}
             />
             <Label
               htmlFor="user-type-toggle"
-              className={`font-medium transition-colors ${!isTenant ? "text-[hsl(var(--sr-green))]" : "text-[hsl(var(--sr-muted))]"}`}
+              className={`font-medium transition-colors ${isTenant ? "text-[hsl(var(--sr-green))]" : "text-[hsl(var(--sr-muted))]"}`}
             >
               For Landlords
             </Label>

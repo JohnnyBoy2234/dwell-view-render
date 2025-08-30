@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
+import { PropertiesRouteGuard } from "@/components/RoleGuard";
 import Navbar from "./components/Navbar";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
@@ -52,7 +53,7 @@ const App = () => (
 
             {/* Routes with Navbar */}
             <Route path="/" element={<><Navbar /><Index /></>} />
-            <Route path="/properties" element={<><Navbar /><RouteGuard><Properties /></RouteGuard></>} />
+            <Route path="/properties" element={<><Navbar /><PropertiesRouteGuard><Properties /></PropertiesRouteGuard></>} />
             <Route path="/about" element={<><Navbar /><About /></>} />
 
             {/* Routes without Navbar */}
@@ -60,10 +61,10 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Enhanced Dashboard Routes */}
-            <Route path="/tenant-dashboard" element={<EnhancedTenantDashboard />} />
-            <Route path="/tenant-dashboard/*" element={<RouteGuard><TenantDashboardRoutes /></RouteGuard>} />
-            <Route path="/dashboard" element={<EnhancedLandlordDashboard />} />
-            <Route path="/dashboard/*" element={<RouteGuard><LandlordDashboardRoutes /></RouteGuard>} />
+            <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
+            <Route path="/enhancedtenantdashboard/*" element={<RouteGuard><TenantDashboardRoutes /></RouteGuard>} />
+            <Route path="/enhancedlandlorddashboard" element={<EnhancedLandlordDashboard />} />
+            <Route path="/enhancedlandlorddashboard/*" element={<RouteGuard><LandlordDashboardRoutes /></RouteGuard>} />
             {/* Standalone maintenance ticket route for cross-dashboard access */}
             <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />

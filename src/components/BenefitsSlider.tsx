@@ -9,6 +9,7 @@ interface Benefit {
   icon: string;
   title: string;
   text: string;
+  highlight?: boolean;
 }
 
 const benefits: Benefit[] = [
@@ -28,6 +29,12 @@ const benefits: Benefit[] = [
     text: "List a property or find a home in minutes with guided steps.",
   },
   {
+    icon: "💙",
+    title: "Zero Commission",
+    text: "Keep 100% of your rental income with no hidden fees or agent costs.",
+    highlight: true,
+  },
+  {
     icon: "🔒",
     title: "Secure Online Payments",
     text: "Collect and pay rent reliably with safe, automated payments.",
@@ -36,6 +43,17 @@ const benefits: Benefit[] = [
     icon: "🛠️",
     title: "Smart Tools Included",
     text: "Enjoy built-in tenant screening, maintenance tracking, and reports.",
+  },
+  {
+    icon: "📱",
+    title: "Mobile First",
+    text: "Manage your properties and applications from anywhere, anytime.",
+  },
+  {
+    icon: "💙",
+    title: "Zero Commission",
+    text: "Keep 100% of your rental income with no hidden fees or agent costs.",
+    highlight: true,
   },
 ];
 
@@ -70,7 +88,7 @@ export function BenefitsSlider() {
                   </div>
                 </div>
                 <div className="text-center md:text-left">
-                  <h3 className="text-2xl font-bold mb-2 text-blue-600">
+                  <h3 className={`text-2xl font-bold mb-2 ${benefit.highlight ? 'text-primary font-extrabold' : 'text-blue-600'}`}>
                     {benefit.title}
                   </h3>
                   <p className="text-gray-600">{benefit.text}</p>

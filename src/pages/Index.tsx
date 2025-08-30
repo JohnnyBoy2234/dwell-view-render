@@ -17,6 +17,8 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
+import { ThemeTagline } from "@/components/ui/ThemeTagline";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 // Lightweight utilities for homepage motion without new deps
 function useParallax() {
@@ -230,6 +232,8 @@ const Index = () => {
               <Star className="h-8 w-8 text-success-green animate-pulse" style={{ animationDelay: '0.5s' }} />
             </div>
             
+            <ThemeTagline variant="hero" />
+            
             <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
               Find your perfect rental home in South Africa — connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
             </p>
@@ -319,19 +323,7 @@ const Index = () => {
               </div>
             )}
 
-            {/* Enhanced Trust bullets with glass effect */}
-            <div className="mt-8 flex flex-wrap justify-center gap-6 text-white/90 reveal-up" style={{ animationDelay: '350ms' }}>
-              {[
-                { icon: CheckCircle, text: "Direct Contact", color: "from-blue-400 to-blue-600" },
-                { icon: CheckCircle, text: "No Commission", color: "from-emerald-400 to-emerald-600" },
-                { icon: CheckCircle, text: "Verified Properties", color: "from-purple-400 to-purple-600" }
-              ].map((item, i) => (
-                <div key={item.text} className="flex items-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-full px-4 py-2 hover:scale-105 transition-transform duration-300">
-                  <item.icon className="h-5 w-5 mr-2 text-white" />
-                  <span>{item.text}</span>
-                </div>
-              ))}
-            </div>
+
           </div>
         </div>
       </section>
@@ -365,12 +357,12 @@ const Index = () => {
       {/* From Listing to Lease, Made Easy - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">From Listing to Lease, Made Easy</h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform.
-            </p>
-          </div>
+          <SectionHeader
+            title="From Listing to Lease, Made Easy"
+            subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
+            showTagline={true}
+            taglineVariant="eyebrow"
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {[
@@ -468,12 +460,12 @@ const Index = () => {
       {/* Featured Properties with Glass Cards */}
       <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Featured Properties</h2>
-            <p className="text-lg text-muted-foreground">
-              Discover handpicked properties across South Africa's major cities
-            </p>
-          </div>
+          <SectionHeader
+            title="Featured Properties"
+            subtitle="Discover handpicked properties across South Africa's major cities"
+            showTagline={true}
+            taglineVariant="eyebrow"
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {featuredProperties.map((property) => (
