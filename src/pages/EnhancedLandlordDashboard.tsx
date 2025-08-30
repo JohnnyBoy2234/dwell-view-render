@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
@@ -37,6 +37,7 @@ interface TenantListItem {
 export default function EnhancedLandlordDashboard() {
   const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { loading: metricsLoading, metrics } = useLandlordMetrics();
   const [currentTab, setCurrentTab] = useState('/enhancedlandlorddashboard');
@@ -57,8 +58,15 @@ export default function EnhancedLandlordDashboard() {
       navigate('/tenant-dashboard');
       return;
     }
+    
+    // Sync currentTab with the current URL path
+    const path = location.pathname;
+    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
+      setCurrentTab(path);
+    }
+    
     fetchDashboardData();
-  }, [user, isLandlord, navigate]);
+  }, [user, isLandlord, navigate, location.pathname]);
 
   const fetchDashboardData = async () => {
     if (!user) return;
@@ -429,11 +437,21 @@ export default function EnhancedLandlordDashboard() {
     );
   };
 
+  const handleTabChange = (tab: string) => {
+    setCurrentTab(tab);
+    // Update the URL when changing tabs
+    if (tab !== '/enhancedlandlorddashboard') {
+      navigate(tab);
+    } else {
+      navigate('/enhancedlandlorddashboard');
+    }
+  };
+
   return (
     <EnhancedDashboardLayout 
       title="Rental Manager" 
       currentTab={currentTab}
-      onTabChange={setCurrentTab}
+      onTabChange={handleTabChange}
     >
       {renderTabContent()}
     </EnhancedDashboardLayout>

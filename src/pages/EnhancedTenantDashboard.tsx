@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { MessagesTab } from '@/components/dashboard/MessagesTab';
 import { RentDueCard } from '@/components/dashboard/tenant/RentDueCard';
@@ -22,8 +22,9 @@ import { BUILD_TAG } from '@/version';
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { unreadCount } = useUnreadMessages();
-  const [currentTab, setCurrentTab] = useState('/tenant-dashboard');
+  const [currentTab, setCurrentTab] = useState('/enhancedtenantdashboard');
   const {
     loading,
     rentDue,
@@ -42,15 +43,31 @@ export default function EnhancedTenantDashboard() {
       return;
     }
     if (isLandlord) {
-              navigate('/enhancedtenantdashboard');
+      navigate('/enhancedlandlorddashboard');
       return;
     }
-  }, [user, isLandlord, navigate]);
+    
+    // Sync currentTab with the current URL path
+    const path = location.pathname;
+    if (path !== '/enhancedtenantdashboard' && path.startsWith('/enhancedtenantdashboard')) {
+      setCurrentTab(path);
+    }
+  }, [user, isLandlord, navigate, location.pathname]);
 
   const handleMakePayment = () => {
     if (rentDue) {
       // Navigate to payment page or open payment modal
       navigate(`/payment/${rentDue.tenancyId}`);
+    }
+  };
+
+  const handleTabChange = (tab: string) => {
+    setCurrentTab(tab);
+    // Update the URL when changing tabs
+    if (tab !== '/enhancedtenantdashboard') {
+      navigate(tab);
+    } else {
+      navigate('/enhancedtenantdashboard');
     }
   };
 
@@ -236,7 +253,7 @@ export default function EnhancedTenantDashboard() {
     <EnhancedDashboardLayout 
       title="Tenant Dashboard" 
       currentTab={currentTab}
-      onTabChange={setCurrentTab}
+      onTabChange={handleTabChange}
     >
       {renderTabContent()}
     </EnhancedDashboardLayout>
