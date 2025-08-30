@@ -43,7 +43,14 @@ export default function EnhancedLandlordDashboard() {
   const { toast } = useToast();
   const { loading: metricsLoading, metrics } = useLandlordMetrics();
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications();
-  const [currentTab, setCurrentTab] = useState('/enhancedlandlorddashboard');
+  const [currentTab, setCurrentTab] = useState(() => {
+    // Initialize currentTab from the current URL path
+    const path = location.pathname;
+    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
+      return path;
+    }
+    return '/enhancedlandlorddashboard';
+  });
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
   const [loadingMaintenance, setLoadingMaintenance] = useState(false);
   
@@ -82,6 +89,27 @@ export default function EnhancedLandlordDashboard() {
       fetchMaintenanceRequests();
     }
   }, [user, isLandlord, navigate, location.pathname, fetchAllApplications]);
+
+  // Add a separate useEffect to handle URL changes and sync currentTab
+  useEffect(() => {
+    const path = location.pathname;
+    console.log('[Dashboard] Current path:', path, 'Current tab:', currentTab);
+    
+    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
+      console.log('[Dashboard] Setting current tab to:', path);
+      setCurrentTab(path);
+    }
+  }, [location.pathname, currentTab]);
+
+  // Add a useEffect to handle tab-specific data fetching when currentTab changes
+  useEffect(() => {
+    if (currentTab === '/enhancedlandlorddashboard/applications') {
+      fetchAllApplications();
+    }
+    if (currentTab === '/enhancedlandlorddashboard/maintenance') {
+      fetchMaintenanceRequests();
+    }
+  }, [currentTab, fetchAllApplications]);
 
   const fetchDashboardData = async () => {
     if (!user) return;
@@ -224,24 +252,33 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderTabContent = () => {
+    console.log('[Dashboard] Rendering tab content for:', currentTab);
+    
     switch (currentTab) {
       case '/enhancedlandlorddashboard/messages':
         // Navigate to the actual messages page instead of showing MessagesTab
         navigate('/enhancedlandlorddashboard/messages');
         return null;
       case '/enhancedlandlorddashboard/properties':
+        console.log('[Dashboard] Rendering properties tab');
         return renderPropertiesTab();
       case '/enhancedlandlorddashboard/applications':
+        console.log('[Dashboard] Rendering applications tab');
         return renderApplicationsTab();
       case '/enhancedlandlorddashboard/tenants':
+        console.log('[Dashboard] Rendering tenants tab');
         return renderTenantsTab();
       case '/enhancedlandlorddashboard/payments':
+        console.log('[Dashboard] Rendering payments tab');
         return renderPaymentsTab();
       case '/enhancedlandlorddashboard/reports':
+        console.log('[Dashboard] Rendering reports tab');
         return renderReportsTab();
       case '/enhancedlandlorddashboard/maintenance':
+        console.log('[Dashboard] Rendering maintenance tab');
         return renderMaintenanceTab();
       default:
+        console.log('[Dashboard] Rendering default dashboard content');
         return renderDashboardContent();
     }
   };
@@ -1123,6 +1160,7 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const handleTabChange = (tab: string) => {
+    console.log('[Dashboard] Tab change requested:', tab);
     setCurrentTab(tab);
     // Update the URL when changing tabs
     if (tab !== '/enhancedlandlorddashboard') {

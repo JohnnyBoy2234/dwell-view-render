@@ -61,10 +61,8 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Enhanced Dashboard Routes */}
-            <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
-            <Route path="/enhancedtenantdashboard/*" element={<RouteGuard><TenantDashboardRoutes /></RouteGuard>} />
-            <Route path="/enhancedlandlorddashboard" element={<EnhancedLandlordDashboard />} />
-            <Route path="/enhancedlandlorddashboard/*" element={<RouteGuard><LandlordDashboardRoutes /></RouteGuard>} />
+            <Route path="/enhancedtenantdashboard/*" element={<EnhancedTenantDashboard />} />
+            <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
             {/* Standalone maintenance ticket route for cross-dashboard access */}
             <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
