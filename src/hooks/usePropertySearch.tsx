@@ -66,29 +66,57 @@ export function usePropertySearch(properties: Property[]) {
 
   // Filter properties based on current filters
   const filteredProperties = properties.filter(property => {
-    // Enhanced search term filter with intelligent location matching
+    // Enhanced search term filter with strict location matching
     if (filters.searchTerm) {
       const searchTermLower = filters.searchTerm.toLowerCase().trim();
       const propertyLocationLower = property.location.toLowerCase();
       const propertyTitleLower = property.title.toLowerCase();
       
-      // Check for exact matches first
-      if (propertyLocationLower.includes(searchTermLower) || 
-          propertyTitleLower.includes(searchTermLower)) {
-        // Continue to other filters
+      // Split search terms and location into words
+      const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 1);
+      const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 1);
+      
+      // Check for exact location matches first (most strict)
+      if (propertyLocationLower.includes(searchTermLower)) {
+        // Exact match found, continue to other filters
       } else {
-        // Check for partial city/suburb matches
-        const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 2);
-        const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 2);
-        
-        const hasMatch = searchWords.some(searchWord => 
-          locationWords.some(locationWord => 
+        // Check if ALL search words are present in the location
+        const allSearchWordsFound = searchWords.every(searchWord => {
+          // Check if this search word appears in any location word
+          return locationWords.some(locationWord => 
             locationWord.includes(searchWord) || searchWord.includes(locationWord)
-          )
-        );
+          );
+        });
         
-        if (!hasMatch) {
+        if (!allSearchWordsFound) {
           return false;
+        }
+        
+        // Additional validation: ensure the search term represents a significant part of the location
+        // This prevents "Cape" from matching "Cape Town" when searching for "Cape Town"
+        const searchTermLength = searchTermLower.length;
+        
+        // If search term is short (like "Cape"), require it to be part of a longer location word
+        if (searchTermLength < 4) {
+          const hasSignificantMatch = locationWords.some(locationWord => 
+            locationWord.length >= searchTermLength + 2 && locationWord.includes(searchTermLower)
+          );
+          if (!hasSignificantMatch) {
+            return false;
+          }
+        }
+        
+        // Additional validation: check for common city patterns
+        // If searching for a city name, ensure it's not just a partial match in a suburb
+        const commonCities = ['cape town', 'johannesburg', 'pretoria', 'durban', 'port elizabeth', 'bloemfontein', 'kimberley', 'east london', 'nelspruit', 'polokwane'];
+        const isSearchingForCity = commonCities.some(city => searchTermLower.includes(city));
+        
+        if (isSearchingForCity) {
+          // For city searches, ensure the city name appears prominently in the location
+          const cityInLocation = commonCities.some(city => propertyLocationLower.includes(city));
+          if (!cityInLocation) {
+            return false;
+          }
         }
       }
     }

@@ -471,7 +471,7 @@ All colors MUST be HSL.
 
 .property24-filter-button:hover {
   border-color: hsl(var(--ocean-blue));
-  color: hsl(var(--ocean-blue));
+  color: hsl(var(--foreground));
   background: hsl(var(--ocean-blue) / 0.05);
 }
 
