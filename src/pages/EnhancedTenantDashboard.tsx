@@ -42,7 +42,7 @@ export default function EnhancedTenantDashboard() {
       return;
     }
     if (isLandlord) {
-      navigate('/dashboard');
+              navigate('/enhancedtenantdashboard');
       return;
     }
   }, [user, isLandlord, navigate]);

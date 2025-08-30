@@ -70,7 +70,7 @@ export default function PropertyManagement() {
 
   useEffect(() => {
     if (!user || !isLandlord) {
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
       return;
     }
     
@@ -98,7 +98,7 @@ export default function PropertyManagement() {
         description: "Failed to load property details",
         variant: "destructive",
       });
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
     } finally {
       setLoading(false);
     }

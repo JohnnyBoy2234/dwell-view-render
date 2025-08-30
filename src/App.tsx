@@ -69,7 +69,7 @@ const App = () => (
             <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
             <Route path="/landlord-lease-signing/:tenancyId" element={<RouteGuard><LandlordLeaseSigningPage /></RouteGuard>} />
-            <Route path="/dashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
+            <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/list-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/property/:id" element={<PropertyDetail />} />

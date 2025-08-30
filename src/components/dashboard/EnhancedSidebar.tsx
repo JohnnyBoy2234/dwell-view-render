@@ -25,23 +25,23 @@ interface SidebarItem {
 }
 
 const tenantItems: SidebarItem[] = [
-  { title: 'Dashboard', url: '/tenant-dashboard', icon: Home },
-  { title: 'Messages', url: '/tenant-messages', icon: MessageSquare },
-  { title: 'Properties', url: '/properties', icon: Building },
-  { title: 'Applications', url: '/tenant-applications', icon: FileText },
-  { title: 'Maintenance', url: '/tenant-dashboard/maintenance', icon: Settings },
-  { title: 'Profile', url: '/tenant-profile', icon: User },
+  { title: 'Dashboard', url: '/enhancedtenantdashboard', icon: Home },
+  { title: 'Messages', url: '/enhancedtenantdashboard/messages', icon: MessageSquare },
+  { title: 'Properties', url: '/enhancedtenantdashboard/properties', icon: Building },
+  { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: FileText },
+  { title: 'Maintenance', url: '/enhancedtenantdashboard/maintenance', icon: Settings },
+  { title: 'Profile', url: '/enhancedtenantdashboard/profile', icon: User },
 ];
 
 const landlordItems: SidebarItem[] = [
-  { title: 'Rental Manager', url: '/dashboard', icon: Home },
-  { title: 'Properties', url: '/dashboard/properties', icon: Building },
-  { title: 'Messages', url: '/dashboard/messages', icon: MessageSquare },
-  { title: 'Applications', url: '/dashboard/applications', icon: FileText },
-  { title: 'Tenants', url: '/dashboard/tenants', icon: Users },
-  { title: 'Payments', url: '/dashboard/payments', icon: DollarSign },
-  { title: 'Maintenance', url: '/dashboard/maintenance', icon: Wrench },
-  { title: 'Reports', url: '/dashboard/reports', icon: BarChart3 },
+  { title: 'Rental Manager', url: '/enhancedlandlorddashboard', icon: Home },
+  { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
+  { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare },
+  { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: FileText },
+  { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
+  { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: DollarSign },
+  { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
+  { title: 'Reports', url: '/enhancedlandlorddashboard/reports', icon: BarChart3 },
 ];
 
 interface EnhancedSidebarProps {
@@ -80,8 +80,8 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
       return currentTab === path;
     }
     // Only exact match for the dashboard root to avoid double-highlighting
-    if (path === '/dashboard') {
-      return currentPath === '/dashboard';
+    if (path === '/enhancedlandlorddashboard' || path === '/enhancedtenantdashboard') {
+      return currentPath === path;
     }
     return currentPath === path || currentPath.startsWith(path + '/');
   };

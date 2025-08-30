@@ -140,8 +140,7 @@ const HowItWorks: React.FC = () => {
                   <SectionHeader
           title="How SwiftRent Works"
           subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
-          showTagline={true}
-          taglineVariant="eyebrow"
+          showTagline={false}
         />
         </div>
 

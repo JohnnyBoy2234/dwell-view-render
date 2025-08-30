@@ -39,7 +39,7 @@ export default function EnhancedLandlordDashboard() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { loading: metricsLoading, metrics } = useLandlordMetrics();
-  const [currentTab, setCurrentTab] = useState('/dashboard');
+  const [currentTab, setCurrentTab] = useState('/enhancedlandlorddashboard');
   
   const [properties, setProperties] = useState<PropertyWithTenant[]>([]);
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
@@ -147,22 +147,22 @@ export default function EnhancedLandlordDashboard() {
 
   const renderTabContent = () => {
     switch (currentTab) {
-      case '/dashboard/messages':
+      case '/enhancedlandlorddashboard/messages':
         // Navigate to the actual messages page instead of showing MessagesTab
-        navigate('/dashboard/messages');
+        navigate('/enhancedlandlorddashboard/messages');
         return null;
-      case '/dashboard/properties':
+      case '/enhancedlandlorddashboard/properties':
         return renderPropertiesTab();
-      case '/dashboard/applications':
+      case '/enhancedlandlorddashboard/applications':
         return renderApplicationsTab();
-      case '/dashboard/tenants':
+      case '/enhancedlandlorddashboard/tenants':
         return renderTenantsTab();
-      case '/dashboard/payments':
+      case '/enhancedlandlorddashboard/payments':
         return renderPaymentsTab();
-      case '/dashboard/reports':
+      case '/enhancedlandlorddashboard/reports':
         return renderReportsTab();
-      case '/dashboard/maintenance':
-        navigate('/dashboard/maintenance');
+      case '/enhancedlandlorddashboard/maintenance':
+        navigate('/enhancedlandlorddashboard/maintenance');
         return null;
       default:
         return renderDashboardContent();
@@ -176,7 +176,7 @@ export default function EnhancedLandlordDashboard() {
           <Building className="h-6 w-6 text-ocean-blue" />
           <h2 className="text-xl font-bold">Manage Properties</h2>
         </div>
-        <Button onClick={() => navigate('/dashboard/add-property')} size="sm">
+        <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')} size="sm">
           <Plus className="h-4 w-4 mr-1" />
           Add Property
         </Button>
@@ -267,7 +267,7 @@ export default function EnhancedLandlordDashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-xl text-ocean-blue">Your Properties</CardTitle>
-              <Button onClick={() => navigate('/dashboard/add-property')} size="sm">
+              <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')} size="sm">
                 <Plus className="h-4 w-4 mr-1" />
                 Add Property
               </Button>
@@ -301,7 +301,7 @@ export default function EnhancedLandlordDashboard() {
           <Home className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Properties Yet</h3>
           <p className="text-muted-foreground mb-4">Start building your rental portfolio</p>
-          <Button onClick={() => navigate('/dashboard/add-property')}>
+          <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')}>
             <Plus className="h-4 w-4 mr-2" />
             Add Your First Property
           </Button>
@@ -353,13 +353,13 @@ export default function EnhancedLandlordDashboard() {
                   <div className="flex gap-1">
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/dashboard/applications');
+                      setCurrentTab('/enhancedlandlorddashboard/applications');
                     }}>
                       <FileText className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/dashboard/messages');
+                      setCurrentTab('/enhancedlandlorddashboard/messages');
                     }}>
                       <MessageSquare className="h-3 w-3" />
                     </Button>
