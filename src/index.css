@@ -481,6 +481,33 @@ All colors MUST be HSL.
   color: white;
 }
 
+/* Filter dropdown styling for better contrast */
+[data-radix-popper-content-wrapper] {
+  z-index: 50;
+}
+
+[data-radix-popper-content-wrapper] .p-4 {
+  background: white;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[data-radix-popper-content-wrapper] button {
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
+}
+
+[data-radix-popper-content-wrapper] button:hover {
+  background-color: hsl(var(--ocean-blue) / 0.1);
+  color: hsl(var(--foreground));
+}
+
+[data-radix-popper-content-wrapper] button:focus {
+  outline: 2px solid hsl(var(--ocean-blue));
+  outline-offset: 2px;
+}
+
 .filter-chip {
   display: inline-flex;
   align-items: center;
