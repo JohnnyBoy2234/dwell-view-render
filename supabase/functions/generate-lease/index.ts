@@ -77,32 +77,36 @@ serve(async (req) => {
       // fallback to text-only header
     }
 
-    const drawHeader = () => {
+    const drawHeader = (targetPage = page) => {
       const top = height - 30;
       // If logo available, draw it small with name; else draw brand mark square + name (like navbar)
+      // Mask any existing header content
+      targetPage.drawRectangle({ x: 0, y: height - 100, width, height: 100, color: rgb(1,1,1) });
       if (logoImage) {
         const logoW = 80;
         const aspect = logoImage.height / logoImage.width;
         const logoH = logoW * aspect;
-        page.drawImage(logoImage, { x: 50, y: top - logoH + 10, width: logoW, height: logoH });
-        page.drawText("SwiftRent", { x: 50 + logoW + 10, y: top - 8, font: boldFont, size: 16, color: rgb(0,0,0) });
+        targetPage.drawImage(logoImage, { x: 50, y: top - logoH + 10, width: logoW, height: logoH });
+        targetPage.drawText("SwiftRent", { x: 50 + logoW + 10, y: top - 8, font: boldFont, size: 16, color: rgb(0,0,0) });
       } else {
         // Brand square
-        page.drawRectangle({ x: 50, y: top - 18, width: 18, height: 18, color: rgb(0.06, 0.47, 0.74) });
-        page.drawText("SwiftRent", { x: 50 + 18 + 10, y: top - 8, font: boldFont, size: 16, color: rgb(0,0,0) });
+        targetPage.drawRectangle({ x: 50, y: top - 18, width: 18, height: 18, color: rgb(0.06, 0.47, 0.74) });
+        targetPage.drawText("SwiftRent", { x: 50 + 18 + 10, y: top - 8, font: boldFont, size: 16, color: rgb(0,0,0) });
       }
     };
 
-    const drawFooter = (pageNumber: number) => {
+    const drawFooter = (pageNumber: number, targetPage = page) => {
       const footerY = 30;
+      // Mask any existing footer content
+      targetPage.drawRectangle({ x: 0, y: 0, width, height: 60, color: rgb(1,1,1) });
       // subtle divider line
-      page.drawRectangle({ x: 40, y: footerY + 22, width: width - 80, height: 0.5, color: rgb(0.85,0.85,0.85) });
-      page.drawText("SwiftRent • From Listing to Lease, Made Easy", { x: 50, y: footerY, font, size: 9, color: rgb(0.2,0.2,0.2) });
+      targetPage.drawRectangle({ x: 40, y: footerY + 22, width: width - 80, height: 0.5, color: rgb(0.85,0.85,0.85) });
+      targetPage.drawText("SwiftRent • From Listing to Lease, Made Easy", { x: 50, y: footerY, font, size: 9, color: rgb(0.2,0.2,0.2) });
       const pageNumText = `Page ${pageNumber}`;
       const textWidthVal = font.widthOfTextAtSize(pageNumText, 9);
-      page.drawText(pageNumText, { x: width - 50 - textWidthVal, y: footerY, font, size: 9, color: rgb(0.2,0.2,0.2) });
+      targetPage.drawText(pageNumText, { x: width - 50 - textWidthVal, y: footerY, font, size: 9, color: rgb(0.2,0.2,0.2) });
       // Initials anchors on every page
-      page.drawText("Initials __________ SWIFTRENT_INIT_LANDLORD    __________ SWIFTRENT_INIT_TENANT_1", { x: 50, y: footerY + 8, font, size: 9, color: rgb(0.2,0.2,0.2) });
+      targetPage.drawText("Initials __________ SWIFTRENT_INIT_LANDLORD    __________ SWIFTRENT_INIT_TENANT_1", { x: 50, y: footerY + 8, font, size: 9, color: rgb(0.2,0.2,0.2) });
     };
 
     const drawText = (text: string, size = fontSize, isBold = false) => {
@@ -119,8 +123,55 @@ serve(async (req) => {
       y -= size * 1.5;
     };
 
-    // Page header
-    drawHeader();
+    // If a source PDF is configured, import it and decorate; else render fallback template
+    let importedSource = false;
+    try {
+      const srcUrl = Deno.env.get("LEASE_SOURCE_URL");
+      if (srcUrl) {
+        const res = await fetch(srcUrl);
+        if (res.ok) {
+          const srcBytes = new Uint8Array(await res.arrayBuffer());
+          const srcPdf = await PDFDocument.load(srcBytes);
+          const srcPages = await pdfDoc.copyPages(srcPdf, srcPdf.getPageIndices());
+          pdfDoc.removePage(0);
+          srcPages.forEach((p) => pdfDoc.addPage(p));
+          const pages = pdfDoc.getPages();
+          pages.forEach((p, idx) => {
+            const { width: w, height: h } = p.getSize();
+            width = w; height = h;
+            drawHeader(p);
+            drawFooter(idx + 1, p);
+          });
+          importedSource = true;
+        }
+      } else {
+        // Fallback: try to read from Storage path lease-documents/templates/source-template.pdf
+        const { data: srcFile } = await supabaseClient.storage
+          .from("lease-documents")
+          .download("templates/source-template.pdf");
+        if (srcFile) {
+          const buf = new Uint8Array(await srcFile.arrayBuffer());
+          const srcPdf = await PDFDocument.load(buf);
+          const srcPages = await pdfDoc.copyPages(srcPdf, srcPdf.getPageIndices());
+          pdfDoc.removePage(0);
+          srcPages.forEach((p) => pdfDoc.addPage(p));
+          const pages = pdfDoc.getPages();
+          pages.forEach((p, idx) => {
+            const { width: w, height: h } = p.getSize();
+            width = w; height = h;
+            drawHeader(p);
+            drawFooter(idx + 1, p);
+          });
+          importedSource = true;
+        }
+      }
+    } catch (_e) {
+      importedSource = false;
+    }
+
+    if (!importedSource) {
+      // Page header
+      drawHeader();
 
     drawText("RESIDENTIAL LEASE AGREEMENT", 18, true);
     y -= 20;
@@ -200,6 +251,20 @@ serve(async (req) => {
     y -= 20;
 
     drawText("This document becomes legally binding upon the digital signature of both parties.", 10);
+    }
+
+    // Append a Key Terms page summarizing merge fields
+    let summaryPage = pdfDoc.addPage();
+    page = summaryPage; ({ width, height } = page.getSize()); y = height - 60;
+    drawHeader();
+    drawText("SCHEDULE A – KEY TERMS", 14, true);
+    drawText(`Premises Address: ${safeString(tenancy.properties.location)}`);
+    drawText(`Landlord: ${safeString(tenancy.landlord_profile.display_name)}`);
+    drawText(`Tenant: ${safeString(tenancy.tenant_profile.display_name)}`);
+    drawText(`Monthly Rent: R${safeString(tenancy.monthly_rent)}`);
+    drawText(`Deposit: R${safeString(tenancy.security_deposit)}`);
+    drawText(`Lease Term: ${new Date(safeString(tenancy.start_date)).toLocaleDateString()} to ${new Date(safeString(tenancy.end_date)).toLocaleDateString()}`);
+    drawFooter(pdfDoc.getPageCount());
     
     const pdfBytes = await pdfDoc.save();
     // SwiftRent filename convention
@@ -229,7 +294,9 @@ serve(async (req) => {
 
     if (updateError) throw updateError;
 
-    // Draw footer on last page
+    // Draw footer on last page if not yet drawn
+    const lastPage = pdfDoc.getPages()[pdfDoc.getPageCount()-1];
+    page = lastPage; ({ width, height } = page.getSize());
     drawFooter(pdfDoc.getPageCount());
 
     return new Response(JSON.stringify({ success: true, documentPath: filePath }), {
