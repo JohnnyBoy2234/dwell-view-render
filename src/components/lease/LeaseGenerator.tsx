@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { currentSigningProviderName } from "@/lib/signing";
+import { LeaseCreationWizard } from "./LeaseCreationWizard";
 
 interface Tenancy {
   id: string;
@@ -48,6 +49,7 @@ export const LeaseGenerator = ({
   onSigningRequested 
 }: LeaseGeneratorProps) => {
   const [generating, setGenerating] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const { user } = useAuth();
 
   // Status badge with role-aware labels
@@ -81,38 +83,19 @@ export const LeaseGenerator = ({
     );
   };
 
-  const generateLease = async () => {
-    setGenerating(true);
-    try {
-      if (currentSigningProviderName === 'docusign') {
-        // Create DocuSign envelope for this tenancy
-        const { data, error } = await supabase.functions.invoke('create-docusign-envelope', {
-          body: { tenancyId: tenancy.id }
-        });
-        if (error) throw error;
-        if ((data as any)?.error) throw new Error((data as any).error);
-        toast.success("DocuSign envelope created");
-      } else {
-        // Legacy: generate PDF lease
-        const { error } = await supabase.functions.invoke('generate-lease', {
-          body: { tenancyId: tenancy.id }
-        });
-        if (error) throw error;
-        toast.success("Lease document generated successfully");
-      }
-      onLeaseGenerated?.();
-    } catch (error) {
-      console.error('Error generating lease:', error);
-      toast.error("Failed to generate lease document");
-    } finally {
-      setGenerating(false);
-    }
+  const openWizard = () => {
+    setShowWizard(true);
   };
 
   // Direct download helper
   const downloadLease = async () => {
     try {
-      const title = tenancy.properties?.title || "Lease_Agreement";
+      const address = tenancy.properties?.location || tenancy.properties?.title || "Lease";
+      const dateStr = new Date().toISOString().slice(0,10);
+      const isSigned = tenancy.lease_status === 'completed';
+      const suffix = isSigned ? 'Signed' : 'Draft';
+      const safeAddress = address.replace(/[^a-z0-9]/gi, "_");
+      const fileName = `SwiftRent_Lease_${safeAddress}_${dateStr}_${suffix}.pdf`;
       const ref = tenancy.lease_document_path || tenancy.lease_document_url || "";
       if (!ref) {
         toast.error("No document available to download");
@@ -121,8 +104,10 @@ export const LeaseGenerator = ({
 
       if (ref.startsWith("http")) {
         const a = document.createElement("a");
-        a.href = ref;
-        a.download = `${title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
+        // Prefer forcing download if supported by adding query param
+        const joiner = ref.includes('?') ? '&' : '?';
+        a.href = `${ref}${joiner}download=${encodeURIComponent(fileName)}`;
+        a.download = fileName;
         a.target = "_blank";
         document.body.appendChild(a);
         a.click();
@@ -140,7 +125,7 @@ export const LeaseGenerator = ({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -212,12 +197,12 @@ export const LeaseGenerator = ({
         <div className="flex gap-2">
           {canGenerate && (
             <Button 
-              onClick={generateLease} 
+              onClick={openWizard} 
               disabled={generating}
               className="flex items-center gap-2"
             >
               <FileText className="h-4 w-4" />
-              {generating ? "Generating..." : "Generate Lease"}
+              Generate Lease
             </Button>
           )}
 
@@ -296,6 +281,16 @@ export const LeaseGenerator = ({
           </div>
         )}
       </CardContent>
+      {/* Wizard Modal */}
+      {showWizard && (
+        <LeaseCreationWizard 
+          isOpen={showWizard}
+          onClose={() => setShowWizard(false)}
+          propertyId={tenancy.property_id}
+          onLeaseCreated={onLeaseGenerated}
+          selectedTenant={{ id: tenancy.tenant_id, name: tenancy.tenant_profile?.display_name || 'Tenant' }}
+        />
+      )}
     </Card>
   );
 };

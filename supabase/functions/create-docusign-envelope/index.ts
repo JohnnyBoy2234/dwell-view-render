@@ -130,24 +130,53 @@ Deno.serve(async (req) => {
     }
 
     // Build recipients
-    const signers = [
-      {
-        email: tenantEmail,
-        name: nameById[tenancy.tenant_id] || "Tenant",
-        recipientId: "1",
-        routingOrder: "1",
-        clientUserId: tenancy.tenant_id, // required for embedded signing view
-        roleName: "tenant",
+    const tenantSigner = {
+      email: tenantEmail,
+      name: nameById[tenancy.tenant_id] || "Tenant",
+      recipientId: "1",
+      routingOrder: "1",
+      clientUserId: tenancy.tenant_id, // required for embedded signing view
+      roleName: "tenant",
+      tabs: {
+        signHereTabs: [
+          { anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+        ],
+        dateSignedTabs: [
+          { anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
+        ],
+        fullNameTabs: [
+          { anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
+        ],
+        initialHereTabs: [
+          { anchorString: "SWIFTRENT_INIT_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+        ],
       },
-      {
-        email: landlordEmail,
-        name: nameById[tenancy.landlord_id] || "Landlord",
-        recipientId: "2",
-        routingOrder: "2",
-        clientUserId: tenancy.landlord_id,
-        roleName: "landlord",
+    } as any;
+
+    const landlordSigner = {
+      email: landlordEmail,
+      name: nameById[tenancy.landlord_id] || "Landlord",
+      recipientId: "2",
+      routingOrder: "2",
+      clientUserId: tenancy.landlord_id,
+      roleName: "landlord",
+      tabs: {
+        signHereTabs: [
+          { anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+        ],
+        dateSignedTabs: [
+          { anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
+        ],
+        fullNameTabs: [
+          { anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
+        ],
+        initialHereTabs: [
+          { anchorString: "SWIFTRENT_INIT_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+        ],
       },
-    ];
+    } as any;
+
+    const signers = [tenantSigner, landlordSigner];
 
     const envelopeDefinition = {
       emailSubject: "Lease Agreement",
