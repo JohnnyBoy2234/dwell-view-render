@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -63,7 +63,7 @@ export const useLandlordApplications = (propertyId?: string) => {
     }
   }, [user, propertyId]);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!user || !propertyId) return;
 
     setLoading(true);
@@ -124,10 +124,10 @@ export const useLandlordApplications = (propertyId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, propertyId, toast]);
 
   // Function to fetch all applications for a landlord across all properties
-  const fetchAllApplications = async () => {
+  const fetchAllApplications = useCallback(async () => {
     if (!user) return;
 
     setLoading(true);
@@ -193,9 +193,9 @@ export const useLandlordApplications = (propertyId?: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
-  const updateApplicationStatus = async (applicationId: string, status: string) => {
+  const updateApplicationStatus = useCallback(async (applicationId: string, status: string) => {
     try {
       const { error } = await supabase
         .from('applications')
@@ -205,8 +205,12 @@ export const useLandlordApplications = (propertyId?: string) => {
 
       if (error) throw error;
 
-      // Refresh applications
-      await fetchApplications();
+      // Refresh applications list appropriately
+      if (propertyId) {
+        await fetchApplications();
+      } else {
+        await fetchAllApplications();
+      }
       
       toast({
         title: "Success",
@@ -223,7 +227,7 @@ export const useLandlordApplications = (propertyId?: string) => {
       });
       return false;
     }
-  };
+  }, [user, propertyId, fetchApplications, fetchAllApplications, toast]);
 
   return {
     applications,

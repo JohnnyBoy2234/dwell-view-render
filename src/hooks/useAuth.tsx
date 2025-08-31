@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  roleLoaded: boolean;
   signUp: (email: string, password: string, role?: 'tenant' | 'landlord') => Promise<{ error: any; isNewUser?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: (role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLandlord, setIsLandlord] = useState(false);
+  const [roleLoaded, setRoleLoaded] = useState(false);
   const [returnToPath, setReturnToPath] = useState<string | null>(null);
 
   useEffect(() => {
@@ -36,11 +38,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         // Check user role
         if (session?.user) {
+          setRoleLoaded(false);
           setTimeout(() => {
             checkUserRole(session.user.id);
           }, 0);
         } else {
           setIsLandlord(false);
+          setRoleLoaded(true);
         }
       }
     );
@@ -52,9 +56,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
 
       if (session?.user) {
+        setRoleLoaded(false);
         setTimeout(() => {
           checkUserRole(session.user.id);
         }, 0);
+      } else {
+        setRoleLoaded(true);
       }
     });
 
@@ -71,8 +78,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
       
       setIsLandlord(!!data);
+      setRoleLoaded(true);
     } catch (error) {
       setIsLandlord(false);
+      setRoleLoaded(true);
     }
   };
 
@@ -168,6 +177,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     session,
     loading,
+    roleLoaded,
     signUp,
     signIn,
     signInWithGoogle,

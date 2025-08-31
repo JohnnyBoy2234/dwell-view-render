@@ -20,7 +20,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { BUILD_TAG } from '@/version';
 
 export default function EnhancedTenantDashboard() {
-  const { user, isLandlord } = useAuth();
+  const { user, isLandlord, roleLoaded } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
@@ -42,6 +42,9 @@ export default function EnhancedTenantDashboard() {
       navigate('/auth');
       return;
     }
+    if (!roleLoaded) {
+      return;
+    }
     if (isLandlord) {
       navigate('/enhancedlandlorddashboard');
       return;
@@ -52,7 +55,7 @@ export default function EnhancedTenantDashboard() {
     if (path !== '/enhancedtenantdashboard' && path.startsWith('/enhancedtenantdashboard')) {
       setCurrentTab(path);
     }
-  }, [user, isLandlord, navigate, location.pathname]);
+  }, [user, isLandlord, roleLoaded, navigate, location.pathname]);
 
   const handleMakePayment = () => {
     if (rentDue) {
