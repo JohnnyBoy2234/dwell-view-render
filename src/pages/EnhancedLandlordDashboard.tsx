@@ -308,17 +308,17 @@ export default function EnhancedLandlordDashboard() {
       });
       if (error || !data?.url) throw error || new Error('No download URL');
 
-      const response = await fetch(data.url);
-      if (!response.ok) throw new Error('Failed to download file');
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const filename = suggestedName || 'document';
+      const joiner = data.url.includes('?') ? '&' : '?';
+      const downloadUrl = `${data.url}${joiner}download=${encodeURIComponent(filename)}`;
+
       const a = document.createElement('a');
-      a.href = url;
-      a.download = suggestedName || 'document';
+      a.href = downloadUrl;
+      a.setAttribute('download', filename);
+      a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
       a.remove();
-      window.URL.revokeObjectURL(url);
     } catch (e: any) {
       toast({ title: 'Download failed', description: e.message || 'Unable to download document', variant: 'destructive' });
     }
