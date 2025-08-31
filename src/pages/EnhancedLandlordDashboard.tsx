@@ -37,7 +37,7 @@ interface TenantListItem {
 }
 
 export default function EnhancedLandlordDashboard() {
-  const { user, isLandlord } = useAuth();
+  const { user, isLandlord, roleLoaded } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -66,37 +66,18 @@ export default function EnhancedLandlordDashboard() {
       navigate('/auth');
       return;
     }
-    if (!isLandlord) {
-      navigate('/tenant-dashboard');
+    if (!roleLoaded) {
       return;
     }
-    
-    // Sync currentTab with the current URL path
-    const path = location.pathname;
-    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
-      setCurrentTab(path);
+    if (!isLandlord) {
+      // Route to the enhanced tenant dashboard if user is not a landlord
+      navigate('/enhancedtenantdashboard');
+      return;
     }
-    
+
+    // Initial data fetch (only once per auth/role change)
     fetchDashboardData();
-    
-    // Fetch applications when on applications tab
-    if (path === '/enhancedlandlorddashboard/applications') {
-      try {
-        fetchAllApplications();
-      } catch (error) {
-        console.log('Error calling fetchAllApplications in initial load:', error);
-      }
-    }
-    
-    // Fetch maintenance requests when on maintenance tab
-    if (path === '/enhancedlandlorddashboard/maintenance') {
-      try {
-        fetchMaintenanceRequests();
-      } catch (error) {
-        console.log('Error calling fetchMaintenanceRequests in initial load:', error);
-      }
-    }
-  }, [user, isLandlord, navigate, location.pathname, fetchAllApplications]);
+  }, [user, isLandlord, roleLoaded, navigate]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
   useEffect(() => {
@@ -570,7 +551,7 @@ export default function EnhancedLandlordDashboard() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setCurrentTab('/enhancedlandlorddashboard/messages')}
+                      onClick={() => navigate('/enhancedlandlorddashboard/messages')}
                     >
                       <MessageSquare className="h-4 w-4 mr-1" />
                       Message
@@ -709,7 +690,7 @@ export default function EnhancedLandlordDashboard() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setCurrentTab('/enhancedlandlorddashboard/messages')}
+                        onClick={() => navigate('/enhancedlandlorddashboard/messages')}
                       >
                         <MessageSquare className="h-4 w-4 mr-1" />
                         Remind
@@ -1156,13 +1137,13 @@ export default function EnhancedLandlordDashboard() {
                   <div className="flex gap-1">
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/enhancedlandlorddashboard/applications');
+                      navigate('/enhancedlandlorddashboard/applications');
                     }}>
                       <FileText className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/enhancedlandlorddashboard/messages');
+                      navigate('/enhancedlandlorddashboard/messages');
                     }}>
                       <MessageSquare className="h-3 w-3" />
                     </Button>
@@ -1218,7 +1199,7 @@ export default function EnhancedLandlordDashboard() {
                 {tenant.payment_status}
               </Badge>
               <div className="flex gap-1">
-                <Button size="sm" variant="ghost" onClick={() => setCurrentTab('/messages')}>
+                <Button size="sm" variant="ghost" onClick={() => navigate('/enhancedlandlorddashboard/messages')}>
                   <MessageSquare className="h-3 w-3" />
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => navigate(`/tenant-profile/${tenant.id}`)}>
@@ -1234,8 +1215,7 @@ export default function EnhancedLandlordDashboard() {
 
   const handleTabChange = (tab: string) => {
     console.log('[Dashboard] Tab change requested:', tab);
-    setCurrentTab(tab);
-    // Update the URL when changing tabs
+    // Only navigate; currentTab will sync from the URL
     if (tab !== '/enhancedlandlorddashboard') {
       navigate(tab);
     } else {
