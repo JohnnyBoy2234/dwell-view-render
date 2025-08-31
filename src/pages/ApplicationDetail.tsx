@@ -29,6 +29,27 @@ interface ApplicationDetail {
     user_id: string;
     display_name: string;
   };
+  screening_details?: {
+    full_name?: string;
+    id_number?: string;
+    phone?: string;
+    employment_status?: string;
+    job_title?: string;
+    company_name?: string;
+    net_monthly_income?: number;
+    current_address?: string;
+    reason_for_moving?: string;
+    previous_landlord_name?: string;
+    previous_landlord_contact?: string;
+  };
+  documents?: Array<{
+    id: string;
+    document_type: string;
+    file_path: string;
+    file_type: string;
+    status?: string;
+    uploaded_at?: string;
+  }>;
 }
 
 export default function ApplicationDetail() {
@@ -77,28 +98,35 @@ export default function ApplicationDetail() {
 
       if (error) throw error;
 
-      // Fetch property details
-      const { data: propertyData, error: propertyError } = await supabase
-        .from('properties')
-        .select('id, title, location, images, price, bedrooms, bathrooms')
-        .eq('id', appData.property_id)
-        .single();
-
-      if (propertyError) throw propertyError;
-
-      // Fetch landlord profile
-      const { data: landlordData, error: landlordError } = await supabase
-        .from('profiles')
-        .select('user_id, display_name')
-        .eq('user_id', appData.landlord_id)
-        .single();
-
-      if (landlordError) throw landlordError;
+      // Parallel fetches: property, landlord profile, screening details, documents
+      const [propertyResp, landlordResp, screeningResp, docsResp] = await Promise.all([
+        supabase
+          .from('properties')
+          .select('id, title, location, images, price, bedrooms, bathrooms')
+          .eq('id', appData.property_id)
+          .maybeSingle(),
+        supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .eq('user_id', appData.landlord_id)
+          .maybeSingle(),
+        supabase
+          .from('screening_details')
+          .select('full_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact')
+          .eq('user_id', appData.tenant_id)
+          .maybeSingle(),
+        supabase
+          .from('documents')
+          .select('id, document_type, file_path, file_type, status, uploaded_at')
+          .eq('user_id', appData.tenant_id)
+      ]);
 
       setApplication({
         ...appData,
-        property: propertyData,
-        landlord: landlordData
+        property: propertyResp.data || undefined,
+        landlord: landlordResp.data || undefined,
+        screening_details: screeningResp.data || undefined,
+        documents: docsResp.data || []
       });
     } catch (error: any) {
       toast({
@@ -163,118 +191,131 @@ export default function ApplicationDetail() {
           </Button>
         </div>
 
-        {/* Application Header */}
+        {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl font-bold">Application Details</h1>
             {getStatusBadge(application.status)}
           </div>
           <p className="text-muted-foreground">
-            Application submitted on {new Date(application.created_at).toLocaleDateString()}
+            Applied on {new Date(application.created_at).toLocaleDateString()}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Property Details */}
-          <div className="lg:col-span-2">
+        {/* Screening Details Focus */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Home className="h-5 w-5" />
-                  Property Information
-                </CardTitle>
+                <CardTitle>Personal & Employment</CardTitle>
               </CardHeader>
               <CardContent>
-                {application.property?.images?.[0] && (
-                  <div className="mb-4">
-                    <img
-                      src={application.property.images[0]}
-                      alt={application.property.title}
-                      className="w-full h-48 object-cover rounded-lg"
-                    />
-                  </div>
-                )}
-                <h3 className="text-xl font-semibold mb-2">{application.property?.title}</h3>
-                <div className="flex items-center text-muted-foreground mb-4">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {application.property?.location}
-                </div>
-                <div className="text-2xl font-bold mb-4">
-                  R{application.property?.price?.toLocaleString()}/month
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
-                    <span className="text-sm text-muted-foreground">Bedrooms</span>
-                    <div className="font-semibold">{application.property?.bedrooms}</div>
+                    <span className="text-muted-foreground">Full Name</span>
+                    <div className="font-medium break-words">{application.screening_details?.full_name || '—'}</div>
                   </div>
                   <div>
-                    <span className="text-sm text-muted-foreground">Bathrooms</span>
-                    <div className="font-semibold">{application.property?.bathrooms}</div>
+                    <span className="text-muted-foreground">ID Number</span>
+                    <div className="font-medium break-words">{application.screening_details?.id_number || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Phone</span>
+                    <div className="font-medium break-words">{application.screening_details?.phone || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Employment Status</span>
+                    <div className="font-medium capitalize">{application.screening_details?.employment_status || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Job Title</span>
+                    <div className="font-medium break-words">{application.screening_details?.job_title || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Company</span>
+                    <div className="font-medium break-words">{application.screening_details?.company_name || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Net Monthly Income</span>
+                    <div className="font-medium">{application.screening_details?.net_monthly_income ? `R${application.screening_details.net_monthly_income.toLocaleString()}` : '—'}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Residence</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div className="sm:col-span-2">
+                    <span className="text-muted-foreground">Current Address</span>
+                    <div className="font-medium break-words">{application.screening_details?.current_address || '—'}</div>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <span className="text-muted-foreground">Reason for Moving</span>
+                    <div className="font-medium break-words">{application.screening_details?.reason_for_moving || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Previous Landlord</span>
+                    <div className="font-medium break-words">{application.screening_details?.previous_landlord_name || '—'}</div>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Landlord Contact</span>
+                    <div className="font-medium break-words">{application.screening_details?.previous_landlord_contact || '—'}</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {application.documents && application.documents.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Documents</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {application.documents.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
+                        <div className="min-w-0">
+                          <div className="font-medium break-words">{doc.file_path.split('/').pop()}</div>
+                          <div className="text-xs text-muted-foreground capitalize">{doc.document_type}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
 
-          {/* Application Status & Actions */}
-          <div className="space-y-6">
+          {/* Right column: status and actions */}
+          <div className="space-y-4 sm:space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Application Status</CardTitle>
+                <CardTitle>Status</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center">
-                  {getStatusBadge(application.status)}
+              <CardContent className="space-y-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Applied</span>
+                  <span>{new Date(application.created_at).toLocaleDateString()}</span>
                 </div>
-                
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Applied:</span>
-                    <span>{new Date(application.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Last Updated:</span>
-                    <span>{new Date(application.updated_at).toLocaleDateString()}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Last Updated</span>
+                  <span>{new Date(application.updated_at).toLocaleDateString()}</span>
                 </div>
-
-                {application.status === 'invited' && (
-                  <div className="pt-4">
-                    <Button className="w-full">
-                      Complete Application
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Landlord</CardTitle>
+                <CardTitle>Contact</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="font-semibold">{application.landlord?.display_name}</div>
-                <Button 
-                  variant="outline" 
-                  className="w-full mt-3"
-                  onClick={() => navigate('/messages')}
-                >
+                <div className="font-semibold mb-3 break-words">{application.landlord?.display_name}</div>
+                <Button variant="outline" className="w-full sm:w-auto" onClick={() => navigate('/tenant/messages')}>
                   Send Message
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate(`/property/${application.property_id}`)}
-                >
-                  View Property
                 </Button>
               </CardContent>
             </Card>
