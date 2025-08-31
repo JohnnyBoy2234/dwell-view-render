@@ -37,7 +37,7 @@ interface TenantListItem {
 }
 
 export default function EnhancedLandlordDashboard() {
-  const { user, isLandlord } = useAuth();
+  const { user, isLandlord, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -62,12 +62,15 @@ export default function EnhancedLandlordDashboard() {
     // Visible in production console to verify current deployed build
     // eslint-disable-next-line no-console
     console.log('[EnhancedLandlordDashboard] Build:', BUILD_TAG);
+    if (authLoading) {
+      return;
+    }
     if (!user) {
       navigate('/auth');
       return;
     }
     if (!isLandlord) {
-      navigate('/tenant-dashboard');
+      navigate('/enhancedtenantdashboard');
       return;
     }
     
@@ -96,7 +99,7 @@ export default function EnhancedLandlordDashboard() {
         console.log('Error calling fetchMaintenanceRequests in initial load:', error);
       }
     }
-  }, [user, isLandlord, navigate, location.pathname, fetchAllApplications]);
+  }, [authLoading, user, isLandlord, navigate, location.pathname, fetchAllApplications]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
   useEffect(() => {
@@ -1218,7 +1221,7 @@ export default function EnhancedLandlordDashboard() {
                 {tenant.payment_status}
               </Badge>
               <div className="flex gap-1">
-                <Button size="sm" variant="ghost" onClick={() => setCurrentTab('/messages')}>
+                <Button size="sm" variant="ghost" onClick={() => setCurrentTab('/enhancedlandlorddashboard/messages')}>
                   <MessageSquare className="h-3 w-3" />
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => navigate(`/tenant-profile/${tenant.id}`)}>
