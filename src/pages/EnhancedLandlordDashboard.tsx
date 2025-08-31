@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
-import { useLandlordApplications } from '@/hooks/useLandlordApplications';
+import { useLandlordApplications, ApplicationWithTenant } from '@/hooks/useLandlordApplications';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { MessagesTab } from '@/components/dashboard/MessagesTab';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -459,14 +460,122 @@ export default function EnhancedLandlordDashboard() {
                   </div>
                   
                   <div className="flex gap-2 ml-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/application/${application.id}`)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Details
-                    </Button>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View Details
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
+                        <DialogHeader>
+                          <DialogTitle className="text-left">Application Details - {application.tenant_profile?.display_name || 'Tenant'}</DialogTitle>
+                          <DialogDescription className="text-left">
+                            Screening information and submitted documents
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-6">
+                          {/* Personal Information */}
+                          <div>
+                            <h4 className="font-medium mb-3">Personal Information</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Full Name</label>
+                                <p>{application.screening_details?.full_name || 'N/A'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Phone</label>
+                                <p>{application.screening_details?.phone || 'N/A'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">ID Number</label>
+                                <p>{application.screening_details?.id_number || 'N/A'}</p>
+                              </div>
+                              <div>
+                                <label className="text-sm font-medium text-muted-foreground">Applied</label>
+                                <p>{new Date(application.created_at).toLocaleDateString()}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Employment & Income */}
+                          {application.screening_details && (
+                            <div>
+                              <h4 className="font-medium mb-3">Employment & Income</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Employment Status</label>
+                                  <p className="capitalize">{application.screening_details.employment_status || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Job Title</label>
+                                  <p>{application.screening_details.job_title || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Company</label>
+                                  <p>{application.screening_details.company_name || 'N/A'}</p>
+                                </div>
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Net Monthly Income</label>
+                                  <p>R{application.screening_details.net_monthly_income ? application.screening_details.net_monthly_income.toLocaleString() : 'N/A'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Housing History */}
+                          {application.screening_details && (
+                            <div>
+                              <h4 className="font-medium mb-3">Housing History</h4>
+                              <div className="grid gap-4">
+                                <div>
+                                  <label className="text-sm font-medium text-muted-foreground">Current Address</label>
+                                  <p>{application.screening_details.current_address || 'N/A'}</p>
+                                </div>
+                                {application.screening_details.previous_landlord_name && (
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <label className="text-sm font-medium text-muted-foreground">Previous Landlord</label>
+                                      <p>{application.screening_details.previous_landlord_name}</p>
+                                    </div>
+                                    <div>
+                                      <label className="text-sm font-medium text-muted-foreground">Landlord Contact</label>
+                                      <p>{application.screening_details.previous_landlord_contact || 'N/A'}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Documents */}
+                          {application.documents && application.documents.length > 0 && (
+                            <div>
+                              <h4 className="font-medium mb-3">Documents</h4>
+                              <div className="grid gap-2">
+                                {application.documents.map((doc) => (
+                                  <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                      <FileText className="h-4 w-4 text-muted-foreground" />
+                                      <span className="text-sm truncate max-w-[200px]">{doc.file_path.split('/').pop()}</span>
+                                      <Badge variant="outline" className="text-xs">
+                                        {doc.document_type === 'id' ? 'ID Document' : 'Income Document'}
+                                      </Badge>
+                                    </div>
+                                    <Button variant="outline" size="sm" onClick={() => window.open(doc.file_path, '_blank')}>
+                                      Download
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                     {application.status === 'pending' && (
                       <>
                         <Button
