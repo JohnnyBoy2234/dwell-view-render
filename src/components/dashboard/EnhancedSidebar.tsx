@@ -124,7 +124,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
                     className={
                       isActive(item.url) 
                         ? "bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-soft" 
-                        : "hover:bg-earth-light/50 hover:text-earth-warm-dark"
+                        : "hover:bg-gradient-to-r hover:from-ocean-blue hover:to-success-green hover:text-white"
                     }
                   >
                     <button 

@@ -34,7 +34,7 @@ interface ApplicationDetail {
 export default function ApplicationDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const [application, setApplication] = useState<ApplicationDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,12 +53,27 @@ export default function ApplicationDetail() {
     if (!id || !user) return;
 
     try {
-      const { data: appData, error } = await supabase
-        .from('applications')
-        .select('*')
-        .eq('id', id)
-        .eq('tenant_id', user.id)
-        .single();
+      let appData: any = null;
+      let error: any = null;
+      if (isLandlord) {
+        const resp = await supabase
+          .from('applications')
+          .select('*')
+          .eq('id', id)
+          .eq('landlord_id', user.id)
+          .single();
+        appData = resp.data;
+        error = resp.error;
+      } else {
+        const resp = await supabase
+          .from('applications')
+          .select('*')
+          .eq('id', id)
+          .eq('tenant_id', user.id)
+          .single();
+        appData = resp.data;
+        error = resp.error;
+      }
 
       if (error) throw error;
 
@@ -91,7 +106,7 @@ export default function ApplicationDetail() {
         title: "Error loading application",
         description: error.message
       });
-      navigate('/tenant-dashboard');
+      navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
     } finally {
       setLoading(false);
     }
@@ -129,7 +144,7 @@ export default function ApplicationDetail() {
           <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-bold mb-2">Application not found</h2>
           <p className="text-muted-foreground mb-4">The application you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate('/tenant-dashboard')}>
+          <Button onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard')}>
             Back to Dashboard
           </Button>
         </Card>
@@ -142,7 +157,7 @@ export default function ApplicationDetail() {
       <div className="container mx-auto p-6 max-w-4xl">
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate('/tenant-dashboard')}>
+          <Button variant="outline" onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
