@@ -132,50 +132,69 @@ export default function EnhancedLandlordDashboard() {
   const fetchDashboardData = async () => {
     if (!user) return;
 
-    // Use sample data by default to avoid hitting Supabase resource limits
-    console.log('Using sample data to avoid resource limit issues');
-    
-    const sampleProperties = [
-      {
-        id: 'sample-1',
-        title: 'Modern 2-Bedroom Apartment',
-        location: 'Cape Town, Sea Point',
-        images: [],
-        price: 15000,
-        status: 'available'
-      },
-      {
-        id: 'sample-2',
-        title: 'Cozy Studio in CBD',
-        location: 'Cape Town, CBD',
-        images: [],
-        price: 12000,
-        status: 'rented'
+    setLoading(true);
+    try {
+      // Fetch real properties from Supabase
+      const { data: propertiesData, error: propertiesError } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (propertiesError) {
+        console.error('Error fetching properties:', propertiesError);
+        setProperties([]);
+      } else {
+        const transformedProperties = (propertiesData || []).map(prop => ({
+          id: prop.id,
+          title: prop.title,
+          location: prop.location,
+          images: prop.images || [],
+          price: prop.price,
+          status: prop.status
+        }));
+        setProperties(transformedProperties);
       }
-    ];
-    setProperties(sampleProperties);
-    
-    const sampleTenants = [
-      {
-        id: 'sample-tenant-1',
-        name: 'John Smith',
-        property_title: 'Modern 2-Bedroom Apartment',
-        monthly_rent: 15000,
-        payment_status: 'paid' as 'paid' | 'pending' | 'overdue',
-        lease_end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-      },
-      {
-        id: 'sample-tenant-2',
-        name: 'Sarah Johnson',
-        property_title: 'Cozy Studio in CBD',
-        monthly_rent: 12000,
-        payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
-        lease_end_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
+
+      // Fetch real tenants from tenancies and profiles
+      const { data: tenanciesData, error: tenanciesError } = await supabase
+        .from('tenancies')
+        .select(`
+          id,
+          tenant_id,
+          monthly_rent,
+          end_date,
+          status,
+          properties!inner(title),
+          profiles!inner(display_name)
+        `)
+        .eq('landlord_id', user.id)
+        .eq('status', 'active');
+
+      if (tenanciesError) {
+        console.error('Error fetching tenants:', tenanciesError);
+        setTenants([]);
+      } else {
+        const transformedTenants = (tenanciesData || []).map((tenancy: any) => ({
+          id: tenancy.tenant_id,
+          name: tenancy.profiles?.display_name || 'Unknown Tenant',
+          property_title: tenancy.properties?.title || 'Unknown Property',
+          monthly_rent: tenancy.monthly_rent,
+          payment_status: 'pending' as 'paid' | 'pending' | 'overdue', // You can enhance this with real payment data
+          lease_end_date: tenancy.end_date
+        }));
+        setTenants(transformedTenants);
       }
-    ];
-    setTenants(sampleTenants);
-    
-    setLoading(false);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load dashboard data",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchMaintenanceRequests = async () => {
@@ -190,39 +209,8 @@ export default function EnhancedLandlordDashboard() {
         .order('created_at', { ascending: false });
       
       if (error) {
-        console.log('Error fetching maintenance requests:', error);
-        // If table doesn't exist or has issues, show sample data for demonstration
-        const sampleData: MaintenanceRequest[] = [
-          {
-            id: 'sample-1',
-            title: 'Kitchen Sink Leak',
-            description: 'Kitchen sink is leaking under the cabinet, causing water damage',
-            property_id: properties[0]?.id || 'sample-property',
-            tenant_id: 'sample-tenant',
-            priority: 'high',
-            category: 'plumbing',
-            status: 'submitted',
-            estimated_cost: 250,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            landlord_id: user.id,
-          },
-          {
-            id: 'sample-2',
-            title: 'Broken Window Lock',
-            description: 'Window lock in bedroom is broken, needs replacement',
-            property_id: properties[0]?.id || 'sample-property',
-            tenant_id: 'sample-tenant',
-            priority: 'medium',
-            category: 'general',
-            status: 'in_progress',
-            estimated_cost: 80,
-            created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-            updated_at: new Date().toISOString(),
-            landlord_id: user.id,
-          }
-        ];
-        setMaintenanceRequests(sampleData);
+        console.error('Error fetching maintenance requests:', error);
+        setMaintenanceRequests([]);
         return;
       }
       
@@ -232,18 +220,19 @@ export default function EnhancedLandlordDashboard() {
         title: item.title || item.description || 'Maintenance Request',
         description: item.description || item.title || 'No description provided',
         property_id: item.property_id,
+        tenant_id: item.tenant_id,
         priority: item.priority || 'medium',
         category: item.category || 'general',
         status: item.status || 'submitted',
         estimated_cost: item.estimated_cost || null,
         created_at: item.created_at || new Date().toISOString(),
+        updated_at: item.updated_at || new Date().toISOString(),
         landlord_id: item.landlord_id || user.id,
       }));
       
       setMaintenanceRequests(transformedData as MaintenanceRequest[]);
     } catch (error: any) {
       console.error('Error fetching maintenance requests:', error);
-      // Don't show error toast, just set empty array
       setMaintenanceRequests([]);
     } finally {
       setLoadingMaintenance(false);

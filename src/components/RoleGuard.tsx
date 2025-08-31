@@ -13,7 +13,7 @@ export function RoleGuard({
   requiredRole, 
   fallbackPath 
 }: RoleGuardProps) {
-  const { user, isLoading } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export function RoleGuard({
 
 // Special guard for properties routing
 export function PropertiesRouteGuard({ children }: { children: ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
