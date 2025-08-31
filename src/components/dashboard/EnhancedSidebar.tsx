@@ -58,7 +58,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const maintenanceTotal = maintenanceUnread
     ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0)
     : 0;
-  const { state } = useSidebar();
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
 
   const items = isLandlord ? landlordItems : tenantItems;
@@ -91,6 +91,10 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
       onTabChange(item.url);
     } else {
       navigate(item.url);
+    }
+    // Auto-close sidebar on mobile after navigation
+    if (isMobile) {
+      setOpenMobile(false);
     }
   };
 
