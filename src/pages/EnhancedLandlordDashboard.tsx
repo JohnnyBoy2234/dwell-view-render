@@ -135,30 +135,38 @@ export default function EnhancedLandlordDashboard() {
       // Fetch tenants with payment status
       const { data: tenantsData, error: tenantsError } = await supabase
         .from('tenancies')
-        .select(`
-          id,
-          monthly_rent,
-          end_date,
-          properties!inner (
-            title
-          ),
-          tenant_profile:profiles!fk_tenancies_tenant (
-            display_name
-          )
-        `)
+        .select('*')
         .eq('landlord_id', user.id)
         .eq('status', 'active');
 
       if (tenantsError) throw tenantsError;
       
-      const transformedTenants = (tenantsData || []).map((tenant: any) => ({
-        id: tenant.id,
-        name: tenant.tenant_profile?.display_name || 'Unknown Tenant',
-        property_title: tenant.properties?.title || 'Unknown Property',
-        monthly_rent: tenant.monthly_rent,
-        payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
-        lease_end_date: tenant.end_date,
-      }));
+      // Fetch property and profile data separately for each tenant
+      const transformedTenants = await Promise.all(
+        (tenantsData || []).map(async (tenant: any) => {
+          const [propertyResult, profileResult] = await Promise.all([
+            supabase
+              .from('properties')
+              .select('title')
+              .eq('id', tenant.property_id)
+              .maybeSingle(),
+            supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('user_id', tenant.tenant_id)
+              .maybeSingle()
+          ]);
+
+          return {
+            id: tenant.id,
+            name: profileResult?.data?.display_name || 'Unknown Tenant',
+            property_title: propertyResult?.data?.title || 'Unknown Property',
+            monthly_rent: tenant.monthly_rent,
+            payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
+            lease_end_date: tenant.end_date,
+          };
+        })
+      );
       
       setTenants(transformedTenants);
 
