@@ -104,10 +104,12 @@ export default function EnhancedLandlordDashboard() {
     console.log('[Dashboard] Current path:', path, 'Current tab:', currentTab);
     
     if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
-      console.log('[Dashboard] Setting current tab to:', path);
-      setCurrentTab(path);
+      if (currentTab !== path) {
+        console.log('[Dashboard] Setting current tab to:', path);
+        setCurrentTab(path);
+      }
     }
-  }, [location.pathname, currentTab]);
+  }, [location.pathname]);
 
   // Add a useEffect to handle tab-specific data fetching when currentTab changes
   useEffect(() => {
@@ -165,8 +167,8 @@ export default function EnhancedLandlordDashboard() {
           monthly_rent,
           end_date,
           status,
-          properties!inner(title),
-          profiles!inner(display_name)
+          properties(title),
+          tenant_profiles:profiles!tenant_id(display_name)
         `)
         .eq('landlord_id', user.id)
         .eq('status', 'active');
@@ -177,10 +179,10 @@ export default function EnhancedLandlordDashboard() {
       } else {
         const transformedTenants = (tenanciesData || []).map((tenancy: any) => ({
           id: tenancy.tenant_id,
-          name: tenancy.profiles?.display_name || 'Unknown Tenant',
+          name: tenancy.tenant_profiles?.display_name || 'Unknown Tenant',
           property_title: tenancy.properties?.title || 'Unknown Property',
           monthly_rent: tenancy.monthly_rent,
-          payment_status: 'pending' as 'paid' | 'pending' | 'overdue', // You can enhance this with real payment data
+          payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
           lease_end_date: tenancy.end_date
         }));
         setTenants(transformedTenants);
