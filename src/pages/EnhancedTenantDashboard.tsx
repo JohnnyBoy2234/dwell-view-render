@@ -18,6 +18,7 @@ import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { BUILD_TAG } from '@/version';
+import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -86,9 +87,12 @@ export default function EnhancedTenantDashboard() {
         );
       case '/enhancedtenantdashboard/applications':
         return (
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold mb-4">Applications</h2>
-            <p className="text-muted-foreground">Track your rental applications</p>
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-2">
+              <FileText className="h-6 w-6 text-ocean-blue" />
+              <h2 className="text-xl font-bold">Applications</h2>
+            </div>
+            <TenantApplicationsSection />
           </div>
         );
       case '/enhancedtenantdashboard/maintenance':
