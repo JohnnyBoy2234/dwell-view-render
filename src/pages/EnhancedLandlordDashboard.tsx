@@ -301,6 +301,29 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
+  const handleDownloadApplicationDocument = async (documentId: string, suggestedName?: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('landlord-get-document-url', {
+        body: { document_id: documentId }
+      });
+      if (error || !data?.url) throw error || new Error('No download URL');
+
+      const response = await fetch(data.url);
+      if (!response.ok) throw new Error('Failed to download file');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = suggestedName || 'document';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e: any) {
+      toast({ title: 'Download failed', description: e.message || 'Unable to download document', variant: 'destructive' });
+    }
+  };
+
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
     
@@ -565,7 +588,11 @@ export default function EnhancedLandlordDashboard() {
                                         {doc.document_type === 'id' ? 'ID Document' : 'Income Document'}
                                       </Badge>
                                     </div>
-                                    <Button variant="outline" size="sm" onClick={() => window.open(doc.file_path, '_blank')}>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      onClick={() => handleDownloadApplicationDocument(doc.id, doc.file_path.split('/').pop())}
+                                    >
                                       Download
                                     </Button>
                                   </div>
