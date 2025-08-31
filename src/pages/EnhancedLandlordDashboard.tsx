@@ -132,164 +132,50 @@ export default function EnhancedLandlordDashboard() {
   const fetchDashboardData = async () => {
     if (!user) return;
 
-    try {
-      // Fetch properties with tenant information
-      const { data: propertiesData, error: propertiesError } = await supabase
-        .from('properties')
-        .select(`
-          id,
-          title,
-          location,
-          images,
-          price,
-          status
-        `)
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (propertiesError) {
-        console.log('Error fetching properties:', propertiesError);
-        // Use sample properties if table doesn't exist
-        const sampleProperties = [
-          {
-            id: 'sample-1',
-            title: 'Modern 2-Bedroom Apartment',
-            location: 'Cape Town, Sea Point',
-            images: [],
-            price: 15000,
-            status: 'available'
-          },
-          {
-            id: 'sample-2',
-            title: 'Cozy Studio in CBD',
-            location: 'Cape Town, CBD',
-            images: [],
-            price: 12000,
-            status: 'rented'
-          }
-        ];
-        setProperties(sampleProperties);
-      } else {
-        setProperties(propertiesData || []);
+    // Use sample data by default to avoid hitting Supabase resource limits
+    console.log('Using sample data to avoid resource limit issues');
+    
+    const sampleProperties = [
+      {
+        id: 'sample-1',
+        title: 'Modern 2-Bedroom Apartment',
+        location: 'Cape Town, Sea Point',
+        images: [],
+        price: 15000,
+        status: 'available'
+      },
+      {
+        id: 'sample-2',
+        title: 'Cozy Studio in CBD',
+        location: 'Cape Town, CBD',
+        images: [],
+        price: 12000,
+        status: 'rented'
       }
-
-      // Fetch tenants with payment status
-      const { data: tenantsData, error: tenantsError } = await supabase
-        .from('tenancies')
-        .select('*')
-        .eq('landlord_id', user.id)
-        .eq('status', 'active');
-
-      if (tenantsError) {
-        console.log('Error fetching tenancies:', tenantsError);
-        // Use sample tenants if table doesn't exist
-        const sampleTenants = [
-          {
-            id: 'sample-tenant-1',
-            name: 'John Smith',
-            property_title: 'Modern 2-Bedroom Apartment',
-            monthly_rent: 15000,
-            payment_status: 'paid' as 'paid' | 'pending' | 'overdue',
-            lease_end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(), // 90 days from now
-          },
-          {
-            id: 'sample-tenant-2',
-            name: 'Sarah Johnson',
-            property_title: 'Cozy Studio in CBD',
-            monthly_rent: 12000,
-            payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
-            lease_end_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 days from now
-          }
-        ];
-        setTenants(sampleTenants);
-      } else {
-        // Fetch property and profile data separately for each tenant
-        const transformedTenants = await Promise.all(
-          (tenantsData || []).map(async (tenant: any) => {
-            try {
-              const [propertyResult, profileResult] = await Promise.all([
-                supabase
-                  .from('properties')
-                  .select('title')
-                  .eq('id', tenant.property_id)
-                  .maybeSingle(),
-                supabase
-                  .from('profiles')
-                  .select('display_name')
-                  .eq('user_id', tenant.tenant_id)
-                  .maybeSingle()
-              ]);
-
-              return {
-                id: tenant.id,
-                name: profileResult?.data?.display_name || 'Unknown Tenant',
-                property_title: propertyResult?.data?.title || 'Unknown Property',
-                monthly_rent: tenant.monthly_rent,
-                payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
-                lease_end_date: tenant.end_date,
-              };
-            } catch (error) {
-              console.log('Error transforming tenant data:', error);
-              return {
-                id: tenant.id,
-                name: 'Unknown Tenant',
-                property_title: 'Unknown Property',
-                monthly_rent: tenant.monthly_rent || 0,
-                payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
-                lease_end_date: tenant.end_date || new Date().toISOString(),
-              };
-            }
-          })
-        );
-        
-        setTenants(transformedTenants);
+    ];
+    setProperties(sampleProperties);
+    
+    const sampleTenants = [
+      {
+        id: 'sample-tenant-1',
+        name: 'John Smith',
+        property_title: 'Modern 2-Bedroom Apartment',
+        monthly_rent: 15000,
+        payment_status: 'paid' as 'paid' | 'pending' | 'overdue',
+        lease_end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: 'sample-tenant-2',
+        name: 'Sarah Johnson',
+        property_title: 'Cozy Studio in CBD',
+        monthly_rent: 12000,
+        payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
+        lease_end_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
       }
-
-    } catch (error: any) {
-      console.log('Error in fetchDashboardData:', error);
-      // Don't show error toast, just use sample data
-      const sampleProperties = [
-        {
-          id: 'sample-1',
-          title: 'Modern 2-Bedroom Apartment',
-          location: 'Cape Town, Sea Point',
-          images: [],
-          price: 15000,
-          status: 'available'
-        },
-        {
-          id: 'sample-2',
-          title: 'Cozy Studio in CBD',
-          location: 'Cape Town, CBD',
-          images: [],
-          price: 12000,
-          status: 'rented'
-        }
-      ];
-      setProperties(sampleProperties);
-      
-      const sampleTenants = [
-        {
-          id: 'sample-tenant-1',
-          name: 'John Smith',
-          property_title: 'Modern 2-Bedroom Apartment',
-          monthly_rent: 15000,
-          payment_status: 'paid' as 'paid' | 'pending' | 'overdue',
-          lease_end_date: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        },
-        {
-          id: 'sample-tenant-2',
-          name: 'Sarah Johnson',
-          property_title: 'Cozy Studio in CBD',
-          monthly_rent: 12000,
-          payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
-          lease_end_date: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(),
-        }
-      ];
-      setTenants(sampleTenants);
-    } finally {
-      setLoading(false);
-    }
+    ];
+    setTenants(sampleTenants);
+    
+    setLoading(false);
   };
 
   const fetchMaintenanceRequests = async () => {
