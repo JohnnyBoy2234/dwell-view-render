@@ -19,7 +19,8 @@ async function getAccessTokenJWT() {
   const integrationKey = Deno.env.get("DOCUSIGN_INTEGRATION_KEY");
   const impersonatedUserId = Deno.env.get("DOCUSIGN_IMPERSONATED_USER_ID");
   const authServer = Deno.env.get("DOCUSIGN_AUTH_SERVER") || "account-d.docusign.com";
-  const rsaPrivateKeyPem = Deno.env.get("DOCUSIGN_RSA_PRIVATE_KEY");
+  const rsaPrivateKeyRaw = Deno.env.get("DOCUSIGN_RSA_PRIVATE_KEY") || "";
+  const rsaPrivateKeyPem = rsaPrivateKeyRaw.includes("\\n") ? rsaPrivateKeyRaw.replace(/\\n/g, "\n") : rsaPrivateKeyRaw;
   
   if (!integrationKey || !impersonatedUserId || !rsaPrivateKeyPem) {
     throw new Error("Missing DocuSign JWT secrets");
