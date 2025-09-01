@@ -29,6 +29,7 @@ const tenantItems: SidebarItem[] = [
   { title: 'Messages', url: '/enhancedtenantdashboard/messages', icon: MessageSquare },
   { title: 'Properties', url: '/enhancedtenantdashboard/properties', icon: Building },
   { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: FileText },
+  { title: 'Leases', url: '/enhancedtenantdashboard/leases', icon: FileText },
   { title: 'Maintenance', url: '/enhancedtenantdashboard/maintenance', icon: Settings },
   { title: 'Profile', url: '/enhancedtenantdashboard/profile', icon: User },
 ];

@@ -37,18 +37,17 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
       try {
         const query = supabase
           .from("tenancies")
-          .select(
-            `*,
+          .select(`*,
             properties(title, location),
             tenant_profile:profiles!tenant_id(display_name),
-            landlord_profile:profiles!landlord_id(display_name)`
-          )
-          .eq("lease_status", "completed")
+            landlord_profile:profiles!landlord_id(display_name)
+          `)
+          .in("lease_status", ["awaiting_tenant_signature", "awaiting_landlord_signature", "completed"]) 
           .order("created_at", { ascending: false });
 
-        const { data, error } = await (role === "landlord"
-          ? query.eq("landlord_id", user.id)
-          : query.eq("tenant_id", user.id));
+        const { data, error } = await (role === "landlord" ?
+          query.eq("landlord_id", user.id) :
+          query.eq("tenant_id", user.id));
         if (error) throw error;
         setLeases((data as any) || []);
       } catch (e: any) {
@@ -111,8 +110,8 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
       ) : leases.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No signed leases yet</CardTitle>
-            <CardDescription>Completed leases will appear here</CardDescription>
+            <CardTitle>No leases yet</CardTitle>
+            <CardDescription>When a lease is sent to you for signing, it will appear here</CardDescription>
           </CardHeader>
         </Card>
       ) : (
@@ -129,15 +128,33 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
               <CardContent>
                 <div className="flex items-center justify-between text-sm mb-3">
                   <div>
-                    <div>Rent: R{(lease.monthly_rent || 0).toLocaleString()}</div>
-                    <div>Start: {new Date(lease.start_date).toLocaleDateString()}</div>
+                    <div>Landlord: {lease.landlord_profile?.display_name || 'Landlord'}</div>
+                    {lease.start_date && <div>Start: {new Date(lease.start_date).toLocaleDateString()}</div>}
                   </div>
-                  <Badge>Active</Badge>
+                  <Badge>{lease.lease_status?.replaceAll('_',' ')}</Badge>
                 </div>
-                <Button className="w-full" onClick={() => downloadLease(lease)}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
+                {lease.lease_status === 'awaiting_tenant_signature' ? (
+                  <Button className="w-full" onClick={async () => {
+                    try {
+                      const { data, error } = await supabase.functions.invoke('get-docusign-recipient-view', {
+                        body: { tenancyId: lease.id, role: 'tenant' }
+                      });
+                      if (error) throw error;
+                      const url = (data as any)?.url;
+                      if (!url) throw new Error('No signing URL');
+                      window.open(url, '_blank');
+                    } catch (e: any) {
+                      toast({ variant: 'destructive', title: 'Failed to open signing', description: e.message });
+                    }
+                  }}>
+                    Review & Sign
+                  </Button>
+                ) : (
+                  <Button className="w-full" onClick={() => downloadLease(lease)}>
+                    <Download className="h-4 w-4 mr-2" />
+                    Download PDF
+                  </Button>
+                )}
               </CardContent>
             </Card>
           ))}

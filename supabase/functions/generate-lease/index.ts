@@ -283,12 +283,13 @@ serve(async (req) => {
 
     if (uploadError) throw uploadError;
 
-    // Update the tenancy record with the PDF PATH and set status to awaiting tenant signature
+    // Update the tenancy record with the PDF PATH and set status to awaiting tenant signature (do not mark tenancy active)
     const { error: updateError } = await supabaseClient
       .from("tenancies")
       .update({ 
         lease_document_path: filePath,
-        lease_status: 'awaiting_tenant_signature'
+        lease_status: 'awaiting_tenant_signature',
+        status: 'pending'
       })
       .eq("id", tenancyId);
 

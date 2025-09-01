@@ -14,6 +14,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Home, MessageSquare, Building, FileText, Settings, User, Calendar } from 'lucide-react';
+import { SignedLeasesList } from '@/components/lease/SignedLeasesList';
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -93,6 +94,12 @@ export default function EnhancedTenantDashboard() {
               <h2 className="text-xl font-bold">Applications</h2>
             </div>
             <TenantApplicationsSection />
+          </div>
+        );
+      case '/enhancedtenantdashboard/leases':
+        return (
+          <div className="space-y-6">
+            <SignedLeasesList role="tenant" />
           </div>
         );
       case '/enhancedtenantdashboard/maintenance':
