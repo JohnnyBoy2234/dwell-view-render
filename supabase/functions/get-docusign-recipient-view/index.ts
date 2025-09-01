@@ -66,7 +66,10 @@ Deno.serve(async (req) => {
   }
   
   try {
-    const { tenancyId, role, returnUrl = "https://swiftrent.co.za/tenant-dashboard" } = await req.json();
+    console.log("=== DocuSign Recipient View Function Started ===");
+    const body = await req.json();
+    console.log("Request body:", JSON.stringify(body, null, 2));
+    const { tenancyId, role, returnUrl = "https://swiftrent.co.za/tenant-dashboard" } = body;
     
     if (!tenancyId || !role || (role !== "tenant" && role !== "landlord")) {
       return new Response(JSON.stringify({ error: "tenancyId and role ('tenant'|'landlord') are required" }), { 
@@ -77,7 +80,10 @@ Deno.serve(async (req) => {
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    console.log("Supabase config check - URL exists:", !!SUPABASE_URL, "SERVICE_ROLE exists:", !!SERVICE_ROLE);
+    
     if (!SUPABASE_URL || !SERVICE_ROLE) {
+      console.error("Missing Supabase configuration");
       return new Response(JSON.stringify({ error: "Server misconfigured: missing Supabase env" }), { 
         status: 500, 
         headers: { "Content-Type": "application/json", ...corsHeaders } 
@@ -214,7 +220,12 @@ Deno.serve(async (req) => {
     
   } catch (e) {
     console.error("Edge function error:", e);
-    return new Response(JSON.stringify({ error: String(e) }), { 
+    console.error("Error stack:", e.stack);
+    return new Response(JSON.stringify({ 
+      error: String(e),
+      stack: e.stack,
+      message: e.message 
+    }), { 
       status: 500, 
       headers: { "Content-Type": "application/json", ...corsHeaders } 
     });
