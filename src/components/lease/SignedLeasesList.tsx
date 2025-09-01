@@ -18,6 +18,7 @@ interface SignedLease {
   end_date: string | null;
   lease_document_path: string | null;
   lease_document_url?: string | null;
+  lease_status?: string | null;
   created_at: string;
   properties?: { title: string; location: string } | null;
   tenant_profile?: { display_name: string } | null;
@@ -145,7 +146,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
                           <div>Landlord: {lease.landlord_profile?.display_name || 'Landlord'}</div>
                           {lease.start_date && <div>Start: {new Date(lease.start_date).toLocaleDateString()}</div>}
                         </div>
-                        <Badge>{lease.lease_status?.replaceAll('_',' ')}</Badge>
+                        <Badge>{lease.lease_status?.replace(/_/g, ' ')}</Badge>
                       </div>
                       {lease.lease_status === 'awaiting_tenant_signature' ? (
                         <Button className="w-full" onClick={async () => {
