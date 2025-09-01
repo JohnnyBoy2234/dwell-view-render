@@ -38,6 +38,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
   { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare },
   { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: FileText },
+  { title: 'Leases', url: '/enhancedlandlorddashboard/leases', icon: FileText },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
   { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: DollarSign },
   { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },

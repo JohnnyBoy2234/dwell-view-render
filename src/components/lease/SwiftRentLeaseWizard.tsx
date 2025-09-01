@@ -110,9 +110,57 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
     })();
   }, [propertyId]);
 
+  // Prefill landlord and tenant from profiles/screening details
+  useEffect(() => {
+    (async () => {
+      try {
+        // Landlord profile (name best-effort)
+        if (user) {
+          const { data: lprof } = await supabase
+            .from('profiles')
+            .select('display_name')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          setLandlord((prev) => ({
+            ...prev,
+            fullName: prev.fullName || lprof?.display_name || prev.fullName,
+            email: prev.email || (user.email ?? ""),
+          }));
+        }
+
+        // Tenant screening details
+        if (selectedTenant?.id) {
+          const [{ data: sdet }, { data: tprof }] = await Promise.all([
+            supabase
+              .from('screening_details')
+              .select('full_name, id_number, phone, current_address')
+              .eq('user_id', selectedTenant.id)
+              .maybeSingle(),
+            supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('user_id', selectedTenant.id)
+              .maybeSingle(),
+          ]);
+          const name = sdet?.full_name || selectedTenant.name || tprof?.display_name || "";
+          setTenants([{ 
+            fullName: name, 
+            idNumber: sdet?.id_number || "", 
+            email: "", 
+            phone: sdet?.phone || "", 
+            address: sdet?.current_address || "" 
+          }]);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+  }, [user?.id, selectedTenant?.id]);
+
   const valid = useMemo(() => {
     if (!landlord.fullName || !landlord.idNumber || !landlord.email || !landlord.phone || !landlord.address) return false;
-    if (!tenants.length || tenants.some((t) => !t.fullName || !t.idNumber || !t.email || !t.phone || !t.address)) return false;
+    // Relax tenant requirements: email and phone optional (auto-filled where possible)
+    if (!tenants.length || tenants.some((t) => !t.fullName || !t.idNumber || !t.address)) return false;
     if (!premises.address || !premises.maxOccupants || premises.maxOccupants < 1) return false;
     if (!rent.amount || !deposit.amount) return false;
     if (!term.startDate || !term.endDate) return false;
@@ -208,10 +256,10 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
         </Button>
         <div className="flex-1">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Step {step} of 6</span>
+            <span>Step {step} of 7</span>
           </div>
           <div className="w-full bg-muted rounded-full h-2 mt-1">
-            <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: `${(step / 6) * 100}%` }} />
+            <div className="bg-primary h-2 rounded-full transition-all duration-300" style={{ width: `${(step / 7) * 100}%` }} />
           </div>
         </div>
       </div>
@@ -446,6 +494,9 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
             <Button disabled={!valid || loading} onClick={generate} className="w-full">
               {loading ? 'Generating...' : 'Generate & Send for Signing'}
             </Button>
+            {!valid && (
+              <p className="mt-2 text-xs text-destructive">Please complete all required fields in previous steps.</p>
+            )}
           </CardContent>
         </Card>
       )}

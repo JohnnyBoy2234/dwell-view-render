@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play } from 'lucide-react';
+import { LandlordLeasesList } from '@/components/lease/LandlordLeasesList';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
@@ -337,6 +338,8 @@ export default function EnhancedLandlordDashboard() {
       case '/enhancedlandlorddashboard/applications':
         console.log('[Dashboard] Rendering applications tab');
         return renderApplicationsTab();
+      case '/enhancedlandlorddashboard/leases':
+        return renderLeasesTab();
       case '/enhancedlandlorddashboard/tenants':
         console.log('[Dashboard] Rendering tenants tab');
         return renderTenantsTab();
@@ -354,6 +357,11 @@ export default function EnhancedLandlordDashboard() {
         return renderDashboardContent();
     }
   };
+  const renderLeasesTab = () => (
+    <div className="space-y-6">
+      <LandlordLeasesList />
+    </div>
+  );
 
   const renderPropertiesTab = () => (
     <div className="space-y-6">
