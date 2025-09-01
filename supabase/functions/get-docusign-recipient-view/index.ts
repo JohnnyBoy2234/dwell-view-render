@@ -108,25 +108,40 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Create envelope for this signing session
-    const createEnvelopeResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${SERVICE_ROLE}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ tenancyId })
-    });
-    
-    if (!createEnvelopeResp.ok) {
-      const errText = await createEnvelopeResp.text();
-      return new Response(JSON.stringify({ error: `Failed to create envelope: ${errText}` }), { 
-        status: 500, 
-        headers: { "Content-Type": "application/json", ...corsHeaders } 
+    // Helper to create envelope
+    async function createEnvelope(): Promise<string> {
+      const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`;
+      console.log("Calling create-docusign-envelope:", url);
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${SERVICE_ROLE}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tenancyId })
       });
+      const text = await resp.text();
+      console.log("create-docusign-envelope status:", resp.status, "body:", text);
+      if (!resp.ok) {
+        throw new Error(`create-docusign-envelope failed ${resp.status}: ${text}`);
+      }
+      try {
+        const json = JSON.parse(text || "{}");
+        return json.envelopeId as string;
+      } catch (e) {
+        throw new Error(`create-docusign-envelope invalid JSON: ${text}`);
+      }
     }
-    
-    const { envelopeId } = await createEnvelopeResp.json();
+
+    // Create envelope (with one retry on failure)
+    let envelopeId: string | undefined;
+    try {
+      envelopeId = await createEnvelope();
+    } catch (e) {
+      console.warn("First attempt to create envelope failed, retrying once...", e);
+      envelopeId = await createEnvelope();
+    }
+
     if (!envelopeId) {
       return new Response(JSON.stringify({ error: "No envelope ID received from create-docusign-envelope" }), { 
         status: 500, 
@@ -166,7 +181,16 @@ Deno.serve(async (req) => {
     }
 
     // Get DocuSign access token
-    const accessToken = await getAccessTokenJWT();
+    let accessToken: string;
+    try {
+      accessToken = await getAccessTokenJWT();
+    } catch (e) {
+      console.error("DocuSign JWT token error:", e);
+      return new Response(JSON.stringify({ error: `DocuSign JWT token error: ${String(e)}` }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders }
+      });
+    }
     const accountId = Deno.env.get("DOCUSIGN_ACCOUNT_ID");
     const basePath = Deno.env.get("DOCUSIGN_BASE_PATH") || "https://demo.docusign.net/restapi";
     
@@ -191,28 +215,34 @@ Deno.serve(async (req) => {
       clientUserId,
     };
 
-    // Create recipient view for embedded signing
-    const viewResp = await fetch(`${basePath}/v2.1/accounts/${accountId}/envelopes/${envelopeId}/views/recipient`, {
-      method: "POST",
-      headers: { 
-        Authorization: `Bearer ${accessToken}`, 
-        "Content-Type": "application/json" 
-      },
-      body: JSON.stringify(viewReq),
-    });
-    
-    if (!viewResp.ok) {
-      const errText = await viewResp.text();
-      console.error(`DocuSign recipient view failed: ${viewResp.status} ${errText}`);
-      return new Response(JSON.stringify({ 
-        error: `DocuSign recipient view failed: ${viewResp.status} ${errText}` 
-      }), { 
-        status: 502, 
-        headers: { "Content-Type": "application/json", ...corsHeaders } 
+    // Create recipient view for embedded signing (retry once on failure by recreating envelope)
+    async function createRecipientView(currentEnvelopeId: string) {
+      const url = `${basePath}/v2.1/accounts/${accountId}/envelopes/${currentEnvelopeId}/views/recipient`;
+      console.log("Requesting recipient view:", url, "for role:", role);
+      const resp = await fetch(url, {
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${accessToken}`, 
+          "Content-Type": "application/json" 
+        },
+        body: JSON.stringify(viewReq),
       });
+      const text = await resp.text();
+      console.log("recipient view status:", resp.status, "body:", text);
+      if (!resp.ok) {
+        throw new Error(`recipient view failed ${resp.status}: ${text}`);
+      }
+      return JSON.parse(text);
     }
-    
-    const viewJson = await viewResp.json();
+
+    let viewJson: any;
+    try {
+      viewJson = await createRecipientView(envelopeId);
+    } catch (e) {
+      console.warn("First attempt at recipient view failed, recreating envelope and retrying...", e);
+      envelopeId = await createEnvelope();
+      viewJson = await createRecipientView(envelopeId);
+    }
     const url = viewJson.url as string;
 
     return new Response(JSON.stringify({ url }), { 
