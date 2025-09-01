@@ -1,4 +1,4 @@
-import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench, type LucideIcon } from 'lucide-react';
+import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench, Inbox, type LucideIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -37,7 +37,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Rental Manager', url: '/enhancedlandlorddashboard', icon: Home },
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
   { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare },
-  { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: FileText },
+  { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
   { title: 'Leases', url: '/enhancedlandlorddashboard/leases', icon: FileText },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
   { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: DollarSign },

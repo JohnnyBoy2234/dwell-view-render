@@ -192,12 +192,12 @@ export function LandlordLeasesList() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <Select onValueChange={(val) => setPropertyFilter(val || null)}>
+          <Select onValueChange={(val) => setPropertyFilter(val === 'ALL' ? null : val)}>
             <SelectTrigger className="w-[220px]">
               <SelectValue placeholder="Filter by property" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All properties</SelectItem>
+              <SelectItem value="ALL">All properties</SelectItem>
               {[...new Map(leases.map(l => [l.property_id, l])).values()].map((l) => (
                 <SelectItem key={l.property_id} value={l.property_id}>
                   {l.properties?.title || l.properties?.location || l.property_id}
@@ -216,7 +216,7 @@ export function LandlordLeasesList() {
             </SelectTrigger>
             <SelectContent>
               {draftTenancies.length === 0 ? (
-                <SelectItem value="" disabled>No draft tenancies</SelectItem>
+                <SelectItem value="NO_DRAFTS" disabled>No draft tenancies</SelectItem>
               ) : (
                 draftTenancies.map((l) => (
                   <SelectItem key={l.id} value={l.id}>
