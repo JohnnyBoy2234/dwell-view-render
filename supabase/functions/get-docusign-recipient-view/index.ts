@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
     // Load tenancy with lease document path
     const { data: tenancy, error: tErr } = await supabase
       .from("tenancies")
-      .select("id, tenant_id, landlord_id, lease_document_path, envelope_id, signing_provider")
+      .select("id, tenant_id, landlord_id, lease_document_path")
       .eq("id", tenancyId)
       .maybeSingle();
       
@@ -100,30 +100,31 @@ Deno.serve(async (req) => {
       });
     }
 
-    // If no envelope exists, create one first
-    if (!tenancy.envelope_id) {
-      const createEnvelopeResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${SERVICE_ROLE}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ tenancyId })
+    // Create envelope for this signing session
+    const createEnvelopeResp = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${SERVICE_ROLE}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ tenancyId })
+    });
+    
+    if (!createEnvelopeResp.ok) {
+      const errText = await createEnvelopeResp.text();
+      return new Response(JSON.stringify({ error: `Failed to create envelope: ${errText}` }), { 
+        status: 500, 
+        headers: { "Content-Type": "application/json", ...corsHeaders } 
       });
-      
-      if (!createEnvelopeResp.ok) {
-        const errText = await createEnvelopeResp.text();
-        return new Response(JSON.stringify({ error: `Failed to create envelope: ${errText}` }), { 
-          status: 500, 
-          headers: { "Content-Type": "application/json", ...corsHeaders } 
-        });
-      }
-      
-      const { envelopeId } = await createEnvelopeResp.json();
-      tenancy.envelope_id = envelopeId;
     }
-
-    const envelopeId = tenancy.envelope_id as string;
+    
+    const { envelopeId } = await createEnvelopeResp.json();
+    if (!envelopeId) {
+      return new Response(JSON.stringify({ error: "No envelope ID received from create-docusign-envelope" }), { 
+        status: 500, 
+        headers: { "Content-Type": "application/json", ...corsHeaders } 
+      });
+    }
 
     // Load profiles and emails
     const { data: profiles, error: pErr } = await supabase
