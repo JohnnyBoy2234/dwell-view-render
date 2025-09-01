@@ -95,10 +95,10 @@ Deno.serve(async (req) => {
     
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
 
-    // Load tenancy with lease document path
+    // Load tenancy with lease document path and existing envelope if any
     const { data: tenancy, error: tErr } = await supabase
       .from("tenancies")
-      .select("id, tenant_id, landlord_id, lease_document_path")
+      .select("id, tenant_id, landlord_id, lease_document_path, envelope_id, signing_provider, lease_status")
       .eq("id", tenancyId)
       .maybeSingle();
       
@@ -108,7 +108,6 @@ Deno.serve(async (req) => {
         headers: { "Content-Type": "application/json", ...corsHeaders } 
       });
     }
-
     // Helper to create envelope
     async function createEnvelope(): Promise<string> {
       const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`;
@@ -134,13 +133,23 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Create envelope (with one retry on failure)
-    let envelopeId: string | undefined;
-    try {
-      envelopeId = await createEnvelope();
-    } catch (e) {
-      console.warn("First attempt to create envelope failed, retrying once...", e);
-      envelopeId = await createEnvelope();
+    // Use existing envelope if available; otherwise create (with one retry). Guard that a lease PDF exists before creating.
+    let envelopeId: string | undefined = (tenancy as any).envelope_id && (tenancy as any).signing_provider === 'docusign' 
+      ? (tenancy as any).envelope_id 
+      : undefined;
+    if (!envelopeId) {
+      if (!(tenancy as any).lease_document_path) {
+        return new Response(JSON.stringify({ error: "Lease document not found for this tenancy. Generate the lease first from the landlord dashboard." }), { 
+          status: 400, 
+          headers: { "Content-Type": "application/json", ...corsHeaders } 
+        });
+      }
+      try {
+        envelopeId = await createEnvelope();
+      } catch (e) {
+        console.warn("First attempt to create envelope failed, retrying once...", e);
+        envelopeId = await createEnvelope();
+      }
     }
 
     if (!envelopeId) {
