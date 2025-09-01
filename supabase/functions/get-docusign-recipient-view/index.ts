@@ -184,14 +184,74 @@ Deno.serve(async (req) => {
       clientUserId,
     };
 
-    const viewResp = await fetch(`${basePath}/v2.1/accounts/${accountId}/envelopes/${envelopeId}/views/recipient`, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-      body: JSON.stringify(viewReq),
-    });
+    async function createRecipientView(envId: string) {
+      const resp = await fetch(`${basePath}/v2.1/accounts/${accountId}/envelopes/${envId}/views/recipient`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify(viewReq),
+      });
+      return resp;
+    }
+
+    // Try to create the recipient view; if it fails (e.g., envelope recipients not embedded), recreate envelope and retry once
+    let viewResp = await createRecipientView(envelopeId);
     if (!viewResp.ok) {
+      // Attempt one-time recreate envelope and retry
       const errText = await viewResp.text();
-      return new Response(JSON.stringify({ error: `DocuSign recipient view failed: ${viewResp.status} ${errText}` }), { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } });
+      // Recreate envelope with embedded recipients
+      const { data: file2 } = await supabase.storage.from("lease-documents").download(tenancy.lease_document_path);
+      if (file2) {
+        const documentBase64b = b64encode(new Uint8Array(await file2.arrayBuffer()));
+        const tenantSigner2 = {
+          email: tenantEmail,
+          name: nameById[tenancy.tenant_id] || "Tenant",
+          recipientId: "1",
+          routingOrder: "1",
+          clientUserId: tenancy.tenant_id,
+          roleName: "tenant",
+          tabs: {
+            signHereTabs: [{ anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" }],
+            dateSignedTabs: [{ anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" }],
+            fullNameTabs: [{ anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" }],
+            initialHereTabs: [{ anchorString: "SWIFTRENT_INIT_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" }],
+          },
+        } as any;
+        const landlordSigner2 = {
+          email: landlordEmail,
+          name: nameById[tenancy.landlord_id] || "Landlord",
+          recipientId: "2",
+          routingOrder: "2",
+          clientUserId: tenancy.landlord_id,
+          roleName: "landlord",
+          tabs: {
+            signHereTabs: [{ anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" }],
+            dateSignedTabs: [{ anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" }],
+            fullNameTabs: [{ anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" }],
+            initialHereTabs: [{ anchorString: "SWIFTRENT_INIT_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" }],
+          },
+        } as any;
+        const envDef2 = {
+          emailSubject: "Lease Agreement",
+          status: "sent",
+          documents: [{ documentBase64: documentBase64b, name: "Lease.pdf", fileExtension: "pdf", documentId: "1" }],
+          recipients: { signers: [tenantSigner2, landlordSigner2] },
+        };
+        const createResp2 = await fetch(`${basePath}/v2.1/accounts/${accountId}/envelopes`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(envDef2),
+        });
+        if (createResp2.ok) {
+          const env2 = await createResp2.json();
+          envelopeId = env2.envelopeId as string;
+          await supabase.from("tenancies").update({ envelope_id: envelopeId, signing_provider: "docusign" }).eq("id", tenancyId);
+          viewResp = await createRecipientView(envelopeId);
+        }
+      }
+    }
+    if (!viewResp.ok) {
+      const errText2 = await viewResp.text();
+      return new Response(JSON.stringify({ error: `DocuSign recipient view failed: ${viewResp.status} ${errText2}` }), { status: 502, headers: { "Content-Type": "application/json", ...corsHeaders } });
     }
     const viewJson = await viewResp.json();
     const url = viewJson.url as string;
