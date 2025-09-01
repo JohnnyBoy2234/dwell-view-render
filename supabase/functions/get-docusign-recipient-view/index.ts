@@ -10,7 +10,9 @@ import { SignJWT, importPKCS8 } from "https://esm.sh/jose@5.2.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, prefer",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 async function getAccessTokenJWT() {
@@ -62,7 +64,7 @@ function b64encode(uint8: Uint8Array) {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: { ...corsHeaders } });
+    return new Response("ok", { headers: { ...corsHeaders } });
   }
   
   try {
