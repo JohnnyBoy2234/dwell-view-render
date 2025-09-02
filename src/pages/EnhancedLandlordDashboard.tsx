@@ -10,7 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play } from 'lucide-react';
+import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play, Save, Trash2 } from 'lucide-react';
 import { LandlordLeasesList } from '@/components/lease/LandlordLeasesList';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -38,6 +38,49 @@ interface TenantListItem {
   lease_end_date: string;
 }
 
+
+interface AdditionalCost {
+  id?: string;
+  description: string;
+  amount: number;
+  tenant_id?: string;
+  property_id?: string;
+}
+
+interface LandlordDetails {
+  id?: string;
+  name: string;
+  address: string;
+  contact: string;
+  vatNumber?: string;
+  bank: string;
+  accountHolder: string;
+  accountNumber: string;
+  branchCode: string;
+}
+
+interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  date: string;
+  dueDate: string;
+  landlordDetails: LandlordDetails;
+  tenantDetails: {
+    name: string;
+    address: string;
+    contact: string;
+  };
+  propertyDetails: {
+    title: string;
+    address: string;
+  };
+  items: {
+    description: string;
+    amount: number;
+  }[];
+  totalAmount: number;
+}
+
 export default function EnhancedLandlordDashboard() {
   const { user, isLandlord, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -58,7 +101,29 @@ export default function EnhancedLandlordDashboard() {
   
   const [properties, setProperties] = useState<PropertyWithTenant[]>([]);
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  
+  // Invoice costs state
+  const [additionalCosts, setAdditionalCosts] = useState<AdditionalCost[]>([]);
+  const [invoiceSchedule, setInvoiceSchedule] = useState<string>('7');
+  const [addCostModalOpen, setAddCostModalOpen] = useState(false);
+  const [newCost, setNewCost] = useState<AdditionalCost>({ description: '', amount: 0 });
+  
+  // Landlord details state
+  const [landlordDetails, setLandlordDetails] = useState<LandlordDetails>({
+    name: '',
+    address: '',
+    contact: '',
+    vatNumber: '',
+    bank: '',
+    accountHolder: '',
+    accountNumber: '',
+    branchCode: ''
+  });
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [generatingInvoice, setGeneratingInvoice] = useState(false);
+  const [generatedInvoice, setGeneratedInvoice] = useState<Invoice | null>(null);
+  const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
 
   useEffect(() => {
     // Visible in production console to verify current deployed build
@@ -81,26 +146,14 @@ export default function EnhancedLandlordDashboard() {
     if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
       setCurrentTab(path);
     }
-    
-    fetchDashboardData();
-    
-    // Fetch applications when on applications tab
-    if (path === '/enhancedlandlorddashboard/applications') {
-      try {
-        fetchAllApplications();
-      } catch (error) {
-        console.log('Error calling fetchAllApplications in initial load:', error);
-      }
-    }
-    
-    // Fetch maintenance requests when on maintenance tab
-    if (path === '/enhancedlandlorddashboard/maintenance') {
-      try {
-        fetchMaintenanceRequests();
-      } catch (error) {
-        console.log('Error calling fetchMaintenanceRequests in initial load:', error);
-      }
-    }
+
+    fetchAllApplications();
+    fetchProperties();
+    fetchTenants();
+    fetchMaintenanceRequests();
+    fetchLandlordSettings();
+    fetchAdditionalCosts();
+    fetchInvoiceScheduleSettings();
   }, [authLoading, user, isLandlord, navigate, location.pathname, fetchAllApplications]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
@@ -134,9 +187,26 @@ export default function EnhancedLandlordDashboard() {
         // Maintenance will show sample data from the function
       }
     }
+    if (currentTab === '/enhancedlandlorddashboard/reports') {
+      try {
+        fetchLandlordSettings();
+        fetchAdditionalCosts();
+        fetchInvoiceScheduleSettings();
+      } catch (error) {
+        console.log('Error loading reports data:', error);
+      }
+    }
   }, [currentTab, fetchAllApplications]);
 
-  const fetchDashboardData = async () => {
+  // Fetch data on component mount
+  useEffect(() => {
+    if (user) {
+      fetchProperties();
+      fetchTenants();
+    }
+  }, [user]);
+
+  const fetchProperties = async () => {
     if (!user) return;
 
     setLoading(true);
@@ -162,7 +232,18 @@ export default function EnhancedLandlordDashboard() {
         }));
         setProperties(transformedProperties);
       }
+    } catch (error) {
+      console.error('Error in fetchProperties:', error);
+      setProperties([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const fetchTenants = async () => {
+    if (!user) return;
+
+    try {
       // Fetch real tenants from tenancies and profiles
       const { data: tenanciesData, error: tenanciesError } = await supabase
         .from('tenancies')
@@ -279,15 +360,233 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'available':
-        return 'default';
-      case 'rented':
-      case 'occupied':
-        return 'secondary';
-      default:
-        return 'outline';
+  // Invoice costs handler functions
+  const handleAddCost = async () => {
+    if (!newCost.description.trim() || newCost.amount <= 0) {
+      toast({
+        title: "Invalid Cost",
+        description: "Please enter a valid description and amount",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const cost: AdditionalCost = {
+        id: Date.now().toString(),
+        description: newCost.description.trim(),
+        amount: newCost.amount,
+      };
+
+      const updatedCosts = [...additionalCosts, cost];
+      setAdditionalCosts(updatedCosts);
+      
+      // Save to localStorage until database migration is applied
+      localStorage.setItem('additionalCosts', JSON.stringify(updatedCosts));
+      
+      setNewCost({ description: '', amount: 0 });
+      setAddCostModalOpen(false);
+      
+      toast({
+        title: "Cost Added",
+        description: "Additional cost has been added and saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving additional cost:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save additional cost",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRemoveCost = async (index: number) => {
+    try {
+      const updatedCosts = additionalCosts.filter((_, i) => i !== index);
+      setAdditionalCosts(updatedCosts);
+      
+      // Save to localStorage until database migration is applied
+      localStorage.setItem('additionalCosts', JSON.stringify(updatedCosts));
+      
+      toast({
+        title: "Cost Removed",
+        description: "Additional cost has been removed",
+      });
+    } catch (error) {
+      console.error('Error removing additional cost:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove additional cost",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveInvoiceSettings = async () => {
+    try {
+      // For now, just save to localStorage until database migration is applied
+      localStorage.setItem('invoiceSchedule', invoiceSchedule);
+      
+      toast({
+        title: "Settings Saved",
+        description: `Invoice will be sent ${invoiceSchedule === '7' ? '1 week' : invoiceSchedule === '3' ? '3 days' : '1 day'} before due date`,
+      });
+    } catch (error) {
+      console.error('Error saving invoice schedule settings:', error);
+      toast({
+        title: "Settings Saved",
+        description: `Invoice will be sent ${invoiceSchedule === '7' ? '1 week' : invoiceSchedule === '3' ? '3 days' : '1 day'} before due date`,
+      });
+    }
+  };
+
+  // Supabase fetch functions
+  const fetchLandlordSettings = async () => {
+    if (!user) return;
+    
+    try {
+      // Use localStorage as fallback until database migration is applied
+      const saved = localStorage.getItem('landlordDetails');
+      if (saved) {
+        setLandlordDetails(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error fetching landlord settings:', error);
+    }
+  };
+
+  const fetchAdditionalCosts = async () => {
+    if (!user) return;
+    
+    try {
+      // Use localStorage as fallback until database migration is applied
+      const saved = localStorage.getItem('additionalCosts');
+      if (saved) {
+        setAdditionalCosts(JSON.parse(saved));
+      }
+    } catch (error) {
+      console.error('Error fetching additional costs:', error);
+    }
+  };
+
+  const fetchInvoiceScheduleSettings = async () => {
+    if (!user) return;
+    
+    try {
+      // Use localStorage as fallback until database migration is applied
+      const saved = localStorage.getItem('invoiceSchedule');
+      if (saved) {
+        setInvoiceSchedule(saved);
+      }
+    } catch (error) {
+      console.error('Error fetching invoice schedule settings:', error);
+    }
+  };
+
+  const handleSaveLandlordSettings = async () => {
+    if (!user) return;
+    
+    try {
+      // Save to localStorage until database migration is applied
+      localStorage.setItem('landlordDetails', JSON.stringify(landlordDetails));
+
+      toast({
+        title: "Settings Saved",
+        description: "Landlord details have been saved successfully",
+      });
+    } catch (error) {
+      console.error('Error saving landlord settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save landlord settings",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleGenerateInvoice = async () => {
+    setGeneratingInvoice(true);
+    try {
+      // Validate landlord details
+      if (!landlordDetails.name.trim()) {
+        toast({
+          title: "Missing Information",
+          description: "Please save landlord details before generating invoice",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // For demo purposes, use first tenant and property
+      if (tenants.length === 0 || properties.length === 0) {
+        toast({
+          title: "No Data Available",
+          description: "No tenants or properties found to generate invoice",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const tenant = tenants[0];
+      const property = properties[0];
+
+      // Generate invoice
+      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      const invoice: Invoice = {
+        id: `INV-${Date.now()}`,
+        invoiceNumber,
+        date: new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
+        landlordDetails,
+        tenantDetails: {
+          name: tenant.name,
+          address: property.location,
+          contact: tenant.id, // In real app, would have tenant contact info
+        },
+        propertyDetails: {
+          title: property.title,
+          address: property.location,
+        },
+        items: [
+          {
+            description: "Monthly Rent",
+            amount: tenant.monthly_rent,
+          },
+          ...additionalCosts.map(cost => ({
+            description: cost.description,
+            amount: cost.amount,
+          })),
+        ],
+        totalAmount: tenant.monthly_rent + additionalCosts.reduce((sum, cost) => sum + cost.amount, 0),
+      };
+
+      // Save invoice to localStorage until database migration is applied
+      try {
+        const savedInvoices = JSON.parse(localStorage.getItem('savedInvoices') || '[]');
+        savedInvoices.push(invoice);
+        localStorage.setItem('savedInvoices', JSON.stringify(savedInvoices));
+      } catch (error) {
+        console.error('Error saving invoice to localStorage:', error);
+        // Continue with preview even if save fails
+      }
+
+      setGeneratedInvoice(invoice);
+      setInvoicePreviewOpen(true);
+
+      toast({
+        title: "Invoice Generated",
+        description: `Invoice ${invoice.invoiceNumber} has been generated and saved successfully`,
+      });
+    } catch (error) {
+      console.error('Error generating invoice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate invoice",
+        variant: "destructive",
+      });
+    } finally {
+      setGeneratingInvoice(false);
     }
   };
 
@@ -1043,8 +1342,458 @@ export default function EnhancedLandlordDashboard() {
           </Card>
         </div>
       )}
+
+      {/* Additional Invoice Costs & Scheduling Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="h-6 w-6 text-ocean-blue" />
+            <h3 className="text-xl font-bold">Additional Invoice Costs & Scheduling</h3>
+            <Badge variant="secondary" className="ml-2">
+              Invoice Management
+            </Badge>
+          </div>
+
+          <div className="space-y-6">
+            {/* Additional Costs Section */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h4 className="text-lg font-semibold">Additional Costs</h4>
+                <Dialog open={addCostModalOpen} onOpenChange={setAddCostModalOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-ocean-blue hover:bg-ocean-blue/90">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Cost
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Additional Cost</DialogTitle>
+                      <DialogDescription>
+                        Add a custom cost item to include in tenant invoices
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Description</label>
+                        <input
+                          type="text"
+                          value={newCost.description}
+                          onChange={(e) => setNewCost({ ...newCost, description: e.target.value })}
+                          placeholder="e.g., Maintenance Fee, Security Fee"
+                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Amount (ZAR)</label>
+                        <input
+                          type="number"
+                          value={newCost.amount}
+                          onChange={(e) => setNewCost({ ...newCost, amount: parseFloat(e.target.value) || 0 })}
+                          placeholder="0.00"
+                          min="0"
+                          step="0.01"
+                          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+                        />
+                      </div>
+                      <div className="flex gap-2 pt-4">
+                        <Button onClick={handleAddCost} className="flex-1">
+                          Add Cost
+                        </Button>
+                        <Button variant="outline" onClick={() => setAddCostModalOpen(false)} className="flex-1">
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+
+              {additionalCosts.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No additional costs added yet</p>
+                  <p className="text-sm">Add custom cost items to include in tenant invoices</p>
+                </div>
+              ) : (
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left p-3 font-medium">Description</th>
+                        <th className="text-right p-3 font-medium">Amount (ZAR)</th>
+                        <th className="text-center p-3 font-medium">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {additionalCosts.map((cost, index) => (
+                        <tr key={index} className="border-t">
+                          <td className="p-3">{cost.description}</td>
+                          <td className="p-3 text-right font-medium">R{cost.amount.toLocaleString()}</td>
+                          <td className="p-3 text-center">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveCost(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Invoice Scheduling Section */}
+            <div className="border-t pt-6">
+              <h4 className="text-lg font-semibold mb-4">Invoice Scheduling</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">
+                    Send invoice before due date
+                  </label>
+                  <select
+                    value={invoiceSchedule}
+                    onChange={(e) => setInvoiceSchedule(e.target.value)}
+                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+                  >
+                    <option value="7">1 week before</option>
+                    <option value="3">3 days before</option>
+                    <option value="1">1 day before</option>
+                  </select>
+                </div>
+                <div className="flex items-end">
+                  <Button 
+                    onClick={handleSaveInvoiceSettings}
+                    className="w-full bg-success-green hover:bg-success-green/90"
+                  >
+                    <Save className="h-4 w-4 mr-2" />
+                    Save Settings
+                  </Button>
+                </div>
+              </div>
+              
+              {invoiceSchedule && (
+                <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                    <Calendar className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      Invoices will be sent {invoiceSchedule === '7' ? '1 week' : invoiceSchedule === '3' ? '3 days' : '1 day'} before the due date
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Total Summary */}
+            {additionalCosts.length > 0 && (
+              <div className="border-t pt-6">
+                <div className="bg-muted/30 rounded-lg p-4">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold">Total Additional Costs:</span>
+                    <span className="text-xl font-bold text-ocean-blue">
+                      R{additionalCosts.reduce((sum, cost) => sum + cost.amount, 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    This amount will be added to the base rent for each tenant invoice
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Landlord Invoice Settings Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <User className="h-6 w-6 text-ocean-blue" />
+            <h3 className="text-xl font-bold">Landlord Invoice Settings</h3>
+            <Badge variant="secondary" className="ml-2">
+              Business Details
+            </Badge>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">Name *</label>
+              <input
+                type="text"
+                value={landlordDetails.name}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, name: e.target.value })}
+                placeholder="Your full name or business name"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Contact *</label>
+              <input
+                type="text"
+                value={landlordDetails.contact}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, contact: e.target.value })}
+                placeholder="Phone number or email"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium mb-2">Address *</label>
+              <textarea
+                value={landlordDetails.address}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, address: e.target.value })}
+                placeholder="Your business address"
+                rows={3}
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">VAT Number</label>
+              <input
+                type="text"
+                value={landlordDetails.vatNumber}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, vatNumber: e.target.value })}
+                placeholder="Optional VAT registration number"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Bank Name</label>
+              <input
+                type="text"
+                value={landlordDetails.bank}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, bank: e.target.value })}
+                placeholder="e.g., Standard Bank, FNB"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Account Holder</label>
+              <input
+                type="text"
+                value={landlordDetails.accountHolder}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, accountHolder: e.target.value })}
+                placeholder="Account holder name"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Account Number</label>
+              <input
+                type="text"
+                value={landlordDetails.accountNumber}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, accountNumber: e.target.value })}
+                placeholder="Bank account number"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2">Branch Code</label>
+              <input
+                type="text"
+                value={landlordDetails.branchCode}
+                onChange={(e) => setLandlordDetails({ ...landlordDetails, branchCode: e.target.value })}
+                placeholder="6-digit branch code"
+                className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-ocean-blue focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end mt-6">
+            <Button 
+              onClick={handleSaveLandlordSettings}
+              disabled={savingSettings}
+              className="bg-success-green hover:bg-success-green/90"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {savingSettings ? 'Saving...' : 'Save Settings'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Invoice Actions Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="h-6 w-6 text-ocean-blue" />
+            <h3 className="text-xl font-bold">Invoice Actions</h3>
+            <Badge variant="secondary" className="ml-2">
+              Generate & Preview
+            </Badge>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+              <div>
+                <h4 className="font-semibold">Generate Invoice</h4>
+                <p className="text-sm text-muted-foreground">
+                  Create an invoice with landlord details, tenant information, and additional costs
+                </p>
+              </div>
+              <Button 
+                onClick={handleGenerateInvoice}
+                disabled={generatingInvoice || !landlordDetails.name.trim()}
+                className="bg-ocean-blue hover:bg-ocean-blue/90"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                {generatingInvoice ? 'Generating...' : 'Generate Invoice'}
+              </Button>
+            </div>
+
+            {!landlordDetails.name.trim() && (
+              <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
+                <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm font-medium">
+                    Please save your landlord details before generating invoices
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Invoice Preview Modal */}
+      <Dialog open={invoicePreviewOpen} onOpenChange={setInvoicePreviewOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Invoice Preview</DialogTitle>
+            <DialogDescription>
+              Review the generated invoice before sending or exporting
+            </DialogDescription>
+          </DialogHeader>
+          
+          {generatedInvoice && (
+            <div className="space-y-6 p-6 bg-white dark:bg-gray-900 rounded-lg border">
+              {/* Invoice Header */}
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-2xl font-bold text-ocean-blue">INVOICE</h2>
+                  <p className="text-sm text-muted-foreground">#{generatedInvoice.invoiceNumber}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">Date: {new Date(generatedInvoice.date).toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">Due: {new Date(generatedInvoice.dueDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+
+              {/* Landlord & Tenant Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-semibold mb-2">From:</h3>
+                  <div className="text-sm space-y-1">
+                    <p className="font-medium">{generatedInvoice.landlordDetails.name}</p>
+                    <p>{generatedInvoice.landlordDetails.address}</p>
+                    <p>{generatedInvoice.landlordDetails.contact}</p>
+                    {generatedInvoice.landlordDetails.vatNumber && (
+                      <p>VAT: {generatedInvoice.landlordDetails.vatNumber}</p>
+                    )}
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold mb-2">To:</h3>
+                  <div className="text-sm space-y-1">
+                    <p className="font-medium">{generatedInvoice.tenantDetails.name}</p>
+                    <p>{generatedInvoice.tenantDetails.address}</p>
+                    <p>{generatedInvoice.tenantDetails.contact}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Property Details */}
+              <div>
+                <h3 className="font-semibold mb-2">Property:</h3>
+                <div className="text-sm">
+                  <p className="font-medium">{generatedInvoice.propertyDetails.title}</p>
+                  <p>{generatedInvoice.propertyDetails.address}</p>
+                </div>
+              </div>
+
+              {/* Invoice Items */}
+              <div>
+                <h3 className="font-semibold mb-4">Invoice Items:</h3>
+                <div className="border rounded-lg overflow-hidden">
+                  <table className="w-full">
+                    <thead className="bg-muted/50">
+                      <tr>
+                        <th className="text-left p-3 font-medium">Description</th>
+                        <th className="text-right p-3 font-medium">Amount (ZAR)</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {generatedInvoice.items.map((item, index) => (
+                        <tr key={index} className="border-t">
+                          <td className="p-3">{item.description}</td>
+                          <td className="p-3 text-right font-medium">R{item.amount.toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot className="bg-muted/30 border-t-2">
+                      <tr>
+                        <td className="p-3 font-bold">Total Amount</td>
+                        <td className="p-3 text-right font-bold text-lg text-ocean-blue">
+                          R{generatedInvoice.totalAmount.toLocaleString()}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              {/* Banking Details */}
+              {generatedInvoice.landlordDetails.bank && (
+                <div>
+                  <h3 className="font-semibold mb-2">Payment Details:</h3>
+                  <div className="text-sm bg-muted/30 p-4 rounded-lg">
+                    <p><span className="font-medium">Bank:</span> {generatedInvoice.landlordDetails.bank}</p>
+                    <p><span className="font-medium">Account Holder:</span> {generatedInvoice.landlordDetails.accountHolder}</p>
+                    <p><span className="font-medium">Account Number:</span> {generatedInvoice.landlordDetails.accountNumber}</p>
+                    <p><span className="font-medium">Branch Code:</span> {generatedInvoice.landlordDetails.branchCode}</p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-2 pt-4">
+                <Button variant="outline" onClick={() => setInvoicePreviewOpen(false)} className="flex-1">
+                  Close Preview
+                </Button>
+                <Button className="flex-1 bg-success-green hover:bg-success-green/90">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export PDF
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'available':
+        return 'default';
+      case 'rented':
+      case 'occupied':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
 
 
 

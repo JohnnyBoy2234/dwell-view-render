@@ -277,38 +277,6 @@ export default function PropertyDetail() {
     setBookingOpen(true);
   };
 
-  const handleCallLandlord = () => {
-    if (!user) {
-      toast({
-        variant: "destructive", 
-        title: "Sign in required",
-        description: "Please sign in to call the landlord."
-      });
-      navigate('/auth');
-      return;
-    }
-
-    if (property?.profiles?.phone) {
-      window.open(`tel:${property.profiles.phone}`, '_self');
-    } else {
-      toast({
-        variant: "destructive",
-        title: "Phone number not available",
-        description: "The landlord's phone number is not available."
-      });
-    }
-  };
-
-
-
-  const toggleLike = () => {
-    setIsLiked(!isLiked);
-    toast({
-      title: isLiked ? "Removed from favorites" : "Added to favorites",
-      description: isLiked ? "Property removed from your favorites" : "Property saved to your favorites"
-    });
-  };
-
   const handleShare = async () => {
     if (!property) return;
 
