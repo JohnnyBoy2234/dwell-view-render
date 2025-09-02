@@ -65,7 +65,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   {isLandlord && hasProperties ? (
-                    <Button variant="ghost" size="sm" asChild><Link to="/dashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Rental Manager</Link></Button>
+                    <Button variant="ghost" size="sm" asChild><Link to="/dashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />LandLord Dashboard</Link></Button>
                   ) : !isLandlord ? (
                     <Button variant="ghost" size="sm" asChild><Link to="/tenant-dashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
                   ) : (
