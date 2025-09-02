@@ -62,10 +62,6 @@ async function getAccessTokenJWT() {
   return json.access_token as string;
 }
 
-function b64encode(uint8: Uint8Array) {
-  return btoa(String.fromCharCode(...uint8));
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: { ...corsHeaders } });
@@ -97,13 +93,17 @@ Deno.serve(async (req) => {
     }
     
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+    console.log("Supabase client created successfully");
 
     // Load tenancy with lease document path and existing envelope if any
+    console.log("Fetching tenancy data for ID:", tenancyId);
     const { data: tenancy, error: tErr } = await supabase
       .from("tenancies")
       .select("id, tenant_id, landlord_id, lease_document_path, envelope_id, signing_provider, lease_status")
       .eq("id", tenancyId)
       .maybeSingle();
+    
+    console.log("Tenancy query result:", { tenancy: !!tenancy, error: tErr });
       
     if (tErr || !tenancy) {
       return new Response(JSON.stringify({ error: "Tenancy not found" }), { 
@@ -111,6 +111,7 @@ Deno.serve(async (req) => {
         headers: { "Content-Type": "application/json", ...corsHeaders } 
       });
     }
+
     // Helper to create envelope
     async function createEnvelope(): Promise<string> {
       const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`;

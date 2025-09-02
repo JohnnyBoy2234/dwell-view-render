@@ -61,8 +61,14 @@ async function getAccessTokenJWT() {
 }
 
 function b64encode(uint8: Uint8Array) {
-  // Deno compatible base64
-  return btoa(String.fromCharCode(...uint8));
+  // Deno compatible base64 - avoid spread operator for large arrays
+  let binary = '';
+  const chunkSize = 8192; // Process in chunks to avoid stack overflow
+  for (let i = 0; i < uint8.length; i += chunkSize) {
+    const chunk = uint8.slice(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary);
 }
 
 Deno.serve(async (req) => {
