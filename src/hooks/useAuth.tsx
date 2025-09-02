@@ -162,24 +162,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      // Try signOut without global scope first
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
-      if (error) {
-        console.error('Sign out error:', error);
-        // Force clear local state even if server signout fails
-        setUser(null);
-        setSession(null);
-        setIsLandlord(false);
-        // Redirect to home page
-        window.location.href = '/';
-      }
-    } catch (err) {
-      console.error('Sign out error:', err);
-      // Force clear local state
+      // Clear local state first to prevent auto sign-in
       setUser(null);
       setSession(null);
       setIsLandlord(false);
-      // Redirect to home page
+      
+      // Clear all auth data from localStorage
+      localStorage.removeItem('sb-rsfrvjaqxhoqavvscvwf-auth-token');
+      localStorage.removeItem('supabase.auth.token');
+      
+      // Then sign out from server
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+      
+      // Force redirect to home page
+      window.location.href = '/';
+    } catch (err) {
+      console.error('Sign out error:', err);
+      // Force redirect to home page
       window.location.href = '/';
     }
   };
