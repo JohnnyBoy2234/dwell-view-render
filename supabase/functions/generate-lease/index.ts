@@ -288,8 +288,8 @@ serve(async (req) => {
       .from("tenancies")
       .update({ 
         lease_document_path: filePath,
-        lease_status: 'awaiting_tenant_signature',
-        status: 'pending'
+        lease_status: 'awaiting_tenant_signature'
+        // Remove status update to avoid constraint violation
       })
       .eq("id", tenancyId);
 
