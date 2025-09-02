@@ -93,13 +93,17 @@ Deno.serve(async (req) => {
     }
     
     const supabase = createClient(SUPABASE_URL, SERVICE_ROLE);
+    console.log("Supabase client created successfully");
 
     // Load tenancy with lease document path and existing envelope if any
+    console.log("Fetching tenancy data for ID:", tenancyId);
     const { data: tenancy, error: tErr } = await supabase
       .from("tenancies")
       .select("id, tenant_id, landlord_id, lease_document_path, envelope_id, signing_provider, lease_status")
       .eq("id", tenancyId)
       .maybeSingle();
+    
+    console.log("Tenancy query result:", { tenancy: !!tenancy, error: tErr });
       
     if (tErr || !tenancy) {
       return new Response(JSON.stringify({ error: "Tenancy not found" }), { 
