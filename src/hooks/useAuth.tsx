@@ -161,7 +161,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      // Try signOut without global scope first
+      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      if (error) {
+        console.error('Sign out error:', error);
+        // Force clear local state even if server signout fails
+        setUser(null);
+        setSession(null);
+        setIsLandlord(false);
+        // Redirect to home page
+        window.location.href = '/';
+      }
+    } catch (err) {
+      console.error('Sign out error:', err);
+      // Force clear local state
+      setUser(null);
+      setSession(null);
+      setIsLandlord(false);
+      // Redirect to home page
+      window.location.href = '/';
+    }
   };
 
   const value = {
