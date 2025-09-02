@@ -21,6 +21,9 @@ async function getAccessTokenJWT() {
   const authServer = Deno.env.get("DOCUSIGN_AUTH_SERVER") || "account-d.docusign.com";
   const rsaPrivateKeyRaw = Deno.env.get("DOCUSIGN_RSA_PRIVATE_KEY") || "";
   const rsaPrivateKeyPem = rsaPrivateKeyRaw.includes("\\n") ? rsaPrivateKeyRaw.replace(/\\n/g, "\n") : rsaPrivateKeyRaw;
+  if (rsaPrivateKeyPem.includes("BEGIN RSA PRIVATE KEY")) {
+    throw new Error("DOCUSIGN_RSA_PRIVATE_KEY must be PKCS8 (BEGIN PRIVATE KEY), not PKCS1 (BEGIN RSA PRIVATE KEY). Convert your key to PKCS8 and update the secret.");
+  }
   
   if (!integrationKey || !impersonatedUserId || !rsaPrivateKeyPem) {
     throw new Error("Missing DocuSign JWT secrets");
