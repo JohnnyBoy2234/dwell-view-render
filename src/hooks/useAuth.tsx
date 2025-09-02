@@ -68,7 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select('role')
         .eq('user_id', userId)
         .eq('role', 'landlord')
-        .single();
+        .maybeSingle();
       
       setIsLandlord(!!data);
     } catch (error) {
