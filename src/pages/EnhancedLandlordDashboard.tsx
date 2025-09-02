@@ -1634,35 +1634,52 @@ export default function EnhancedLandlordDashboard() {
             </Badge>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
-              <div>
-                <h4 className="font-semibold">Generate Invoice</h4>
-                <p className="text-sm text-muted-foreground">
-                  Create an invoice with landlord details, tenant information, and additional costs
-                </p>
-              </div>
+          {tenants.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold mb-2">No Active Tenants</h3>
+              <p className="text-muted-foreground mb-4">
+                You need active tenants to generate invoices. Add properties and tenants first.
+              </p>
               <Button 
-                onClick={handleGenerateInvoice}
-                disabled={generatingInvoice || !landlordDetails.name.trim()}
-                className="bg-ocean-blue hover:bg-ocean-blue/90"
+                onClick={() => navigate('/enhancedlandlorddashboard/properties')}
+                variant="outline"
               >
-                <FileText className="h-4 w-4 mr-2" />
-                {generatingInvoice ? 'Generating...' : 'Generate Invoice'}
+                <Plus className="h-4 w-4 mr-2" />
+                Add Properties
               </Button>
             </div>
-
-            {!landlordDetails.name.trim() && (
-              <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
-                <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
-                  <AlertTriangle className="h-4 w-4" />
-                  <span className="text-sm font-medium">
-                    Please save your landlord details before generating invoices
-                  </span>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+                <div>
+                  <h4 className="font-semibold">Generate Invoice</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Create an invoice with landlord details, tenant information, and additional costs
+                  </p>
                 </div>
+                <Button 
+                  onClick={handleGenerateInvoice}
+                  disabled={generatingInvoice || !landlordDetails.name.trim()}
+                  className="bg-ocean-blue hover:bg-ocean-blue/90"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  {generatingInvoice ? 'Generating...' : 'Generate Invoice'}
+                </Button>
               </div>
-            )}
-          </div>
+
+              {!landlordDetails.name.trim() && (
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 rounded-lg">
+                  <div className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      Please save your landlord details before generating invoices
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
 
