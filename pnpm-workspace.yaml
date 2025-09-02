@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - '@swc/core'
+  - canvas
+  - core-js
+  - esbuild
+  - root
+  - supabase

@@ -285,6 +285,53 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_messages: {
+        Row: {
+          attachments: string[] | null
+          body: string
+          created_at: string
+          id: string
+          maintenance_request_id: string
+          read_at: string | null
+          recipient_user_id: string
+          sender_role: string
+          sender_user_id: string
+          updated_at: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          body: string
+          created_at?: string
+          id?: string
+          maintenance_request_id: string
+          read_at?: string | null
+          recipient_user_id: string
+          sender_role: string
+          sender_user_id: string
+          updated_at?: string
+        }
+        Update: {
+          attachments?: string[] | null
+          body?: string
+          created_at?: string
+          id?: string
+          maintenance_request_id?: string
+          read_at?: string | null
+          recipient_user_id?: string
+          sender_role?: string
+          sender_user_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_messages_maintenance_request_id_fkey"
+            columns: ["maintenance_request_id"]
+            isOneToOne: false
+            referencedRelation: "maintenance_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_requests: {
         Row: {
           actual_cost: number | null

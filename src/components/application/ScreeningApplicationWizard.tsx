@@ -128,7 +128,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       });
 
       if (onSubmissionComplete) onSubmissionComplete();
-      else navigate("/tenant-dashboard");
+      else navigate("/enhancedtenantdashboard");
       return true;
     } catch (e) {
       console.error("Quick apply error", e);
@@ -452,7 +452,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       });
 
       if (onSubmissionComplete) onSubmissionComplete();
-      else navigate("/tenant-dashboard");
+      else navigate("/enhancedtenantdashboard");
     } catch (error: any) {
       console.error("Submit application error", error);
       toast({
@@ -495,13 +495,29 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   }
 
   const StepIndicator = () => (
-    <div className="flex items-center justify-between gap-2">
-      {steps.map((s, idx) => (
-        <div key={s.key} className="flex-1">
-          <div className={`h-1 rounded-full ${idx <= currentStep ? "bg-primary" : "bg-muted"}`} />
-          <div className="mt-2 text-xs text-muted-foreground text-center">{s.title}</div>
+    <div className="w-full">
+      {/* Desktop/Tablet progress bar */}
+      <div className="hidden sm:flex items-center justify-between gap-2">
+        {steps.map((s, idx) => (
+          <div key={s.key} className="flex-1">
+            <div className={`h-1 rounded-full ${idx <= currentStep ? "bg-primary" : "bg-muted"}`} />
+            <div className="mt-2 text-xs text-muted-foreground text-center">{s.title}</div>
+          </div>
+        ))}
+      </div>
+      {/* Mobile: scrollable chips */}
+      <div className="sm:hidden -mx-2 px-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 snap-x snap-mandatory">
+          {steps.map((s, idx) => (
+            <div
+              key={s.key}
+              className={`shrink-0 snap-start px-3 py-1.5 rounded-full text-xs border ${idx === currentStep ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-foreground border-muted"}`}
+            >
+              {s.title}
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   );
 
@@ -573,7 +589,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           {currentStep === 1 && (
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Employment Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="employment_status">Employment Status *</Label>
                   <Select value={formData.employment_status} onValueChange={(v) => handleInputChange("employment_status", v)}>
@@ -594,7 +610,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                   <Input id="net_monthly_income" type="number" value={formData.net_monthly_income} onChange={(e) => handleInputChange("net_monthly_income", e.target.value)} />
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="job_title">Job Title</Label>
                   <Input id="job_title" value={formData.job_title} onChange={(e) => handleInputChange("job_title", e.target.value)} />
@@ -620,7 +636,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                 <Label htmlFor="reason_for_moving">Reason for Moving</Label>
                 <Textarea id="reason_for_moving" value={formData.reason_for_moving} onChange={(e) => handleInputChange("reason_for_moving", e.target.value)} />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="previous_landlord_name">Previous Landlord Name</Label>
                   <Input id="previous_landlord_name" value={formData.previous_landlord_name} onChange={(e) => handleInputChange("previous_landlord_name", e.target.value)} />

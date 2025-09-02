@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -16,7 +16,8 @@ import {
   Users, 
   FileText, 
   CreditCard, 
-  Wrench, 
+  Wrench,
+  Package,
   ArrowLeft,
   ExternalLink,
   Mail,
@@ -32,6 +33,7 @@ import { LeaseSigningDialog } from '@/components/lease/LeaseSigningDialog';
 import { LeaseCreationWizard } from '@/components/lease/LeaseCreationWizard';
 import { ApplicationsTab } from '@/components/property/ApplicationsTab';
 import { PaymentsTab } from '@/components/property/PaymentsTab';
+import { InventoryTab } from '@/components/property/InventoryTab';
 import { ViewingSlotsManager } from '@/components/viewing/ViewingSlotsManager';
 
 interface MaintenanceRequest {
@@ -54,15 +56,21 @@ export default function PropertyManagement() {
   
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'overview');
   const [emailForInvite, setEmailForInvite] = useState('');
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
   const [showLeaseDialog, setShowLeaseDialog] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<{ id: string; name: string } | null>(null);
 
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSearchParams({ tab: value });
+  };
+
   useEffect(() => {
     if (!user || !isLandlord) {
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
       return;
     }
     
@@ -90,7 +98,7 @@ export default function PropertyManagement() {
         description: "Failed to load property details",
         variant: "destructive",
       });
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
     } finally {
       setLoading(false);
     }
@@ -188,115 +196,260 @@ export default function PropertyManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 bg-gradient-to-br from-background via-earth-light/20 to-success-green/5 min-h-screen">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-ocean-blue/[0.04] via-ocean-blue/[0.02] to-success-green/[0.05]">
+      {/* Background blobs */}
+      <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br from-brand-blue to-brand-green blur-3xl opacity-20"></div>
+        <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-gradient-to-tr from-success-green to-ocean-blue blur-3xl opacity-10"></div>
+        <div className="ui-noise"></div>
       </div>
-
-      {/* Property Header */}
-      <div className="flex items-start gap-4 p-6 bg-gradient-to-r from-white to-earth-light/40 rounded-2xl border border-ocean-blue/20 shadow-medium">
-        <div className="p-4 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl shadow-soft">
-          <Home className="h-8 w-8 text-white" />
+      {/* Content wrapper */}
+      <div className="container mx-auto p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
         </div>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{property.title}</h1>
-          <p className="text-muted-foreground">{property.location}</p>
-          <div className="flex items-center gap-4 mt-2">
-            <Badge variant={getStatusBadgeVariant(property.status)}>
-              {property.status.toUpperCase()}
-            </Badge>
-            <span className="text-lg font-semibold">R{property.price.toLocaleString()}/month</span>
+        {/* Property Header */}
+        <div className="flex items-start gap-4 p-6 rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-ocean-blue to-success-green text-white shadow-soft ring-1 ring-white/20">
+            <Home className="h-8 w-8 text-white" />
+          </div>
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">{property.title}</h1>
+            <p className="text-muted-foreground">{property.location}</p>
+            <div className="flex items-center gap-4 mt-2">
+              <Badge variant={getStatusBadgeVariant(property.status)}>
+                {property.status.toUpperCase()}
+              </Badge>
+              <span className="text-lg font-semibold">R{property.price.toLocaleString()}/month</span>
+            </div>
           </div>
         </div>
-      </div>
 
       {/* Tabs Navigation - Mobile-First Responsive */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        {/* Mobile: Horizontal scrollable tabs */}
-        <div className="md:hidden">
-          <TabsList className="inline-flex h-12 items-center justify-start rounded-lg bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft p-1 overflow-x-auto w-full scrollbar-hide">
-            <div className="flex space-x-1 min-w-max px-1">
-              <TabsTrigger value="overview" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <Home className="h-3 w-3" />
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="listing" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <List className="h-3 w-3" />
-                Listing
-              </TabsTrigger>
-              <TabsTrigger value="viewings" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <Calendar className="h-3 w-3" />
-                Viewing
-              </TabsTrigger>
-              <TabsTrigger value="applications" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <Users className="h-3 w-3" />
-                Apps
-              </TabsTrigger>
-              <TabsTrigger value="leases" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <FileText className="h-3 w-3" />
-                Leases
-              </TabsTrigger>
-              <TabsTrigger value="payments" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <CreditCard className="h-3 w-3" />
-                Payments
-              </TabsTrigger>
-              <TabsTrigger value="maintenance" className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
-                <Wrench className="h-3 w-3" />
-                Maintenance
-              </TabsTrigger>
-            </div>
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        {/* Mobile: Stacked dashboard cards (no slider) */}
+        <div className="md:hidden space-y-4">
+          {/* Lease Agreements */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <FileText className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Lease Agreements</CardTitle>
+                <CardDescription>Current Lease</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-lg font-semibold truncate">{property.title}</div>
+              <div className="mt-3 grid grid-cols-3 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>View</Button>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>Renew</Button>
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>Share PDF</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Messages */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Mail className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Messages</CardTitle>
+                <CardDescription>Recent</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="rounded-2xl bg-muted p-3 text-sm text-foreground/80">Thanks for letting me know, I’ll arrange for someone to come by and fix it.</div>
+              <div className="rounded-2xl bg-gradient-to-r from-ocean-blue to-success-green text-white p-3 text-sm ml-auto w-fit">Thanks for letting me know, I’ll arrange for someone to come by and fix it.</div>
+              <div className="mt-2">
+                <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/messages')}>Open Messages</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Maintenance */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Wrench className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Maintenance</CardTitle>
+                <CardDescription>Active Request</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <Progress value={40} className="h-2" />
+              <div className="flex items-center justify-between text-sm">
+                <div className="font-medium">Leaking sink</div>
+                <Button variant="ghost" size="sm" onClick={() => navigate('/messages')}>Chat</Button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('maintenance')}>View Requests</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('maintenance')}>New Request</Button>
+              </div>
+            </CardContent>
+          </Card>
+          {/* Applications */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Users className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Applications</CardTitle>
+                <CardDescription>Manage applicants</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('applications')}>View Applications</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('applications')}>Invite Tenant</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Payments */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <CreditCard className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Payments</CardTitle>
+                <CardDescription>Collection & history</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('payments')}>Details</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('payments')}>Set Up</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Listing */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <List className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Listing</CardTitle>
+                <CardDescription>Advertise your property</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => navigate(`/property/${property.id}`)}>View Listing</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => navigate('/list-property', { state: { editProperty: property } })}>Edit Listing</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Viewings */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Viewings</CardTitle>
+                <CardDescription>Manage slots</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('viewings')}>View Slots</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('viewings')}>New Slot</Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Inventory */}
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
+            <CardHeader className="flex flex-row items-center gap-3">
+              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
+                <Package className="h-5 w-5" />
+              </div>
+              <div>
+                <CardTitle className="text-base">Inventory</CardTitle>
+                <CardDescription>Track items</CardDescription>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={() => setActiveTab('inventory')}>Open Inventory</Button>
+                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('inventory')}>Add Item</Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Desktop: Grid layout */}
         <div className="hidden md:block">
-          <TabsList className="grid w-full grid-cols-7 bg-gradient-to-r from-earth-light/40 to-ocean-blue/10 border border-ocean-blue/20 shadow-soft h-12">
-            <TabsTrigger value="overview" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+          <TabsList className="grid w-full grid-cols-8 h-12 rounded-2xl bg-gradient-to-r from-ocean-blue/10 via-background/60 to-success-green/10 dark:from-ocean-blue/10 dark:via-slate-900/50 dark:to-success-green/10 backdrop-blur-md border border-white/20 dark:border-white/10 ring-1 ring-black/5 shadow-soft">
+            <TabsTrigger value="overview" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
               <Home className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="listing" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="listing" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <List className="h-4 w-4" />
               <span className="hidden lg:inline">Listing</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="viewings" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="viewings" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Calendar className="h-4 w-4" />
               <span className="hidden lg:inline">Viewing</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="applications" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="applications" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Users className="h-4 w-4" />
               <span className="hidden lg:inline">Applications</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="leases" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="leases" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <FileText className="h-4 w-4" />
               <span className="hidden lg:inline">Leases</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="payments" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="payments" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Payments</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="maintenance" className="flex items-center gap-2 px-3 py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:text-foreground data-[state=active]:shadow-sm">
+            <TabsTrigger value="maintenance" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <Wrench className="h-4 w-4" />
               <span className="hidden lg:inline">Maintenance</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
+              <Package className="h-4 w-4" />
+              <span className="hidden lg:inline">Inventory</span>
+              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
           </TabsList>
         </div>
 
-        {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
+        {/* Overview Tab (hidden on mobile) */}
+        <TabsContent value="overview" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               {/* Summary Cards */}
-              <Card>
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <CreditCard className="h-5 w-5" />
@@ -305,13 +458,13 @@ export default function PropertyManagement() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground mb-4">Upcoming payments will appear here</p>
-                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="flex items-center gap-2 border-transparent bg-gradient-to-r from-ocean-blue/10 to-success-green/10 hover:from-ocean-blue/20 hover:to-success-green/20">
                     Details <ExternalLink className="h-4 w-4" />
                   </Button>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <FileText className="h-5 w-5" />
@@ -326,7 +479,7 @@ export default function PropertyManagement() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <List className="h-5 w-5" />
@@ -344,7 +497,7 @@ export default function PropertyManagement() {
 
             {/* Next Steps Card */}
             <div>
-              <Card>
+              <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop hover:bg-white/70 dark:hover:bg-slate-900/60">
                 <CardHeader>
                   <CardTitle>Next steps</CardTitle>
                   <CardDescription>Get your property ready for tenants</CardDescription>
@@ -372,9 +525,9 @@ export default function PropertyManagement() {
           </div>
         </TabsContent>
 
-        {/* Listing Tab */}
-        <TabsContent value="listing" className="space-y-6">
-          <Card>
+        {/* Listing Tab (hidden on mobile) */}
+        <TabsContent value="listing" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader>
               <CardTitle>Listing Status</CardTitle>
               <CardDescription>Manage your rental advertisement</CardDescription>
@@ -388,7 +541,6 @@ export default function PropertyManagement() {
                   </Badge>
                 </div>
               </div>
-              
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium">Listing setup</span>
@@ -397,7 +549,6 @@ export default function PropertyManagement() {
                 <Progress value={100} className="h-2" />
                 <p className="text-sm text-muted-foreground mt-1">Setup complete</p>
               </div>
-
               <div className="flex gap-3">
                 <Button 
                   className="flex-1"
@@ -416,23 +567,23 @@ export default function PropertyManagement() {
           </Card>
         </TabsContent>
 
-        {/* Applications Tab */}
-        <TabsContent value="applications" className="space-y-6">
+        {/* Applications Tab (hidden on mobile) */}
+        <TabsContent value="applications" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ApplicationsTab 
             propertyId={property.id} 
             onStartLease={handleStartLease}
           />
         </TabsContent>
 
-        {/* Viewings Tab */}
-        <TabsContent value="viewings" className="space-y-6">
+        {/* Viewings Tab (hidden on mobile) */}
+        <TabsContent value="viewings" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ViewingSlotsManager propertyId={property.id} />
         </TabsContent>
 
-        {/* Leases Tab */}
-        <TabsContent value="leases" className="space-y-6">
+        {/* Leases Tab (hidden on mobile) */}
+        <TabsContent value="leases" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
+            <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
               <CardHeader>
                 <CardTitle>Free online lease signing</CardTitle>
                 <CardDescription>Generate and sign leases digitally</CardDescription>
@@ -446,8 +597,7 @@ export default function PropertyManagement() {
                 </Button>
               </CardContent>
             </Card>
-
-            <Card>
+            <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
               <CardHeader>
                 <CardTitle>Property condition report</CardTitle>
                 <CardDescription>Document property condition</CardDescription>
@@ -456,7 +606,7 @@ export default function PropertyManagement() {
                 <p className="text-muted-foreground mb-4">
                   Create detailed property condition reports with photos and notes.
                 </p>
-                <Button variant="outline" className="w-full" disabled>
+                <Button variant="outline" className="w-full border-transparent bg-gradient-to-r from-ocean-blue/10 to-success-green/10" disabled>
                   Join waitlist
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">Coming soon</p>
@@ -465,14 +615,14 @@ export default function PropertyManagement() {
           </div>
         </TabsContent>
 
-        {/* Payments Tab */}
-        <TabsContent value="payments" className="space-y-6">
+        {/* Payments Tab (hidden on mobile) */}
+        <TabsContent value="payments" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <PaymentsTab propertyId={property.id} />
         </TabsContent>
 
-        {/* Maintenance Tab */}
-        <TabsContent value="maintenance" className="space-y-6">
-          <Card>
+        {/* Maintenance Tab (hidden on mobile) */}
+        <TabsContent value="maintenance" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader>
               <CardTitle>Maintenance Requests</CardTitle>
               <CardDescription>Track and manage maintenance for this property</CardDescription>
@@ -489,7 +639,7 @@ export default function PropertyManagement() {
               ) : (
                 <div className="space-y-4">
                   {maintenanceRequests.map((request) => (
-                    <Card key={request.id}>
+                    <Card key={request.id} className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu hover:-translate-y-0.5 hover:shadow-pop">
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
@@ -516,9 +666,18 @@ export default function PropertyManagement() {
                               </Badge>
                             </div>
                           </div>
-                          <Badge variant="outline">
-                            {request.status.replace('_', ' ')}
-                          </Badge>
+                          <div className="flex flex-col items-end gap-2">
+                            <Badge variant="outline">
+                              {request.status.replace('_', ' ')}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              onClick={() => navigate(`/maintenance/${request.id}`)}
+                              className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue/90 hover:to-success-green/90 text-white"
+                            >
+                              Respond
+                            </Button>
+                          </div>
                         </div>
                       </CardContent>
                     </Card>
@@ -527,6 +686,11 @@ export default function PropertyManagement() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Inventory Tab (hidden on mobile) */}
+        <TabsContent value="inventory" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <InventoryTab propertyId={property.id} />
         </TabsContent>
       </Tabs>
 
@@ -547,6 +711,7 @@ export default function PropertyManagement() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileText, Upload, ArrowRight } from "lucide-react";
-import { TemplateLeaseWorkflow } from "./TemplateLeaseWorkflow";
+import { SwiftRentLeaseWizard } from "./SwiftRentLeaseWizard";
 import { UploadLeaseWorkflow } from "./UploadLeaseWorkflow";
 
 interface LeaseCreationWizardProps {
@@ -117,7 +117,7 @@ export const LeaseCreationWizard = ({
             </div>
           </div>
         ) : selectedWorkflow === 'template' ? (
-          <TemplateLeaseWorkflow
+          <SwiftRentLeaseWizard
             propertyId={propertyId}
             onBack={handleBack}
             onComplete={handleComplete}

@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Link } from 'react-router-dom';
 import { Component, ReactNode } from 'react';
+import { BUILD_TAG } from '@/version';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
@@ -49,12 +50,12 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]">
         <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
-          <header className="h-16 flex items-center border-b bg-background/95 backdrop-blur-sm sticky top-0 z-40 px-3 sm:px-4 lg:px-6">
+          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.10] via-background/80 to-success-green/[0.10] backdrop-blur-sm">
             <SidebarTrigger className="md:hidden mr-3">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>
@@ -65,6 +66,11 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                 <div className="hidden sm:block">
                   <Badge variant="secondary" className="text-xs">
                     {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
+                  </Badge>
+                </div>
+                <div className="hidden sm:block">
+                  <Badge variant="outline" className="text-[10px] ml-1">
+                    {BUILD_TAG}
                   </Badge>
                 </div>
               </div>

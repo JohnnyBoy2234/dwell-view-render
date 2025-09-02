@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,12 @@ export interface ApplicationWithTenant {
   status: string;
   created_at: string;
   updated_at: string;
+  properties?: {
+    id: string;
+    title: string;
+    location: string;
+    images: string[];
+  };
   tenant_profile?: {
     display_name: string;
     user_id: string;
@@ -20,11 +26,6 @@ export interface ApplicationWithTenant {
     last_name: string;
     is_complete: boolean;
     created_at: string;
-    documents?: Array<{
-      type: string;
-      url: string;
-      name: string;
-    }>;
   };
   screening_details?: {
     full_name: string;
@@ -62,7 +63,7 @@ export const useLandlordApplications = (propertyId?: string) => {
     }
   }, [user, propertyId]);
 
-  const fetchApplications = async () => {
+  const fetchApplications = useCallback(async () => {
     if (!user || !propertyId) return;
 
     setLoading(true);
@@ -88,7 +89,7 @@ export const useLandlordApplications = (propertyId?: string) => {
               .maybeSingle(),
             supabase
               .from('screening_profiles')
-              .select('first_name, last_name, is_complete, created_at, documents')
+              .select('first_name, last_name, is_complete, created_at')
               .eq('user_id', app.tenant_id)
               .maybeSingle(),
             supabase
@@ -102,35 +103,99 @@ export const useLandlordApplications = (propertyId?: string) => {
               .eq('user_id', app.tenant_id)
           ]);
 
-           return {
-             ...app,
-             tenant_profile: tenantProfile.data,
-             screening_profile: screeningProfile.data ? {
-               ...screeningProfile.data,
-               documents: Array.isArray(screeningProfile.data.documents) 
-                 ? screeningProfile.data.documents as Array<{type: string; url: string; name: string;}>
-                 : []
-             } : undefined,
-             screening_details: screeningDetails.data,
-             documents: documents.data || []
-           };
+          return {
+            ...app,
+            tenant_profile: tenantProfile.data || undefined,
+            screening_profile: screeningProfile.data || undefined,
+            screening_details: screeningDetails.data || undefined,
+            documents: documents.data || []
+          } as ApplicationWithTenant;
         })
       );
 
       setApplications(applicationsWithProfiles);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching applications:', error);
       toast({
-        title: "Error",
-        description: "Failed to load applications",
         variant: "destructive",
+        title: "Error loading applications",
+        description: error.message
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, propertyId, toast]);
 
-  const updateApplicationStatus = async (applicationId: string, status: string) => {
+  // Function to fetch all applications for a landlord across all properties
+  const fetchAllApplications = useCallback(async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // First get all applications for the landlord
+      const { data: applicationsData, error } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching applications:', error);
+        setApplications([]);
+        return;
+      }
+
+      // Then fetch related data for each application
+      const applicationsWithProfiles = await Promise.all(
+        (applicationsData || []).map(async (app) => {
+          const [tenantProfile, screeningProfile, screeningDetails, documents, property] = await Promise.all([
+            supabase
+              .from('profiles')
+              .select('display_name, user_id')
+              .eq('user_id', app.tenant_id)
+              .maybeSingle(),
+            supabase
+              .from('screening_profiles')
+              .select('first_name, last_name, is_complete, created_at')
+              .eq('user_id', app.tenant_id)
+              .maybeSingle(),
+            supabase
+              .from('screening_details')
+              .select('full_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact, consent_given')
+              .eq('user_id', app.tenant_id)
+              .maybeSingle(),
+            supabase
+              .from('documents')
+              .select('id, document_type, file_path, file_type, status, uploaded_at')
+              .eq('user_id', app.tenant_id),
+            supabase
+              .from('properties')
+              .select('id, title, location, images')
+              .eq('id', app.property_id)
+              .maybeSingle()
+          ]);
+
+          return {
+            ...app,
+            properties: property.data || undefined,
+            tenant_profile: tenantProfile.data || undefined,
+            screening_profile: screeningProfile.data || undefined,
+            screening_details: screeningDetails.data || undefined,
+            documents: documents.data || []
+          } as ApplicationWithTenant;
+        })
+      );
+
+      setApplications(applicationsWithProfiles);
+    } catch (error: any) {
+      console.error('Error fetching all applications:', error);
+      setApplications([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const updateApplicationStatus = useCallback(async (applicationId: string, status: string) => {
     try {
       const { error } = await supabase
         .from('applications')
@@ -158,12 +223,13 @@ export const useLandlordApplications = (propertyId?: string) => {
       });
       return false;
     }
-  };
+  }, [user, fetchApplications, toast]);
 
   return {
     applications,
     loading,
     fetchApplications,
+    fetchAllApplications,
     updateApplicationStatus,
   };
 };

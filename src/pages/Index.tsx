@@ -1,83 +1,99 @@
-import {
-  Button,
-} from "@/components/ui/button";
-
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-
-import {
-  Input,
-} from "@/components/ui/input";
-
-import {
-  EnhancedAddressAutocomplete,
-} from "@/components/ui/enhanced-address-autocomplete";
-
-import {
-  Badge,
-} from "@/components/ui/badge";
-
-import {
-  Switch,
-} from "@/components/ui/switch";
-
-import {
-  Label,
-} from "@/components/ui/label";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import {
-  Slider,
-} from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import "@/styles/animations.css";
 
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import {MoreFiltersModal} from "@/components/search/MoreFiltersModal";
 
 import PropertyCard from "@/components/PropertyCard";
+import { BenefitsSlider } from "@/components/BenefitsSlider";
 
 import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import {
-  Search,
-  Home,
-  Shield,
-  Users,
-  Star,
-  ArrowRight,
-  CheckCircle,
-  MessageSquare,
-  Calendar,
-  FileText,
-  DollarSign,
-  Mail,
-  Building2,
-} from "lucide-react";
+import { ArrowRight, CheckCircle, Home, Sparkles, Star, Zap } from "lucide-react";
 
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
-import {
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
+import HowItWorks from "@/components/HowItWorks";
+import { ThemeTagline } from "@/components/ui/ThemeTagline";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+
+// Lightweight utilities for homepage motion without new deps
+function useParallax() {
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const onMouseMove = (e: React.MouseEvent) => {
+    const { currentTarget, clientX, clientY } = e;
+    const rect = (currentTarget as HTMLElement).getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width - 0.5) * 2; // -1..1
+    const y = ((clientY - rect.top) / rect.height - 0.5) * 2; // -1..1
+    setPos({ x, y });
+  };
+  return { pos, onMouseMove };
+}
+
+function AnimatedCounter({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) {
+  const ref = useRef<HTMLDivElement | null>(null);
+  const [val, setVal] = useState(from);
+  useEffect(() => {
+    let raf = 0;
+    let start = 0;
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        start = performance.now();
+        const step = (t: number) => {
+          const p = Math.min(1, (t - start) / duration);
+          const eased = 1 - Math.pow(1 - p, 3);
+          setVal(Math.round(from + (to - from) * eased));
+          if (p < 1) raf = requestAnimationFrame(step);
+        };
+        raf = requestAnimationFrame(step);
+        obs.disconnect();
+      }
+    }, { threshold: 0.3 });
+    if (ref.current) obs.observe(ref.current);
+    return () => { cancelAnimationFrame(raf); obs.disconnect(); };
+  }, [from, to, duration]);
+  return <div ref={ref}>{val.toLocaleString()}</div>;
+}
+
+// 3D tilt helper (no deps)
+function useTilt() {
+  const onMove = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const px = (e.clientX - rect.left) / rect.width; // 0..1
+    const py = (e.clientY - rect.top) / rect.height; // 0..1
+    const rx = (0.5 - py) * 10; // rotateX
+    const ry = (px - 0.5) * 10; // rotateY
+    el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
+  };
+  const onLeave = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget as HTMLElement;
+    el.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0)`;
+  };
+  return { onMove, onLeave };
+}
+
+// Magnetic hover helper (no deps)
+function useMagnet(intensity = 12) {
+  const onMove = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget as HTMLElement;
+    const rect = el.getBoundingClientRect();
+    const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
+    const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
+    el.style.transform = `translate(${dx * intensity}px, ${dy * intensity}px)`;
+  };
+  const onLeave = (e: React.MouseEvent<HTMLElement>) => {
+    const el = e.currentTarget as HTMLElement;
+    el.style.transform = `translate(0, 0)`;
+  };
+  return { onMove, onLeave };
+}
 
 const Index = () => {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
-  const [userType, setUserType] = useState('tenant'); // 'tenant' or 'landlord'
   const navigate = useNavigate();
 
   // Use the unified search filters hook
@@ -93,8 +109,6 @@ const Index = () => {
 
   // No results state for hero section
   const [showNoResults, setShowNoResults] = useState(false);
-
-  const isTenant = userType === 'tenant';
 
   // merge partial updates coming from Property24SearchBar
   const onFiltersChange = (patch: Partial<typeof filters>) => {
@@ -120,6 +134,7 @@ const Index = () => {
     }
   };
   
+
   // Featured properties for the homepage
   const featuredProperties = [
     {
@@ -159,65 +174,114 @@ const Index = () => {
     },
   ];
 
+  const heroParallax = useParallax();
+  const tilt = useTilt();
+  const magnet = useMagnet();
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 -z-10">
+        {/* Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50" />
+        
+        {/* Floating Geometric Shapes */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse" />
+        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-blue-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute bottom-40 left-20 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }} />
+        
+        {/* Grid Pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.03%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40" />
+        
+        {/* Animated Orbs */}
+        <div className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
+        <div className="absolute top-32 right-32 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '1.5s' }} />
+        <div className="absolute bottom-20 right-20 w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '2.5s' }} />
+      </div>
       
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden">
         {/* Premium Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
+        
+        {/* Enhanced Aurora blobs */}
+        <div className="home-aurora">
+          <div className="blob --1" />
+          <div className="blob --2" />
+          <div className="blob --3" />
+        </div>
+        
         {/* Subtle Pattern Overlay */}
-        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 min-h-[70vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center">
-          <div className="text-center max-w-4xl mx-auto w-full">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 mt-2 sm:mt-4 lg:mt-0 block text-white leading-tight">
-              <span className="block text-white">Renting the way</span>
-              <span className="block text-success-green">it should be</span>
-            </h1>
-            <p className="text-lg md:text-xl mb-8 text-white/90">
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent via-white/5 to-transparent" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 min-h-[70vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center" onMouseMove={heroParallax.onMouseMove}>
+          <div
+            className="text-center max-w-5xl mx-auto w-full"
+            style={{
+              transform: `perspective(1200px) translate3d(${heroParallax.pos.x * 6}px, ${heroParallax.pos.y * 6}px, 0)`,
+              transition: 'transform 120ms ease-out',
+            }}
+          >
+            {/* Enhanced Title with Icons */}
+            <div className="flex items-center justify-center gap-3 mb-4 reveal-up">
+              <Sparkles className="h-8 w-8 text-success-green animate-pulse" />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+                <span className="block">Renting the way</span>
+                <span className="block text-success-green">it should be</span>
+              </h1>
+              <Star className="h-8 w-8 text-success-green animate-pulse" style={{ animationDelay: '0.5s' }} />
+            </div>
+            
+            <ThemeTagline variant="hero" />
+            
+            <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
               Find your perfect rental home in South Africa — connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
             </p>
-            
-            {/* Property24-style Search Bar */}
-            <Property24SearchBar
-              filters={filters}
-              onFiltersChange={onFiltersChange}
-              onSearch={handleSearch}
-              onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
-            />
 
-            <MoreFiltersModal
-              open={moreFiltersOpen}
-              onClose={() => setMoreFiltersOpen(false)}
-              filters={advancedFilters}
-              onFiltersChange={(newFilters) => {
-                setAdvancedFilters(prev => ({ ...prev, ...newFilters }));
-              }}
-              onApplyFilters={applyFilters}
-              onClearFilters={() => {
-                setAdvancedFilters({
-                  propertyTypes: [],
-                  amenities: [],
-                  bathrooms: "Any",
-                  availableFrom: null
-                });
-                updateFilters({
-                  searchTerm: "",
-                  propertyType: "Any",
-                  minPrice: "",
-                  maxPrice: "",
-                  bedrooms: "Any",
-                  bathrooms: "Any",
-                  propertyTypes: [],
-                  amenities: [],
-                  availableFrom: null
-                });
-              }}
-            />
-            
+            {/* Glass Search Bar */}
+            <div className="reveal-up" style={{ animationDelay: '200ms' }}>
+              <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-1 shadow-2xl">
+                <Property24SearchBar
+                  filters={filters}
+                  onFiltersChange={onFiltersChange}
+                  onSearch={handleSearch}
+                  onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
+                />
+              </div>
+
+              <MoreFiltersModal
+                open={moreFiltersOpen}
+                onClose={() => setMoreFiltersOpen(false)}
+                filters={advancedFilters}
+                onFiltersChange={(newFilters) => {
+                  setAdvancedFilters(prev => ({ ...prev, ...newFilters }));
+                }}
+                onApplyFilters={applyFilters}
+                onClearFilters={() => {
+                  setAdvancedFilters({
+                    propertyTypes: [],
+                    amenities: [],
+                    bathrooms: "Any",
+                    availableFrom: null
+                  });
+                  updateFilters({
+                    searchTerm: "",
+                    propertyType: "Any",
+                    minPrice: "",
+                    maxPrice: "",
+                    bedrooms: "Any",
+                    bathrooms: "Any",
+                    propertyTypes: [],
+                    amenities: [],
+                    availableFrom: null
+                  });
+                }}
+              />
+            </div>
+
             {/* No Results Message in Hero Section */}
             {showNoResults && (
-              <div className="mt-6 p-4 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div className="mt-6 p-4 backdrop-blur-xl bg-white/10 rounded-lg border border-white/20 reveal-up" style={{ animationDelay: '300ms' }}>
                 <div className="text-center">
                   <h3 className="text-lg font-semibold text-white mb-2">No properties match your filters</h3>
                   <p className="text-white/80 mb-4">Try adjusting your search criteria or browse all available properties.</p>
@@ -244,7 +308,7 @@ const Index = () => {
                         });
                         setShowNoResults(false);
                       }}
-                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue"
+                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
                     >
                       Clear Filters
                     </Button>
@@ -258,302 +322,161 @@ const Index = () => {
                 </div>
               </div>
             )}
-            
-            <div className="mt-8 flex flex-wrap justify-center gap-6 text-white/90">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                <span>Direct Contact</span>
+
+
+          </div>
+        </div>
+      </section>
+
+      {/* Trusted by + value props marquee */}
+      <section className="py-6 backdrop-blur-xl bg-white/5 border-t border-b border-white/10">
+        <div className="text-center text-sm text-muted-foreground mb-3">Trusted by renters and landlords across SA</div>
+        <div className="home-marquee">
+          <div className="home-marquee-track gap-8 px-4 sm:px-8">
+            {Array.from({ length: 2 }).map((_, loop) => (
+              <div className="flex gap-8 pr-8" key={loop}>
+                {[
+                  'Zero Commission',
+                  'Secure Payments',
+                  'Instant Messaging',
+                  'Maintenance Manager',
+                  'Digital Lease Signing',
+                  'Verified Listings',
+                  'Smart Search',
+                ].map((tag) => (
+                  <span key={`${loop}-${tag}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl bg-white/10 text-foreground/80 border border-white/20 hover:bg-white/20 transition-colors duration-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-success-green" /> {tag}
+                  </span>
+                ))}
               </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                <span>No Commission</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid with Glass Cards */}
+      <section className="py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeader
+            title="From Listing to Lease, Made Easy"
+            subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
+            showTagline={true}
+            taglineVariant="eyebrow"
+          />
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {[
+              {
+                title: 'Tenant Applications and Screening',
+                desc: 'Online tenant application submission form capturing personal info, employment, rental history. Automated credit and background checks integration. Reference and employment verification. Risk assessment and scoring system for applicant suitability. Application status tracking and communication hub.',
+                icon: '👥',
+                gradient: 'from-blue-500/20 to-indigo-500/20',
+                border: 'border-blue-500/30',
+                iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+              },
+              {
+                title: 'Viewings and Scheduling',
+                desc: 'Calendaring system for property viewings. Tenants and agents can book viewing times via shared calendar slots. Automated notifications and reminders sent to tenants and landlords. Viewing history and follow-up management.',
+                icon: '📅',
+                gradient: 'from-green-500/20 to-emerald-500/20',
+                border: 'border-green-500/30',
+                iconBg: 'bg-gradient-to-br from-green-500 to-emerald-600',
+              },
+              {
+                title: 'Compliance and LeasePack Management',
+                desc: 'Storage and easy retrieval of compliance certificates (electrical, safety, etc). Digital lease agreement signing and stamping. License, certification, and legal document management. Tenant access to lease documents and compliance info. Alerts for expiring certificates or renewal requirements.',
+                icon: '📋',
+                gradient: 'from-purple-500/20 to-violet-500/20',
+                border: 'border-purple-500/30',
+                iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600',
+              },
+              {
+                title: 'Maintenance Management',
+                desc: 'Tenant maintenance request submission portal. Ticket management with tracking status (open, in progress, resolved). Coordination with maintenance teams and vendors. Maintenance cost tracking and history logs. Emergency maintenance alert system.',
+                icon: '🔧',
+                gradient: 'from-orange-500/20 to-red-500/20',
+                border: 'border-orange-500/30',
+                iconBg: 'bg-gradient-to-br from-orange-500 to-red-600',
+              },
+              {
+                title: 'Property Portfolio Management',
+                desc: 'Comprehensive dashboard for managing multiple properties. Financial tracking with rent collection and expense monitoring. Tenant communication hub with integrated messaging. Document storage and organization system. Performance analytics and reporting tools.',
+                icon: '🏢',
+                gradient: 'from-cyan-500/20 to-teal-500/20',
+                border: 'border-cyan-500/30',
+                iconBg: 'bg-gradient-to-br from-cyan-500 to-teal-600',
+              },
+              {
+                title: 'Smart Notifications & Alerts',
+                desc: 'Real-time notifications for applications, maintenance requests, and lease renewals. Automated reminders for rent payments and document expiry. Customizable alert preferences for different user types. Multi-channel communication via email, SMS, and in-app notifications.',
+                icon: '🔔',
+                gradient: 'from-pink-500/20 to-rose-500/20',
+                border: 'border-pink-500/30',
+                iconBg: 'bg-gradient-to-br from-pink-500 to-rose-600',
+              },
+            ].map((feature, i) => (
+              <div
+                key={feature.title}
+                className={`group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] reveal-up hover:bg-white/20`}
+                style={{ animationDelay: `${100 + i * 120}ms` }}
+                onMouseMove={tilt.onMove}
+                onMouseLeave={tilt.onLeave}
+              >
+                {/* Enhanced glass effect overlay */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl" />
+                
+                {/* Animated border glow */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                {/* Content */}
+                <div className="relative z-10 flex gap-6">
+                  {/* Enhanced Icon */}
+                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                    {feature.icon}
+                  </div>
+                  
+                  {/* Text content */}
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-sm">
+                      {feature.desc}
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Subtle inner glow */}
+                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               </div>
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 mr-2" />
-                <span>Verified Properties</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-muted/30">
+      <HowItWorks />
+
+      {/* Featured Properties with Glass Cards */}
+      <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-foreground mb-4">How SwiftRent Works</h2>
-            <p className="text-lg text-muted-foreground mb-8">
-              Simple steps to find your home or rent your property
-            </p>
-            
-            {/* Toggle Switch - visible on mobile */}
-            <div className="flex items-center justify-center space-x-6 mb-8 lg:hidden">
-              <Label htmlFor="user-type-toggle" className={`text-lg font-semibold transition-colors ${isTenant ? 'text-ocean-blue' : 'text-muted-foreground'}`}>
-                For Tenants
-              </Label>
-              <Switch
-                id="user-type-toggle"
-                checked={!isTenant}
-                onCheckedChange={(checked) => setUserType(checked ? 'landlord' : 'tenant')}
-                aria-label="Toggle between tenant and landlord view"
-              />
-              <Label htmlFor="user-type-toggle" className={`text-lg font-semibold transition-colors ${!isTenant ? 'text-ocean-blue' : 'text-muted-foreground'}`}>
-                For Landlords
-              </Label>
-            </div>
-          </div>
-          
-          {/* Desktop - show both cards side by side */}
-          <div className="hidden lg:grid lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {/* For Tenants */}
-            <Card className="shadow-lg border-ocean-blue/20 bg-gradient-to-br from-white to-ocean-blue/5 min-h-[420px] flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-soft bg-gradient-to-br from-ocean-blue to-ocean-blue-light">
-                    <Home className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-ocean-blue-dark">For Tenants</h3>
-                    <p className="text-sm text-muted-foreground">Find your perfect home</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-6 flex-grow">
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-full flex items-center justify-center flex-shrink-0">
-                      <Search className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Search & Find</h4>
-                      <p className="text-sm text-muted-foreground">Browse thousands of verified properties with photos and details</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-earth-warm to-earth-warm-dark rounded-full flex items-center justify-center flex-shrink-0">
-                      <Users className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Connect & View</h4>
-                      <p className="text-sm text-muted-foreground">Message landlords directly and book property viewings</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-success-green to-success-green-glow rounded-full flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Apply & Move In</h4>
-                      <p className="text-sm text-muted-foreground">Submit your application online and sign your lease digitally</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 pt-4 border-t">
-                  <Link to="/properties">
-                    <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white">
-                      Start Searching
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* For Landlords */}
-            <Card className="shadow-lg border-success-green/20 bg-gradient-to-br from-white to-success-green/5 min-h-[420px] flex flex-col">
-              <CardContent className="p-8 flex flex-col h-full">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-soft bg-gradient-to-br from-success-green to-success-green-glow">
-                    <Shield className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-2xl font-bold text-success-green-dark">For Landlords</h3>
-                    <p className="text-sm text-muted-foreground">List your property easily</p>
-                  </div>
-                </div>
-                
-                <div className="space-y-6 flex-grow">
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-success-green to-success-green-glow rounded-full flex items-center justify-center flex-shrink-0">
-                      <Home className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">List Your Property</h4>
-                      <p className="text-sm text-muted-foreground">Add property details, upload photos, and set your price</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-earth-warm to-earth-warm-dark rounded-full flex items-center justify-center flex-shrink-0">
-                      <Users className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Meet Tenants</h4>
-                      <p className="text-sm text-muted-foreground">Receive applications and choose your ideal tenant</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-full flex items-center justify-center flex-shrink-0">
-                      <CheckCircle className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold mb-1">Rent & Manage</h4>
-                      <p className="text-sm text-muted-foreground">Sign lease agreements and collect rent payments online</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="mt-6 pt-4 border-t">
-                  <Link to="/list-property">
-                    <Button className="w-full bg-success-green hover:bg-success-green-dark text-white">
-                      List Property
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Mobile - show single card based on toggle */}
-          <div className="lg:hidden max-w-md mx-auto">
-            {isTenant ? (
-              <Card key="tenant" className="shadow-lg border-ocean-blue/20 bg-gradient-to-br from-white to-ocean-blue/5 transition-all duration-500">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-soft bg-gradient-to-br from-ocean-blue to-ocean-blue-light">
-                      <Home className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-ocean-blue-dark">For Tenants</h3>
-                      <p className="text-sm text-muted-foreground">Find your perfect home</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-full flex items-center justify-center flex-shrink-0">
-                        <Search className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Search & Find</h4>
-                        <p className="text-sm text-muted-foreground">Browse thousands of verified properties with photos and details</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-br from-earth-warm to-earth-warm-dark rounded-full flex items-center justify-center flex-shrink-0">
-                        <Users className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Connect & View</h4>
-                        <p className="text-sm text-muted-foreground">Message landlords directly and book property viewings</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-br from-success-green to-success-green-glow rounded-full flex items-center justify-center flex-shrink-0">
-                        <CheckCircle className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Apply & Move In</h4>
-                        <p className="text-sm text-muted-foreground">Submit your application online and sign your lease digitally</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6 pt-4 border-t">
-                    <Link to="/properties">
-                      <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white">
-                        Start Searching
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card key="landlord" className="shadow-lg border-success-green/20 bg-gradient-to-br from-white to-success-green/5 transition-all duration-500">
-                <CardContent className="p-8">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-soft bg-gradient-to-br from-success-green to-success-green-glow">
-                      <Shield className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-success-green-dark">For Landlords</h3>
-                      <p className="text-sm text-muted-foreground">List your property easily</p>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-6">
-                    <div className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-br from-success-green to-success-green-glow rounded-full flex items-center justify-center flex-shrink-0">
-                        <Home className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">List Your Property</h4>
-                        <p className="text-sm text-muted-foreground">Add property details, upload photos, and set your price</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-br from-earth-warm to-earth-warm-dark rounded-full flex items-center justify-center flex-shrink-0">
-                        <Users className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Meet Tenants</h4>
-                        <p className="text-sm text-muted-foreground">Receive applications and choose your ideal tenant</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-full flex items-center justify-center flex-shrink-0">
-                        <CheckCircle className="h-4 w-4 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold mb-1">Rent & Manage</h4>
-                        <p className="text-sm text-muted-foreground">Sign lease agreements and collect rent payments online</p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-6 pt-4 border-t">
-                    <Link to="/list-property">
-                      <Button className="w-full bg-success-green hover:bg-success-green-dark text-white">
-                        List Property
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Properties */}
-      <section className="py-16 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-foreground mb-4">Featured Properties</h2>
-            <p className="text-lg text-muted-foreground">
-              Discover handpicked properties across South Africa's major cities
-            </p>
-          </div>
+          <SectionHeader
+            title="Featured Properties"
+            subtitle="Discover handpicked properties across South Africa's major cities"
+            showTagline={false}
+          />
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
+              <div key={property.id} className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02]">
+                <PropertyCard {...property} />
+              </div>
             ))}
           </div>
           
           <div className="text-center">
             <Link to="/properties">
-              <Button size="lg" variant="outline">
+              <Button size="lg" variant="outline" className="backdrop-blur-xl bg-white/10 border-white/20 hover:bg-white/20 text-foreground">
                 View All Properties
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>
@@ -562,31 +485,32 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 bg-background">
+      {/* Stats Section with animated counters and glass cards */}
+      <section className="py-16 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">5,000+</div>
-              <div className="text-muted-foreground">Active Properties</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">15,000+</div>
-              <div className="text-muted-foreground">Happy Tenants</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">98%</div>
-              <div className="text-muted-foreground">Success Rate</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-muted-foreground">Support</div>
-            </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { number: 5000, label: "Active Properties", icon: Home },
+              { number: 15000, label: "Happy Tenants", icon: Star },
+              { number: 98, label: "Success Rate", icon: CheckCircle, suffix: "%" },
+              { number: 24, label: "Support", icon: Zap, suffix: "/7" }
+            ].map((stat, i) => (
+              <div key={stat.label} className="text-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105">
+                <div className="text-4xl font-bold text-primary mb-2 flex items-center justify-center gap-2">
+                  {stat.icon && <stat.icon className="h-8 w-8 text-primary/60" />}
+                  <span>
+                    {stat.number !== 98 ? <AnimatedCounter to={stat.number} /> : stat.number}
+                    {stat.suffix}
+                  </span>
+                </div>
+                <div className="text-muted-foreground">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section with enhanced glass effects */}
       <section className="py-20 bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -596,21 +520,33 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <Button size="lg" variant="secondary">
-                Browse Properties
+              <Button size="lg" variant="secondary" className="relative overflow-hidden backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/30">
+                <span
+                  className="magnet"
+                  onMouseMove={magnet.onMove}
+                  onMouseLeave={magnet.onLeave}
+                >
+                  Browse Properties
+                </span>
               </Button>
             </Link>
             <Link to="/list-property">
-              <Button size="lg" variant="outline" className="text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-sm bg-white/10">
-                List Your Property
+              <Button size="lg" variant="outline" className="relative overflow-hidden text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-xl bg-white/10">
+                <span
+                  className="magnet"
+                  onMouseMove={magnet.onMove}
+                  onMouseLeave={magnet.onLeave}
+                >
+                  List Your Property
+                </span>
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-muted py-12">
+      {/* Footer with glass effect */}
+      <footer className="backdrop-blur-xl bg-white/5 border-t border-white/10 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
@@ -628,32 +564,32 @@ const Index = () => {
             <div>
               <h4 className="font-semibold mb-4">For Tenants</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/properties" className="hover:text-primary">Browse Properties</Link></li>
-                <li><Link to="/how-it-works" className="hover:text-primary">How It Works</Link></li>
-                <li><a href="#" className="hover:text-primary">Rental Tips</a></li>
+                <li><Link to="/properties" className="hover:text-primary transition-colors duration-300">Browse Properties</Link></li>
+                <li><Link to="/how-it-works" className="hover:text-primary transition-colors duration-300">How It Works</Link></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Rental Tips</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">For Landlords</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary">List Property</a></li>
-                <li><a href="#" className="hover:text-primary">Pricing Guide</a></li>
-                <li><a href="#" className="hover:text-primary">Landlord Resources</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">List Property</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Pricing Guide</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Landlord Resources</a></li>
               </ul>
             </div>
             
             <div>
               <h4 className="font-semibold mb-4">Support</h4>
               <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/about" className="hover:text-primary">About Us</Link></li>
-                <li><a href="#" className="hover:text-primary">Contact</a></li>
-                <li><a href="#" className="hover:text-primary">Help Center</a></li>
+                <li><Link to="/about" className="hover:text-primary transition-colors duration-300">About Us</Link></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Contact</a></li>
+                <li><a href="#" className="hover:text-primary transition-colors duration-300">Help Center</a></li>
               </ul>
             </div>
           </div>
           
-          <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
+          <div className="border-t border-white/10 mt-8 pt-8 text-center text-muted-foreground">
             <p>&copy; 2024 SwiftRent. All rights reserved.</p>
           </div>
         </div>

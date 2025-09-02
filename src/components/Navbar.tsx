@@ -33,7 +33,6 @@ const Navbar = () => {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/properties", label: "Properties", icon: Search },
-    { path: "/how-it-works", label: "How It Works", icon: Heart },
     { path: "/about", label: "About", icon: User }
   ];
 
@@ -65,9 +64,9 @@ const Navbar = () => {
               {user ? (
                 <>
                   {isLandlord && hasProperties ? (
-                    <Button variant="ghost" size="sm" asChild><Link to="/dashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />LandLord Dashboard</Link></Button>
+                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Rental Manager</Link></Button>
                   ) : !isLandlord ? (
-                    <Button variant="ghost" size="sm" asChild><Link to="/tenant-dashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
+                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedtenantdashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
                   ) : (
                     <Button variant="ghost" size="sm" asChild>
                       <Link to="/messages" className="flex items-center relative">
@@ -86,7 +85,7 @@ const Navbar = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-background border-border z-50" align="end">
                       <DropdownMenuItem asChild>
-                        <Link to={isLandlord ? "/dashboard" : "/tenant-dashboard"} className="cursor-pointer">
+                        <Link to={isLandlord ? "/enhancedlandlorddashboard" : "/enhancedtenantdashboard"} className="cursor-pointer">
                           <LayoutDashboard className="h-4 w-4 mr-2" />
                           Dashboard
                         </Link>
@@ -165,9 +164,9 @@ const Navbar = () => {
               {user ? (
                 <>
                   {isLandlord ? (
-                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/dashboard">Rental Manager</Link></Button>
+                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedlandlorddashboard">Rental Manager</Link></Button>
                   ) : (
-                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/tenant-dashboard">My Dashboard</Link></Button>
+                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedtenantdashboard">My Dashboard</Link></Button>
                   )}
                   <Button className="w-full" onClick={signOut}><LogOut className="h-4 w-4 mr-2"/>Sign Out</Button>
                 </>

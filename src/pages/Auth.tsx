@@ -91,7 +91,11 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
-      navigate('/dashboard');
+      if (user.role === 'landlord') {
+        navigate('/enhancedlandlorddashboard');
+      } else {
+        navigate('/enhancedtenantdashboard');
+      }
     }
   }, [user, loading, navigate]);
 
@@ -235,7 +239,11 @@ export default function Auth() {
       title: "Welcome back!",
       description: "You've been signed in successfully.",
     });
-    navigate('/dashboard');
+    if (user?.role === 'landlord') {
+      navigate('/enhancedlandlorddashboard');
+    } else {
+      navigate('/enhancedtenantdashboard');
+    }
     setSignInLoading(false);
   };
 

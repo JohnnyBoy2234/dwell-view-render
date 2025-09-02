@@ -25,7 +25,7 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
   };
 
   return (
-    <Card className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <Card className="rounded-2xl bg-white ring-1 ring-black/5 shadow-card overflow-hidden transition hover:shadow-lg hover:-translate-y-[1px] focus-within:ring-2 focus-within:ring-brand-blue/40">
       <CardHeader className="pb-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -34,12 +34,12 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
                 <img
                   src={property.images[0]}
                   alt={property.title}
-                  className="w-16 h-16 object-cover rounded-lg"
+                  className="w-16 h-16 object-cover rounded-xl"
                 />
               )}
               <div>
-                <h3 className="font-semibold text-lg">{property.title}</h3>
-                <p className="text-sm text-muted-foreground">{property.location}</p>
+                <h3 className="text-base font-semibold text-brand-gray-900">{property.title}</h3>
+                <p className="text-sm text-brand-gray-500">{property.location}</p>
                 <p className="text-sm font-medium">R{property.price.toLocaleString()}/month</p>
               </div>
             </div>

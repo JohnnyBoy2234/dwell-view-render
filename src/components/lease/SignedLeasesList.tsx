@@ -18,6 +18,7 @@ interface SignedLease {
   end_date: string | null;
   lease_document_path: string | null;
   lease_document_url?: string | null;
+  lease_status?: string | null;
   created_at: string;
   properties?: { title: string; location: string } | null;
   tenant_profile?: { display_name: string } | null;
@@ -37,18 +38,17 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
       try {
         const query = supabase
           .from("tenancies")
-          .select(
-            `*,
+          .select(`*,
             properties(title, location),
             tenant_profile:profiles!tenant_id(display_name),
-            landlord_profile:profiles!landlord_id(display_name)`
-          )
-          .eq("lease_status", "completed")
+            landlord_profile:profiles!landlord_id(display_name)
+          `)
+          .in("lease_status", ["awaiting_tenant_signature", "awaiting_landlord_signature", "completed"]) 
           .order("created_at", { ascending: false });
 
-        const { data, error } = await (role === "landlord"
-          ? query.eq("landlord_id", user.id)
-          : query.eq("tenant_id", user.id));
+        const { data, error } = await (role === "landlord" ?
+          query.eq("landlord_id", user.id) :
+          query.eq("tenant_id", user.id));
         if (error) throw error;
         setLeases((data as any) || []);
       } catch (e: any) {
@@ -94,53 +94,127 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
     }
   };
 
+  const pending = leases.filter(l => l.lease_status !== 'completed');
+  const signed = leases.filter(l => l.lease_status === 'completed');
+
   return (
     <section aria-labelledby="signed-leases-heading">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 id="signed-leases-heading" className="text-xl font-semibold">Signed Leases</h2>
-          <p className="text-sm text-muted-foreground">Download finalized lease agreements anytime</p>
+          <h2 id="signed-leases-heading" className="text-xl font-semibold">Leases</h2>
+          <p className="text-sm text-muted-foreground">Review, sign, and download your lease documents</p>
         </div>
         <Badge variant="secondary">{leases.length}</Badge>
       </div>
 
       {loading ? (
         <Card>
-          <CardContent className="py-8 text-center text-muted-foreground">Loading signed leases…</CardContent>
+          <CardContent className="py-8 text-center text-muted-foreground">Loading leases…</CardContent>
         </Card>
       ) : leases.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No signed leases yet</CardTitle>
-            <CardDescription>Completed leases will appear here</CardDescription>
+            <CardTitle>No leases yet</CardTitle>
+            <CardDescription>When a lease is sent to you for signing, it will appear here</CardDescription>
           </CardHeader>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {leases.map((lease) => (
-            <Card key={lease.id} className="hover:shadow-sm transition-shadow">
-              <CardHeader>
-                <CardTitle className="text-base flex items-center gap-2">
-                  <FileText className="h-4 w-4 text-primary" />
-                  {lease.properties?.title || "Property"}
-                </CardTitle>
-                <CardDescription>{lease.properties?.location}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between text-sm mb-3">
-                  <div>
-                    <div>Rent: R{(lease.monthly_rent || 0).toLocaleString()}</div>
-                    <div>Start: {new Date(lease.start_date).toLocaleDateString()}</div>
-                  </div>
-                  <Badge>Active</Badge>
-                </div>
-                <Button className="w-full" onClick={() => downloadLease(lease)}>
-                  <Download className="h-4 w-4 mr-2" />
-                  Download PDF
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="space-y-8">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Pending</h3>
+              <Badge variant="secondary">{pending.length}</Badge>
+            </div>
+            {pending.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-sm text-muted-foreground">No pending leases</CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pending.map((lease) => (
+                  <Card key={lease.id} className="hover:shadow-sm transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        {lease.properties?.title || "Property"}
+                      </CardTitle>
+                      <CardDescription>{lease.properties?.location}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm mb-3">
+                        <div>
+                          <div>Landlord: {lease.landlord_profile?.display_name || 'Landlord'}</div>
+                          {lease.start_date && <div>Start: {new Date(lease.start_date).toLocaleDateString()}</div>}
+                        </div>
+                        <Badge>{lease.lease_status?.replace(/_/g, ' ')}</Badge>
+                      </div>
+                      {lease.lease_status === 'awaiting_tenant_signature' ? (
+                        <Button className="w-full" onClick={async () => {
+                          try {
+                            const { data, error } = await supabase.functions.invoke('get-docusign-recipient-view', {
+                              body: { tenancyId: lease.id, role: 'tenant' }
+                            });
+                            if (error) throw error;
+                            const url = (data as any)?.url;
+                            if (!url) throw new Error('No signing URL');
+                            window.open(url, '_blank');
+                          } catch (e: any) {
+                            toast({ variant: 'destructive', title: 'Failed to open signing', description: e.message });
+                          }
+                        }}>
+                          Review & Sign
+                        </Button>
+                      ) : (
+                        <Button className="w-full" onClick={() => downloadLease(lease)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download PDF
+                        </Button>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-lg font-semibold">Signed</h3>
+              <Badge variant="secondary">{signed.length}</Badge>
+            </div>
+            {signed.length === 0 ? (
+              <Card>
+                <CardContent className="p-6 text-sm text-muted-foreground">No signed leases yet</CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {signed.map((lease) => (
+                  <Card key={lease.id} className="hover:shadow-sm transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="text-base flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-primary" />
+                        {lease.properties?.title || "Property"}
+                      </CardTitle>
+                      <CardDescription>{lease.properties?.location}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center justify-between text-sm mb-3">
+                        <div>
+                          <div>Landlord: {lease.landlord_profile?.display_name || 'Landlord'}</div>
+                          {lease.start_date && <div>Start: {new Date(lease.start_date).toLocaleDateString()}</div>}
+                        </div>
+                        <Badge>signed</Badge>
+                      </div>
+                      <Button className="w-full" onClick={() => downloadLease(lease)}>
+                        <Download className="h-4 w-4 mr-2" />
+                        Download PDF
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </section>

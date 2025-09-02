@@ -187,7 +187,7 @@ export default function ListProperty() {
         description: "Your property is now live on SwiftRent and visible to potential tenants."
       });
 
-      navigate('/dashboard');
+              navigate('/enhancedlandlorddashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",

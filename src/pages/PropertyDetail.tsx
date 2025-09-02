@@ -378,7 +378,8 @@ export default function PropertyDetail() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
-      <div className="container mx-auto p-4 md:p-6 max-w-6xl">
+      <div className="container mx-auto p-4 md:p-6 max-w-6xl pb-24 md:pb-6">
+
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
           <Button variant="outline" onClick={() => navigate('/properties')}>
@@ -440,10 +441,25 @@ export default function PropertyDetail() {
 
             {/* Property Details */}
             <Tabs defaultValue="overview" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-ocean-blue/10 to-earth-warm/10 border border-ocean-blue/20">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="features">Features</TabsTrigger>
-              </TabsList>
+              <div className="border-b border-brand-gray-200">
+                <TabsList className="bg-transparent p-0 h-auto">
+                  <div className="flex gap-2">
+                    <TabsTrigger
+                      value="overview"
+                      className="px-3 py-2 text-sm font-medium text-brand-gray-700 hover:text-brand-blue rounded-none border-b-2 border-transparent data-[state=active]:border-brand-blue data-[state=active]:text-brand-blue"
+                      aria-selected
+                    >
+                      Overview
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="features"
+                      className="px-3 py-2 text-sm font-medium text-brand-gray-700 hover:text-brand-blue rounded-none border-b-2 border-transparent data-[state=active]:border-brand-blue data-[state=active]:text-brand-blue"
+                    >
+                      Features
+                    </TabsTrigger>
+                  </div>
+                </TabsList>
+              </div>
               
               <TabsContent value="overview">
                 <Card className="bg-gradient-to-br from-card/80 via-card to-earth-warm/5 border-earth-warm/20 shadow-elegant">
@@ -713,6 +729,32 @@ export default function PropertyDetail() {
         </div>
 
       </div>
+
+      {/* Mobile glass sticky action bar */}
+      {property && (
+        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
+            <button
+              onClick={handleRequestViewing}
+              className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
+            >
+              Book Viewing
+            </button>
+            <button
+              onClick={handleContactLandlord}
+              className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
+            >
+              Message
+            </button>
+            <button
+              onClick={handleShare}
+              className="rounded-xl bg-brand.green text-white px-3 py-2 text-sm hover:bg-brand.green/90 focus:outline-none focus:ring-2 focus:ring-brand.green/40"
+            >
+              Share
+            </button>
+          </div>
+        </div>
+      )}
 
       {property && (
         <BookViewingDialog

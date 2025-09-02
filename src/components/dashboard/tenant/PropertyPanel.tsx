@@ -51,7 +51,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Property Image */}
-        <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
+        <div className="relative aspect-video rounded-lg overflow-hidden bg-gradient-to-br from-ocean-blue/[0.1] to-success-green/[0.1]">
           {tenantProperty.images.length > 0 ? (
             <img
               src={tenantProperty.images[0]}
@@ -132,7 +132,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => window.location.href = '/maintenance/new'}
+              onClick={() => window.location.href = '/tenant-dashboard/maintenance'}
               className="border-earth-warm text-earth-warm hover:bg-earth-warm/10"
             >
               Report Issue

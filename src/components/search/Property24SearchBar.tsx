@@ -384,7 +384,11 @@ export const Property24SearchBar = ({
                   <Button
                     key={option.value}
                     variant={filters.propertyType === option.value ? "default" : "ghost"}
-                    className="w-full justify-start"
+                    className={`w-full justify-start ${
+                      filters.propertyType === option.value 
+                        ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
+                        : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
+                    }`}
                     onClick={() => {
                       onFiltersChange({ propertyType: option.value });
                       setPropertyTypeOpen(false);
@@ -408,7 +412,7 @@ export const Property24SearchBar = ({
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Min Price</label>
+                    <label className="text-sm font-medium mb-2 block text-foreground">Min Price</label>
                     <Select value={filters.minPrice || ""} onValueChange={(value) => onFiltersChange({ minPrice: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
@@ -421,7 +425,7 @@ export const Property24SearchBar = ({
                     </Select>
                   </div>
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Max Price</label>
+                    <label className="text-sm font-medium mb-2 block text-foreground">Max Price</label>
                     <Select value={filters.maxPrice || ""} onValueChange={(value) => onFiltersChange({ maxPrice: value })}>
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
@@ -457,7 +461,11 @@ export const Property24SearchBar = ({
                   <Button
                     key={option.value}
                     variant={filters.bedrooms === option.value ? "default" : "ghost"}
-                    className="w-full justify-start"
+                    className={`w-full justify-start ${
+                      filters.bedrooms === option.value 
+                        ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
+                        : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
+                    }`}
                     onClick={() => {
                       onFiltersChange({ bedrooms: option.value });
                       setBedroomsOpen(false);
@@ -483,7 +491,11 @@ export const Property24SearchBar = ({
                   <Button
                     key={option.value}
                     variant={filters.bathrooms === option.value ? "default" : "ghost"}
-                    className="w-full justify-start"
+                    className={`w-full justify-start ${
+                      filters.bathrooms === option.value 
+                        ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
+                        : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
+                    }`}
                     onClick={() => {
                       onFiltersChange({ bathrooms: option.value });
                       setBathroomsOpen(false);

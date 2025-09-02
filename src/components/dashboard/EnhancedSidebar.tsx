@@ -1,7 +1,8 @@
-import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building } from 'lucide-react';
+import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, DollarSign, Users, Building, Wrench, Inbox, type LucideIcon } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import {
   Sidebar,
   SidebarContent,
@@ -19,27 +20,30 @@ import { Badge } from '@/components/ui/badge';
 interface SidebarItem {
   title: string;
   url: string;
-  icon: any;
+  icon: LucideIcon;
   badge?: number;
 }
 
 const tenantItems: SidebarItem[] = [
-  { title: 'Dashboard', url: '/tenant-dashboard', icon: Home },
-  { title: 'Messages', url: '/tenant-messages', icon: MessageSquare },
-  { title: 'Properties', url: '/properties', icon: Building },
-  { title: 'Applications', url: '/tenant-applications', icon: FileText },
-  { title: 'Maintenance', url: '/maintenance', icon: Settings },
-  { title: 'Profile', url: '/tenant-profile', icon: User },
+  { title: 'Dashboard', url: '/enhancedtenantdashboard', icon: Home },
+  { title: 'Messages', url: '/enhancedtenantdashboard/messages', icon: MessageSquare },
+  { title: 'Properties', url: '/enhancedtenantdashboard/properties', icon: Building },
+  { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: FileText },
+  { title: 'Leases', url: '/enhancedtenantdashboard/leases', icon: FileText },
+  { title: 'Maintenance', url: '/enhancedtenantdashboard/maintenance', icon: Settings },
+  { title: 'Profile', url: '/enhancedtenantdashboard/profile', icon: User },
 ];
 
 const landlordItems: SidebarItem[] = [
-  { title: 'Rental Manager', url: '/dashboard', icon: Home },
-  { title: 'Properties', url: '/manage-properties', icon: Building },
-  { title: 'Messages', url: '/messages', icon: MessageSquare },
-  { title: 'Applications', url: '/applications', icon: FileText },
-  { title: 'Tenants', url: '/tenants', icon: Users },
-  { title: 'Payments', url: '/payments', icon: DollarSign },
-  { title: 'Reports', url: '/reports', icon: BarChart3 },
+  { title: 'Rental Manager', url: '/enhancedlandlorddashboard', icon: Home },
+  { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
+  { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare },
+  { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
+  { title: 'Leases', url: '/enhancedlandlorddashboard/leases', icon: FileText },
+  { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
+  { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: DollarSign },
+  { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
+  { title: 'Reports', url: '/enhancedlandlorddashboard/reports', icon: BarChart3 },
 ];
 
 interface EnhancedSidebarProps {
@@ -52,21 +56,34 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const navigate = useNavigate();
   const { isLandlord } = useAuth();
   const { unreadCount } = useUnreadMessages();
-  const { state } = useSidebar();
+  const { data: maintenanceUnread } = useUnreadCounts();
+  const maintenanceTotal = maintenanceUnread
+    ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0)
+    : 0;
+  const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
 
   const items = isLandlord ? landlordItems : tenantItems;
   
-  // Add unread count to messages
-  const itemsWithBadges = items.map(item => ({
+  // Add unread count to messages and maintenance requests
+  const itemsWithBadges = items.map((item) => ({
     ...item,
-    badge: item.title === 'Messages' ? unreadCount : undefined
+    badge:
+      item.title === 'Messages'
+        ? unreadCount
+        : item.title === 'Maintenance'
+        ? maintenanceTotal
+        : undefined,
   }));
 
   const currentPath = location.pathname;
   const isActive = (path: string) => {
     if (currentTab && onTabChange) {
       return currentTab === path;
+    }
+    // Only exact match for the dashboard root to avoid double-highlighting
+    if (path === '/enhancedlandlorddashboard' || path === '/enhancedtenantdashboard') {
+      return currentPath === path;
     }
     return currentPath === path || currentPath.startsWith(path + '/');
   };
@@ -76,6 +93,10 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
       onTabChange(item.url);
     } else {
       navigate(item.url);
+    }
+    // Auto-close sidebar on mobile after navigation
+    if (isMobile) {
+      setOpenMobile(false);
     }
   };
 
@@ -109,7 +130,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
                     className={
                       isActive(item.url) 
                         ? "bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-soft" 
-                        : "hover:bg-earth-light/50 hover:text-earth-warm-dark"
+                        : "hover:bg-gradient-to-r hover:from-ocean-blue hover:to-success-green hover:text-white"
                     }
                   >
                     <button 

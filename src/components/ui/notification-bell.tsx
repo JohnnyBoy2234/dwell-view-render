@@ -56,9 +56,9 @@ export function NotificationBell() {
       navigate(notification.link_url);
     } else if (notification.tenancyId) {
       if (isLandlord) {
-        navigate(`/dashboard?tab=leases&tenancy=${notification.tenancyId}`);
+        navigate(`/enhancedlandlorddashboard?tab=leases&tenancy=${notification.tenancyId}`);
       } else {
-        navigate(`/tenant-dashboard#leases-section`);
+                  navigate(`/enhancedtenantdashboard#leases-section`);
       }
     }
     
@@ -130,7 +130,7 @@ export function NotificationBell() {
             <DropdownMenuItem 
               className="px-4 py-2 text-center text-primary cursor-pointer"
               onClick={() => {
-                navigate(isLandlord ? '/dashboard' : '/tenant-dashboard');
+                navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
                 setOpen(false);
               }}
             >

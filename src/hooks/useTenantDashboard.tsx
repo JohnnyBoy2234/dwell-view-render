@@ -118,17 +118,7 @@ export function useTenantDashboard() {
       // Fetch upcoming viewings (for viewing requests)
       const { data: viewingData, error: viewingError } = await supabase
         .from('viewing_slots')
-        .select(`
-          id,
-          start_time,
-          end_time,
-          status,
-          property_id,
-          properties (
-            title,
-            location
-          )
-        `)
+        .select(`id, start_time, end_time, status, property_id`)
         .eq('booked_by_tenant_id', user.id)
         .eq('status', 'booked')
         .gt('start_time', new Date().toISOString())
