@@ -36,6 +36,7 @@ import DocuSignRedirect from "./pages/DocuSignRedirect";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
+import { Analytics } from "@vercel/analytics/next"
 
 const queryClient = new QueryClient();
 
