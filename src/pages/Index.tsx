@@ -314,7 +314,7 @@ const Index = () => {
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
-                  'No Agent',
+                  'No Agents',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
@@ -327,7 +327,7 @@ const Index = () => {
                   'Verified Listings',
                   'Smart Search',
                 ].map((tag, index) => {
-                  const isBlueItem = tag === 'No Agent Commission' || tag === 'No Agent';
+                  const isBlueItem = tag === 'No Agent Commission' || tag === 'No Agents';
                   
                   return (
                     <span 
