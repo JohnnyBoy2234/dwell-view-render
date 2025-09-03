@@ -75,16 +75,16 @@ export const RentalApplicationForm = ({ propertyId, landlordId, inviteId, onSubm
 
   useEffect(() => {
     if (user) {
-      loadExistingData();
+      checkExistingApplication();
     }
   }, [user, propertyId]);
 
-  const loadExistingData = async () => {
+  const checkExistingApplication = async () => {
     if (!user) return;
     
     setLoading(true);
     try {
-      // Check for existing application
+      // Only check for existing application status, don't pre-fill form
       const { data: application } = await supabase
         .from('applications')
         .select('*')
@@ -94,59 +94,33 @@ export const RentalApplicationForm = ({ propertyId, landlordId, inviteId, onSubm
 
       if (application) {
         setExistingApplication(application);
-        
-        // If application exists and is not in draft state, prevent submission
-        if (application.status !== 'invited') {
-          return;
-        }
-      }
-
-      // Load existing screening profile data
-      const { data: profile } = await supabase
-        .from('screening_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (profile) {
-        setFormData(prev => ({
-          ...prev,
-          first_name: profile.first_name || '',
-          middle_name: profile.middle_name || '',
-          last_name: profile.last_name || '',
-          has_pets: profile.has_pets || false,
-          pet_details: profile.pet_details || '',
-          screening_consent: profile.screening_consent || false
-        }));
-      }
-
-      // Load existing screening details
-      const { data: details } = await supabase
-        .from('screening_details')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (details) {
-        setFormData(prev => ({
-          ...prev,
-          id_number: details.id_number || '',
-          phone: details.phone || '',
-          employment_status: details.employment_status || '',
-          job_title: details.job_title || '',
-          company_name: details.company_name || '',
-          net_monthly_income: details.net_monthly_income?.toString() || '',
-          current_address: details.current_address || '',
-          reason_for_moving: details.reason_for_moving || '',
-          previous_landlord_name: details.previous_landlord_name || '',
-          previous_landlord_contact: details.previous_landlord_contact || ''
-        }));
       }
     } catch (error) {
-      console.error('Error loading existing data:', error);
+      console.error('Error checking existing application:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      first_name: '',
+      middle_name: '',
+      last_name: '',
+      id_number: '',
+      phone: '',
+      employment_status: '',
+      job_title: '',
+      company_name: '',
+      net_monthly_income: '',
+      current_address: '',
+      reason_for_moving: '',
+      previous_landlord_name: '',
+      previous_landlord_contact: '',
+      has_pets: false,
+      pet_details: '',
+      screening_consent: false
+    });
   };
 
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
@@ -250,29 +224,20 @@ export const RentalApplicationForm = ({ propertyId, landlordId, inviteId, onSubm
         .update({ is_tenant_screened: true })
         .eq('user_id', user.id);
 
-      // Create or update application
+      // Always create a new application record
       const applicationData = {
         tenant_id: user.id,
         landlord_id: landlordId,
         property_id: propertyId,
-        status: 'submitted'
+        status: 'submitted',
+        created_at: new Date().toISOString()
       };
 
-      let applicationResult;
-      if (existingApplication) {
-        applicationResult = await supabase
-          .from('applications')
-          .update({ ...applicationData, updated_at: new Date().toISOString() })
-          .eq('id', existingApplication.id)
-          .select()
-          .single();
-      } else {
-        applicationResult = await supabase
-          .from('applications')
-          .insert(applicationData)
-          .select()
-          .single();
-      }
+      const applicationResult = await supabase
+        .from('applications')
+        .insert(applicationData)
+        .select()
+        .single();
 
       if (applicationResult.error) throw applicationResult.error;
 
@@ -298,14 +263,20 @@ export const RentalApplicationForm = ({ propertyId, landlordId, inviteId, onSubm
       }
 
       toast({
-        title: "Application Submitted",
-        description: "Your rental application has been submitted successfully. A credit check will be performed.",
+        title: "Application Submitted Successfully!",
+        description: "Your rental application has been submitted and is being processed. You will be notified of the outcome.",
       });
 
+      // Reset form to fresh state after successful submission
+      resetForm();
+      
       if (onSubmissionComplete) {
         onSubmissionComplete();
       } else {
-        navigate('/tenant-dashboard');
+        // Small delay to show the success message before navigation
+        setTimeout(() => {
+          navigate('/tenant-dashboard');
+        }, 2000);
       }
 
     } catch (error: any) {
