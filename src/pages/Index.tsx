@@ -380,7 +380,13 @@ const Index = () => {
             {[
               {
                 title: 'Tenant Applications and Screening',
-                desc: 'Online tenant application submission form capturing personal info, employment, rental history. Automated credit and background checks integration. Reference and employment verification. Risk assessment and scoring system for applicant suitability. Application status tracking and communication hub.',
+                desc: [
+                  'Online tenant application submission form capturing personal info, employment, rental history',
+                  'Automated credit and background checks integration',
+                  'Reference and employment verification',
+                  'Risk assessment and scoring system for applicant suitability',
+                  'Application status tracking and communication hub'
+                ],
                 icon: '👥',
                 gradient: 'from-blue-500/20 to-indigo-500/20',
                 border: 'border-blue-500/30',
@@ -388,7 +394,12 @@ const Index = () => {
               },
               {
                 title: 'Viewings and Scheduling',
-                desc: 'Calendaring system for property viewings. Tenants and agents can book viewing times via shared calendar slots. Automated notifications and reminders sent to tenants and landlords. Viewing history and follow-up management.',
+                desc: [
+                  'Calendaring system for property viewings',
+                  'Tenants and agents can book viewing times via shared calendar slots',
+                  'Automated notifications and reminders sent to tenants and landlords',
+                  'Viewing history and follow-up management'
+                ],
                 icon: '📅',
                 gradient: 'from-green-500/20 to-emerald-500/20',
                 border: 'border-green-500/30',
@@ -396,7 +407,13 @@ const Index = () => {
               },
               {
                 title: 'Compliance and LeasePack Management',
-                desc: 'Storage and easy retrieval of compliance certificates (electrical, safety, etc). Digital lease agreement signing and stamping. License, certification, and legal document management. Tenant access to lease documents and compliance info. Alerts for expiring certificates or renewal requirements.',
+                desc: [
+                  'Storage and easy retrieval of compliance certificates (electrical, safety, etc)',
+                  'Digital lease agreement signing and stamping',
+                  'License, certification, and legal document management',
+                  'Tenant access to lease documents and compliance info',
+                  'Alerts for expiring certificates or renewal requirements'
+                ],
                 icon: '📋',
                 gradient: 'from-purple-500/20 to-violet-500/20',
                 border: 'border-purple-500/30',
@@ -404,7 +421,13 @@ const Index = () => {
               },
               {
                 title: 'Maintenance Management',
-                desc: 'Tenant maintenance request submission portal. Ticket management with tracking status (open, in progress, resolved). Coordination with maintenance teams and vendors. Maintenance cost tracking and history logs. Emergency maintenance alert system.',
+                desc: [
+                  'Tenant maintenance request submission portal',
+                  'Ticket management with tracking status (open, in progress, resolved)',
+                  'Coordination with maintenance teams and vendors',
+                  'Maintenance cost tracking and history logs',
+                  'Emergency maintenance alert system'
+                ],
                 icon: '🔧',
                 gradient: 'from-orange-500/20 to-red-500/20',
                 border: 'border-orange-500/30',
@@ -412,7 +435,13 @@ const Index = () => {
               },
               {
                 title: 'Property Portfolio Management',
-                desc: 'Comprehensive dashboard for managing multiple properties. Financial tracking with rent collection and expense monitoring. Tenant communication hub with integrated messaging. Document storage and organization system. Performance analytics and reporting tools.',
+                desc: [
+                  'Comprehensive dashboard for managing multiple properties',
+                  'Financial tracking with rent collection and expense monitoring',
+                  'Tenant communication hub with integrated messaging',
+                  'Document storage and organization system',
+                  'Performance analytics and reporting tools'
+                ],
                 icon: '🏢',
                 gradient: 'from-cyan-500/20 to-teal-500/20',
                 border: 'border-cyan-500/30',
@@ -420,7 +449,12 @@ const Index = () => {
               },
               {
                 title: 'Smart Notifications & Alerts',
-                desc: 'Real-time notifications for applications, maintenance requests, and lease renewals. Automated reminders for rent payments and document expiry. Customizable alert preferences for different user types. Multi-channel communication via email, SMS, and in-app notifications.',
+                desc: [
+                  'Real-time notifications for applications, maintenance requests, and lease renewals',
+                  'Automated reminders for rent payments and document expiry',
+                  'Customizable alert preferences for different user types',
+                  'Multi-channel communication via email, SMS, and in-app notifications'
+                ],
                 icon: '🔔',
                 gradient: 'from-pink-500/20 to-rose-500/20',
                 border: 'border-pink-500/30',
@@ -452,9 +486,14 @@ const Index = () => {
                     <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed text-sm">
-                      {feature.desc}
-                    </p>
+                    <ul className="text-muted-foreground leading-relaxed text-sm space-y-1">
+                      {feature.desc.map((item, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="text-primary mr-2 mt-1">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
                 
