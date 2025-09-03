@@ -139,6 +139,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          application_id: string | null
           document_type: string
           file_path: string
           file_type: string
@@ -151,6 +152,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          application_id?: string | null
           document_type: string
           file_path: string
           file_type: string
@@ -163,6 +165,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          application_id?: string | null
           document_type?: string
           file_path?: string
           file_type?: string
@@ -175,6 +178,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_user_id_fkey"
             columns: ["user_id"]
@@ -818,6 +828,7 @@ export type Database = {
           created_at: string
           custom_clauses: Json
           end_date: string | null
+          envelope_id: string | null
           id: string
           landlord_id: string
           landlord_signature_url: string | null
@@ -828,6 +839,7 @@ export type Database = {
           notes: string | null
           property_id: string
           security_deposit: number | null
+          signing_provider: string | null
           start_date: string
           status: string
           tenant_id: string
@@ -839,6 +851,7 @@ export type Database = {
           created_at?: string
           custom_clauses?: Json
           end_date?: string | null
+          envelope_id?: string | null
           id?: string
           landlord_id: string
           landlord_signature_url?: string | null
@@ -849,6 +862,7 @@ export type Database = {
           notes?: string | null
           property_id: string
           security_deposit?: number | null
+          signing_provider?: string | null
           start_date: string
           status?: string
           tenant_id: string
@@ -860,6 +874,7 @@ export type Database = {
           created_at?: string
           custom_clauses?: Json
           end_date?: string | null
+          envelope_id?: string | null
           id?: string
           landlord_id?: string
           landlord_signature_url?: string | null
@@ -870,6 +885,7 @@ export type Database = {
           notes?: string | null
           property_id?: string
           security_deposit?: number | null
+          signing_provider?: string | null
           start_date?: string
           status?: string
           tenant_id?: string

@@ -231,12 +231,21 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${user.id}/${documentType}_${Date.now()}.${fileExt}`;
-      
-      const bucket = documentType === 'id' ? 'id-documents' : 'income-documents';
+      let fileName: string;
+      let bucketName: string;
+
+      // Handle Experian credit report with special naming
+      if (documentType === 'experian_credit_report') {
+        const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd format
+        fileName = `experian_report_${user.id}_${today}.pdf`;
+        bucketName = 'income-documents'; // Store in income documents bucket
+      } else {
+        fileName = `${user.id}/${documentType}_${Date.now()}.${fileExt}`;
+        bucketName = documentType === 'id' ? 'id-documents' : 'income-documents';
+      }
       
       const { error } = await supabase.storage
-        .from(bucket)
+        .from(bucketName)
         .upload(fileName, file);
 
       if (error) throw error;
@@ -246,13 +255,13 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         .from('documents')
         .insert({
           user_id: user.id,
-          document_type: documentType,
+          document_type: documentType === 'experian_credit_report' ? 'EXPERIAN_CREDIT_REPORT' : documentType,
           file_path: fileName,
           file_type: file.type,
         });
 
       const { data: urlData } = supabase.storage
-        .from(bucket)
+        .from(bucketName)
         .getPublicUrl(fileName);
 
       const newDocument: DocumentItem = {
@@ -263,9 +272,10 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
 
       setUploadedDocuments(prev => [...prev, newDocument]);
       
+      const toastMessage = documentType === 'experian_credit_report' ? 'Experian report uploaded.' : `${file.name} has been uploaded successfully.`;
       toast({
         title: "Document Uploaded",
-        description: `${file.name} has been uploaded successfully.`,
+        description: toastMessage,
       });
     } catch (error: any) {
       console.error('Error uploading document:', error);
@@ -281,13 +291,23 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
 
   const removeDocument = async (index: number) => {
     const document = uploadedDocuments[index];
-    const fileName = document.url.split('/').pop();
-    const bucket = document.type === 'id' ? 'id-documents' : 'income-documents';
+    let bucketName: string;
+    let filePath: string;
+    
+    if (document.type === 'experian_credit_report') {
+      bucketName = 'income-documents';
+      // Experian reports use direct filename without user folder
+      filePath = document.url.split('/').pop() || '';
+    } else {
+      bucketName = document.type === 'id' ? 'id-documents' : 'income-documents';
+      const fileName = document.url.split('/').pop();
+      filePath = `${user?.id}/${fileName}`;
+    }
     
     try {
       await supabase.storage
-        .from(bucket)
-        .remove([`${user?.id}/${fileName}`]);
+        .from(bucketName)
+        .remove([filePath]);
         
       setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
       
@@ -660,6 +680,67 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                 </p>
               </div>
 
+              {/* Experian Credit Check */}
+              <Card className="mb-6">
+                <CardHeader>
+                  <CardTitle className="text-base">Experian Credit Check (Free)</CardTitle>
+                  <CardDescription className="space-y-3">
+                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-3 rounded-lg">
+                      <p className="text-sm font-medium text-primary">
+                        ✨ Check your Experian Credit Report for FREE in under 5 minutes — instantly downloadable and ready to upload to your SwiftRent application for landlord review. ✨
+                      </p>
+                    </div>
+                    <div className="text-xs text-muted-foreground leading-relaxed">
+                      <strong>Disclaimer:</strong> SwiftRent provides this link for your convenience. Credit reports and related services are offered directly by Experian Credit Bureau South Africa. SwiftRent does not manage or store this information. This is a free service under the National Credit Act. Reports are generally available in less than 5 minutes and can be added to your rental documents for landlord review.
+                    </div>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button
+                    type="button"
+                    className="w-full"
+                    onClick={() => window.open('https://up.experian.co.za', '_blank', 'noopener,noreferrer')}
+                  >
+                    Get My Free Experian Credit Report
+                  </Button>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="experian-upload">Upload your Experian Credit Report (PDF only)</Label>
+                    <Input
+                      id="experian-upload"
+                      type="file"
+                      accept=".pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          if (file.type !== 'application/pdf') {
+                            toast({ 
+                              variant: 'destructive', 
+                              title: 'Invalid file type', 
+                              description: 'Please upload a PDF file from Experian.' 
+                            });
+                            return;
+                          }
+                          if (file.size > 10 * 1024 * 1024) { // 10MB
+                            toast({ 
+                              variant: 'destructive', 
+                              title: 'File too large', 
+                              description: 'File is larger than 10 MB. Please compress and try again.' 
+                            });
+                            return;
+                          }
+                          uploadDocument(file, 'experian_credit_report');
+                        }
+                      }}
+                      disabled={uploading}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Please upload the PDF you downloaded from Experian. Max 10 MB.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Income Documents */}
                 <Card>
@@ -736,10 +817,12 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                         <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center space-x-3">
                             <FileText className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-sm font-medium">{doc.name}</p>
-                              <p className="text-xs text-muted-foreground capitalize">{doc.type} document</p>
-                            </div>
+                             <div>
+                               <p className="text-sm font-medium">{doc.name}</p>
+                               <p className="text-xs text-muted-foreground capitalize">
+                                 {doc.type === 'experian_credit_report' ? 'Experian Credit Report' : `${doc.type} document`}
+                               </p>
+                             </div>
                           </div>
                           <Button
                             type="button"
