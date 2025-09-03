@@ -210,7 +210,7 @@ export default function PropertyManagement() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/enhancedlandlorddashboard')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -298,7 +298,7 @@ export default function PropertyManagement() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('maintenance')}>View Requests</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('maintenance')}>New Request</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('maintenance')}>New Request</Button>
               </div>
             </CardContent>
           </Card>
@@ -316,7 +316,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('applications')}>View Applications</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('applications')}>Invite Tenant</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('applications')}>Invite Tenant</Button>
               </div>
             </CardContent>
           </Card>
@@ -335,7 +335,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('payments')}>Details</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('payments')}>Set Up</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('payments')}>Set Up</Button>
               </div>
             </CardContent>
           </Card>
@@ -354,7 +354,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate(`/property/${property.id}`)}>View Listing</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => navigate('/list-property', { state: { editProperty: property } })}>Edit Listing</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => navigate('/list-property', { state: { editProperty: property } })}>Edit Listing</Button>
               </div>
             </CardContent>
           </Card>
@@ -373,7 +373,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('viewings')}>View Slots</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('viewings')}>New Slot</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('viewings')}>New Slot</Button>
               </div>
             </CardContent>
           </Card>
@@ -392,7 +392,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('inventory')}>Open Inventory</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('inventory')}>Add Item</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('inventory')}>Add Item</Button>
               </div>
             </CardContent>
           </Card>
@@ -673,7 +673,7 @@ export default function PropertyManagement() {
                             <Button
                               size="sm"
                               onClick={() => navigate(`/maintenance/${request.id}`)}
-                              className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue/90 hover:to-success-green/90 text-white"
+                              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
                             >
                               Respond
                             </Button>
