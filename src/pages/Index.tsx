@@ -328,7 +328,6 @@ const Index = () => {
 
       {/* Trusted by + value props marquee */}
       <section className="py-6 backdrop-blur-xl bg-white/5 border-t border-b border-white/10">
-        <div className="text-center text-sm text-muted-foreground mb-3">Trusted by renters and landlords across SA</div>
         <div className="home-marquee">
           <div className="home-marquee-track gap-8 px-4 sm:px-8">
             {Array.from({ length: 2 }).map((_, loop) => (
@@ -338,6 +337,7 @@ const Index = () => {
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
+                  'Zero Commission',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
@@ -345,6 +345,7 @@ const Index = () => {
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
+                  'Zero Commission',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
