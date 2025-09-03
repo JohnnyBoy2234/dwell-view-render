@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
-import { useLandlordApplications, ApplicationWithTenant } from '@/hooks/useLandlordApplications';
+import { supabase } from '@/integrations/supabase/client';
+import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { MessagesTab } from '@/components/dashboard/MessagesTab';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
@@ -12,11 +12,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play, Save, Trash2 } from 'lucide-react';
 import { LandlordLeasesList } from '@/components/lease/LandlordLeasesList';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@/types/maintenance';
 import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
+import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
+import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 
 interface PropertyWithTenant {
   id: string;
@@ -63,23 +64,22 @@ interface LandlordDetails {
 interface Invoice {
   id: string;
   invoiceNumber: string;
-  date: string;
-  dueDate: string;
-  landlordDetails: LandlordDetails;
-  tenantDetails: {
-    name: string;
-    address: string;
-    contact: string;
-  };
-  propertyDetails: {
-    title: string;
-    address: string;
-  };
-  items: {
-    description: string;
-    amount: number;
-  }[];
+  invoiceDate: string;
+  landlordName: string;
+  landlordAddress: string;
+  landlordContact: string;
+  vatNumber?: string;
+  tenantName: string;
+  rentalProperty: string;
+  rentalPeriod: string;
+  items: { description: string; amount: number }[];
   totalAmount: number;
+  bank: string;
+  accountHolder: string;
+  accountNumber: string;
+  branchCode: string;
+  paymentDueDate: string;
+  createdAt: string;
 }
 
 export default function EnhancedLandlordDashboard() {
@@ -87,7 +87,6 @@ export default function EnhancedLandlordDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { loading: metricsLoading, metrics } = useLandlordMetrics();
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications();
   
   // Initialize lease notifications
@@ -126,9 +125,11 @@ export default function EnhancedLandlordDashboard() {
     branchCode: ''
   });
   const [savingSettings, setSavingSettings] = useState(false);
-  const [generatingInvoice, setGeneratingInvoice] = useState(false);
   const [generatedInvoice, setGeneratedInvoice] = useState<Invoice | null>(null);
   const [invoicePreviewOpen, setInvoicePreviewOpen] = useState(false);
+  const [generatingInvoice, setGeneratingInvoice] = useState(false);
+  const [invoiceHistory, setInvoiceHistory] = useState<Invoice[]>([]);
+  const [nextInvoiceNumber, setNextInvoiceNumber] = useState(1);
 
   useEffect(() => {
     // Visible in production console to verify current deployed build
@@ -152,14 +153,13 @@ export default function EnhancedLandlordDashboard() {
       setCurrentTab(path);
     }
 
-    fetchAllApplications();
     fetchProperties();
     fetchTenants();
     fetchMaintenanceRequests();
     fetchLandlordSettings();
     fetchAdditionalCosts();
     fetchInvoiceScheduleSettings();
-  }, [authLoading, user, isLandlord, navigate, location.pathname, fetchAllApplications]);
+  }, [authLoading, user, isLandlord, navigate, location.pathname]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
   useEffect(() => {
@@ -176,14 +176,6 @@ export default function EnhancedLandlordDashboard() {
 
   // Add a useEffect to handle tab-specific data fetching when currentTab changes
   useEffect(() => {
-    if (currentTab === '/enhancedlandlorddashboard/applications') {
-      try {
-        fetchAllApplications();
-      } catch (error) {
-        console.log('Error calling fetchAllApplications:', error);
-        // Applications will show sample data from the hook
-      }
-    }
     if (currentTab === '/enhancedlandlorddashboard/maintenance') {
       try {
         fetchMaintenanceRequests();
@@ -197,11 +189,12 @@ export default function EnhancedLandlordDashboard() {
         fetchLandlordSettings();
         fetchAdditionalCosts();
         fetchInvoiceScheduleSettings();
+        fetchInvoiceHistory();
       } catch (error) {
         console.log('Error loading reports data:', error);
       }
     }
-  }, [currentTab, fetchAllApplications]);
+  }, [currentTab]);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -489,6 +482,28 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
+  const fetchInvoiceHistory = async () => {
+    if (!user) return;
+    
+    try {
+      // Use localStorage as fallback until database migration is applied
+      const saved = localStorage.getItem('invoiceHistory');
+      if (saved) {
+        const history = JSON.parse(saved);
+        setInvoiceHistory(history);
+        // Set next invoice number based on existing invoices
+        if (history.length > 0) {
+          const maxNumber = Math.max(...history.map((inv: Invoice) => 
+            parseInt(inv.invoiceNumber.split('-')[2]) || 0
+          ));
+          setNextInvoiceNumber(maxNumber + 1);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching invoice history:', error);
+    }
+  };
+
   const handleSaveLandlordSettings = async () => {
     if (!user) return;
     
@@ -536,23 +551,25 @@ export default function EnhancedLandlordDashboard() {
       const tenant = tenants[0];
       const property = properties[0];
 
-      // Generate invoice
-      const invoiceNumber = `INV-${new Date().getFullYear()}-${String(Date.now()).slice(-6)}`;
+      // Generate invoice with new format
+      const currentDate = new Date();
+      const invoiceNumber = `INV-${currentDate.getFullYear()}-${String(nextInvoiceNumber).padStart(4, '0')}`;
+      const dueDate = new Date(currentDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+      
+      // Generate rental period (current month)
+      const rentalPeriod = `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getFullYear()}`;
+
       const invoice: Invoice = {
         id: `INV-${Date.now()}`,
         invoiceNumber,
-        date: new Date().toISOString().split('T')[0],
-        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 30 days from now
-        landlordDetails,
-        tenantDetails: {
-          name: tenant.name,
-          address: property.location,
-          contact: tenant.id, // In real app, would have tenant contact info
-        },
-        propertyDetails: {
-          title: property.title,
-          address: property.location,
-        },
+        invoiceDate: currentDate.toISOString().split('T')[0],
+        landlordName: landlordDetails.name,
+        landlordAddress: landlordDetails.address,
+        landlordContact: landlordDetails.contact,
+        vatNumber: landlordDetails.vatNumber || undefined,
+        tenantName: tenant.name,
+        rentalProperty: `${property.title}, ${property.location}`,
+        rentalPeriod,
         items: [
           {
             description: "Monthly Rent",
@@ -564,17 +581,21 @@ export default function EnhancedLandlordDashboard() {
           })),
         ],
         totalAmount: tenant.monthly_rent + additionalCosts.reduce((sum, cost) => sum + cost.amount, 0),
+        bank: landlordDetails.bank,
+        accountHolder: landlordDetails.accountHolder,
+        accountNumber: landlordDetails.accountNumber,
+        branchCode: landlordDetails.branchCode,
+        paymentDueDate: dueDate.toISOString().split('T')[0],
+        createdAt: currentDate.toISOString(),
       };
 
-      // Save invoice to localStorage until database migration is applied
-      try {
-        const savedInvoices = JSON.parse(localStorage.getItem('savedInvoices') || '[]');
-        savedInvoices.push(invoice);
-        localStorage.setItem('savedInvoices', JSON.stringify(savedInvoices));
-      } catch (error) {
-        console.error('Error saving invoice to localStorage:', error);
-        // Continue with preview even if save fails
-      }
+      // Save invoice to history
+      const updatedHistory = [...invoiceHistory, invoice];
+      setInvoiceHistory(updatedHistory);
+      localStorage.setItem('invoiceHistory', JSON.stringify(updatedHistory));
+      
+      // Update next invoice number
+      setNextInvoiceNumber(nextInvoiceNumber + 1);
 
       setGeneratedInvoice(invoice);
       setInvoicePreviewOpen(true);
@@ -606,28 +627,6 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
-  const handleDownloadApplicationDocument = async (documentId: string, suggestedName?: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('landlord-get-document-url', {
-        body: { document_id: documentId }
-      });
-      if (error || !data?.url) throw error || new Error('No download URL');
-
-      const filename = suggestedName || 'document';
-      const joiner = data.url.includes('?') ? '&' : '?';
-      const downloadUrl = `${data.url}${joiner}download=${encodeURIComponent(filename)}`;
-
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.setAttribute('download', filename);
-      a.style.display = 'none';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    } catch (e: any) {
-      toast({ title: 'Download failed', description: e.message || 'Unable to download document', variant: 'destructive' });
-    }
-  };
 
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
@@ -640,8 +639,8 @@ export default function EnhancedLandlordDashboard() {
         console.log('[Dashboard] Rendering properties tab');
         return renderPropertiesTab();
       case '/enhancedlandlorddashboard/applications':
-        console.log('[Dashboard] Rendering applications tab');
-        return renderApplicationsTab();
+        console.log('[Dashboard] Applications tab disabled - functionality not implemented');
+        return renderNotImplementedTab('Applications', 'Rental application management is not yet implemented.');
       case '/enhancedlandlorddashboard/leases':
         return renderLeasesTab();
       case '/enhancedlandlorddashboard/tenants':
@@ -709,239 +708,29 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
 
-  const renderApplicationsTab = () => (
+  const renderNotImplementedTab = (title: string, description: string) => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <FileText className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Rental Applications</h2>
+        <AlertTriangle className="h-6 w-6 text-orange-500" />
+        <h2 className="text-xl font-bold">{title}</h2>
         <Badge variant="secondary" className="ml-2">
-          {applications.length} applications
+          Not Implemented
         </Badge>
       </div>
       
-      {applicationsLoading ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-muted animate-pulse h-24 rounded-lg"></div>
-          ))}
-        </div>
-      ) : applications.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Applications Yet</h3>
-            <p className="text-muted-foreground mb-4">
-              You haven't received any rental applications yet. Applications will appear here once tenants apply for your properties.
-            </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
-              <Building className="h-4 w-4 mr-2" />
-              View Properties
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {applications.map((application) => (
-            <Card key={application.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center">
-                        <User className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">
-                          {application.tenant_profile?.display_name || 'Unknown Tenant'}
-                        </h4>
-                        <p className="text-sm text-muted-foreground">
-                          {application.properties?.title || 'Unknown Property'} • {application.properties?.location || 'Unknown Location'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        Applied {new Date(application.created_at).toLocaleDateString()}
-                      </span>
-                      <Badge 
-                        variant={application.status === 'pending' ? 'secondary' : application.status === 'accepted' ? 'default' : 'destructive'}
-                      >
-                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                      </Badge>
-                    </div>
-                    
-                    {application.screening_details && (
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <span className="text-muted-foreground">Income:</span>
-                          <p className="font-medium">R{application.screening_details.net_monthly_income?.toLocaleString() || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Employment:</span>
-                          <p className="font-medium">{application.screening_details.employment_status || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Job Title:</span>
-                          <p className="font-medium">{application.screening_details.job_title || 'N/A'}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Company:</span>
-                          <p className="font-medium">{application.screening_details.company_name || 'N/A'}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2 ml-4">
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Details
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-                        <DialogHeader>
-                          <DialogTitle className="text-left">Application Details - {application.tenant_profile?.display_name || 'Tenant'}</DialogTitle>
-                          <DialogDescription className="text-left">
-                            Screening information and submitted documents
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-6">
-                          {/* Personal Information */}
-                          <div>
-                            <h4 className="font-medium mb-3">Personal Information</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Full Name</label>
-                                <p>{application.screening_details?.full_name || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Phone</label>
-                                <p>{application.screening_details?.phone || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">ID Number</label>
-                                <p>{application.screening_details?.id_number || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <label className="text-sm font-medium text-muted-foreground">Applied</label>
-                                <p>{new Date(application.created_at).toLocaleDateString()}</p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Employment & Income */}
-                          {application.screening_details && (
-                            <div>
-                              <h4 className="font-medium mb-3">Employment & Income</h4>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-muted-foreground">Employment Status</label>
-                                  <p className="capitalize">{application.screening_details.employment_status || 'N/A'}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-muted-foreground">Job Title</label>
-                                  <p>{application.screening_details.job_title || 'N/A'}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-muted-foreground">Company</label>
-                                  <p>{application.screening_details.company_name || 'N/A'}</p>
-                                </div>
-                                <div>
-                                  <label className="text-sm font-medium text-muted-foreground">Net Monthly Income</label>
-                                  <p>R{application.screening_details.net_monthly_income ? application.screening_details.net_monthly_income.toLocaleString() : 'N/A'}</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Housing History */}
-                          {application.screening_details && (
-                            <div>
-                              <h4 className="font-medium mb-3">Housing History</h4>
-                              <div className="grid gap-4">
-                                <div>
-                                  <label className="text-sm font-medium text-muted-foreground">Current Address</label>
-                                  <p>{application.screening_details.current_address || 'N/A'}</p>
-                                </div>
-                                {application.screening_details.previous_landlord_name && (
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <label className="text-sm font-medium text-muted-foreground">Previous Landlord</label>
-                                      <p>{application.screening_details.previous_landlord_name}</p>
-                                    </div>
-                                    <div>
-                                      <label className="text-sm font-medium text-muted-foreground">Landlord Contact</label>
-                                      <p>{application.screening_details.previous_landlord_contact || 'N/A'}</p>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Documents */}
-                          {application.documents && application.documents.length > 0 && (
-                            <div>
-                              <h4 className="font-medium mb-3">Documents</h4>
-                              <div className="grid gap-2">
-                                {application.documents.map((doc) => (
-                                  <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                    <div className="flex items-center gap-2">
-                                      <FileText className="h-4 w-4 text-muted-foreground" />
-                                      <span className="text-sm truncate max-w-[200px]">{doc.file_path.split('/').pop()}</span>
-                                      <Badge variant="outline" className="text-xs">
-                                        {doc.document_type === 'id' ? 'ID Document' : 'Income Document'}
-                                      </Badge>
-                                    </div>
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm" 
-                                      onClick={() => handleDownloadApplicationDocument(doc.id, doc.file_path.split('/').pop())}
-                                    >
-                                      Download
-                                    </Button>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </DialogContent>
-                    </Dialog>
-                    {application.status === 'pending' && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => updateApplicationStatus(application.id, 'accepted')}
-                          className="bg-success-green hover:bg-success-green-dark"
-                        >
-                          <Check className="h-4 w-4 mr-1" />
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => updateApplicationStatus(application.id, 'declined')}
-                        >
-                          <X className="h-4 w-4 mr-1" />
-                          Decline
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <Card>
+        <CardContent className="p-8 text-center">
+          <AlertTriangle className="h-12 w-12 text-orange-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold mb-2">Feature Not Available</h3>
+          <p className="text-muted-foreground mb-4">
+            {description}
+          </p>
+          <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+            <Building className="h-4 w-4 mr-2" />
+            View Properties
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 
@@ -963,9 +752,9 @@ export default function EnhancedLandlordDashboard() {
             <p className="text-muted-foreground mb-4">
               You don't have any active tenants yet. Tenants will appear here once they sign leases and move into your properties.
             </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/applications')}>
-              <FileText className="h-4 w-4 mr-2" />
-              View Applications
+            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+              <Building className="h-4 w-4 mr-2" />
+              View Properties
             </Button>
           </CardContent>
         </Card>
@@ -1062,9 +851,9 @@ export default function EnhancedLandlordDashboard() {
             <p className="text-muted-foreground mb-4">
               You don't have any active leases yet. Once tenants sign leases, you'll be able to track rent payments here.
             </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/applications')}>
-              <FileText className="h-4 w-4 mr-2" />
-              View Applications
+            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+              <Building className="h-4 w-4 mr-2" />
+              View Properties
             </Button>
           </CardContent>
         </Card>
@@ -1202,9 +991,9 @@ export default function EnhancedLandlordDashboard() {
             <p className="text-muted-foreground mb-4">
               Financial reports will be available once you have active tenants and rental income.
             </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/applications')}>
-              <FileText className="h-4 w-4 mr-2" />
-              View Applications
+            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+              <Building className="h-4 w-4 mr-2" />
+              View Properties
             </Button>
           </CardContent>
         </Card>
@@ -1688,6 +1477,74 @@ export default function EnhancedLandlordDashboard() {
         </CardContent>
       </Card>
 
+      {/* Invoice History Card */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="h-6 w-6 text-ocean-blue" />
+            <h3 className="text-xl font-bold">Invoice History</h3>
+            <Badge variant="secondary" className="ml-2">
+              {invoiceHistory.length} invoices
+            </Badge>
+          </div>
+
+          {invoiceHistory.length === 0 ? (
+            <div className="text-center py-8">
+              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-lg font-semibold mb-2">No Invoices Generated</h3>
+              <p className="text-muted-foreground">
+                Generated invoices will appear here with options to view and export.
+              </p>
+            </div>
+          ) : (
+            <div className="border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead className="bg-muted/50">
+                  <tr>
+                    <th className="text-left p-3 font-medium">Invoice Number</th>
+                    <th className="text-left p-3 font-medium">Date</th>
+                    <th className="text-left p-3 font-medium">Tenant</th>
+                    <th className="text-right p-3 font-medium">Total Amount</th>
+                    <th className="text-center p-3 font-medium">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {invoiceHistory.map((invoice, index) => (
+                    <tr key={index} className="border-t">
+                      <td className="p-3 font-medium">{invoice.invoiceNumber}</td>
+                      <td className="p-3">{new Date(invoice.invoiceDate).toLocaleDateString()}</td>
+                      <td className="p-3">{invoice.tenantName}</td>
+                      <td className="p-3 text-right font-medium">R{invoice.totalAmount.toLocaleString()}</td>
+                      <td className="p-3">
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setGeneratedInvoice(invoice);
+                              setInvoicePreviewOpen(true);
+                            }}
+                            className="text-ocean-blue hover:text-ocean-blue/80"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <InvoiceDownloadButton 
+                            invoice={invoice}
+                            variant="ghost"
+                            size="sm"
+                            className="text-success-green hover:text-success-green/80"
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Invoice Preview Modal */}
       <Dialog open={invoicePreviewOpen} onOpenChange={setInvoicePreviewOpen}>
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -1703,45 +1560,39 @@ export default function EnhancedLandlordDashboard() {
               {/* Invoice Header */}
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-2xl font-bold text-ocean-blue">INVOICE</h2>
+                  <h2 className="text-2xl font-bold text-ocean-blue">RENTAL INVOICE</h2>
                   <p className="text-sm text-muted-foreground">#{generatedInvoice.invoiceNumber}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">Date: {new Date(generatedInvoice.date).toLocaleDateString()}</p>
-                  <p className="text-sm text-muted-foreground">Due: {new Date(generatedInvoice.dueDate).toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">Date: {new Date(generatedInvoice.invoiceDate).toLocaleDateString()}</p>
+                  <p className="text-sm text-muted-foreground">Due: {new Date(generatedInvoice.paymentDueDate).toLocaleDateString()}</p>
                 </div>
+              </div>
+
+              {/* Rental Period */}
+              <div className="bg-muted/30 rounded-lg p-4">
+                <h3 className="font-semibold mb-1">Rental Period</h3>
+                <p className="text-lg">{generatedInvoice.rentalPeriod}</p>
               </div>
 
               {/* Landlord & Tenant Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="font-semibold mb-2">From:</h3>
+                  <h3 className="font-semibold mb-2">Landlord Details:</h3>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{generatedInvoice.landlordDetails.name}</p>
-                    <p>{generatedInvoice.landlordDetails.address}</p>
-                    <p>{generatedInvoice.landlordDetails.contact}</p>
-                    {generatedInvoice.landlordDetails.vatNumber && (
-                      <p>VAT: {generatedInvoice.landlordDetails.vatNumber}</p>
-                    )}
+                    <p className="font-medium">{generatedInvoice.landlordName}</p>
+                    <p>{generatedInvoice.landlordAddress}</p>
+                    <p>{generatedInvoice.landlordContact}</p>
+                    {generatedInvoice.vatNumber && <p>VAT: {generatedInvoice.vatNumber}</p>}
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold mb-2">To:</h3>
+                  <h3 className="font-semibold mb-2">Tenant Details:</h3>
                   <div className="text-sm space-y-1">
-                    <p className="font-medium">{generatedInvoice.tenantDetails.name}</p>
-                    <p>{generatedInvoice.tenantDetails.address}</p>
-                    <p>{generatedInvoice.tenantDetails.contact}</p>
+                    <p className="font-medium">{generatedInvoice.tenantName}</p>
+                    <p>{generatedInvoice.rentalProperty}</p>
                   </div>
-                </div>
-              </div>
-
-              {/* Property Details */}
-              <div>
-                <h3 className="font-semibold mb-2">Property:</h3>
-                <div className="text-sm">
-                  <p className="font-medium">{generatedInvoice.propertyDetails.title}</p>
-                  <p>{generatedInvoice.propertyDetails.address}</p>
                 </div>
               </div>
 
@@ -1776,15 +1627,16 @@ export default function EnhancedLandlordDashboard() {
                 </div>
               </div>
 
-              {/* Banking Details */}
-              {generatedInvoice.landlordDetails.bank && (
+              {/* Payment Details */}
+              {generatedInvoice.bank && (
                 <div>
                   <h3 className="font-semibold mb-2">Payment Details:</h3>
-                  <div className="text-sm bg-muted/30 p-4 rounded-lg">
-                    <p><span className="font-medium">Bank:</span> {generatedInvoice.landlordDetails.bank}</p>
-                    <p><span className="font-medium">Account Holder:</span> {generatedInvoice.landlordDetails.accountHolder}</p>
-                    <p><span className="font-medium">Account Number:</span> {generatedInvoice.landlordDetails.accountNumber}</p>
-                    <p><span className="font-medium">Branch Code:</span> {generatedInvoice.landlordDetails.branchCode}</p>
+                  <div className="text-sm bg-muted/30 p-4 rounded-lg space-y-1">
+                    <p><span className="font-medium">Bank:</span> {generatedInvoice.bank}</p>
+                    <p><span className="font-medium">Account Holder:</span> {generatedInvoice.accountHolder}</p>
+                    <p><span className="font-medium">Account Number:</span> {generatedInvoice.accountNumber}</p>
+                    <p><span className="font-medium">Branch Code:</span> {generatedInvoice.branchCode}</p>
+                    <p><span className="font-medium">Payment Due Date:</span> {new Date(generatedInvoice.paymentDueDate).toLocaleDateString()}</p>
                   </div>
                 </div>
               )}
@@ -1793,10 +1645,10 @@ export default function EnhancedLandlordDashboard() {
                 <Button variant="outline" onClick={() => setInvoicePreviewOpen(false)} className="flex-1">
                   Close Preview
                 </Button>
-                <Button className="flex-1 bg-success-green hover:bg-success-green/90">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Export PDF
-                </Button>
+                <InvoiceDownloadButton 
+                  invoice={generatedInvoice}
+                  className="flex-1 bg-success-green hover:bg-success-green/90"
+                />
               </div>
             </div>
           )}
@@ -1965,7 +1817,7 @@ export default function EnhancedLandlordDashboard() {
   );
 
   const renderDashboardContent = () => {
-    if (loading || metricsLoading) {
+    if (loading) {
       return (
         <div className="space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -1980,14 +1832,54 @@ export default function EnhancedLandlordDashboard() {
 
     return (
       <div className="space-y-8">
-        {/* Metrics Grid */}
-        <MetricsGrid metrics={metrics} loading={metricsLoading} />
+        {/* Basic Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <Building className="h-8 w-8 text-ocean-blue" />
+              <div>
+                <p className="text-sm text-muted-foreground">Properties</p>
+                <p className="text-2xl font-bold">{properties.length}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <Users className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Tenants</p>
+                <p className="text-2xl font-bold">{tenants.length}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <Wrench className="h-8 w-8 text-orange-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Maintenance</p>
+                <p className="text-2xl font-bold">{maintenanceRequests.length}</p>
+              </div>
+            </div>
+          </Card>
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <DollarSign className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-sm text-muted-foreground">Monthly Revenue</p>
+                <p className="text-2xl font-bold">R{tenants.reduce((sum, t) => sum + t.monthly_rent, 0).toLocaleString()}</p>
+              </div>
+            </div>
+          </Card>
+        </div>
 
         {/* Properties Section */}
         <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-ocean-blue">Your Properties</CardTitle>
+              <CardTitle className="text-xl text-ocean-blue flex items-center gap-2">
+                <Building className="h-5 w-5" />
+                Your Properties
+              </CardTitle>
               <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')} size="sm">
                 <Plus className="h-4 w-4 mr-1" />
                 Add Property
@@ -2074,9 +1966,9 @@ export default function EnhancedLandlordDashboard() {
                   <div className="flex gap-1">
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/enhancedlandlorddashboard/applications');
+                      navigate(`/property/${property.id}`);
                     }}>
-                      <FileText className="h-3 w-3" />
+                      <Eye className="h-3 w-3" />
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
