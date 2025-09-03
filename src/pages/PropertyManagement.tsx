@@ -31,6 +31,7 @@ import {
 import { Property } from '@/types/dashboard';
 import { LeaseSigningDialog } from '@/components/lease/LeaseSigningDialog';
 import { LeaseCreationWizard } from '@/components/lease/LeaseCreationWizard';
+import { LeaseManagement } from '@/components/lease/LeaseManagement';
 import { ApplicationsTab } from '@/components/property/ApplicationsTab';
 import { PaymentsTab } from '@/components/property/PaymentsTab';
 import { InventoryTab } from '@/components/property/InventoryTab';
@@ -210,7 +211,7 @@ export default function PropertyManagement() {
           <Button 
             variant="ghost" 
             size="sm" 
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate('/enhancedlandlorddashboard')}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -238,26 +239,8 @@ export default function PropertyManagement() {
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         {/* Mobile: Stacked dashboard cards (no slider) */}
         <div className="md:hidden space-y-4">
-          {/* Lease Agreements */}
-          <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
-            <CardHeader className="flex flex-row items-center gap-3">
-              <div className="p-2 rounded-xl bg-ocean-blue/10 text-ocean-blue">
-                <FileText className="h-5 w-5" />
-              </div>
-              <div>
-                <CardTitle className="text-base">Lease Agreements</CardTitle>
-                <CardDescription>Current Lease</CardDescription>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-semibold truncate">{property.title}</div>
-              <div className="mt-3 grid grid-cols-3 gap-2">
-                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>View</Button>
-                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>Renew</Button>
-                <Button variant="outline" size="sm" onClick={() => setActiveTab('leases')}>Share PDF</Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Lease Management */}
+          <LeaseManagement propertyId={property.id} />
 
           {/* Messages */}
           <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
@@ -298,7 +281,7 @@ export default function PropertyManagement() {
               </div>
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('maintenance')}>View Requests</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('maintenance')}>New Request</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('maintenance')}>New Request</Button>
               </div>
             </CardContent>
           </Card>
@@ -316,7 +299,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('applications')}>View Applications</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('applications')}>Invite Tenant</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('applications')}>Invite Tenant</Button>
               </div>
             </CardContent>
           </Card>
@@ -335,7 +318,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('payments')}>Details</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('payments')}>Set Up</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('payments')}>Set Up</Button>
               </div>
             </CardContent>
           </Card>
@@ -354,7 +337,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => navigate(`/property/${property.id}`)}>View Listing</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => navigate('/list-property', { state: { editProperty: property } })}>Edit Listing</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => navigate('/list-property', { state: { editProperty: property } })}>Edit Listing</Button>
               </div>
             </CardContent>
           </Card>
@@ -373,7 +356,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('viewings')}>View Slots</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('viewings')}>New Slot</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('viewings')}>New Slot</Button>
               </div>
             </CardContent>
           </Card>
@@ -392,7 +375,7 @@ export default function PropertyManagement() {
             <CardContent className="space-y-3">
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" size="sm" onClick={() => setActiveTab('inventory')}>Open Inventory</Button>
-                <Button size="sm" className="bg-gradient-to-r from-ocean-blue to-success-green text-white" onClick={() => setActiveTab('inventory')}>Add Item</Button>
+                <Button size="sm" className="bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => setActiveTab('inventory')}>Add Item</Button>
               </div>
             </CardContent>
           </Card>
@@ -582,37 +565,7 @@ export default function PropertyManagement() {
 
         {/* Leases Tab (hidden on mobile) */}
         <TabsContent value="leases" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
-              <CardHeader>
-                <CardTitle>Free online lease signing</CardTitle>
-                <CardDescription>Generate and sign leases digitally</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Create professional lease agreements and collect signatures online.
-                </p>
-                <Button onClick={() => setShowLeaseDialog(true)} className="w-full">
-                  Get started
-                </Button>
-              </CardContent>
-            </Card>
-            <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
-              <CardHeader>
-                <CardTitle>Property condition report</CardTitle>
-                <CardDescription>Document property condition</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4">
-                  Create detailed property condition reports with photos and notes.
-                </p>
-                <Button variant="outline" className="w-full border-transparent bg-gradient-to-r from-ocean-blue/10 to-success-green/10" disabled>
-                  Join waitlist
-                </Button>
-                <p className="text-xs text-muted-foreground mt-2">Coming soon</p>
-              </CardContent>
-            </Card>
-          </div>
+          <LeaseManagement propertyId={property.id} />
         </TabsContent>
 
         {/* Payments Tab (hidden on mobile) */}
@@ -673,7 +626,7 @@ export default function PropertyManagement() {
                             <Button
                               size="sm"
                               onClick={() => navigate(`/maintenance/${request.id}`)}
-                              className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue/90 hover:to-success-green/90 text-white"
+                              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
                             >
                               Respond
                             </Button>

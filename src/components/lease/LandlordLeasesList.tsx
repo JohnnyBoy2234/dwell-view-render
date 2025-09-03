@@ -157,19 +157,27 @@ export function LandlordLeasesList() {
   const continueSigning = async (lease: LeaseRow) => {
     try {
       if (currentSigningProviderName === 'docusign') {
-        const { data, error } = await supabase.functions.invoke('get-docusign-recipient-view', {
+        // Step 1: Initiate OAuth2 authorization
+        const { data: authData, error: authError } = await supabase.functions.invoke('initiate-docusign-auth', {
           body: { tenancyId: lease.id, role: 'landlord' }
         });
-        if (error) throw error;
-        const url = (data as any)?.url;
-        if (!url) throw new Error('No signing URL');
-        window.open(url, '_blank');
+        if (authError) throw authError;
+        
+        // Step 2: Redirect to DocuSign for authorization
+        const authUrl = (authData as any)?.authUrl;
+        if (!authUrl) throw new Error('No authorization URL received');
+        
+        // Store the state for the callback
+        localStorage.setItem('docusign_auth_state', (authData as any)?.state);
+        
+        // Redirect to DocuSign
+        window.location.href = authUrl;
         return;
       }
       // Fallback: open legacy landlord signing page
       window.open(`/landlord-sign/${lease.id}`, '_blank');
     } catch (e: any) {
-      toast({ variant: 'destructive', title: 'Failed to continue signing', description: e.message });
+      toast({ variant: 'destructive', title: 'Failed to initiate signing', description: e.message });
     }
   };
 

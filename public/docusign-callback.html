@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DocuSign Callback</title>
+</head>
+<body>
+    <script>
+        // Extract parameters from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const state = urlParams.get('state');
+        const error = urlParams.get('error');
+
+        if (error) {
+            // Redirect to dashboard with error
+            window.location.href = 'https://swiftrent.co.za/enhancedtenantdashboard?error=' + encodeURIComponent(error);
+        } else if (code && state) {
+            // Redirect to our callback page with parameters
+            const callbackUrl = 'https://swiftrent.co.za/auth/callback?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state);
+            window.location.href = callbackUrl;
+        } else {
+            // No parameters, redirect to dashboard
+            window.location.href = 'https://swiftrent.co.za/enhancedtenantdashboard';
+        }
+    </script>
+    <p>Processing DocuSign authorization...</p>
+</body>
+</html>

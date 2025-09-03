@@ -15,6 +15,7 @@ import { LandlordLeasesList } from '@/components/lease/LandlordLeasesList';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@/types/maintenance';
+import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 
 interface PropertyWithTenant {
   id: string;
@@ -84,6 +85,12 @@ export default function EnhancedLandlordDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { loading: metricsLoading, metrics } = useLandlordMetrics();
+  const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications();
+  
+  // Initialize lease notifications
+  useLeaseNotifications();
+  
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
     const path = location.pathname;

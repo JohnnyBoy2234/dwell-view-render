@@ -253,7 +253,8 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm truncate max-w-[200px]">{doc.file_path.split('/').pop()}</span>
                     <Badge variant="outline" className="text-xs">
-                      {doc.document_type === 'id' ? 'ID Document' : 'Income Document'}
+                      {doc.document_type === 'EXPERIAN_CREDIT_REPORT' ? 'Experian Credit Report' : 
+                       doc.document_type === 'id' ? 'ID Document' : 'Income Document'}
                     </Badge>
                   </div>
                   <Button 
