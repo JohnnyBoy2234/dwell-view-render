@@ -343,21 +343,19 @@ const Index = () => {
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
-                ].map((tag, index) => {
+                ].map((tag) => {
                   const isZeroCommission = tag === 'Zero Commission';
-                  const isEveryFourth = (index + 1) % 4 === 0;
-                  const shouldHighlight = isZeroCommission || isEveryFourth;
                   
                   return (
                     <span 
                       key={`${loop}-${tag}`} 
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl text-foreground/80 border transition-colors duration-300 ${
-                        shouldHighlight 
-                          ? 'bg-ocean-blue/20 text-white border-ocean-blue/40 hover:bg-ocean-blue/30' 
+                        isZeroCommission 
+                          ? 'bg-ocean-blue text-white border-ocean-blue hover:bg-ocean-blue-dark' 
                           : 'bg-white/10 border-white/20 hover:bg-white/20'
                       }`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${shouldHighlight ? 'bg-white' : 'bg-success-green'}`} /> 
+                      <span className={`w-1.5 h-1.5 rounded-full ${isZeroCommission ? 'bg-white' : 'bg-success-green'}`} /> 
                       {tag}
                     </span>
                   );
