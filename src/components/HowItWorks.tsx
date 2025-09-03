@@ -138,7 +138,7 @@ const HowItWorks: React.FC = () => {
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                   <SectionHeader
-          title="How SwiftRent Works"
+          title="Why SwiftRent"
           subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
           showTagline={false}
         />

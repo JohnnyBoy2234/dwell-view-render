@@ -339,10 +339,15 @@ const Index = () => {
                   'Instant Messaging',
                   'Maintenance Manager',
                   'Digital Lease Signing',
-                  'Zero Commission',
                   'Verified Listings',
                   'Smart Search',
                   'Zero Commission',
+                  'Secure Payments',
+                  'Instant Messaging',
+                  'Maintenance Manager',
+                  'Digital Lease Signing',
+                  'Verified Listings',
+                  'Smart Search',
                 ].map((tag, index) => {
                   const isZeroCommission = tag === 'Zero Commission';
                   
@@ -366,11 +371,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
+      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title="Why SwiftRent"
+            title="From Listing to Lease, Made Easy"
             subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
             showTagline={true}
             taglineVariant="eyebrow"
