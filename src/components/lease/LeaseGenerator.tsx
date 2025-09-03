@@ -250,14 +250,21 @@ export const LeaseGenerator = ({
                 try {
                   if (currentSigningProviderName === 'docusign') {
                     const role = isTenant ? 'tenant' : 'landlord';
-                    const { data, error } = await supabase.functions.invoke('get-docusign-recipient-view', {
+                    // Step 1: Initiate OAuth2 authorization
+                    const { data: authData, error: authError } = await supabase.functions.invoke('initiate-docusign-auth', {
                       body: { tenancyId: tenancy.id, role }
                     });
-                    if (error) throw error;
-                    if ((data as any)?.error) throw new Error((data as any).error);
-                    const url = (data as any)?.url;
-                    if (!url) throw new Error('No signing URL received');
-                    window.open(url, '_blank');
+                    if (authError) throw authError;
+                    
+                    // Step 2: Redirect to DocuSign for authorization
+                    const authUrl = (authData as any)?.authUrl;
+                    if (!authUrl) throw new Error('No authorization URL received');
+                    
+                    // Store the state for the callback
+                    localStorage.setItem('docusign_auth_state', (authData as any)?.state);
+                    
+                    // Redirect to DocuSign
+                    window.location.href = authUrl;
                   } else {
                     onSigningRequested?.();
                   }
