@@ -375,7 +375,7 @@ const Index = () => {
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title="Why SwiftRent"
+            title="From Listing to Lease, Made Easy"
             subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
             showTagline={true}
             taglineVariant="eyebrow"
