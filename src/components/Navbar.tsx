@@ -7,15 +7,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUserProperties } from "@/hooks/useUserProperties";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useNotifications } from "@/hooks/useNotifications";
-import { NotificationBell } from "@/components/ui/notification-bell";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const Navbar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut, isLandlord } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
-  const { notifications, unreadCount: notifUnread, markAsRead } = useNotifications();
   const { hasProperties } = useUserProperties();
 
   // Prevents the page from scrolling when the mobile menu is open
