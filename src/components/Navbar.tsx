@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUserProperties } from "@/hooks/useUserProperties";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { NotificationBell } from "@/components/notifications/NotificationBell";
+// import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const Navbar = () => {
   const location = useLocation();
@@ -73,7 +73,7 @@ const Navbar = () => {
                       </Link>
                     </Button>
                   )}
-                  <NotificationBell />
+                  {/* <NotificationBell /> */}
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm">
