@@ -232,8 +232,6 @@ const Index = () => {
               <Star className="h-8 w-8 text-success-green animate-pulse" style={{ animationDelay: '0.5s' }} />
             </div>
             
-            <ThemeTagline variant="hero" />
-            
             <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
               Find your perfect rental home in South Africa — connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
             </p>
@@ -340,22 +338,24 @@ const Index = () => {
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
+                  'Zero Commission',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
-                ].map((tag) => {
+                  'Zero Commission',
+                ].map((tag, index) => {
                   const isZeroCommission = tag === 'Zero Commission';
                   
                   return (
                     <span 
-                      key={`${loop}-${tag}`} 
+                      key={`${loop}-${tag}-${index}`} 
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl text-foreground/80 border transition-colors duration-300 ${
                         isZeroCommission 
                           ? 'bg-ocean-blue text-white border-ocean-blue hover:bg-ocean-blue-dark' 
-                          : 'bg-white/10 border-white/20 hover:bg-white/20'
+                          : 'bg-white/10 border-gray-300/50 hover:bg-white/20'
                       }`}
                     >
-                      <span className={`w-1.5 h-1.5 rounded-full ${isZeroCommission ? 'bg-white' : 'bg-success-green'}`} /> 
+                      <span className="w-1.5 h-1.5 rounded-full bg-success-green" /> 
                       {tag}
                     </span>
                   );
@@ -366,11 +366,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid with Glass Cards */}
+      {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title="From Listing to Lease, Made Easy"
+            title="Why SwiftRent"
             subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
             showTagline={true}
             taglineVariant="eyebrow"

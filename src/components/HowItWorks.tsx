@@ -174,12 +174,12 @@ const HowItWorks: React.FC = () => {
         </div>
 
         <div className="pb-8 sm:pb-12 lg:pb-16">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="relative">
               <div className="md:hidden">
                 {isTenant ? <TenantCard /> : <LandlordCard />}
               </div>
-              <div className="hidden md:grid md:grid-cols-2 md:gap-6 lg:gap-8">
+              <div className="hidden md:grid md:grid-cols-2 md:gap-8 lg:gap-12">
                 <TenantCard />
                 <LandlordCard />
               </div>
