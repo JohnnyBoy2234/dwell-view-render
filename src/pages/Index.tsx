@@ -354,7 +354,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
             title="Why SwiftRent"
-            subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
+            subtitle="From Listing to Lease, Made Easy"
             showTagline={false}
             taglineVariant="eyebrow"
           />
