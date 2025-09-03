@@ -463,7 +463,7 @@ const Index = () => {
             ].map((feature, i) => (
               <div
                 key={feature.title}
-                className={`group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] reveal-up hover:bg-white/20`}
+                className={`group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] reveal-up hover:bg-white/20 h-full flex flex-col`}
                 style={{ animationDelay: `${100 + i * 120}ms` }}
                 onMouseMove={tilt.onMove}
                 onMouseLeave={tilt.onLeave}
@@ -475,18 +475,18 @@ const Index = () => {
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
                 {/* Content */}
-                <div className="relative z-10 flex gap-6">
+                <div className="relative z-10 flex gap-6 flex-1">
                   {/* Enhanced Icon */}
                   <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                     {feature.icon}
                   </div>
                   
                   {/* Text content */}
-                  <div className="flex-1">
+                  <div className="flex-1 flex flex-col">
                     <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                       {feature.title}
                     </h3>
-                    <ul className="text-muted-foreground leading-relaxed text-sm space-y-1">
+                    <ul className="text-muted-foreground leading-relaxed text-sm space-y-1 flex-1">
                       {feature.desc.map((item, index) => (
                         <li key={index} className="flex items-start">
                           <span className="text-primary mr-2 mt-1">•</span>
