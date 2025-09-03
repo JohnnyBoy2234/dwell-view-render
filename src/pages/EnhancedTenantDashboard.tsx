@@ -21,6 +21,7 @@ import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { BUILD_TAG } from '@/version';
 import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
+import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -127,23 +128,7 @@ export default function EnhancedTenantDashboard() {
       case '/enhancedtenantdashboard/maintenance':
         return (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Settings className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Maintenance Requests</h2>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Maintenance</h3>
-                <p className="text-muted-foreground mb-4">
-                  Submit and track maintenance requests
-                </p>
-                <Button onClick={() => navigate('/maintenance/new')}>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Submit Request
-                </Button>
-              </CardContent>
-            </Card>
+            <TenantMaintenance />
           </div>
         );
       case '/enhancedtenantdashboard/profile':
