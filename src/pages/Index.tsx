@@ -356,7 +356,7 @@ const Index = () => {
             <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
               Why SwiftRent
             </h2>
-            <p className="text-sm font-medium text-ocean-blue mb-4">
+            <p className="text-lg font-medium text-muted-foreground mb-4">
               From Listing to Lease, Made Easy
             </p>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
