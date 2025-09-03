@@ -14,9 +14,11 @@ const DocuSignCallback = () => {
   useEffect(() => {
     const handleCallback = async () => {
       try {
-        const code = searchParams.get('code');
-        const state = searchParams.get('state');
-        const error = searchParams.get('error');
+        // Check if we're on the root domain and have URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code') || searchParams.get('code');
+        const state = urlParams.get('state') || searchParams.get('state');
+        const error = urlParams.get('error') || searchParams.get('error');
 
         if (error) {
           setStatus('error');

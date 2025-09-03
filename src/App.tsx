@@ -32,6 +32,7 @@ import TenantMessages from "./pages/TenantMessages";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import DocuSignCallback from "./pages/DocuSignCallback";
+import DocuSignRedirect from "./pages/DocuSignRedirect";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/auth/callback" element={<DocuSignCallback />} />
+            <Route path="/docusign-redirect" element={<DocuSignRedirect />} />
             
             {/* Enhanced Dashboard Routes */}
             <Route path="/enhancedtenantdashboard/*" element={<EnhancedTenantDashboard />} />
