@@ -11,7 +11,7 @@ const tenantData = {
     title: "For Tenants",
     subtitle: "Find Your Home",
     description:
-      "Follow four simple steps to rent with confidence on SwiftRent.",
+      "Follow four simple steps to rent with confidence and ease on SwiftRent.",
   },
   steps: [
     {
