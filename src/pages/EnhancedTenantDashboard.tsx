@@ -11,6 +11,7 @@ import { PropertyPanel } from '@/components/dashboard/tenant/PropertyPanel';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
+import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Home, MessageSquare, Building, FileText, Settings, User, Calendar } from 'lucide-react';
@@ -26,6 +27,10 @@ export default function EnhancedTenantDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
+  
+  // Initialize lease notifications
+  useLeaseNotifications();
+  
   const [currentTab, setCurrentTab] = useState('/enhancedtenantdashboard');
   const {
     loading,
