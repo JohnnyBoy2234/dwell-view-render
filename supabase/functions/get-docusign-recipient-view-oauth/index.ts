@@ -176,8 +176,8 @@ async function createEnvelope(accessToken: string, tenancy: any) {
       throw new Error("Missing DOCUSIGN_ACCOUNT_ID");
     }
 
-    // Call the create-docusign-envelope function with OAuth2 token
-    const createResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope`, {
+    // Call the create-docusign-envelope-oauth function with OAuth2 token
+    const createResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/create-docusign-envelope-oauth`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
