@@ -310,11 +310,11 @@ const Index = () => {
             {Array.from({ length: 2 }).map((_, loop) => (
               <div className="flex gap-8 pr-8" key={loop}>
                 {[
-                  'Zero Commission',
+                  'No Agent Commission',
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
-                  'Zero Commission',
+                  'No Agent Commission',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
@@ -322,19 +322,19 @@ const Index = () => {
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
-                  'Zero Commission',
-                  'No Agent',
+                  'No Agent Commission',
+                  'No Agents',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
                 ].map((tag, index) => {
-                  const isZeroCommission = tag === 'Zero Commission';
+                  const isBlueItem = tag === 'No Agent Commission' || tag === 'No Agents';
                   
                   return (
                     <span 
                       key={`${loop}-${tag}-${index}`} 
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl text-foreground/80 border transition-colors duration-300 ${
-                        isZeroCommission 
+                        isBlueItem 
                           ? 'bg-ocean-blue text-white border-ocean-blue hover:bg-ocean-blue-dark' 
                           : 'bg-white/10 border-gray-300/50 hover:bg-white/20'
                       }`}
