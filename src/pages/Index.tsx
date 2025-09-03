@@ -576,7 +576,7 @@ const Index = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
-              <Button size="lg" variant="secondary" className="relative overflow-hidden backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/30">
+              <Button size="lg" variant="secondary" className="relative overflow-hidden backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/30 text-ocean-blue">
                 <span
                   className="magnet"
                   onMouseMove={magnet.onMove}
