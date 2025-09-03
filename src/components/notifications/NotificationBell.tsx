@@ -19,6 +19,11 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
   const navigate = useNavigate();
   const { notifications, unreadCount, markAsRead, markAsUnread, markAllAsRead, deleteNotification } = useNotifications();
 
+  // Debug isOpen state changes
+  useEffect(() => {
+    console.log('NotificationBell isOpen changed to:', isOpen);
+  }, [isOpen]);
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -97,9 +102,15 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
     <div className={`relative ${className}`} ref={dropdownRef}>
       {/* Bell Icon with Badge */}
       <Button
+        type="button"
         variant="ghost"
         size="sm"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('NotificationBell clicked, current isOpen:', isOpen);
+          setIsOpen(!isOpen);
+        }}
         className="relative p-2 hover:bg-muted/50 transition-colors duration-200"
       >
         <Bell className="h-5 w-5 text-foreground" />
