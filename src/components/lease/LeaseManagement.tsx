@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ import { SignatureModal } from './SignatureModal';
 import { LEASE_STATUS_INFO, LeaseStatus, LeaseRole } from '@/types/lease';
 import { useAuth } from '@/hooks/useAuth';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 interface LeaseManagementProps {
   propertyId: string;
@@ -31,7 +32,8 @@ interface LeaseManagementProps {
 
 export function LeaseManagement({ propertyId, tenantUserId, onGenerateLease }: LeaseManagementProps) {
   const { user } = useAuth();
-  const { lease, loading, generateLease, signLease, requestChanges, cancelLease, downloadLease } = useLease(null);
+  const [currentLeaseId, setCurrentLeaseId] = useState<string | null>(null);
+  const { lease, loading, generateLease, signLease, requestChanges, cancelLease, downloadLease, refetch } = useLease(currentLeaseId);
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [showRequestChangesModal, setShowRequestChangesModal] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -52,9 +54,44 @@ export function LeaseManagement({ propertyId, tenantUserId, onGenerateLease }: L
     return LEASE_STATUS_INFO[status];
   };
 
+  // Fetch the current lease for this property
+  useEffect(() => {
+    const fetchCurrentLease = async () => {
+      try {
+        const { data: leaseData, error } = await supabase
+          .from('leases')
+          .select('*')
+          .eq('property_id', propertyId)
+          .in('status', ['DRAFT', 'PENDING_TENANT_SIGNATURE', 'PENDING_LANDLORD_SIGNATURE', 'COMPLETED'])
+          .order('version', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+          console.error('Error fetching lease:', error);
+          return;
+        }
+
+        if (leaseData) {
+          setCurrentLeaseId(leaseData.id);
+        }
+      } catch (err) {
+        console.error('Error fetching lease:', err);
+      }
+    };
+
+    if (propertyId) {
+      fetchCurrentLease();
+    }
+  }, [propertyId]);
+
   const handleGenerateLease = async () => {
     try {
       const newLease = await generateLease(propertyId, tenantUserId);
+      if (newLease) {
+        setCurrentLeaseId(newLease.id);
+        await refetch();
+      }
       if (onGenerateLease) {
         onGenerateLease(newLease);
       }

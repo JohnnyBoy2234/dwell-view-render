@@ -1,228 +1,328 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '../integrations/supabase/client';
-import { Button } from '../components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
-import { Checkbox } from '../components/ui/checkbox';
-import { useToast } from '../hooks/use-toast';
-import { Skeleton } from '../components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, Download, PenTool, CheckCircle, AlertCircle } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { useLease } from '@/hooks/useLease';
+import { SignatureModal } from '@/components/lease/SignatureModal';
+import { useToast } from '@/hooks/use-toast';
+import { createLeaseNotifications } from '@/utils/notificationHelpers';
 
-const LeaseSigningPage = () => {
-  const { tenancyId } = useParams();
+export default function LeaseSigningPage() {
+  const { leaseId } = useParams<{ leaseId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { toast } = useToast();
-  const [tenancy, setTenancy] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [agreed, setAgreed] = useState(false);
-  const [signing, setSigning] = useState(false);
+  const { lease, loading, signLease, downloadLease, refetch } = useLease(leaseId);
+  const [showSignatureModal, setShowSignatureModal] = useState(false);
+  const [signingLoading, setSigningLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchTenancy = async () => {
-      if (!tenancyId) return;
-      try {
-        const { data, error } = await supabase
-          .from('tenancies')
-          .select(`
-            *,
-            properties!inner (
-              title,
-              location
-            ),
-            landlord_profile:profiles!fk_tenancies_landlord (
-              display_name
-            )
-          `)
-          .eq('id', tenancyId)
-          .single();
+  const isLandlord = user?.id === lease?.landlord_user_id;
+  const isTenant = user?.id === lease?.tenant_user_id;
+  const canSign = (isLandlord && lease?.status === 'DRAFT') || 
+                  (isLandlord && lease?.status === 'PENDING_LANDLORD_SIGNATURE') ||
+                  (isTenant && lease?.status === 'PENDING_TENANT_SIGNATURE');
 
-        if (error) throw error;
-        // Security check: ensure the current user is the tenant for this tenancy
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.id !== data.tenant_id) {
-            toast({ title: 'Unauthorized', description: 'You do not have permission to view this page.', variant: 'destructive' });
-            navigate('/tenant-dashboard');
-            return;
-        }
-        setTenancy(data);
-      } catch (error: any) {
-        console.error('Error fetching tenancy:', error);
-        toast({ title: 'Error', description: 'Could not fetch lease details.', variant: 'destructive' });
-      } finally {
-        setLoading(false);
-      }
-    };
+  const hasSigned = (role: 'LANDLORD' | 'TENANT') => {
+    return lease?.signatures?.some(sig => sig.role === role && sig.signed_at);
+  };
 
-    fetchTenancy();
-  }, [tenancyId, toast, navigate]);
-
-  const handleSignLease = async () => {
-    if (!agreed) {
-      toast({ title: 'Agreement Required', description: 'You must agree to the terms before signing.', variant: 'destructive' });
-      return;
-    }
-    setSigning(true);
-    try {
-      const { error } = await supabase
-        .from('tenancies')
-        .update({ 
-            tenant_signed_at: new Date().toISOString(),
-            lease_status: 'awaiting_landlord_signature' // Tenant has signed, awaiting landlord
-        })
-        .eq('id', tenancyId);
-
-      if (error) throw error;
-
-      // Notify landlord via edge function
-      try {
-        await supabase.functions.invoke('notify-lease-signed', {
-          body: { 
-            tenancyId: tenancyId,
-            signedBy: 'tenant'
-          }
-        });
-      } catch (notifyError) {
-        console.error('Error sending notification:', notifyError);
-      }
-
-      toast({ title: 'Lease Signed!', description: 'We have notified the landlord to add their signature.' });
-      navigate('/tenant-dashboard');
-    } catch (error: any) {
-      console.error('Error signing lease:', error);
-      toast({ title: 'Signing Failed', description: error.message, variant: 'destructive' });
-    } finally {
-      setSigning(false);
+  const getStatusInfo = (status: string) => {
+    switch (status) {
+      case 'DRAFT':
+        return { label: 'Draft', color: 'bg-gray-500' };
+      case 'PENDING_TENANT_SIGNATURE':
+        return { label: 'Awaiting Tenant Signature', color: 'bg-yellow-500' };
+      case 'PENDING_LANDLORD_SIGNATURE':
+        return { label: 'Awaiting Landlord Signature', color: 'bg-blue-500' };
+      case 'COMPLETED':
+        return { label: 'Completed', color: 'bg-green-500' };
+      case 'CANCELED':
+        return { label: 'Canceled', color: 'bg-red-500' };
+      case 'CHANGES_REQUESTED':
+        return { label: 'Changes Requested', color: 'bg-orange-500' };
+      default:
+        return { label: status, color: 'bg-gray-500' };
     }
   };
-  
-  const handleDownload = async (filePath: string, filename: string) => {
+
+  const handleSign = async (signatureBase64: string) => {
     try {
-      const { data, error } = await supabase.storage
-        .from('lease-documents')
-        .download(filePath);
-
-      if (error) throw error;
-
-      const blob = new Blob([data], { type: 'application/pdf' });
-      const blobUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = blobUrl;
-      a.download = filename || 'lease-agreement.pdf';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(blobUrl);
+      setSigningLoading(true);
+      const role = isLandlord ? 'LANDLORD' : 'TENANT';
+      await signLease(role, signatureBase64);
+      
+      // Create notification for the other party
+      if (isLandlord) {
+        await createLeaseNotifications.leaseSigned(
+          lease?.landlord_user_id || '',
+          lease?.tenant_user_id || '',
+          lease?.lease_data?.property_address || 'Property',
+          lease?.id || '',
+          'landlord'
+        );
+      } else {
+        await createLeaseNotifications.leaseSigned(
+          lease?.landlord_user_id || '',
+          lease?.tenant_user_id || '',
+          lease?.lease_data?.property_address || 'Property',
+          lease?.id || '',
+          'tenant'
+        );
+      }
+      
+      setShowSignatureModal(false);
+      toast({
+        title: "Lease Signed Successfully",
+        description: "Your signature has been added to the lease.",
+      });
+      
+      // Refresh the lease data
+      await refetch();
     } catch (error) {
-      console.error('Download failed:', error);
-      toast({ title: 'Download Failed', description: 'Could not download the PDF.', variant: 'destructive' });
+      console.error('Error signing lease:', error);
+      toast({
+        variant: "destructive",
+        title: "Signing Failed",
+        description: "There was an error signing the lease. Please try again.",
+      });
+    } finally {
+      setSigningLoading(false);
+    }
+  };
+
+  const handleDownload = async (type: 'draft' | 'signed') => {
+    try {
+      await downloadLease(type);
+    } catch (error) {
+      console.error('Error downloading lease:', error);
+      toast({
+        variant: "destructive",
+        title: "Download Failed",
+        description: "There was an error downloading the lease. Please try again.",
+      });
     }
   };
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
-        <Skeleton className="h-12 w-1/2 mb-4" />
-        <Skeleton className="h-96 w-full" />
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-ocean-blue mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading lease...</p>
+        </div>
       </div>
     );
   }
 
-  if (!tenancy) {
-    return <div className="container mx-auto p-4">Lease not found.</div>;
+  if (!lease) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Lease Not Found</h2>
+          <p className="text-muted-foreground mb-4">The lease you're looking for doesn't exist or you don't have permission to view it.</p>
+          <Button onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
   }
-  
-  const canTenantSign = !tenancy.tenant_signed_at;
-  const isFullySigned = tenancy.tenant_signed_at && tenancy.landlord_signed_at;
+
+  const statusInfo = getStatusInfo(lease.status);
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 max-w-4xl">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">Lease Agreement</h1>
+            <p className="text-muted-foreground">
+              {lease.lease_data?.property_address || 'Property Address'}
+            </p>
+          </div>
+        </div>
+        <Badge className={`${statusInfo.color} text-white`}>
+          {statusInfo.label}
+        </Badge>
+      </div>
+
+      {/* Lease Details */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Review and Sign Your Lease Agreement</CardTitle>
-          <CardDescription>For property: {tenancy.properties?.title}</CardDescription>
+          <CardTitle>Lease Information</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="mb-6">
-            <h3 className="font-semibold mb-2">Lease Document</h3>
-            {tenancy.lease_document_path ? (
-              <>
-                <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                  <p className="text-blue-800 font-medium">Lease document is ready for review</p>
-                  <p className="text-sm text-blue-600">Please download and review the lease document before signing.</p>
-                </div>
-                <Button variant="outline" onClick={() => handleDownload(tenancy.lease_document_path, `lease-${tenancy.properties?.title}.pdf`)}>
-                    Download PDF
-                </Button>
-              </>
-            ) : (
-              <p className="text-red-500">Lease document is not yet available.</p>
-            )}
-          </div>
-          
-          {/* Lease Summary */}
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-semibold mb-2">Lease Summary</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium">Property:</span> {tenancy.properties?.title}
-              </div>
-              <div>
-                <span className="font-medium">Landlord:</span> {tenancy.landlord_profile?.display_name || 'N/A'}
-              </div>
-              <div>
-                <span className="font-medium">Monthly Rent:</span> ${tenancy.monthly_rent?.toLocaleString()}
-              </div>
-              <div>
-                <span className="font-medium">Security Deposit:</span> ${tenancy.security_deposit?.toLocaleString()}
-              </div>
-              <div>
-                <span className="font-medium">Start Date:</span> {new Date(tenancy.start_date).toLocaleDateString()}
-              </div>
-              {tenancy.end_date && (
-                <div>
-                  <span className="font-medium">End Date:</span> {new Date(tenancy.end_date).toLocaleDateString()}
-                </div>
-              )}
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Property Address</label>
+              <p className="text-sm">{lease.lease_data?.property_address || 'N/A'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Rent Amount</label>
+              <p className="text-sm">R{lease.lease_data?.rent_amount?.toLocaleString() || 'N/A'}</p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Lease Start Date</label>
+              <p className="text-sm">
+                {lease.lease_data?.start_date ? new Date(lease.lease_data.start_date).toLocaleDateString() : 'N/A'}
+              </p>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-muted-foreground">Lease End Date</label>
+              <p className="text-sm">
+                {lease.lease_data?.end_date ? new Date(lease.lease_data.end_date).toLocaleDateString() : 'N/A'}
+              </p>
             </div>
           </div>
         </CardContent>
-        
-        {/* Signing Section */}
-        {canTenantSign && (
-          <CardFooter className="flex flex-col items-start gap-4 bg-blue-50 p-6">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="terms" checked={agreed} onCheckedChange={(checked) => setAgreed(!!checked)} />
-              <label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                I have read, understood, and agree to all the terms and conditions in this lease agreement.
-              </label>
-            </div>
-            <Button onClick={handleSignLease} disabled={!agreed || signing}>
-              {signing ? 'Signing...' : 'Digitally Sign Lease'}
-            </Button>
-          </CardFooter>
-        )}
-        
-        {/* Status Messages */}
-        {tenancy.tenant_signed_at && !tenancy.landlord_signed_at && (
-          <CardFooter className="bg-yellow-50 p-6">
-            <p className="text-yellow-800 font-semibold">
-              You signed this lease on {new Date(tenancy.tenant_signed_at).toLocaleDateString()}. 
-              Waiting for landlord signature to finalize the agreement.
-            </p>
-          </CardFooter>
-        )}
-        
-        {isFullySigned && (
-          <CardFooter className="bg-green-50 p-6">
-            <p className="text-green-800 font-semibold">
-              This lease is fully executed! Both parties signed on: 
-              You - {new Date(tenancy.tenant_signed_at).toLocaleDateString()}, 
-              Landlord - {new Date(tenancy.landlord_signed_at).toLocaleDateString()}
-            </p>
-          </CardFooter>
-        )}
       </Card>
+
+      {/* Signatures Status */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Signature Status</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                  <span className="text-blue-600 font-semibold text-sm">L</span>
+                </div>
+                <div>
+                  <p className="font-medium">Landlord Signature</p>
+                  <p className="text-sm text-muted-foreground">
+                    {lease.landlord_user_id === user?.id ? 'You' : 'Landlord'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasSigned('LANDLORD') ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-green-600">Signed</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
+                    <span className="text-sm text-muted-foreground">Pending</span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between p-4 border rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <span className="text-green-600 font-semibold text-sm">T</span>
+                </div>
+                <div>
+                  <p className="font-medium">Tenant Signature</p>
+                  <p className="text-sm text-muted-foreground">
+                    {lease.tenant_user_id === user?.id ? 'You' : 'Tenant'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasSigned('TENANT') ? (
+                  <>
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="text-sm text-green-600">Signed</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
+                    <span className="text-sm text-muted-foreground">Pending</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3">
+            {/* Download Buttons */}
+            {lease.pdf_draft_url && (
+              <Button 
+                variant="outline" 
+                onClick={() => handleDownload('draft')}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Draft
+              </Button>
+            )}
+            
+            {lease.pdf_signed_url && (
+              <Button 
+                variant="outline" 
+                onClick={() => handleDownload('signed')}
+                className="flex items-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                Download Signed
+              </Button>
+            )}
+
+            {/* Sign Button */}
+            {canSign && (
+              <Button 
+                onClick={() => setShowSignatureModal(true)}
+                className="flex items-center gap-2 bg-ocean-blue hover:bg-ocean-blue-dark"
+                disabled={signingLoading}
+              >
+                <PenTool className="h-4 w-4" />
+                {signingLoading ? 'Signing...' : `Sign as ${isLandlord ? 'Landlord' : 'Tenant'}`}
+              </Button>
+            )}
+
+            {/* Status Messages */}
+            {!canSign && lease.status === 'COMPLETED' && (
+              <div className="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">
+                <CheckCircle className="h-5 w-5" />
+                <span className="text-sm font-medium">Lease is fully signed and completed!</span>
+              </div>
+            )}
+
+            {!canSign && lease.status !== 'COMPLETED' && (
+              <div className="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg">
+                <AlertCircle className="h-5 w-5" />
+                <span className="text-sm font-medium">
+                  {isLandlord ? 'Waiting for tenant signature' : 'Waiting for landlord signature'}
+                </span>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Signature Modal */}
+      {showSignatureModal && (
+        <SignatureModal
+          isOpen={showSignatureModal}
+          onClose={() => setShowSignatureModal(false)}
+          onSign={handleSign}
+          title={`Sign as ${isLandlord ? 'Landlord' : 'Tenant'}`}
+          loading={signingLoading}
+        />
+      )}
     </div>
   );
-};
-
-export default LeaseSigningPage;
+}

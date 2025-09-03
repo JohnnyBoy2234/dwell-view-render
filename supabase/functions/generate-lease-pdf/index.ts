@@ -125,7 +125,12 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
         currentY -= fontSize + 2;
         
         // Check if we need a new page
-        if (currentY < margin + 50) {
+        if (currentY < margin + 80) { // Leave space for footer
+          // Add footer to current page
+          const pageNum = pdfDoc.getPageCount();
+          addPageFooter(currentPage, pageNum, pageNum + 1); // We'll update total pages later
+          
+          // Create new page
           currentPage = pdfDoc.addPage([pageWidth, pageHeight]);
           currentY = pageHeight - margin - 50;
         }
@@ -141,22 +146,51 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
     return currentY - fontSize - 2;
   }
   
-  // Helper function to add header to each page
-  function addPageHeader(page: any, pageNum: number, totalPages: number) {
-    // SwiftRent logo placeholder (left)
-    page.drawText('SwiftRent', { 
-      x: margin, 
-      y: pageHeight - 30, 
-      size: 12, 
-      font: boldFont, 
-      color: rgb(0.15, 0.39, 0.92) // ocean-blue
-    });
+  // Helper function to add header to first page only
+  function addFirstPageHeader(page: any) {
+    // Try to load SwiftRent logo from Storage
+    let logoImage: any = null;
+    try {
+      // Try to load logo from Supabase Storage
+      const logoUrl = leaseData.branding?.logo_url;
+      if (logoUrl) {
+        const response = await fetch(logoUrl);
+        if (response.ok) {
+          const logoBytes = new Uint8Array(await response.arrayBuffer());
+          logoImage = await pdfDoc.embedPng(logoBytes);
+        }
+      }
+    } catch (error) {
+      console.log('Logo not found, using brand square');
+    }
+
+    if (logoImage) {
+      // If logo is available, draw it without text
+      const logoW = 60;
+      const aspect = logoImage.height / logoImage.width;
+      const logoH = logoW * aspect;
+      page.drawImage(logoImage, { 
+        x: margin, 
+        y: pageHeight - 50 - logoH, 
+        width: logoW, 
+        height: logoH 
+      });
+    } else {
+      // Brand square without text (logo is visual)
+      page.drawRectangle({ 
+        x: margin, 
+        y: pageHeight - 50, 
+        width: 20, 
+        height: 20, 
+        color: rgb(0.15, 0.39, 0.92) // ocean-blue
+      });
+    }
     
     // Document title (center)
     page.drawText('Residential Lease Agreement', { 
       x: pageWidth / 2 - 100, 
       y: pageHeight - 30, 
-      size: 12, 
+      size: 14, 
       font: boldFont, 
       color: rgb(0, 0, 0)
     });
@@ -169,7 +203,10 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
       font: font, 
       color: rgb(0.5, 0.5, 0.5)
     });
-    
+  }
+
+  // Helper function to add footer to each page
+  function addPageFooter(page: any, pageNum: number, totalPages: number) {
     // Footer
     page.drawText(`SwiftRent • ${leaseData.property.address} • Page ${pageNum} of ${totalPages}`, { 
       x: margin, 
@@ -180,12 +217,11 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
     });
   }
   
-  // Add header to first page
-  addPageHeader(currentPage, 1, 1);
+  // Add header to first page only
+  addFirstPageHeader(currentPage);
   
-  // Title
-  yPosition = addText('RESIDENTIAL LEASE AGREEMENT', margin, yPosition, contentWidth, 16, boldFont, rgb(0.15, 0.39, 0.92));
-  yPosition -= 20;
+  // Start content below header
+  yPosition = pageHeight - margin - 100;
   
   // Agreement date
   yPosition = addText(`This Agreement is made on ${formatDate(new Date().toISOString())}`, margin, yPosition, contentWidth, 12, font);
@@ -342,11 +378,11 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   yPosition = addText('Date: _________________________', margin, yPosition, contentWidth, 11, font);
   yPosition -= 20;
   
-  // Add headers to all pages
+  // Add footers to all pages
   const totalPages = pdfDoc.getPageCount();
   for (let i = 0; i < totalPages; i++) {
     const page = pdfDoc.getPage(i);
-    addPageHeader(page, i + 1, totalPages);
+    addPageFooter(page, i + 1, totalPages);
   }
   
   return await pdfDoc.save();

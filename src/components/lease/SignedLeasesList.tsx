@@ -149,26 +149,9 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
                         <Badge>{lease.lease_status?.replace(/_/g, ' ')}</Badge>
                       </div>
                       {lease.lease_status === 'awaiting_tenant_signature' ? (
-                        <Button className="w-full" onClick={async () => {
-                          try {
-                            // Step 1: Initiate OAuth2 authorization
-                            const { data: authData, error: authError } = await supabase.functions.invoke('initiate-docusign-auth', {
-                              body: { tenancyId: lease.id, role: 'tenant' }
-                            });
-                            if (authError) throw authError;
-                            
-                            // Step 2: Redirect to DocuSign for authorization
-                            const authUrl = (authData as any)?.authUrl;
-                            if (!authUrl) throw new Error('No authorization URL received');
-                            
-                            // Store the state for the callback
-                            localStorage.setItem('docusign_auth_state', (authData as any)?.state);
-                            
-                            // Redirect to DocuSign
-                            window.location.href = authUrl;
-                          } catch (e: any) {
-                            toast({ variant: 'destructive', title: 'Failed to initiate signing', description: e.message });
-                          }
+                        <Button className="w-full" onClick={() => {
+                          // Navigate to the new in-app signing page
+                          window.location.href = `/enhancedtenantdashboard/leases/${lease.id}/sign`;
                         }}>
                           Review & Sign
                         </Button>
