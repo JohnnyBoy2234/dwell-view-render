@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
     }
 
     // Exchange authorization code for access token
-    const tokenResponse = await exchangeCodeForToken(code);
+    const tokenResponse = await exchangeCodeForToken(code, state);
     
     if (!tokenResponse.access_token) {
       return new Response(
@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
   }
 });
 
-async function exchangeCodeForToken(code: string) {
+async function exchangeCodeForToken(code: string, state: string) {
   const clientId = Deno.env.get("DOCUSIGN_INTEGRATION_KEY");
   const clientSecret = Deno.env.get("DOCUSIGN_CLIENT_SECRET");
   const redirectUri = Deno.env.get("DOCUSIGN_REDIRECT_URI") || "https://swiftrent.co.za/auth/callback";
@@ -95,6 +95,10 @@ async function exchangeCodeForToken(code: string) {
     throw new Error("Missing DocuSign client credentials");
   }
 
+  // Parse state to get code verifier
+  const stateData = JSON.parse(atob(state));
+  const codeVerifier = stateData.codeVerifier;
+
   const tokenUrl = `https://${authServer}/oauth/token`;
   
   const formData = new URLSearchParams();
@@ -103,6 +107,7 @@ async function exchangeCodeForToken(code: string) {
   formData.append("redirect_uri", redirectUri);
   formData.append("client_id", clientId);
   formData.append("client_secret", clientSecret);
+  formData.append("code_verifier", codeVerifier);
 
   const response = await fetch(tokenUrl, {
     method: "POST",
