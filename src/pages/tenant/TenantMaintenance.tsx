@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import type { Priority, Category } from '@/types/maintenance';
 
 const priorityColors = {
@@ -51,20 +52,66 @@ export default function TenantMaintenance() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!tenantProperty) {
+    if (!user) {
       toast({
         title: "Error",
-        description: "No property found. Please contact support.",
+        description: "Please log in to submit a maintenance request.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!title.trim() || !description.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in both title and description.",
         variant: "destructive",
       });
       return;
     }
 
     try {
+      let propertyId = tenantProperty?.id;
+      
+      // If no tenantProperty, try to find any property associated with the user
+      if (!propertyId) {
+        const { data: tenancyData } = await supabase
+          .from('tenancies')
+          .select('property_id')
+          .eq('tenant_id', user.id)
+          .eq('status', 'active')
+          .single();
+          
+        if (tenancyData) {
+          propertyId = tenancyData.property_id;
+        } else {
+          // If still no property, create a generic maintenance request
+          // This allows tenants to submit requests even without active tenancy
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('user_id')
+            .eq('user_id', user.id)
+            .single();
+            
+          if (!userData) {
+            toast({
+              title: "Error",
+              description: "Unable to verify your account. Please contact support.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Use a placeholder property ID or create without property_id
+          propertyId = 'no-property-assigned';
+        }
+      }
+
       await createMaintenance.mutateAsync({
-        property_id: tenantProperty.id,
-        title,
-        description,
+        property_id: propertyId,
+        title: title.trim(),
+        description: description.trim(),
         priority,
         category,
         images: [], // TODO: Handle photo uploads
@@ -77,8 +124,19 @@ export default function TenantMaintenance() {
       setCategory('general');
       setPhotos(null);
       setIsCreateDialogOpen(false);
-    } catch (error) {
+      
+      toast({
+        title: "Success",
+        description: "Your maintenance request has been submitted successfully.",
+      });
+      
+    } catch (error: any) {
       console.error('Error creating maintenance request:', error);
+      toast({
+        title: "Submission Failed",
+        description: error.message || "Failed to submit maintenance request. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
