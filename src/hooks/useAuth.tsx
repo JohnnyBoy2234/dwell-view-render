@@ -29,33 +29,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
 
-        // Check user role
+        // Check user role BEFORE setting loading to false
         if (session?.user) {
-          setTimeout(() => {
-            checkUserRole(session.user.id);
-          }, 0);
+          await checkUserRole(session.user.id);
         } else {
           setIsLandlord(false);
         }
+        
+        setLoading(false);
       }
     );
 
     // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
 
       if (session?.user) {
-        setTimeout(() => {
-          checkUserRole(session.user.id);
-        }, 0);
+        await checkUserRole(session.user.id);
       }
+      
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

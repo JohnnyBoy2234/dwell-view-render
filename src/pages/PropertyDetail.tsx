@@ -268,7 +268,7 @@ export default function PropertyDetail() {
       toast({
         variant: "destructive",
         title: "Sign in required",
-        description: "Please sign in to request a viewing."
+        description: "Please sign in to book a viewing."
       });
       navigate('/auth');
       return;
@@ -534,7 +534,7 @@ export default function PropertyDetail() {
             <Card className="bg-gradient-to-br from-ocean-blue/5 via-card to-earth-warm/5 border-ocean-blue/30 shadow-elegant">
               <CardHeader>
                 <CardTitle>Contact</CardTitle>
-                <CardDescription>Message the landlord or request a viewing</CardDescription>
+                <CardDescription>Message the landlord or book a viewing</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {property.profiles && (
@@ -583,7 +583,7 @@ export default function PropertyDetail() {
                           onClick={handleRequestViewing}
                         >
                           <Calendar className="h-4 w-4 mr-2" />
-                          Request a Viewing
+                          Book a Viewing
                         </Button>
                       )}
                       
@@ -613,11 +613,11 @@ export default function PropertyDetail() {
               <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-ocean-blue/5 border-earth-warm/30 shadow-elegant">
                 <CardHeader>
                   <CardTitle>Get Started</CardTitle>
-                <CardDescription>Sign in to message the landlord or request a viewing</CardDescription>
+                <CardDescription>Sign in to message the landlord or book a viewing</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="text-center space-y-3">
-                    <p className="text-muted-foreground">Sign in to contact the landlord or request a viewing for this property</p>
+                    <p className="text-muted-foreground">Sign in to contact the landlord or book a viewing for this property</p>
                     <Button 
                       className="w-full" 
                       onClick={() => navigate('/auth')}
