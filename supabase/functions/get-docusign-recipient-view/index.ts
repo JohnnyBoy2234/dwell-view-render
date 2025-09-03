@@ -1,12 +1,11 @@
 // @ts-nocheck
-// DocuSign: generate embedded recipient view (signing URL) for tenant or landlord
-// Request body: { tenancyId: string, role: 'tenant'|'landlord', returnUrl?: string }
+// DocuSign: generate embedded recipient view (signing URL) for tenant or landlord using OAuth2
+// Request body: { tenancyId: string, role: 'tenant'|'landlord', accessToken: string, returnUrl?: string }
 // Secrets required:
 // - SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
-// - DOCUSIGN_INTEGRATION_KEY, DOCUSIGN_IMPERSONATED_USER_ID, DOCUSIGN_AUTH_SERVER, DOCUSIGN_ACCOUNT_ID, DOCUSIGN_BASE_PATH, DOCUSIGN_RSA_PRIVATE_KEY
+// - DOCUSIGN_INTEGRATION_KEY, DOCUSIGN_CLIENT_SECRET, DOCUSIGN_AUTH_SERVER, DOCUSIGN_ACCOUNT_ID, DOCUSIGN_BASE_PATH
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { SignJWT, importPKCS8 } from "https://esm.sh/jose@5.2.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
