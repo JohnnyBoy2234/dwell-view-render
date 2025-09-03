@@ -371,11 +371,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* From Listing to Lease, Made Easy - Enhanced Feature Grid with Glass Cards */}
+      {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <SectionHeader
-            title="From Listing to Lease, Made Easy"
+            title="Why SwiftRent"
             subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
             showTagline={true}
             taglineVariant="eyebrow"
