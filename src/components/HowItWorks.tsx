@@ -148,7 +148,7 @@ const HowItWorks: React.FC = () => {
           <div className="flex items-center justify-center space-x-4">
             <Label
               htmlFor="user-type-toggle"
-              className={`font-medium transition-colors ${isTenant ? "text-[hsl(var(--sr-blue))]" : "text-[hsl(var(--sr-muted))]"}`}
+              className={`font-medium transition-colors ${!isTenant ? "text-[hsl(var(--sr-blue))]" : "text-[hsl(var(--sr-muted))]"}`}
             >
               For Tenants
             </Label>
@@ -166,7 +166,7 @@ const HowItWorks: React.FC = () => {
             />
             <Label
               htmlFor="user-type-toggle"
-              className={`font-medium transition-colors ${!isTenant ? "text-[hsl(var(--sr-green))]" : "text-[hsl(var(--sr-muted))]"}`}
+              className={`font-medium transition-colors ${isTenant ? "text-[hsl(var(--sr-green))]" : "text-[hsl(var(--sr-muted))]"}`}
             >
               For Landlords
             </Label>

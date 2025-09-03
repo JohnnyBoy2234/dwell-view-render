@@ -154,39 +154,20 @@ export default function Properties() {
       setLoading(true);
       setError(null);
       
-      // Add a timeout to prevent infinite loading
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Request timeout after 10 seconds')), 10000)
-      );
-      
-      // First, let's try a simple query to see if the table exists
-      const queryPromise = supabase
+      const { data, error } = await supabase
         .from('properties')
         .select('*')
-        .limit(10);
-      
-      const { data, error } = await Promise.race([queryPromise, timeoutPromise]) as any;
+        .eq('status', 'available')
+        .order('featured', { ascending: false })
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('[Properties] Supabase error:', error);
-        console.error('[Properties] Error details:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code
-        });
         throw error;
       }
       
       console.log('[Properties] Properties fetched successfully:', data?.length || 0, 'properties');
-      
-      // Filter for available properties only if we have data
-      const availableProperties = (data || []).filter(prop => prop.status === 'available');
-      setProperties(availableProperties);
-      
-      if (availableProperties.length === 0 && (data || []).length > 0) {
-        console.log('[Properties] No available properties found, but table has data');
-      }
+      setProperties(data || []);
     } catch (error: any) {
       console.error('[Properties] Error fetching properties:', error);
       setError(error.message);

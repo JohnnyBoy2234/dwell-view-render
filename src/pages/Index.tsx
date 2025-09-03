@@ -11,7 +11,7 @@ import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import { ArrowRight, CheckCircle, Home, Star, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle, Home, Sparkles, Star, Zap } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -185,13 +185,15 @@ const Index = () => {
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50" />
         
-
       </div>
       
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden">
         {/* Premium Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
+        
+        {/* Subtle Pattern Overlay */}
+        <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent via-white/5 to-transparent" />
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 min-h-[70vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center" onMouseMove={heroParallax.onMouseMove}>
           <div
@@ -201,12 +203,14 @@ const Index = () => {
               transition: 'transform 120ms ease-out',
             }}
           >
-            {/* Enhanced Title */}
-            <div className="mb-4 reveal-up">
+            {/* Enhanced Title with Icons */}
+            <div className="flex items-center justify-center gap-3 mb-4 reveal-up">
+              <Sparkles className="h-8 w-8 text-success-green animate-pulse" />
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
                 <span className="block">Renting the way</span>
                 <span className="block text-success-green">it should be</span>
               </h1>
+              <Star className="h-8 w-8 text-success-green animate-pulse" style={{ animationDelay: '0.5s' }} />
             </div>
             
             <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
@@ -305,35 +309,34 @@ const Index = () => {
 
       {/* Trusted by + value props marquee */}
       <section className="py-6 backdrop-blur-xl bg-white/5 border-t border-b border-white/10">
+        <div className="text-center text-sm text-muted-foreground mb-3">Trusted by renters and landlords across SA</div>
         <div className="home-marquee">
           <div className="home-marquee-track gap-8 px-4 sm:px-8">
             {Array.from({ length: 2 }).map((_, loop) => (
               <div className="flex gap-8 pr-8" key={loop}>
                 {[
-                  'No Agent Commission',
+                  'Zero Commission',
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
-                  'No Agents',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
-                  'No Agent Commission',
+                  'Zero Commission',
                   'Secure Payments',
                   'Instant Messaging',
                   'Maintenance Manager',
-                  'No Agent Commission',
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
                 ].map((tag, index) => {
-                  const isBlueItem = tag === 'No Agent Commission' || tag === 'No Agents';
+                  const isZeroCommission = tag === 'Zero Commission';
                   
                   return (
                     <span 
                       key={`${loop}-${tag}-${index}`} 
                       className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl text-foreground/80 border transition-colors duration-300 ${
-                        isBlueItem 
+                        isZeroCommission 
                           ? 'bg-ocean-blue text-white border-ocean-blue hover:bg-ocean-blue-dark' 
                           : 'bg-white/10 border-gray-300/50 hover:bg-white/20'
                       }`}
@@ -352,17 +355,12 @@ const Index = () => {
       {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
-              Why SwiftRent
-            </h2>
-            <p className="text-lg font-medium text-muted-foreground mb-4">
-              From Listing to Lease, Made Easy
-            </p>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform.
-            </p>
-          </div>
+          <SectionHeader
+            title="Why SwiftRent"
+            subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
+            showTagline={true}
+            taglineVariant="eyebrow"
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {[

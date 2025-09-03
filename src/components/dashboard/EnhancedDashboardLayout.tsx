@@ -6,7 +6,7 @@ import { LogOut, Menu, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Component, ReactNode } from 'react';
 import { BUILD_TAG } from '@/version';
-// import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
@@ -69,7 +69,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
             
             <div className="flex items-center gap-2 sm:gap-4 ml-auto">
               {/* Notifications */}
-              {/* <NotificationBell /> */}
+              <NotificationBell />
               
               {/* Custom Actions */}
               {actions}

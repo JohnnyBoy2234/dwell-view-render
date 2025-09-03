@@ -35,18 +35,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
       const { data, error } = await query;
 
-      if (error) {
-        // If table doesn't exist, just return empty data instead of crashing
-        if (error.code === '42P01' || error.message.includes('relation "notifications" does not exist')) {
-          console.log('Notifications table does not exist, returning empty data');
-          setNotifications([]);
-          setUnreadCount(0);
-          setError(null);
-          setLoading(false);
-          return;
-        }
-        throw error;
-      }
+      if (error) throw error;
 
       setNotifications(data || []);
       setUnreadCount(data?.filter(n => !n.is_read).length || 0);

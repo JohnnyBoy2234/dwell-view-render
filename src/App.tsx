@@ -37,7 +37,6 @@ import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes"
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 
-
 const queryClient = new QueryClient();
 
 const App = () => (
