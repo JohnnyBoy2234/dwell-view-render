@@ -79,7 +79,7 @@ export function ViewingSlotNotification({
                   </Badge>
                 </div>
                 <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
-                  Book a viewing for "{propertyTitle}"
+                  Request a viewing for "{propertyTitle}"
                 </p>
               </div>
 

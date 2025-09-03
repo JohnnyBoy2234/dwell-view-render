@@ -85,7 +85,7 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
           <DialogTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5" />
             {activeBooking && !isUpdating ? "Manage Your Viewing" : 
-             isUpdating ? "Reschedule Viewing" : "Book a Viewing"}
+             isUpdating ? "Reschedule Viewing" : "Request a Viewing"}
           </DialogTitle>
           <DialogDescription>
             {activeBooking && !isUpdating ? 
