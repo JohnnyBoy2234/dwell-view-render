@@ -377,7 +377,7 @@ const Index = () => {
           <SectionHeader
             title="Why SwiftRent"
             subtitle="Complete property management solution from initial listing to ongoing maintenance - everything you need in one powerful platform."
-            showTagline={true}
+            showTagline={false}
             taglineVariant="eyebrow"
           />
 
