@@ -185,29 +185,12 @@ const Index = () => {
         {/* Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50" />
         
-        {/* Floating Geometric Shapes */}
-        <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-xl animate-pulse" />
-        <div className="absolute top-40 right-20 w-24 h-24 bg-gradient-to-br from-emerald-400/20 to-blue-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-40 left-20 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-xl animate-pulse" style={{ animationDelay: '2s' }} />
-        
-        
-        {/* Animated Orbs */}
-        <div className="absolute top-20 left-20 w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.5s' }} />
-        <div className="absolute top-32 right-32 w-1.5 h-1.5 bg-emerald-400 rounded-full animate-bounce" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-20 right-20 w-2.5 h-2.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '2.5s' }} />
       </div>
       
       {/* Hero Section */}
       <section className="relative text-white overflow-hidden">
         {/* Premium Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
-        
-        {/* Enhanced Aurora blobs */}
-        <div className="home-aurora">
-          <div className="blob --1" />
-          <div className="blob --2" />
-          <div className="blob --3" />
-        </div>
         
         {/* Subtle Pattern Overlay */}
         <div className="absolute inset-0 opacity-10 bg-gradient-to-br from-transparent via-white/5 to-transparent" />
