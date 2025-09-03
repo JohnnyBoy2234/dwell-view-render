@@ -343,11 +343,25 @@ const Index = () => {
                   'Digital Lease Signing',
                   'Verified Listings',
                   'Smart Search',
-                ].map((tag) => (
-                  <span key={`${loop}-${tag}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl bg-white/10 text-foreground/80 border border-white/20 hover:bg-white/20 transition-colors duration-300">
-                    <span className="w-1.5 h-1.5 rounded-full bg-success-green" /> {tag}
-                  </span>
-                ))}
+                ].map((tag, index) => {
+                  const isZeroCommission = tag === 'Zero Commission';
+                  const isEveryFourth = (index + 1) % 4 === 0;
+                  const shouldHighlight = isZeroCommission || isEveryFourth;
+                  
+                  return (
+                    <span 
+                      key={`${loop}-${tag}`} 
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl text-foreground/80 border transition-colors duration-300 ${
+                        shouldHighlight 
+                          ? 'bg-ocean-blue/20 text-white border-ocean-blue/40 hover:bg-ocean-blue/30' 
+                          : 'bg-white/10 border-white/20 hover:bg-white/20'
+                      }`}
+                    >
+                      <span className={`w-1.5 h-1.5 rounded-full ${shouldHighlight ? 'bg-white' : 'bg-success-green'}`} /> 
+                      {tag}
+                    </span>
+                  );
+                })}
               </div>
             ))}
           </div>
