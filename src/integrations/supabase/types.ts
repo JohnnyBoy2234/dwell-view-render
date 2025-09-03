@@ -139,6 +139,7 @@ export type Database = {
       }
       documents: {
         Row: {
+          application_id: string | null
           document_type: string
           file_path: string
           file_type: string
@@ -151,6 +152,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          application_id?: string | null
           document_type: string
           file_path: string
           file_type: string
@@ -163,6 +165,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          application_id?: string | null
           document_type?: string
           file_path?: string
           file_type?: string
@@ -175,6 +178,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "documents_user_id_fkey"
             columns: ["user_id"]
