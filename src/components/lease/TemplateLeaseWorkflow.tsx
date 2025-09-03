@@ -111,8 +111,7 @@ export const TemplateLeaseWorkflow = ({
       console.log("Starting lease generation for property:", propertyId);
       console.log("Selected tenant for lease:", selectedTenant);
       
-      // First create a tenancy record
-      // Build custom clauses payload from selected common clauses and custom text
+      // Prepare lease data in the new format
       const selectedClauseObjects = leaseData.selectedClauses.map((id) => {
         const clause = commonClauses.find(c => c.id === id);
         return clause ? { id: clause.id, title: clause.title, description: clause.description } : { id, title: id, description: '' };
@@ -122,35 +121,85 @@ export const TemplateLeaseWorkflow = ({
         : [];
       const customClausesPayload = [...selectedClauseObjects, ...additionalCustom];
 
-      const { data: tenancy, error: tenancyError } = await supabase
-        .from('tenancies')
-        .insert({
-          property_id: propertyId,
-          landlord_id: user.id,
-          tenant_id: selectedTenant.id,
-          monthly_rent: parseFloat(leaseData.monthlyRent),
-          security_deposit: parseFloat(leaseData.securityDeposit),
+      const newLeaseData = {
+        landlord: {
+          name: leaseData.landlordName || 'Landlord',
+          id_number: leaseData.landlordIdNumber || '',
+          company: leaseData.landlordCompany || '',
+          email: leaseData.landlordEmail || '',
+          phone: leaseData.landlordPhone || '',
+          address: leaseData.landlordAddress || '',
+        },
+        tenant: {
+          name: selectedTenant.name || '',
+          id_number: selectedTenant.id_number || '',
+          email: selectedTenant.email || '',
+          phone: selectedTenant.phone || '',
+          current_address: selectedTenant.current_address || '',
+          occupants: [],
+        },
+        property: {
+          address: leaseData.propertyAddress || '',
+          unit: leaseData.propertyUnit || '',
+          city: leaseData.propertyCity || 'Cape Town',
+          province: leaseData.propertyProvince || 'Western Cape',
+          postal_code: leaseData.propertyPostalCode || '',
+          type: (leaseData.propertyType as 'apartment' | 'house' | 'townhouse') || 'apartment',
+          parking: (leaseData.propertyParking as 'N/A' | '1 bay' | '2 bays') || 'N/A',
+        },
+        term: {
           start_date: leaseData.startDate,
-          end_date: leaseData.leaseType === 'month-to-month' ? null : leaseData.endDate,
-          lease_status: 'draft',
-          custom_clauses: customClausesPayload
-        })
-        .select()
-        .single();
+          end_date: leaseData.leaseType === 'month-to-month' ? '' : leaseData.endDate,
+          option_to_renew: leaseData.optionToRenew || true,
+          notice_period_days: leaseData.noticePeriodDays || 30,
+        },
+        rent: {
+          monthly_rent: parseFloat(leaseData.monthlyRent),
+          due_day: leaseData.rentDueDay || 1,
+          payment_method: (leaseData.paymentMethod as 'EFT' | 'Cash' | 'Cheque') || 'EFT',
+          late_fee_policy: {
+            grace_days: leaseData.lateFeeGraceDays || 7,
+            late_fee_fixed: parseFloat(leaseData.lateFeeAmount) || 250,
+            late_fee_percent: parseFloat(leaseData.lateFeePercent) || 0,
+          },
+        },
+        deposit: {
+          amount: parseFloat(leaseData.securityDeposit),
+          return_days: leaseData.depositReturnDays || 30,
+        },
+        utilities: {
+          water: (leaseData.waterResponsibility as 'tenant' | 'landlord' | 'included') || 'tenant',
+          electricity: (leaseData.electricityResponsibility as 'tenant' | 'landlord' | 'included') || 'tenant',
+          internet: (leaseData.internetResponsibility as 'tenant' | 'landlord' | 'included') || 'tenant',
+          other: leaseData.otherUtilities || '',
+        },
+        maintenance: {
+          tenant_minor_repairs_cap: parseFloat(leaseData.tenantMinorRepairsCap) || 500,
+          landlord_responsible: leaseData.landlordMaintenanceResponsible || ['Structural repairs', 'Plumbing issues', 'Electrical problems'],
+        },
+        access: {
+          entry_notice_hours: leaseData.entryNoticeHours || 24,
+        },
+        governing_law: leaseData.governingLaw || 'South African law',
+        attachments: {
+          move_in_inspection_required: leaseData.moveInInspectionRequired || false,
+          annexures: leaseData.annexures || [],
+        },
+        branding: {
+          company_name: 'SwiftRent',
+          logo_url: '',
+        },
+        clauses: customClausesPayload,
+      };
 
-      if (tenancyError) {
-        console.error('Error creating tenancy:', tenancyError);
-        throw new Error(`Failed to create tenancy: ${tenancyError.message}`);
-      }
-
-      console.log("Tenancy created:", tenancy);
-
-      // Generate the lease document
-      console.log("Calling generate-lease function...");
-      const { data, error } = await supabase.functions.invoke('generate-lease', {
-        body: { 
-          tenancyId: tenancy.id,
-          leaseData
+      // Use the new lease management system
+      console.log("Calling lease-management function...");
+      const { data, error } = await supabase.functions.invoke('lease-management', {
+        body: {
+          action: 'generate',
+          property_id: propertyId,
+          tenant_user_id: selectedTenant.id,
+          lease_data: newLeaseData
         }
       });
 

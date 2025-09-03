@@ -190,23 +190,7 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
         return;
       }
 
-      // Create tenancy record
-      const { data: tenancy, error: tErr } = await supabase
-        .from('tenancies')
-        .insert({
-          property_id: propertyId,
-          landlord_id: user.id,
-          tenant_id: selectedTenant.id,
-          monthly_rent: parseFloat(rent.amount),
-          security_deposit: parseFloat(deposit.amount),
-          start_date: term.startDate,
-          end_date: term.endDate,
-          lease_status: 'draft'
-        })
-        .select()
-        .single();
-      if (tErr || !tenancy) throw new Error(tErr?.message || 'Failed to create tenancy');
-
+      // Prepare lease data in the new format
       const selectedClauses = standardClauses.filter(c => selectedClauseIds.includes(c.id));
       const customClauses = customClausesText
         .split(/\n\n+/)
@@ -214,22 +198,95 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
         .filter(Boolean)
         .map((text, i) => ({ id: `custom-${i+1}`, title: 'Additional Terms', body: text }));
 
-      const payload = {
-        tenancyId: tenancy.id,
-        wizard: {
-          landlord,
-          tenants,
-          premises,
-          rent,
-          deposit,
-          term,
-          landlordBank,
-          attachments: { hasIncoming: !!attachments.incomingInspection, hasRules: !!attachments.rules, hasRider: !!attachments.rider },
-          clauses: [...selectedClauses, ...customClauses],
+      const leaseData = {
+        landlord: {
+          name: landlord.fullName,
+          id_number: landlord.idNumber,
+          company: '', // Add company field if needed
+          email: landlord.email,
+          phone: landlord.phone,
+          address: landlord.address,
         },
-        propertyId,
+        tenant: {
+          name: tenants[0]?.fullName || '',
+          id_number: tenants[0]?.idNumber || '',
+          email: tenants[0]?.email || '',
+          phone: tenants[0]?.phone || '',
+          current_address: tenants[0]?.address || '',
+          occupants: tenants.slice(1).map(t => ({
+            name: t.fullName,
+            relationship: 'Additional Occupant',
+            age: 'N/A'
+          }))
+        },
+        property: {
+          address: premises.address,
+          unit: '',
+          city: 'Cape Town', // You might want to extract this from address
+          province: 'Western Cape',
+          postal_code: '',
+          type: 'apartment' as 'apartment' | 'house' | 'townhouse',
+          parking: premises.parkingNo ? `${premises.parkingNo} bay(s)` as '1 bay' | '2 bays' : 'N/A' as 'N/A',
+        },
+        term: {
+          start_date: term.startDate,
+          end_date: term.endDate,
+          option_to_renew: true,
+          notice_period_days: 30,
+        },
+        rent: {
+          monthly_rent: parseFloat(rent.amount),
+          due_day: 1,
+          payment_method: 'EFT' as 'EFT' | 'Cash' | 'Cheque',
+          late_fee_policy: {
+            grace_days: 7,
+            late_fee_fixed: parseFloat(rent.lateFee),
+            late_fee_percent: 0,
+          },
+        },
+        deposit: {
+          amount: parseFloat(deposit.amount),
+          return_days: 30,
+        },
+        utilities: {
+          water: 'tenant' as 'tenant' | 'landlord' | 'included',
+          electricity: 'tenant' as 'tenant' | 'landlord' | 'included',
+          internet: 'tenant' as 'tenant' | 'landlord' | 'included',
+          other: '',
+        },
+        maintenance: {
+          tenant_minor_repairs_cap: 500,
+          landlord_responsible: ['Structural repairs', 'Plumbing issues', 'Electrical problems'],
+        },
+        access: {
+          entry_notice_hours: 24,
+        },
+        governing_law: 'South African law',
+        attachments: {
+          move_in_inspection_required: !!attachments.incomingInspection,
+          annexures: [
+            ...(attachments.incomingInspection ? ['Move-in Inspection Report'] : []),
+            ...(attachments.rules ? ['Property Rules'] : []),
+            ...(attachments.rider ? ['Additional Rider'] : []),
+          ],
+        },
+        branding: {
+          company_name: 'SwiftRent',
+          logo_url: '',
+        },
+        clauses: [...selectedClauses, ...customClauses],
       };
-      const { data, error } = await supabase.functions.invoke('generate-lease', { body: payload });
+
+      // Use the new lease management system
+      const { data, error } = await supabase.functions.invoke('lease-management', {
+        body: {
+          action: 'generate',
+          property_id: propertyId,
+          tenant_user_id: selectedTenant.id,
+          lease_data: leaseData
+        }
+      });
+
       if (error || (data as any)?.error) throw new Error((error as any)?.message || (data as any)?.error || 'Failed');
       toast.success("Lease generated and sent for signing");
       onComplete();

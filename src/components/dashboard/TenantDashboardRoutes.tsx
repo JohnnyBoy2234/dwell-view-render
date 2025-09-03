@@ -8,6 +8,7 @@ import TenantSupport from '@/pages/tenant/TenantSupport';
 import Messages from '@/pages/Messages';
 import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
+import LeaseSigningPage from '@/pages/LeaseSigningPage';
 
 export default function TenantDashboardRoutes() {
   return (
@@ -45,6 +46,11 @@ export default function TenantDashboardRoutes() {
       <Route path="/support" element={
         <EnhancedDashboardLayout title="Support & Help">
           <TenantSupport />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="/leases/:leaseId/sign" element={
+        <EnhancedDashboardLayout title="Sign Lease">
+          <LeaseSigningPage />
         </EnhancedDashboardLayout>
       } />
     </Routes>
