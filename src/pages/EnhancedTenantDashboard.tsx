@@ -81,14 +81,31 @@ export default function EnhancedTenantDashboard() {
   const renderTabContent = () => {
     switch (currentTab) {
       case '/enhancedtenantdashboard/messages':
-        // Navigate to the actual messages page instead of showing MessagesTab
-        navigate('/tenant/messages');
-        return null;
+        return (
+          <div className="space-y-6">
+            <MessagesTab />
+          </div>
+        );
       case '/enhancedtenantdashboard/properties':
         return (
-          <div className="text-center py-8">
-            <h2 className="text-2xl font-bold mb-4">Properties</h2>
-            <p className="text-muted-foreground">Browse available rental properties</p>
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-6">
+              <Building className="h-6 w-6 text-ocean-blue" />
+              <h2 className="text-xl font-bold">Browse Properties</h2>
+            </div>
+            <Card>
+              <CardContent className="p-8 text-center">
+                <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Available Properties</h3>
+                <p className="text-muted-foreground mb-4">
+                  Browse and apply for rental properties
+                </p>
+                <Button onClick={() => navigate('/properties')}>
+                  <Building className="h-4 w-4 mr-2" />
+                  View All Properties
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         );
       case '/enhancedtenantdashboard/applications':
@@ -118,7 +135,13 @@ export default function EnhancedTenantDashboard() {
               <CardContent className="p-8 text-center">
                 <Settings className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Maintenance</h3>
-                <p className="text-muted-foreground">Submit and track maintenance requests</p>
+                <p className="text-muted-foreground mb-4">
+                  Submit and track maintenance requests
+                </p>
+                <Button onClick={() => navigate('/maintenance/new')}>
+                  <Settings className="h-4 w-4 mr-2" />
+                  Submit Request
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -134,7 +157,13 @@ export default function EnhancedTenantDashboard() {
               <CardContent className="p-8 text-center">
                 <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">Your Profile</h3>
-                <p className="text-muted-foreground">Manage your account settings</p>
+                <p className="text-muted-foreground mb-4">
+                  Manage your account settings and personal information
+                </p>
+                <Button onClick={() => navigate('/profile')}>
+                  <User className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
               </CardContent>
             </Card>
           </div>
@@ -232,7 +261,7 @@ export default function EnhancedTenantDashboard() {
         <div className="mt-12">
           <SectionHeader title="Quick Actions" className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/properties') as any}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/properties')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-brand.blue/10 text-brand.blue grid place-content-center mb-2">
                   <Home className="h-5 w-5" />
@@ -241,7 +270,7 @@ export default function EnhancedTenantDashboard() {
                 <p className="text-sm text-brand.gray500">Find your next home</p>
               </div>
             </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => setCurrentTab('/enhancedtenantdashboard/messages') as any}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/messages')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-brand.green/10 text-brand.green grid place-content-center mb-2">
                   <MessageSquare className="h-5 w-5" />
@@ -250,7 +279,7 @@ export default function EnhancedTenantDashboard() {
                 <p className="text-sm text-brand.gray500">Chat with landlords</p>
               </div>
             </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => setCurrentTab('/enhancedtenantdashboard/maintenance') as any}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/maintenance')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-brand.blue/10 text-brand.blue grid place-content-center mb-2">
                   <Settings className="h-5 w-5" />
