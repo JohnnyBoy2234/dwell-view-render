@@ -353,12 +353,17 @@ const Index = () => {
       {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="Why SwiftRent"
-            subtitle="No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring—giving you confidence every time."
-            showTagline={true}
-            taglineVariant="eyebrow"
-          />
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
+              Why SwiftRent
+            </h2>
+            <p className="text-lg font-medium text-muted-foreground mb-4">
+              From Listing to Lease, Made Easy
+            </p>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+              No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring—giving you confidence every time.
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {[
