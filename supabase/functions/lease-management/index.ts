@@ -238,9 +238,11 @@ serve(async (req) => {
       )
     }
 
+    const requestBody = await req.json()
+
     switch (action) {
       case 'generate': {
-        const { property_id, tenant_user_id, lease_data } = await req.json()
+        const { property_id, tenant_user_id, lease_data } = requestBody
 
         if (!property_id) {
           return new Response(
@@ -324,7 +326,7 @@ serve(async (req) => {
       }
 
       case 'sign': {
-        const { lease_id, role, signature_png_base64 } = await req.json()
+        const { lease_id, role, signature_png_base64 } = requestBody
 
         if (!lease_id || !role || !signature_png_base64) {
           return new Response(
@@ -455,7 +457,7 @@ serve(async (req) => {
       }
 
       case 'request-changes': {
-        const { lease_id, reason } = await req.json()
+        const { lease_id, reason } = requestBody
 
         if (!lease_id || !reason) {
           return new Response(
@@ -504,7 +506,7 @@ serve(async (req) => {
       }
 
       case 'cancel': {
-        const { lease_id } = await req.json()
+        const { lease_id } = requestBody
 
         if (!lease_id) {
           return new Response(
