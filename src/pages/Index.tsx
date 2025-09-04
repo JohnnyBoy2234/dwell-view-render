@@ -356,7 +356,7 @@ const Index = () => {
           <SectionHeader
             title="Why SwiftRent"
             subtitle="No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring—giving you confidence every time."
-            showTagline={false}
+            showTagline={true}
             taglineVariant="eyebrow"
           />
 
