@@ -64,7 +64,7 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
     await deleteNotification(notificationId);
   };
 
-  const getNotificationIcon = (type: string) => {
+  const getNotificationIcon = (type?: string) => {
     switch (type) {
       case 'lease':
         return '📄';
@@ -83,7 +83,7 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
     }
   };
 
-  const getPriorityColor = (priority: string) => {
+  const getPriorityColor = (priority?: string) => {
     switch (priority) {
       case 'urgent':
         return 'text-red-500';
@@ -183,7 +183,7 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                             <h4 className={`text-sm font-medium ${
                               !notification.is_read ? 'text-foreground' : 'text-muted-foreground'
                             }`}>
-                              {notification.title}
+                              {notification.title || 'Untitled Notification'}
                             </h4>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -222,15 +222,15 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                           <p className={`text-xs mt-1 ${
                             !notification.is_read ? 'text-foreground/80' : 'text-muted-foreground'
                           }`}>
-                            {notification.message}
+                            {notification.message || 'No message available'}
                           </p>
                           
                           <div className="flex items-center justify-between mt-2">
                             <span className={`text-xs ${getPriorityColor(notification.priority)}`}>
-                              {notification.priority.toUpperCase()}
+                              {notification.priority?.toUpperCase() || 'NORMAL'}
                             </span>
                             <span className="text-xs text-muted-foreground">
-                              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
+                              {notification.created_at ? formatDistanceToNow(new Date(notification.created_at), { addSuffix: true }) : 'Just now'}
                             </span>
                           </div>
                         </div>

@@ -35,10 +35,28 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist, just return empty data instead of crashing
+        if (error.code === '42P01' || error.message.includes('relation "notifications" does not exist')) {
+          console.log('Notifications table does not exist, returning empty data');
+          setNotifications([]);
+          setUnreadCount(0);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+        throw error;
+      }
 
-      setNotifications(data || []);
-      setUnreadCount(data?.filter(n => !n.is_read).length || 0);
+      // Ensure data is an array and has the expected structure
+      const validNotifications = (data || []).filter(notification => 
+        notification && 
+        typeof notification === 'object' && 
+        notification.id
+      );
+      
+      setNotifications(validNotifications);
+      setUnreadCount(validNotifications.filter(n => !n.is_read).length || 0);
       setError(null);
     } catch (err) {
       console.error('Error fetching notifications:', err);
