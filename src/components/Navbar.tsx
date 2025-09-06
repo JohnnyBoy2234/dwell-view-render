@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, User, Menu, X, LogOut, LayoutDashboard, MessageCircle, Bell } from "lucide-react";
+import { Home, Search, Heart, User, Menu, X, LogOut, LayoutDashboard, MessageCircle, Bell, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -12,7 +12,7 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 const Navbar = () => {
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, signOut, isLandlord } = useAuth();
+  const { user, signOut, isLandlord, isAdmin } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { hasProperties } = useUserProperties();
 
@@ -94,6 +94,17 @@ const Navbar = () => {
                           Dashboard
                         </Link>
                       </DropdownMenuItem>
+                      {isAdmin && (
+                        <>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link to="/admin/dashboard" className="cursor-pointer">
+                              <Shield className="h-4 w-4 mr-2" />
+                              Admin Panel
+                            </Link>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={signOut} className="cursor-pointer">
                         <LogOut className="h-4 w-4 mr-2" />
@@ -184,6 +195,13 @@ const Navbar = () => {
                     <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedlandlorddashboard">Rental Manager</Link></Button>
                   ) : (
                     <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedtenantdashboard">My Dashboard</Link></Button>
+                  )}
+                  {isAdmin && (
+                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}>
+                      <Link to="/admin/dashboard" className="flex items-center">
+                        <Shield className="h-4 w-4 mr-2" />Admin Panel
+                      </Link>
+                    </Button>
                   )}
                   <Button className="w-full" onClick={signOut}><LogOut className="h-4 w-4 mr-2"/>Sign Out</Button>
                 </>

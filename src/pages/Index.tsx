@@ -11,7 +11,7 @@ import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
 
-import { ArrowRight, CheckCircle, Home, Star, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle, Home, Star, Zap, Shield } from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
 
@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
 import { ThemeTagline } from "@/components/ui/ThemeTagline";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { useAuth } from "@/hooks/useAuth";
 
 // Lightweight utilities for homepage motion without new deps
 function useParallax() {
@@ -95,6 +96,7 @@ function useMagnet(intensity = 12) {
 const Index = () => {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
 
   // Use the unified search filters hook
   const { filters, updateFilters, executeSearch } = usePropertySearchFilters();
@@ -296,6 +298,21 @@ const Index = () => {
                     </Button>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Admin Quick Access Button */}
+            {user && isAdmin && (
+              <div className="mt-8 reveal-up" style={{ animationDelay: '400ms' }}>
+                <Button 
+                  onClick={() => navigate('/admin/dashboard')}
+                  variant="outline"
+                  className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
+                  {...magnet}
+                >
+                  <Shield className="h-4 w-4 mr-2" />
+                  Admin Panel
+                </Button>
               </div>
             )}
 

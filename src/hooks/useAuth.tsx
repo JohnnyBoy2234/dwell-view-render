@@ -14,6 +14,7 @@ interface AuthContextType {
   resetPassword: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isLandlord: boolean;
+  isAdmin: boolean;
   redirectAfterAuth: (path: string) => void;
 }
 
@@ -24,6 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLandlord, setIsLandlord] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [returnToPath, setReturnToPath] = useState<string | null>(null);
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           }, 0);
         } else {
           setIsLandlord(false);
+          setIsAdmin(false);
         }
       }
     );
@@ -63,16 +66,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkUserRole = async (userId: string) => {
     try {
-      const { data } = await supabase
+      const { data: roles } = await supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'landlord')
-        .maybeSingle();
+        .eq('user_id', userId);
       
-      setIsLandlord(!!data);
+      const userRoles = roles?.map(r => r.role) || [];
+      setIsLandlord(userRoles.includes('landlord'));
+      setIsAdmin(userRoles.includes('admin'));
     } catch (error) {
       setIsLandlord(false);
+      setIsAdmin(false);
     }
   };
 
@@ -176,6 +180,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setSession(null);
       setIsLandlord(false);
+      setIsAdmin(false);
       
       // Clear all auth data from localStorage
       localStorage.removeItem('sb-rsfrvjaqxhoqavvscvwf-auth-token');
@@ -208,6 +213,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetPassword,
     signOut,
     isLandlord,
+    isAdmin,
     redirectAfterAuth
   };
 
