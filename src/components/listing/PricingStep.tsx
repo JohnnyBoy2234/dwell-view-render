@@ -26,7 +26,7 @@ export default function PricingStep({ control, errors }: PricingStepProps) {
         <Card className="p-6">
           <div className="space-y-4">
             <Label htmlFor="price" className="flex items-center gap-2 text-lg font-semibold">
-              <DollarSign className="h-5 w-5" />
+              <span className="w-5 h-5 flex items-center justify-center text-lg font-bold text-primary">R</span>
               Monthly Rent *
             </Label>
             <div className="relative">
