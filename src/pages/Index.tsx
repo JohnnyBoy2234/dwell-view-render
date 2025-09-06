@@ -376,26 +376,15 @@ const Index = () => {
               },
               {
                 title: 'Viewings and Scheduling',
-                desc: [
-                  'Calendaring system for property viewings',
-                  'Tenants and agents can book viewing times via shared calendar slots',
-                  'Automated notifications and reminders sent to tenants and landlords',
-                  'Viewing history and follow-up management'
-                ],
+                desc: 'Simplify the viewing process with an integrated calendar system that lets tenants and agents book available times instantly. Automated reminders and notifications keep everyone informed, reduce missed appointments, and make scheduling seamless for landlords managing multiple properties.',
                 icon: '📅',
                 gradient: 'from-green-500/20 to-emerald-500/20',
                 border: 'border-green-500/30',
                 iconBg: 'bg-gradient-to-br from-green-500 to-emerald-600',
               },
               {
-                title: 'Compliance and LeasePack Management',
-                desc: [
-                  'Storage and easy retrieval of compliance certificates (electrical, safety, etc)',
-                  'Digital lease agreement signing and stamping',
-                  'License, certification, and legal document management',
-                  'Tenant access to lease documents and compliance info',
-                  'Alerts for expiring certificates or renewal requirements'
-                ],
+                title: 'Lease & Compliance Hub',
+                desc: 'Simplify rentals with digital lease agreements that can be signed online. Tenants and landlords can easily download compliance certificates and legal documents, while smart alerts ensure renewals and expiries are never missed.',
                 icon: '📋',
                 gradient: 'from-purple-500/20 to-violet-500/20',
                 border: 'border-purple-500/30',
@@ -403,13 +392,7 @@ const Index = () => {
               },
               {
                 title: 'Maintenance Management',
-                desc: [
-                  'Tenant maintenance request submission portal',
-                  'Ticket management with tracking status (open, in progress, resolved)',
-                  'Coordination with maintenance teams and vendors',
-                  'Maintenance cost tracking and history logs',
-                  'Emergency maintenance alert system'
-                ],
+                desc: 'Make maintenance hassle-free with a simple request portal for tenants and an easy-to-track ticketing system for landlords. Every issue can be monitored from open to resolved, costs are logged for full transparency, and urgent requests trigger instant alerts.',
                 icon: '🔧',
                 gradient: 'from-orange-500/20 to-red-500/20',
                 border: 'border-orange-500/30',
@@ -417,13 +400,7 @@ const Index = () => {
               },
               {
                 title: 'Property Portfolio Management',
-                desc: [
-                  'Comprehensive dashboard for managing multiple properties',
-                  'Financial tracking with rent collection and expense monitoring',
-                  'Tenant communication hub with integrated messaging',
-                  'Document storage and organization system',
-                  'Performance analytics and reporting tools'
-                ],
+                desc: 'Manage your entire property portfolio in one place. From tracking rent and expenses to communicating with tenants and accessing performance insights, everything you need to stay in control is organized into one powerful dashboard.',
                 icon: '🏢',
                 gradient: 'from-cyan-500/20 to-teal-500/20',
                 border: 'border-cyan-500/30',
@@ -431,12 +408,7 @@ const Index = () => {
               },
               {
                 title: 'Smart Notifications & Alerts',
-                desc: [
-                  'Real-time notifications for applications, maintenance requests, and lease renewals',
-                  'Automated reminders for rent payments and document expiry',
-                  'Customizable alert preferences for different user types',
-                  'Multi-channel communication via email, SMS, and in-app notifications'
-                ],
+                desc: 'Stay on top of every detail with real-time notifications. From new applications and maintenance updates to rent reminders and expiring documents, our customizable alerts keep landlords and tenants informed instantly through email, WhatsApp, and in-app messaging.',
                 icon: '🔔',
                 gradient: 'from-pink-500/20 to-rose-500/20',
                 border: 'border-pink-500/30',
