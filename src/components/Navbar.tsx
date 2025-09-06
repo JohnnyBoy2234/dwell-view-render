@@ -61,6 +61,12 @@ const Navbar = () => {
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
+                  <Button 
+                    asChild 
+                    className="bg-success-green hover:bg-success-green-dark text-white"
+                  >
+                    <Link to="/list-property">List Property</Link>
+                  </Button>
                   {isLandlord && hasProperties ? (
                     <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Rental Manager</Link></Button>
                   ) : !isLandlord ? (
@@ -98,6 +104,12 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
+                  <Button 
+                    asChild 
+                    className="bg-success-green hover:bg-success-green-dark text-white"
+                  >
+                    <Link to="/list-property">List Property</Link>
+                  </Button>
                   <Button asChild><Link to="/auth">Sign In</Link></Button>
                 </>
               )}
@@ -159,6 +171,13 @@ const Navbar = () => {
             </div>
 
             <div className="p-4 border-t border-border space-y-2">
+              <Button 
+                className="w-full bg-success-green hover:bg-success-green-dark text-white" 
+                asChild 
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                <Link to="/list-property">List Property</Link>
+              </Button>
               {user ? (
                 <>
                   {isLandlord ? (
