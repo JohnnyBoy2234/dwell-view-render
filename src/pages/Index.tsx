@@ -189,6 +189,7 @@ const Index = () => {
       </div>
       
       {/* Hero Section */}
+     
       <section className="relative text-white overflow-hidden">
         {/* Premium Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
