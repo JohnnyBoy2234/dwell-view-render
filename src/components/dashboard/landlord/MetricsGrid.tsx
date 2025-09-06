@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Building, Users, FileText, DollarSign, TrendingUp, Home } from 'lucide-react';
+import { Building, Users, FileText, Banknote, TrendingUp, Home } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LandlordMetrics {
@@ -44,7 +44,7 @@ const MetricCard = ({
         <div className="h-8 bg-muted animate-pulse rounded" />
       ) : (
         <div className={`text-2xl font-bold ${textColor}`}>
-          {typeof value === 'number' && title.includes('Rent') 
+          {typeof value === 'number' && (title.includes('Rent') || title.includes('Revenue')) 
             ? `R${value.toLocaleString()}` 
             : value}
         </div>
@@ -79,7 +79,7 @@ export function MetricsGrid({ metrics, loading }: MetricsGridProps) {
     {
       title: 'Total Rent Due',
       value: metrics.totalRentDue,
-      icon: DollarSign,
+      icon: Banknote,
       gradient: 'bg-gradient-to-br from-white to-destructive/20',
       textColor: 'text-destructive',
     }
