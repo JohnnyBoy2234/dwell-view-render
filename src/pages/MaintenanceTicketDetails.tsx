@@ -313,7 +313,7 @@ export default function MaintenanceTicketDetails() {
               <div>
                 <Label className="text-xs font-medium text-muted-foreground">Property</Label>
                 <p className="text-sm font-medium">
-                  {ticket.properties?.price ? `R${ticket.properties.price.toLocaleString()}/month` : 'Property'}
+                  {ticket.properties?.title || 'Property'}
                 </p>
               </div>
               <div>

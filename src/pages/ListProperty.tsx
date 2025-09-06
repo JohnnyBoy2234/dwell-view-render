@@ -92,7 +92,7 @@ export default function ListProperty() {
         fieldsToValidate = ['property_type'];
         break;
       case 2:
-        fieldsToValidate = ['location', 'title', 'description'];
+        fieldsToValidate = ['location', 'description'];
         break;
       case 3:
         fieldsToValidate = ['bedrooms', 'bathrooms'];

@@ -16,24 +16,11 @@ export const useNotifications = (filters?: NotificationFilters) => {
     if (!user) return;
 
     try {
-      let query = supabase
+      const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-
-      // Apply filters
-      if (filters?.type) {
-        query = query.eq('type', filters.type);
-      }
-      if (filters?.is_read !== undefined) {
-        query = query.eq('is_read', filters.is_read);
-      }
-      if (filters?.priority) {
-        query = query.eq('priority', filters.priority);
-      }
-
-      const { data, error } = await query;
 
       if (error) {
         // If table doesn't exist, just return empty data instead of crashing
@@ -64,7 +51,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
     } finally {
       setLoading(false);
     }
-  }, [user, filters]);
+  }, [user]);
 
   // Mark notification as read
   const markAsRead = useCallback(async (notificationId: string) => {
@@ -285,7 +272,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
   useEffect(() => {
     if (!isConnected && user) {
       console.log('WebSocket disconnected, starting fallback polling');
-      const interval = setInterval(fetchNotifications, 30000); // Poll every 30 seconds
+      const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
   }, [isConnected, user, fetchNotifications]);

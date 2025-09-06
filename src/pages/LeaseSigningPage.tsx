@@ -147,7 +147,7 @@ export default function LeaseSigningPage() {
           <div>
             <h1 className="text-2xl font-bold">Lease Agreement</h1>
             <p className="text-muted-foreground">
-              {lease.lease_data?.property_address || 'Property Address'}
+              {lease.lease_data?.property?.address || 'Property Address'}
             </p>
           </div>
         </div>
@@ -165,7 +165,7 @@ export default function LeaseSigningPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Property Address</label>
-              <p className="text-sm">{lease.lease_data?.property_address || 'N/A'}</p>
+              <p className="text-sm">{lease.lease_data?.property?.address || 'N/A'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Rent Amount</label>
@@ -319,7 +319,7 @@ export default function LeaseSigningPage() {
           isOpen={showSignatureModal}
           onClose={() => setShowSignatureModal(false)}
           onSign={handleSign}
-          title={`Sign as ${isLandlord ? 'Landlord' : 'Tenant'}`}
+          role={isLandlord ? 'LANDLORD' : 'TENANT'}
           loading={signingLoading}
         />
       )}

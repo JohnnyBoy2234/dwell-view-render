@@ -207,8 +207,8 @@ export const TemplateLeaseWorkflow = ({
           payment_method: (leaseData.paymentMethod as 'EFT' | 'Cash' | 'Cheque') || 'EFT',
           late_fee_policy: {
             grace_days: leaseData.lateFeeGraceDays || 7,
-            late_fee_fixed: parseFloat(leaseData.lateFeeAmount) || 250,
-            late_fee_percent: parseFloat(leaseData.lateFeePercent) || 0,
+            late_fee_fixed: parseFloat(leaseData.lateFeeAmount?.toString() || '250') || 250,
+            late_fee_percent: parseFloat(leaseData.lateFeePercent?.toString() || '0') || 0,
           },
         },
         deposit: {
@@ -222,7 +222,7 @@ export const TemplateLeaseWorkflow = ({
           other: leaseData.otherUtilities || '',
         },
         maintenance: {
-          tenant_minor_repairs_cap: parseFloat(leaseData.tenantMinorRepairsCap) || 500,
+          tenant_minor_repairs_cap: parseFloat(leaseData.tenantMinorRepairsCap?.toString() || '500') || 500,
           landlord_responsible: leaseData.landlordMaintenanceResponsible || ['Structural repairs', 'Plumbing issues', 'Electrical problems'],
         },
         access: {
