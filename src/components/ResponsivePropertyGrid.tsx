@@ -63,9 +63,9 @@ export const ResponsivePropertyGrid: React.FC<ResponsivePropertyGridProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 items-stretch">
       {properties.map((property) => (
-        <div key={property.id} className="animate-fade-in">
+        <div key={property.id} className="animate-fade-in h-full">
           <PropertyCard
             id={property.id}
             title={`R${property.price.toLocaleString()}/month`}

@@ -35,7 +35,7 @@ const PropertyCard = ({
 
   return (
     <Card 
-      className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg"
+      className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg h-full flex flex-col"
       role="button"
       tabIndex={0}
       onClick={() => navigate(`/property/${id}`)}
@@ -59,34 +59,32 @@ const PropertyCard = ({
         )}
       </div>
 
-      <CardContent className="p-4">
-        <div className="space-y-2">
+      <CardContent className="p-4 flex-1 flex flex-col">
+        <div className="space-y-2 flex-1 flex flex-col">
           <div className="flex items-center justify-between">
-            <Badge variant="secondary">{type}</Badge>
+            <Badge variant="secondary" className="line-clamp-1">{type}</Badge>
           </div>
           
           <h3 className="font-semibold text-lg line-clamp-1">R{price.toLocaleString()}/month</h3>
           
           <div className="flex items-center text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-1" />
-            <span className="text-sm">{type} in {location}</span>
+            <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
+            <span className="text-sm line-clamp-1">{type} in {location}</span>
           </div>
 
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+          <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-auto">
             <div className="flex items-center">
-              <Bed className="h-4 w-4 mr-1" />
+              <Bed className="h-4 w-4 mr-1 flex-shrink-0" />
               <span>{beds} beds</span>
             </div>
             <div className="flex items-center">
-              <Bath className="h-4 w-4 mr-1" />
+              <Bath className="h-4 w-4 mr-1 flex-shrink-0" />
               <span>{baths} baths</span>
             </div>
-            {parking > 0 && (
-              <div className="flex items-center">
-                <Car className="h-4 w-4 mr-1" />
-                <span>{parking} parking</span>
-              </div>
-            )}
+            <div className="flex items-center">
+              <Car className="h-4 w-4 mr-1 flex-shrink-0" />
+              <span>{parking} parking</span>
+            </div>
           </div>
         </div>
       </CardContent>
