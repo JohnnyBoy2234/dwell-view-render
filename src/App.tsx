@@ -36,6 +36,8 @@ import DocuSignRedirect from "./pages/DocuSignRedirect";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
+import VerifyId from "@/pages/VerifyId";
+import KycManagement from "@/pages/admin/KycManagement";
 import { Analytics } from "@vercel/analytics/next"
 
 const queryClient = new QueryClient();
@@ -53,6 +55,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
             <Route path="/admin/management" element={<RouteGuard><AdminManagement /></RouteGuard>} />
             <Route path="/admin/documents" element={<RouteGuard><DocumentReview /></RouteGuard>} />
+            <Route path="/admin/kyc" element={<RouteGuard><KycManagement /></RouteGuard>} />
 
             {/* Routes with Navbar */}
             <Route path="/" element={<><Navbar /><Index /></>} />
@@ -83,6 +86,7 @@ const App = () => (
             <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
             <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />
             <Route path="/tenant/messages" element={<RouteGuard><TenantMessages /></RouteGuard>} />
+            <Route path="/verify-id" element={<RouteGuard><VerifyId /></RouteGuard>} />
             <Route path="/apply/:id" element={<PropertyDetail />} />
             <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
             <Route path="*" element={<NotFound />} />
