@@ -138,7 +138,11 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={markAllAsRead}
+                      onClick={async () => {
+                        console.log('Mark all as read clicked, unreadCount:', unreadCount);
+                        await markAllAsRead();
+                        console.log('Mark all as read completed');
+                      }}
                       className="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                     >
                       <CheckCheck className="h-3 w-3 mr-1" />

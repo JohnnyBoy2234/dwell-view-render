@@ -130,8 +130,12 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
   // Mark all notifications as read
   const markAllAsRead = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user, cannot mark all as read');
+      return;
+    }
 
+    console.log('Marking all notifications as read for user:', user.id);
     try {
       const { error } = await supabase
         .from('notifications')
@@ -142,13 +146,27 @@ export const useNotifications = (filters?: NotificationFilters) => {
         .eq('user_id', user.id)
         .eq('is_read', false);
 
-      if (error) throw error;
+      if (error) {
+        // If table doesn't exist, just update local state
+        if (error.code === '42P01' || error.message.includes('relation "notifications" does not exist')) {
+          console.log('Notifications table does not exist, updating local state only');
+          setNotifications(prev => 
+            prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
+          );
+          setUnreadCount(0);
+          console.log('Local state updated (fallback), unreadCount set to 0');
+          return;
+        }
+        throw error;
+      }
 
       // Update local state
+      console.log('Database update successful, updating local state');
       setNotifications(prev => 
         prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
       );
       setUnreadCount(0);
+      console.log('Local state updated, unreadCount set to 0');
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
       setError(err instanceof Error ? err.message : 'Failed to mark all notifications as read');
