@@ -368,13 +368,7 @@ const Index = () => {
             {[
               {
                 title: 'Tenant Applications and Screening',
-                desc: [
-                  'Online tenant application submission form capturing personal info, employment, rental history',
-                  'Automated credit and background checks integration',
-                  'Reference and employment verification',
-                  'Risk assessment and scoring system for applicant suitability',
-                  'Application status tracking and communication hub'
-                ],
+                desc: 'Apply online in minutes with a simple form capturing your details, employment, and rental history. Credit checks are powered by Experian, with references and employment verified for trust. Our smart risk scoring and real-time updates give landlords clear insights, while tenants enjoy a smooth, effortless rental journey',
                 icon: '👥',
                 gradient: 'from-blue-500/20 to-indigo-500/20',
                 border: 'border-blue-500/30',
@@ -474,14 +468,20 @@ const Index = () => {
                     <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
                       {feature.title}
                     </h3>
-                    <ul className="text-muted-foreground leading-relaxed text-sm space-y-1 flex-1">
-                      {feature.desc.map((item, index) => (
-                        <li key={index} className="flex items-start">
-                          <span className="text-primary mr-2 mt-1">•</span>
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {Array.isArray(feature.desc) ? (
+                      <ul className="text-muted-foreground leading-relaxed text-sm space-y-1 flex-1">
+                        {feature.desc.map((item, index) => (
+                          <li key={index} className="flex items-start">
+                            <span className="text-primary mr-2 mt-1">•</span>
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-muted-foreground leading-relaxed text-sm flex-1">
+                        {feature.desc}
+                      </p>
+                    )}
                   </div>
                 </div>
                 
