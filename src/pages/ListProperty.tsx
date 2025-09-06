@@ -161,6 +161,7 @@ export default function ListProperty() {
       const { error } = await supabase
         .from('properties')
         .insert({
+          title: `${data.property_type} in ${data.location}`, // Generate title from property type and location
           description: data.description,
           location: data.location,
           property_type: data.property_type,
