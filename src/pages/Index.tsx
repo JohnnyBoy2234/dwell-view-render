@@ -210,7 +210,7 @@ const Index = () => {
             </div>
             
             <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
-              Find your perfect rental home in South Africa — connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
+              Find your perfect rental home in South Africa connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
             </p>
 
             {/* Glass Search Bar */}
@@ -360,7 +360,7 @@ const Index = () => {
               From Listing to Lease, Made Easy
             </p>
             <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring—giving you confidence every time.
+              No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring giving you confidence every time.
             </p>
           </div>
 
