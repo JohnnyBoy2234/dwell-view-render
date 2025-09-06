@@ -68,7 +68,7 @@ const Navbar = () => {
                     <Link to="/list-property">List Property</Link>
                   </Button>
                   {isLandlord && hasProperties ? (
-                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Rental Manager</Link></Button>
+                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Landlord Dashboard</Link></Button>
                   ) : !isLandlord ? (
                     <Button variant="ghost" size="sm" asChild><Link to="/enhancedtenantdashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
                   ) : (
@@ -192,7 +192,7 @@ const Navbar = () => {
               {user ? (
                 <>
                   {isLandlord ? (
-                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedlandlorddashboard">Rental Manager</Link></Button>
+                    <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedlandlorddashboard">Landlord Dashboard</Link></Button>
                   ) : (
                     <Button variant="outline" className="w-full" asChild onClick={() =>setIsMobileMenuOpen(false)}><Link to="/enhancedtenantdashboard">My Dashboard</Link></Button>
                   )}

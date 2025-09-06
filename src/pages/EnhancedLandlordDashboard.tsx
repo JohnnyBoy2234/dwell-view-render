@@ -2055,7 +2055,7 @@ export default function EnhancedLandlordDashboard() {
 
   return (
     <EnhancedDashboardLayout 
-      title="Rental Manager" 
+      title="Landlord Dashboard" 
       currentTab={currentTab}
       onTabChange={handleTabChange}
     >

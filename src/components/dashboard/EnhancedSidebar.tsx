@@ -35,7 +35,7 @@ const tenantItems: SidebarItem[] = [
 ];
 
 const landlordItems: SidebarItem[] = [
-  { title: 'Rental Manager', url: '/enhancedlandlorddashboard', icon: Home },
+  { title: 'Landlord Dashboard', url: '/enhancedlandlorddashboard', icon: Home },
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
   { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare },
   { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
