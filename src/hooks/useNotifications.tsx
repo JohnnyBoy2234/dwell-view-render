@@ -55,7 +55,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
         notification.id
       );
       
-      setNotifications(validNotifications);
+      setNotifications(validNotifications as Notification[]);
       setUnreadCount(validNotifications.filter(n => !n.is_read).length || 0);
       setError(null);
     } catch (err) {
@@ -211,7 +211,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
       // Update local state if it's for the current user
       if (notification.user_id === user?.id) {
-        setNotifications(prev => [notification, ...prev]);
+        setNotifications(prev => [notification as Notification, ...prev]);
         if (!notification.is_read) {
           setUnreadCount(prev => prev + 1);
         }

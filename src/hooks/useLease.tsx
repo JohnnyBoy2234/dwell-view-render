@@ -39,7 +39,7 @@ export function useLease(leaseId: string | null) {
 
       if (leaseError) throw leaseError;
 
-      setLease(leaseData);
+      setLease(leaseData as unknown as LeaseWithSignatures);
     } catch (err) {
       console.error('Error fetching lease:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch lease');
@@ -272,7 +272,7 @@ export function useLeases(propertyId?: string, userId?: string) {
 
       if (error) throw error;
 
-      setLeases(data || []);
+      setLeases((data || []) as unknown as Lease[]);
     } catch (err) {
       console.error('Error fetching leases:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch leases');

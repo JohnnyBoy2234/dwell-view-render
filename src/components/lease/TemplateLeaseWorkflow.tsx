@@ -15,10 +15,17 @@ interface TemplateLeaseWorkflowProps {
   propertyId: string;
   onBack: () => void;
   onComplete: () => void;
-  selectedTenant?: { id: string; name: string } | null;
+  selectedTenant?: { 
+    id: string; 
+    name: string;
+    id_number?: string;
+    email?: string;
+    phone?: string;
+    current_address?: string;
+  } | null;
 }
 
-interface LeaseData {
+interface TemplateLeaseData {
   leaseType: 'fixed' | 'month-to-month';
   startDate: string;
   endDate: string;
@@ -27,6 +34,47 @@ interface LeaseData {
   dueDay: string;
   selectedClauses: string[];
   customClauses: string;
+  // Landlord information
+  landlordName?: string;
+  landlordIdNumber?: string;
+  landlordCompany?: string;
+  landlordEmail?: string;
+  landlordPhone?: string;
+  landlordAddress?: string;
+  // Property information
+  propertyAddress?: string;
+  propertyUnit?: string;
+  propertyCity?: string;
+  propertyProvince?: string;
+  propertyPostalCode?: string;
+  propertyType?: string;
+  propertyParking?: string;
+  // Terms
+  optionToRenew?: boolean;
+  noticePeriodDays?: number;
+  // Rent details
+  rentDueDay?: number;
+  paymentMethod?: string;
+  lateFeeGraceDays?: number;
+  lateFeeAmount?: number;
+  lateFeePercent?: number;
+  // Deposit
+  depositReturnDays?: number;
+  // Utilities
+  waterResponsibility?: string;
+  electricityResponsibility?: string;
+  internetResponsibility?: string;
+  otherUtilities?: string;
+  // Maintenance
+  tenantMinorRepairsCap?: number;
+  landlordMaintenanceResponsible?: string;
+  // Access
+  entryNoticeHours?: number;
+  // Legal
+  governingLaw?: string;
+  // Attachments
+  moveInInspectionRequired?: boolean;
+  annexures?: string;
 }
 
 const commonClauses = [
@@ -47,7 +95,7 @@ export const TemplateLeaseWorkflow = ({
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [leaseData, setLeaseData] = useState<LeaseData>({
+  const [leaseData, setLeaseData] = useState<TemplateLeaseData>({
     leaseType: 'fixed',
     startDate: '',
     endDate: '',
@@ -215,7 +263,7 @@ export const TemplateLeaseWorkflow = ({
 
       // TODO: Send notification to tenant about lease ready for signing
       // This would typically send an email or in-app notification to the tenant
-      console.log(`Lease ready for tenant ${tenancy.tenant_id} to sign: ${data.documentUrl}`);
+      console.log(`Lease ready for tenant ${selectedTenant.id} to sign: ${data.documentUrl}`);
 
       toast.success("Lease generated successfully! Tenant will be notified to sign.");
       onComplete();

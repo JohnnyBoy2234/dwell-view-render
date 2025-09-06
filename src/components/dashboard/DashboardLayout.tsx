@@ -55,7 +55,7 @@ export function DashboardLayout({ children, title, actions }: DashboardLayoutPro
                       {notifications.slice(0, 8).map((n) => (
                         <DropdownMenuItem key={n.id} asChild>
                           <Link
-                            to={n.link_url || '#'}
+                            to={n.link_url || n.action_url || '#'}
                             className={`block w-full text-left px-3 py-2 ${n.is_read ? 'opacity-70' : ''}`}
                             onClick={() => markAsRead(n.id)}
                           >

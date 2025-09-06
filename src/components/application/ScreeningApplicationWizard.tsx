@@ -173,15 +173,16 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       // Only auto-fill basic user information from profiles table
       const { data: userProfile } = await supabase
         .from("profiles")
-        .select("first_name, last_name, phone")
+        .select("display_name, phone")
         .eq("user_id", user.id)
         .maybeSingle();
       
       if (userProfile) {
+        const displayNameParts = userProfile.display_name?.split(' ') || [''];
         setFormData((prev) => ({
           ...prev,
-          first_name: userProfile.first_name || "",
-          last_name: userProfile.last_name || "",
+          first_name: displayNameParts[0] || "",
+          last_name: displayNameParts.slice(1).join(' ') || "",
           phone: userProfile.phone || "",
           // Keep screening consent as false to require user to explicitly agree each time
           screening_consent: false,

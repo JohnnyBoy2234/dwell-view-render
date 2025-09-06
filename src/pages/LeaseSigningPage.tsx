@@ -59,7 +59,7 @@ export default function LeaseSigningPage() {
         await createLeaseNotifications.leaseSigned(
           lease?.landlord_user_id || '',
           lease?.tenant_user_id || '',
-          lease?.lease_data?.property_address || 'Property',
+          lease?.lease_data?.property?.address || 'Property',
           lease?.id || '',
           'landlord'
         );
@@ -67,7 +67,7 @@ export default function LeaseSigningPage() {
         await createLeaseNotifications.leaseSigned(
           lease?.landlord_user_id || '',
           lease?.tenant_user_id || '',
-          lease?.lease_data?.property_address || 'Property',
+          lease?.lease_data?.property?.address || 'Property',
           lease?.id || '',
           'tenant'
         );
@@ -169,18 +169,18 @@ export default function LeaseSigningPage() {
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Rent Amount</label>
-              <p className="text-sm">R{lease.lease_data?.rent_amount?.toLocaleString() || 'N/A'}</p>
+              <p className="text-sm">R{lease.lease_data?.rent?.monthly_rent?.toLocaleString() || 'N/A'}</p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Lease Start Date</label>
               <p className="text-sm">
-                {lease.lease_data?.start_date ? new Date(lease.lease_data.start_date).toLocaleDateString() : 'N/A'}
+                {lease.lease_data?.term?.start_date ? new Date(lease.lease_data.term.start_date).toLocaleDateString() : 'N/A'}
               </p>
             </div>
             <div>
               <label className="text-sm font-medium text-muted-foreground">Lease End Date</label>
               <p className="text-sm">
-                {lease.lease_data?.end_date ? new Date(lease.lease_data.end_date).toLocaleDateString() : 'N/A'}
+                {lease.lease_data?.term?.end_date ? new Date(lease.lease_data.term.end_date).toLocaleDateString() : 'N/A'}
               </p>
             </div>
           </div>
