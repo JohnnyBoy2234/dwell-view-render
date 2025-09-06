@@ -1,4 +1,5 @@
-import { Home, MessageSquare, FileText, DollarSign } from 'lucide-react';
+import { Home, MessageSquare, FileText } from 'lucide-react';
+import { RandIcon } from '@/components/icons/RandIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -17,7 +18,7 @@ const tenantItems = [
   { title: 'Dashboard', url: '/tenant-dashboard', icon: Home },
   { title: 'Messages', url: '/tenant/messages', icon: MessageSquare },
   { title: 'My Leases', url: '#leases-section', icon: FileText, scrollTo: 'leases-section' },
-  { title: 'Payments', url: '/tenant/payments', icon: DollarSign },
+  { title: 'Payments', url: '/tenant/payments', icon: RandIcon },
 ];
 
 export function TenantSidebar() {

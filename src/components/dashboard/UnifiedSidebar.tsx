@@ -7,11 +7,11 @@ import {
   HelpCircle, 
   Building, 
   Users, 
-  DollarSign, 
   BarChart3,
   Settings,
   Calendar
 } from 'lucide-react';
+import { RandIcon } from '@/components/icons/RandIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -43,7 +43,7 @@ const landlordNavigationItems = [
   { title: 'Properties', url: '/dashboard/properties', icon: Building, description: 'Manage Your Properties' },
   { title: 'Tenants', url: '/dashboard/tenants', icon: Users, description: 'Tenant Management' },
   { title: 'Messages', url: '/dashboard/messages', icon: MessageSquare, description: 'Communications' },
-  { title: 'Payment Tracking', url: '/dashboard/payments', icon: DollarSign, description: 'Rent & Payment Management' },
+  { title: 'Payment Tracking', url: '/dashboard/payments', icon: RandIcon, description: 'Rent & Payment Management' },
   { title: 'Lease Management', url: '/dashboard/leases', icon: FileText, description: 'Lease Agreements' },
   { title: 'Maintenance', url: '/dashboard/maintenance', icon: Wrench, description: 'Maintenance Requests' },
   { title: 'Analytics', url: '/dashboard/analytics', icon: BarChart3, description: 'Reports & Insights' },
