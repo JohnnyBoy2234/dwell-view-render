@@ -170,49 +170,33 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         return;
       }
 
-      // Screening profile
-      const { data: profile } = await supabase
-        .from("screening_profiles")
-        .select("*")
+      // Only auto-fill basic user information from profiles table
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, phone")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (profile) {
+      
+      if (userProfile) {
         setFormData((prev) => ({
           ...prev,
-          first_name: profile.first_name || "",
-          middle_name: profile.middle_name || "",
-          last_name: profile.last_name || "",
-          has_pets: profile.has_pets || false,
-          pet_details: profile.pet_details || "",
-          screening_consent: profile.screening_consent || false,
+          first_name: userProfile.first_name || "",
+          last_name: userProfile.last_name || "",
+          phone: userProfile.phone || "",
+          // Keep screening consent as false to require user to explicitly agree each time
+          screening_consent: false,
         }));
-
-        // Load existing documents
-        if (profile.documents && Array.isArray(profile.documents)) {
-          setUploadedDocuments(profile.documents as unknown as DocumentItem[]);
-        }
       }
 
-      // Screening details
-      const { data: details } = await supabase
-        .from("screening_details")
-        .select("*")
+      // Load existing documents from screening profile (if any)
+      const { data: profile } = await supabase
+        .from("screening_profiles")
+        .select("documents")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (details) {
-        setFormData((prev) => ({
-          ...prev,
-          id_number: details.id_number || "",
-          phone: details.phone || "",
-          employment_status: details.employment_status || "",
-          job_title: details.job_title || "",
-          company_name: details.company_name || "",
-          net_monthly_income: details.net_monthly_income?.toString() || "",
-          current_address: details.current_address || "",
-          reason_for_moving: details.reason_for_moving || "",
-          previous_landlord_name: details.previous_landlord_name || "",
-          previous_landlord_contact: details.previous_landlord_contact || "",
-        }));
+      
+      if (profile?.documents && Array.isArray(profile.documents)) {
+        setUploadedDocuments(profile.documents as unknown as DocumentItem[]);
       }
     } catch (err) {
       console.error("Error loading existing application data", err);
