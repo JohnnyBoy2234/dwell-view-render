@@ -265,6 +265,157 @@ export type Database = {
           },
         ]
       }
+      kyc_audit: {
+        Row: {
+          action: string
+          actor: string | null
+          created_at: string | null
+          id: number
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          created_at?: string | null
+          id?: number
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          created_at?: string | null
+          id?: number
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      kyc_profiles: {
+        Row: {
+          created_at: string | null
+          id_doc_path: string | null
+          notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_path: string | null
+          status: Database["public"]["Enums"]["kyc_status"]
+          submitted_at: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id_doc_path?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id_doc_path?: string | null
+          notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string | null
+          status?: Database["public"]["Enums"]["kyc_status"]
+          submitted_at?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lease_audit_logs: {
+        Row: {
+          action: string
+          actor_user_id: string
+          created_at: string | null
+          id: string
+          lease_id: string
+          metadata: Json | null
+        }
+        Insert: {
+          action: string
+          actor_user_id: string
+          created_at?: string | null
+          id?: string
+          lease_id: string
+          metadata?: Json | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string
+          created_at?: string | null
+          id?: string
+          lease_id?: string
+          metadata?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lease_audit_logs_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lease_signatures: {
+        Row: {
+          created_at: string | null
+          geo_meta: Json | null
+          id: string
+          ip_address: string | null
+          lease_id: string
+          role: string
+          signature_hash: string | null
+          signature_image_url: string | null
+          signed_at: string | null
+          signer_user_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          geo_meta?: Json | null
+          id?: string
+          ip_address?: string | null
+          lease_id: string
+          role: string
+          signature_hash?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_user_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          geo_meta?: Json | null
+          id?: string
+          ip_address?: string | null
+          lease_id?: string
+          role?: string
+          signature_hash?: string | null
+          signature_image_url?: string | null
+          signed_at?: string | null
+          signer_user_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lease_signatures_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lease_templates: {
         Row: {
           created_at: string
@@ -294,6 +445,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      leases: {
+        Row: {
+          created_at: string | null
+          id: string
+          landlord_user_id: string
+          lease_data: Json
+          pdf_draft_url: string | null
+          pdf_signed_url: string | null
+          property_id: string
+          status: string
+          tenant_user_id: string | null
+          updated_at: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          landlord_user_id: string
+          lease_data: Json
+          pdf_draft_url?: string | null
+          pdf_signed_url?: string | null
+          property_id: string
+          status: string
+          tenant_user_id?: string | null
+          updated_at?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          landlord_user_id?: string
+          lease_data?: Json
+          pdf_draft_url?: string | null
+          pdf_signed_url?: string | null
+          property_id?: string
+          status?: string
+          tenant_user_id?: string | null
+          updated_at?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leases_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       maintenance_messages: {
         Row: {
@@ -1095,6 +1296,15 @@ export type Database = {
         Args: { display_name_param: string; email_param: string }
         Returns: Json
       }
+      create_kyc_audit_log: {
+        Args: {
+          _action: string
+          _actor?: string
+          _metadata?: Json
+          _user_id: string
+        }
+        Returns: undefined
+      }
       create_notification: {
         Args: {
           _link_url: string
@@ -1121,6 +1331,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: {
+        Args: { user_id?: string }
+        Returns: boolean
+      }
       mark_messages_as_read: {
         Args: { conversation_uuid: string; user_role: string }
         Returns: undefined
@@ -1139,6 +1353,7 @@ export type Database = {
       }
     }
     Enums: {
+      kyc_status: "not_started" | "submitted" | "approved" | "declined"
       user_role: "tenant" | "landlord" | "admin"
     }
     CompositeTypes: {
@@ -1267,6 +1482,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      kyc_status: ["not_started", "submitted", "approved", "declined"],
       user_role: ["tenant", "landlord", "admin"],
     },
   },
