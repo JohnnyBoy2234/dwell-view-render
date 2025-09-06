@@ -239,9 +239,6 @@ export default function ListProperty() {
             <span className="text-sm font-medium text-muted-foreground">
               Step {currentStep} of {steps.length}
             </span>
-            <span className="text-sm font-medium text-primary">
-              {Math.round(progress)}% complete
-            </span>
           </div>
           <Progress value={progress} className="h-2" />
           
