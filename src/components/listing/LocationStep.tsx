@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
-import { MapPin, PenTool, FileText } from 'lucide-react';
+import { MapPin, FileText } from 'lucide-react';
 import { ListingFormData } from '@/pages/ListProperty';
 
 interface LocationStepProps {
@@ -49,34 +49,6 @@ export default function LocationStep({ control, errors }: LocationStepProps) {
           </p>
         </div>
 
-        {/* Title */}
-        <div className="space-y-2">
-          <Label htmlFor="title" className="flex items-center gap-2">
-            <PenTool className="h-4 w-4" />
-            Property Title *
-          </Label>
-          <Controller
-            name="title"
-            control={control}
-            rules={{ 
-              required: 'Title is required',
-              maxLength: { value: 100, message: 'Title should not exceed 100 characters' }
-            }}
-            render={({ field }) => (
-              <Input
-                {...field}
-                placeholder="e.g., Modern 2-bedroom apartment with stunning city views"
-                className="text-base"
-              />
-            )}
-          />
-          {errors.title && (
-            <p className="text-sm text-destructive">{errors.title.message}</p>
-          )}
-          <p className="text-sm text-muted-foreground">
-            Create an eye-catching title that highlights your property's best features
-          </p>
-        </div>
 
         {/* Description */}
         <div className="space-y-2">

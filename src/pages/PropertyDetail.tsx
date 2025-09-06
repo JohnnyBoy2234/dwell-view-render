@@ -367,12 +367,11 @@ export default function PropertyDetail() {
             {property.featured && <Badge variant="secondary">Featured</Badge>}
             <Badge>{property.status}</Badge>
           </div>
-          <h1 className="text-3xl font-bold mb-2">{property.title}</h1>
+          <h1 className="text-3xl font-bold mb-2">R{property.price.toLocaleString()}/month</h1>
           <div className="flex items-center text-muted-foreground mb-4">
             <MapPin className="h-4 w-4 mr-1" />
-            {property.location}
+            {property.property_type} in {property.location}
           </div>
-          <div className="text-3xl font-bold">R{property.price.toLocaleString()}/month</div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">

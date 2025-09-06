@@ -68,7 +68,7 @@ export const ResponsivePropertyGrid: React.FC<ResponsivePropertyGridProps> = ({
         <div key={property.id} className="animate-fade-in">
           <PropertyCard
             id={property.id}
-            title={property.title}
+            title={`R${property.price.toLocaleString()}/month`}
             location={property.location}
             price={property.price}
             beds={property.bedrooms}

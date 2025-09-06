@@ -23,7 +23,6 @@ export interface ListingFormData {
   
   // Location
   location: string;
-  title: string;
   description: string;
   
   // Details
@@ -63,7 +62,6 @@ export default function ListProperty() {
     defaultValues: {
       property_type: '',
       location: '',
-      title: '',
       description: '',
       bedrooms: undefined,
       bathrooms: undefined,
@@ -163,7 +161,6 @@ export default function ListProperty() {
       const { error } = await supabase
         .from('properties')
         .insert({
-          title: data.title,
           description: data.description,
           location: data.location,
           property_type: data.property_type,

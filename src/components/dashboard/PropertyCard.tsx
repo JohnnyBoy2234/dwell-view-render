@@ -33,14 +33,13 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
               {property.images && property.images.length > 0 && (
                 <img
                   src={property.images[0]}
-                  alt={property.title}
+                  alt={`${property.property_type} in ${property.location}`}
                   className="w-16 h-16 object-cover rounded-xl"
                 />
               )}
               <div>
-                <h3 className="text-base font-semibold text-brand-gray-900">{property.title}</h3>
-                <p className="text-sm text-brand-gray-500">{property.location}</p>
-                <p className="text-sm font-medium">R{property.price.toLocaleString()}/month</p>
+                <h3 className="text-base font-semibold text-brand-gray-900">R{property.price.toLocaleString()}/month</h3>
+                <p className="text-sm text-brand-gray-500">{property.property_type} in {property.location}</p>
               </div>
             </div>
           </div>

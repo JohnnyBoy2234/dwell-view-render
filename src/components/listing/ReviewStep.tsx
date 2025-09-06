@@ -12,7 +12,6 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
   const {
     property_type,
     location,
-    title,
     description,
     bedrooms,
     bathrooms,
@@ -59,7 +58,7 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
                 <MapPin className="h-4 w-4" />
                 {location}
               </div>
-              <h3 className="text-xl font-semibold">{title}</h3>
+              <h3 className="text-xl font-semibold">{property_type} in {location}</h3>
             </div>
             
             <div className="flex items-center gap-4 text-sm">

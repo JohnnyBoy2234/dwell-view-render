@@ -224,13 +224,12 @@ export default function PropertyManagement() {
             <Home className="h-8 w-8 text-white" />
           </div>
           <div className="flex-1">
-            <h1 className="text-2xl font-bold">{property.title}</h1>
-            <p className="text-muted-foreground">{property.location}</p>
+            <h1 className="text-2xl font-bold">R{property.price.toLocaleString()}/month</h1>
+            <p className="text-muted-foreground">{property.property_type} in {property.location}</p>
             <div className="flex items-center gap-4 mt-2">
               <Badge variant={getStatusBadgeVariant(property.status)}>
                 {property.status.toUpperCase()}
               </Badge>
-              <span className="text-lg font-semibold">R{property.price.toLocaleString()}/month</span>
             </div>
           </div>
         </div>

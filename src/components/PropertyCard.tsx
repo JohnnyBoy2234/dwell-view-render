@@ -49,7 +49,7 @@ const PropertyCard = ({
       <div className="relative overflow-hidden rounded-t-lg">
         <img
           src={image}
-          alt={title}
+          alt={`${type} in ${location}`}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />
         {featured && (
@@ -63,17 +63,13 @@ const PropertyCard = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Badge variant="secondary">{type}</Badge>
-            <span className="text-2xl font-bold text-primary">
-              R{price.toLocaleString()}
-              <span className="text-sm font-normal text-muted-foreground">/month</span>
-            </span>
           </div>
           
-          <h3 className="font-semibold text-lg line-clamp-1">{title}</h3>
+          <h3 className="font-semibold text-lg line-clamp-1">R{price.toLocaleString()}/month</h3>
           
           <div className="flex items-center text-muted-foreground">
             <MapPin className="h-4 w-4 mr-1" />
-            <span className="text-sm">{location}</span>
+            <span className="text-sm">{type} in {location}</span>
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-muted-foreground">
