@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, ArrowLeft, Mail } from 'lucide-react';
+import EmailVerification from '@/components/auth/EmailVerification';
 
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -87,6 +88,8 @@ export default function Auth() {
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
   const [forgotPasswordLoading, setForgotPasswordLoading] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
 
   // Redirect if already logged in
   useEffect(() => {
@@ -174,12 +177,9 @@ export default function Auth() {
     }
 
     if (isNewUser) {
-      toast({
-        title: "Account Created!",
-        description: "You can now sign in to your account.",
-        duration: 5000,
-      });
-      setActiveTab('signin');
+      // Show email verification step
+      setPendingEmail(signUpData.email);
+      setShowEmailVerification(true);
     }
     
     setSignUpLoading(false);
@@ -325,6 +325,46 @@ export default function Auth() {
     setResetEmailSent(false);
     setForgotPasswordLoading(false);
   };
+
+  // Email verification handlers
+  const handleEmailVerified = () => {
+    setShowEmailVerification(false);
+    setPendingEmail('');
+    toast({
+      title: "Email Verified!",
+      description: "Your account has been successfully created. You can now sign in.",
+      duration: 5000,
+    });
+    setActiveTab('signin');
+  };
+
+  const handleResendVerificationEmail = async () => {
+    try {
+      const { error } = await signUp(pendingEmail, signUpData.password, signUpData.role as 'tenant' | 'landlord');
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
+      throw new Error(error.message || "Failed to resend verification email");
+    }
+  };
+
+  const handleBackToSignUp = () => {
+    setShowEmailVerification(false);
+    setPendingEmail('');
+  };
+
+  // Show email verification if needed
+  if (showEmailVerification) {
+    return (
+      <EmailVerification
+        email={pendingEmail}
+        onVerified={handleEmailVerified}
+        onBack={handleBackToSignUp}
+        onResendEmail={handleResendVerificationEmail}
+      />
+    );
+  }
 
   // Show forgot password form if needed
   if (showForgotPassword) {

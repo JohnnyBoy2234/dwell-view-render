@@ -167,10 +167,10 @@ export const LeaseGenerator = ({
             <span className="font-medium">Tenant:</span> {tenancy.tenant_profile?.display_name}
           </div>
           <div>
-            <span className="font-medium">Monthly Rent:</span> ${tenancy.monthly_rent}
+            <span className="font-medium">Monthly Rent:</span> R{tenancy.monthly_rent}
           </div>
           <div>
-            <span className="font-medium">Security Deposit:</span> ${tenancy.security_deposit}
+            <span className="font-medium">Security Deposit:</span> R{tenancy.security_deposit}
           </div>
           <div>
             <span className="font-medium">Lease Term:</span> {tenancy.start_date} to {tenancy.end_date}

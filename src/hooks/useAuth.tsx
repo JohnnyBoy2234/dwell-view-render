@@ -98,15 +98,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: role
         });
         
-        // Create user profile
+        // Create user profile (email_verified will be false until verified)
         await supabase.from('profiles').insert({
           user_id: data.user.id,
           display_name: data.user.email?.split('@')[0] || 'User',
-          email_verified: true
+          email_verified: false
         });
 
       } catch (roleError) {
-        console.error('Error creating user role/profile or sending verification email:', roleError);
+        console.error('Error creating user role/profile:', roleError);
         // Don't fail signup if role creation fails, but log the error
       }
     }
@@ -124,6 +124,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error };
     }
 
+    // Check if email is verified
+    if (data.user && !data.user.email_confirmed_at) {
+      // Sign out the user if email is not verified
+      await supabase.auth.signOut();
+      return { 
+        error: { 
+          message: "Please verify your email before signing in. Check your inbox for a verification code." 
+        } 
+      };
+    }
     
     return { error: null };
   };
