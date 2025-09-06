@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,15 +19,13 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { KycStatusPill } from '@/components/kyc/KycStatusPill';
 import { KycReviewDrawer } from '@/components/admin/KycReviewDrawer';
+import { AdminLayout } from '@/components/admin/AdminLayout';
 import type { AdminKycListItem, KycStatus } from '@/types/kyc';
 
-export default function KycManagement() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+function KycManagementContent() {
   const { toast } = useToast();
   
   const [kycProfiles, setKycProfiles] = useState<AdminKycListItem[]>([]);
@@ -42,32 +39,6 @@ export default function KycManagement() {
     declined: 0
   });
 
-  // Check admin access
-  useEffect(() => {
-    const checkAdminAccess = async () => {
-      if (!user) {
-        navigate('/auth');
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase.rpc('is_admin', { user_id: user.id });
-        if (error || !data) {
-          toast({
-            variant: "destructive",
-            title: "Access Denied",
-            description: "You don't have admin privileges",
-          });
-          navigate('/');
-          return;
-        }
-      } catch (error) {
-        navigate('/');
-      }
-    };
-
-    checkAdminAccess();
-  }, [user, navigate]);
 
   const fetchKycProfiles = async () => {
     setLoading(true);
@@ -175,7 +146,7 @@ export default function KycManagement() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -346,5 +317,13 @@ export default function KycManagement() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function KycManagement() {
+  return (
+    <AdminLayout>
+      <KycManagementContent />
+    </AdminLayout>
   );
 }

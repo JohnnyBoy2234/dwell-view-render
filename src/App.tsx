@@ -55,7 +55,7 @@ const App = () => (
             <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
             <Route path="/admin/management" element={<RouteGuard><AdminManagement /></RouteGuard>} />
             <Route path="/admin/documents" element={<RouteGuard><DocumentReview /></RouteGuard>} />
-            <Route path="/admin/kyc" element={<RouteGuard><KycManagement /></RouteGuard>} />
+            <Route path="/admin/kyc" element={<KycManagement />} />
 
             {/* Routes with Navbar */}
             <Route path="/" element={<><Navbar /><Index /></>} />
