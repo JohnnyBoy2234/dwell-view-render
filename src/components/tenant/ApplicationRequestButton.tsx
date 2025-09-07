@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileText, X, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,12 +13,6 @@ interface ApplicationRequestButtonProps {
   className?: string;
 }
 
-interface ApplicationRequestStatus {
-  id: string;
-  status: 'requested' | 'invited' | 'declined';
-  created_at: string;
-}
-
 export const ApplicationRequestButton = ({ 
   propertyId, 
   landlordId, 
@@ -28,36 +22,7 @@ export const ApplicationRequestButton = ({
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [requestStatus, setRequestStatus] = useState<ApplicationRequestStatus | null>(null);
-
-  // Check if user has already requested application for this property
-  const checkRequestStatus = async () => {
-    if (!user) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('application_requests')
-        .select('*')
-        .eq('tenant_id', user.id)
-        .eq('property_id', propertyId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking request status:', error);
-        return;
-      }
-
-      if (data) {
-        setRequestStatus(data as ApplicationRequestStatus);
-      }
-    } catch (error) {
-      console.error('Error checking request status:', error);
-    }
-  };
-
-  useState(() => {
-    checkRequestStatus();
-  });
+  const [hasRequested, setHasRequested] = useState(false);
 
   const handleRequestApplication = async () => {
     if (!user) {
@@ -72,33 +37,21 @@ export const ApplicationRequestButton = ({
     setLoading(true);
     
     try {
-      // Insert application request
-      const { data, error } = await supabase
-        .from('application_requests')
+      // Send notification to landlord using notifications table
+      await supabase
+        .from('notifications')
         .insert({
-          tenant_id: user.id,
-          landlord_id: landlordId,
-          property_id: propertyId,
-          status: 'requested'
-        })
-        .select()
-        .single();
+          user_id: landlordId,
+          type: 'application_request',
+          message: `${user.email} has requested an application for ${propertyTitle}`,
+          metadata: {
+            tenantId: user.id,
+            propertyId: propertyId,
+            propertyTitle: propertyTitle
+          }
+        });
 
-      if (error) {
-        throw error;
-      }
-
-      setRequestStatus(data as ApplicationRequestStatus);
-
-      // Send notification to landlord
-      await supabase.functions.invoke('notify-application-request', {
-        body: {
-          landlordId,
-          tenantId: user.id,
-          propertyId,
-          propertyTitle
-        }
-      });
+      setHasRequested(true);
 
       toast({
         title: "Application requested",
@@ -117,60 +70,13 @@ export const ApplicationRequestButton = ({
     }
   };
 
-  const handleCloseRequest = async () => {
-    if (!requestStatus) return;
-
-    setLoading(true);
-    
-    try {
-      const { error } = await supabase
-        .from('application_requests')
-        .delete()
-        .eq('id', requestStatus.id);
-
-      if (error) {
-        throw error;
-      }
-
-      setRequestStatus(null);
-
-      toast({
-        title: "Request withdrawn",
-        description: "Your application request has been withdrawn."
-      });
-
-    } catch (error) {
-      console.error('Error withdrawing request:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to withdraw request. Please try again."
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'requested':
-        return <Badge variant="secondary">Application Requested</Badge>;
-      case 'invited':
-        return <Badge className="bg-green-100 text-green-800">Application Invited</Badge>;
-      case 'declined':
-        return <Badge variant="destructive">Application Declined</Badge>;
-      default:
-        return null;
-    }
-  };
-
   if (!user || user.id === landlordId) {
     return null;
   }
 
   return (
     <div className="space-y-2">
-      {!requestStatus ? (
+      {!hasRequested ? (
         <Button 
           variant="outline" 
           className={className}
@@ -190,20 +96,7 @@ export const ApplicationRequestButton = ({
           )}
         </Button>
       ) : (
-        <div className="flex items-center gap-2">
-          {getStatusBadge(requestStatus.status)}
-          {requestStatus.status === 'requested' && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCloseRequest}
-              disabled={loading}
-            >
-              <X className="h-3 w-3 mr-1" />
-              Close
-            </Button>
-          )}
-        </div>
+        <Badge variant="secondary">Application Requested</Badge>
       )}
     </div>
   );
