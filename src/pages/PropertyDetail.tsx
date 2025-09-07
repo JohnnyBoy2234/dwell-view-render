@@ -560,32 +560,18 @@ export default function PropertyDetail() {
                   </div>
                 ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
-                     {activeBooking ? (
-                        <Button 
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => setBookingOpen(true)}
-                        >
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Manage Your Viewing
-                        </Button>
-                      ) : (
-                        <Button 
-                          variant="outline"
-                          className="w-full"
-                          onClick={handleRequestViewing}
-                        >
-                          <Calendar className="h-4 w-4 mr-2" />
-                          Request a Viewing
-                        </Button>
-                      )}
-                      
-                      {/* Application Button */}
-                      <TenantApplicationButton 
-                        propertyId={property.id}
-                        className="w-full"
-                      />
-                    </div>
+                     <StartConversation
+                       propertyId={property.id}
+                       landlordId={property.landlord_id}
+                       propertyTitle={property.title}
+                     />
+                     
+                     {/* Application Button */}
+                     <TenantApplicationButton 
+                       propertyId={property.id}
+                       className="w-full"
+                     />
+                   </div>
                 ) : (
                   <StartConversation
                     propertyId={property.id}
