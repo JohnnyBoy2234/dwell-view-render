@@ -84,6 +84,7 @@ export default function StartConversation({
     setLoading(true);
     
     try {
+      console.log('Creating conversation with:', { propertyId, landlordId, userId: user.id, inquiryId });
       const conversation = await createConversation(
         propertyId,
         landlordId,
@@ -91,15 +92,29 @@ export default function StartConversation({
         inquiryId
       );
 
+      console.log('Conversation created:', conversation);
       if (conversation) {
+        console.log('Navigating to:', `/tenant/messages?c=${conversation.id}`);
         navigate(`/tenant/messages?c=${conversation.id}`);
         toast({
           title: "Conversation started",
           description: `You can now message about ${propertyTitle}`
         });
+      } else {
+        console.log('No conversation returned');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to create conversation"
+        });
       }
     } catch (error) {
       console.error('Error starting conversation:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to start conversation. Please try again."
+      });
     } finally {
       setLoading(false);
       setOpen(false);
