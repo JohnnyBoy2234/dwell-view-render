@@ -71,32 +71,50 @@ export default function ApplicationDetail() {
   }, [id, user, navigate]);
 
   const fetchApplication = async () => {
-    if (!id || !user) return;
+    if (!id || !user) {
+      console.log('Missing id or user:', { id, user: user?.id });
+      return;
+    }
+
+    console.log('Fetching application:', { id, userId: user.id, isLandlord });
 
     try {
       let appData: any = null;
       let error: any = null;
       if (isLandlord) {
+        console.log('Fetching as landlord');
         const resp = await supabase
           .from('applications')
           .select('*')
           .eq('id', id)
           .eq('landlord_id', user.id)
-          .single();
+          .maybeSingle();
         appData = resp.data;
         error = resp.error;
       } else {
+        console.log('Fetching as tenant');
         const resp = await supabase
           .from('applications')
           .select('*')
           .eq('id', id)
           .eq('tenant_id', user.id)
-          .single();
+          .maybeSingle();
         appData = resp.data;
         error = resp.error;
       }
 
+      console.log('Application fetch result:', { appData, error });
+
       if (error) throw error;
+      
+      if (!appData) {
+        console.log('No application data found');
+        setApplication(null);
+        setLoading(false);
+        return;
+      }
+
+      console.log('Fetching related data for application:', appData.id);
 
       // Parallel fetches: property, landlord profile, screening details, documents
       const [propertyResp, landlordResp, screeningResp, docsResp] = await Promise.all([
@@ -121,6 +139,13 @@ export default function ApplicationDetail() {
           .eq('user_id', appData.tenant_id)
       ]);
 
+      console.log('Related data fetch results:', {
+        property: propertyResp.data,
+        landlord: landlordResp.data,
+        screening: screeningResp.data,
+        documents: docsResp.data
+      });
+
       setApplication({
         ...appData,
         property: propertyResp.data || undefined,
@@ -129,12 +154,13 @@ export default function ApplicationDetail() {
         documents: docsResp.data || []
       });
     } catch (error: any) {
+      console.error('Error in fetchApplication:', error);
       toast({
         variant: "destructive",
         title: "Error loading application",
         description: error.message
       });
-      navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
+      navigate(isLandlord ? '/dashboard' : '/tenant-dashboard');
     } finally {
       setLoading(false);
     }
@@ -172,7 +198,7 @@ export default function ApplicationDetail() {
           <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-bold mb-2">Application not found</h2>
           <p className="text-muted-foreground mb-4">The application you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard')}>
+          <Button onClick={() => navigate(isLandlord ? '/dashboard' : '/tenant-dashboard')}>
             Back to Dashboard
           </Button>
         </Card>
@@ -185,7 +211,7 @@ export default function ApplicationDetail() {
       <div className="container mx-auto p-6 max-w-4xl">
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard')}>
+          <Button variant="outline" onClick={() => navigate(isLandlord ? '/dashboard' : '/tenant-dashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>

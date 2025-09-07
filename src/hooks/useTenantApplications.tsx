@@ -36,8 +36,12 @@ export const useTenantApplications = () => {
   }, [user]);
 
   const fetchApplications = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('No user found for applications fetch');
+      return;
+    }
     
+    console.log('Fetching applications for tenant:', user.id);
     setLoading(true);
     try {
       const { data: applicationsData, error } = await supabase
@@ -46,12 +50,18 @@ export const useTenantApplications = () => {
         .eq('tenant_id', user.id)
         .order('created_at', { ascending: false });
 
+      console.log('Applications fetch result:', { applicationsData, error });
+
       if (error) throw error;
 
       if (applicationsData && applicationsData.length > 0) {
+        console.log('Found applications, fetching related data');
         // Get unique property and landlord IDs
         const propertyIds = Array.from(new Set(applicationsData.map(app => app.property_id)));
         const landlordIds = Array.from(new Set(applicationsData.map(app => app.landlord_id)));
+
+        console.log('Property IDs:', propertyIds);
+        console.log('Landlord IDs:', landlordIds);
 
         // Fetch property details
         const { data: propertiesData, error: propertiesError } = await supabase
@@ -79,8 +89,10 @@ export const useTenantApplications = () => {
           landlord: profilesById.get(app.landlord_id)
         }));
 
+        console.log('Final enriched applications:', enrichedApplications);
         setApplications(enrichedApplications);
       } else {
+        console.log('No applications found');
         setApplications([]);
       }
     } catch (error) {
