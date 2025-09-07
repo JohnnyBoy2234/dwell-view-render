@@ -94,8 +94,8 @@ export default function StartConversation({
 
       console.log('Conversation created:', conversation);
       if (conversation) {
-        console.log('Navigating to:', `/tenant/messages?c=${conversation.id}`);
-        navigate(`/tenant/messages?c=${conversation.id}`);
+        console.log('Navigating to:', `/messages?c=${conversation.id}`);
+        navigate(`/messages?c=${conversation.id}`);
         toast({
           title: "Conversation started",
           description: `You can now message about ${propertyTitle}`
@@ -134,7 +134,7 @@ export default function StartConversation({
       );
 
       if (conversation) {
-        navigate(`/tenant/messages?c=${conversation.id}`);
+        navigate(`/messages?c=${conversation.id}`);
       }
     } catch (error) {
       console.error('Error creating conversation:', error);
