@@ -582,7 +582,7 @@ export default function PropertyDetail() {
                           onClick={handleRequestViewing}
                         >
                           <Calendar className="h-4 w-4 mr-2" />
-                          Book a Viewing
+                          Request a Viewing
                         </Button>
                       )}
                       
@@ -705,7 +705,7 @@ export default function PropertyDetail() {
               onClick={handleRequestViewing}
               className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
             >
-              Book Viewing
+              Request Viewing
             </button>
             <button
               onClick={handleContactLandlord}

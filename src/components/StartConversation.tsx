@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Send } from 'lucide-react';
+import { MessageCircle, Send, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface StartConversationProps {
   propertyId: string;
@@ -24,8 +25,37 @@ export default function StartConversation({
   const { createConversation } = useMessaging();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [showFirstMessageGuide, setShowFirstMessageGuide] = useState(false);
+  const [isFirstMessage, setIsFirstMessage] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Check if this is the first message to this landlord
+  useEffect(() => {
+    const checkFirstMessage = async () => {
+      if (!user || !landlordId) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('tenant_id', user.id)
+          .eq('landlord_id', landlordId)
+          .limit(1);
+          
+        if (error) {
+          console.error('Error checking existing conversations:', error);
+          return;
+        }
+        
+        setIsFirstMessage(!data || data.length === 0);
+      } catch (error) {
+        console.error('Error checking first message:', error);
+      }
+    };
+    
+    checkFirstMessage();
+  }, [user, landlordId]);
 
   const handleStartConversation = async () => {
     if (!user) {
@@ -33,6 +63,12 @@ export default function StartConversation({
       const currentPath = window.location.pathname;
       sessionStorage.setItem('returnTo', currentPath);
       navigate('/auth');
+      return;
+    }
+    
+    // Show first message guide if this is the first conversation
+    if (isFirstMessage) {
+      setShowFirstMessageGuide(true);
       return;
     }
 
@@ -67,6 +103,33 @@ export default function StartConversation({
     } finally {
       setLoading(false);
       setOpen(false);
+    }
+  };
+
+  const handleProceedWithMessage = async () => {
+    setShowFirstMessageGuide(false);
+    setLoading(true);
+    
+    try {
+      const conversation = await createConversation(
+        propertyId,
+        landlordId,
+        user.id,
+        inquiryId
+      );
+
+      if (conversation) {
+        navigate(`/tenant/messages?c=${conversation.id}`);
+      }
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to start conversation. Please try again."
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
