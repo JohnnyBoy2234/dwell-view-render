@@ -35,7 +35,10 @@ export default function Messages() {
 
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
+  const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const selectedConversation = conversations.find(c => c.id === activeConversation);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +47,19 @@ export default function Messages() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Pre-fill message for first-time contact
+  useEffect(() => {
+    if (selectedConversation && messages.length === 0 && !isLandlord && !hasPrefilledMessage) {
+      const propertyTitle = selectedConversation.properties?.title || 'this property';
+      const autoMessage = `Hello, I am interested in ${propertyTitle}. I would like to schedule a viewing. Please let me know what times you have available.`;
+      setNewMessage(autoMessage);
+      setHasPrefilledMessage(true);
+    } else if (selectedConversation && messages.length > 0 && hasPrefilledMessage) {
+      // If messages exist, clear any pre-filled message
+      setHasPrefilledMessage(false);
+    }
+  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -89,8 +105,6 @@ export default function Messages() {
     );
   }
 
-  const selectedConversation = conversations.find(c => c.id === activeConversation);
-
   const [searchParams] = useSearchParams();
   useEffect(() => {
     const cid = searchParams.get('c');
@@ -99,6 +113,8 @@ export default function Messages() {
       if (exists) {
         setActiveConversation(cid);
         setShowConversations(false);
+        // Reset pre-fill state when switching conversations
+        setHasPrefilledMessage(false);
       }
     }
   }, [searchParams, conversations]);
