@@ -94,6 +94,15 @@ export default function Auth() {
   // Redirect if already logged in
   useEffect(() => {
     if (user && !loading) {
+      // Check if there's a returnTo path in sessionStorage
+      const returnTo = sessionStorage.getItem('returnTo');
+      if (returnTo) {
+        sessionStorage.removeItem('returnTo');
+        navigate(returnTo);
+        return;
+      }
+      
+      // Default redirect based on role
       if (user.role === 'landlord') {
         navigate('/enhancedlandlorddashboard');
       } else {
@@ -239,10 +248,19 @@ export default function Auth() {
       title: "Welcome back!",
       description: "You've been signed in successfully.",
     });
-    if (user?.role === 'landlord') {
-      navigate('/enhancedlandlorddashboard');
+    
+    // Check if there's a returnTo path in sessionStorage
+    const returnTo = sessionStorage.getItem('returnTo');
+    if (returnTo) {
+      sessionStorage.removeItem('returnTo');
+      navigate(returnTo);
     } else {
-      navigate('/enhancedtenantdashboard');
+      // Default redirect based on role
+      if (user?.role === 'landlord') {
+        navigate('/enhancedlandlorddashboard');
+      } else {
+        navigate('/enhancedtenantdashboard');
+      }
     }
     setSignInLoading(false);
   };
