@@ -3,7 +3,7 @@ import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Send, Info } from 'lucide-react';
+import { Calendar, Send, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -136,8 +136,8 @@ export default function StartConversation({
   if (!user) {
     return (
       <Button onClick={() => navigate('/auth')} className="w-full">
-        <MessageCircle className="h-4 w-4 mr-2" />
-        Sign in to Message
+        <Calendar className="h-4 w-4 mr-2" />
+        Sign in to Request Viewing
       </Button>
     );
   }
@@ -150,18 +150,34 @@ export default function StartConversation({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-full">
-          <MessageCircle className="h-4 w-4 mr-2" />
-          Message Landlord
+          <Calendar className="h-4 w-4 mr-2" />
+          Request Viewing
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Start Conversation</DialogTitle>
+          <DialogTitle>Request Viewing</DialogTitle>
           <DialogDescription>
             Start a conversation with the landlord about "{propertyTitle}"
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
+          {isFirstMessage && (
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-start gap-3">
+                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    How to request a viewing
+                  </p>
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    To arrange a viewing, please suggest a few times that work for you in your message. 
+                    The landlord will confirm the final time and date. Once agreed, you can formally request an application.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <p className="text-sm text-muted-foreground">
             This will create a new conversation thread where you can discuss property details, 
             schedule viewings, and ask questions directly with the landlord.
@@ -179,7 +195,7 @@ export default function StartConversation({
               ) : (
                 <>
                   <Send className="h-4 w-4 mr-2" />
-                  Start Conversation
+                  Request Viewing
                 </>
               )}
             </Button>

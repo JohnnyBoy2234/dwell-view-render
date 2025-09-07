@@ -35,6 +35,7 @@ import { TenantApplicationButton } from '@/components/tenant/TenantApplicationBu
 import { BookViewingDialog } from "@/components/viewing/BookViewingDialog";
 import { useViewingBooking } from "@/hooks/useViewingBooking";
 import { format } from "date-fns";
+import StartConversation from '@/components/StartConversation';
 
 interface Property {
   id: string;
@@ -559,13 +560,6 @@ export default function PropertyDetail() {
                   </div>
                 ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
-                     <Button 
-                       className="w-full" 
-                       onClick={handleContactLandlord}
-                     >
-                       <Mail className="h-4 w-4 mr-2" />
-                       Message Landlord
-                     </Button>
                      {activeBooking ? (
                         <Button 
                           variant="outline"
@@ -593,13 +587,11 @@ export default function PropertyDetail() {
                       />
                     </div>
                 ) : (
-                  <Button 
-                    className="w-full"
-                    onClick={() => navigate('/auth')}
-                  >
-                    <Mail className="h-4 w-4 mr-2" />
-                    Sign In to Message Landlord
-                  </Button>
+                  <StartConversation
+                    propertyId={property.id}
+                    landlordId={property.landlord_id}
+                    propertyTitle={property.title}
+                  />
                 )}
 
                 
