@@ -61,8 +61,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const { error } = await supabase
         .from('notifications')
         .update({ 
-          is_read: true, 
-          read_at: new Date().toISOString() 
+          is_read: true
         })
         .eq('id', notificationId)
         .eq('user_id', user.id);
@@ -73,7 +72,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       setNotifications(prev => 
         prev.map(n => 
           n.id === notificationId 
-            ? { ...n, is_read: true, read_at: new Date().toISOString() }
+            ? { ...n, is_read: true }
             : n
         )
       );
@@ -92,8 +91,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const { error } = await supabase
         .from('notifications')
         .update({ 
-          is_read: false, 
-          read_at: null 
+          is_read: false
         })
         .eq('id', notificationId)
         .eq('user_id', user.id);
@@ -104,7 +102,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       setNotifications(prev => 
         prev.map(n => 
           n.id === notificationId 
-            ? { ...n, is_read: false, read_at: null }
+            ? { ...n, is_read: false }
             : n
         )
       );
@@ -127,8 +125,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const { error } = await supabase
         .from('notifications')
         .update({ 
-          is_read: true, 
-          read_at: new Date().toISOString() 
+          is_read: true
         })
         .eq('user_id', user.id)
         .eq('is_read', false);
@@ -138,7 +135,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
         if (error.code === '42P01' || error.message.includes('relation "notifications" does not exist')) {
           console.log('Notifications table does not exist, updating local state only');
           setNotifications(prev => 
-            prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
+            prev.map(n => ({ ...n, is_read: true }))
           );
           setUnreadCount(0);
           console.log('Local state updated (fallback), unreadCount set to 0');
@@ -150,7 +147,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       // Update local state
       console.log('Database update successful, updating local state');
       setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true, read_at: new Date().toISOString() }))
+        prev.map(n => ({ ...n, is_read: true }))
       );
       setUnreadCount(0);
       console.log('Local state updated, unreadCount set to 0');

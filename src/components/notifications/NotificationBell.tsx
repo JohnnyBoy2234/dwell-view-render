@@ -41,10 +41,10 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
       await markAsRead(notification.id);
     }
     
-    // Navigate to action URL if provided
-    if (notification.action_url) {
-      // Use React Router navigation instead of window.location.href
-      navigate(notification.action_url);
+    // Navigate to link URL or action URL if provided
+    const targetUrl = notification.link_url || notification.action_url;
+    if (targetUrl) {
+      navigate(targetUrl);
       setIsOpen(false);
     }
   };
