@@ -454,10 +454,41 @@ export function useMessaging() {
         }
       });
 
+    // Subscribe to viewing proposal changes
+    const viewingProposalChannel = supabase
+      .channel('viewing-proposals-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'viewing_proposals'
+        },
+        (payload) => {
+          console.log('🔍 Viewing proposal change received:', payload);
+          const proposal = payload.new || payload.old;
+          
+          // If this affects the active conversation, trigger a refresh
+          if (proposal && 
+              typeof proposal === 'object' && 
+              'conversation_id' in proposal &&
+              proposal.conversation_id === activeConversation) {
+            console.log('✅ Proposal change affects active conversation');
+            // You can add custom handling here in the Messages component
+            // For now, we'll just refetch conversations to update any counts
+            fetchConversations();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('📡 Viewing proposals subscription status:', status);
+      });
+
     return () => {
       console.log('🔌 Cleaning up real-time subscriptions');
       supabase.removeChannel(conversationChannel);
       supabase.removeChannel(messageChannel);
+      supabase.removeChannel(viewingProposalChannel);
     };
   }, [user, activeConversation]);
 

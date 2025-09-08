@@ -92,6 +92,7 @@ const App = () => (
             <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MobileBottomBar />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>
