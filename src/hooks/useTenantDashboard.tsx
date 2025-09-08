@@ -59,11 +59,14 @@ export function useTenantDashboard() {
         `)
         .eq('tenant_id', user.id)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
-      if (tenancyError && tenancyError.code !== 'PGRST116') throw tenancyError;
+      if (tenancyError) {
+        console.error('Error fetching tenancy data:', tenancyError);
+        // Don't throw here, just log the error and continue
+      }
 
-      if (tenancyData) {
+      if (tenancyData && tenancyData.properties) {
         setTenantProperty({
           id: tenancyData.properties.id,
           title: tenancyData.properties.title,
@@ -83,9 +86,11 @@ export function useTenantDashboard() {
           .order('due_date', { ascending: true })
           .limit(1);
 
-        if (rentError) throw rentError;
+        if (rentError) {
+          console.error('Error fetching rent payment data:', rentError);
+        }
 
-        if (rentData && rentData.length > 0) {
+        if (!rentError && rentData && rentData.length > 0) {
           const payment = rentData[0];
           const today = new Date();
           const dueDate = new Date(payment.due_date);
@@ -108,12 +113,16 @@ export function useTenantDashboard() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (maintenanceError) throw maintenanceError;
-      setRecentMaintenance((maintenanceData || []).map(item => ({
-        ...item,
-        status: item.status as 'submitted' | 'in_progress' | 'completed' | 'cancelled',
-        priority: item.priority as 'low' | 'medium' | 'high'
-      })));
+      if (maintenanceError) {
+        console.error('Error fetching maintenance data:', maintenanceError);
+      }
+      if (!maintenanceError) {
+        setRecentMaintenance((maintenanceData || []).map(item => ({
+          ...item,
+          status: item.status as 'submitted' | 'in_progress' | 'completed' | 'cancelled',
+          priority: item.priority as 'low' | 'medium' | 'high'
+        })));
+      }
 
       // Fetch upcoming viewings (for viewing requests)
       const { data: viewingData, error: viewingError } = await supabase
@@ -125,8 +134,11 @@ export function useTenantDashboard() {
         .order('start_time', { ascending: true })
         .limit(3);
 
-      if (viewingError) throw viewingError;
-      setUpcomingViewings(viewingData || []);
+      if (viewingError) {
+        console.error('Error fetching viewing data:', viewingError);
+      } else {
+        setUpcomingViewings(viewingData || []);
+      }
 
     } catch (error: any) {
       console.error('Error fetching tenant dashboard data:', error);
