@@ -386,7 +386,9 @@ export function useMessaging() {
   useEffect(() => {
     if (!user) return;
 
-    // Subscribe to conversation changes
+    console.log('🔔 Setting up real-time subscriptions for user:', user.id);
+
+    // Subscribe to conversation changes - remove malformed filter
     const conversationChannel = supabase
       .channel('conversations-changes')
       .on(
@@ -394,14 +396,28 @@ export function useMessaging() {
         {
           event: '*',
           schema: 'public',
-          table: 'conversations',
-          filter: `landlord_id=eq.${user.id},tenant_id=eq.${user.id}`
+          table: 'conversations'
         },
-        () => {
-          fetchConversations();
+        (payload) => {
+          console.log('📨 Conversation change received:', payload);
+          // Only refetch if the change affects this user
+          const conversation = payload.new || payload.old;
+          if (conversation && 
+              typeof conversation === 'object' && 
+              'landlord_id' in conversation && 
+              'tenant_id' in conversation &&
+              (conversation.landlord_id === user.id || conversation.tenant_id === user.id)) {
+            console.log('✅ Conversation change affects current user, refetching...');
+            fetchConversations();
+          }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Conversations subscription status:', status);
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Conversations channel error, retrying...');
+        }
+      });
 
     // Subscribe to message changes
     const messageChannel = supabase
@@ -414,6 +430,7 @@ export function useMessaging() {
           table: 'messages'
         },
         (payload) => {
+          console.log('💬 Message change received:', payload);
           const newMessage = payload.new as Message;
           
           // If this is for the active conversation, add it to messages
@@ -430,9 +447,15 @@ export function useMessaging() {
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('📡 Messages subscription status:', status);
+        if (status === 'CHANNEL_ERROR') {
+          console.error('❌ Messages channel error, retrying...');
+        }
+      });
 
     return () => {
+      console.log('🔌 Cleaning up real-time subscriptions');
       supabase.removeChannel(conversationChannel);
       supabase.removeChannel(messageChannel);
     };
