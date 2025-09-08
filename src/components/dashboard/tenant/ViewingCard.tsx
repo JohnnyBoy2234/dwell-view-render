@@ -32,7 +32,7 @@ export function ViewingCard({ upcomingViewings }: ViewingCardProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {nextViewing ? (
+        {nextViewing && nextViewing.properties ? (
           <>
             <div className="p-3 bg-gradient-to-r from-background to-earth-light/40 rounded-lg">
               <div className="flex items-center justify-between mb-2">
@@ -44,10 +44,10 @@ export function ViewingCard({ upcomingViewings }: ViewingCardProps) {
                 </span>
               </div>
               <h4 className="font-semibold text-sm truncate">
-                {nextViewing.properties.title}
+                {nextViewing.properties?.title || 'Property Title'}
               </h4>
               <p className="text-xs text-muted-foreground truncate">
-                {nextViewing.properties.location}
+                {nextViewing.properties?.location || 'Location'}
               </p>
               <p className="text-xs text-earth-warm font-medium mt-1">
                 {format(new Date(nextViewing.start_time), 'h:mm a')} - {format(new Date(nextViewing.end_time), 'h:mm a')}
