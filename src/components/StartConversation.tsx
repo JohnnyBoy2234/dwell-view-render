@@ -35,6 +35,8 @@ export default function StartConversation({
     const checkFirstMessage = async () => {
       if (!user || !landlordId) return;
       
+      console.log('🔍 Checking for existing conversations:', { userId: user.id, landlordId });
+      
       try {
         const { data, error } = await supabase
           .from('conversations')
@@ -44,13 +46,14 @@ export default function StartConversation({
           .limit(1);
           
         if (error) {
-          console.error('Error checking existing conversations:', error);
+          console.error('❌ Error checking existing conversations:', error);
           return;
         }
         
+        console.log('✅ Existing conversations check result:', { data, count: data?.length });
         setIsFirstMessage(!data || data.length === 0);
       } catch (error) {
-        console.error('Error checking first message:', error);
+        console.error('❌ Error checking first message:', error);
       }
     };
     

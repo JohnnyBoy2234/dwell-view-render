@@ -283,7 +283,30 @@ export function useMessaging() {
   const createConversation = async (propertyId: string, landlordId: string, tenantId: string, inquiryId?: string) => {
     if (!user) return null;
 
+    console.log('🚀 Creating conversation:', { propertyId, landlordId, tenantId, inquiryId, userId: user.id });
+
     try {
+      // First check if conversation already exists
+      const { data: existing, error: checkError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('property_id', propertyId)
+        .eq('landlord_id', landlordId)
+        .eq('tenant_id', tenantId)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('❌ Error checking existing conversation:', checkError);
+        throw checkError;
+      }
+
+      if (existing) {
+        console.log('✅ Found existing conversation:', existing.id);
+        return existing;
+      }
+
+      // Create new conversation
+      console.log('🆕 Creating new conversation...');
       const { data, error } = await supabase
         .from('conversations')
         .insert({
@@ -296,9 +319,12 @@ export function useMessaging() {
         .single();
 
       if (error) {
-        // If conversation already exists, fetch it
+        console.error('❌ Error creating conversation:', error);
+        
+        // If conversation already exists due to race condition, try to fetch it again
         if (error.code === '23505') {
-          const { data: existing } = await supabase
+          console.log('🔄 Duplicate detected, fetching existing...');
+          const { data: duplicate, error: dupError } = await supabase
             .from('conversations')
             .select('*')
             .eq('property_id', propertyId)
@@ -306,14 +332,22 @@ export function useMessaging() {
             .eq('tenant_id', tenantId)
             .single();
           
-          return existing;
+          if (dupError) {
+            console.error('❌ Error fetching duplicate:', dupError);
+            throw dupError;
+          }
+          
+          console.log('✅ Found duplicate conversation:', duplicate.id);
+          return duplicate;
         }
         throw error;
       }
 
+      console.log('✅ Successfully created conversation:', data.id);
       fetchConversations();
       return data;
     } catch (error: any) {
+      console.error('❌ Final error in createConversation:', error);
       toast({
         variant: "destructive",
         title: "Error creating conversation",
