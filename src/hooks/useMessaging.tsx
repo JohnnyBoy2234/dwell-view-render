@@ -485,6 +485,7 @@ export function useMessaging() {
     sendMessage,
     createConversation,
     fetchConversations,
+    fetchMessages,
     markMessagesAsRead
   };
 }

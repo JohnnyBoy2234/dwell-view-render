@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +21,8 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
+import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
+import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 
 export default function Messages() {
   const { user, isLandlord } = useAuth();
@@ -30,17 +33,50 @@ export default function Messages() {
     messages,
     loading,
     onlineUsers,
-    sendMessage
+    sendMessage,
+    fetchMessages: refetchMessages
   } = useMessaging();
 
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
   const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
+  const [showViewingModal, setShowViewingModal] = useState(false);
+  const [viewingProposals, setViewingProposals] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
   const selectedConversation = conversations.find(c => c.id === activeConversation);
+
+  // Fetch viewing proposals for active conversation
+  useEffect(() => {
+    if (activeConversation && user) {
+      fetchViewingProposals();
+    }
+  }, [activeConversation, user]);
+
+  const fetchViewingProposals = async () => {
+    if (!activeConversation || !user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('viewing_proposals')
+        .select(`
+          *,
+          properties (
+            title,
+            location
+          )
+        `)
+        .eq('conversation_id', activeConversation)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setViewingProposals(data || []);
+    } catch (error) {
+      console.error('Error fetching viewing proposals:', error);
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -69,6 +105,13 @@ export default function Messages() {
 
     await sendMessage(activeConversation, newMessage);
     setNewMessage('');
+  };
+
+  const handleViewingModalSuccess = () => {
+    fetchViewingProposals();
+    if (activeConversation) {
+      refetchMessages(activeConversation);
+    }
   };
 
   const getOtherUser = (conversation: any) => {
@@ -297,7 +340,7 @@ export default function Messages() {
                   </div>
                 ) : (
                   <div className="space-y-4 py-4">
-                    {/* Viewing Slot Notification */}
+                     {/* Viewing Slot Notification for Tenants */}
                     {!isLandlord && selectedConversation && (
                       <ViewingSlotNotification
                         propertyId={selectedConversation.property_id}
@@ -305,10 +348,49 @@ export default function Messages() {
                         propertyTitle={selectedConversation.properties?.title || 'Property'}
                       />
                     )}
+
+                    {/* Create Viewing Slot Button for Landlords */}
+                    {isLandlord && selectedConversation && (
+                      <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-medium">Schedule a viewing</p>
+                            <p className="text-xs text-muted-foreground">Create a viewing proposal for this tenant</p>
+                          </div>
+                          <Button
+                            onClick={() => setShowViewingModal(true)}
+                            size="sm"
+                            className="bg-primary hover:bg-primary/90"
+                          >
+                            Create / Add Viewing Slot
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Viewing Proposals */}
+                    {viewingProposals.map((proposal) => (
+                      <div key={proposal.id} className="flex justify-center">
+                        <ViewingProposalCard
+                          proposal={proposal}
+                          onUpdate={() => {
+                            fetchViewingProposals();
+                            if (activeConversation) {
+                              refetchMessages(activeConversation);
+                            }
+                          }}
+                        />
+                      </div>
+                    ))}
                     
-                    {messages.map((message) => {
+                     {messages.map((message) => {
                       const isSender = message.sender_id === user.id;
                       const isRead = isMessageRead(message);
+                      
+                      // Skip rendering messages that are viewing_proposal type as they're handled above
+                      if (message.message_type === 'viewing_proposal') {
+                        return null;
+                      }
                       
                       return (
                         <div
@@ -384,6 +466,19 @@ export default function Messages() {
         )}
       </div>
     </div>
+
+    {/* Add Viewing Slot Modal */}
+    {selectedConversation && (
+      <AddViewingSlotModal
+        open={showViewingModal}
+        onOpenChange={setShowViewingModal}
+        conversationId={selectedConversation.id}
+        propertyId={selectedConversation.property_id}
+        tenantId={selectedConversation.tenant_id}
+        propertyTitle={selectedConversation.properties?.title}
+        onSuccess={handleViewingModalSuccess}
+      />
+    )}
     </>
   );
 }

@@ -622,6 +622,7 @@ export type Database = {
           read_by_tenant: boolean | null
           sender_id: string
           updated_at: string
+          viewing_proposal_id: string | null
         }
         Insert: {
           attachment_url?: string | null
@@ -635,6 +636,7 @@ export type Database = {
           read_by_tenant?: boolean | null
           sender_id: string
           updated_at?: string
+          viewing_proposal_id?: string | null
         }
         Update: {
           attachment_url?: string | null
@@ -648,6 +650,7 @@ export type Database = {
           read_by_tenant?: boolean | null
           sender_id?: string
           updated_at?: string
+          viewing_proposal_id?: string | null
         }
         Relationships: [
           {
@@ -655,6 +658,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_viewing_proposal_id_fkey"
+            columns: ["viewing_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "viewing_proposals"
             referencedColumns: ["id"]
           },
         ]
@@ -1187,6 +1197,110 @@ export type Database = {
         }
         Relationships: []
       }
+      viewing_proposals: {
+        Row: {
+          cancelled_at: string | null
+          confirmed_at: string | null
+          conversation_id: string
+          created_at: string
+          created_by: string
+          duration_minutes: number
+          id: string
+          landlord_id: string
+          notes: string | null
+          property_id: string
+          start_at: string
+          status: Database["public"]["Enums"]["viewing_proposal_status"]
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          conversation_id: string
+          created_at?: string
+          created_by: string
+          duration_minutes?: number
+          id?: string
+          landlord_id: string
+          notes?: string | null
+          property_id: string
+          start_at: string
+          status?: Database["public"]["Enums"]["viewing_proposal_status"]
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          confirmed_at?: string | null
+          conversation_id?: string
+          created_at?: string
+          created_by?: string
+          duration_minutes?: number
+          id?: string
+          landlord_id?: string
+          notes?: string | null
+          property_id?: string
+          start_at?: string
+          status?: Database["public"]["Enums"]["viewing_proposal_status"]
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewing_proposals_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "viewing_proposals_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      viewing_reminders: {
+        Row: {
+          attempts: number
+          created_at: string
+          fire_at: string
+          id: number
+          kind: string
+          sent_at: string | null
+          viewing_proposal_id: string
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          fire_at: string
+          id?: number
+          kind: string
+          sent_at?: string | null
+          viewing_proposal_id: string
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          fire_at?: string
+          id?: number
+          kind?: string
+          sent_at?: string | null
+          viewing_proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "viewing_reminders_viewing_proposal_id_fkey"
+            columns: ["viewing_proposal_id"]
+            isOneToOne: false
+            referencedRelation: "viewing_proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       viewing_slots: {
         Row: {
           booked_by_tenant_id: string | null
@@ -1355,6 +1469,12 @@ export type Database = {
     Enums: {
       kyc_status: "not_started" | "submitted" | "approved" | "declined"
       user_role: "tenant" | "landlord" | "admin"
+      viewing_proposal_status:
+        | "proposed"
+        | "confirmed"
+        | "declined"
+        | "cancelled"
+        | "expired"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1484,6 +1604,13 @@ export const Constants = {
     Enums: {
       kyc_status: ["not_started", "submitted", "approved", "declined"],
       user_role: ["tenant", "landlord", "admin"],
+      viewing_proposal_status: [
+        "proposed",
+        "confirmed",
+        "declined",
+        "cancelled",
+        "expired",
+      ],
     },
   },
 } as const

@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
 import Navbar from "./components/Navbar";
+import { MobileBottomBar } from "./components/MobileBottomBar";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import About from "./pages/About";

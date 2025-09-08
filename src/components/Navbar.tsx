@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, User, Menu, X, LogOut, LayoutDashboard, MessageCircle, Bell, Shield } from "lucide-react";
+import { Home, Search, Heart, User, Menu, X, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -55,6 +55,22 @@ const Navbar = () => {
                   {item.label}
                 </Link>
               ))}
+              {/* Messages Link */}
+              {user && (
+                <Link 
+                  to="/messages" 
+                  className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 ${
+                    location.pathname.startsWith('/messages') ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  Messages
+                  {messageUnread > 0 && (
+                    <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
+                      {messageUnread > 99 ? '99+' : messageUnread}
+                    </Badge>
+                  )}
+                </Link>
+              )}
             </div>
 
             {/* Desktop Action Buttons */}
@@ -71,14 +87,7 @@ const Navbar = () => {
                     <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Landlord Dashboard</Link></Button>
                   ) : !isLandlord ? (
                     <Button variant="ghost" size="sm" asChild><Link to="/enhancedtenantdashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
-                  ) : (
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link to="/messages" className="flex items-center relative">
-                        <MessageCircle className="h-4 w-4 mr-2" />Messages
-                        {messageUnread > 0 && <Badge variant="destructive" className="ml-2 h-5 w-5 flex items-center justify-center p-0 text-xs">{messageUnread > 99 ? '99+' : messageUnread}</Badge>}
-                      </Link>
-                    </Button>
-                  )}
+                  ) : null}
                   <NotificationBell />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -179,6 +188,29 @@ const Navbar = () => {
                   </Link>
                 );
               })}
+              
+              {/* Messages Link in Mobile Menu */}
+              {user && (
+                <Link
+                  to="/messages"
+                  className={`flex items-center space-x-3 px-3 py-2 rounded-md text-base font-medium transition-colors ${
+                    location.pathname.startsWith('/messages')
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:text-primary hover:bg-secondary"
+                  }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <div className="flex items-center gap-2">
+                    <span>Messages</span>
+                    {messageUnread > 0 && (
+                      <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
+                        {messageUnread > 99 ? '99+' : messageUnread}
+                      </Badge>
+                    )}
+                  </div>
+                </Link>
+              )}
             </div>
 
             <div className="p-4 border-t border-border space-y-2">
