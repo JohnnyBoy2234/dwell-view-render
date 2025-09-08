@@ -106,6 +106,17 @@ serve(async (req) => {
       }
     });
 
+    // Log telemetry event
+    await supabaseAdmin.rpc('log_event', {
+      _user_id: user_id,
+      _name: 'kyc_declined',
+      _properties: {
+        reviewed_by: user.id,
+        reviewed_at: new Date().toISOString(),
+        decline_reason: reason.trim()
+      }
+    });
+
     // Get user profile for notification
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')

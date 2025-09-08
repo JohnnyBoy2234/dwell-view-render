@@ -104,6 +104,16 @@ serve(async (req) => {
       }
     });
 
+    // Log telemetry event
+    await supabaseAdmin.rpc('log_event', {
+      _user_id: user_id,
+      _name: 'kyc_approved',
+      _properties: {
+        reviewed_by: user.id,
+        reviewed_at: new Date().toISOString()
+      }
+    });
+
     // Delete original documents from storage for privacy
     const filesToDelete = [];
     if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);

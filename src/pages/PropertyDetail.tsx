@@ -36,6 +36,7 @@ import { BookViewingDialog } from "@/components/viewing/BookViewingDialog";
 import { useViewingBooking } from "@/hooks/useViewingBooking";
 import { format } from "date-fns";
 import StartConversation from '@/components/StartConversation';
+import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
 
 interface Property {
   id: string;
@@ -558,27 +559,29 @@ export default function PropertyDetail() {
                       This is your property listing
                     </p>
                   </div>
-                ) : user && property.landlord_id !== user.id ? (
-                  <div className="space-y-2">
-                     <StartConversation
-                       propertyId={property.id}
-                       landlordId={property.landlord_id}
-                       propertyTitle={property.title}
-                     />
-                     
-                     {/* Application Button */}
-                     <TenantApplicationButton 
-                       propertyId={property.id}
-                       className="w-full"
-                     />
-                   </div>
-                ) : (
-                  <StartConversation
-                    propertyId={property.id}
-                    landlordId={property.landlord_id}
-                    propertyTitle={property.title}
-                  />
-                )}
+                 ) : user && property.landlord_id !== user.id ? (
+                   <div className="space-y-2">
+                      <GatedViewingButton
+                        propertyId={property.id}
+                        landlordId={property.landlord_id}
+                        propertyTitle={property.title}
+                        onRequestViewing={handleRequestViewing}
+                      />
+                      
+                      {/* Application Button */}
+                      <TenantApplicationButton 
+                        propertyId={property.id}
+                        className="w-full"
+                      />
+                    </div>
+                 ) : (
+                   <GatedViewingButton
+                     propertyId={property.id}
+                     landlordId={property.landlord_id}
+                     propertyTitle={property.title}
+                     onRequestViewing={handleRequestViewing}
+                   />
+                 )}
 
                 
               </CardContent>

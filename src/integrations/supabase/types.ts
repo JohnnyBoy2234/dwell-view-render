@@ -129,25 +129,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "conversations_landlord_id_fkey"
-            columns: ["landlord_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "conversations_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "conversations_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -233,15 +219,7 @@ export type Database = {
           used_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "email_verification_tokens_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       events: {
         Row: {
@@ -265,15 +243,7 @@ export type Database = {
           properties?: Json | null
           user_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "events_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       inquiries: {
         Row: {
@@ -317,13 +287,6 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "inquiries_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
         ]
       }
       kyc_audit: {
@@ -351,15 +314,7 @@ export type Database = {
           metadata?: Json | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "kyc_audit_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       kyc_profiles: {
         Row: {
@@ -398,15 +353,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "kyc_profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       lease_audit_logs: {
         Row: {
@@ -434,13 +381,6 @@ export type Database = {
           metadata?: Json | null
         }
         Relationships: [
-          {
-            foreignKeyName: "lease_audit_logs_actor_user_id_fkey"
-            columns: ["actor_user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
           {
             foreignKeyName: "lease_audit_logs_lease_id_fkey"
             columns: ["lease_id"]
@@ -497,13 +437,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "leases"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "lease_signatures_signer_user_id_fkey"
-            columns: ["signer_user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -579,25 +512,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "leases_landlord_user_id_fkey"
-            columns: ["landlord_user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "leases_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "leases_tenant_user_id_fkey"
-            columns: ["tenant_user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -766,13 +685,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-          {
             foreignKeyName: "messages_viewing_proposal_id_fkey"
             columns: ["viewing_proposal_id"]
             isOneToOne: false
@@ -919,15 +831,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       properties: {
         Row: {
@@ -996,15 +900,7 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "properties_landlord_id_fkey"
-            columns: ["landlord_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       rent_payments: {
         Row: {
@@ -1275,15 +1171,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_presence_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       user_roles: {
         Row: {
@@ -1304,15 +1192,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "user_roles_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       verification_codes: {
         Row: {
@@ -1339,15 +1219,7 @@ export type Database = {
           id?: string
           user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "verification_codes_user_fk"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "user_kyc_gate"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       viewing_proposals: {
         Row: {
@@ -1539,16 +1411,7 @@ export type Database = {
       }
     }
     Views: {
-      user_kyc_gate: {
-        Row: {
-          can_request_viewing: boolean | null
-          email: string | null
-          email_verified: boolean | null
-          kyc_status: Database["public"]["Enums"]["kyc_status"] | null
-          user_id: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       can_access_application: {
@@ -1566,6 +1429,15 @@ export type Database = {
       cancel_viewing_booking: {
         Args: { slot_uuid: string; tenant_uuid: string }
         Returns: boolean
+      }
+      check_user_gate_status: {
+        Args: { _user_id: string }
+        Returns: {
+          can_request_viewing: boolean
+          email_verified: boolean
+          kyc_status: string
+          user_id: string
+        }[]
       }
       create_admin_account: {
         Args: { display_name_param: string; email_param: string }

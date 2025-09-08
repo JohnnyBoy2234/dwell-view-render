@@ -109,6 +109,17 @@ export function useKyc() {
         }
       });
 
+      // Log telemetry event
+      await supabase.rpc('log_event', {
+        _user_id: user.id,
+        _name: 'kyc_uploaded',
+        _properties: {
+          file_kind: kind,
+          file_size: file.size,
+          file_type: file.type
+        }
+      });
+
       toast({
         title: "File uploaded successfully",
         description: `Your ${kind === 'id_doc' ? 'ID document' : 'selfie'} has been uploaded.`,
@@ -153,6 +164,15 @@ export function useKyc() {
         _metadata: {
           ip_address: await getClientIP(),
           user_agent: navigator.userAgent
+        }
+      });
+
+      // Log telemetry event
+      await supabase.rpc('log_event', {
+        _user_id: user.id,
+        _name: 'kyc_submitted',
+        _properties: {
+          submitted_at: new Date().toISOString()
         }
       });
 
