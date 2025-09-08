@@ -11,11 +11,11 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
   const isOwn = message.senderUserId === currentUserId;
   return (
-    <div className={cn('flex mb-4', isOwn ? 'justify-end' : 'justify-start')}>
+    <div className={cn('flex mb-3', isOwn ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
-          'max-w-[80%] rounded-lg p-3 shadow',
-          isOwn ? 'bg-ocean-blue text-white' : 'bg-muted'
+          'max-w-[85%] sm:max-w-[80%] rounded-2xl p-3 shadow-sm',
+          isOwn ? 'bg-ocean-blue text-white rounded-br-md' : 'bg-muted rounded-bl-md'
         )}
       >
         <div className="flex items-center gap-2 mb-1">

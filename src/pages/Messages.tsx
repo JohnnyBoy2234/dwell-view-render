@@ -187,7 +187,8 @@ export default function Messages() {
 
   return (
     <>
-    <div className="flex items-center gap-4 mb-6">
+    {/* Desktop Header - hidden on mobile */}
+    <div className="hidden lg:flex items-center gap-4 mb-6">
       <div className="flex items-center gap-2">
         <MessageCircle className="h-6 w-6 text-primary" />
         <h2 className="text-lg font-semibold">Conversations</h2>
@@ -197,18 +198,31 @@ export default function Messages() {
       </Badge>
     </div>
     
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 h-[calc(100vh-12rem)]">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-6 h-screen lg:h-[calc(100vh-12rem)]">
       {/* Conversations List */}
       <div className={`${showConversations ? 'block' : 'hidden lg:block'} lg:col-span-1`}>
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+        <div className="h-full lg:rounded-lg lg:border lg:bg-card">
+          {/* Mobile Header */}
+          <div className="lg:hidden flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              <h1 className="text-lg font-semibold">Messages</h1>
+            </div>
+            <Badge variant="secondary" className="text-xs">
+              {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
+            </Badge>
+          </div>
+          
+          {/* Desktop Header */}
+          <div className="hidden lg:block p-6 pb-3">
+            <div className="flex items-center gap-2">
               <MessageCircle className="h-5 w-5" />
-              Conversations
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <ScrollArea className="h-[calc(100vh-20rem)]">
+              <h3 className="font-semibold">Conversations</h3>
+            </div>
+          </div>
+          
+          <div className="p-0">
+            <ScrollArea className="h-[calc(100vh-80px)] lg:h-[calc(100vh-20rem)]">
               {conversations.length === 0 ? (
                 <div className="p-6 text-center">
                   <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
@@ -270,16 +284,16 @@ export default function Messages() {
                 </div>
               )}
             </ScrollArea>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {/* Chat Window */}
       <div className={`${!showConversations ? 'block' : 'hidden lg:block'} lg:col-span-2`}>
         {selectedConversation ? (
-          <Card className="h-full flex flex-col">
+          <div className="h-full flex flex-col lg:rounded-lg lg:border lg:bg-card">
             {/* Chat Header */}
-            <CardHeader className="pb-3">
+            <div className="flex-shrink-0 p-3 lg:p-6 pb-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
               <div className="flex items-center gap-3">
                 <Button
                   variant="ghost"
@@ -316,17 +330,19 @@ export default function Messages() {
                 </div>
               </div>
               
-              <Separator />
-              
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Home className="h-4 w-4" />
-                <span>{selectedConversation.properties?.title}</span>
+              <div className="hidden lg:block my-3">
+                <Separator />
               </div>
-            </CardHeader>
+              
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2 lg:mt-0">
+                <Home className="h-4 w-4" />
+                <span className="truncate">{selectedConversation.properties?.title}</span>
+              </div>
+            </div>
 
             {/* Messages */}
-            <CardContent className="flex-1 p-0">
-              <ScrollArea className="h-[calc(100vh-24rem)] px-4">
+            <div className="flex-1 min-h-0">
+              <ScrollArea className="h-full px-3 lg:px-4">
                 {loading ? (
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -393,19 +409,19 @@ export default function Messages() {
                       }
                       
                       return (
-                        <div
+                         <div
                           key={message.id}
-                          className={`flex ${isSender ? 'justify-end' : 'justify-start'}`}
+                          className={`flex mb-3 ${isSender ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div className={`max-w-[70%] ${isSender ? 'order-2' : 'order-1'}`}>
+                          <div className={`max-w-[85%] sm:max-w-[70%] ${isSender ? 'order-2' : 'order-1'}`}>
                             <div
-                              className={`rounded-lg px-4 py-2 ${
+                              className={`rounded-2xl px-4 py-3 ${
                                 isSender
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted text-foreground'
+                                  ? 'bg-primary text-primary-foreground rounded-br-md'
+                                  : 'bg-muted text-foreground rounded-bl-md'
                               }`}
                             >
-                              <p className="text-sm">{message.content}</p>
+                              <p className="text-sm leading-relaxed">{message.content}</p>
                             </div>
                             
                             <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
@@ -436,7 +452,7 @@ export default function Messages() {
                   </div>
                 )}
               </ScrollArea>
-            </CardContent>
+            </div>
 
             {/* Message Input */}
             <div className="p-4 border-t">
@@ -452,17 +468,15 @@ export default function Messages() {
                 </Button>
               </form>
             </div>
-          </Card>
+          </div>
         ) : (
-          <Card className="h-full flex items-center justify-center">
-            <div className="text-center">
+          <div className="h-full flex items-center justify-center lg:rounded-lg lg:border lg:bg-card">
+            <div className="text-center p-8">
               <MessageCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-xl font-semibold mb-2">Select a conversation</h3>
-              <p className="text-muted-foreground">
-                Choose a conversation from the list to start messaging
-              </p>
+              <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
+              <p className="text-muted-foreground">Choose a conversation to start messaging</p>
             </div>
-          </Card>
+          </div>
         )}
       </div>
     </div>

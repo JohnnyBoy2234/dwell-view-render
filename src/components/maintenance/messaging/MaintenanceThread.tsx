@@ -30,7 +30,7 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-1">
         {data?.pages.map((page: any) => (
           <div key={page.cursor}>
             {page.messages?.map((msg: any) => (
@@ -44,7 +44,7 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
           </button>
         )}
       </div>
-      <div className="border-t p-4">
+      <div className="border-t p-3 lg:p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <MessageComposer onSend={handleSend} disabled={sendMessage.isPending} />
       </div>
     </div>
