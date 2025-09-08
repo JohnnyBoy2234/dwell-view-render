@@ -64,18 +64,18 @@ export default {
 				'success-green-dark': 'hsl(var(--success-green-dark))',
 				'success-green-light': 'hsl(var(--success-green-light))',
 				'success-green-glow': 'hsl(var(--success-green-glow))',
-				// Brand-safe aliases used in new glass UI polish
-				brand: {
-					blue: '#2563EB',
-					blue700: '#1D4ED8',
-					green: '#10B981',
-					green600: '#059669',
-					gray900: '#0F172A',
-					gray700: '#334155',
-					gray500: '#64748B',
-					gray200: '#E5E7EB',
-					white: '#FFFFFF',
-				},
+        /* Brand-safe aliases used in new glass UI polish (deprecated - use semantic tokens) */
+        brand: {
+          blue: 'hsl(214 100% 59%)',
+          blue700: 'hsl(217 91% 60%)',
+          green: 'hsl(142 76% 47%)',
+          green600: 'hsl(142 72% 44%)',
+          gray900: 'hsl(222 84% 5%)',
+          gray700: 'hsl(215 28% 17%)',
+          gray500: 'hsl(220 9% 46%)',
+          gray200: 'hsl(220 13% 91%)',
+          white: 'hsl(0 0% 100%)',
+        },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
