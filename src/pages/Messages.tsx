@@ -18,7 +18,7 @@ import {
   CheckCheck
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
 
 export default function Messages() {
@@ -36,7 +36,9 @@ export default function Messages() {
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
   const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
+  const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const selectedConversation = conversations.find(c => c.id === activeConversation);
 
@@ -106,18 +108,39 @@ export default function Messages() {
   }
 
   const [searchParams] = useSearchParams();
+  
+  // Handle initial URL parameter only once
   useEffect(() => {
+    if (hasProcessedUrlParam || conversations.length === 0) return;
+    
     const cid = searchParams.get('c');
+    console.log('🔗 Processing URL parameter:', cid);
+    
     if (cid) {
       const exists = conversations.find(c => c.id === cid);
       if (exists) {
+        console.log('✅ Setting conversation from URL:', cid);
         setActiveConversation(cid);
         setShowConversations(false);
-        // Reset pre-fill state when switching conversations
         setHasPrefilledMessage(false);
+        setHasProcessedUrlParam(true);
       }
+    } else {
+      setHasProcessedUrlParam(true);
     }
-  }, [searchParams, conversations]);
+  }, [conversations, searchParams, hasProcessedUrlParam]);
+
+  // Handle manual conversation switching
+  const handleConversationClick = (conversationId: string) => {
+    console.log('👆 Manual conversation switch to:', conversationId);
+    setActiveConversation(conversationId);
+    setShowConversations(false);
+    
+    // Clear URL parameter to prevent conflicts
+    const newSearchParams = new URLSearchParams(searchParams);
+    newSearchParams.delete('c');
+    navigate({ search: newSearchParams.toString() }, { replace: true });
+  };
 
   return (
     <>
@@ -162,10 +185,7 @@ export default function Messages() {
                             ? 'bg-muted border-l-primary'
                             : 'border-l-transparent'
                         }`}
-                        onClick={() => {
-                          setActiveConversation(conversation.id);
-                          setShowConversations(false);
-                        }}
+                        onClick={() => handleConversationClick(conversation.id)}
                       >
                         <div className="flex items-start gap-3">
                           <div className="relative">
