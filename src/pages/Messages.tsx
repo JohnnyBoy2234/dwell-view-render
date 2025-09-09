@@ -193,7 +193,7 @@ export default function Messages() {
   if (isMobile) {
     return (
       <>
-        <div className="fixed inset-0 bg-background flex flex-col z-10">
+        <div className="fixed inset-0 bg-background flex flex-col z-30 pb-16">
           {/* Conversations List - Mobile */}
           {showConversations && (
             <div className="flex-1 flex flex-col h-full">
@@ -423,7 +423,7 @@ export default function Messages() {
               </div>
 
               {/* Message Input - Mobile */}
-              <div className="p-4 border-t bg-background flex-shrink-0">
+              <div className="p-4 border-t bg-background flex-shrink-0 mb-16">
                 <form onSubmit={handleSendMessage} className="flex gap-2">
                   <Input
                     value={newMessage}
