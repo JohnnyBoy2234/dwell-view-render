@@ -78,28 +78,33 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
     
     setIsAutoDetecting(true);
     let progress = 0;
+    let stableFrames = 0;
     
     detectionIntervalRef.current = setInterval(() => {
       if (hasDocumentInFrame()) {
-        progress += 10;
-        setDetectionProgress(progress);
-        
-        if (progress >= 100) {
-          clearInterval(detectionIntervalRef.current!);
-          setDetectionProgress(0);
-          setIsAutoDetecting(false);
-          capturePhoto();
+        stableFrames++;
+        // Only increment progress if document has been stable for at least 3 frames
+        if (stableFrames >= 3) {
+          progress += 2; // Much slower increment (2% instead of 10%)
+          setDetectionProgress(progress);
+          
+          if (progress >= 100) {
+            clearInterval(detectionIntervalRef.current!);
+            setDetectionProgress(0);
+            setIsAutoDetecting(false);
+            capturePhoto();
+          }
         }
       } else {
-        progress = Math.max(0, progress - 5);
+        stableFrames = 0;
+        progress = Math.max(0, progress - 3);
         setDetectionProgress(progress);
       }
-    }, 200);
+    }, 300); // Slower interval (300ms instead of 200ms)
   };
 
   const hasDocumentInFrame = () => {
     // Simple document detection based on frame analysis
-    // In a real app, you'd use more sophisticated computer vision
     if (!videoRef.current || !canvasRef.current) return false;
     
     const video = videoRef.current;
@@ -113,17 +118,49 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
     canvas.height = 240;
     context.drawImage(video, 0, 0, 320, 240);
     
-    const imageData = context.getImageData(80, 60, 160, 120);
+    // Check the center area where the ID frame is positioned
+    const centerX = 160;
+    const centerY = 120;
+    const frameWidth = 160;
+    const frameHeight = 100;
+    
+    const imageData = context.getImageData(
+      centerX - frameWidth/2, 
+      centerY - frameHeight/2, 
+      frameWidth, 
+      frameHeight
+    );
     const data = imageData.data;
     
     let edges = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
-      if (brightness > 200 || brightness < 50) edges++;
+    let rectangularEdges = 0;
+    
+    // More sophisticated detection
+    for (let y = 0; y < frameHeight; y++) {
+      for (let x = 0; x < frameWidth; x++) {
+        const index = (y * frameWidth + x) * 4;
+        const brightness = (data[index] + data[index + 1] + data[index + 2]) / 3;
+        
+        // Look for high contrast (document edges)
+        if (brightness > 220 || brightness < 40) {
+          edges++;
+          
+          // Check for rectangular patterns (ID card shape)
+          if ((y < 10 || y > frameHeight - 10) && x > 20 && x < frameWidth - 20) {
+            rectangularEdges++;
+          }
+          if ((x < 10 || x > frameWidth - 10) && y > 20 && y < frameHeight - 20) {
+            rectangularEdges++;
+          }
+        }
+      }
     }
     
-    // Simple heuristic: if there are enough high-contrast areas, assume document is present
-    return edges > imageData.width * imageData.height * 0.1;
+    // Require both general edges and rectangular patterns
+    const hasEnoughEdges = edges > frameWidth * frameHeight * 0.08;
+    const hasRectangularShape = rectangularEdges > 50;
+    
+    return hasEnoughEdges && hasRectangularShape;
   };
 
   useEffect(() => {
@@ -349,11 +386,13 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
                 <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg">
                   <div className="text-center">
                     <div className="text-sm font-medium">
-                      {detectionProgress > 0 ? 'Detecting document...' : 'Position your ID in the frame'}
+                      {detectionProgress === 0 ? 'Position your ID in the white frame' 
+                       : detectionProgress < 50 ? 'Hold steady...' 
+                       : 'Almost ready - don\'t move!'}
                     </div>
                     {detectionProgress > 0 && (
                       <div className="text-xs mt-1">
-                        {Math.round(detectionProgress)}% - Hold still!
+                        {Math.round(detectionProgress)}% - Keep ID in frame
                       </div>
                     )}
                   </div>
