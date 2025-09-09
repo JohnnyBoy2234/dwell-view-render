@@ -91,6 +91,8 @@ const App = () => (
             <Route path="/tenant/messages" element={<RouteGuard><TenantMessages /></RouteGuard>} />
             <Route path="/verify-id" element={<RouteGuard><VerifyId /></RouteGuard>} />
             <Route path="/mobile-capture" element={<MobileCapture />} />
+            <Route path="/kyc/capture" element={<KycCapture />} />
+        <Route path="/kyc/capture" element={<KycCapture />} />
             <Route path="/apply/:id" element={<PropertyDetail />} />
             <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
             <Route path="*" element={<NotFound />} />

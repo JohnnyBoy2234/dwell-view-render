@@ -316,6 +316,36 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_capture_sessions: {
+        Row: {
+          created_at: string
+          desktop_user_id: string
+          expires_at: string
+          file_path: string | null
+          id: string
+          purpose: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          desktop_user_id: string
+          expires_at?: string
+          file_path?: string | null
+          id?: string
+          purpose: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          desktop_user_id?: string
+          expires_at?: string
+          file_path?: string | null
+          id?: string
+          purpose?: string
+          status?: string
+        }
+        Relationships: []
+      }
       kyc_profiles: {
         Row: {
           created_at: string | null

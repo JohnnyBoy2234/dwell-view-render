@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
-import { QRCodeModal } from './QRCodeModal';
+import { QRCaptureModal } from './QRCaptureModal';
 import { FileUploadZone } from './FileUploadZone';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, ArrowLeft, ArrowRight, Shield, Upload, Camera, FileText, AlertTriangle, QrCode, Smartphone } from 'lucide-react';
@@ -456,7 +456,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
       </div>
 
       {/* QR Code Modal */}
-      <QRCodeModal
+      <QRCaptureModal
         open={showQRModal}
         onOpenChange={setShowQRModal}
         type={qrModalType}

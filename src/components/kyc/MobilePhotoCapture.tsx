@@ -16,11 +16,8 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
-  const [isAutoDetecting, setIsAutoDetecting] = useState(false);
-  const [detectionProgress, setDetectionProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { uploadFile, uploading } = useKyc();
   const { toast } = useToast();
 
@@ -59,9 +56,8 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          startAutoDetection();
-        };
+        videoRef.current.setAttribute('playsinline', 'true');
+        videoRef.current.setAttribute('muted', 'true');
       }
     } catch (error) {
       toast({
@@ -73,103 +69,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
     }
   }, [type, toast]);
 
-  const startAutoDetection = () => {
-    if (type === 'selfie') return; // Skip auto-detection for selfies
-    
-    setIsAutoDetecting(true);
-    let progress = 0;
-    let stableFrames = 0;
-    
-    detectionIntervalRef.current = setInterval(() => {
-      if (hasDocumentInFrame()) {
-        stableFrames++;
-        // Only increment progress if document has been stable for at least 3 frames
-        if (stableFrames >= 3) {
-          progress += 2; // Much slower increment (2% instead of 10%)
-          setDetectionProgress(progress);
-          
-          if (progress >= 100) {
-            clearInterval(detectionIntervalRef.current!);
-            setDetectionProgress(0);
-            setIsAutoDetecting(false);
-            capturePhoto();
-          }
-        }
-      } else {
-        stableFrames = 0;
-        progress = Math.max(0, progress - 3);
-        setDetectionProgress(progress);
-      }
-    }, 300); // Slower interval (300ms instead of 200ms)
-  };
-
-  const hasDocumentInFrame = () => {
-    // Simple document detection based on frame analysis
-    if (!videoRef.current || !canvasRef.current) return false;
-    
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    const context = canvas.getContext('2d');
-    
-    if (!context) return false;
-    
-    // Set small canvas for analysis
-    canvas.width = 320;
-    canvas.height = 240;
-    context.drawImage(video, 0, 0, 320, 240);
-    
-    // Check the center area where the ID frame is positioned
-    const centerX = 160;
-    const centerY = 120;
-    const frameWidth = 160;
-    const frameHeight = 100;
-    
-    const imageData = context.getImageData(
-      centerX - frameWidth/2, 
-      centerY - frameHeight/2, 
-      frameWidth, 
-      frameHeight
-    );
-    const data = imageData.data;
-    
-    let edges = 0;
-    let rectangularEdges = 0;
-    
-    // More sophisticated detection
-    for (let y = 0; y < frameHeight; y++) {
-      for (let x = 0; x < frameWidth; x++) {
-        const index = (y * frameWidth + x) * 4;
-        const brightness = (data[index] + data[index + 1] + data[index + 2]) / 3;
-        
-        // Look for high contrast (document edges)
-        if (brightness > 220 || brightness < 40) {
-          edges++;
-          
-          // Check for rectangular patterns (ID card shape)
-          if ((y < 10 || y > frameHeight - 10) && x > 20 && x < frameWidth - 20) {
-            rectangularEdges++;
-          }
-          if ((x < 10 || x > frameWidth - 10) && y > 20 && y < frameHeight - 20) {
-            rectangularEdges++;
-          }
-        }
-      }
-    }
-    
-    // Require both general edges and rectangular patterns
-    const hasEnoughEdges = edges > frameWidth * frameHeight * 0.08;
-    const hasRectangularShape = rectangularEdges > 50;
-    
-    return hasEnoughEdges && hasRectangularShape;
-  };
-
-  useEffect(() => {
-    return () => {
-      if (detectionIntervalRef.current) {
-        clearInterval(detectionIntervalRef.current);
-      }
-    };
-  }, []);
+  // REMOVED AUTO-DETECTION CODE - Manual capture only
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -207,12 +107,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach(track => track.stop());
     }
-    if (detectionIntervalRef.current) {
-      clearInterval(detectionIntervalRef.current);
-    }
     setIsCapturing(false);
-    setIsAutoDetecting(false);
-    setDetectionProgress(0);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -342,62 +237,25 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
             </div>
           )}
 
-          {/* Overlay for camera guide */}
+          {/* Simple camera guide overlay */}
           {isCapturing && !capturedImage && (
             <div className="absolute inset-0 pointer-events-none">
               <div className="h-full flex items-center justify-center">
-                <div className={`relative border-2 rounded-lg transition-all duration-300 ${
-                  isAutoDetecting 
-                    ? `border-green-400 shadow-lg shadow-green-400/50` 
-                    : 'border-white/50'
-                }`}>
+                <div className="relative border-2 border-white/50 rounded-lg">
                   {type === 'selfie' ? (
                     <div className="w-64 h-80 bg-transparent" />
                   ) : (
                     <div className="w-80 h-48 bg-transparent" />
                   )}
-                  
-                  {/* Detection progress overlay */}
-                  {isAutoDetecting && detectionProgress > 0 && (
-                    <div className="absolute inset-0 rounded-lg overflow-hidden">
-                      <div 
-                        className="absolute top-0 left-0 h-1 bg-green-400 transition-all duration-200"
-                        style={{ width: `${detectionProgress}%` }}
-                      />
-                      <div 
-                        className="absolute top-0 right-0 w-1 bg-green-400 transition-all duration-200"
-                        style={{ height: `${detectionProgress}%` }}
-                      />
-                      <div 
-                        className="absolute bottom-0 right-0 h-1 bg-green-400 transition-all duration-200"
-                        style={{ width: `${detectionProgress}%` }}
-                      />
-                      <div 
-                        className="absolute bottom-0 left-0 w-1 bg-green-400 transition-all duration-200"
-                        style={{ height: `${detectionProgress}%` }}
-                      />
-                    </div>
-                  )}
                 </div>
               </div>
               
-              {/* Auto-detection status */}
-              {isAutoDetecting && (
-                <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg">
-                  <div className="text-center">
-                    <div className="text-sm font-medium">
-                      {detectionProgress === 0 ? 'Position your ID in the white frame' 
-                       : detectionProgress < 50 ? 'Hold steady...' 
-                       : 'Almost ready - don\'t move!'}
-                    </div>
-                    {detectionProgress > 0 && (
-                      <div className="text-xs mt-1">
-                        {Math.round(detectionProgress)}% - Keep ID in frame
-                      </div>
-                    )}
-                  </div>
+              {/* Manual capture instruction */}
+              <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg">
+                <div className="text-center text-sm">
+                  Position your {type === 'selfie' ? 'face and ID' : 'ID document'} in the frame, then tap the button to capture
                 </div>
-              )}
+              </div>
             </div>
           )}
         </div>
@@ -424,26 +282,18 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
               </Button>
             </div>
           ) : isCapturing ? (
-            // Camera controls
+            // Manual camera controls only
             <div className="flex flex-col items-center space-y-4">
-              {type !== 'selfie' && (
-                <div className="text-center text-sm text-muted-foreground">
-                  {isAutoDetecting ? 'Auto-capture active' : 'Manual capture mode'}
-                </div>
-              )}
               <Button 
                 onClick={capturePhoto}
                 size="lg"
                 className="w-16 h-16 rounded-full bg-white text-black hover:bg-white/90"
-                disabled={isAutoDetecting && detectionProgress > 50}
               >
                 <div className="w-12 h-12 border-4 border-black rounded-full" />
               </Button>
-              {type !== 'selfie' && (
-                <div className="text-xs text-center text-muted-foreground max-w-xs">
-                  Position your ID in the white frame for auto-capture, or tap the button to take a photo manually
-                </div>
-              )}
+              <div className="text-xs text-center text-muted-foreground max-w-xs">
+                Tap the button to take a photo
+              </div>
             </div>
           ) : null}
         </div>
