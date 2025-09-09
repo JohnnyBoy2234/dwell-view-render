@@ -8,6 +8,13 @@ export function MobileBottomBar() {
   const location = useLocation();
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
+  
+  // Hide bottom bar when on messages page
+  const isOnMessagesPage = location.pathname === '/messages';
+  
+  if (isOnMessagesPage) {
+    return null;
+  }
 
   const navItems = [
     { path: '/', icon: Home, label: 'Home' },

@@ -423,7 +423,7 @@ export default function Messages() {
               </div>
 
               {/* Message Input - Mobile */}
-              <div className="p-4 border-t bg-background flex-shrink-0 mb-16">
+              <div className="p-4 border-t bg-background flex-shrink-0">
                 <form onSubmit={handleSendMessage} className="flex gap-2">
                   <Input
                     value={newMessage}
