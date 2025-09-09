@@ -459,7 +459,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
       <QRCaptureModal
         open={showQRModal}
         onOpenChange={setShowQRModal}
-        type={qrModalType}
+        purpose={qrModalType}
         onUploadSuccess={refresh}
       />
     </div>

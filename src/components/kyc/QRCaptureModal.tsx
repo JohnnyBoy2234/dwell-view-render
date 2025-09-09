@@ -5,8 +5,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, Copy, ExternalLink, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { WaitForPhoneUpload } from './WaitForPhoneUpload';
+import { useKycCapture } from '@/hooks/useKycCapture';
 
 interface QRCaptureModalProps {
   open: boolean;
@@ -23,31 +23,13 @@ interface CaptureSession {
 
 export function QRCaptureModal({ open, onOpenChange, purpose, onUploadSuccess }: QRCaptureModalProps) {
   const [session, setSession] = useState<CaptureSession | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { createCaptureSession, updateKycProfile, loading, error, clearError } = useKycCapture();
   const { toast } = useToast();
 
   const createSession = async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('kyc-create-capture-session', {
-        body: { purpose }
-      });
-
-      if (error) throw error;
-      
-      setSession({
-        sid: data.sid,
-        qrPayload: data.qrPayload,
-        deeplink: data.deeplink
-      });
-    } catch (err) {
-      console.error('Error creating capture session:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create capture session');
-    } finally {
-      setLoading(false);
+    const sessionData = await createCaptureSession(purpose);
+    if (sessionData) {
+      setSession(sessionData);
     }
   };
 
@@ -62,9 +44,9 @@ export function QRCaptureModal({ open, onOpenChange, purpose, onUploadSuccess }:
   useEffect(() => {
     if (!open) {
       setSession(null);
-      setError(null);
+      clearError();
     }
-  }, [open]);
+  }, [open, clearError]);
 
   const getPurposeTitle = () => {
     switch (purpose) {
@@ -98,9 +80,15 @@ export function QRCaptureModal({ open, onOpenChange, purpose, onUploadSuccess }:
     window.open(session.qrPayload, '_blank');
   };
 
-  const handleUploadSuccess = (filePath: string) => {
-    onUploadSuccess(filePath);
-    onOpenChange(false);
+  const handleUploadSuccess = async (filePath: string) => {
+    try {
+      await updateKycProfile(purpose, filePath);
+      onUploadSuccess(filePath);
+      onOpenChange(false);
+    } catch (err) {
+      console.error('Failed to update KYC profile:', err);
+      // Keep modal open on error
+    }
   };
 
   const handleExpired = () => {

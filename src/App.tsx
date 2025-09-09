@@ -40,6 +40,7 @@ import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 import VerifyId from "@/pages/VerifyId";
 import KycManagement from "@/pages/admin/KycManagement";
 import MobileCapture from "@/pages/MobileCapture";
+import KycCapture from "@/pages/KycCapture";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { Analytics } from "@vercel/analytics/next"
 
@@ -92,7 +93,6 @@ const App = () => (
             <Route path="/verify-id" element={<RouteGuard><VerifyId /></RouteGuard>} />
             <Route path="/mobile-capture" element={<MobileCapture />} />
             <Route path="/kyc/capture" element={<KycCapture />} />
-        <Route path="/kyc/capture" element={<KycCapture />} />
             <Route path="/apply/:id" element={<PropertyDetail />} />
             <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
             <Route path="*" element={<NotFound />} />
