@@ -37,6 +37,7 @@ interface KycReviewDrawerProps {
 export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDrawerProps) {
   const [open, setOpen] = useState(false);
   const [idDocUrl, setIdDocUrl] = useState<string>('');
+  const [idBackUrl, setIdBackUrl] = useState<string>('');
   const [selfieUrl, setSelfieUrl] = useState<string>('');
   const [declineReason, setDeclineReason] = useState('');
   const [processing, setProcessing] = useState(false);
@@ -82,6 +83,7 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
 
   const refreshUrls = () => {
     setIdDocUrl('');
+    setIdBackUrl('');
     setSelfieUrl('');
     loadPreviewUrls();
   };

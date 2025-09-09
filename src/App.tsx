@@ -40,6 +40,7 @@ import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 import VerifyId from "@/pages/VerifyId";
 import KycManagement from "@/pages/admin/KycManagement";
 import MobileCapture from "@/pages/MobileCapture";
+import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { Analytics } from "@vercel/analytics/next"
 
 const queryClient = new QueryClient();
@@ -61,7 +62,7 @@ const App = () => (
 
             {/* Routes with Navbar */}
             <Route path="/" element={<><Navbar /><Index /></>} />
-            <Route path="/properties" element={<><Navbar /><PropertiesRouteGuard><Properties /></PropertiesRouteGuard></>} />
+            <Route path="/properties" element={<><Navbar /><AuthenticatedRoute><Properties /></AuthenticatedRoute></>} />
             <Route path="/about" element={<><Navbar /><About /></>} />
 
             {/* Routes without Navbar */}
@@ -79,11 +80,11 @@ const App = () => (
             <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
             <Route path="/landlord-lease-signing/:tenancyId" element={<RouteGuard><LandlordLeaseSigningPage /></RouteGuard>} />
             <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
-            <Route path="/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
-            <Route path="/list-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
+            <Route path="/add-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
+            <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
-            <Route path="/messages" element={<RouteGuard><EnhancedDashboardLayout title="Messages"><Messages /></EnhancedDashboardLayout></RouteGuard>} />
+            <Route path="/messages" element={<AuthenticatedRoute><EnhancedDashboardLayout title="Messages"><Messages /></EnhancedDashboardLayout></AuthenticatedRoute>} />
             <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
             <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
             <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />

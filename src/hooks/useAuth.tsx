@@ -130,7 +130,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check if email is verified
     if (data.user && !data.user.email_confirmed_at) {
-      // Sign out the user if email is not verified
       await supabase.auth.signOut();
       return { 
         error: { 
@@ -138,12 +137,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } 
       };
     }
-        // Redirect to ID verification after successful sign-in
-        if (data.user?.email_confirmed_at) {
-          setTimeout(() => {
-            checkKycStatusAndRedirect(data.user.id);
-          }, 100);
-        }
+    
+    return { error: null };
   };
 
   const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' = 'tenant') => {
