@@ -319,7 +319,9 @@ export type Database = {
       kyc_profiles: {
         Row: {
           created_at: string | null
+          id_back_path: string | null
           id_doc_path: string | null
+          id_front_path: string | null
           notes: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -331,7 +333,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          id_back_path?: string | null
           id_doc_path?: string | null
+          id_front_path?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -343,7 +347,9 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          id_back_path?: string | null
           id_doc_path?: string | null
+          id_front_path?: string | null
           notes?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null

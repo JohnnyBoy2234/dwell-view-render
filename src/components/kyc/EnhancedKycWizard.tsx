@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { QRCodeModal } from './QRCodeModal';
+import { FileUploadZone } from './FileUploadZone';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, ArrowLeft, ArrowRight, Shield, Upload, Camera, FileText, AlertTriangle, QrCode, Smartphone } from 'lucide-react';
-import { FileUploadZone } from './FileUploadZone';
 import { useKyc } from '@/hooks/useKyc';
 import { useToast } from '@/hooks/use-toast';
 
@@ -22,7 +22,7 @@ interface KycWizardProps {
   onComplete: () => void;
 }
 
-export function KycWizard({ onComplete }: KycWizardProps) {
+export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [idFront, setIdFront] = useState<File | null>(null);
   const [idBack, setIdBack] = useState<File | null>(null);
@@ -39,72 +39,63 @@ export function KycWizard({ onComplete }: KycWizardProps) {
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
-  const handleIdFrontSelect = async (file: File) => {
+  const handleFileSelect = async (file: File, type: 'id_front' | 'id_back' | 'selfie') => {
     try {
-      setIdFront(file);
       const preview = URL.createObjectURL(file);
-      setIdFrontPreview(preview);
       
-      await uploadFile(file, 'id_front');
-    } catch (error) {
-      console.error('Error uploading front ID:', error);
-    }
-  };
-
-  const handleIdBackSelect = async (file: File) => {
-    try {
-      setIdBack(file);
-      const preview = URL.createObjectURL(file);
-      setIdBackPreview(preview);
+      switch (type) {
+        case 'id_front':
+          setIdFront(file);
+          setIdFrontPreview(preview);
+          break;
+        case 'id_back':
+          setIdBack(file);
+          setIdBackPreview(preview);
+          break;
+        case 'selfie':
+          setSelfie(file);
+          setSelfiePreview(preview);
+          break;
+      }
       
-      await uploadFile(file, 'id_back');
+      await uploadFile(file, type);
     } catch (error) {
-      console.error('Error uploading back ID:', error);
+      console.error(`Error uploading ${type}:`, error);
     }
   };
 
-  const handleSelfieSelect = async (file: File) => {
-    try {
-      setSelfie(file);
-      const preview = URL.createObjectURL(file);
-      setSelfiePreview(preview);
-      
-      await uploadFile(file, 'selfie');
-    } catch (error) {
-      console.error('Error uploading selfie:', error);
-    }
-  };
-
-  const handleRemoveIdFront = () => {
-    setIdFront(null);
-    if (idFrontPreview) {
-      URL.revokeObjectURL(idFrontPreview);
-      setIdFrontPreview('');
-    }
-  };
-
-  const handleRemoveIdBack = () => {
-    setIdBack(null);
-    if (idBackPreview) {
-      URL.revokeObjectURL(idBackPreview);
-      setIdBackPreview('');
-    }
-  };
-
-  const handleRemoveSelfie = () => {
-    setSelfie(null);
-    if (selfiePreview) {
-      URL.revokeObjectURL(selfiePreview);
-      setSelfiePreview('');
+  const handleFileRemove = (type: 'id_front' | 'id_back' | 'selfie') => {
+    switch (type) {
+      case 'id_front':
+        setIdFront(null);
+        if (idFrontPreview) {
+          URL.revokeObjectURL(idFrontPreview);
+          setIdFrontPreview('');
+        }
+        break;
+      case 'id_back':
+        setIdBack(null);
+        if (idBackPreview) {
+          URL.revokeObjectURL(idBackPreview);
+          setIdBackPreview('');
+        }
+        break;
+      case 'selfie':
+        setSelfie(null);
+        if (selfiePreview) {
+          URL.revokeObjectURL(selfiePreview);
+          setSelfiePreview('');
+        }
+        break;
     }
   };
 
   const canProceedToNext = () => {
     switch (currentStep) {
       case 0: return true; // Intro
-      case 1: return idFront !== null; // Front ID
-      case 2: return idBack !== null; // Back ID
-      case 3: return selfie !== null; // Selfie with ID
+      case 1: return idFront !== null || kycProfile?.id_front_path; // Front ID
+      case 2: return idBack !== null || kycProfile?.id_back_path; // Back ID
+      case 3: return selfie !== null || kycProfile?.selfie_path; // Selfie with ID
       case 4: return declarationAccepted; // Review
       default: return false;
     }
@@ -152,31 +143,37 @@ export function KycWizard({ onComplete }: KycWizardProps) {
             <div className="space-y-4">
               <h2 className="text-2xl font-bold">Identity Verification</h2>
               <p className="text-muted-foreground">
-                We keep everyone safe by verifying identity. You'll upload your ID document 
-                and take a selfie while holding your ID.
+                Complete your identity verification to access all features. You'll need to upload photos of both sides of your ID and take a selfie.
               </p>
             </div>
 
             <Alert>
-              <AlertTriangle className="h-4 w-4" />
+              <Smartphone className="h-4 w-4" />
               <AlertDescription>
-                <strong>Important:</strong> Make sure you have your government-issued ID ready 
-                and good lighting for clear photos.
+                <strong>Use Your Phone for Best Results:</strong> Each step includes a QR code to easily take high-quality photos with your phone camera.
               </AlertDescription>
             </Alert>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
               <div className="p-4 border rounded-lg space-y-2">
-                <Upload className="h-6 w-6 text-primary mx-auto" />
-                <h3 className="font-medium">Step 1: ID Document</h3>
+                <FileText className="h-6 w-6 text-primary mx-auto" />
+                <h3 className="font-medium">Step 1: Front of ID</h3>
                 <p className="text-muted-foreground">
-                  Upload a clear photo of your government-issued ID
+                  Photo of the front side of your government-issued ID
+                </p>
+              </div>
+              
+              <div className="p-4 border rounded-lg space-y-2">
+                <FileText className="h-6 w-6 text-primary mx-auto" />
+                <h3 className="font-medium">Step 2: Back of ID</h3>
+                <p className="text-muted-foreground">
+                  Photo of the back side of your government-issued ID
                 </p>
               </div>
               
               <div className="p-4 border rounded-lg space-y-2">
                 <Camera className="h-6 w-6 text-primary mx-auto" />
-                <h3 className="font-medium">Step 2: Selfie with ID</h3>
+                <h3 className="font-medium">Step 3: Selfie with ID</h3>
                 <p className="text-muted-foreground">
                   Take a selfie while holding your ID next to your face
                 </p>
@@ -184,10 +181,10 @@ export function KycWizard({ onComplete }: KycWizardProps) {
             </div>
 
             <div className="text-xs text-muted-foreground space-y-1">
-              <p>✓ Good lighting with no shadows or glare</p>
-              <p>✓ All text clearly readable</p>
-              <p>✓ Full document edges visible</p>
-              <p>✓ No HEIC format (use JPEG, PNG, or WebP)</p>
+              <p>✓ Use good lighting with no shadows or glare</p>
+              <p>✓ Ensure all text is clearly readable</p>
+              <p>✓ Keep document flat with all edges visible</p>
+              <p>✓ For selfies: both your face and ID should be clearly visible</p>
             </div>
           </div>
         );
@@ -211,10 +208,38 @@ export function KycWizard({ onComplete }: KycWizardProps) {
             <FileUploadZone
               label="Upload Front of ID"
               description="Take or upload a clear photo of the front of your government-issued ID (driver's license, passport, national ID card)"
-              onFileSelect={handleIdFrontSelect}
-              onFileRemove={handleRemoveIdFront}
+              onFileSelect={(file) => handleFileSelect(file, 'id_front')}
+              onFileRemove={() => handleFileRemove('id_front')}
               currentFile={idFront}
               previewUrl={idFrontPreview}
+              isUploading={uploading}
+            />
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Back of ID Document</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => openQRModal('id_back')}
+                className="flex items-center gap-2"
+              >
+                <QrCode className="h-4 w-4" />
+                Use Phone
+              </Button>
+            </div>
+            
+            <FileUploadZone
+              label="Upload Back of ID"
+              description="Take or upload a clear photo of the back of your government-issued ID document"
+              onFileSelect={(file) => handleFileSelect(file, 'id_back')}
+              onFileRemove={() => handleFileRemove('id_back')}
+              currentFile={idBack}
+              previewUrl={idBackPreview}
               isUploading={uploading}
             />
           </div>
@@ -239,8 +264,8 @@ export function KycWizard({ onComplete }: KycWizardProps) {
             <FileUploadZone
               label="Take Selfie with ID"
               description="Take a selfie while holding your ID document next to your face. Both your face and ID should be clearly visible."
-              onFileSelect={handleSelfieSelect}
-              onFileRemove={handleRemoveSelfie}
+              onFileSelect={(file) => handleFileSelect(file, 'selfie')}
+              onFileRemove={() => handleFileRemove('selfie')}
               currentFile={selfie}
               previewUrl={selfiePreview}
               isUploading={uploading}
@@ -261,45 +286,45 @@ export function KycWizard({ onComplete }: KycWizardProps) {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <h3 className="font-medium">Front of ID</h3>
-                {idFrontPreview ? (
+                {(idFrontPreview || kycProfile?.id_front_path) ? (
                   <img 
-                    src={idFrontPreview} 
+                    src={idFrontPreview || (kycProfile?.id_front_path ? `/api/kyc/preview/${kycProfile.id_front_path}` : '')} 
                     alt="Front of ID" 
-                    className="w-full h-48 object-cover rounded-lg border"
+                    className="w-full h-32 object-cover rounded-lg border"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
+                  <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-muted-foreground" />
                   </div>
                 )}
               </div>
 
               <div className="space-y-2">
                 <h3 className="font-medium">Back of ID</h3>
-                {idBackPreview ? (
+                {(idBackPreview || kycProfile?.id_back_path) ? (
                   <img 
-                    src={idBackPreview} 
+                    src={idBackPreview || (kycProfile?.id_back_path ? `/api/kyc/preview/${kycProfile.id_back_path}` : '')} 
                     alt="Back of ID" 
-                    className="w-full h-48 object-cover rounded-lg border"
+                    className="w-full h-32 object-cover rounded-lg border"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-                    <FileText className="h-8 w-8 text-muted-foreground" />
+                  <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-muted-foreground" />
                   </div>
                 )}
               </div>
 
               <div className="space-y-2">
                 <h3 className="font-medium">Selfie with ID</h3>
-                {selfiePreview ? (
+                {(selfiePreview || kycProfile?.selfie_path) ? (
                   <img 
-                    src={selfiePreview} 
+                    src={selfiePreview || (kycProfile?.selfie_path ? `/api/kyc/preview/${kycProfile.selfie_path}` : '')} 
                     alt="Selfie with ID" 
-                    className="w-full h-48 object-cover rounded-lg border"
+                    className="w-full h-32 object-cover rounded-lg border"
                   />
                 ) : (
-                  <div className="w-full h-48 bg-muted rounded-lg flex items-center justify-center">
-                    <Camera className="h-8 w-8 text-muted-foreground" />
+                  <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
+                    <Camera className="h-6 w-6 text-muted-foreground" />
                   </div>
                 )}
               </div>
@@ -342,7 +367,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         {/* Progress Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
@@ -354,23 +379,23 @@ export function KycWizard({ onComplete }: KycWizardProps) {
           
           <Progress value={progress} className="h-2" />
           
-          <div className="flex justify-between mt-2">
+          <div className="flex justify-between mt-4">
             {STEPS.map((step, index) => {
               const Icon = step.icon;
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
               
               return (
-                <div key={step.id} className="flex items-center space-x-2">
+                <div key={step.id} className="flex flex-col items-center space-y-2">
                   <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-xs
+                    w-10 h-10 rounded-full flex items-center justify-center text-xs
                     ${isCompleted ? 'bg-success text-success-foreground' : 
                       isActive ? 'bg-primary text-primary-foreground' : 
                       'bg-muted text-muted-foreground'}
                   `}>
-                    <Icon className="h-4 w-4" />
+                    <Icon className="h-5 w-5" />
                   </div>
-                  <span className={`hidden md:block text-sm ${
+                  <span className={`text-xs text-center max-w-16 ${
                     isActive ? 'text-foreground font-medium' : 'text-muted-foreground'
                   }`}>
                     {step.title}
@@ -428,13 +453,14 @@ export function KycWizard({ onComplete }: KycWizardProps) {
             </Button>
           )}
         </div>
-        {/* QR Code Modal */}
-        <QRCodeModal
-          open={showQRModal}
-          onOpenChange={setShowQRModal}
-          type={qrModalType}
-        />
       </div>
+
+      {/* QR Code Modal */}
+      <QRCodeModal
+        open={showQRModal}
+        onOpenChange={setShowQRModal}
+        type={qrModalType}
+      />
     </div>
   );
 }

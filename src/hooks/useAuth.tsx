@@ -138,8 +138,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } 
       };
     }
-    
-    return { error: null };
+        // Redirect to ID verification after successful sign-in
+        if (data.user?.email_confirmed_at) {
+          setTimeout(() => {
+            checkKycStatusAndRedirect(data.user.id);
+          }, 100);
+        }
   };
 
   const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' = 'tenant') => {

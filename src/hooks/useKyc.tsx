@@ -53,7 +53,7 @@ export function useKyc() {
     }
   };
 
-  const uploadFile = async (file: File, kind: 'id_doc' | 'selfie') => {
+  const uploadFile = async (file: File, kind: 'id_doc' | 'id_front' | 'id_back' | 'selfie') => {
     if (!user) throw new Error('User not authenticated');
     
     setUploading(true);
@@ -85,9 +85,13 @@ export function useKyc() {
       if (error) throw error;
 
       // Update or create KYC profile
+      const pathField = kind === 'selfie' ? 'selfie_path' : 
+                       kind === 'id_front' ? 'id_front_path' :
+                       kind === 'id_back' ? 'id_back_path' : 'id_doc_path';
+      
       const updateData = {
         user_id: user.id,
-        [kind === 'id_doc' ? 'id_doc_path' : 'selfie_path']: data.path,
+        [pathField]: data.path,
         status: 'not_started' as const
       };
 
@@ -120,9 +124,13 @@ export function useKyc() {
         }
       });
 
+      const description = kind === 'selfie' ? 'selfie' :
+                         kind === 'id_front' ? 'front of ID' :
+                         kind === 'id_back' ? 'back of ID' : 'ID document';
+      
       toast({
         title: "File uploaded successfully",
-        description: `Your ${kind === 'id_doc' ? 'ID document' : 'selfie'} has been uploaded.`,
+        description: `Your ${description} has been uploaded.`,
       });
 
       await fetchKycProfile();
@@ -140,8 +148,9 @@ export function useKyc() {
   };
 
   const submitForReview = async () => {
-    if (!user || !kycProfile?.id_doc_path || !kycProfile?.selfie_path) {
-      throw new Error('Both ID document and selfie are required');
+    if (!user || !kycProfile?.selfie_path || 
+        (!kycProfile?.id_front_path || !kycProfile?.id_back_path)) {
+      throw new Error('Front ID, back ID, and selfie with ID are all required');
     }
 
     setSubmitting(true);
@@ -206,16 +215,16 @@ export function useKyc() {
 
     try {
       // Clear existing files if any
-      if (kycProfile?.id_doc_path) {
-        await supabase.storage
-          .from('kyc-uploads')
-          .remove([kycProfile.id_doc_path]);
-      }
+      const filesToRemove = [];
+      if (kycProfile?.id_doc_path) filesToRemove.push(kycProfile.id_doc_path);
+      if (kycProfile?.id_front_path) filesToRemove.push(kycProfile.id_front_path);
+      if (kycProfile?.id_back_path) filesToRemove.push(kycProfile.id_back_path);
+      if (kycProfile?.selfie_path) filesToRemove.push(kycProfile.selfie_path);
       
-      if (kycProfile?.selfie_path) {
+      if (filesToRemove.length > 0) {
         await supabase.storage
           .from('kyc-uploads')
-          .remove([kycProfile.selfie_path]);
+          .remove(filesToRemove);
       }
 
       // Reset profile
@@ -224,6 +233,8 @@ export function useKyc() {
         .update({
           status: 'not_started',
           id_doc_path: null,
+          id_front_path: null,
+          id_back_path: null,
           selfie_path: null,
           notes: null,
           reviewed_by: null,

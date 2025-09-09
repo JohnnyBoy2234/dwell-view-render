@@ -39,6 +39,7 @@ import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRou
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 import VerifyId from "@/pages/VerifyId";
 import KycManagement from "@/pages/admin/KycManagement";
+import MobileCapture from "@/pages/MobileCapture";
 import { Analytics } from "@vercel/analytics/next"
 
 const queryClient = new QueryClient();
@@ -88,6 +89,7 @@ const App = () => (
             <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />
             <Route path="/tenant/messages" element={<RouteGuard><TenantMessages /></RouteGuard>} />
             <Route path="/verify-id" element={<RouteGuard><VerifyId /></RouteGuard>} />
+            <Route path="/mobile-capture" element={<MobileCapture />} />
             <Route path="/apply/:id" element={<PropertyDetail />} />
             <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
             <Route path="*" element={<NotFound />} />

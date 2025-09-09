@@ -3,7 +3,9 @@ export type KycStatus = 'not_started' | 'submitted' | 'approved' | 'declined';
 export interface KycProfile {
   user_id: string;
   status: KycStatus;
-  id_doc_path?: string;
+  id_doc_path?: string; // Legacy field, keep for backward compatibility
+  id_front_path?: string;
+  id_back_path?: string;
   selfie_path?: string;
   notes?: string;
   reviewed_by?: string;
