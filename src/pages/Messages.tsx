@@ -193,7 +193,7 @@ export default function Messages() {
   if (isMobile) {
     return (
       <>
-        <div className="fixed inset-0 bg-background flex flex-col z-30 pb-16">
+        <div className="fixed inset-0 bg-background flex flex-col z-30">
           {/* Conversations List - Mobile */}
           {showConversations && (
             <div className="flex-1 flex flex-col h-full">
@@ -278,10 +278,11 @@ export default function Messages() {
           {!showConversations && selectedConversation && (
             <div className="flex-1 flex flex-col h-full">
               {/* Mobile Chat Header */}
-              <div className="flex items-center gap-3 p-4 border-b bg-background flex-shrink-0">
+              <div className="flex items-center gap-3 p-4 border-b bg-background flex-shrink-0 relative z-40">
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="relative z-50"
                   onClick={() => {
                     setShowConversations(true);
                     // Clear URL parameter when going back
@@ -429,8 +430,8 @@ export default function Messages() {
               </div>
 
               {/* Message Input - Mobile */}
-              <div className="p-4 border-t bg-background flex-shrink-0">
-                <form onSubmit={handleSendMessage} className="flex gap-2">
+              <form onSubmit={handleSendMessage} className="p-4 border-t bg-background flex-shrink-0">
+                <div className="flex gap-2">
                   <Input
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
@@ -441,8 +442,8 @@ export default function Messages() {
                   <Button type="submit" disabled={!newMessage.trim() || loading} className="rounded-full h-10 w-10 p-0 flex-shrink-0">
                     <Send className="h-4 w-4" />
                   </Button>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
           )}
         </div>
