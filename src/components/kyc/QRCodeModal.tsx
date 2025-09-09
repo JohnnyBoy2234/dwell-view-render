@@ -65,38 +65,38 @@ export function QRCodeModal({ open, onOpenChange, type }: QRCodeModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <QrCode className="h-5 w-5" />
+      <DialogContent className="max-w-sm max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <QrCode className="h-4 w-4" />
             {getTitle()}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-sm">
             {getInstructions()}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* QR Code */}
-          <div className="flex justify-center p-4 bg-white rounded-lg">
+          <div className="flex justify-center p-3 bg-white rounded-lg">
             <QRCode 
               value={mobileUrl}
-              size={200}
+              size={160}
               level="M"
             />
           </div>
 
           {/* Instructions */}
-          <Alert>
+          <Alert className="p-3">
             <Smartphone className="h-4 w-4" />
             <AlertDescription>
               <div className="space-y-2">
-                <p><strong>How to use:</strong></p>
-                <ol className="list-decimal list-inside space-y-1 text-sm">
+                <p className="text-sm font-medium">How to use:</p>
+                <ol className="list-decimal list-inside space-y-1 text-xs">
                   <li>Open your phone's camera app</li>
                   <li>Point it at the QR code above</li>
                   <li>Tap the notification to open the link</li>
-                  <li>Follow the on-screen instructions to take your photo</li>
+                  <li>Position your ID in the frame for auto-capture</li>
                   <li>The photo will automatically appear here</li>
                 </ol>
               </div>
@@ -105,42 +105,42 @@ export function QRCodeModal({ open, onOpenChange, type }: QRCodeModalProps) {
 
           {/* Alternative Options */}
           <div className="space-y-2">
-            <p className="text-sm font-medium">Alternative options:</p>
+            <p className="text-xs font-medium">Alternative options:</p>
             
             <div className="flex flex-col gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={copyToClipboard}
-                className="justify-start"
+                className="justify-start text-xs h-8"
               >
-                <Copy className="h-4 w-4 mr-2" />
-                {isCopied ? 'Link Copied!' : 'Copy Link to Send Manually'}
+                <Copy className="h-3 w-3 mr-2" />
+                {isCopied ? 'Link Copied!' : 'Copy Link'}
               </Button>
               
               <Button
                 variant="outline"
                 size="sm"
                 onClick={openInNewTab}
-                className="justify-start"
+                className="justify-start text-xs h-8"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="h-3 w-3 mr-2" />
                 Open in New Tab
               </Button>
             </div>
           </div>
 
           {/* Tips */}
-          <Alert>
+          <Alert className="p-3">
             <Camera className="h-4 w-4" />
             <AlertDescription>
               <div className="text-xs space-y-1">
-                <p><strong>Photo Tips:</strong></p>
+                <p className="font-medium">Photo Tips:</p>
                 <ul className="list-disc list-inside space-y-1">
-                  <li>Use good lighting, avoid shadows and glare</li>
-                  <li>Keep the document flat and all edges visible</li>
-                  <li>Make sure all text is clearly readable</li>
-                  <li>For selfies: hold ID next to your face, both should be visible</li>
+                  <li>Use good lighting, avoid shadows</li>
+                  <li>Keep document flat and visible</li>
+                  <li>Auto-capture works for ID documents</li>
+                  <li>For selfies: hold ID next to face</li>
                 </ul>
               </div>
             </AlertDescription>

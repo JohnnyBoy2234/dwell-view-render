@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -16,8 +16,11 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
   const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [capturedFile, setCapturedFile] = useState<File | null>(null);
+  const [isAutoDetecting, setIsAutoDetecting] = useState(false);
+  const [detectionProgress, setDetectionProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const detectionIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const { uploadFile, uploading } = useKyc();
   const { toast } = useToast();
 
@@ -56,6 +59,9 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.onloadedmetadata = () => {
+          startAutoDetection();
+        };
       }
     } catch (error) {
       toast({
@@ -66,6 +72,67 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       setIsCapturing(false);
     }
   }, [type, toast]);
+
+  const startAutoDetection = () => {
+    if (type === 'selfie') return; // Skip auto-detection for selfies
+    
+    setIsAutoDetecting(true);
+    let progress = 0;
+    
+    detectionIntervalRef.current = setInterval(() => {
+      if (hasDocumentInFrame()) {
+        progress += 10;
+        setDetectionProgress(progress);
+        
+        if (progress >= 100) {
+          clearInterval(detectionIntervalRef.current!);
+          setDetectionProgress(0);
+          setIsAutoDetecting(false);
+          capturePhoto();
+        }
+      } else {
+        progress = Math.max(0, progress - 5);
+        setDetectionProgress(progress);
+      }
+    }, 200);
+  };
+
+  const hasDocumentInFrame = () => {
+    // Simple document detection based on frame analysis
+    // In a real app, you'd use more sophisticated computer vision
+    if (!videoRef.current || !canvasRef.current) return false;
+    
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    
+    if (!context) return false;
+    
+    // Set small canvas for analysis
+    canvas.width = 320;
+    canvas.height = 240;
+    context.drawImage(video, 0, 0, 320, 240);
+    
+    const imageData = context.getImageData(80, 60, 160, 120);
+    const data = imageData.data;
+    
+    let edges = 0;
+    for (let i = 0; i < data.length; i += 4) {
+      const brightness = (data[i] + data[i + 1] + data[i + 2]) / 3;
+      if (brightness > 200 || brightness < 50) edges++;
+    }
+    
+    // Simple heuristic: if there are enough high-contrast areas, assume document is present
+    return edges > imageData.width * imageData.height * 0.1;
+  };
+
+  useEffect(() => {
+    return () => {
+      if (detectionIntervalRef.current) {
+        clearInterval(detectionIntervalRef.current);
+      }
+    };
+  }, []);
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -103,7 +170,12 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
       tracks.forEach(track => track.stop());
     }
+    if (detectionIntervalRef.current) {
+      clearInterval(detectionIntervalRef.current);
+    }
     setIsCapturing(false);
+    setIsAutoDetecting(false);
+    setDetectionProgress(0);
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,14 +304,56 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
           {isCapturing && !capturedImage && (
             <div className="absolute inset-0 pointer-events-none">
               <div className="h-full flex items-center justify-center">
-                <div className="border-2 border-white/50 rounded-lg">
+                <div className={`relative border-2 rounded-lg transition-all duration-300 ${
+                  isAutoDetecting 
+                    ? `border-green-400 shadow-lg shadow-green-400/50` 
+                    : 'border-white/50'
+                }`}>
                   {type === 'selfie' ? (
                     <div className="w-64 h-80 bg-transparent" />
                   ) : (
                     <div className="w-80 h-48 bg-transparent" />
                   )}
+                  
+                  {/* Detection progress overlay */}
+                  {isAutoDetecting && detectionProgress > 0 && (
+                    <div className="absolute inset-0 rounded-lg overflow-hidden">
+                      <div 
+                        className="absolute top-0 left-0 h-1 bg-green-400 transition-all duration-200"
+                        style={{ width: `${detectionProgress}%` }}
+                      />
+                      <div 
+                        className="absolute top-0 right-0 w-1 bg-green-400 transition-all duration-200"
+                        style={{ height: `${detectionProgress}%` }}
+                      />
+                      <div 
+                        className="absolute bottom-0 right-0 h-1 bg-green-400 transition-all duration-200"
+                        style={{ width: `${detectionProgress}%` }}
+                      />
+                      <div 
+                        className="absolute bottom-0 left-0 w-1 bg-green-400 transition-all duration-200"
+                        style={{ height: `${detectionProgress}%` }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
+              
+              {/* Auto-detection status */}
+              {isAutoDetecting && (
+                <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-black/80 text-white px-4 py-2 rounded-lg">
+                  <div className="text-center">
+                    <div className="text-sm font-medium">
+                      {detectionProgress > 0 ? 'Detecting document...' : 'Position your ID in the frame'}
+                    </div>
+                    {detectionProgress > 0 && (
+                      <div className="text-xs mt-1">
+                        {Math.round(detectionProgress)}% - Hold still!
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -267,14 +381,25 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
             </div>
           ) : isCapturing ? (
             // Camera controls
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center space-y-4">
+              {type !== 'selfie' && (
+                <div className="text-center text-sm text-muted-foreground">
+                  {isAutoDetecting ? 'Auto-capture active' : 'Manual capture mode'}
+                </div>
+              )}
               <Button 
                 onClick={capturePhoto}
                 size="lg"
                 className="w-16 h-16 rounded-full bg-white text-black hover:bg-white/90"
+                disabled={isAutoDetecting && detectionProgress > 50}
               >
                 <div className="w-12 h-12 border-4 border-black rounded-full" />
               </Button>
+              {type !== 'selfie' && (
+                <div className="text-xs text-center text-muted-foreground max-w-xs">
+                  Position your ID in the white frame for auto-capture, or tap the button to take a photo manually
+                </div>
+              )}
             </div>
           ) : null}
         </div>
