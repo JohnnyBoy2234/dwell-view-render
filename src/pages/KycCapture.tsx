@@ -26,17 +26,27 @@ export default function KycCapture() {
 
   // Validate parameters on mount
   useEffect(() => {
+    // For testing route, allow missing parameters
+    const isTestRoute = window.location.pathname === '/kyc/test';
+    
     if (!sid || !token) {
-      setError('Invalid capture session. Please scan the QR code again.');
-      return;
+      if (!isTestRoute) {
+        setError('Invalid capture session. Please scan the QR code again.');
+        return;
+      } else {
+        // Test mode - set default purpose
+        setPurpose('id_front');
+      }
     }
 
     // Decode token to get purpose (optional, for better UX)
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      setPurpose(payload.purpose || '');
-    } catch (err) {
-      console.warn('Could not decode token for purpose');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        setPurpose(payload.purpose || '');
+      } catch (err) {
+        console.warn('Could not decode token for purpose');
+      }
     }
   }, [sid, token]);
 
@@ -166,7 +176,19 @@ export default function KycCapture() {
   };
 
   const confirmUpload = async () => {
-    if (!capturedBlob || !sid || !token) return;
+    if (!capturedBlob) return;
+    
+    // For test mode, just show success
+    const isTestRoute = window.location.pathname === '/kyc/test';
+    if (isTestRoute) {
+      toast({
+        title: "Success!",
+        description: "Photo captured successfully (test mode).",
+      });
+      return;
+    }
+    
+    if (!sid || !token) return;
     
     setUploading(true);
     
