@@ -88,17 +88,23 @@ export default function Messages() {
     scrollToBottom();
   }, [messages]);
 
-  // Pre-fill message for first-time contact
+  // Pre-fill message only for truly first-time contact (no conversation history)
   useEffect(() => {
-    if (selectedConversation && messages.length === 0 && !isLandlord && !hasPrefilledMessage) {
-      const propertyTitle = selectedConversation.properties?.title || 'this property';
-      const autoMessage = `Hello, I am interested in ${propertyTitle}. I would like to schedule a viewing. Please let me know what times you have available.`;
-      setNewMessage(autoMessage);
-      setHasPrefilledMessage(true);
-    } else if (selectedConversation && messages.length > 0 && hasPrefilledMessage) {
+    if (selectedConversation && !isLandlord && !hasPrefilledMessage) {
+      // Only show pre-typed message if conversation has no message history at all
+      if (selectedConversation.last_message_at === null && messages.length === 0) {
+        const propertyTitle = selectedConversation.properties?.title || 'this property';
+        const autoMessage = `Hello, I am interested in ${propertyTitle}. I would like to schedule a viewing. Please let me know what times you have available.`;
+        setNewMessage(autoMessage);
+        setHasPrefilledMessage(true);
+      }
+    }
+    
+    // Clear pre-typed message if user manually switches conversations
+    if (selectedConversation && hasPrefilledMessage && newMessage && messages.length > 0) {
       setHasPrefilledMessage(false);
     }
-  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage]);
+  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage]);
 
   // Handle initial URL parameter only once
   useEffect(() => {
@@ -190,8 +196,8 @@ export default function Messages() {
         <div className="fixed inset-0 bg-background flex flex-col z-10">
           {/* Conversations List - Mobile */}
           {showConversations && (
-            <div className="flex-1 flex flex-col">
-              <div className="flex items-center justify-between p-4 border-b bg-background">
+            <div className="flex-1 flex flex-col h-full">
+              <div className="flex items-center justify-between p-4 border-b bg-background flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <MessageCircle className="h-5 w-5 text-primary" />
                   <h1 className="text-lg font-semibold">Messages</h1>
@@ -201,7 +207,7 @@ export default function Messages() {
                 </Badge>
               </div>
               
-              <ScrollArea className="flex-1">
+              <ScrollArea className="flex-1 min-h-0">
                 {conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
                     <div>
@@ -270,9 +276,9 @@ export default function Messages() {
 
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col h-full">
               {/* Mobile Chat Header */}
-              <div className="flex items-center gap-3 p-4 border-b bg-background">
+              <div className="flex items-center gap-3 p-4 border-b bg-background flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -304,9 +310,9 @@ export default function Messages() {
               </div>
 
               {/* Messages - Mobile */}
-              <div className="flex-1 overflow-hidden">
+              <div className="flex-1 min-h-0">
                 <ScrollArea className="h-full">
-                  <div className="p-4 space-y-4">
+                  <div className="p-4 space-y-3">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -372,9 +378,9 @@ export default function Messages() {
                           return (
                             <div
                               key={message.id}
-                              className={`flex mb-4 ${isSender ? 'justify-end' : 'justify-start'}`}
+                              className={`flex mb-3 ${isSender ? 'justify-end' : 'justify-start'}`}
                             >
-                              <div className={`max-w-[80%] ${isSender ? 'order-2' : 'order-1'}`}>
+                              <div className={`max-w-[85%] ${isSender ? 'order-2' : 'order-1'}`}>
                                 <div
                                   className={`rounded-2xl px-4 py-3 ${
                                     isSender
@@ -417,7 +423,7 @@ export default function Messages() {
               </div>
 
               {/* Message Input - Mobile */}
-              <div className="p-4 border-t bg-background">
+              <div className="p-4 border-t bg-background flex-shrink-0">
                 <form onSubmit={handleSendMessage} className="flex gap-2">
                   <Input
                     value={newMessage}

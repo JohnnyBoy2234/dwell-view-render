@@ -11,16 +11,16 @@ interface MessageBubbleProps {
 export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
   const isOwn = message.senderUserId === currentUserId;
   return (
-    <div className={cn('flex mb-3', isOwn ? 'justify-end' : 'justify-start')}>
+    <div className={cn('flex mb-2', isOwn ? 'justify-end' : 'justify-start')}>
       <div
         className={cn(
           'max-w-[85%] sm:max-w-[80%] rounded-2xl p-3 shadow-sm',
-          isOwn ? 'bg-ocean-blue text-white rounded-br-md' : 'bg-muted rounded-bl-md'
+          isOwn ? 'bg-primary text-primary-foreground rounded-br-md' : 'bg-muted text-foreground rounded-bl-md'
         )}
       >
         <div className="flex items-center gap-2 mb-1">
           <Badge variant="secondary">{message.senderRole}</Badge>
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs opacity-70">
             {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
           </span>
         </div>
@@ -30,7 +30,7 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
             {message.attachments.map((fileName, index) => (
               <div
                 key={index}
-                className="block text-xs text-muted-foreground"
+                className="block text-xs opacity-70"
               >
                 📎 {fileName}
               </div>
@@ -38,7 +38,7 @@ export function MessageBubble({ message, currentUserId }: MessageBubbleProps) {
           </div>
         )}
         {message.readAt && isOwn && (
-          <div className="text-[10px] text-right mt-1 text-muted-foreground">✓ Read</div>
+          <div className="text-[10px] text-right mt-1 opacity-70">✓ Read</div>
         )}
       </div>
     </div>
