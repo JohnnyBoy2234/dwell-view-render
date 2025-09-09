@@ -26,21 +26,19 @@ export default function MobileCapture() {
   }, [searchParams]);
 
   const handleCapture = (file: File) => {
-    // Store the captured file info in sessionStorage for the parent window
-    const captureData = {
-      type: captureType,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type,
-      timestamp: Date.now()
-    };
+    // Notify parent window of successful upload
+    if (window.opener) {
+      window.opener.postMessage({
+        type: 'kyc-upload-success',
+        captureType: captureType,
+        fileName: file.name
+      }, '*');
+    }
     
-    sessionStorage.setItem('mobileCapture', JSON.stringify(captureData));
-    
-    // Show success message and close after delay
+    // Show success and close
     setTimeout(() => {
       window.close();
-    }, 2000);
+    }, 1000);
   };
 
   const handleClose = () => {

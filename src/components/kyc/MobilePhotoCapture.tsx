@@ -201,13 +201,18 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
 
     try {
       await uploadFile(capturedFile, type);
-      onCapture(capturedFile);
       toast({
         title: "Photo uploaded successfully",
         description: `Your ${type.replace('_', ' ')} has been uploaded.`,
       });
+      onCapture(capturedFile);
     } catch (error) {
       console.error('Upload error:', error);
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Please try again.",
+      });
     }
   };
 

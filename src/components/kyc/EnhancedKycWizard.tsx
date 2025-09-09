@@ -34,7 +34,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrModalType, setQRModalType] = useState<'id_front' | 'id_back' | 'selfie'>('id_front');
   
-  const { kycProfile, uploadFile, submitForReview, uploading, submitting } = useKyc();
+  const { kycProfile, uploadFile, submitForReview, uploading, submitting, refresh } = useKyc();
   const { toast } = useToast();
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
@@ -460,6 +460,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
         open={showQRModal}
         onOpenChange={setShowQRModal}
         type={qrModalType}
+        onUploadSuccess={refresh}
       />
     </div>
   );

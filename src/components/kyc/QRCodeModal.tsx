@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -10,11 +10,29 @@ interface QRCodeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   type: 'id_front' | 'id_back' | 'selfie';
+  onUploadSuccess?: () => void;
 }
 
-export function QRCodeModal({ open, onOpenChange, type }: QRCodeModalProps) {
+export function QRCodeModal({ open, onOpenChange, type, onUploadSuccess }: QRCodeModalProps) {
   const [isCopied, setIsCopied] = useState(false);
   const { toast } = useToast();
+
+  // Listen for messages from mobile capture window
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'kyc-upload-success' && event.data.captureType === type) {
+        toast({
+          title: "Photo uploaded successfully",
+          description: `Your ${type.replace('_', ' ')} has been uploaded.`,
+        });
+        onUploadSuccess?.();
+        onOpenChange(false);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [type, onUploadSuccess, onOpenChange, toast]);
 
   const getTitle = () => {
     switch (type) {
