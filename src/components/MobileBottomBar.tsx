@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { Home, Search, Heart, Send, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,11 +8,12 @@ export function MobileBottomBar() {
   const location = useLocation();
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
+  const [searchParams] = useSearchParams();
   
-  // Hide bottom bar when on messages page
-  const isOnMessagesPage = location.pathname === '/messages';
+  // Hide bottom bar only when in a specific conversation
+  const isInConversation = location.pathname === '/messages' && searchParams.get('c');
   
-  if (isOnMessagesPage) {
+  if (isInConversation) {
     return null;
   }
 

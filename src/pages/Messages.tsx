@@ -171,9 +171,9 @@ export default function Messages() {
     setActiveConversation(conversationId);
     setShowConversations(false);
     
-    // Clear URL parameter to prevent conflicts
+    // Set URL parameter for mobile bottom bar to hide
     const newSearchParams = new URLSearchParams(searchParams);
-    newSearchParams.delete('c');
+    newSearchParams.set('c', conversationId);
     navigate({ search: newSearchParams.toString() }, { replace: true });
   };
 
@@ -282,7 +282,13 @@ export default function Messages() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowConversations(true)}
+                  onClick={() => {
+                    setShowConversations(true);
+                    // Clear URL parameter when going back
+                    const newSearchParams = new URLSearchParams(searchParams);
+                    newSearchParams.delete('c');
+                    navigate({ search: newSearchParams.toString() }, { replace: true });
+                  }}
                 >
                   <ArrowLeft className="h-4 w-4" />
                 </Button>
