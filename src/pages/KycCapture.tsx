@@ -56,6 +56,8 @@ export default function KycCapture() {
 
     const startCamera = async () => {
       try {
+        console.log('Starting camera initialization...');
+        
         // Check if we have mediaDevices support
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error('Camera not supported on this device');
@@ -70,7 +72,9 @@ export default function KycCapture() {
           audio: false,
         };
 
+        console.log('Requesting camera with constraints:', constraints);
         const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('Camera stream obtained:', mediaStream);
         
         setStream(mediaStream);
         
@@ -83,10 +87,15 @@ export default function KycCapture() {
           
           // Wait for video to be ready before playing
           await new Promise((resolve) => {
-            videoRef.current!.onloadedmetadata = () => resolve(undefined);
+            videoRef.current!.onloadedmetadata = () => {
+              console.log('Video metadata loaded');
+              resolve(undefined);
+            };
           });
           
+          console.log('Starting video play...');
           await videoRef.current.play();
+          console.log('Video playing successfully');
         }
       } catch (err) {
         console.error('Error accessing camera:', err);
@@ -112,6 +121,7 @@ export default function KycCapture() {
     // Cleanup function
     return () => {
       if (stream) {
+        console.log('Cleaning up camera stream');
         stream.getTracks().forEach(track => track.stop());
       }
     };
@@ -212,22 +222,39 @@ export default function KycCapture() {
       return;
     }
     
-    if (!sid || !token) return;
+    if (!sid || !token) {
+      toast({
+        variant: "destructive",
+        title: "Upload failed",
+        description: "Missing session information. Please scan the QR code again.",
+      });
+      return;
+    }
     
     setUploading(true);
     
     try {
+      console.log('Starting upload process...', { sid, token: token.substring(0, 20) + '...' });
+      
       const formData = new FormData();
       formData.append('file', capturedBlob, `capture_${sid}.jpg`);
       
-      const uploadUrl = `https://rsfrvjaqxhoqavvscvwf.supabase.co/functions/v1/kyc-upload-capture?sid=${sid}&t=${encodeURIComponent(token)}`;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rsfrvjaqxhoqavvscvwf.supabase.co';
+      const uploadUrl = `${supabaseUrl}/functions/v1/kyc-upload-capture?sid=${sid}&t=${encodeURIComponent(token)}`;
+      
+      console.log('Uploading to:', uploadUrl);
       
       const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
       });
       
+      console.log('Upload response status:', response.status);
+      
       if (response.ok) {
+        const result = await response.json();
+        console.log('Upload successful:', result);
+        
         toast({
           title: "Success!",
           description: "Photo uploaded successfully. You can return to your computer.",
@@ -245,7 +272,8 @@ export default function KycCapture() {
         
       } else {
         const errorText = await response.text();
-        throw new Error(errorText || 'Upload failed');
+        console.error('Upload failed:', response.status, errorText);
+        throw new Error(errorText || `Upload failed with status ${response.status}`);
       }
     } catch (err) {
       console.error('Upload error:', err);
@@ -302,7 +330,7 @@ export default function KycCapture() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              Capture Error
+              Camera Not Available
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -323,12 +351,46 @@ export default function KycCapture() {
                   capture="environment"
                   onChange={handleFileUpload}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  id="fallback-upload"
                 />
-                <Button variant="outline" className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  Choose Photo from Gallery
+                <Button variant="outline" className="w-full" asChild>
+                  <label htmlFor="fallback-upload" className="cursor-pointer">
+                    <Upload className="h-4 w-4 mr-2" />
+                    Choose Photo from Gallery
+                  </label>
                 </Button>
               </div>
+              
+              {/* Test mode button for development */}
+              {window.location.pathname === '/kyc/test' && (
+                <Button 
+                  variant="secondary" 
+                  className="w-full"
+                  onClick={() => {
+                    // Create a test blob for testing
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 400;
+                    canvas.height = 300;
+                    const ctx = canvas.getContext('2d');
+                    if (ctx) {
+                      ctx.fillStyle = '#f0f0f0';
+                      ctx.fillRect(0, 0, 400, 300);
+                      ctx.fillStyle = '#333';
+                      ctx.font = '16px Arial';
+                      ctx.fillText('Test Image', 150, 150);
+                    }
+                    canvas.toBlob((blob) => {
+                      if (blob) {
+                        setCapturedBlob(blob);
+                        const imageUrl = URL.createObjectURL(blob);
+                        setCapturedImageUrl(imageUrl);
+                      }
+                    }, 'image/jpeg');
+                  }}
+                >
+                  Create Test Image
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -414,12 +476,12 @@ export default function KycCapture() {
             <Button 
               onClick={takePhoto}
               size="lg"
-              className="w-16 h-16 rounded-full bg-white text-black hover:bg-white/90 border-4 border-white"
+              className="w-20 h-20 rounded-full bg-white text-black hover:bg-white/90 border-4 border-white shadow-lg"
               disabled={!stream}
             >
-              <div className="w-8 h-8 bg-black rounded-full" />
+              <div className="w-10 h-10 bg-black rounded-full" />
             </Button>
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-sm text-center text-foreground font-medium">
               Tap the button to take a photo
             </p>
             

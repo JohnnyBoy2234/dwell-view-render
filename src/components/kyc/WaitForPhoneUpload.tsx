@@ -23,10 +23,10 @@ export function WaitForPhoneUpload({ sid, onUploaded, onExpired }: WaitForPhoneU
     });
 
     channel.on('broadcast', { event: 'status' }, (payload) => {
-      console.log('Received broadcast:', payload);
+      console.log('Received broadcast for session:', sid, 'payload:', payload);
       
       if (payload?.status === 'uploaded' && payload?.filePath) {
-        console.log('File uploaded:', payload.filePath);
+        console.log('File uploaded successfully:', payload.filePath);
         setStatus('uploaded');
         onUploaded(payload.filePath);
         toast({
@@ -34,9 +34,11 @@ export function WaitForPhoneUpload({ sid, onUploaded, onExpired }: WaitForPhoneU
           description: "Your photo has been uploaded successfully.",
         });
       } else if (payload?.status === 'expired') {
-        console.log('Session expired');
+        console.log('Session expired for session:', sid);
         setStatus('expired');
         onExpired();
+      } else {
+        console.log('Unknown broadcast payload:', payload);
       }
     });
 

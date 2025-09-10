@@ -27,9 +27,13 @@ export function QRCaptureModal({ open, onOpenChange, purpose, onUploadSuccess }:
   const { toast } = useToast();
 
   const createSession = async () => {
+    console.log('Creating capture session for purpose:', purpose);
     const sessionData = await createCaptureSession(purpose);
     if (sessionData) {
+      console.log('Session created successfully:', sessionData);
       setSession(sessionData);
+    } else {
+      console.error('Failed to create session');
     }
   };
 

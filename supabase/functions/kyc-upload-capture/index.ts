@@ -29,7 +29,7 @@ serve(async (req) => {
     }
 
     // Verify JWT token
-    const jwtSecret = Deno.env.get('JWT_SECRET') || 'your-secret-key-change-in-production';
+    const jwtSecret = Deno.env.get('JWT_SECRET') || 'swiftrent-kyc-capture-secret-key-2024';
     const key = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(jwtSecret),

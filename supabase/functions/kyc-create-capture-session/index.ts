@@ -18,10 +18,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== KYC Create Capture Session Function Started ===');
+    
     // Get Supabase client
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    console.log('Supabase client created');
 
     // Get the authorization header
     const authHeader = req.headers.get('Authorization');
@@ -45,8 +49,11 @@ serve(async (req) => {
 
     const body: CreateSessionRequest = await req.json();
     const { purpose } = body;
+    
+    console.log('Request body:', body);
 
     if (!['id_front', 'id_back', 'selfie'].includes(purpose)) {
+      console.error('Invalid purpose:', purpose);
       return new Response(JSON.stringify({ error: 'Invalid purpose' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -54,6 +61,8 @@ serve(async (req) => {
     }
 
     // Create capture session
+    console.log('Creating capture session for user:', userData.user.id, 'purpose:', purpose);
+    
     const { data: session, error: sessionError } = await supabase
       .from('kyc_capture_sessions')
       .insert({
@@ -66,14 +75,16 @@ serve(async (req) => {
 
     if (sessionError) {
       console.error('Error creating session:', sessionError);
-      return new Response(JSON.stringify({ error: 'Failed to create session' }), {
+      return new Response(JSON.stringify({ error: 'Failed to create session', details: sessionError.message }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
+    
+    console.log('Session created successfully:', session);
 
     // Create JWT token for upload (expires in 15 minutes)
-    const jwtSecret = Deno.env.get('JWT_SECRET') || 'your-secret-key-change-in-production';
+    const jwtSecret = Deno.env.get('JWT_SECRET') || 'swiftrent-kyc-capture-secret-key-2024';
     const key = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(jwtSecret),
@@ -98,12 +109,18 @@ serve(async (req) => {
     const baseUrl = origin || (referer ? new URL(referer).origin : 'https://f5a1e625-cf98-41f1-aaee-d1a1c45b87ea.lovableproject.com');
     const deeplink = `/kyc/capture?sid=${session.id}&t=${uploadToken}`;
     const qrPayload = `${baseUrl}${deeplink}`;
+    
+    console.log('Generated QR payload:', qrPayload);
 
-    return new Response(JSON.stringify({
+    const response = {
       sid: session.id,
       deeplink: deeplink,
       qrPayload: qrPayload
-    }), {
+    };
+    
+    console.log('Returning response:', response);
+
+    return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
