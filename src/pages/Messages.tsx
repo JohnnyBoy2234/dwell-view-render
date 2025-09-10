@@ -270,45 +270,6 @@ export default function Messages() {
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
             <div className="flex-1 flex flex-col h-full relative">
-              {/* Mobile Chat Header - Fixed */}
-              <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background shadow-md z-50">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="relative z-50"
-                  onClick={() => {
-                    setShowConversations(true);
-                    // Clear URL parameter when going back
-                    const newSearchParams = new URLSearchParams(searchParams);
-                    newSearchParams.delete('c');
-                    navigate({ search: newSearchParams.toString() }, { replace: true });
-                  }}
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="relative flex-shrink-0">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>
-                      {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {onlineUsers.has(getOtherUser(selectedConversation).id) && (
-                    <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-green-500 rounded-full border border-background"></div>
-                  )}
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-sm truncate">{getOtherUser(selectedConversation).name}</h3>
-                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-xs px-1 py-0 flex-shrink-0">
-                      {getOtherUser(selectedConversation).role}
-                    </Badge>
-                    <span className="break-words leading-tight">{selectedConversation.properties?.title}</span>
-                  </div>
-                </div>
-              </div>
-
                 {/* Messages - Mobile */}
                 <div className="flex-1 min-h-0 pt-20">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
