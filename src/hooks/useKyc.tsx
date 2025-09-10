@@ -56,9 +56,18 @@ export function useKyc() {
   const uploadFile = async (file: File, kind: 'id_doc' | 'id_front' | 'selfie') => {
     if (!user) throw new Error('User not authenticated');
     
+    console.log('uploadFile called', { user: !!user, fileType: file.type, fileSize: file.size, kind });
+    
     setUploading(true);
     
     try {
+      // Check auth session
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      console.log('Auth session check:', { hasSession: !!session, authError });
+      
+      if (!session) {
+        throw new Error('No authentication session found. Please sign in again.');
+      }
       // Validate file
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
@@ -75,6 +84,7 @@ export function useKyc() {
       const filePath = `kyc/${user.id}/${fileName}`;
 
       // Upload to storage
+      console.log('Attempting storage upload:', { filePath, fileSize: file.size });
       const { data, error } = await supabase.storage
         .from('kyc-uploads')
         .upload(filePath, file, {
@@ -82,7 +92,11 @@ export function useKyc() {
           upsert: false
         });
 
-      if (error) throw error;
+      console.log('Storage upload result:', { data, error });
+      if (error) {
+        console.error('Storage upload error details:', error);
+        throw error;
+      }
 
       // Update or create KYC profile
       const pathField = kind === 'selfie' ? 'selfie_path' : 

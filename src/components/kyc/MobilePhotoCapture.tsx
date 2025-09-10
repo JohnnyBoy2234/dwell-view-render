@@ -159,18 +159,27 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
     if (!capturedFile) return;
 
     try {
+      console.log('Starting file upload for:', type);
       await uploadFile(capturedFile, type);
       toast({
         title: "Photo uploaded successfully",
         description: `Your ${type.replace('_', ' ')} has been uploaded.`,
       });
       onCapture(capturedFile);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Upload error:', error);
+      
+      let errorMessage = "Please try again.";
+      if (error.message?.includes('authentication') || error.message?.includes('session')) {
+        errorMessage = "Your session has expired. Please sign in again.";
+      } else if (error.message?.includes('authorization')) {
+        errorMessage = "Authentication error. Please sign out and sign in again.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Upload failed",
-        description: "Please try again.",
+        description: errorMessage,
       });
     }
   };
@@ -240,7 +249,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
               <div className="space-y-3 w-full max-w-xs">
                 <Button 
                   onClick={startCamera} 
-                  className="w-full"
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
                   size="lg"
                 >
                   <Camera className="h-5 w-5 mr-2" />
@@ -255,8 +264,13 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     id="gallery-upload"
                   />
-                  <Button variant="outline" className="w-full" size="lg" asChild>
-                    <label htmlFor="gallery-upload" className="cursor-pointer">
+                  <Button 
+                    variant="outline" 
+                    className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground" 
+                    size="lg" 
+                    asChild
+                  >
+                    <label htmlFor="gallery-upload" className="cursor-pointer flex items-center justify-center">
                       <Upload className="h-5 w-5 mr-2" />
                       Upload from Gallery
                     </label>
