@@ -92,7 +92,10 @@ serve(async (req) => {
       key
     );
 
-    const baseUrl = req.headers.get('origin') || supabaseUrl.replace('https://', 'https://');
+    // Use the correct base URL for the QR code
+    const origin = req.headers.get('origin');
+    const referer = req.headers.get('referer');
+    const baseUrl = origin || (referer ? new URL(referer).origin : 'https://f5a1e625-cf98-41f1-aaee-d1a1c45b87ea.lovableproject.com');
     const deeplink = `/kyc/capture?sid=${session.id}&t=${uploadToken}`;
     const qrPayload = `${baseUrl}${deeplink}`;
 
