@@ -128,7 +128,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
             <div className="space-y-4">
               <h2 className="text-2xl font-bold">Identity Verification</h2>
               <p className="text-muted-foreground">
-                Complete your identity verification to access all features. You'll need to upload photos of both sides of your ID and take a selfie.
+                At SwiftRent, safety and trust aren’t just features – they’re part of who we are. Every landlord and every tenant is verified through ID checks before using our platform. This ensures that you connect only with real, accountable people, creating a community built on security, honesty, and peace of mind. Because when trust comes first, renting becomes effortless.
               </p>
             </div>
 
