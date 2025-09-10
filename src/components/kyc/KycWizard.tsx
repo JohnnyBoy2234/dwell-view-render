@@ -341,7 +341,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4 pb-24 md:pb-4">
       <div className="max-w-2xl mx-auto">
         {/* Progress Header */}
         <div className="mb-8">
@@ -399,7 +399,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
         </Card>
 
         {/* Navigation */}
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between mt-6 pb-20 md:pb-6">
           <Button
             variant="outline"
             onClick={handlePrevious}

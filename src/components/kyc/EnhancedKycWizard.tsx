@@ -327,7 +327,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4 pb-24 md:pb-4">
       <div className="max-w-3xl mx-auto">
         {/* Progress Header */}
         <div className="mb-8">
@@ -385,7 +385,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
         </Card>
 
         {/* Navigation */}
-        <div className="flex justify-between mt-6">
+        <div className="flex justify-between mt-6 pb-20 md:pb-6">
           <Button
             variant="outline"
             onClick={handlePrevious}
@@ -397,12 +397,12 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
 
           {currentStep === STEPS.length - 1 ? (
             <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
+              onClick={handleSubmit}
+              disabled={!canProceedToNext() || submitting}
+              className="bg-success hover:bg-success/90"
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
+              {submitting ? 'Submitting...' : 'Submit for Review'}
+              <CheckCircle className="h-4 w-4 ml-2" />
             </Button>
           ) : (
             <Button
