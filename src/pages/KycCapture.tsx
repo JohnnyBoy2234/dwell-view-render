@@ -244,8 +244,22 @@ export default function KycCapture() {
       
       console.log('Uploading to:', uploadUrl);
       
+      // Get the current user's session token
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Session data:', session ? 'Session exists' : 'No session');
+      
+      if (!session?.access_token) {
+        console.error('No authentication token available');
+        throw new Error('No authentication token available. Please log in again.');
+      }
+      
+      console.log('Using token:', session.access_token.substring(0, 20) + '...');
+
       const response = await fetch(uploadUrl, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
         body: formData,
       });
       
@@ -353,7 +367,7 @@ export default function KycCapture() {
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   id="fallback-upload"
                 />
-                <Button variant="outline" className="w-full" asChild>
+                <Button variant="outline" className="w-full border-green-600 text-green-600 hover:bg-green-50" asChild>
                   <label htmlFor="fallback-upload" className="cursor-pointer">
                     <Upload className="h-4 w-4 mr-2" />
                     Choose Photo from Gallery
@@ -445,30 +459,40 @@ export default function KycCapture() {
       <div className="p-4 pb-20 bg-background/95 backdrop-blur border-t">{/* Added pb-20 for mobile navigation */}
         {capturedImageUrl ? (
           // Review controls
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={retakePhoto}
-              disabled={uploading}
-              className="flex-1"
-            >
-              <RotateCcw className="h-4 w-4 mr-2" />
-              Retake
-            </Button>
-            <Button 
-              onClick={confirmUpload} 
-              disabled={uploading}
-              className="flex-1 bg-success hover:bg-success/90"
-            >
-              {uploading ? (
-                'Uploading...'
-              ) : (
-                <>
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Confirm & Upload
-                </>
-              )}
-            </Button>
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-sm text-green-600 font-medium mb-2">
+                ✓ Photo captured successfully!
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button 
+                variant="outline" 
+                onClick={retakePhoto}
+                disabled={uploading}
+                className="flex-1 border-gray-300 hover:bg-gray-50"
+              >
+                <RotateCcw className="h-4 w-4 mr-2" />
+                Retake
+              </Button>
+              <Button 
+                onClick={confirmUpload} 
+                disabled={uploading}
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200"
+              >
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Confirm & Upload
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         ) : stream ? (
           // Camera controls - MANUAL CAPTURE ONLY
@@ -476,10 +500,12 @@ export default function KycCapture() {
             <Button 
               onClick={takePhoto}
               size="lg"
-              className="w-20 h-20 rounded-full bg-white text-black hover:bg-white/90 border-4 border-white shadow-lg"
+              className="w-20 h-20 rounded-full bg-green-600 text-white hover:bg-green-700 border-4 border-green-500 shadow-xl"
               disabled={!stream}
             >
-              <div className="w-10 h-10 bg-black rounded-full" />
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <Camera className="h-6 w-6 text-green-600" />
+              </div>
             </Button>
             <p className="text-sm text-center text-foreground font-medium">
               Tap the button to take a photo
@@ -494,7 +520,7 @@ export default function KycCapture() {
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                 id="gallery-upload-kyc"
               />
-              <Button variant="outline" size="sm" className="text-xs" asChild>
+              <Button variant="outline" size="sm" className="text-xs border-green-600 text-green-600 hover:bg-green-50" asChild>
                 <label htmlFor="gallery-upload-kyc" className="cursor-pointer">
                   <Upload className="h-3 w-3 mr-1" />
                   Or choose from gallery
