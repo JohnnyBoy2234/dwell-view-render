@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useKyc } from '@/hooks/useKyc';
 import { EmailVerificationGate } from '@/components/kyc/EmailVerificationGate';
-import { KycWizard } from '@/components/kyc/KycWizard';
+import { EnhancedKycWizard } from '@/components/kyc/EnhancedKycWizard';
 import { KycStatusPill } from '@/components/kyc/KycStatusPill';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -43,7 +43,7 @@ export default function VerifyId() {
   // Show appropriate content based on KYC status
   const renderContent = () => {
     if (!kycProfile || kycProfile.status === 'not_started') {
-      return <KycWizard onComplete={() => window.location.reload()} />;
+      return <EnhancedKycWizard onComplete={() => window.location.reload()} />;
     }
 
     switch (kycProfile.status) {
@@ -68,7 +68,7 @@ export default function VerifyId() {
                   <Clock className="h-4 w-4" />
                   <AlertDescription>
                     We're reviewing your documents. You'll receive a notification once the review is complete. 
-                    This usually takes 24 hours.
+                    This usually takes 1-3 business days.
                   </AlertDescription>
                 </Alert>
 
