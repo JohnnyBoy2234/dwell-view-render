@@ -199,17 +199,7 @@ export default function Messages() {
         <div className="fixed inset-0 bg-background flex flex-col z-30">
           {/* Conversations List - Mobile */}
           {showConversations && (
-            <div className="flex-1 flex flex-col h-full">
-              <div className="flex items-center justify-between p-4 border-b bg-background flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-primary" />
-                  <h1 className="text-lg font-semibold">Messages</h1>
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
-                </Badge>
-              </div>
-              
+            <div className="flex-1 flex flex-col h-full">              
               <ScrollArea className="flex-1 min-h-0">
                 {conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
