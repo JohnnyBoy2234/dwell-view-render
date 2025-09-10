@@ -364,7 +364,7 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
                   <Button
                     onClick={handleApprove}
                     disabled={processing}
-                    className="flex-1 bg-success hover:bg-success/90"
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   >
                     {processing ? (
                       <>

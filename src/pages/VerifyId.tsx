@@ -110,10 +110,10 @@ export default function VerifyId() {
                 </div>
 
                 <Button 
-                  onClick={() => window.location.href = '/dashboard'}
+                  onClick={() => window.location.href = '/'}
                   className="w-full"
                 >
-                  Continue to Dashboard
+                  Continue to Home Page
                 </Button>
               </CardContent>
             </Card>
