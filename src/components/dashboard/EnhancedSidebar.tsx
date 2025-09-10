@@ -1,4 +1,4 @@
-import { Home, MessageSquare, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, type LucideIcon } from 'lucide-react';
+import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, type LucideIcon } from 'lucide-react';
 import { RandIcon } from '@/components/icons/RandIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';

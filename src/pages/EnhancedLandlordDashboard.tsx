@@ -778,12 +778,11 @@ export default function EnhancedLandlordDashboard() {
                   </div>
                   
                   <div className="flex gap-2 ml-4">
-                    <Button
-                      size="sm"
+                    <Button 
+                      size="sm" 
                       variant="outline"
-                      onClick={() => setCurrentTab('/enhancedlandlorddashboard/messages')}
+                      onClick={() => navigate('/messages')}
                     >
-                      <MessageSquare className="h-4 w-4 mr-1" />
                       Message
                     </Button>
                     <Button
@@ -917,12 +916,11 @@ export default function EnhancedLandlordDashboard() {
                     </div>
                     
                     <div className="flex gap-2">
-                      <Button
-                        size="sm"
+                      <Button 
+                        size="sm" 
                         variant="outline"
-                        onClick={() => setCurrentTab('/enhancedlandlorddashboard/messages')}
+                        onClick={() => navigate('/messages')}
                       >
-                        <MessageSquare className="h-4 w-4 mr-1" />
                         Remind
                       </Button>
                       <Button
@@ -1943,9 +1941,9 @@ export default function EnhancedLandlordDashboard() {
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
-                      setCurrentTab('/enhancedlandlorddashboard/messages');
+                      navigate('/messages');
                     }}>
-                      <MessageSquare className="h-3 w-3" />
+                      Message
                     </Button>
                     <Button size="sm" variant="ghost" onClick={(e) => {
                       e.stopPropagation();
@@ -1999,8 +1997,8 @@ export default function EnhancedLandlordDashboard() {
                 {tenant.payment_status}
               </Badge>
               <div className="flex gap-1">
-                <Button size="sm" variant="ghost" onClick={() => setCurrentTab('/enhancedlandlorddashboard/messages')}>
-                  <MessageSquare className="h-3 w-3" />
+                <Button size="sm" variant="ghost" onClick={() => navigate('/messages')}>
+                  Message
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => navigate(`/tenant-profile/${tenant.id}`)}>
                   <Eye className="h-3 w-3" />

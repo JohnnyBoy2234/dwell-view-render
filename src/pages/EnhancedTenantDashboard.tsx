@@ -189,7 +189,9 @@ export default function EnhancedTenantDashboard() {
           <StatCard
             label="Unread Messages"
             value={unreadCount ?? 0}
-            icon={<MessageSquare className="h-5 w-5" />}
+            icon={<div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
+              <div className="h-3 w-3 bg-blue-600 rounded-full"></div>
+            </div>}
           />
           <StatCard
             label="Upcoming Viewings"
@@ -246,10 +248,10 @@ export default function EnhancedTenantDashboard() {
                 <p className="text-sm text-brand.gray500">Find your next home</p>
               </div>
             </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/messages')}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/messages')}>
               <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-brand.green/10 text-brand.green grid place-content-center mb-2">
-                  <MessageSquare className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 grid place-content-center mb-2">
+                  <div className="h-5 w-5 bg-blue-600 rounded-full"></div>
                 </div>
                 <h4 className="font-semibold">Messages</h4>
                 <p className="text-sm text-brand.gray500">Chat with landlords</p>
