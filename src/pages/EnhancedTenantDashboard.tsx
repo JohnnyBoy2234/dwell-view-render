@@ -2,9 +2,7 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
-import { MessagesTab } from '@/components/dashboard/MessagesTab';
 import { RentDueCard } from '@/components/dashboard/tenant/RentDueCard';
-import { MessagesCard } from '@/components/dashboard/tenant/MessagesCard';
 import { ViewingCard } from '@/components/dashboard/tenant/ViewingCard';
 import { MaintenanceCard } from '@/components/dashboard/tenant/MaintenanceCard';
 import { PropertyPanel } from '@/components/dashboard/tenant/PropertyPanel';
@@ -14,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, MessageSquare, Building, FileText, Settings, User, Calendar } from 'lucide-react';
+import { Home, Building, FileText, Settings, User, Calendar } from 'lucide-react';
 import { SignedLeasesList } from '@/components/lease/SignedLeasesList';
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
@@ -81,12 +79,6 @@ export default function EnhancedTenantDashboard() {
 
   const renderTabContent = () => {
     switch (currentTab) {
-      case '/enhancedtenantdashboard/messages':
-        return (
-          <div className="space-y-6">
-            <MessagesTab />
-          </div>
-        );
       case '/enhancedtenantdashboard/properties':
         return (
           <div className="space-y-6">
@@ -224,7 +216,6 @@ export default function EnhancedTenantDashboard() {
                 rentDue={rentDue} 
                 onMakePayment={handleMakePayment} 
               />
-              <MessagesCard unreadCount={unreadCount} />
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -27,7 +27,6 @@ interface SidebarItem {
 
 const tenantItems: SidebarItem[] = [
   { title: 'Dashboard', url: '/enhancedtenantdashboard', icon: Home },
-  { title: 'Messages', url: '/enhancedtenantdashboard/messages', icon: MessageSquare },
   { title: 'Properties', url: '/enhancedtenantdashboard/properties', icon: Building },
   { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: Inbox },
   { title: 'Leases', url: '/enhancedtenantdashboard/leases', icon: FileText },
@@ -38,7 +37,6 @@ const tenantItems: SidebarItem[] = [
 const landlordItems: SidebarItem[] = [
   { title: 'Landlord Dashboard', url: '/enhancedlandlorddashboard', icon: Home },
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
-  { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare },
   { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
   { title: 'Leases', url: '/enhancedlandlorddashboard/leases', icon: FileText },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },

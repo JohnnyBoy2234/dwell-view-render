@@ -55,28 +55,26 @@ const Navbar = () => {
                   {item.label}
                 </Link>
               ))}
-              {/* Messages Link */}
-              {user && (
-                <Link 
-                  to="/messages" 
-                  className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 ${
-                    location.pathname.startsWith('/messages') ? "text-primary" : "text-muted-foreground"
-                  }`}
-                >
-                  Messages
-                  {messageUnread > 0 && (
-                    <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
-                      {messageUnread > 99 ? '99+' : messageUnread}
-                    </Badge>
-                  )}
-                </Link>
-              )}
             </div>
 
             {/* Desktop Action Buttons */}
             <div className="hidden md:flex items-center space-x-4">
               {user ? (
                 <>
+                  <Button 
+                    asChild 
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Link to="/messages" className="flex items-center gap-1">
+                      <MessageCircle className="h-4 w-4" />
+                      Messages
+                      {messageUnread > 0 && (
+                        <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center ml-1">
+                          {messageUnread > 99 ? '99+' : messageUnread}
+                        </Badge>
+                      )}
+                    </Link>
+                  </Button>
                   <Button 
                     asChild 
                     className="bg-success-green hover:bg-success-green-dark text-white"

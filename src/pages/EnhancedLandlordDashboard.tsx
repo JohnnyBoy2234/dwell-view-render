@@ -4,13 +4,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
-import { MessagesTab } from '@/components/dashboard/MessagesTab';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Home, Eye, Plus, Users, MessageSquare, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play, Save, Trash2 } from 'lucide-react';
+import { Home, Eye, Plus, Users, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play, Save, Trash2 } from 'lucide-react';
 import { LandlordLeasesList } from '@/components/lease/LandlordLeasesList';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
@@ -632,9 +631,6 @@ export default function EnhancedLandlordDashboard() {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
     
     switch (currentTab) {
-      case '/enhancedlandlorddashboard/messages':
-        console.log('[Dashboard] Rendering messages tab');
-        return renderMessagesTab();
       case '/enhancedlandlorddashboard/properties':
         console.log('[Dashboard] Rendering properties tab');
         return renderPropertiesTab();
@@ -682,31 +678,6 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
 
-  const renderMessagesTab = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <MessageSquare className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Messages</h2>
-        <Badge variant="secondary" className="ml-2">
-          Communication Center
-        </Badge>
-      </div>
-      
-      <Card>
-        <CardContent className="p-8 text-center">
-          <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Messages</h3>
-          <p className="text-muted-foreground mb-4">
-            Communicate with your tenants and manage conversations
-          </p>
-          <Button onClick={() => navigate('/messages')}>
-            <MessageSquare className="h-4 w-2" />
-            Open Messages
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
 
   const renderNotImplementedTab = (title: string, description: string) => (
     <div className="space-y-6">
