@@ -120,10 +120,19 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
   const handleStepClick = (stepIndex: number) => {
     if (!isMobile) return; // Only for mobile
     
+    // For mobile, directly trigger file input instead of QR modal
     if (stepIndex === 0) {
-      openQRModal('id_front');
+      // Trigger file input for ID front
+      const fileInput = document.getElementById('mobile-id-front-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.click();
+      }
     } else if (stepIndex === 1) {
-      openQRModal('selfie');
+      // Trigger file input for selfie
+      const fileInput = document.getElementById('mobile-selfie-upload') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.click();
+      }
     }
   };
 
@@ -343,12 +352,30 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
           </Card>
         </div>
 
-        {/* QR Code Modal */}
-        <QRCaptureModal
-          open={showQRModal}
-          onOpenChange={setShowQRModal}
-          purpose={qrModalType}
-          onUploadSuccess={refresh}
+        {/* Hidden file inputs for mobile camera access */}
+        <input
+          id="mobile-id-front-upload"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFileSelect(e.target.files[0], 'id_front');
+            }
+          }}
+          className="hidden"
+        />
+        <input
+          id="mobile-selfie-upload"
+          type="file"
+          accept="image/*"
+          capture="user"
+          onChange={(e) => {
+            if (e.target.files && e.target.files[0]) {
+              handleFileSelect(e.target.files[0], 'selfie');
+            }
+          }}
+          className="hidden"
         />
       </div>
     );
