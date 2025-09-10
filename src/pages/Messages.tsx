@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,21 +27,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 export default function Messages() {
   const { user, isLandlord } = useAuth();
   const isMobile = useIsMobile();
-  const {
-    conversations,
-    activeConversation,
-    setActiveConversation,
-    messages,
-    loading,
-    onlineUsers,
-    sendMessage,
-    fetchMessages: refetchMessages
-  } = useMessaging();
-
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
   const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
+  const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -49,17 +39,9 @@ export default function Messages() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const selectedConversation = conversations.find(c => c.id === activeConversation);
-
-  // Fetch viewing proposals for active conversation
-  useEffect(() => {
-    if (activeConversation && user) {
-      fetchViewingProposals();
-    }
-  }, [activeConversation, user]);
-
-  const fetchViewingProposals = async () => {
-    if (!activeConversation || !user) return;
+  // Define fetchViewingProposals as useCallback to avoid dependency issues
+  const fetchViewingProposals = useCallback(async () => {
+    if (!user) return;
     
     try {
       const { data, error } = await supabase
@@ -77,9 +59,32 @@ export default function Messages() {
       if (error) throw error;
       setViewingProposals(data || []);
     } catch (error) {
-      console.error('Error fetching viewing proposals:', error);
+      console.error('Error fetching viewing requests:', error);
     }
-  };
+  }, [activeConversation, user]);
+
+  const {
+    conversations,
+    activeConversation,
+    setActiveConversation,
+    messages,
+    loading,
+    onlineUsers,
+    sendMessage,
+    fetchMessages: refetchMessages
+  } = useMessaging(() => {
+    // Refresh viewing proposals when they change
+    fetchViewingProposals();
+  });
+
+  const selectedConversation = conversations.find(c => c.id === activeConversation);
+
+  // Fetch viewing requests for active conversation
+  useEffect(() => {
+    if (activeConversation && user) {
+      fetchViewingProposals();
+    }
+  }, [activeConversation, user, fetchViewingProposals]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,7 +98,7 @@ export default function Messages() {
 
   // Pre-fill message only for truly first-time contact (no conversation history)
   useEffect(() => {
-    if (selectedConversation && !isLandlord && !hasPrefilledMessage) {
+    if (selectedConversation && !isLandlord && !hasPrefilledMessage && !sentAutoMessage) {
       // Only show pre-typed message if conversation has no message history at all
       if (selectedConversation.last_message_at === null && messages.length === 0) {
         const propertyTitle = selectedConversation.properties?.title || 'this property';
@@ -107,7 +112,12 @@ export default function Messages() {
     if (selectedConversation && hasPrefilledMessage && newMessage && messages.length > 0) {
       setHasPrefilledMessage(false);
     }
-  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage]);
+  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage, sentAutoMessage]);
+
+  // Reset sentAutoMessage when switching conversations
+  useEffect(() => {
+    setSentAutoMessage(false);
+  }, [activeConversation]);
 
   // Handle initial URL parameter only once
   useEffect(() => {
@@ -129,6 +139,7 @@ export default function Messages() {
         if (messageParam) {
           setNewMessage(decodeURIComponent(messageParam));
           setHasPrefilledMessage(true);
+          // Don't set sentAutoMessage to true here since it hasn't been sent yet
         }
         
         setHasProcessedUrlParam(true);
@@ -143,6 +154,13 @@ export default function Messages() {
     if (!newMessage.trim() || !activeConversation) return;
 
     await sendMessage(activeConversation, newMessage);
+    
+    // Mark auto message as sent if this was the pre-filled message
+    if (hasPrefilledMessage) {
+      setSentAutoMessage(true);
+      setHasPrefilledMessage(false);
+    }
+    
     setNewMessage('');
   };
 
@@ -309,7 +327,7 @@ export default function Messages() {
                             <div className="flex items-center justify-between">
                               <div>
                                 <p className="text-sm font-medium">Schedule a viewing</p>
-                                <p className="text-xs text-muted-foreground">Create a viewing proposal for this tenant</p>
+                                <p className="text-xs text-muted-foreground">Create a viewing request for this tenant</p>
                               </div>
                               <Button
                                 onClick={() => setShowViewingModal(true)}
@@ -591,7 +609,7 @@ export default function Messages() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-medium">Schedule a viewing</p>
-                            <p className="text-xs text-muted-foreground">Create a viewing proposal for this tenant</p>
+                            <p className="text-xs text-muted-foreground">Create a viewing request for this tenant</p>
                           </div>
                           <Button
                             onClick={() => setShowViewingModal(true)}
@@ -604,7 +622,7 @@ export default function Messages() {
                       </div>
                     )}
 
-                    {/* Viewing Proposals */}
+                    {/* Viewing Requests */}
                     {viewingProposals.map((proposal) => (
                       <div key={proposal.id} className="flex justify-center">
                         <ViewingProposalCard

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtime } from './useRealtime';
 
 export interface ApplicationWithTenant {
   id: string;
@@ -202,6 +203,18 @@ export const useLandlordApplications = (propertyId?: string) => {
       }
     }
   }, [user, propertyId, fetchApplications, fetchAllApplications]);
+
+  // Set up real-time updates for applications
+  useRealtime({
+    onApplicationChange: () => {
+      console.log('🔄 Refreshing landlord applications due to real-time update');
+      if (propertyId) {
+        fetchApplications();
+      } else {
+        fetchAllApplications();
+      }
+    }
+  });
 
   const updateApplicationStatus = useCallback(async (applicationId: string, status: string) => {
     try {

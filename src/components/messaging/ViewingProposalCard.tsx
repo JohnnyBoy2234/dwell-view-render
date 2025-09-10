@@ -144,7 +144,7 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
-            <span className="font-semibold text-sm">Viewing Proposal</span>
+            <span className="font-semibold text-sm">Request Viewing</span>
           </div>
           <Badge className={`${getStatusColor(proposal.status)} flex items-center gap-1 text-xs`}>
             {getStatusIcon(proposal.status)}

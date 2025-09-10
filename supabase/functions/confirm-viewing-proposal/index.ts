@@ -80,12 +80,12 @@ serve(async (req: Request) => {
       throw new Error('Failed to confirm viewing');
     }
 
-    // Create system message about confirmation
+    // Create system message about confirmation (from landlord's side)
     const { error: messageError } = await supabase
       .from('messages')
       .insert({
         conversation_id: proposal.conversation_id,
-        sender_id: user.id,
+        sender_id: proposal.landlord_id,
         content: `Viewing confirmed for ${proposalTime.toLocaleDateString('en-ZA', {
           weekday: 'long',
           year: 'numeric',
@@ -94,7 +94,7 @@ serve(async (req: Request) => {
           hour: '2-digit',
           minute: '2-digit',
           timeZone: 'Africa/Johannesburg'
-        })} SAST`,
+        })}`,
         message_type: 'system'
       });
 

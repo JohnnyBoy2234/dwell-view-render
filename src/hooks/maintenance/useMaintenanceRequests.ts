@@ -1,11 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealtime } from '@/hooks/useRealtime';
 import type { MaintenanceRequest, CreateMaintenanceRequest } from '@/types/maintenance';
 import { useToast } from '@/hooks/use-toast';
 
 export function useMaintenanceRequests() {
   const { user, isLandlord } = useAuth();
+  const queryClient = useQueryClient();
+  
+  // Set up real-time updates for maintenance requests
+  useRealtime({
+    onMaintenanceChange: () => {
+      console.log('🔄 Refreshing maintenance requests due to real-time update');
+      queryClient.invalidateQueries({ queryKey: ['maintenance-requests', user?.id, isLandlord] });
+    }
+  });
   
   return useQuery({
     queryKey: ['maintenance-requests', user?.id, isLandlord],

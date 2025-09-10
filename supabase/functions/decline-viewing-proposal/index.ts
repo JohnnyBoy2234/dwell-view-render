@@ -68,13 +68,13 @@ serve(async (req: Request) => {
       throw new Error('Failed to decline viewing');
     }
 
-    // Create system message about decline
+    // Create system message about decline (from landlord's side)
     const proposalTime = new Date(proposal.start_at);
     const { error: messageError } = await supabase
       .from('messages')
       .insert({
         conversation_id: proposal.conversation_id,
-        sender_id: user.id,
+        sender_id: proposal.landlord_id,
         content: `Viewing declined for ${proposalTime.toLocaleDateString('en-ZA', {
           weekday: 'long',
           year: 'numeric',
@@ -83,7 +83,7 @@ serve(async (req: Request) => {
           hour: '2-digit',
           minute: '2-digit',
           timeZone: 'Africa/Johannesburg'
-        })} SAST${reason ? ` - ${reason}` : ''}`,
+        })}${reason ? ` - ${reason}` : ''}`,
         message_type: 'system'
       });
 

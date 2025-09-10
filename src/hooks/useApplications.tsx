@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealtime } from './useRealtime';
 
 
 export interface Application {
@@ -23,6 +24,14 @@ export const useApplications = () => {
       fetchApplications();
     }
   }, [user]);
+
+  // Set up real-time updates for applications
+  useRealtime({
+    onApplicationChange: () => {
+      console.log('🔄 Refreshing applications due to real-time update');
+      fetchApplications();
+    }
+  });
 
 
   const fetchApplications = async () => {
