@@ -216,9 +216,9 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="text-center">
-                  <h3 className="font-semibold text-lg">Review & Submit</h3>
+                  <h3 className="font-semibold text-lg">Thank You</h3>
                   <p className="text-sm text-muted-foreground">
-                    Review your documents and complete verification
+                    Thank you for submitting your ID. We are now reviewing it and will send you a notification shortly
                   </p>
                 </div>
 
@@ -362,9 +362,9 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
         return (
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-bold mb-2">Review & Submit</h2>
+              <h2 className="text-2xl font-bold mb-2">Thank You</h2>
               <p className="text-muted-foreground">
-                Please review your uploaded documents and confirm submission
+                Thank you for submitting your ID. We are now reviewing it and will send you a notification shortly
               </p>
             </div>
 
