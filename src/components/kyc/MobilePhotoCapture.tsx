@@ -43,24 +43,54 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
   const startCamera = useCallback(async () => {
     try {
       setIsCapturing(true);
-      const stream = await navigator.mediaDevices.getUserMedia({
+      
+      // Check if we have mediaDevices support
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Camera not supported on this device');
+      }
+
+      const constraints = {
         video: { 
           facingMode: type === 'selfie' ? 'user' : 'environment',
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 720, min: 480 }
         }
-      });
+      };
+
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.setAttribute('playsinline', 'true');
         videoRef.current.setAttribute('muted', 'true');
+        videoRef.current.setAttribute('autoplay', 'true');
+        
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          videoRef.current!.onloadedmetadata = () => resolve(undefined);
+        });
+        
+        await videoRef.current.play();
       }
     } catch (error) {
+      console.error('Camera error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      let description = "Unable to access camera. ";
+      if (errorMessage.includes('Permission denied') || errorMessage.includes('NotAllowedError')) {
+        description += "Please allow camera access and try again.";
+      } else if (errorMessage.includes('NotFoundError')) {
+        description += "No camera found on this device.";
+      } else if (errorMessage.includes('NotSupportedError')) {
+        description += "Camera not supported on this device.";
+      } else {
+        description += "Please use the gallery upload option.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Camera Error",
-        description: "Unable to access camera. Please check permissions.",
+        description,
       });
       setIsCapturing(false);
     }
@@ -221,13 +251,15 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
                   <input
                     type="file"
                     accept="image/*"
-                    capture="environment"
                     onChange={handleFileUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    id="gallery-upload"
                   />
-                  <Button variant="outline" className="w-full" size="lg">
-                    <Upload className="h-5 w-5 mr-2" />
-                    Upload from Gallery
+                  <Button variant="outline" className="w-full" size="lg" asChild>
+                    <label htmlFor="gallery-upload" className="cursor-pointer">
+                      <Upload className="h-5 w-5 mr-2" />
+                      Upload from Gallery
+                    </label>
                   </Button>
                 </div>
               </div>

@@ -56,14 +56,21 @@ export default function KycCapture() {
 
     const startCamera = async () => {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
+        // Check if we have mediaDevices support
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Camera not supported on this device');
+        }
+
+        const constraints = {
           video: { 
             facingMode: { ideal: purpose === 'selfie' ? 'user' : 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: { ideal: 1280, min: 640 },
+            height: { ideal: 720, min: 480 }
           },
           audio: false,
-        });
+        };
+
+        const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
         
         setStream(mediaStream);
         
@@ -72,11 +79,31 @@ export default function KycCapture() {
           // Important for iOS to avoid fullscreen
           videoRef.current.setAttribute('playsinline', 'true');
           videoRef.current.setAttribute('muted', 'true');
+          videoRef.current.setAttribute('autoplay', 'true');
+          
+          // Wait for video to be ready before playing
+          await new Promise((resolve) => {
+            videoRef.current!.onloadedmetadata = () => resolve(undefined);
+          });
+          
           await videoRef.current.play();
         }
       } catch (err) {
         console.error('Error accessing camera:', err);
-        setError('Unable to access camera. Please check permissions or use the file upload option.');
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        
+        let errorDescription = 'Unable to access camera. ';
+        if (errorMessage.includes('Permission denied') || errorMessage.includes('NotAllowedError')) {
+          errorDescription += 'Please allow camera access and refresh the page.';
+        } else if (errorMessage.includes('NotFoundError')) {
+          errorDescription += 'No camera found on this device.';
+        } else if (errorMessage.includes('NotSupportedError')) {
+          errorDescription += 'Camera not supported on this device.';
+        } else {
+          errorDescription += 'Please use the file upload option below.';
+        }
+        
+        setError(errorDescription);
       }
     };
 
@@ -401,13 +428,15 @@ export default function KycCapture() {
               <input
                 type="file"
                 accept="image/*"
-                capture="environment"
                 onChange={handleFileUpload}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                id="gallery-upload-kyc"
               />
-              <Button variant="outline" size="sm" className="text-xs">
-                <Upload className="h-3 w-3 mr-1" />
-                Or choose from gallery
+              <Button variant="outline" size="sm" className="text-xs" asChild>
+                <label htmlFor="gallery-upload-kyc" className="cursor-pointer">
+                  <Upload className="h-3 w-3 mr-1" />
+                  Or choose from gallery
+                </label>
               </Button>
             </div>
           </div>
