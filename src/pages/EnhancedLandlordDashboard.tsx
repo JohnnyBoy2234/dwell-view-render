@@ -729,9 +729,7 @@ export default function EnhancedLandlordDashboard() {
                     <div className="text-sm text-muted-foreground space-y-1">
                       <p>Property: {application.properties?.title || 'Unknown Property'}</p>
                       <p>Applied: {new Date(application.created_at).toLocaleDateString()}</p>
-                      {application.tenant_profile?.email && (
-                        <p>Email: {application.tenant_profile.email}</p>
-                      )}
+                      <p>Tenant: {application.tenant_profile?.display_name || 'Unknown Tenant'}</p>
                     </div>
                   </div>
                   
