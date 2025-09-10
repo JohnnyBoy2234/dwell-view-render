@@ -67,7 +67,7 @@ export default function VerifyId() {
                 <Alert>
                   <Clock className="h-4 w-4" />
                   <AlertDescription>
-                    We're reviewing your documents. You'll receive a notification once the review is complete. 
+                    We're reviewing your documents. You'll receive a notification once the verification is complete. 
                     This usually takes 1-3 business days.
                   </AlertDescription>
                 </Alert>

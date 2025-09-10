@@ -45,15 +45,15 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
   const { toast } = useToast();
 
   const loadPreviewUrls = async () => {
-    if (!kycProfile.id_doc_path && !kycProfile.selfie_path) return;
+    if (!kycProfile.id_front_path && !kycProfile.selfie_path) return;
     
     setLoading(true);
     try {
       // Generate signed URLs for preview
-      if (kycProfile.id_doc_path) {
+      if (kycProfile.id_front_path) {
         const { data } = await supabase.storage
           .from('kyc-uploads')
-          .createSignedUrl(kycProfile.id_doc_path, 60); // 60 second expiry
+          .createSignedUrl(kycProfile.id_front_path, 60); // 60 second expiry
         
         if (data?.signedUrl) {
           setIdDocUrl(data.signedUrl);
@@ -91,14 +91,12 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
   const handleApprove = async () => {
     setProcessing(true);
     try {
-      const response = await fetch('/api/kyc/admin/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: kycProfile.user_id })
+      const { data, error } = await supabase.functions.invoke('kyc-admin-approve', {
+        body: { user_id: kycProfile.user_id }
       });
 
-      if (!response.ok) {
-        throw new Error('Approval failed');
+      if (error) {
+        throw new Error(error.message || 'Approval failed');
       }
 
       toast({
@@ -109,10 +107,11 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
       onReview();
       setOpen(false);
     } catch (error: any) {
+      console.error('Approval error:', error);
       toast({
         variant: "destructive",
         title: "Approval Failed",
-        description: error.message,
+        description: error.message || 'Failed to approve KYC verification',
       });
     } finally {
       setProcessing(false);
@@ -131,17 +130,15 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
 
     setProcessing(true);
     try {
-      const response = await fetch('/api/kyc/admin/decline', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+      const { data, error } = await supabase.functions.invoke('kyc-admin-decline', {
+        body: { 
           user_id: kycProfile.user_id,
           reason: declineReason 
-        })
+        }
       });
 
-      if (!response.ok) {
-        throw new Error('Decline failed');
+      if (error) {
+        throw new Error(error.message || 'Decline failed');
       }
 
       toast({
@@ -153,10 +150,11 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
       setOpen(false);
       setDeclineReason('');
     } catch (error: any) {
+      console.error('Decline error:', error);
       toast({
         variant: "destructive",
         title: "Decline Failed",
-        description: error.message,
+        description: error.message || 'Failed to decline KYC verification',
       });
     } finally {
       setProcessing(false);
@@ -278,7 +276,7 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
                         <div className="text-center">
                           <FileText className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                           <p className="text-sm text-muted-foreground">
-                            {kycProfile.id_doc_path ? 'Preview unavailable' : 'No document uploaded'}
+                            {kycProfile.id_front_path ? 'Preview unavailable' : 'No document uploaded'}
                           </p>
                         </div>
                       </div>

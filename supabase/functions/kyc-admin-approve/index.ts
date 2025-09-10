@@ -116,8 +116,11 @@ serve(async (req) => {
 
     // Delete original documents from storage for privacy
     const filesToDelete = [];
-    if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);
+    if (kycProfile.id_front_path) filesToDelete.push(kycProfile.id_front_path);
+    if (kycProfile.id_back_path) filesToDelete.push(kycProfile.id_back_path);
     if (kycProfile.selfie_path) filesToDelete.push(kycProfile.selfie_path);
+    // Handle legacy field names
+    if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);
 
     if (filesToDelete.length > 0) {
       try {
@@ -134,7 +137,9 @@ serve(async (req) => {
         await supabaseAdmin
           .from('kyc_profiles')
           .update({
-            id_doc_path: null,
+            id_front_path: null,
+            id_back_path: null,
+            id_doc_path: null, // legacy field
             selfie_path: null
           })
           .eq('user_id', user_id);

@@ -60,19 +60,15 @@ function KycManagementContent() {
       // Transform data to include user email
       const profilesWithUserInfo: AdminKycListItem[] = await Promise.all(
         (data || []).map(async (profile: any) => {
-          // Get user email from auth.users (we need to use a function for this)
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('user_id')
-            .eq('user_id', profile.user_id)
-            .single();
-
           // For now, we'll use the user_id as email placeholder
           // In production, you'd want a function to get the actual email
           return {
             ...profile,
             user_email: `user-${profile.user_id.slice(0, 8)}@example.com`, // Placeholder
-            user_display_name: profile.profiles?.display_name || 'Unknown User'
+            user_display_name: profile.profiles?.display_name || 'Unknown User',
+            // Handle both old and new field names
+            id_front_path: profile.id_front_path || profile.id_doc_path,
+            id_back_path: profile.id_back_path
           };
         })
       );
