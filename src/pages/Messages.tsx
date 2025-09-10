@@ -44,8 +44,6 @@ export default function Messages() {
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -87,23 +85,7 @@ export default function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Handle scroll for responsive header
-  const handleScroll = (e: any) => {
-    if (!isMobile) return;
-    
-    const scrollElement = e.target;
-    const currentScrollY = scrollElement.scrollTop;
-    
-    if (currentScrollY > lastScrollY && currentScrollY > 50) {
-      // Scrolling down - hide header
-      setHeaderVisible(false);
-    } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
-      // Scrolling up or near top - show header
-      setHeaderVisible(true);
-    }
-    
-    setLastScrollY(currentScrollY);
-  };
+  // Remove scroll handler - header is now permanently fixed
 
   useEffect(() => {
     scrollToBottom();
@@ -217,17 +199,7 @@ export default function Messages() {
         <div className="fixed inset-0 bg-background flex flex-col z-30">
           {/* Conversations List - Mobile */}
           {showConversations && (
-            <div className="flex-1 flex flex-col h-full">
-              <div className="flex items-center justify-between p-4 border-b bg-background flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-primary" />
-                  <h1 className="text-lg font-semibold">Messages</h1>
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
-                </Badge>
-              </div>
-              
+            <div className="flex-1 flex flex-col h-full">              
               <ScrollArea className="flex-1 min-h-0">
                 {conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
@@ -298,10 +270,8 @@ export default function Messages() {
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
             <div className="flex-1 flex flex-col h-full relative">
-              {/* Mobile Chat Header */}
-              <div className={`absolute top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-md z-40 transition-transform duration-300 ease-in-out ${
-                headerVisible ? 'translate-y-0' : '-translate-y-full'
-              }`}>
+              {/* Mobile Chat Header - Fixed */}
+              <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background shadow-md z-50">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -340,10 +310,8 @@ export default function Messages() {
               </div>
 
                 {/* Messages - Mobile */}
-                <div className={`flex-1 min-h-0 transition-all duration-300 ease-in-out ${
-                  headerVisible ? 'pt-20' : 'pt-0'
-                }`}>
-                  <ScrollArea className="h-full" onScrollCapture={handleScroll} ref={scrollAreaRef}>
+                <div className="flex-1 min-h-0 pt-20">
+                  <ScrollArea className="h-full" ref={scrollAreaRef}>
                   <div className="p-4 space-y-3">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
