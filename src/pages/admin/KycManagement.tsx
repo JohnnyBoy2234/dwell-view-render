@@ -43,35 +43,49 @@ function KycManagementContent() {
   const fetchKycProfiles = async () => {
     setLoading(true);
     try {
-      // Fetch KYC profiles with user info
-      const { data, error } = await supabase
+      // Fetch KYC profiles
+      const { data: kycData, error: kycError } = await supabase
         .from('kyc_profiles')
-        .select(`
-          *,
-          profiles!inner(
-            display_name,
-            user_id
-          )
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (kycError) throw kycError;
 
-      // Transform data to include user email
-      const profilesWithUserInfo: AdminKycListItem[] = await Promise.all(
-        (data || []).map(async (profile: any) => {
-          // For now, we'll use the user_id as email placeholder
-          // In production, you'd want a function to get the actual email
-          return {
-            ...profile,
-            user_email: `user-${profile.user_id.slice(0, 8)}@example.com`, // Placeholder
-            user_display_name: profile.profiles?.display_name || 'Unknown User',
-            // Handle both old and new field names
-            id_front_path: profile.id_front_path || profile.id_doc_path,
-            id_back_path: profile.id_back_path
-          };
-        })
+      // Fetch user profiles separately (only if we have KYC data)
+      let profilesData = [];
+      if (kycData && kycData.length > 0) {
+        const userIds = kycData.map(profile => profile.user_id);
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .in('user_id', userIds);
+
+        if (profilesError) {
+          console.warn('Error fetching user profiles:', profilesError);
+          // Don't throw - continue with empty profiles
+        } else {
+          profilesData = profiles || [];
+        }
+      }
+
+      // Create a map of user profiles for quick lookup
+      const profilesMap = new Map(
+        (profilesData || []).map(profile => [profile.user_id, profile])
       );
+
+      // Transform data to include user info
+      const profilesWithUserInfo: AdminKycListItem[] = (kycData || []).map((profile: any) => {
+        const userProfile = profilesMap.get(profile.user_id);
+        
+        return {
+          ...profile,
+          user_email: `user-${profile.user_id.slice(0, 8)}@example.com`, // Placeholder
+          user_display_name: userProfile?.display_name || 'Unknown User',
+          // Handle both old and new field names
+          id_front_path: profile.id_front_path || profile.id_doc_path,
+          id_back_path: profile.id_back_path
+        };
+      });
 
       setKycProfiles(profilesWithUserInfo);
 
