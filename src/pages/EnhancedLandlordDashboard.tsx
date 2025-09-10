@@ -91,13 +91,6 @@ export default function EnhancedLandlordDashboard() {
   // Initialize lease notifications
   useLeaseNotifications();
   
-  // Fetch applications on mount
-  useEffect(() => {
-    if (user && isLandlord) {
-      fetchAllApplications();
-    }
-  }, [user, isLandlord, fetchAllApplications]);
-  
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
     const path = location.pathname;

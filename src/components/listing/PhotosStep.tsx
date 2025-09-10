@@ -63,6 +63,7 @@ export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
               type="file"
               multiple
               accept="image/*"
+              capture="environment"
               onChange={handleImageChange}
               className="hidden"
               id="image-upload"

@@ -57,11 +57,7 @@ export const useLandlordApplications = (propertyId?: string) => {
   const [applications, setApplications] = useState<ApplicationWithTenant[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (user && propertyId) {
-      fetchApplications();
-    }
-  }, [user, propertyId]);
+  // Move useEffect after useCallback definitions
 
   const fetchApplications = useCallback(async () => {
     if (!user || !propertyId) return;
@@ -194,6 +190,18 @@ export const useLandlordApplications = (propertyId?: string) => {
       setLoading(false);
     }
   }, [user]);
+
+  // Fetch applications when dependencies change
+  useEffect(() => {
+    if (user) {
+      if (propertyId) {
+        fetchApplications();
+      } else {
+        // If no propertyId, fetch all applications for the landlord
+        fetchAllApplications();
+      }
+    }
+  }, [user, propertyId, fetchApplications, fetchAllApplications]);
 
   const updateApplicationStatus = useCallback(async (applicationId: string, status: string) => {
     try {

@@ -270,13 +270,21 @@ export default function PropertyDetail() {
       toast({
         variant: "destructive",
         title: "Sign in required",
-        description: "Please sign in to book a viewing."
+        description: "Please sign in to request a viewing."
       });
       navigate('/auth');
       return;
     }
 
-    setBookingOpen(true);
+    if (!property) return;
+
+    // Create conversation and navigate to messages with pre-typed viewing request
+    const conv = await createConversation(property.id, property.landlord_id, user.id);
+    if (conv) {
+      // Navigate to messages with a pre-typed viewing request message
+      const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
+      navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
+    }
   };
 
   const handleShare = async () => {

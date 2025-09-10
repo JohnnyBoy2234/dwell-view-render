@@ -241,6 +241,7 @@ export default function TenantMaintenance() {
                   type="file"
                   multiple
                   accept="image/*"
+                  capture="environment"
                   onChange={(e) => setPhotos(e.target.files)}
                 />
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
