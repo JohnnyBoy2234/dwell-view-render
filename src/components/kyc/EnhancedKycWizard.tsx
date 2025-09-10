@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { QRCaptureModal } from './QRCaptureModal';
 import { FileUploadZone } from './FileUploadZone';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, ArrowLeft, ArrowRight, Upload, Camera, FileText, AlertTriangle, QrCode } from 'lucide-react';
+import { CheckCircle, ArrowLeft, ArrowRight, Upload, Camera, FileText, AlertTriangle, QrCode, Shield, Star, Zap } from 'lucide-react';
 import { useKyc } from '@/hooks/useKyc';
 import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -140,14 +140,43 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4 pb-24">
         <div className="max-w-md mx-auto space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold">Identity Verification</h1>
-            <p className="text-muted-foreground text-sm">
-              Complete both steps to verify your identity
+          {/* Hero Section with Shield Badge */}
+          <div className="text-center space-y-4">
+            <div className="relative">
+              {/* Background Blob */}
+              <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-gradient-to-br from-ocean-blue/20 to-success-green/20 blur-2xl"></div>
+              
+              {/* Shield Badge */}
+              <div className="relative mx-auto w-20 h-20 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center shadow-lg mb-4">
+                <Shield className="h-10 w-10 text-white" />
+              </div>
+              
+              {/* Trust Indicators */}
+              <div className="flex justify-center gap-2 mb-4">
+                <div className="flex items-center gap-1 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full text-xs font-medium text-ocean-blue">
+                  <Star className="h-3 w-3 fill-current" />
+                  Secure
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full text-xs font-medium text-success-green">
+                  <Zap className="h-3 w-3" />
+                  Fast
+                </div>
+                <div className="flex items-center gap-1 px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full text-xs font-medium text-ocean-blue">
+                  <Shield className="h-3 w-3" />
+                  Verified
+                </div>
+              </div>
+            </div>
+            
+            <h1 className="text-3xl font-bold text-ocean-blue">
+              Identity Verification
+            </h1>
+            <p className="text-muted-foreground text-base leading-relaxed">
+              Complete both steps to verify your identity and unlock full platform access
             </p>
           </div>
 
-          {/* Clickable Step Boxes */}
+          {/* Enhanced Step Cards */}
           <div className="space-y-4">
             {STEPS.slice(0, 2).map((step, index) => {
               const Icon = step.icon;
@@ -156,49 +185,69 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
               return (
                 <Card 
                   key={step.id} 
-                  className={`cursor-pointer transition-all duration-200 ${
+                  className={`cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                     isCompleted 
-                      ? 'border-success bg-success/5 shadow-md' 
-                      : 'hover:shadow-md border-2 border-dashed border-muted-foreground/30 hover:border-primary/50'
+                      ? 'border-success bg-gradient-to-br from-success/10 to-success/5 shadow-lg shadow-success/20' 
+                      : 'border-2 border-dashed border-ocean-blue/30 hover:border-ocean-blue/60 bg-white/80 backdrop-blur-sm hover:shadow-lg'
                   }`}
                   onClick={() => handleStepClick(index)}
                 >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
-                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${
                           isCompleted 
-                            ? 'bg-success text-success-foreground' 
-                            : 'bg-muted text-muted-foreground'
+                            ? 'bg-gradient-to-br from-success to-success-green text-white' 
+                            : 'bg-gradient-to-br from-ocean-blue to-ocean-blue-light text-white'
                         }`}>
                           {isCompleted ? (
-                            <CheckCircle className="h-6 w-6" />
+                            <CheckCircle className="h-7 w-7" />
                           ) : (
-                            <Icon className="h-6 w-6" />
+                            <Icon className="h-7 w-7" />
                           )}
                         </div>
                         
-                        <div className="space-y-1">
-                          <h3 className="font-semibold text-lg">Step {index + 1}: {step.title}</h3>
-                          <p className="text-sm text-muted-foreground">
+                        <div className="space-y-1 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-lg text-ocean-blue">Step {index + 1}</h3>
+                            {isCompleted && (
+                              <div className="flex items-center gap-1 px-2 py-1 bg-success/20 rounded-full">
+                                <CheckCircle className="h-3 w-3 text-success" />
+                                <span className="text-xs text-success font-semibold">Done</span>
+                              </div>
+                            )}
+                          </div>
+                          <h4 className="font-semibold text-base">{step.title}</h4>
+                          <p className="text-sm text-muted-foreground leading-relaxed">
                             {step.description}
                           </p>
                         </div>
                       </div>
                       
-                      <div className="flex items-center space-x-2">
-                        {isCompleted && (
-                          <span className="text-xs text-success font-medium">Completed</span>
+                      <div className="flex flex-col items-center space-y-1">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          isCompleted 
+                            ? 'bg-success/20' 
+                            : 'bg-ocean-blue/20'
+                        }`}>
+                          <Camera className={`h-4 w-4 ${
+                            isCompleted ? 'text-success' : 'text-ocean-blue'
+                          }`} />
+                        </div>
+                        {!isCompleted && (
+                          <span className="text-xs text-ocean-blue font-medium">Tap</span>
                         )}
-                        <Camera className="h-5 w-5 text-muted-foreground" />
                       </div>
                     </div>
                     
                     {!isCompleted && (
-                      <div className="mt-4 text-center">
-                        <p className="text-xs text-primary font-medium">
-                          Tap to take photo
-                        </p>
+                      <div className="mt-4 p-3 bg-gradient-to-r from-ocean-blue/5 to-success-green/5 rounded-lg border border-ocean-blue/20">
+                        <div className="flex items-center justify-center gap-2">
+                          <Camera className="h-4 w-4 text-ocean-blue" />
+                          <p className="text-sm text-ocean-blue font-medium">
+                            Tap to take photo with your camera
+                          </p>
+                        </div>
                       </div>
                     )}
                   </CardContent>
@@ -207,18 +256,24 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
             })}
           </div>
 
-          {/* Review & Submit Section - Always Visible */}
-          <Card className={`${
+          {/* Enhanced Review & Submit Section */}
+          <Card className={`transition-all duration-300 ${
             isStepCompleted(0) && isStepCompleted(1) 
-              ? 'border-primary bg-primary/5' 
-              : 'opacity-50'
+              ? 'border-success bg-gradient-to-br from-success/10 to-success/5 shadow-lg shadow-success/20' 
+              : 'opacity-50 border-muted-foreground/30'
           }`}>
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="text-center">
-                  <h3 className="font-semibold text-lg">Thank You</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Thank you for submitting your ID. We are now reviewing it and will send you a notification shortly
+                  <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <Shield className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="font-bold text-xl text-ocean-blue mb-2">Ready to Submit</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {isStepCompleted(0) && isStepCompleted(1) 
+                      ? "Your documents are ready! Submit for verification to unlock full platform access."
+                      : "Complete both steps above to submit your verification"
+                    }
                   </p>
                 </div>
 
@@ -267,16 +322,16 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
                       onClick={handleSubmit}
                       disabled={!declarationAccepted || submitting}
                       size="lg"
-                      className="w-full bg-success hover:bg-success/90 text-success-foreground font-semibold py-4"
+                      className="w-full bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue-dark hover:to-success-green-dark text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
                     >
                       {submitting ? (
                         <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-success-foreground border-t-transparent mr-2" />
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
                           Submitting...
                         </>
                       ) : (
                         <>
-                          <CheckCircle className="h-5 w-5 mr-2" />
+                          <Shield className="h-5 w-5 mr-2" />
                           Complete Identity Verification
                         </>
                       )}

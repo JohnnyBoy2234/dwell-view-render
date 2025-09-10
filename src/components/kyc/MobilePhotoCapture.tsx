@@ -260,6 +260,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
                   <input
                     type="file"
                     accept="image/*"
+                    capture="environment"
                     onChange={handleFileUpload}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     id="gallery-upload"

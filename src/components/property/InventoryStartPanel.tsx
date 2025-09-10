@@ -226,6 +226,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                 type="file"
                 multiple
                 accept="image/*"
+                capture="environment"
                 aria-label="Attach photos"
                 onChange={(e) => {
                   handleAddPhotos(note.id, e.target.files);
