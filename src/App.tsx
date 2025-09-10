@@ -63,7 +63,7 @@ const App = () => (
 
             {/* Routes with Navbar */}
             <Route path="/" element={<><Navbar /><Index /></>} />
-            <Route path="/properties" element={<><Navbar /><AuthenticatedRoute><Properties /></AuthenticatedRoute></>} />
+            <Route path="/properties" element={<><Navbar /><Properties /></>} />
             <Route path="/about" element={<><Navbar /><About /></>} />
 
             {/* Routes without Navbar */}
