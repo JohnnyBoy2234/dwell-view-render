@@ -44,7 +44,10 @@ export default function Messages() {
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -82,6 +85,24 @@ export default function Messages() {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Handle scroll for responsive header
+  const handleScroll = (e: any) => {
+    if (!isMobile) return;
+    
+    const scrollElement = e.target;
+    const currentScrollY = scrollElement.scrollTop;
+    
+    if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      // Scrolling down - hide header
+      setHeaderVisible(false);
+    } else if (currentScrollY < lastScrollY || currentScrollY <= 50) {
+      // Scrolling up or near top - show header
+      setHeaderVisible(true);
+    }
+    
+    setLastScrollY(currentScrollY);
   };
 
   useEffect(() => {
@@ -255,9 +276,9 @@ export default function Messages() {
                                 )}
                               </div>
                               
-                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                <Home className="h-3 w-3 flex-shrink-0" />
-                                <span className="truncate">{conversation.properties?.title}</span>
+                               <div className="flex items-start gap-1 text-xs text-muted-foreground">
+                                <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                                <span className="break-words leading-tight">{conversation.properties?.title}</span>
                               </div>
                               
                               <p className="text-xs text-muted-foreground mt-1">
@@ -276,9 +297,11 @@ export default function Messages() {
 
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
-            <div className="flex-1 flex flex-col h-full">
+            <div className="flex-1 flex flex-col h-full relative">
               {/* Mobile Chat Header */}
-              <div className="flex items-center gap-3 p-4 border-b bg-background flex-shrink-0 relative z-40">
+              <div className={`absolute top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-md z-40 transition-transform duration-300 ease-in-out ${
+                headerVisible ? 'translate-y-0' : '-translate-y-full'
+              }`}>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -307,18 +330,20 @@ export default function Messages() {
                 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-sm truncate">{getOtherUser(selectedConversation).name}</h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <Badge variant="outline" className="text-xs px-1 py-0">
+                  <div className="flex items-start gap-2 text-xs text-muted-foreground">
+                    <Badge variant="outline" className="text-xs px-1 py-0 flex-shrink-0">
                       {getOtherUser(selectedConversation).role}
                     </Badge>
-                    <span className="truncate">{selectedConversation.properties?.title}</span>
+                    <span className="break-words leading-tight">{selectedConversation.properties?.title}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Messages - Mobile */}
-              <div className="flex-1 min-h-0">
-                <ScrollArea className="h-full">
+                {/* Messages - Mobile */}
+                <div className={`flex-1 min-h-0 transition-all duration-300 ease-in-out ${
+                  headerVisible ? 'pt-20' : 'pt-0'
+                }`}>
+                  <ScrollArea className="h-full" onScrollCapture={handleScroll} ref={scrollAreaRef}>
                   <div className="p-4 space-y-3">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
@@ -426,11 +451,11 @@ export default function Messages() {
                     )}
                     <div ref={messagesEndRef} />
                   </div>
-                </ScrollArea>
-              </div>
+                  </ScrollArea>
+                </div>
 
-              {/* Message Input - Mobile */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t bg-background flex-shrink-0">
+                {/* Message Input - Mobile */}
+                <form onSubmit={handleSendMessage} className="p-4 border-t bg-background flex-shrink-0">
                 <div className="flex gap-2">
                   <Input
                     value={newMessage}
@@ -443,8 +468,8 @@ export default function Messages() {
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
-              </form>
-            </div>
+                </form>
+              </div>
           )}
         </div>
 
@@ -535,9 +560,9 @@ export default function Messages() {
                               )}
                             </div>
                             
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Home className="h-3 w-3" />
-                              <span className="truncate">{conversation.properties?.title}</span>
+                            <div className="flex items-start gap-1 text-xs text-muted-foreground">
+                              <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
+                              <span className="break-words leading-tight">{conversation.properties?.title}</span>
                             </div>
                             
                             <p className="text-xs text-muted-foreground mt-1">
@@ -592,9 +617,9 @@ export default function Messages() {
                 <Separator />
               </div>
               
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Home className="h-4 w-4" />
-                <span className="truncate">{selectedConversation.properties?.title}</span>
+              <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                <Home className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                <span className="break-words leading-tight">{selectedConversation.properties?.title}</span>
               </div>
             </div>
 
