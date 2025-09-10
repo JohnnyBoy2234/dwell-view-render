@@ -13,7 +13,7 @@ export function useKycCapture() {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const createCaptureSession = async (purpose: 'id_front' | 'id_back' | 'selfie'): Promise<CaptureSession | null> => {
+  const createCaptureSession = async (purpose: 'id_front' | 'selfie'): Promise<CaptureSession | null> => {
     setLoading(true);
     setError(null);
     
@@ -45,11 +45,10 @@ export function useKycCapture() {
     }
   };
 
-  const updateKycProfile = async (purpose: 'id_front' | 'id_back' | 'selfie', filePath: string) => {
+  const updateKycProfile = async (purpose: 'id_front' | 'selfie', filePath: string) => {
     try {
       const columnMap = {
         'id_front': 'id_front_path',
-        'id_back': 'id_back_path', 
         'selfie': 'selfie_path'
       };
 

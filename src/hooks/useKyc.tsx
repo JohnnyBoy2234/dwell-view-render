@@ -53,7 +53,7 @@ export function useKyc() {
     }
   };
 
-  const uploadFile = async (file: File, kind: 'id_doc' | 'id_front' | 'id_back' | 'selfie') => {
+  const uploadFile = async (file: File, kind: 'id_doc' | 'id_front' | 'selfie') => {
     if (!user) throw new Error('User not authenticated');
     
     setUploading(true);
@@ -86,8 +86,7 @@ export function useKyc() {
 
       // Update or create KYC profile
       const pathField = kind === 'selfie' ? 'selfie_path' : 
-                       kind === 'id_front' ? 'id_front_path' :
-                       kind === 'id_back' ? 'id_back_path' : 'id_doc_path';
+                       kind === 'id_front' ? 'id_front_path' : 'id_doc_path';
       
       const updateData = {
         user_id: user.id,
@@ -125,8 +124,7 @@ export function useKyc() {
       });
 
       const description = kind === 'selfie' ? 'selfie' :
-                         kind === 'id_front' ? 'front of ID' :
-                         kind === 'id_back' ? 'back of ID' : 'ID document';
+                         kind === 'id_front' ? 'front of ID' : 'ID document';
       
       toast({
         title: "File uploaded successfully",
@@ -148,9 +146,8 @@ export function useKyc() {
   };
 
   const submitForReview = async () => {
-    if (!user || !kycProfile?.selfie_path || 
-        (!kycProfile?.id_front_path || !kycProfile?.id_back_path)) {
-      throw new Error('Front ID, back ID, and selfie with ID are all required');
+    if (!user || !kycProfile?.selfie_path || !kycProfile?.id_front_path) {
+      throw new Error('Front ID and selfie with ID are required');
     }
 
     setSubmitting(true);
@@ -218,7 +215,6 @@ export function useKyc() {
       const filesToRemove = [];
       if (kycProfile?.id_doc_path) filesToRemove.push(kycProfile.id_doc_path);
       if (kycProfile?.id_front_path) filesToRemove.push(kycProfile.id_front_path);
-      if (kycProfile?.id_back_path) filesToRemove.push(kycProfile.id_back_path);
       if (kycProfile?.selfie_path) filesToRemove.push(kycProfile.selfie_path);
       
       if (filesToRemove.length > 0) {
@@ -234,7 +230,6 @@ export function useKyc() {
           status: 'not_started',
           id_doc_path: null,
           id_front_path: null,
-          id_back_path: null,
           selfie_path: null,
           notes: null,
           reviewed_by: null,

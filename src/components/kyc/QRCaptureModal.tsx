@@ -11,7 +11,7 @@ import { useKycCapture } from '@/hooks/useKycCapture';
 interface QRCaptureModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  purpose: 'id_front' | 'id_back' | 'selfie';
+  purpose: 'id_front' | 'selfie';
   onUploadSuccess: (filePath: string) => void;
 }
 
@@ -51,7 +51,6 @@ export function QRCaptureModal({ open, onOpenChange, purpose, onUploadSuccess }:
   const getPurposeTitle = () => {
     switch (purpose) {
       case 'id_front': return 'Front of ID Document';
-      case 'id_back': return 'Back of ID Document';  
       case 'selfie': return 'Selfie with ID';
       default: return 'Take Photo';
     }

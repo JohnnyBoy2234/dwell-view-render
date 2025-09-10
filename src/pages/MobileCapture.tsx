@@ -7,7 +7,7 @@ import { AlertTriangle } from 'lucide-react';
 export default function MobileCapture() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [captureType, setCaptureType] = useState<'id_front' | 'id_back' | 'selfie' | null>(null);
+  const [captureType, setCaptureType] = useState<'id_front' | 'selfie' | null>(null);
 
   useEffect(() => {
     const type = searchParams.get('type');
@@ -18,11 +18,11 @@ export default function MobileCapture() {
       return;
     }
 
-    if (!['id_front', 'id_back', 'selfie'].includes(type)) {
+    if (!['id_front', 'selfie'].includes(type)) {
       return;
     }
 
-    setCaptureType(type as 'id_front' | 'id_back' | 'selfie');
+    setCaptureType(type as 'id_front' | 'selfie');
   }, [searchParams]);
 
   const handleCapture = (file: File) => {

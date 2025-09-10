@@ -9,7 +9,7 @@ import QRCode from 'react-qr-code';
 interface QRCodeModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  type: 'id_front' | 'id_back' | 'selfie';
+  type: 'id_front' | 'selfie';
   onUploadSuccess?: () => void;
 }
 
@@ -37,7 +37,6 @@ export function QRCodeModal({ open, onOpenChange, type, onUploadSuccess }: QRCod
   const getTitle = () => {
     switch (type) {
       case 'id_front': return 'Scan to Take Front ID Photo';
-      case 'id_back': return 'Scan to Take Back ID Photo';
       case 'selfie': return 'Scan to Take Selfie with ID';
       default: return 'Scan to Take Photo';
     }
@@ -47,9 +46,7 @@ export function QRCodeModal({ open, onOpenChange, type, onUploadSuccess }: QRCod
     switch (type) {
       case 'id_front': 
         return 'Scan this QR code with your phone to take a high-quality photo of the front of your ID document.';
-      case 'id_back': 
-        return 'Scan this QR code with your phone to take a high-quality photo of the back of your ID document.';
-      case 'selfie': 
+      case 'selfie':
         return 'Scan this QR code with your phone to take a selfie while holding your ID document next to your face.';
       default: 
         return 'Scan this QR code with your phone to take a photo.';

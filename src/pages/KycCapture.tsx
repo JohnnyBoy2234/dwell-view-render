@@ -93,7 +93,6 @@ export default function KycCapture() {
   const getPurposeTitle = () => {
     switch (purpose) {
       case 'id_front': return 'Front of ID Document';
-      case 'id_back': return 'Back of ID Document';
       case 'selfie': return 'Selfie with ID';
       default: return 'Take Photo';
     }
@@ -103,9 +102,7 @@ export default function KycCapture() {
     switch (purpose) {
       case 'id_front': 
         return 'Position the front of your ID document clearly in the camera view. Make sure all text is readable and there\'s no glare.';
-      case 'id_back': 
-        return 'Position the back of your ID document clearly in the camera view. Ensure all information is visible and readable.';
-      case 'selfie': 
+      case 'selfie':
         return 'Hold your ID document next to your face. Both your face and the ID should be clearly visible.';
       default: 
         return 'Position your document in the camera view and tap the button to capture.';

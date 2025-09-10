@@ -7,7 +7,7 @@ import { useKyc } from '@/hooks/useKyc';
 import { useToast } from '@/hooks/use-toast';
 
 interface MobilePhotoCaptureProps {
-  type: 'id_front' | 'id_back' | 'selfie';
+  type: 'id_front' | 'selfie';
   onCapture: (file: File) => void;
   onClose: () => void;
 }
@@ -24,7 +24,6 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
   const getTitle = () => {
     switch (type) {
       case 'id_front': return 'Photo: Front of ID';
-      case 'id_back': return 'Photo: Back of ID';
       case 'selfie': return 'Selfie with ID in Hand';
       default: return 'Take Photo';
     }
@@ -34,9 +33,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
     switch (type) {
       case 'id_front': 
         return 'Position the front of your ID document in the frame. Ensure all text is clearly visible and there\'s no glare.';
-      case 'id_back': 
-        return 'Position the back of your ID document in the frame. Make sure all information is clearly readable.';
-      case 'selfie': 
+      case 'selfie':
         return 'Hold your ID document next to your face. Both your face and the ID should be clearly visible in the photo.';
       default: 
         return 'Position your document in the frame.';

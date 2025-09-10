@@ -13,7 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 const STEPS = [
   { id: 'intro', title: 'Introduction', icon: Shield },
   { id: 'id-front', title: 'Front of ID', icon: FileText },
-  { id: 'id-back', title: 'Back of ID', icon: FileText },
   { id: 'selfie', title: 'Selfie with ID', icon: Camera },
   { id: 'review', title: 'Review & Submit', icon: CheckCircle }
 ];
@@ -25,21 +24,19 @@ interface KycWizardProps {
 export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [idFront, setIdFront] = useState<File | null>(null);
-  const [idBack, setIdBack] = useState<File | null>(null);
   const [selfie, setSelfie] = useState<File | null>(null);
   const [declarationAccepted, setDeclarationAccepted] = useState(false);
   const [idFrontPreview, setIdFrontPreview] = useState<string>('');
-  const [idBackPreview, setIdBackPreview] = useState<string>('');
   const [selfiePreview, setSelfiePreview] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
-  const [qrModalType, setQRModalType] = useState<'id_front' | 'id_back' | 'selfie'>('id_front');
+  const [qrModalType, setQRModalType] = useState<'id_front' | 'selfie'>('id_front');
   
   const { kycProfile, uploadFile, submitForReview, uploading, submitting, refresh } = useKyc();
   const { toast } = useToast();
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
-  const handleFileSelect = async (file: File, type: 'id_front' | 'id_back' | 'selfie') => {
+  const handleFileSelect = async (file: File, type: 'id_front' | 'selfie') => {
     try {
       const preview = URL.createObjectURL(file);
       
@@ -47,10 +44,6 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
         case 'id_front':
           setIdFront(file);
           setIdFrontPreview(preview);
-          break;
-        case 'id_back':
-          setIdBack(file);
-          setIdBackPreview(preview);
           break;
         case 'selfie':
           setSelfie(file);
@@ -64,20 +57,13 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
     }
   };
 
-  const handleFileRemove = (type: 'id_front' | 'id_back' | 'selfie') => {
+  const handleFileRemove = (type: 'id_front' | 'selfie') => {
     switch (type) {
       case 'id_front':
         setIdFront(null);
         if (idFrontPreview) {
           URL.revokeObjectURL(idFrontPreview);
           setIdFrontPreview('');
-        }
-        break;
-      case 'id_back':
-        setIdBack(null);
-        if (idBackPreview) {
-          URL.revokeObjectURL(idBackPreview);
-          setIdBackPreview('');
         }
         break;
       case 'selfie':
@@ -94,14 +80,13 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
     switch (currentStep) {
       case 0: return true; // Intro
       case 1: return idFront !== null || kycProfile?.id_front_path; // Front ID
-      case 2: return idBack !== null || kycProfile?.id_back_path; // Back ID
-      case 3: return selfie !== null || kycProfile?.selfie_path; // Selfie with ID
-      case 4: return declarationAccepted; // Review
+      case 2: return selfie !== null || kycProfile?.selfie_path; // Selfie with ID
+      case 3: return declarationAccepted; // Review
       default: return false;
     }
   };
 
-  const openQRModal = (type: 'id_front' | 'id_back' | 'selfie') => {
+  const openQRModal = (type: 'id_front' | 'selfie') => {
     setQRModalType(type);
     setShowQRModal(true);
   };
@@ -154,7 +139,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
               </AlertDescription>
             </Alert>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
               <div className="p-4 border rounded-lg space-y-2">
                 <FileText className="h-6 w-6 text-primary mx-auto" />
                 <h3 className="font-medium">Step 1: Front of ID</h3>
@@ -164,16 +149,8 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
               </div>
               
               <div className="p-4 border rounded-lg space-y-2">
-                <FileText className="h-6 w-6 text-primary mx-auto" />
-                <h3 className="font-medium">Step 2: Back of ID</h3>
-                <p className="text-muted-foreground">
-                  Photo of the back side of your government-issued ID
-                </p>
-              </div>
-              
-              <div className="p-4 border rounded-lg space-y-2">
                 <Camera className="h-6 w-6 text-primary mx-auto" />
-                <h3 className="font-medium">Step 3: Selfie with ID</h3>
+                <h3 className="font-medium">Step 2: Selfie with ID</h3>
                 <p className="text-muted-foreground">
                   Take a selfie while holding your ID next to your face
                 </p>
@@ -221,34 +198,6 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
         return (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Back of ID Document</h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => openQRModal('id_back')}
-                className="flex items-center gap-2"
-              >
-                <QrCode className="h-4 w-4" />
-                Use Phone
-              </Button>
-            </div>
-            
-            <FileUploadZone
-              label="Upload Back of ID"
-              description="Take or upload a clear photo of the back of your government-issued ID document"
-              onFileSelect={(file) => handleFileSelect(file, 'id_back')}
-              onFileRemove={() => handleFileRemove('id_back')}
-              currentFile={idBack}
-              previewUrl={idBackPreview}
-              isUploading={uploading}
-            />
-          </div>
-        );
-
-      case 3:
-        return (
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Selfie with ID</h3>
               <Button
                 variant="outline"
@@ -273,7 +222,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
           </div>
         );
 
-      case 4:
+      case 3:
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -283,28 +232,13 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <h3 className="font-medium">Front of ID</h3>
                 {(idFrontPreview || kycProfile?.id_front_path) ? (
                   <img 
                     src={idFrontPreview || (kycProfile?.id_front_path ? `/api/kyc/preview/${kycProfile.id_front_path}` : '')} 
                     alt="Front of ID" 
-                    className="w-full h-32 object-cover rounded-lg border"
-                  />
-                ) : (
-                  <div className="w-full h-32 bg-muted rounded-lg flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <h3 className="font-medium">Back of ID</h3>
-                {(idBackPreview || kycProfile?.id_back_path) ? (
-                  <img 
-                    src={idBackPreview || (kycProfile?.id_back_path ? `/api/kyc/preview/${kycProfile.id_back_path}` : '')} 
-                    alt="Back of ID" 
                     className="w-full h-32 object-cover rounded-lg border"
                   />
                 ) : (

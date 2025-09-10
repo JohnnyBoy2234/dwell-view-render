@@ -32,7 +32,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
   const [idBackPreview, setIdBackPreview] = useState<string>('');
   const [selfiePreview, setSelfiePreview] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
-  const [qrModalType, setQRModalType] = useState<'id_front' | 'id_back' | 'selfie'>('id_front');
+  const [qrModalType, setQRModalType] = useState<'id_front' | 'selfie'>('id_front');
   
   const { kycProfile, uploadFile, submitForReview, uploading, submitting, refresh } = useKyc();
   const { toast } = useToast();
@@ -57,7 +57,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
       const preview = URL.createObjectURL(file);
       setIdBackPreview(preview);
       
-      await uploadFile(file, 'id_back');
+      await uploadFile(file, 'id_front');
     } catch (error) {
       console.error('Error uploading back ID:', error);
     }
@@ -110,7 +110,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
     }
   };
 
-  const openQRModal = (type: 'id_front' | 'id_back' | 'selfie') => {
+  const openQRModal = (type: 'id_front' | 'selfie') => {
     setQRModalType(type);
     setShowQRModal(true);
   };

@@ -18,10 +18,13 @@ serve(async (req) => {
     const sid = url.searchParams.get('sid');
     const token = url.searchParams.get('t');
 
+    console.log('Kyc upload capture request:', { sid, token: token ? 'present' : 'missing' });
+
     if (!sid || !token) {
-      return new Response('Missing sid or token', { 
+      console.error('Missing required parameters:', { sid: !!sid, token: !!token });
+      return new Response(JSON.stringify({ error: 'Missing sid or token' }), { 
         status: 400, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -38,17 +41,20 @@ serve(async (req) => {
     let tokenPayload;
     try {
       tokenPayload = await verify(token, key);
+      console.log('Token verified successfully:', { sid: tokenPayload.sid, purpose: tokenPayload.purpose });
     } catch (err) {
-      return new Response('Invalid or expired token', { 
+      console.error('Token verification failed:', err.message);
+      return new Response(JSON.stringify({ error: 'Invalid or expired token', details: err.message }), { 
         status: 401, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
     if (tokenPayload.sid !== sid) {
-      return new Response('Token session mismatch', { 
+      console.error('Token session mismatch:', { tokenSid: tokenPayload.sid, requestSid: sid });
+      return new Response(JSON.stringify({ error: 'Token session mismatch' }), { 
         status: 401, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -67,37 +73,45 @@ serve(async (req) => {
       .single();
 
     if (sessionError || !session) {
-      return new Response('Session not found or expired', { 
+      console.error('Session query error:', sessionError, 'Session found:', !!session);
+      return new Response(JSON.stringify({ error: 'Session not found or expired', details: sessionError?.message }), { 
         status: 404, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    console.log('Session found:', { id: session.id, purpose: session.purpose, status: session.status });
 
     // Parse the multipart form data
     const formData = await req.formData();
     const file = formData.get('file') as File;
 
     if (!file) {
-      return new Response('No file provided', { 
+      console.error('No file provided in form data');
+      return new Response(JSON.stringify({ error: 'No file provided' }), { 
         status: 400, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    console.log('File received:', { name: file.name, type: file.type, size: file.size });
 
     // Validate file type and size
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-      return new Response('Invalid file type. Only JPEG, PNG, and WebP are allowed.', { 
+      console.error('Invalid file type:', file.type);
+      return new Response(JSON.stringify({ error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.' }), { 
         status: 400, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
     const maxSize = 10 * 1024 * 1024; // 10MB
     if (file.size > maxSize) {
-      return new Response('File too large. Maximum size is 10MB.', { 
+      console.error('File too large:', file.size);
+      return new Response(JSON.stringify({ error: 'File too large. Maximum size is 10MB.' }), { 
         status: 400, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
 
@@ -117,11 +131,13 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError);
-      return new Response('Failed to upload file', { 
+      return new Response(JSON.stringify({ error: 'Failed to upload file', details: uploadError.message }), { 
         status: 500, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    console.log('File uploaded to storage:', filePath);
 
     // Update session status
     const { error: updateError } = await supabase
@@ -134,11 +150,13 @@ serve(async (req) => {
 
     if (updateError) {
       console.error('Session update error:', updateError);
-      return new Response('Failed to update session', { 
+      return new Response(JSON.stringify({ error: 'Failed to update session', details: updateError.message }), { 
         status: 500, 
-        headers: corsHeaders 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
     }
+
+    console.log('Session updated successfully');
 
     // Broadcast to realtime channel
     const channel = supabase.channel(`kyc_capture:${sid}`);
