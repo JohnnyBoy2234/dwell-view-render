@@ -196,7 +196,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
                   key={step.id} 
                   className={`cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
                     isCompleted 
-                      ? 'border-success bg-gradient-to-br from-success/10 to-success/5 shadow-lg shadow-success/20' 
+                      ? 'border-success bg-gradient-to-br from-success/20 to-success/10 shadow-lg shadow-success/20'
                       : 'border-2 border-dashed border-ocean-blue/30 hover:border-ocean-blue/60 bg-white/80 backdrop-blur-sm hover:shadow-lg'
                   }`}
                   onClick={() => handleStepClick(index)}
@@ -220,9 +220,9 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
                           <div className="flex items-center gap-2">
                             <h3 className="font-bold text-lg text-ocean-blue">Step {index + 1}</h3>
                             {isCompleted && (
-                              <div className="flex items-center gap-1 px-2 py-1 bg-success/20 rounded-full">
-                                <CheckCircle className="h-3 w-3 text-success" />
-                                <span className="text-xs text-success font-semibold">Done</span>
+                              <div className="flex items-center gap-1 px-2 py-1 bg-success text-white rounded-full">
+                                <CheckCircle className="h-3 w-3" />
+                                <span className="text-xs font-semibold">Done</span>
                               </div>
                             )}
                           </div>
@@ -236,7 +236,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
                       <div className="flex flex-col items-center space-y-1">
                         <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                           isCompleted 
-                            ? 'bg-success/20' 
+                            ? 'bg-success/30' 
                             : 'bg-ocean-blue/20'
                         }`}>
                           <Camera className={`h-4 w-4 ${
