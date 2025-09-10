@@ -114,7 +114,8 @@ export default function Messages() {
     if (hasProcessedUrlParam || conversations.length === 0) return;
     
     const cid = searchParams.get('c');
-    console.log('🔗 Processing URL parameter:', cid);
+    const messageParam = searchParams.get('message');
+    console.log('🔗 Processing URL parameter:', cid, 'message:', messageParam);
     
     if (cid) {
       const exists = conversations.find(c => c.id === cid);
@@ -123,6 +124,13 @@ export default function Messages() {
         setActiveConversation(cid);
         setShowConversations(false);
         setHasPrefilledMessage(false);
+        
+        // Pre-fill message if provided in URL
+        if (messageParam) {
+          setNewMessage(decodeURIComponent(messageParam));
+          setHasPrefilledMessage(true);
+        }
+        
         setHasProcessedUrlParam(true);
       }
     } else {
