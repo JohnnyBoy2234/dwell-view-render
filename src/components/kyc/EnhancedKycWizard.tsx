@@ -291,6 +291,33 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
                 You'll receive a notification once the review is complete.
               </AlertDescription>
             </Alert>
+
+            {/* Prominent Submit Button in Content Area */}
+            <div className="border-t pt-6">
+              <Button
+                onClick={handleSubmit}
+                disabled={!declarationAccepted || submitting}
+                size="lg"
+                className="w-full bg-success hover:bg-success/90 text-success-foreground font-semibold py-4"
+              >
+                {submitting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-success-foreground border-t-transparent mr-2" />
+                    Submitting for Review...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="h-5 w-5 mr-2" />
+                    Complete Identity Verification
+                  </>
+                )}
+              </Button>
+              {!declarationAccepted && (
+                <p className="text-sm text-muted-foreground text-center mt-2">
+                  Please accept the declaration above to continue
+                </p>
+              )}
+            </div>
           </div>
         );
 
@@ -370,12 +397,12 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
 
           {currentStep === STEPS.length - 1 ? (
             <Button
-              onClick={handleSubmit}
-              disabled={!canProceedToNext() || submitting}
-              className="bg-success hover:bg-success/90"
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={currentStep === 0}
             >
-              {submitting ? 'Submitting...' : 'Submit for Review'}
-              <CheckCircle className="h-4 w-4 ml-2" />
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Previous
             </Button>
           ) : (
             <Button
