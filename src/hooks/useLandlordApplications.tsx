@@ -58,10 +58,15 @@ export const useLandlordApplications = (propertyId?: string) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user && propertyId) {
-      fetchApplications();
+    if (user) {
+      if (propertyId) {
+        fetchApplications();
+      } else {
+        // If no propertyId, fetch all applications for the landlord
+        fetchAllApplications();
+      }
     }
-  }, [user, propertyId]);
+  }, [user, propertyId, fetchApplications, fetchAllApplications]);
 
   const fetchApplications = useCallback(async () => {
     if (!user || !propertyId) return;
