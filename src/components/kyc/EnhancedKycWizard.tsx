@@ -6,15 +6,16 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { QRCaptureModal } from './QRCaptureModal';
 import { FileUploadZone } from './FileUploadZone';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { CheckCircle, ArrowLeft, ArrowRight, Shield, Upload, Camera, FileText, AlertTriangle, QrCode, Smartphone } from 'lucide-react';
+import { CheckCircle, ArrowLeft, ArrowRight, Upload, Camera, FileText, AlertTriangle, QrCode } from 'lucide-react';
 import { useKyc } from '@/hooks/useKyc';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
+// Removed intro step as per requirements
 const STEPS = [
-  { id: 'intro', title: 'Introduction', icon: Shield },
-  { id: 'id-front', title: 'Front of ID', icon: FileText },
-  { id: 'selfie', title: 'Selfie with ID', icon: Camera },
-  { id: 'review', title: 'Review & Submit', icon: CheckCircle }
+  { id: 'id-front', title: 'Front of ID', icon: FileText, description: 'Photo of the front side of your government-issued ID' },
+  { id: 'selfie', title: 'Selfie with ID', icon: Camera, description: 'Take a selfie while holding your ID next to your face' },
+  { id: 'review', title: 'Review & Submit', icon: CheckCircle, description: 'Review your documents and submit for verification' }
 ];
 
 interface KycWizardProps {
@@ -33,6 +34,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
   
   const { kycProfile, uploadFile, submitForReview, uploading, submitting, refresh } = useKyc();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
@@ -78,10 +80,9 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
 
   const canProceedToNext = () => {
     switch (currentStep) {
-      case 0: return true; // Intro
-      case 1: return idFront !== null || kycProfile?.id_front_path; // Front ID
-      case 2: return selfie !== null || kycProfile?.selfie_path; // Selfie with ID
-      case 3: return declarationAccepted; // Review
+      case 0: return idFront !== null || kycProfile?.id_front_path; // Front ID
+      case 1: return selfie !== null || kycProfile?.selfie_path; // Selfie with ID
+      case 2: return declarationAccepted; // Review
       default: return false;
     }
   };
@@ -116,57 +117,192 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
     }
   };
 
-  const renderStepContent = () => {
+  const handleStepClick = (stepIndex: number) => {
+    if (!isMobile) return; // Only for mobile
+    
+    if (stepIndex === 0) {
+      openQRModal('id_front');
+    } else if (stepIndex === 1) {
+      openQRModal('selfie');
+    }
+  };
+
+  const isStepCompleted = (stepIndex: number) => {
+    switch (stepIndex) {
+      case 0: return idFront !== null || kycProfile?.id_front_path;
+      case 1: return selfie !== null || kycProfile?.selfie_path;
+      default: return false;
+    }
+  };
+
+  // Mobile One-Pager Design
+  if (isMobile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4 pb-24">
+        <div className="max-w-md mx-auto space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold">Identity Verification</h1>
+            <p className="text-muted-foreground text-sm">
+              Complete both steps to verify your identity
+            </p>
+          </div>
+
+          {/* Clickable Step Boxes */}
+          <div className="space-y-4">
+            {STEPS.slice(0, 2).map((step, index) => {
+              const Icon = step.icon;
+              const isCompleted = isStepCompleted(index);
+              
+              return (
+                <Card 
+                  key={step.id} 
+                  className={`cursor-pointer transition-all duration-200 ${
+                    isCompleted 
+                      ? 'border-success bg-success/5 shadow-md' 
+                      : 'hover:shadow-md border-2 border-dashed border-muted-foreground/30 hover:border-primary/50'
+                  }`}
+                  onClick={() => handleStepClick(index)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4">
+                        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                          isCompleted 
+                            ? 'bg-success text-success-foreground' 
+                            : 'bg-muted text-muted-foreground'
+                        }`}>
+                          {isCompleted ? (
+                            <CheckCircle className="h-6 w-6" />
+                          ) : (
+                            <Icon className="h-6 w-6" />
+                          )}
+                        </div>
+                        
+                        <div className="space-y-1">
+                          <h3 className="font-semibold text-lg">Step {index + 1}: {step.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {step.description}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        {isCompleted && (
+                          <span className="text-xs text-success font-medium">Completed</span>
+                        )}
+                        <Camera className="h-5 w-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                    
+                    {!isCompleted && (
+                      <div className="mt-4 text-center">
+                        <p className="text-xs text-primary font-medium">
+                          Tap to take photo
+                        </p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {/* Review & Submit Section - Always Visible */}
+          <Card className={`${
+            isStepCompleted(0) && isStepCompleted(1) 
+              ? 'border-primary bg-primary/5' 
+              : 'opacity-50'
+          }`}>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <div className="text-center">
+                  <h3 className="font-semibold text-lg">Review & Submit</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Review your documents and complete verification
+                  </p>
+                </div>
+
+                {isStepCompleted(0) && isStepCompleted(1) && (
+                  <>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Front of ID</h4>
+                        <img 
+                          src={idFrontPreview || (kycProfile?.id_front_path ? `/api/kyc/preview/${kycProfile.id_front_path}` : '')} 
+                          alt="Front of ID" 
+                          className="w-full h-20 object-cover rounded border"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-sm">Selfie with ID</h4>
+                        <img 
+                          src={selfiePreview || (kycProfile?.selfie_path ? `/api/kyc/preview/${kycProfile.selfie_path}` : '')} 
+                          alt="Selfie with ID" 
+                          className="w-full h-20 object-cover rounded border"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-3 border rounded-lg">
+                      <Checkbox
+                        id="declaration-mobile"
+                        checked={declarationAccepted}
+                        onCheckedChange={(checked) => setDeclarationAccepted(!!checked)}
+                      />
+                      <div className="space-y-1">
+                        <label 
+                          htmlFor="declaration-mobile" 
+                          className="text-sm font-medium leading-none cursor-pointer"
+                        >
+                          Declaration
+                        </label>
+                        <p className="text-xs text-muted-foreground">
+                          I confirm that the documents uploaded are accurate, genuine, and belong to me.
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleSubmit}
+                      disabled={!declarationAccepted || submitting}
+                      size="lg"
+                      className="w-full bg-success hover:bg-success/90 text-success-foreground font-semibold py-4"
+                    >
+                      {submitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-success-foreground border-t-transparent mr-2" />
+                          Submitting...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-5 w-5 mr-2" />
+                          Complete Identity Verification
+                        </>
+                      )}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* QR Code Modal */}
+        <QRCaptureModal
+          open={showQRModal}
+          onOpenChange={setShowQRModal}
+          purpose={qrModalType}
+          onUploadSuccess={refresh}
+        />
+      </div>
+    );
+  }
+
+  // Desktop Step-by-Step Design (Original Flow)
+  const renderDesktopStepContent = () => {
     switch (currentStep) {
       case 0:
-        return (
-          <div className="space-y-6 text-center">
-            <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
-              <Shield className="h-10 w-10 text-primary" />
-            </div>
-            
-            <div className="space-y-4">
-              <h2 className="text-2xl font-bold">Identity Verification</h2>
-              <p className="text-muted-foreground">
-                At SwiftRent, safety and trust aren’t just features – they’re part of who we are. Every landlord and every tenant is verified through ID checks before using our platform. This ensures that you connect only with real, accountable people, creating a community built on security, honesty, and peace of mind. Because when trust comes first, renting becomes effortless.
-              </p>
-            </div>
-
-            <Alert>
-              <Smartphone className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Use Your Phone for Best Results:</strong> Each step includes a QR code to easily take high-quality photos with your phone camera.
-              </AlertDescription>
-            </Alert>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div className="p-4 border rounded-lg space-y-2">
-                <FileText className="h-6 w-6 text-primary mx-auto" />
-                <h3 className="font-medium">Step 1: Front of ID</h3>
-                <p className="text-muted-foreground">
-                  Photo of the front side of your government-issued ID
-                </p>
-              </div>
-              
-              <div className="p-4 border rounded-lg space-y-2">
-                <Camera className="h-6 w-6 text-primary mx-auto" />
-                <h3 className="font-medium">Step 2: Selfie with ID</h3>
-                <p className="text-muted-foreground">
-                  Take a selfie while holding your ID next to your face
-                </p>
-              </div>
-            </div>
-
-            <div className="text-xs text-muted-foreground space-y-1">
-              <p>✓ Use good lighting with no shadows or glare</p>
-              <p>✓ Ensure all text is clearly readable</p>
-              <p>✓ Keep document flat with all edges visible</p>
-              <p>✓ For selfies: both your face and ID should be clearly visible</p>
-            </div>
-          </div>
-        );
-
-      case 1:
         return (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -194,7 +330,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
           </div>
         );
 
-      case 2:
+      case 1:
         return (
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -222,7 +358,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
           </div>
         );
 
-      case 3:
+      case 2:
         return (
           <div className="space-y-6">
             <div className="text-center">
@@ -291,33 +427,6 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
                 You'll receive a notification once the review is complete.
               </AlertDescription>
             </Alert>
-
-            {/* Prominent Submit Button in Content Area */}
-            <div className="border-t pt-6">
-              <Button
-                onClick={handleSubmit}
-                disabled={!declarationAccepted || submitting}
-                size="lg"
-                className="w-full bg-success hover:bg-success/90 text-success-foreground font-semibold py-4"
-              >
-                {submitting ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-success-foreground border-t-transparent mr-2" />
-                    Submitting for Review...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-5 w-5 mr-2" />
-                    Complete Identity Verification
-                  </>
-                )}
-              </Button>
-              {!declarationAccepted && (
-                <p className="text-sm text-muted-foreground text-center mt-2">
-                  Please accept the declaration above to continue
-                </p>
-              )}
-            </div>
           </div>
         );
 
@@ -380,7 +489,7 @@ export function EnhancedKycWizard({ onComplete }: KycWizardProps) {
           </CardHeader>
           
           <CardContent className="pb-6">
-            {renderStepContent()}
+            {renderDesktopStepContent()}
           </CardContent>
         </Card>
 
