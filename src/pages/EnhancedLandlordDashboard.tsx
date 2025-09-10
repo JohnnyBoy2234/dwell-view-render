@@ -91,6 +91,13 @@ export default function EnhancedLandlordDashboard() {
   // Initialize lease notifications
   useLeaseNotifications();
   
+  // Fetch applications on mount
+  useEffect(() => {
+    if (user && isLandlord) {
+      fetchAllApplications();
+    }
+  }, [user, isLandlord, fetchAllApplications]);
+  
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
     const path = location.pathname;
@@ -635,8 +642,8 @@ export default function EnhancedLandlordDashboard() {
         console.log('[Dashboard] Rendering properties tab');
         return renderPropertiesTab();
       case '/enhancedlandlorddashboard/applications':
-        console.log('[Dashboard] Applications tab disabled - functionality not implemented');
-        return renderNotImplementedTab('Applications', 'Rental application management is not yet implemented.');
+        console.log('[Dashboard] Rendering applications tab');
+        return renderApplicationsTab();
       case '/enhancedlandlorddashboard/leases':
         return renderLeasesTab();
       case '/enhancedlandlorddashboard/tenants':
@@ -659,6 +666,111 @@ export default function EnhancedLandlordDashboard() {
   const renderLeasesTab = () => (
     <div className="space-y-6">
       <LandlordLeasesList />
+    </div>
+  );
+
+  const renderApplicationsTab = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Users className="h-6 w-6 text-ocean-blue" />
+        <h2 className="text-xl font-bold">Rental Applications</h2>
+        <Badge variant="secondary" className="ml-2">
+          {applications.length} Total
+        </Badge>
+      </div>
+      
+      {applicationsLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 bg-muted rounded w-1/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                  <div className="h-3 bg-muted rounded w-1/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : applications.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Applications Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              You haven't received any rental applications yet. Once tenants start applying, they'll appear here.
+            </p>
+            <Button onClick={() => setCurrentTab('/enhancedlandlorddashboard/properties')}>
+              <Building className="h-4 w-4 mr-2" />
+              Manage Properties
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {applications.map((application) => (
+            <Card key={application.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-semibold text-lg">
+                        {application.tenant_profile?.display_name || 'Unknown Tenant'}
+                      </h3>
+                      <Badge 
+                        variant={application.status === 'accepted' ? 'default' : 
+                                application.status === 'declined' ? 'destructive' : 'secondary'}
+                      >
+                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>Property: {application.properties?.title || 'Unknown Property'}</p>
+                      <p>Applied: {new Date(application.created_at).toLocaleDateString()}</p>
+                      {application.tenant_profile?.email && (
+                        <p>Email: {application.tenant_profile.email}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {application.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => updateApplicationStatus(application.id, 'accepted')}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateApplicationStatus(application.id, 'declined')}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Decline
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/tenant-profile/${application.tenant_id}`)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Profile
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 
