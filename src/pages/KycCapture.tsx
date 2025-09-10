@@ -380,7 +380,7 @@ export default function KycCapture() {
       </div>
 
       {/* Bottom Controls */}
-      <div className="p-4 bg-background/95 backdrop-blur border-t">
+      <div className="p-4 pb-20 bg-background/95 backdrop-blur border-t">{/* Added pb-20 for mobile navigation */}
         {capturedImageUrl ? (
           // Review controls
           <div className="flex gap-3">

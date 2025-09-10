@@ -290,7 +290,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
         </div>
 
         {/* Bottom Controls */}
-        <div className="p-4 bg-background border-t">
+        <div className="p-4 pb-20 bg-background border-t">{/* Added pb-20 for mobile navigation */}
           {capturedImage ? (
             // Review controls
             <div className="flex justify-between">
