@@ -46,7 +46,7 @@ export function MobileBottomBar() {
         to={item.path}
         className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
           isActive
-            ? 'text-white bg-white/20'
+            ? 'text-white bg-black/20'
             : 'text-white/80 hover:text-white'
         }`}
       >
@@ -76,7 +76,7 @@ export function MobileBottomBar() {
           to="/list-property"
           className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
             location.pathname === '/list-property'
-              ? 'text-white bg-white/20'
+              ? 'text-white bg-black/20'
               : 'text-white/80 hover:text-white'
           }`}
         >
