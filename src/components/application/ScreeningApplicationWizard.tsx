@@ -159,45 +159,79 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         }
       }
 
-      // If tenant already screened, skip form and auto-apply
+      // Check if tenant is already screened for auto-filling purposes
       const { data: basicProfile } = await supabase
         .from("profiles")
         .select("is_tenant_screened")
         .eq("user_id", user.id)
         .maybeSingle();
+
+      // Auto-fill from screening profile if user is already screened, otherwise use basic profile
       if (basicProfile?.is_tenant_screened) {
-        await quickApply();
-        return;
-      }
-
-      // Only auto-fill basic user information from profiles table
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("display_name, phone")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      if (userProfile) {
-        const displayNameParts = userProfile.display_name?.split(' ') || [''];
-        setFormData((prev) => ({
-          ...prev,
-          first_name: displayNameParts[0] || "",
-          last_name: displayNameParts.slice(1).join(' ') || "",
-          phone: userProfile.phone || "",
-          // Keep screening consent as false to require user to explicitly agree each time
-          screening_consent: false,
-        }));
-      }
-
-      // Load existing documents from screening profile (if any)
-      const { data: profile } = await supabase
-        .from("screening_profiles")
-        .select("documents")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      if (profile?.documents && Array.isArray(profile.documents)) {
-        setUploadedDocuments(profile.documents as unknown as DocumentItem[]);
+        // Load comprehensive data from screening profile
+        const { data: screeningProfile } = await supabase
+          .from("screening_profiles")
+          .select("*")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (screeningProfile) {
+          setFormData((prev) => ({
+            ...prev,
+            first_name: screeningProfile.first_name || "",
+            middle_name: screeningProfile.middle_name || "",
+            last_name: screeningProfile.last_name || "",
+            id_number: screeningProfile.id_number || "",
+            phone: screeningProfile.phone || "",
+            employment_status: screeningProfile.employment_status || "",
+            job_title: screeningProfile.job_title || "",
+            company_name: screeningProfile.company_name || "",
+            net_monthly_income: screeningProfile.net_monthly_income || "",
+            current_address: screeningProfile.current_address || "",
+            reason_for_moving: screeningProfile.reason_for_moving || "",
+            previous_landlord_name: screeningProfile.previous_landlord_name || "",
+            previous_landlord_contact: screeningProfile.previous_landlord_contact || "",
+            has_pets: screeningProfile.has_pets || false,
+            pet_details: screeningProfile.pet_details || "",
+            // Keep screening consent as false to require user to explicitly agree each time
+            screening_consent: false,
+          }));
+          
+          // Load existing documents
+          if (screeningProfile.documents && Array.isArray(screeningProfile.documents)) {
+            setUploadedDocuments(screeningProfile.documents as unknown as DocumentItem[]);
+          }
+        }
+      } else {
+        // Only auto-fill basic user information from profiles table
+        const { data: userProfile } = await supabase
+          .from("profiles")
+          .select("display_name, phone")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (userProfile) {
+          const displayNameParts = userProfile.display_name?.split(' ') || [''];
+          setFormData((prev) => ({
+            ...prev,
+            first_name: displayNameParts[0] || "",
+            last_name: displayNameParts.slice(1).join(' ') || "",
+            phone: userProfile.phone || "",
+            // Keep screening consent as false to require user to explicitly agree each time
+            screening_consent: false,
+          }));
+        }
+        
+        // Load existing documents from screening profile (if any)
+        const { data: profile } = await supabase
+          .from("screening_profiles")
+          .select("documents")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (profile?.documents && Array.isArray(profile.documents)) {
+          setUploadedDocuments(profile.documents as unknown as DocumentItem[]);
+        }
       }
     } catch (err) {
       console.error("Error loading existing application data", err);
