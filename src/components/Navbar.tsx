@@ -26,13 +26,26 @@ const Navbar = () => {
       <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
-                <Home className="h-5 w-5 text-white" />
+            {/* Logo and Mobile Nav */}
+            <div className="flex items-center space-x-4">
+              <Link to="/" className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
+                  <Home className="h-5 w-5 text-white" />
+                </div>
+                <span className="text-xl font-bold text-foreground">SwiftRent</span>
+              </Link>
+              
+              {/* Mobile Navigation Buttons - Only visible on mobile */}
+              <div className="flex md:hidden items-center space-x-2">
+                <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                  Blog
+                </Link>
+                <span className="text-muted-foreground">•</span>
+                <Link to="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+                  About Us
+                </Link>
               </div>
-              <span className="text-xl font-bold text-foreground">SwiftRent</span>
-            </Link>
+            </div>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
