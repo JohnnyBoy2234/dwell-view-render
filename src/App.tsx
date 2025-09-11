@@ -30,6 +30,7 @@ import ApplicationDetail from "./pages/ApplicationDetail";
 import RentalApplication from "./pages/RentalApplication";
 import ResetPassword from "./pages/ResetPassword";
 import TenantMessages from "./pages/TenantMessages";
+import Notifications from "./pages/Notifications";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import DocuSignCallback from "./pages/DocuSignCallback";
@@ -86,6 +87,7 @@ const App = () => (
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
             <Route path="/messages" element={<AuthenticatedRoute><Messages /></AuthenticatedRoute>} />
+            <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
             <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
             <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
             <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />

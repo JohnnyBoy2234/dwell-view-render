@@ -46,7 +46,7 @@ export function MobileBottomBar() {
         to={item.path}
         className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
           isActive
-            ? 'text-white bg-white/20'
+            ? 'text-accent bg-white/20'
             : 'text-white/80 hover:text-white'
         }`}
       >
@@ -76,13 +76,15 @@ export function MobileBottomBar() {
           to="/list-property"
           className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
             location.pathname === '/list-property'
-              ? 'text-white bg-white/20'
+              ? 'text-accent bg-white/20'
               : 'text-white/80 hover:text-white'
           }`}
         >
           <div className="relative">
-            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-              <Plus className="h-4 w-4 text-white" />
+            <div className="w-8 h-8 bg-primary/95 border border-white/30 rounded-lg flex items-center justify-center">
+              <Plus className={`h-4 w-4 ${
+                location.pathname === '/list-property' ? 'text-accent' : 'text-white'
+              }`} />
             </div>
           </div>
           <span className="text-xs text-center">List</span>
