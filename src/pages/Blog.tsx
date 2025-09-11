@@ -1,7 +1,53 @@
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Blog() {
+  const { toast } = useToast();
+
+  const handleShare = async () => {
+    const shareData = {
+      title: "Why Paying Commission on Rentals Is Wrong - SwiftRent Blog",
+      text: "Read this insightful article about commission-free rentals and why the traditional model needs to change.",
+      url: window.location.href
+    };
+
+    // Check if Web Share API is supported (mobile/modern browsers)
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error: any) {
+        // User cancelled the share or an error occurred
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+          // Fall back to clipboard
+          fallbackToClipboard();
+        }
+      }
+    } else {
+      // Fall back to clipboard for desktop browsers
+      fallbackToClipboard();
+    }
+  };
+
+  const fallbackToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast({
+        title: "Link copied to clipboard!",
+        description: "The blog post link has been copied to your clipboard."
+      });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast({
+        variant: "destructive",
+        title: "Share failed",
+        description: "Unable to share or copy the link. Please copy the URL manually."
+      });
+    }
+  };
   return (
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-16">
@@ -14,12 +60,20 @@ export default function Blog() {
         <div className="space-y-8">
           <Card className="border shadow-sm">
             <CardHeader>
-              <CardTitle className="text-2xl md:text-3xl font-bold">
-                Why Paying Commission on Rentals Is Wrong
-              </CardTitle>
-              <p className="text-muted-foreground text-sm">
-                Published on {new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <CardTitle className="text-2xl md:text-3xl font-bold">
+                    Why Paying Commission on Rentals Is Wrong
+                  </CardTitle>
+                  <p className="text-muted-foreground text-sm mt-2">
+                    Published on {new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleShare} className="shrink-0">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+              </div>
             </CardHeader>
             
             <CardContent className="prose prose-gray max-w-none">

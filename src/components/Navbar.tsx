@@ -28,16 +28,13 @@ const Navbar = () => {
       <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Mobile Hamburger Menu - Far Left */}
-            <div className="flex items-center space-x-4">
-              <MobileSidebar />
-              <Link to="/" className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold text-foreground">SwiftRent</span>
-              </Link>
-            </div>
+            {/* Logo */}
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
+                <Home className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-xl font-bold text-foreground">SwiftRent</span>
+            </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-8">
@@ -123,6 +120,9 @@ const Navbar = () => {
                 </>
               )}
             </div>
+
+            {/* Mobile Hamburger Menu - Right Side */}
+            <MobileSidebar />
           </div>
         </div>
       </nav>
