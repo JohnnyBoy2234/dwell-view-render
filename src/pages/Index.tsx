@@ -1,23 +1,15 @@
 import { Button } from "@/components/ui/button";
 import "@/styles/animations.css";
-
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import {MoreFiltersModal} from "@/components/search/MoreFiltersModal";
-
 import PropertyCard from "@/components/PropertyCard";
-import { BenefitsSlider } from "@/components/BenefitsSlider";
-
 import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
-
 import { ArrowRight, CheckCircle, Home, Star, Zap, Shield } from "lucide-react";
-
 import { Link, useNavigate } from "react-router-dom";
-
 import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
-import { ThemeTagline } from "@/components/ui/ThemeTagline";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useAuth } from "@/hooks/useAuth";
 
