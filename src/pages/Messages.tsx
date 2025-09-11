@@ -302,7 +302,7 @@ export default function Messages() {
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
-                  <div className="p-2 space-y-1">
+                  <div className="p-1 space-y-1">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -368,9 +368,9 @@ export default function Messages() {
                           return (
                             <div
                               key={message.id}
-                              className={`flex mb-4 px-2 ${isSender ? 'justify-end' : 'justify-start'}`}
+                              className={`flex mb-4 px-1 ${isSender ? 'justify-end' : 'justify-start'}`}
                             >
-                              <div className={`max-w-[90%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
+                              <div className={`max-w-[95%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                                 <div
                                   className={`rounded-2xl px-4 py-3 ${
                                     isSender
@@ -378,7 +378,7 @@ export default function Messages() {
                                       : 'bg-muted text-foreground rounded-bl-md'
                                   }`}
                                 >
-                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
+                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{message.content}</p>
                                 </div>
                                 
                                 <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
@@ -449,18 +449,7 @@ export default function Messages() {
   // Desktop layout
   return (
     <>
-    {/* Desktop Header */}
-    <div className="flex items-center gap-4 mb-6">
-      <div className="flex items-center gap-2">
-        <MessageCircle className="h-6 w-6 text-primary" />
-        <h2 className="text-lg font-semibold">Conversations</h2>
-      </div>
-      <Badge variant="secondary" className="text-xs">
-        {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
-      </Badge>
-    </div>
-    
-    <div className="grid grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
+    <div className="grid grid-cols-3 gap-6 h-[calc(100vh-6rem)]">
       {/* Conversations List - Desktop */}
       <div className="col-span-1">
         <div className="h-full rounded-lg border bg-card">
@@ -596,7 +585,7 @@ export default function Messages() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-1 py-2 px-2">
+                  <div className="space-y-1 py-1 px-1">
                      {/* Viewing Slot Notification for Tenants */}
                     {!isLandlord && selectedConversation && (
                       <ViewingSlotNotification
@@ -652,9 +641,9 @@ export default function Messages() {
                       return (
                         <div
                           key={message.id}
-                          className={`flex mb-4 px-2 ${isSender ? 'justify-end' : 'justify-start'}`}
+                          className={`flex mb-4 px-1 ${isSender ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div className={`max-w-[80%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
+                          <div className={`max-w-[85%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                             <div
                               className={`rounded-2xl px-4 py-3 ${
                                 isSender
@@ -662,7 +651,7 @@ export default function Messages() {
                                   : 'bg-muted text-foreground rounded-bl-md'
                               }`}
                             >
-                              <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
+                              <p className="text-sm leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{message.content}</p>
                             </div>
                             
                             <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
