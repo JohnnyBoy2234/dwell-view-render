@@ -43,10 +43,29 @@ export default function Messages() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Simplified fetchViewingProposals
+  // Define fetchViewingProposals as useCallback to avoid dependency issues
   const fetchViewingProposals = useCallback(async () => {
-    // Temporarily disabled to fix initialization error
-  }, []);
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('viewing_proposals')
+        .select(`
+          *,
+          properties (
+            title,
+            location
+          )
+        `)
+        .eq('conversation_id', activeConversation)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setViewingProposals(data || []);
+    } catch (error) {
+      console.error('Error fetching viewing requests:', error);
+    }
+  }, [activeConversation, user]);
 
   const {
     conversations,
@@ -64,10 +83,12 @@ export default function Messages() {
 
   const selectedConversation = conversations.find(c => c.id === activeConversation);
 
-  // Simplified useEffect
+  // Fetch viewing requests for active conversation
   useEffect(() => {
-    // Temporarily disabled to fix initialization error
-  }, []);
+    if (activeConversation && user) {
+      fetchViewingProposals();
+    }
+  }, [activeConversation, user, fetchViewingProposals]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,25 +96,62 @@ export default function Messages() {
 
   // Remove scroll handler - header is now permanently fixed
 
-  // Simplified useEffect
   useEffect(() => {
-    // Temporarily disabled to fix initialization error
-  }, []);
+    scrollToBottom();
+  }, [messages]);
 
-  // Simplified useEffect
+  // Pre-fill message only for truly first-time contact (no conversation history)
   useEffect(() => {
-    // Temporarily disabled to fix initialization error
-  }, []);
+    if (selectedConversation && !isLandlord && !hasPrefilledMessage && !sentAutoMessage) {
+      // Only show pre-typed message if conversation has no message history at all
+      if (selectedConversation.last_message_at === null && messages.length === 0) {
+        const propertyTitle = selectedConversation.properties?.title || 'this property';
+        const autoMessage = `Hello, I am interested in ${propertyTitle}. I would like to schedule a viewing. Please let me know what times you have available.`;
+        setNewMessage(autoMessage);
+        setHasPrefilledMessage(true);
+      }
+    }
+    
+    // Clear pre-typed message if user manually switches conversations
+    if (selectedConversation && hasPrefilledMessage && newMessage && messages.length > 0) {
+      setHasPrefilledMessage(false);
+    }
+  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage, sentAutoMessage]);
 
-  // Simplified useEffect
+  // Reset sentAutoMessage when switching conversations
   useEffect(() => {
-    // Temporarily disabled to fix initialization error
-  }, []);
+    setSentAutoMessage(false);
+  }, [activeConversation]);
 
-  // Simplified useEffect
+  // Handle initial URL parameter only once
   useEffect(() => {
-    // Temporarily disabled to fix initialization error
-  }, []);
+    if (hasProcessedUrlParam || conversations.length === 0) return;
+    
+    const cid = searchParams.get('c');
+    const messageParam = searchParams.get('message');
+    console.log('🔗 Processing URL parameter:', cid, 'message:', messageParam);
+    
+    if (cid) {
+      const exists = conversations.find(c => c.id === cid);
+      if (exists) {
+        console.log('✅ Setting conversation from URL:', cid);
+        setActiveConversation(cid);
+        setShowConversations(false);
+        setHasPrefilledMessage(false);
+        
+        // Pre-fill message if provided in URL
+        if (messageParam) {
+          setNewMessage(decodeURIComponent(messageParam));
+          setHasPrefilledMessage(true);
+          // Don't set sentAutoMessage to true here since it hasn't been sent yet
+        }
+        
+        setHasProcessedUrlParam(true);
+      }
+    } else {
+      setHasProcessedUrlParam(true);
+    }
+  }, [conversations, searchParams, hasProcessedUrlParam]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,10 +227,8 @@ export default function Messages() {
     return (
       <>
         <div className="fixed inset-0 bg-background flex flex-col z-30">
-          {/* Mobile Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-background">
-            <div className="flex items-center gap-3">
-            </div>
+          {/* Mobile Header - Removed transparent Messages heading */}
+          <div className="flex items-center justify-end p-4 border-b bg-background">
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" className="relative">
                 <Bell className="h-5 w-5" />
