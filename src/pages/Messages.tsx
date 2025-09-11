@@ -302,7 +302,7 @@ export default function Messages() {
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
-                  <div className="p-4 space-y-3">
+                  <div className="p-2 space-y-1">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -368,9 +368,9 @@ export default function Messages() {
                           return (
                             <div
                               key={message.id}
-                              className={`flex mb-3 ${isSender ? 'justify-end' : 'justify-start'}`}
+                              className={`flex mb-4 px-2 ${isSender ? 'justify-end' : 'justify-start'}`}
                             >
-                              <div className={`max-w-[85%] ${isSender ? 'order-2' : 'order-1'}`}>
+                              <div className={`max-w-[90%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                                 <div
                                   className={`rounded-2xl px-4 py-3 ${
                                     isSender
@@ -378,21 +378,21 @@ export default function Messages() {
                                       : 'bg-muted text-foreground rounded-bl-md'
                                   }`}
                                 >
-                                  <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
                                 </div>
                                 
                                 <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
                                   isSender ? 'justify-end' : 'justify-start'
                                 }`}>
-                                  <Clock className="h-3 w-3" />
-                                  <span>
+                                  <Clock className="h-3 w-3 flex-shrink-0" />
+                                  <span className="truncate">
                                     {new Date(message.created_at).toLocaleTimeString([], {
                                       hour: '2-digit',
                                       minute: '2-digit'
                                     })}
                                   </span>
                                   {isSender && (
-                                    <div className="ml-1">
+                                    <div className="ml-1 flex-shrink-0">
                                       {isRead ? (
                                         <CheckCheck className="h-3 w-3 text-blue-500" />
                                       ) : (
@@ -583,7 +583,7 @@ export default function Messages() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-              <ScrollArea className="h-full px-4">
+              <ScrollArea className="h-full">
                 {loading ? (
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -596,7 +596,7 @@ export default function Messages() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-1 py-2 px-2">
                      {/* Viewing Slot Notification for Tenants */}
                     {!isLandlord && selectedConversation && (
                       <ViewingSlotNotification
@@ -652,9 +652,9 @@ export default function Messages() {
                       return (
                         <div
                           key={message.id}
-                          className={`flex mb-3 ${isSender ? 'justify-end' : 'justify-start'}`}
+                          className={`flex mb-4 px-2 ${isSender ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div className={`max-w-[70%] ${isSender ? 'order-2' : 'order-1'}`}>
+                          <div className={`max-w-[80%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                             <div
                               className={`rounded-2xl px-4 py-3 ${
                                 isSender
@@ -662,21 +662,21 @@ export default function Messages() {
                                   : 'bg-muted text-foreground rounded-bl-md'
                               }`}
                             >
-                              <p className="text-sm leading-relaxed">{message.content}</p>
+                              <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">{message.content}</p>
                             </div>
                             
                             <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
                               isSender ? 'justify-end' : 'justify-start'
                             }`}>
-                              <Clock className="h-3 w-3" />
-                              <span>
+                              <Clock className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">
                                 {new Date(message.created_at).toLocaleTimeString([], {
                                   hour: '2-digit',
                                   minute: '2-digit'
                                 })}
                               </span>
                               {isSender && (
-                                <div className="ml-1">
+                                <div className="ml-1 flex-shrink-0">
                                   {isRead ? (
                                     <CheckCheck className="h-3 w-3 text-blue-500" />
                                   ) : (
