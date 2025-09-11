@@ -43,9 +43,20 @@ export default function Messages() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
+  const {
+    conversations,
+    activeConversation,
+    setActiveConversation,
+    messages,
+    loading,
+    onlineUsers,
+    sendMessage,
+    fetchMessages: refetchMessages
+  } = useMessaging();
+
   // Define fetchViewingProposals as useCallback to avoid dependency issues
   const fetchViewingProposals = useCallback(async () => {
-    if (!user) return;
+    if (!user || !activeConversation) return;
     
     try {
       const { data, error } = await supabase
@@ -66,20 +77,6 @@ export default function Messages() {
       console.error('Error fetching viewing requests:', error);
     }
   }, [activeConversation, user]);
-
-  const {
-    conversations,
-    activeConversation,
-    setActiveConversation,
-    messages,
-    loading,
-    onlineUsers,
-    sendMessage,
-    fetchMessages: refetchMessages
-  } = useMessaging(() => {
-    // Refresh viewing proposals when they change
-    fetchViewingProposals();
-  });
 
   const selectedConversation = conversations.find(c => c.id === activeConversation);
 
@@ -228,19 +225,7 @@ export default function Messages() {
       <>
         <div className="fixed inset-0 bg-background flex flex-col z-30">
           {/* Mobile Header - Removed transparent Messages heading */}
-          <div className="flex items-center justify-end p-4 border-b bg-background">
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="h-5 w-5" />
-                {messageUnread > 0 && (
-                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center">
-                    {messageUnread > 99 ? '99+' : messageUnread}
-                  </Badge>
-                )}
-              </Button>
-            </div>
-          </div>
-
+          
           {/* Conversations List - Mobile */}
           {showConversations && (
             <div className="flex-1 flex flex-col h-full">              
