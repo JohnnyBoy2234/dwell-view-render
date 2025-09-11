@@ -1,8 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Search, Heart, User, Menu, X, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Home, Search, Heart, User, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUserProperties } from "@/hooks/useUserProperties";
@@ -11,22 +10,9 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 const Navbar = () => {
   const location = useLocation();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut, isLandlord, isAdmin } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { hasProperties } = useUserProperties();
-
-  // Prevents the page from scrolling when the mobile menu is open
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [isMobileMenuOpen]);
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },

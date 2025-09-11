@@ -91,11 +91,12 @@ export default function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Remove scroll handler - header is now permanently fixed
-
+  // Auto-scroll to bottom when messages change or when opening a chat
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    if (messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [messages, selectedConversation]);
 
   // Pre-fill message only for truly first-time contact (no conversation history)
   useEffect(() => {
@@ -274,7 +275,14 @@ export default function Messages() {
             {/* Conversations List - Mobile */}
             <div className="flex-1 flex flex-col h-[calc(100vh-8rem)]">              
               <ScrollArea className="flex-1 min-h-0">
-                {conversations.length === 0 ? (
+                {loading ? (
+                  <div className="flex items-center justify-center h-full text-center p-6">
+                    <div>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+                      <p className="text-muted-foreground">Loading conversations...</p>
+                    </div>
+                  </div>
+                ) : conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
                     <div>
                       <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
@@ -391,11 +399,7 @@ export default function Messages() {
               <div className="flex-1 min-h-0 overflow-hidden">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
                   <div className="p-1 space-y-1">
-                    {loading ? (
-                      <div className="flex items-center justify-center h-32">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                      </div>
-                    ) : messages.length === 0 ? (
+                    {messages.length === 0 ? (
                       <div className="flex items-center justify-center h-32 text-muted-foreground">
                         <div className="text-center">
                           <MessageCircle className="h-8 w-8 mx-auto mb-2" />
@@ -558,7 +562,12 @@ export default function Messages() {
           
           <div className="p-0">
             <ScrollArea className="h-[calc(100vh-8rem)]">
-              {conversations.length === 0 ? (
+              {loading ? (
+                <div className="p-6 text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+                  <p className="text-muted-foreground">Loading conversations...</p>
+                </div>
+              ) : conversations.length === 0 ? (
                 <div className="p-6 text-center">
                   <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
                   <p className="text-muted-foreground">No conversations yet</p>
@@ -664,11 +673,7 @@ export default function Messages() {
             {/* Messages */}
             <div className="flex-1 min-h-0">
               <ScrollArea className="h-full">
-                {loading ? (
-                  <div className="flex items-center justify-center h-32">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                  </div>
-                ) : messages.length === 0 ? (
+                {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-32 text-muted-foreground">
                     <div className="text-center">
                       <MessageCircle className="h-8 w-8 mx-auto mb-2" />

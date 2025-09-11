@@ -71,6 +71,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [existingApplication, setExistingApplication] = useState<any>(null);
   const [uploadedDocuments, setUploadedDocuments] = useState<DocumentItem[]>([]);
+  const [incomeDocuments, setIncomeDocuments] = useState<DocumentItem[]>([]);
+  const [creditDocuments, setCreditDocuments] = useState<DocumentItem[]>([]);
 
   const [formData, setFormData] = useState<FormData>({
     first_name: "",
@@ -159,45 +161,156 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         }
       }
 
-      // If tenant already screened, skip form and auto-apply
+      // Check if tenant is already screened for auto-filling purposes
       const { data: basicProfile } = await supabase
         .from("profiles")
         .select("is_tenant_screened")
         .eq("user_id", user.id)
         .maybeSingle();
-      if (basicProfile?.is_tenant_screened) {
-        await quickApply();
-        return;
-      }
 
-      // Only auto-fill basic user information from profiles table
-      const { data: userProfile } = await supabase
-        .from("profiles")
-        .select("display_name, phone")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      if (userProfile) {
-        const displayNameParts = userProfile.display_name?.split(' ') || [''];
+      // Auto-fill from screening profile if user is already screened, otherwise use basic profile
+      if (basicProfile?.is_tenant_screened) {
+        // Load comprehensive data from both screening_profile and screening_details
+        const [screeningProfileResult, screeningDetailsResult] = await Promise.all([
+          supabase
+            .from("screening_profiles")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("screening_details")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle()
+        ]);
+        
+        const screeningProfile = screeningProfileResult.data;
+        const screeningDetails = screeningDetailsResult.data;
+        
+        if (screeningProfile) {
+          // Start with screening profile data
+          let formDataUpdate: Partial<FormData> = {
+            first_name: screeningProfile.first_name || "",
+            middle_name: screeningProfile.middle_name || "",
+            last_name: screeningProfile.last_name || "",
+            has_pets: screeningProfile.has_pets || false,
+            pet_details: screeningProfile.pet_details || "",
+            screening_consent: false, // Always require explicit consent
+          };
+          
+          // Add screening details if available
+          if (screeningDetails) {
+            formDataUpdate = {
+              ...formDataUpdate,
+              first_name: screeningDetails.full_name?.split(' ')[0] || formDataUpdate.first_name || "",
+              last_name: screeningDetails.full_name?.split(' ').slice(1).join(' ') || formDataUpdate.last_name || "",
+              id_number: screeningDetails.id_number || "",
+              phone: screeningDetails.phone || "",
+              employment_status: screeningDetails.employment_status || "",
+              job_title: screeningDetails.job_title || "",
+              company_name: screeningDetails.company_name || "",
+              net_monthly_income: screeningDetails.net_monthly_income?.toString() || "",
+              current_address: screeningDetails.current_address || "",
+              reason_for_moving: screeningDetails.reason_for_moving || "",
+              previous_landlord_name: screeningDetails.previous_landlord_name || "",
+              previous_landlord_contact: screeningDetails.previous_landlord_contact || "",
+            };
+          }
+          
+          setFormData((prev) => ({
+            ...prev,
+            ...formDataUpdate,
+          }));
+          
+          // Load existing documents
+          if (screeningProfile.documents && Array.isArray(screeningProfile.documents)) {
+            const documents = screeningProfile.documents as unknown as DocumentItem[];
+            // Separate documents by type
+            const incomeDocs = documents.filter(doc => doc.type === 'income');
+            const creditDocs = documents.filter(doc => doc.type === 'experian_credit_report');
+            const otherDocs = documents.filter(doc => doc.type !== 'income' && doc.type !== 'experian_credit_report');
+            
+            setIncomeDocuments(incomeDocs);
+            setCreditDocuments(creditDocs);
+            setUploadedDocuments(otherDocs);
+          }
+        }
+      } else {
+        // Auto-fill from both profiles and screening_details tables
+        const [userProfileResult, screeningDetailsResult] = await Promise.all([
+          supabase
+            .from("profiles")
+            .select("display_name, phone")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("screening_details")
+            .select("*")
+            .eq("user_id", user.id)
+            .maybeSingle()
+        ]);
+        
+        const userProfile = userProfileResult.data;
+        const screeningDetails = screeningDetailsResult.data;
+        
+        // Start with basic profile data
+        let formDataUpdate: Partial<FormData> = {
+          screening_consent: false, // Always require explicit consent
+        };
+        
+        // Add profile data
+        if (userProfile) {
+          const displayNameParts = userProfile.display_name?.split(' ') || [''];
+          formDataUpdate = {
+            ...formDataUpdate,
+            first_name: displayNameParts[0] || "",
+            last_name: displayNameParts.slice(1).join(' ') || "",
+            phone: userProfile.phone || "",
+          };
+        }
+        
+        // Add screening details if available
+        if (screeningDetails) {
+          formDataUpdate = {
+            ...formDataUpdate,
+            first_name: screeningDetails.full_name?.split(' ')[0] || formDataUpdate.first_name || "",
+            last_name: screeningDetails.full_name?.split(' ').slice(1).join(' ') || formDataUpdate.last_name || "",
+            id_number: screeningDetails.id_number || "",
+            phone: screeningDetails.phone || formDataUpdate.phone || "",
+            employment_status: screeningDetails.employment_status || "",
+            job_title: screeningDetails.job_title || "",
+            company_name: screeningDetails.company_name || "",
+            net_monthly_income: screeningDetails.net_monthly_income?.toString() || "",
+            current_address: screeningDetails.current_address || "",
+            reason_for_moving: screeningDetails.reason_for_moving || "",
+            previous_landlord_name: screeningDetails.previous_landlord_name || "",
+            previous_landlord_contact: screeningDetails.previous_landlord_contact || "",
+          };
+        }
+        
         setFormData((prev) => ({
           ...prev,
-          first_name: displayNameParts[0] || "",
-          last_name: displayNameParts.slice(1).join(' ') || "",
-          phone: userProfile.phone || "",
-          // Keep screening consent as false to require user to explicitly agree each time
-          screening_consent: false,
+          ...formDataUpdate,
         }));
-      }
-
-      // Load existing documents from screening profile (if any)
-      const { data: profile } = await supabase
-        .from("screening_profiles")
-        .select("documents")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      
-      if (profile?.documents && Array.isArray(profile.documents)) {
-        setUploadedDocuments(profile.documents as unknown as DocumentItem[]);
+        
+        // Load existing documents from screening profile (if any)
+        const { data: profile } = await supabase
+          .from("screening_profiles")
+          .select("documents")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (profile?.documents && Array.isArray(profile.documents)) {
+          const documents = profile.documents as unknown as DocumentItem[];
+          // Separate documents by type
+          const incomeDocs = documents.filter(doc => doc.type === 'income');
+          const creditDocs = documents.filter(doc => doc.type === 'experian_credit_report');
+          const otherDocs = documents.filter(doc => doc.type !== 'income' && doc.type !== 'experian_credit_report');
+          
+          setIncomeDocuments(incomeDocs);
+          setCreditDocuments(creditDocs);
+          setUploadedDocuments(otherDocs);
+        }
       }
     } catch (err) {
       console.error("Error loading existing application data", err);
@@ -222,7 +335,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       // Handle Experian credit report with special naming
       if (documentType === 'experian_credit_report') {
         const today = new Date().toISOString().split('T')[0]; // yyyy-mm-dd format
-        fileName = `experian_report_${user.id}_${today}.pdf`;
+        fileName = `${user.id}/experian_report_${today}.pdf`; // Put in user folder for RLS
         bucketName = 'income-documents'; // Store in income documents bucket
       } else {
         fileName = `${user.id}/${documentType}_${Date.now()}.${fileExt}`;
@@ -255,7 +368,14 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         type: documentType
       };
 
-      setUploadedDocuments(prev => [...prev, newDocument]);
+      // Add to appropriate document array based on type
+      if (documentType === 'experian_credit_report') {
+        setCreditDocuments(prev => [...prev, newDocument]);
+      } else if (documentType === 'income') {
+        setIncomeDocuments(prev => [...prev, newDocument]);
+      } else {
+        setUploadedDocuments(prev => [...prev, newDocument]);
+      }
       
       const toastMessage = documentType === 'experian_credit_report' ? 'Experian report uploaded.' : `${file.name} has been uploaded successfully.`;
       toast({
@@ -274,10 +394,19 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     }
   };
 
-  const removeDocument = async (index: number) => {
-    const document = uploadedDocuments[index];
+  const removeDocument = async (index: number, documentType: 'income' | 'credit' | 'other') => {
+    let document: DocumentItem;
     let bucketName: string;
     let filePath: string;
+    
+    // Get document from appropriate array
+    if (documentType === 'income') {
+      document = incomeDocuments[index];
+    } else if (documentType === 'credit') {
+      document = creditDocuments[index];
+    } else {
+      document = uploadedDocuments[index];
+    }
     
     if (document.type === 'experian_credit_report') {
       bucketName = 'income-documents';
@@ -294,7 +423,14 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         .from(bucketName)
         .remove([filePath]);
         
-      setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+      // Update the appropriate array
+      if (documentType === 'income') {
+        setIncomeDocuments(prev => prev.filter((_, i) => i !== index));
+      } else if (documentType === 'credit') {
+        setCreditDocuments(prev => prev.filter((_, i) => i !== index));
+      } else {
+        setUploadedDocuments(prev => prev.filter((_, i) => i !== index));
+      }
       
       toast({
         title: "Document Removed",
@@ -373,7 +509,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           screening_consent: formData.screening_consent,
           screening_consent_date: new Date().toISOString(),
           is_complete: true,
-          documents: uploadedDocuments as any,
+          documents: [...incomeDocuments, ...creditDocuments, ...uploadedDocuments] as any,
           updated_at: new Date().toISOString(),
         },
       ], { onConflict: 'user_id' });
@@ -790,39 +926,107 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                 </Card>
               </div>
 
-              {/* Uploaded Documents List */}
-              {uploadedDocuments.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-base">Uploaded Documents</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {uploadedDocuments.map((doc, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <FileText className="h-4 w-4 text-muted-foreground" />
-                             <div>
-                               <p className="text-sm font-medium">{doc.name}</p>
-                               <p className="text-xs text-muted-foreground capitalize">
-                                 {doc.type === 'experian_credit_report' ? 'Experian Credit Report' : `${doc.type} document`}
-                               </p>
-                             </div>
+              {/* Document Lists */}
+                {incomeDocuments.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Income Documents</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {incomeDocuments.map((doc, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="text-sm font-medium">{doc.name}</p>
+                                <p className="text-xs text-muted-foreground capitalize">
+                                  Income document
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeDocument(index, 'income')}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
                           </div>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeDocument(index)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Credit Documents List */}
+                {creditDocuments.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Credit Documents</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {creditDocuments.map((doc, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="text-sm font-medium">{doc.name}</p>
+                                <p className="text-xs text-muted-foreground capitalize">
+                                  Experian Credit Report
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeDocument(index, 'credit')}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Other Documents List */}
+                {uploadedDocuments.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Other Documents</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {uploadedDocuments.map((doc, index) => (
+                          <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                            <div className="flex items-center space-x-3">
+                              <FileText className="h-4 w-4 text-muted-foreground" />
+                              <div>
+                                <p className="text-sm font-medium">{doc.name}</p>
+                                <p className="text-xs text-muted-foreground capitalize">
+                                  {doc.type} document
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeDocument(index, 'other')}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
               {uploading && (
                 <div className="flex items-center justify-center p-4">
