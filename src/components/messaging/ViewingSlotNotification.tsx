@@ -61,7 +61,7 @@ export function ViewingSlotNotification({
 
   return (
     <>
-      <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-950/20 dark:to-indigo-950/20 dark:border-blue-800">
+      <Card className="w-full bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-950/20 dark:to-indigo-950/20 dark:border-blue-800">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
@@ -78,7 +78,7 @@ export function ViewingSlotNotification({
                     {availableSlots.length} slots
                   </Badge>
                 </div>
-                <p className="text-sm text-blue-700 dark:text-blue-300 mb-3">
+                <p className="text-sm text-blue-700 dark:text-blue-300 mb-3 break-words">
                   Book a viewing for "{propertyTitle}"
                 </p>
               </div>

@@ -138,7 +138,7 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
   const canTakeAction = user && !isLandlord && user.id === proposal.tenant_id && proposal.status === 'proposed';
 
   return (
-    <Card className="max-w-md bg-gradient-to-br from-background to-muted/20 border-2">
+    <Card className="w-full max-w-full bg-gradient-to-br from-background to-muted/20 border-2">
       <CardContent className="p-4 space-y-3">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -155,10 +155,10 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
         {/* Property Details */}
         {proposal.properties && (
           <div className="space-y-1">
-            <h4 className="font-semibold text-foreground">{proposal.properties.title}</h4>
+            <h4 className="font-semibold text-foreground break-words">{proposal.properties.title}</h4>
             <div className="flex items-center gap-1 text-sm text-muted-foreground">
               <MapPin className="h-3 w-3" />
-              <span className="truncate">{proposal.properties.location}</span>
+              <span className="break-words">{proposal.properties.location}</span>
             </div>
           </div>
         )}
@@ -186,7 +186,7 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
         {/* Notes */}
         {proposal.notes && (
           <div className="text-sm text-muted-foreground bg-muted/50 rounded p-2">
-            <strong>Note:</strong> {proposal.notes}
+            <strong>Note:</strong> <span className="break-words">{proposal.notes}</span>
           </div>
         )}
 

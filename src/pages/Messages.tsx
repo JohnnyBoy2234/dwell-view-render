@@ -302,7 +302,7 @@ export default function Messages() {
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
-                  <div className="p-1 space-y-1 bg-red-500">
+                  <div className="p-1 space-y-1">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -376,7 +376,7 @@ export default function Messages() {
                             >
                               <div className={`max-w-[95%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                                 <div
-                                  className={`rounded-2xl px-4 py-3 border-4 border-yellow-400 ${
+                                  className={`rounded-2xl px-4 py-3 ${
                                     isSender
                                       ? 'bg-primary text-primary-foreground rounded-br-md'
                                       : 'bg-muted text-foreground rounded-bl-md'
@@ -545,7 +545,7 @@ export default function Messages() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-1 py-1 px-1 bg-red-500">
+                  <div className="space-y-1 py-1 px-1">
                      {/* Viewing Slot Notification for Tenants */}
                     {!isLandlord && selectedConversation && (
                       <div className="w-full max-w-[85%] mx-auto">
@@ -609,7 +609,7 @@ export default function Messages() {
                         >
                           <div className={`max-w-[85%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                             <div
-                              className={`rounded-2xl px-4 py-3 border-4 border-yellow-400 ${
+                              className={`rounded-2xl px-4 py-3 ${
                                 isSender
                                   ? 'bg-primary text-primary-foreground rounded-br-md'
                                   : 'bg-muted text-foreground rounded-bl-md'
