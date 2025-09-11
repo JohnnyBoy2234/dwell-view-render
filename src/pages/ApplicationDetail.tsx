@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, FileText, Home, MapPin, Calendar } from 'lucide-react';
+import { ArrowLeft, FileText, Home, MapPin, Calendar, Download } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -127,8 +127,8 @@ export default function ApplicationDetail() {
 
       console.log('Fetching related data for application:', appData.id);
 
-      // Parallel fetches: property, landlord profile, screening details, documents
-      const [propertyResp, landlordResp, screeningResp, docsResp] = await Promise.all([
+      // Parallel fetches: property, landlord profile, screening profile, screening details, documents
+      const [propertyResp, landlordResp, screeningProfileResp, screeningDetailsResp, docsResp] = await Promise.all([
         supabase
           .from('properties')
           .select('id, title, location, images, price, bedrooms, bathrooms')
@@ -141,7 +141,12 @@ export default function ApplicationDetail() {
           .maybeSingle(),
         supabase
           .from('screening_profiles')
-          .select('first_name, middle_name, last_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact, has_pets, pet_details, documents')
+          .select('first_name, middle_name, last_name, has_pets, pet_details, documents')
+          .eq('user_id', appData.tenant_id)
+          .maybeSingle(),
+        supabase
+          .from('screening_details')
+          .select('full_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact')
           .eq('user_id', appData.tenant_id)
           .maybeSingle(),
         supabase
@@ -153,15 +158,41 @@ export default function ApplicationDetail() {
       console.log('Related data fetch results:', {
         property: propertyResp.data,
         landlord: landlordResp.data,
-        screening: screeningResp.data,
+        screeningProfile: screeningProfileResp.data,
+        screeningDetails: screeningDetailsResp.data,
         documents: docsResp.data
       });
+
+      // Combine screening profile and screening details data
+      const screeningProfile = screeningProfileResp.data;
+      const screeningDetails = screeningDetailsResp.data;
+      
+      const combinedScreeningData = {
+        // From screening_profiles
+        first_name: screeningProfile?.first_name,
+        middle_name: screeningProfile?.middle_name,
+        last_name: screeningProfile?.last_name,
+        has_pets: screeningProfile?.has_pets,
+        pet_details: screeningProfile?.pet_details,
+        documents: screeningProfile?.documents,
+        // From screening_details
+        id_number: screeningDetails?.id_number,
+        phone: screeningDetails?.phone,
+        employment_status: screeningDetails?.employment_status,
+        job_title: screeningDetails?.job_title,
+        company_name: screeningDetails?.company_name,
+        net_monthly_income: screeningDetails?.net_monthly_income,
+        current_address: screeningDetails?.current_address,
+        reason_for_moving: screeningDetails?.reason_for_moving,
+        previous_landlord_name: screeningDetails?.previous_landlord_name,
+        previous_landlord_contact: screeningDetails?.previous_landlord_contact,
+      };
 
       setApplication({
         ...appData,
         property: propertyResp.data || undefined,
         landlord: landlordResp.data || undefined,
-        screening_profile: screeningResp.data || undefined,
+        screening_profile: combinedScreeningData,
         documents: docsResp.data || []
       });
     } catch (error: any) {
@@ -191,6 +222,59 @@ export default function ApplicationDetail() {
         return <Badge variant="secondary">Pending</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const downloadDocument = async (document: any) => {
+    try {
+      let fileUrl: string;
+      
+      if (document.source === 'screening_profile') {
+        // Document from screening profile - use the URL directly
+        fileUrl = document.url || document.name;
+      } else {
+        // Document from documents table - construct URL from file_path
+        fileUrl = document.file_path;
+      }
+      
+      // If it's a Supabase storage URL, we might need to get a signed URL
+      if (fileUrl.includes('supabase.co/storage')) {
+        // Extract bucket and file path from the URL
+        const urlParts = fileUrl.split('/storage/v1/object/');
+        if (urlParts.length === 2) {
+          const [bucket, ...pathParts] = urlParts[1].split('/');
+          const filePath = pathParts.join('/');
+          
+          // Get a signed URL for download
+          const { data, error } = await supabase.storage
+            .from(bucket)
+            .createSignedUrl(filePath, 60); // 60 seconds expiry
+          
+          if (error) throw error;
+          fileUrl = data.signedUrl;
+        }
+      }
+      
+      // Create a temporary anchor element to trigger download
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = document.name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Download started",
+        description: `Downloading ${document.name}`,
+      });
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        variant: "destructive",
+        title: "Download failed",
+        description: "Could not download the document. Please try again.",
+      });
     }
   };
 
@@ -331,42 +415,81 @@ export default function ApplicationDetail() {
               </CardContent>
             </Card>
 
-            {((application.documents && application.documents.length > 0) || (application.screening_profile?.documents && application.screening_profile.documents.length > 0)) && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Documents</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {/* Documents from screening profile */}
-                    {application.screening_profile?.documents?.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
-                        <div className="min-w-0">
-                          <div className="font-medium break-words">{doc.name}</div>
-                          <div className="text-xs text-muted-foreground capitalize">{doc.type}</div>
+            {(() => {
+              // Combine and deduplicate documents
+              const screeningDocs = application.screening_profile?.documents || [];
+              const tableDocs = application.documents || [];
+              
+              // Create a map to deduplicate by document name and type
+              const docMap = new Map();
+              
+              // Add screening profile documents first
+              screeningDocs.forEach(doc => {
+                const key = `${doc.name}_${doc.type}`;
+                if (!docMap.has(key)) {
+                  docMap.set(key, {
+                    id: doc.id,
+                    name: doc.name,
+                    type: doc.type,
+                    uploaded_at: doc.uploaded_at,
+                    url: doc.url,
+                    source: 'screening_profile'
+                  });
+                }
+              });
+              
+              // Add table documents (only if not already present)
+              tableDocs.forEach(doc => {
+                const fileName = doc.file_path.split('/').pop();
+                const key = `${fileName}_${doc.document_type}`;
+                if (!docMap.has(key)) {
+                  docMap.set(key, {
+                    id: doc.id,
+                    name: fileName,
+                    type: doc.document_type,
+                    uploaded_at: doc.uploaded_at,
+                    file_path: doc.file_path,
+                    source: 'documents_table'
+                  });
+                }
+              });
+              
+              const allDocuments = Array.from(docMap.values());
+              
+              if (allDocuments.length === 0) return null;
+              
+              return (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Documents</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {allDocuments.map((doc) => (
+                        <div key={`${doc.source}_${doc.id}`} className="flex items-center justify-between p-3 border rounded-lg text-sm">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-medium break-words">{doc.name}</div>
+                            <div className="text-xs text-muted-foreground capitalize">{doc.type}</div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                              {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : '—'}
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => downloadDocument(doc)}
+                            className="ml-3 flex-shrink-0"
+                          >
+                            <Download className="h-4 w-4 mr-1" />
+                            Download
+                          </Button>
                         </div>
-                        <div className="text-xs text-muted-foreground">
-                          {new Date(doc.uploaded_at).toLocaleDateString()}
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {/* Documents from documents table */}
-                    {application.documents?.map((doc) => (
-                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
-                        <div className="min-w-0">
-                          <div className="font-medium break-words">{doc.file_path.split('/').pop()}</div>
-                          <div className="text-xs text-muted-foreground capitalize">{doc.document_type}</div>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : '—'}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </div>
 
           {/* Right column: status and actions */}
