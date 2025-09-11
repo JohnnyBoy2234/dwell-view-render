@@ -44,10 +44,10 @@ export function MobileBottomBar() {
       <Link
         key={item.path}
         to={item.path}
-        className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors relative ${
+        className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
           isActive
-            ? 'text-blue-400 bg-blue-400/10'
-            : 'text-gray-300 hover:text-blue-400'
+            ? 'text-white bg-white/20'
+            : 'text-white/80 hover:text-white'
         }`}
       >
         <div className="relative">
@@ -61,33 +61,33 @@ export function MobileBottomBar() {
               </Badge>
             )}
         </div>
-        <span className="text-xs">{item.label}</span>
+        <span className="text-xs text-center">{item.label}</span>
       </Link>
     );
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-600 z-40 md:hidden">
-      <div className="flex items-center justify-around py-2">
-        {/* Left navigation items */}
+    <div className="fixed bottom-0 left-0 right-0 bg-primary/95 backdrop-blur-md border-t border-primary/20 z-40 md:hidden">
+      <div className="flex items-center justify-between px-2 py-2">
+        {/* All navigation items with consistent spacing */}
         {leftNavItems.map(renderNavItem)}
-
-        {/* Center plus button */}
+        
         <Link
           to="/list-property"
-          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors relative ${
+          className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
             location.pathname === '/list-property'
-              ? 'text-blue-400 bg-blue-400/10'
-              : 'text-gray-300 hover:text-blue-400'
+              ? 'text-white bg-white/20'
+              : 'text-white/80 hover:text-white'
           }`}
         >
           <div className="relative">
-            <Plus className="h-5 w-5" />
+            <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+              <Plus className="h-4 w-4 text-white" />
+            </div>
           </div>
-          <span className="text-xs">List</span>
+          <span className="text-xs text-center">List</span>
         </Link>
 
-        {/* Right navigation items */}
         {rightNavItems.map(renderNavItem)}
       </div>
     </div>
