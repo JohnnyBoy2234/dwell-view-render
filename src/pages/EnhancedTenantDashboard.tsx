@@ -170,20 +170,6 @@ export default function EnhancedTenantDashboard() {
 
     return (
       <div className="space-y-6 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* bg blobs */}
-        <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
-          <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
-          <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gradient-to-tr from-brand.green to-brand.blue blur-3xl opacity-10"></div>
-        </div>
-        <div className="mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-ocean-blue mb-2">
-            Welcome back!
-          </h2>
-          <p className="text-muted-foreground">
-            Here's what's happening with your rental
-          </p>
-        </div>
-
         {/* KPI Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
