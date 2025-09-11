@@ -27,7 +27,7 @@ export function MobileBottomBar() {
 
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread, authRequired: true },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread + messageUnread, authRequired: true },
     { path: '/auth', icon: User, label: 'Desk' }
   ];
 
@@ -46,12 +46,12 @@ export function MobileBottomBar() {
         to={item.path}
         className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
           isActive
-            ? 'text-green-700'
+            ? 'text-white bg-white/20'
             : 'text-white/80 hover:text-white'
         }`}
       >
         <div className="relative">
-          <IconComponent className="h-5 w-5" />
+          <IconComponent className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
             {item.showBadge && item.badgeCount > 0 && (
               <Badge 
                 variant="destructive" 
@@ -76,14 +76,14 @@ export function MobileBottomBar() {
           to="/list-property"
           className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
             location.pathname === '/list-property'
-              ? 'text-green-700'
+              ? 'text-white bg-white/20'
               : 'text-white/80 hover:text-white'
           }`}
         >
           <div className="relative">
             <div className="w-8 h-8 bg-primary/95 border border-white/30 rounded-lg flex items-center justify-center">
               <Plus className={`h-4 w-4 ${
-                location.pathname === '/list-property' ? 'text-green-700' : 'text-white'
+                location.pathname === '/list-property' ? 'text-white' : 'text-white'
               }`} />
             </div>
           </div>

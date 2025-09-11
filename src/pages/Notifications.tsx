@@ -55,7 +55,7 @@ export default function Notifications() {
     }
 
     fetchAllNotifications();
-  }, [user, navigate]);
+  }, [user, navigate, notifications, messageUnread, leaseUnread]);
 
   const fetchAllNotifications = async () => {
     try {
@@ -64,8 +64,8 @@ export default function Notifications() {
       // Combine different types of notifications
       const combinedNotifications: NotificationItem[] = [];
 
-      // Add general notifications
-      if (notifications) {
+      // Add general notifications from database
+      if (notifications && notifications.length > 0) {
         notifications.forEach(notification => {
           combinedNotifications.push({
             id: notification.id,
@@ -80,7 +80,7 @@ export default function Notifications() {
         });
       }
 
-      // Add message notifications
+      // Add message notifications if there are unread messages
       if (messageUnread > 0) {
         combinedNotifications.push({
           id: 'messages',
@@ -94,7 +94,7 @@ export default function Notifications() {
         });
       }
 
-      // Add lease notifications
+      // Add lease notifications if there are unread lease notifications
       if (leaseUnread > 0) {
         combinedNotifications.push({
           id: 'leases',
@@ -161,6 +161,8 @@ export default function Notifications() {
     // Mark as read
     if (!notification.isRead) {
       await markAsRead(notification.id);
+      // Refresh notifications to update the count
+      fetchAllNotifications();
     }
 
     // Navigate to action URL if available
