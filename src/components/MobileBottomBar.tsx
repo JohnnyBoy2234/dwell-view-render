@@ -38,7 +38,8 @@ export function MobileBottomBar() {
     const IconComponent = item.icon;
     const isActive = location.pathname === item.path || 
       (item.path === '/messages' && location.pathname.startsWith('/messages')) ||
-      (item.path === '/notifications' && location.pathname.startsWith('/notifications'));
+      (item.path === '/notifications' && location.pathname.startsWith('/notifications')) ||
+      (item.path === '/auth' && location.pathname.startsWith('/auth'));
 
     return (
       <Link
