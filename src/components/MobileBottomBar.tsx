@@ -64,30 +64,24 @@ export function MobileBottomBar() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border z-40 md:hidden">
-      <div className="flex items-center justify-between px-4 py-2">
+      <div className="flex items-center justify-around py-2">
         {/* Left navigation items */}
-        <div className="flex items-center space-x-2">
-          {leftNavItems.map(renderNavItem)}
-        </div>
+        {leftNavItems.map(renderNavItem)}
 
         {/* Center plus button */}
-        <div className="flex flex-col items-center">
-          <Button
-            asChild
-            size="lg"
-            className="h-12 w-12 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200"
-          >
-            <Link to="/list-property">
-              <Plus className="h-6 w-6 text-white" />
-            </Link>
-          </Button>
-          <span className="text-xs text-muted-foreground mt-1">List</span>
-        </div>
+        <Link
+          to="/list-property"
+          className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors relative"
+        >
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center">
+              <Plus className="h-5 w-5 text-white" />
+            </div>
+          </div>
+        </Link>
 
         {/* Right navigation items */}
-        <div className="flex items-center space-x-2">
-          {rightNavItems.map(renderNavItem)}
-        </div>
+        {rightNavItems.map(renderNavItem)}
       </div>
     </div>
   );
