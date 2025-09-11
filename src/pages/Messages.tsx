@@ -318,33 +318,37 @@ export default function Messages() {
                       <>
                         {/* Viewing components */}
                         {!isLandlord && selectedConversation && (
-                          <ViewingSlotNotification
-                            propertyId={selectedConversation.property_id}
-                            landlordId={selectedConversation.landlord_id}
-                            propertyTitle={selectedConversation.properties?.title || 'Property'}
-                          />
+                          <div className="w-full max-w-[95%] mx-auto">
+                            <ViewingSlotNotification
+                              propertyId={selectedConversation.property_id}
+                              landlordId={selectedConversation.landlord_id}
+                              propertyTitle={selectedConversation.properties?.title || 'Property'}
+                            />
+                          </div>
                         )}
 
                         {isLandlord && selectedConversation && (
-                          <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium">Schedule a viewing</p>
-                                <p className="text-xs text-muted-foreground">Create a viewing request for this tenant</p>
+                          <div className="w-full max-w-[95%] mx-auto">
+                            <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
+                              <div className="flex items-center justify-between">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-medium break-words">Schedule a viewing</p>
+                                  <p className="text-xs text-muted-foreground break-words">Create a viewing request for this tenant</p>
+                                </div>
+                                <Button
+                                  onClick={() => setShowViewingModal(true)}
+                                  size="sm"
+                                  className="bg-primary hover:bg-primary/90 flex-shrink-0 ml-2"
+                                >
+                                  Create
+                                </Button>
                               </div>
-                              <Button
-                                onClick={() => setShowViewingModal(true)}
-                                size="sm"
-                                className="bg-primary hover:bg-primary/90"
-                              >
-                                Create
-                              </Button>
                             </div>
                           </div>
                         )}
 
                         {viewingProposals.map((proposal) => (
-                          <div key={proposal.id} className="flex justify-center">
+                          <div key={proposal.id} className="w-full max-w-[95%] mx-auto">
                             <ViewingProposalCard
                               proposal={proposal}
                               onUpdate={() => {
@@ -453,15 +457,9 @@ export default function Messages() {
       {/* Conversations List - Desktop */}
       <div className="col-span-1">
         <div className="h-full rounded-lg border bg-card">
-          <div className="p-6 pb-3">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <h3 className="font-semibold">Conversations</h3>
-            </div>
-          </div>
           
           <div className="p-0">
-            <ScrollArea className="h-[calc(100vh-20rem)]">
+            <ScrollArea className="h-[calc(100vh-8rem)]">
               {conversations.length === 0 ? (
                 <div className="p-6 text-center">
                   <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
@@ -531,44 +529,6 @@ export default function Messages() {
       <div className="col-span-2">
         {selectedConversation ? (
           <div className="h-full flex flex-col rounded-lg border bg-card">
-            {/* Chat Header */}
-            <div className="flex-shrink-0 p-6 pb-3 border-b">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>
-                      {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {onlineUsers.has(getOtherUser(selectedConversation).id) && (
-                    <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
-                  )}
-                </div>
-                
-                <div className="flex-1">
-                  <h3 className="font-semibold">{getOtherUser(selectedConversation).name}</h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Badge variant="outline" className="text-xs">
-                      {getOtherUser(selectedConversation).role}
-                    </Badge>
-                    {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
-                      <span className="text-green-600">Online</span>
-                    ) : (
-                      <span>Offline</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="my-3">
-                <Separator />
-              </div>
-              
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <Home className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <span className="break-words leading-tight">{selectedConversation.properties?.title}</span>
-              </div>
-            </div>
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
@@ -588,35 +548,39 @@ export default function Messages() {
                   <div className="space-y-1 py-1 px-1">
                      {/* Viewing Slot Notification for Tenants */}
                     {!isLandlord && selectedConversation && (
-                      <ViewingSlotNotification
-                        propertyId={selectedConversation.property_id}
-                        landlordId={selectedConversation.landlord_id}
-                        propertyTitle={selectedConversation.properties?.title || 'Property'}
-                      />
+                      <div className="w-full max-w-[85%] mx-auto">
+                        <ViewingSlotNotification
+                          propertyId={selectedConversation.property_id}
+                          landlordId={selectedConversation.landlord_id}
+                          propertyTitle={selectedConversation.properties?.title || 'Property'}
+                        />
+                      </div>
                     )}
 
                     {/* Create Viewing Slot Button for Landlords */}
                     {isLandlord && selectedConversation && (
-                      <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium">Schedule a viewing</p>
-                            <p className="text-xs text-muted-foreground">Create a viewing request for this tenant</p>
+                      <div className="w-full max-w-[85%] mx-auto">
+                        <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
+                          <div className="flex items-center justify-between">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium break-words">Schedule a viewing</p>
+                              <p className="text-xs text-muted-foreground break-words">Create a viewing request for this tenant</p>
+                            </div>
+                            <Button
+                              onClick={() => setShowViewingModal(true)}
+                              size="sm"
+                              className="bg-primary hover:bg-primary/90 flex-shrink-0 ml-2"
+                            >
+                              Create / Add Viewing Slot
+                            </Button>
                           </div>
-                          <Button
-                            onClick={() => setShowViewingModal(true)}
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90"
-                          >
-                            Create / Add Viewing Slot
-                          </Button>
                         </div>
                       </div>
                     )}
 
                     {/* Viewing Requests */}
                     {viewingProposals.map((proposal) => (
-                      <div key={proposal.id} className="flex justify-center">
+                      <div key={proposal.id} className="w-full max-w-[85%] mx-auto">
                         <ViewingProposalCard
                           proposal={proposal}
                           onUpdate={() => {
