@@ -85,7 +85,7 @@ const App = () => (
             <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
-            <Route path="/messages" element={<AuthenticatedRoute><EnhancedDashboardLayout title="Messages"><Messages /></EnhancedDashboardLayout></AuthenticatedRoute>} />
+            <Route path="/messages" element={<AuthenticatedRoute><Messages /></AuthenticatedRoute>} />
             <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
             <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
             <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />
