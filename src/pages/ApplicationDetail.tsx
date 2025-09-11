@@ -29,8 +29,10 @@ interface ApplicationDetail {
     user_id: string;
     display_name: string;
   };
-  screening_details?: {
-    full_name?: string;
+  screening_profile?: {
+    first_name?: string;
+    middle_name?: string;
+    last_name?: string;
     id_number?: string;
     phone?: string;
     employment_status?: string;
@@ -41,6 +43,15 @@ interface ApplicationDetail {
     reason_for_moving?: string;
     previous_landlord_name?: string;
     previous_landlord_contact?: string;
+    has_pets?: boolean;
+    pet_details?: string;
+    documents?: Array<{
+      id: string;
+      type: string;
+      name: string;
+      url: string;
+      uploaded_at: string;
+    }>;
   };
   documents?: Array<{
     id: string;
@@ -129,8 +140,8 @@ export default function ApplicationDetail() {
           .eq('user_id', appData.landlord_id)
           .maybeSingle(),
         supabase
-          .from('screening_details')
-          .select('full_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact')
+          .from('screening_profiles')
+          .select('first_name, middle_name, last_name, id_number, phone, employment_status, job_title, company_name, net_monthly_income, current_address, reason_for_moving, previous_landlord_name, previous_landlord_contact, has_pets, pet_details, documents')
           .eq('user_id', appData.tenant_id)
           .maybeSingle(),
         supabase
@@ -150,7 +161,7 @@ export default function ApplicationDetail() {
         ...appData,
         property: propertyResp.data || undefined,
         landlord: landlordResp.data || undefined,
-        screening_details: screeningResp.data || undefined,
+        screening_profile: screeningResp.data || undefined,
         documents: docsResp.data || []
       });
     } catch (error: any) {
@@ -239,31 +250,36 @@ export default function ApplicationDetail() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div>
                     <span className="text-muted-foreground">Full Name</span>
-                    <div className="font-medium break-words">{application.screening_details?.full_name || '—'}</div>
+                    <div className="font-medium break-words">
+                      {application.screening_profile ? 
+                        `${application.screening_profile.first_name || ''} ${application.screening_profile.middle_name || ''} ${application.screening_profile.last_name || ''}`.trim() 
+                        : '—'
+                      }
+                    </div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">ID Number</span>
-                    <div className="font-medium break-words">{application.screening_details?.id_number || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.id_number || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Phone</span>
-                    <div className="font-medium break-words">{application.screening_details?.phone || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.phone || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Employment Status</span>
-                    <div className="font-medium capitalize">{application.screening_details?.employment_status || '—'}</div>
+                    <div className="font-medium capitalize">{application.screening_profile?.employment_status || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Job Title</span>
-                    <div className="font-medium break-words">{application.screening_details?.job_title || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.job_title || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Company</span>
-                    <div className="font-medium break-words">{application.screening_details?.company_name || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.company_name || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Net Monthly Income</span>
-                    <div className="font-medium">{application.screening_details?.net_monthly_income ? `R${application.screening_details.net_monthly_income.toLocaleString()}` : '—'}</div>
+                    <div className="font-medium">{application.screening_profile?.net_monthly_income ? `R${application.screening_profile.net_monthly_income.toLocaleString()}` : '—'}</div>
                   </div>
                 </div>
               </CardContent>
@@ -277,36 +293,73 @@ export default function ApplicationDetail() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                   <div className="sm:col-span-2">
                     <span className="text-muted-foreground">Current Address</span>
-                    <div className="font-medium break-words">{application.screening_details?.current_address || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.current_address || '—'}</div>
                   </div>
                   <div className="sm:col-span-2">
                     <span className="text-muted-foreground">Reason for Moving</span>
-                    <div className="font-medium break-words">{application.screening_details?.reason_for_moving || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.reason_for_moving || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Previous Landlord</span>
-                    <div className="font-medium break-words">{application.screening_details?.previous_landlord_name || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.previous_landlord_name || '—'}</div>
                   </div>
                   <div>
                     <span className="text-muted-foreground">Landlord Contact</span>
-                    <div className="font-medium break-words">{application.screening_details?.previous_landlord_contact || '—'}</div>
+                    <div className="font-medium break-words">{application.screening_profile?.previous_landlord_contact || '—'}</div>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {application.documents && application.documents.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Additional Information</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Has Pets</span>
+                    <div className="font-medium">{application.screening_profile?.has_pets ? 'Yes' : 'No'}</div>
+                  </div>
+                  {application.screening_profile?.has_pets && (
+                    <div className="sm:col-span-2">
+                      <span className="text-muted-foreground">Pet Details</span>
+                      <div className="font-medium break-words">{application.screening_profile?.pet_details || '—'}</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {((application.documents && application.documents.length > 0) || (application.screening_profile?.documents && application.screening_profile.documents.length > 0)) && (
               <Card>
                 <CardHeader>
                   <CardTitle>Documents</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {application.documents.map((doc) => (
+                    {/* Documents from screening profile */}
+                    {application.screening_profile?.documents?.map((doc) => (
+                      <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
+                        <div className="min-w-0">
+                          <div className="font-medium break-words">{doc.name}</div>
+                          <div className="text-xs text-muted-foreground capitalize">{doc.type}</div>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {new Date(doc.uploaded_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {/* Documents from documents table */}
+                    {application.documents?.map((doc) => (
                       <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg text-sm">
                         <div className="min-w-0">
                           <div className="font-medium break-words">{doc.file_path.split('/').pop()}</div>
                           <div className="text-xs text-muted-foreground capitalize">{doc.document_type}</div>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {doc.uploaded_at ? new Date(doc.uploaded_at).toLocaleDateString() : '—'}
                         </div>
                       </div>
                     ))}
