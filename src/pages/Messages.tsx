@@ -24,12 +24,13 @@ import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotif
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+// import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 export default function Messages() {
   const { user, isLandlord } = useAuth();
   const isMobile = useIsMobile();
-  const { unreadCount: messageUnread } = useUnreadMessages();
+  // const { unreadCount: messageUnread } = useUnreadMessages();
+  const messageUnread = 0; // Temporary fix
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
   const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
