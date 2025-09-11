@@ -192,27 +192,32 @@ export default function Messages() {
     const fullTitle = conversation.properties?.title || '';
     
     // If the title is short enough, show it as is
-    if (fullTitle.length <= 30) {
+    if (fullTitle.length <= 20) {
       return fullTitle;
     }
     
-    // Try to extract area and city from common address patterns
+    // Try to extract just the area/suburb from common address patterns
     // Look for patterns like "Area, City" or "Suburb, City"
     const areaCityMatch = fullTitle.match(/([^,]+),\s*([^,]+)(?:,|$)/);
     if (areaCityMatch) {
       const area = areaCityMatch[1].trim();
-      const city = areaCityMatch[2].trim();
-      return `${area}, ${city}`;
+      return area;
     }
     
-    // If no comma pattern, try to get last two words (assuming they might be area and city)
+    // If no comma pattern, try to get first meaningful word (assuming it might be area)
     const words = fullTitle.split(' ');
     if (words.length >= 2) {
-      return `${words[words.length - 2]} ${words[words.length - 1]}`;
+      // Skip common words like "House", "Apartment", "in", "at"
+      const skipWords = ['House', 'Apartment', 'Unit', 'in', 'at', 'the'];
+      for (let i = 0; i < words.length; i++) {
+        if (!skipWords.includes(words[i])) {
+          return words[i];
+        }
+      }
     }
     
-    // Fallback: truncate to 30 characters
-    return fullTitle.length > 30 ? fullTitle.substring(0, 30) + '...' : fullTitle;
+    // Fallback: truncate to 20 characters
+    return fullTitle.length > 20 ? fullTitle.substring(0, 20) + '...' : fullTitle;
   };
 
   const isMessageRead = (message: any) => {
@@ -336,9 +341,9 @@ export default function Messages() {
 
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
-            <div className="flex-1 flex flex-col h-full relative">
+            <div className="flex-1 flex flex-col min-h-0">
               {/* Mobile Chat Header */}
-              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
+              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -372,17 +377,16 @@ export default function Messages() {
                         <span>Offline</span>
                       )}
                     </div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Home className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Home className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
                 </div>
               </div>
               
               {/* Messages - Mobile */}
-              <div className="flex-1 min-h-0">
+              <div className="flex-1 min-h-0 overflow-hidden">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
                   <div className="p-1 space-y-1">
                     {loading ? (
@@ -648,12 +652,11 @@ export default function Messages() {
                       <span>Offline</span>
                     )}
                   </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                    <Home className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Home className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
               </div>
             </div>
 
