@@ -750,10 +750,10 @@ export default function EnhancedLandlordDashboard() {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => navigate(`/tenant-profile/${application.tenant_id}`)}
+                      onClick={() => navigate(`/application/${application.id}`)}
                     >
                       <Eye className="h-4 w-4 mr-1" />
-                      View Profile
+                      View Application
                     </Button>
                   </div>
                 </div>
