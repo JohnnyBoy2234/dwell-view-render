@@ -40,9 +40,17 @@ export default function Notifications() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const { notifications, markAsRead, markAllAsRead } = useNotifications();
-  const { unreadCount: messageUnread } = useUnreadMessages();
-  const { unreadCount: leaseUnread } = useLeaseNotifications();
+  const notificationsHook = useNotifications();
+  const messagesHook = useUnreadMessages();
+  
+  // Safely destructure with fallbacks
+  const notifications = notificationsHook?.notifications || [];
+  const markAsRead = notificationsHook?.markAsRead || (() => {});
+  const markAllAsRead = notificationsHook?.markAllAsRead || (() => {});
+  const messageUnread = messagesHook?.unreadCount || 0;
+  
+  // useLeaseNotifications doesn't return unreadCount, it only handles real-time notifications
+  const leaseUnread = 0; // We'll implement this later if needed
 
   const [allNotifications, setAllNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
