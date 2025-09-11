@@ -12,6 +12,7 @@ import { MobileBottomBar } from "./components/MobileBottomBar";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import About from "./pages/About";
+import Blog from "./pages/Blog";
 import Auth from "./pages/Auth";
 import LeaseSigningPage from "./pages/LeaseSigningPage";
 import LandlordLeaseSigningPage from "./pages/LandlordLeaseSigningPage";
@@ -66,6 +67,7 @@ const App = () => (
             <Route path="/" element={<><Navbar /><Index /></>} />
             <Route path="/properties" element={<><Navbar /><Properties /></>} />
             <Route path="/about" element={<><Navbar /><About /></>} />
+            <Route path="/blog" element={<><Navbar /><Blog /></>} />
 
             {/* Routes without Navbar */}
             <Route path="/auth" element={<Auth />} />

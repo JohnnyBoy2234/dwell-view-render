@@ -42,7 +42,8 @@ export default function Notifications() {
   const isMobile = useIsMobile();
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
   const { unreadCount: messageUnread } = useUnreadMessages();
-  const { unreadCount: leaseUnread } = useLeaseNotifications();
+  const leaseNotifications = useLeaseNotifications();
+  const leaseUnread = 0; // Note: useLeaseNotifications doesn't return unread count
 
   const [allNotifications, setAllNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -74,7 +75,7 @@ export default function Notifications() {
             timestamp: notification.created_at,
             isRead: notification.is_read || false,
             actionUrl: notification.action_url,
-            priority: notification.priority || 'medium'
+            priority: (['urgent', 'normal'].includes(notification.priority) ? 'high' : notification.priority) as 'low' | 'medium' | 'high' || 'medium'
           });
         });
       }
