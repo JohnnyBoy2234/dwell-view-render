@@ -21,7 +21,7 @@ export function MobileBottomBar() {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/properties', icon: Search, label: 'Search' },
     { path: '/messages', icon: Send, label: 'Messages', showBadge: true, authRequired: true },
-    { path: '/auth', icon: User, label: user ? 'Profile' : 'Sign In' }
+    { path: '/auth', icon: User, label: user ? 'Dashboard' : 'Sign In' }
   ];
 
   return (
