@@ -188,6 +188,33 @@ export default function Messages() {
     }
   };
 
+  const getShortPropertyInfo = (conversation: any) => {
+    const fullTitle = conversation.properties?.title || '';
+    
+    // If the title is short enough, show it as is
+    if (fullTitle.length <= 30) {
+      return fullTitle;
+    }
+    
+    // Try to extract area and city from common address patterns
+    // Look for patterns like "Area, City" or "Suburb, City"
+    const areaCityMatch = fullTitle.match(/([^,]+),\s*([^,]+)(?:,|$)/);
+    if (areaCityMatch) {
+      const area = areaCityMatch[1].trim();
+      const city = areaCityMatch[2].trim();
+      return `${area}, ${city}`;
+    }
+    
+    // If no comma pattern, try to get last two words (assuming they might be area and city)
+    const words = fullTitle.split(' ');
+    if (words.length >= 2) {
+      return `${words[words.length - 2]} ${words[words.length - 1]}`;
+    }
+    
+    // Fallback: truncate to 30 characters
+    return fullTitle.length > 30 ? fullTitle.substring(0, 30) + '...' : fullTitle;
+  };
+
   const isMessageRead = (message: any) => {
     if (isLandlord) {
       return message.read_by_landlord;
@@ -224,7 +251,18 @@ export default function Messages() {
     return (
       <>
         <div className="fixed inset-0 bg-background flex flex-col z-30">
-          {/* Mobile Header - Removed transparent Messages heading */}
+          {/* Mobile Messages Page Header */}
+          <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-6 w-6 text-primary" />
+              <h1 className="text-lg font-semibold">Messages</h1>
+            </div>
+            <div className="ml-auto">
+              <Badge variant="secondary" className="text-xs">
+                {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
+              </Badge>
+            </div>
+          </div>
           
           {/* Conversations List - Mobile */}
           {showConversations && (
@@ -279,7 +317,7 @@ export default function Messages() {
                               
                                <div className="flex items-start gap-1 text-xs text-muted-foreground">
                                 <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                                <span className="break-words leading-tight">{conversation.properties?.title}</span>
+                                <span className="break-words leading-tight">{getShortPropertyInfo(conversation)}</span>
                               </div>
                               
                               <p className="text-xs text-muted-foreground mt-1">
@@ -339,7 +377,7 @@ export default function Messages() {
                 
                 <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Home className="h-3 w-3 flex-shrink-0" />
-                  <span className="truncate">{selectedConversation.properties?.title}</span>
+                  <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
                 </div>
               </div>
               
@@ -497,7 +535,18 @@ export default function Messages() {
   // Desktop layout
   return (
     <>
-    <div className="grid grid-cols-3 gap-6 h-[calc(100vh-6rem)]">
+    {/* Desktop Messages Page Header */}
+    <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-2">
+        <MessageCircle className="h-6 w-6 text-primary" />
+        <h1 className="text-2xl font-bold">Messages</h1>
+      </div>
+      <Badge variant="secondary" className="text-sm">
+        {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread conversations
+      </Badge>
+    </div>
+    
+    <div className="grid grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
       {/* Conversations List - Desktop */}
       <div className="col-span-1">
         <div className="h-full rounded-lg border bg-card">
@@ -551,7 +600,7 @@ export default function Messages() {
                             
                             <div className="flex items-start gap-1 text-xs text-muted-foreground">
                               <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                              <span className="break-words leading-tight">{conversation.properties?.title}</span>
+                              <span className="break-words leading-tight">{getShortPropertyInfo(conversation)}</span>
                             </div>
                             
                             <p className="text-xs text-muted-foreground mt-1">
@@ -604,7 +653,7 @@ export default function Messages() {
               
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Home className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{selectedConversation.properties?.title}</span>
+                <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
               </div>
             </div>
 
