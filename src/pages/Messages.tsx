@@ -251,27 +251,28 @@ export default function Messages() {
     );
   }
 
-  // Mobile full-screen layout
+  // Mobile layout
   if (isMobile) {
     return (
       <>
-        <div className="fixed inset-0 bg-background flex flex-col z-30">
-          {/* Mobile Messages Page Header */}
-          <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-6 w-6 text-primary" />
-              <h1 className="text-lg font-semibold">Messages</h1>
+        {/* Main Messages Page - Shows with bottom menu */}
+        {showConversations && (
+          <div className="min-h-screen bg-background">
+            {/* Mobile Messages Page Header */}
+            <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="h-6 w-6 text-primary" />
+                <h1 className="text-lg font-semibold">Messages</h1>
+              </div>
+              <div className="ml-auto">
+                <Badge variant="secondary" className="text-xs">
+                  {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
+                </Badge>
+              </div>
             </div>
-            <div className="ml-auto">
-              <Badge variant="secondary" className="text-xs">
-                {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
-              </Badge>
-            </div>
-          </div>
-          
-          {/* Conversations List - Mobile */}
-          {showConversations && (
-            <div className="flex-1 flex flex-col h-full">              
+            
+            {/* Conversations List - Mobile */}
+            <div className="flex-1 flex flex-col h-[calc(100vh-8rem)]">              
               <ScrollArea className="flex-1 min-h-0">
                 {conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
@@ -337,11 +338,12 @@ export default function Messages() {
                 )}
               </ScrollArea>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Chat Window - Mobile Full Screen */}
-          {!showConversations && selectedConversation && (
-            <div className="flex-1 flex flex-col min-h-0">
+        {/* Chat Window - Mobile Full Screen (hides bottom menu) */}
+        {!showConversations && selectedConversation && (
+          <div className="fixed inset-0 bg-background flex flex-col z-30">
               {/* Mobile Chat Header */}
               <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0">
                 <Button
@@ -519,7 +521,6 @@ export default function Messages() {
                 </form>
               </div>
           )}
-        </div>
 
         {selectedConversation && (
           <AddViewingSlotModal
