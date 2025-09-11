@@ -210,7 +210,6 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId: string) => {
     console.log('📥 Fetching messages for conversation:', conversationId);
-    setLoading(true);
     try {
       // First fetch messages
       const { data: messagesData, error: messagesError } = await supabase
@@ -229,7 +228,6 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       if (!messagesData || messagesData.length === 0) {
         console.log('📥 No messages found for conversation');
         setMessages([]);
-        setLoading(false);
         return;
       }
 
@@ -268,8 +266,6 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         title: "Error loading messages",
         description: error.message
       });
-    } finally {
-      setLoading(false);
     }
   };
 
