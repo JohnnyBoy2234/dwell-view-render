@@ -40,17 +40,10 @@ export default function Notifications() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const notificationsHook = useNotifications();
-  const messagesHook = useUnreadMessages();
-  
-  // Safely destructure with fallbacks
-  const notifications = notificationsHook?.notifications || [];
-  const markAsRead = notificationsHook?.markAsRead || (() => {});
-  const markAllAsRead = notificationsHook?.markAllAsRead || (() => {});
-  const messageUnread = messagesHook?.unreadCount || 0;
-  
-  // useLeaseNotifications doesn't return unreadCount, it only handles real-time notifications
-  const leaseUnread = 0; // We'll implement this later if needed
+  const { notifications, markAsRead, markAllAsRead } = useNotifications();
+  const { unreadCount: messageUnread } = useUnreadMessages();
+  const leaseNotifications = useLeaseNotifications();
+  const leaseUnread = 0; // Note: useLeaseNotifications doesn't return unread count
 
   const [allNotifications, setAllNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +75,7 @@ export default function Notifications() {
             timestamp: notification.created_at,
             isRead: notification.is_read || false,
             actionUrl: notification.action_url,
-            priority: notification.priority || 'medium'
+            priority: (['urgent', 'normal'].includes(notification.priority) ? 'high' : notification.priority) as 'low' | 'medium' | 'high' || 'medium'
           });
         });
       }
