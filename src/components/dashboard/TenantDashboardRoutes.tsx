@@ -1,5 +1,8 @@
 import { Routes, Route } from 'react-router-dom';
 import { EnhancedDashboardLayout } from './EnhancedDashboardLayout';
+import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
+import TenantInventory from '@/pages/tenant/TenantInventory';
+import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import TenantLeaseDocuments from '@/pages/tenant/TenantLeaseDocuments';
 import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
 import TenantMaintenanceResponses from '@/pages/tenant/TenantMaintenanceResponses';
@@ -13,9 +16,24 @@ import LeaseSigningPage from '@/pages/LeaseSigningPage';
 export default function TenantDashboardRoutes() {
   return (
     <Routes>
-      <Route path="/lease-documents" element={
-        <EnhancedDashboardLayout title="Lease Documents">
+      <Route path="/contracts" element={
+        <EnhancedDashboardLayout title="Contract Documents">
           <TenantLeaseDocuments />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="/viewings" element={
+        <EnhancedDashboardLayout title="Property Viewings">
+          <TenantPropertyViewings />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="/inventory" element={
+        <EnhancedDashboardLayout title="Property Inventory">
+          <TenantInventory />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="/proof-of-payment" element={
+        <EnhancedDashboardLayout title="Proof of Payment">
+          <TenantProofOfPayment />
         </EnhancedDashboardLayout>
       } />
       <Route path="/maintenance" element={
@@ -48,8 +66,8 @@ export default function TenantDashboardRoutes() {
           <TenantSupport />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/leases/:leaseId/sign" element={
-        <EnhancedDashboardLayout title="Sign Lease">
+      <Route path="/contracts/:leaseId/sign" element={
+        <EnhancedDashboardLayout title="Sign Contract">
           <LeaseSigningPage />
         </EnhancedDashboardLayout>
       } />

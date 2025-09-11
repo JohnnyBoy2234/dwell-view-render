@@ -1,4 +1,4 @@
-import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, type LucideIcon } from 'lucide-react';
+import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, type LucideIcon } from 'lucide-react';
 import { RandIcon } from '@/components/icons/RandIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -26,11 +26,13 @@ interface SidebarItem {
 }
 
 const tenantItems: SidebarItem[] = [
-  { title: 'Dashboard', url: '/enhancedtenantdashboard', icon: Home },
-  { title: 'Properties', url: '/enhancedtenantdashboard/properties', icon: Building },
-  { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: Inbox },
-  { title: 'Leases', url: '/enhancedtenantdashboard/leases', icon: FileText },
+  { title: 'Overview', url: '/enhancedtenantdashboard', icon: Home },
+  { title: 'Property Viewings', url: '/enhancedtenantdashboard/viewings', icon: Eye },
+  { title: 'Inventory', url: '/enhancedtenantdashboard/inventory', icon: FileText },
   { title: 'Maintenance', url: '/enhancedtenantdashboard/maintenance', icon: Settings },
+  { title: 'Proof of Payment', url: '/enhancedtenantdashboard/proof-of-payment', icon: Inbox },
+  { title: 'Contract', url: '/enhancedtenantdashboard/contracts', icon: FileText },
+  { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: Building },
   { title: 'Profile', url: '/enhancedtenantdashboard/profile', icon: User },
 ];
 
@@ -38,7 +40,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Landlord Dashboard', url: '/enhancedlandlorddashboard', icon: Home },
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
   { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
-  { title: 'Leases', url: '/enhancedlandlorddashboard/leases', icon: FileText },
+  { title: 'Contracts', url: '/enhancedlandlorddashboard/leases', icon: FileText },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
   { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: RandIcon },
   { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
