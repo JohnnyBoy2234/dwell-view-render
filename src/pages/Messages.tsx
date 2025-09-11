@@ -15,7 +15,8 @@ import {
   Home,
   Clock,
   Check,
-  CheckCheck
+  CheckCheck,
+  Bell
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -23,10 +24,12 @@ import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotif
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 export default function Messages() {
   const { user, isLandlord } = useAuth();
   const isMobile = useIsMobile();
+  const { unreadCount: messageUnread } = useUnreadMessages();
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
   const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
@@ -223,6 +226,22 @@ export default function Messages() {
     return (
       <>
         <div className="fixed inset-0 bg-background flex flex-col z-30">
+          {/* Mobile Header */}
+          <div className="flex items-center justify-between p-4 border-b bg-background">
+            <div className="flex items-center gap-3">
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="sm" className="relative">
+                <Bell className="h-5 w-5" />
+                {messageUnread > 0 && (
+                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 text-xs flex items-center justify-center">
+                    {messageUnread > 99 ? '99+' : messageUnread}
+                  </Badge>
+                )}
+              </Button>
+            </div>
+          </div>
+
           {/* Conversations List - Mobile */}
           {showConversations && (
             <div className="flex-1 flex flex-col h-full">              
@@ -296,8 +315,8 @@ export default function Messages() {
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
             <div className="flex-1 flex flex-col h-full relative">
-                {/* Messages - Mobile */}
-                <div className="flex-1 min-h-0 pt-20">
+              {/* Messages - Mobile */}
+              <div className="flex-1 min-h-0">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
                   <div className="p-4 space-y-3">
                     {loading ? (
