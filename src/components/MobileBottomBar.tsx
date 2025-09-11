@@ -1,14 +1,16 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { Home, Search, Heart, Send, User, Plus } from 'lucide-react';
+import { Home, Search, Heart, Send, User, Plus, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useNotifications } from '@/hooks/useNotifications';
 
 export function MobileBottomBar() {
   const location = useLocation();
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
+  const { unreadCount: notificationUnread } = useNotifications();
   const [searchParams] = useSearchParams();
   
   // Hide bottom bar only when in a specific conversation
@@ -20,12 +22,13 @@ export function MobileBottomBar() {
 
   const leftNavItems = [
     { path: '/', icon: Home, label: 'Home' },
-    { path: '/properties', icon: Search, label: 'Search' }
+    { path: '/properties', icon: Search, label: 'Find' }
   ];
 
   const rightNavItems = [
-    { path: '/messages', icon: Send, label: 'Messages', showBadge: true, authRequired: true },
-    { path: '/auth', icon: User, label: user ? 'Dashboard' : 'Sign In' }
+    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread, authRequired: true },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread, authRequired: true },
+    { path: '/auth', icon: User, label: 'Desk' }
   ];
 
   const renderNavItem = (item: any) => {
@@ -34,7 +37,8 @@ export function MobileBottomBar() {
     
     const IconComponent = item.icon;
     const isActive = location.pathname === item.path || 
-      (item.path === '/messages' && location.pathname.startsWith('/messages'));
+      (item.path === '/messages' && location.pathname.startsWith('/messages')) ||
+      (item.path === '/notifications' && location.pathname.startsWith('/notifications'));
 
     return (
       <Link
@@ -48,12 +52,12 @@ export function MobileBottomBar() {
       >
         <div className="relative">
           <IconComponent className="h-5 w-5" />
-            {item.showBadge && messageUnread > 0 && (
+            {item.showBadge && item.badgeCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {messageUnread > 9 ? '9+' : messageUnread}
+                {item.badgeCount > 9 ? '9+' : item.badgeCount}
               </Badge>
             )}
         </div>
@@ -63,7 +67,7 @@ export function MobileBottomBar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700 z-40 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-slate-800/95 backdrop-blur-md border-t border-slate-600 z-40 md:hidden">
       <div className="flex items-center justify-around py-2">
         {/* Left navigation items */}
         {leftNavItems.map(renderNavItem)}
@@ -71,13 +75,16 @@ export function MobileBottomBar() {
         {/* Center plus button */}
         <Link
           to="/list-property"
-          className="flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors relative"
+          className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors relative ${
+            location.pathname === '/list-property'
+              ? 'text-blue-400 bg-blue-400/10'
+              : 'text-gray-300 hover:text-blue-400'
+          }`}
         >
           <div className="relative">
-            <div className="h-10 w-10 rounded-lg bg-gray-700 hover:bg-gray-600 transition-all duration-200 flex items-center justify-center">
-              <Plus className="h-5 w-5 text-gray-200" />
-            </div>
+            <Plus className="h-5 w-5" />
           </div>
+          <span className="text-xs">List</span>
         </Link>
 
         {/* Right navigation items */}
