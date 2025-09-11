@@ -7,6 +7,7 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useUserProperties } from "@/hooks/useUserProperties";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { MobileSidebar } from "@/components/MobileSidebar";
 
 const Navbar = () => {
   const location = useLocation();
@@ -35,16 +36,8 @@ const Navbar = () => {
                 <span className="text-xl font-bold text-foreground">SwiftRent</span>
               </Link>
               
-              {/* Mobile Navigation Buttons - Only visible on mobile */}
-              <div className="flex md:hidden items-center space-x-2">
-                <Link to="/blog" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                  Blog
-                </Link>
-                <span className="text-muted-foreground">•</span>
-                <Link to="/about" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-                  About Us
-                </Link>
-              </div>
+              {/* Mobile Hamburger Menu */}
+              <MobileSidebar />
             </div>
 
             {/* Desktop Navigation */}
