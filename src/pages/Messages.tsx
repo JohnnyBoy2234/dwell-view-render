@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-// import { useMessaging } from '@/hooks/useMessaging';
+import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -24,13 +24,13 @@ import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotif
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { useIsMobile } from '@/hooks/use-mobile';
-// import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 export default function Messages() {
   // Minimal version to fix initialization error
   const { user, isLandlord } = useAuth();
   const isMobile = useIsMobile();
-  const messageUnread = 0;
+  const { unreadCount: messageUnread } = useUnreadMessages();
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
   const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
@@ -48,15 +48,19 @@ export default function Messages() {
     // Temporarily disabled to fix initialization error
   }, []);
 
-  // Temporarily disabled useMessaging to fix initialization error
-  const conversations: any[] = [];
-  const activeConversation = null;
-  const setActiveConversation = () => {};
-  const messages: any[] = [];
-  const loading = false;
-  const onlineUsers = new Set();
-  const sendMessage = async () => {};
-  const refetchMessages = async () => {};
+  const {
+    conversations,
+    activeConversation,
+    setActiveConversation,
+    messages,
+    loading,
+    onlineUsers,
+    sendMessage,
+    fetchMessages: refetchMessages
+  } = useMessaging(() => {
+    // Refresh viewing proposals when they change
+    fetchViewingProposals();
+  });
 
   const selectedConversation = conversations.find(c => c.id === activeConversation);
 
