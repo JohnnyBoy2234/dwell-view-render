@@ -39,7 +39,11 @@ export function MobileBottomBar() {
     const isActive = location.pathname === item.path || 
       (item.path === '/messages' && location.pathname.startsWith('/messages')) ||
       (item.path === '/notifications' && location.pathname.startsWith('/notifications')) ||
-      (item.path === '/auth' && location.pathname.startsWith('/auth'));
+      (item.path === '/auth' && (location.pathname.startsWith('/auth') || 
+        location.pathname.startsWith('/enhancedlandlorddashboard') || 
+        location.pathname.startsWith('/enhancedtenantdashboard') ||
+        location.pathname.startsWith('/dashboard') ||
+        location.pathname.startsWith('/tenant-dashboard')));
 
     return (
       <Link
