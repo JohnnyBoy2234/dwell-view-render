@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useRealtime } from './useRealtime';
+// import { useRealtime } from './useRealtime';
 
 interface Message {
   id: string;
@@ -383,23 +383,23 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
-  // Set up real-time subscriptions using centralized real-time system
-  useRealtime({
-    onMessageChange: () => {
-      console.log('🔄 Refreshing messages due to real-time update');
-      if (activeConversation) {
-        fetchMessages(activeConversation);
-      }
-      fetchConversations();
-    },
-    onViewingProposalChange: () => {
-      console.log('🔄 Refreshing viewing proposals due to real-time update');
-      if (onViewingProposalChange) {
-        onViewingProposalChange();
-      }
-      fetchConversations();
-    }
-  });
+  // Temporarily disabled real-time subscriptions to fix initialization error
+  // useRealtime({
+  //   onMessageChange: () => {
+  //     console.log('🔄 Refreshing messages due to real-time update');
+  //     if (activeConversation) {
+  //       fetchMessages(activeConversation);
+  //     }
+  //     fetchConversations();
+  //   },
+  //   onViewingProposalChange: () => {
+  //     console.log('🔄 Refreshing viewing proposals due to real-time update');
+  //     if (onViewingProposalChange) {
+  //       onViewingProposalChange();
+  //     }
+  //     fetchConversations();
+  //   }
+  // });
 
   // Load conversations on mount
   useEffect(() => {
