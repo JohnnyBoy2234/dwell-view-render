@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-// import { useRealtime } from './useRealtime';
+import { useRealtime } from './useRealtime';
 
 interface Message {
   id: string;
@@ -122,7 +122,12 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
   // Fetch conversations
   const fetchConversations = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('❌ Cannot fetch conversations: no user');
+      return;
+    }
+
+    console.log('📋 Fetching conversations for user:', user.id);
 
     try {
       // First fetch conversations with property data
@@ -138,7 +143,12 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         .or(`landlord_id.eq.${user.id},tenant_id.eq.${user.id}`)
         .order('last_message_at', { ascending: false });
 
-      if (conversationsError) throw conversationsError;
+      if (conversationsError) {
+        console.error('❌ Error fetching conversations:', conversationsError);
+        throw conversationsError;
+      }
+
+      console.log('📋 Fetched conversations:', conversationsData?.length || 0, 'conversations');
 
       if (!conversationsData || conversationsData.length === 0) {
         setConversations([]);
@@ -199,6 +209,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId: string) => {
+    console.log('📥 Fetching messages for conversation:', conversationId);
     setLoading(true);
     try {
       // First fetch messages
@@ -208,9 +219,15 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
-      if (messagesError) throw messagesError;
+      if (messagesError) {
+        console.error('❌ Error fetching messages:', messagesError);
+        throw messagesError;
+      }
+
+      console.log('📥 Fetched messages:', messagesData?.length || 0, 'messages');
 
       if (!messagesData || messagesData.length === 0) {
+        console.log('📥 No messages found for conversation');
         setMessages([]);
         setLoading(false);
         return;
@@ -258,20 +275,41 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
   // Send a message
   const sendMessage = async (conversationId: string, content: string) => {
-    if (!user || !content.trim()) return;
+    if (!user || !content.trim()) {
+      console.log('❌ Cannot send message: missing user or content', { user: !!user, content: content.trim() });
+      return;
+    }
+
+    console.log('📤 Sending message:', { conversationId, content: content.trim(), senderId: user.id });
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
           message_type: 'text'
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error sending message:', error);
+        throw error;
+      }
+
+      console.log('✅ Message sent successfully:', data);
+
+      // Refresh messages and conversations immediately after sending
+      if (activeConversation === conversationId) {
+        console.log('🔄 Refreshing messages for active conversation');
+        fetchMessages(conversationId);
+      }
+      console.log('🔄 Refreshing conversations');
+      fetchConversations();
     } catch (error: any) {
+      console.error('❌ Final error in sendMessage:', error);
       toast({
         variant: "destructive",
         title: "Error sending message",
@@ -383,23 +421,23 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
-  // Temporarily disabled real-time subscriptions to fix initialization error
-  // useRealtime({
-  //   onMessageChange: () => {
-  //     console.log('🔄 Refreshing messages due to real-time update');
-  //     if (activeConversation) {
-  //       fetchMessages(activeConversation);
-  //     }
-  //     fetchConversations();
-  //   },
-  //   onViewingProposalChange: () => {
-  //     console.log('🔄 Refreshing viewing proposals due to real-time update');
-  //     if (onViewingProposalChange) {
-  //       onViewingProposalChange();
-  //     }
-  //     fetchConversations();
-  //   }
-  // });
+  // Re-enable real-time subscriptions for messaging
+  useRealtime({
+    onMessageChange: () => {
+      console.log('🔄 Refreshing messages due to real-time update');
+      if (activeConversation) {
+        fetchMessages(activeConversation);
+      }
+      fetchConversations();
+    },
+    onViewingProposalChange: () => {
+      console.log('🔄 Refreshing viewing proposals due to real-time update');
+      if (onViewingProposalChange) {
+        onViewingProposalChange();
+      }
+      fetchConversations();
+    }
+  });
 
   // Load conversations on mount
   useEffect(() => {

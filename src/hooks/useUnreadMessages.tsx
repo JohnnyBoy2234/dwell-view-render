@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-// import { useRealtime } from './useRealtime';
+import { useRealtime } from './useRealtime';
 
 export function useUnreadMessages() {
   const { user, isLandlord } = useAuth();
@@ -63,13 +63,13 @@ export function useUnreadMessages() {
     fetchUnreadCount();
   }, [user, isLandlord]);
 
-  // Temporarily disabled real-time subscription to fix initialization error
-  // useRealtime({
-  //   onMessageChange: () => {
-  //     console.log('🔄 Refreshing unread messages due to real-time update');
-  //     fetchUnreadCount();
-  //   }
-  // });
+  // Re-enable real-time subscription for unread messages
+  useRealtime({
+    onMessageChange: () => {
+      console.log('🔄 Refreshing unread messages due to real-time update');
+      fetchUnreadCount();
+    }
+  });
 
   return { unreadCount, loading, refetch: fetchUnreadCount };
 }
