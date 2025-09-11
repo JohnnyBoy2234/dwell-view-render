@@ -299,6 +299,50 @@ export default function Messages() {
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
             <div className="flex-1 flex flex-col h-full relative">
+              {/* Mobile Chat Header */}
+              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowConversations(true)}
+                  className="p-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="relative">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {onlineUsers.has(getOtherUser(selectedConversation).id) && (
+                      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm truncate">{getOtherUser(selectedConversation).name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant="outline" className="text-xs">
+                        {getOtherUser(selectedConversation).role}
+                      </Badge>
+                      {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
+                        <span className="text-green-600">Online</span>
+                      ) : (
+                        <span>Offline</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Home className="h-3 w-3 flex-shrink-0" />
+                  <span className="truncate">{selectedConversation.properties?.title}</span>
+                </div>
+              </div>
+              
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
@@ -529,6 +573,40 @@ export default function Messages() {
       <div className="col-span-2">
         {selectedConversation ? (
           <div className="h-full flex flex-col rounded-lg border bg-card">
+            {/* Desktop Chat Header */}
+            <div className="flex items-center gap-3 p-4 border-b bg-card">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="relative">
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback>
+                      {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  {onlineUsers.has(getOtherUser(selectedConversation).id) && (
+                    <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
+                  )}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg">{getOtherUser(selectedConversation).name}</h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Badge variant="outline" className="text-xs">
+                      {getOtherUser(selectedConversation).role}
+                    </Badge>
+                    {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
+                      <span className="text-green-600">Online</span>
+                    ) : (
+                      <span>Offline</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Home className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{selectedConversation.properties?.title}</span>
+              </div>
+            </div>
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
