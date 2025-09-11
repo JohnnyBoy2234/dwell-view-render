@@ -132,11 +132,6 @@ const Navbar = () => {
                 </>
               )}
             </div>
-
-            {/* Mobile Menu Button */}
-            <Button variant="ghost" size="sm" className="md:hidden" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-              <Menu className="h-5 w-5" />
-            </Button>
           </div>
         </div>
       </nav>
