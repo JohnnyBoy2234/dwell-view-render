@@ -30,13 +30,13 @@ const Navbar = () => {
           <div className="flex justify-between items-center h-16">
             {/* Mobile Hamburger Menu - Far Left */}
             <div className="flex items-center space-x-4">
-              <MobileSidebar />
               <Link to="/" className="flex items-center space-x-2">
                 <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
                   <Home className="h-5 w-5 text-white" />
                 </div>
                 <span className="text-xl font-bold text-foreground">SwiftRent</span>
               </Link>
+              <MobileSidebar />
             </div>
 
             {/* Desktop Navigation */}
