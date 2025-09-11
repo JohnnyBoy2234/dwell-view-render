@@ -103,7 +103,7 @@ export function AddViewingSlotModal({
       if (error) throw error;
 
       toast({
-        title: "Viewing proposal sent",
+        title: "Viewing request sent",
         description: `Tenant will be notified about the viewing on ${format(localDateTime, 'PPP')} at ${selectedTime}.`,
       });
 
@@ -117,10 +117,10 @@ export function AddViewingSlotModal({
       onOpenChange(false);
 
     } catch (error: any) {
-      console.error('Error creating viewing proposal:', error);
+      console.error('Error creating viewing request:', error);
       toast({
         variant: "destructive",
-        title: "Error creating viewing proposal",
+        title: "Error creating viewing request",
         description: error.message || "Please try again later.",
       });
     } finally {
@@ -139,7 +139,7 @@ export function AddViewingSlotModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Create Viewing Proposal</DialogTitle>
+          <DialogTitle>Create Viewing Request</DialogTitle>
           <p className="text-sm text-muted-foreground">
             Propose a viewing time for <strong>{propertyTitle}</strong>
           </p>
@@ -245,7 +245,7 @@ export function AddViewingSlotModal({
               disabled={loading || !selectedDate || !selectedTime}
               className="flex-1"
             >
-              {loading ? 'Creating...' : 'Create Proposal'}
+              {loading ? 'Creating...' : 'Create Request'}
             </Button>
           </div>
         </form>

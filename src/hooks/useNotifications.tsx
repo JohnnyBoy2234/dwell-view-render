@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { useRealtime } from './useRealtime';
 import { Notification, CreateNotificationData, NotificationFilters } from '@/types/notification';
 
 export const useNotifications = (filters?: NotificationFilters) => {
@@ -209,61 +210,13 @@ export const useNotifications = (filters?: NotificationFilters) => {
     }
   }, [user]);
 
-  // Set up real-time subscription
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('notifications_changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${user.id}`
-        },
-        (payload) => {
-          console.log('Notification change received:', payload);
-          
-          if (payload.eventType === 'INSERT') {
-            const newNotification = payload.new as Notification;
-            setNotifications(prev => [newNotification, ...prev]);
-            if (!newNotification.is_read) {
-              setUnreadCount(prev => prev + 1);
-            }
-          } else if (payload.eventType === 'UPDATE') {
-            const updatedNotification = payload.new as Notification;
-            const oldNotification = payload.old as Notification;
-            
-            setNotifications(prev => 
-              prev.map(n => n.id === updatedNotification.id ? updatedNotification : n)
-            );
-            
-            // Update unread count if read status changed
-            if (oldNotification.is_read !== updatedNotification.is_read) {
-              setUnreadCount(prev => 
-                updatedNotification.is_read ? prev - 1 : prev + 1
-              );
-            }
-          } else if (payload.eventType === 'DELETE') {
-            const deletedNotification = payload.old as Notification;
-            setNotifications(prev => prev.filter(n => n.id !== deletedNotification.id));
-            if (!deletedNotification.is_read) {
-              setUnreadCount(prev => Math.max(0, prev - 1));
-            }
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Notification subscription status:', status);
-        setIsConnected(status === 'SUBSCRIBED');
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
+  // Set up real-time subscription using centralized real-time system
+  useRealtime({
+    onNotificationChange: () => {
+      console.log('🔄 Refreshing notifications due to real-time update');
+      fetchNotifications();
+    }
+  });
 
   // Fallback polling when WebSocket connection fails
   useEffect(() => {

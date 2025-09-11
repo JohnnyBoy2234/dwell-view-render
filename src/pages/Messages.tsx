@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +15,8 @@ import {
   Home,
   Clock,
   Check,
-  CheckCheck
+  CheckCheck,
+  Bell
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -23,10 +24,25 @@ import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotif
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 export default function Messages() {
+  // Minimal version to fix initialization error
   const { user, isLandlord } = useAuth();
   const isMobile = useIsMobile();
+  const { unreadCount: messageUnread } = useUnreadMessages();
+  const [newMessage, setNewMessage] = useState('');
+  const [showConversations, setShowConversations] = useState(true);
+  const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
+  const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
+  const [sentAutoMessage, setSentAutoMessage] = useState(false);
+  const [showViewingModal, setShowViewingModal] = useState(false);
+  const [viewingProposals, setViewingProposals] = useState<any[]>([]);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
   const {
     conversations,
     activeConversation,
@@ -38,28 +54,9 @@ export default function Messages() {
     fetchMessages: refetchMessages
   } = useMessaging();
 
-  const [newMessage, setNewMessage] = useState('');
-  const [showConversations, setShowConversations] = useState(true);
-  const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
-  const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
-  const [showViewingModal, setShowViewingModal] = useState(false);
-  const [viewingProposals, setViewingProposals] = useState<any[]>([]);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-
-  const selectedConversation = conversations.find(c => c.id === activeConversation);
-
-  // Fetch viewing proposals for active conversation
-  useEffect(() => {
-    if (activeConversation && user) {
-      fetchViewingProposals();
-    }
-  }, [activeConversation, user]);
-
-  const fetchViewingProposals = async () => {
-    if (!activeConversation || !user) return;
+  // Define fetchViewingProposals as useCallback to avoid dependency issues
+  const fetchViewingProposals = useCallback(async () => {
+    if (!user || !activeConversation) return;
     
     try {
       const { data, error } = await supabase
@@ -77,9 +74,18 @@ export default function Messages() {
       if (error) throw error;
       setViewingProposals(data || []);
     } catch (error) {
-      console.error('Error fetching viewing proposals:', error);
+      console.error('Error fetching viewing requests:', error);
     }
-  };
+  }, [activeConversation, user]);
+
+  const selectedConversation = conversations.find(c => c.id === activeConversation);
+
+  // Fetch viewing requests for active conversation
+  useEffect(() => {
+    if (activeConversation && user) {
+      fetchViewingProposals();
+    }
+  }, [activeConversation, user, fetchViewingProposals]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -93,7 +99,7 @@ export default function Messages() {
 
   // Pre-fill message only for truly first-time contact (no conversation history)
   useEffect(() => {
-    if (selectedConversation && !isLandlord && !hasPrefilledMessage) {
+    if (selectedConversation && !isLandlord && !hasPrefilledMessage && !sentAutoMessage) {
       // Only show pre-typed message if conversation has no message history at all
       if (selectedConversation.last_message_at === null && messages.length === 0) {
         const propertyTitle = selectedConversation.properties?.title || 'this property';
@@ -107,7 +113,12 @@ export default function Messages() {
     if (selectedConversation && hasPrefilledMessage && newMessage && messages.length > 0) {
       setHasPrefilledMessage(false);
     }
-  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage]);
+  }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage, sentAutoMessage]);
+
+  // Reset sentAutoMessage when switching conversations
+  useEffect(() => {
+    setSentAutoMessage(false);
+  }, [activeConversation]);
 
   // Handle initial URL parameter only once
   useEffect(() => {
@@ -129,6 +140,7 @@ export default function Messages() {
         if (messageParam) {
           setNewMessage(decodeURIComponent(messageParam));
           setHasPrefilledMessage(true);
+          // Don't set sentAutoMessage to true here since it hasn't been sent yet
         }
         
         setHasProcessedUrlParam(true);
@@ -143,6 +155,13 @@ export default function Messages() {
     if (!newMessage.trim() || !activeConversation) return;
 
     await sendMessage(activeConversation, newMessage);
+    
+    // Mark auto message as sent if this was the pre-filled message
+    if (hasPrefilledMessage) {
+      setSentAutoMessage(true);
+      setHasPrefilledMessage(false);
+    }
+    
     setNewMessage('');
   };
 
@@ -167,6 +186,38 @@ export default function Messages() {
         role: 'Landlord'
       };
     }
+  };
+
+  const getShortPropertyInfo = (conversation: any) => {
+    const fullTitle = conversation.properties?.title || '';
+    
+    // If the title is short enough, show it as is
+    if (fullTitle.length <= 20) {
+      return fullTitle;
+    }
+    
+    // Try to extract just the area/suburb from common address patterns
+    // Look for patterns like "Area, City" or "Suburb, City"
+    const areaCityMatch = fullTitle.match(/([^,]+),\s*([^,]+)(?:,|$)/);
+    if (areaCityMatch) {
+      const area = areaCityMatch[1].trim();
+      return area;
+    }
+    
+    // If no comma pattern, try to get first meaningful word (assuming it might be area)
+    const words = fullTitle.split(' ');
+    if (words.length >= 2) {
+      // Skip common words like "House", "Apartment", "in", "at"
+      const skipWords = ['House', 'Apartment', 'Unit', 'in', 'at', 'the'];
+      for (let i = 0; i < words.length; i++) {
+        if (!skipWords.includes(words[i])) {
+          return words[i];
+        }
+      }
+    }
+    
+    // Fallback: truncate to 20 characters
+    return fullTitle.length > 20 ? fullTitle.substring(0, 20) + '...' : fullTitle;
   };
 
   const isMessageRead = (message: any) => {
@@ -205,6 +256,19 @@ export default function Messages() {
     return (
       <>
         <div className="fixed inset-0 bg-background flex flex-col z-30">
+          {/* Mobile Messages Page Header */}
+          <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
+            <div className="flex items-center gap-2">
+              <MessageCircle className="h-6 w-6 text-primary" />
+              <h1 className="text-lg font-semibold">Messages</h1>
+            </div>
+            <div className="ml-auto">
+              <Badge variant="secondary" className="text-xs">
+                {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
+              </Badge>
+            </div>
+          </div>
+          
           {/* Conversations List - Mobile */}
           {showConversations && (
             <div className="flex-1 flex flex-col h-full">              
@@ -258,7 +322,7 @@ export default function Messages() {
                               
                                <div className="flex items-start gap-1 text-xs text-muted-foreground">
                                 <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                                <span className="break-words leading-tight">{conversation.properties?.title}</span>
+                                <span className="break-words leading-tight">{getShortPropertyInfo(conversation)}</span>
                               </div>
                               
                               <p className="text-xs text-muted-foreground mt-1">
@@ -277,11 +341,54 @@ export default function Messages() {
 
           {/* Chat Window - Mobile Full Screen */}
           {!showConversations && selectedConversation && (
-            <div className="flex-1 flex flex-col h-full relative">
-                {/* Messages - Mobile */}
-                <div className="flex-1 min-h-0 pt-20">
+            <div className="flex-1 flex flex-col min-h-0">
+              {/* Mobile Chat Header */}
+              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowConversations(true)}
+                  className="p-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+                
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="relative">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>
+                        {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    {onlineUsers.has(getOtherUser(selectedConversation).id) && (
+                      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
+                    )}
+                  </div>
+                  
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm truncate">{getOtherUser(selectedConversation).name}</h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Badge variant="outline" className="text-xs">
+                        {getOtherUser(selectedConversation).role}
+                      </Badge>
+                      {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
+                        <span className="text-green-600">Online</span>
+                      ) : (
+                        <span>Offline</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                      <Home className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Messages - Mobile */}
+              <div className="flex-1 min-h-0 overflow-hidden">
                   <ScrollArea className="h-full" ref={scrollAreaRef}>
-                  <div className="p-4 space-y-3">
+                  <div className="p-1 space-y-1">
                     {loading ? (
                       <div className="flex items-center justify-center h-32">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -297,33 +404,37 @@ export default function Messages() {
                       <>
                         {/* Viewing components */}
                         {!isLandlord && selectedConversation && (
-                          <ViewingSlotNotification
-                            propertyId={selectedConversation.property_id}
-                            landlordId={selectedConversation.landlord_id}
-                            propertyTitle={selectedConversation.properties?.title || 'Property'}
-                          />
+                          <div className="w-full max-w-[95%] mx-auto">
+                            <ViewingSlotNotification
+                              propertyId={selectedConversation.property_id}
+                              landlordId={selectedConversation.landlord_id}
+                              propertyTitle={selectedConversation.properties?.title || 'Property'}
+                            />
+                          </div>
                         )}
 
                         {isLandlord && selectedConversation && (
-                          <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <p className="text-sm font-medium">Schedule a viewing</p>
-                                <p className="text-xs text-muted-foreground">Create a viewing proposal for this tenant</p>
+                          <div className="w-full max-w-[95%] mx-auto">
+                            <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
+                              <div className="flex items-center justify-between">
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-medium break-words">Schedule a viewing</p>
+                                  <p className="text-xs text-muted-foreground break-words">Create a viewing request for this tenant</p>
+                                </div>
+                                <Button
+                                  onClick={() => setShowViewingModal(true)}
+                                  size="sm"
+                                  className="bg-primary hover:bg-primary/90 flex-shrink-0 ml-2"
+                                >
+                                  Create
+                                </Button>
                               </div>
-                              <Button
-                                onClick={() => setShowViewingModal(true)}
-                                size="sm"
-                                className="bg-primary hover:bg-primary/90"
-                              >
-                                Create
-                              </Button>
                             </div>
                           </div>
                         )}
 
                         {viewingProposals.map((proposal) => (
-                          <div key={proposal.id} className="flex justify-center">
+                          <div key={proposal.id} className="w-full max-w-[95%] mx-auto">
                             <ViewingProposalCard
                               proposal={proposal}
                               onUpdate={() => {
@@ -347,9 +458,9 @@ export default function Messages() {
                           return (
                             <div
                               key={message.id}
-                              className={`flex mb-3 ${isSender ? 'justify-end' : 'justify-start'}`}
+                              className={`flex mb-4 px-1 ${isSender ? 'justify-end' : 'justify-start'}`}
                             >
-                              <div className={`max-w-[85%] ${isSender ? 'order-2' : 'order-1'}`}>
+                              <div className={`max-w-[95%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                                 <div
                                   className={`rounded-2xl px-4 py-3 ${
                                     isSender
@@ -357,21 +468,21 @@ export default function Messages() {
                                       : 'bg-muted text-foreground rounded-bl-md'
                                   }`}
                                 >
-                                  <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{message.content}</p>
                                 </div>
                                 
                                 <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
                                   isSender ? 'justify-end' : 'justify-start'
                                 }`}>
-                                  <Clock className="h-3 w-3" />
-                                  <span>
+                                  <Clock className="h-3 w-3 flex-shrink-0" />
+                                  <span className="truncate">
                                     {new Date(message.created_at).toLocaleTimeString([], {
                                       hour: '2-digit',
                                       minute: '2-digit'
                                     })}
                                   </span>
                                   {isSender && (
-                                    <div className="ml-1">
+                                    <div className="ml-1 flex-shrink-0">
                                       {isRead ? (
                                         <CheckCheck className="h-3 w-3 text-blue-500" />
                                       ) : (
@@ -428,14 +539,14 @@ export default function Messages() {
   // Desktop layout
   return (
     <>
-    {/* Desktop Header */}
+    {/* Desktop Messages Page Header */}
     <div className="flex items-center gap-4 mb-6">
       <div className="flex items-center gap-2">
         <MessageCircle className="h-6 w-6 text-primary" />
-        <h2 className="text-lg font-semibold">Conversations</h2>
+        <h1 className="text-2xl font-bold">Messages</h1>
       </div>
-      <Badge variant="secondary" className="text-xs">
-        {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
+      <Badge variant="secondary" className="text-sm">
+        {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread conversations
       </Badge>
     </div>
     
@@ -443,15 +554,9 @@ export default function Messages() {
       {/* Conversations List - Desktop */}
       <div className="col-span-1">
         <div className="h-full rounded-lg border bg-card">
-          <div className="p-6 pb-3">
-            <div className="flex items-center gap-2">
-              <MessageCircle className="h-5 w-5" />
-              <h3 className="font-semibold">Conversations</h3>
-            </div>
-          </div>
           
           <div className="p-0">
-            <ScrollArea className="h-[calc(100vh-20rem)]">
+            <ScrollArea className="h-[calc(100vh-8rem)]">
               {conversations.length === 0 ? (
                 <div className="p-6 text-center">
                   <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
@@ -499,7 +604,7 @@ export default function Messages() {
                             
                             <div className="flex items-start gap-1 text-xs text-muted-foreground">
                               <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                              <span className="break-words leading-tight">{conversation.properties?.title}</span>
+                              <span className="break-words leading-tight">{getShortPropertyInfo(conversation)}</span>
                             </div>
                             
                             <p className="text-xs text-muted-foreground mt-1">
@@ -521,9 +626,9 @@ export default function Messages() {
       <div className="col-span-2">
         {selectedConversation ? (
           <div className="h-full flex flex-col rounded-lg border bg-card">
-            {/* Chat Header */}
-            <div className="flex-shrink-0 p-6 pb-3 border-b">
-              <div className="flex items-center gap-3">
+            {/* Desktop Chat Header */}
+            <div className="flex items-center gap-3 p-4 border-b bg-card">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="relative">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback>
@@ -535,8 +640,8 @@ export default function Messages() {
                   )}
                 </div>
                 
-                <div className="flex-1">
-                  <h3 className="font-semibold">{getOtherUser(selectedConversation).name}</h3>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg">{getOtherUser(selectedConversation).name}</h3>
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Badge variant="outline" className="text-xs">
                       {getOtherUser(selectedConversation).role}
@@ -547,22 +652,17 @@ export default function Messages() {
                       <span>Offline</span>
                     )}
                   </div>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                    <Home className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
+                  </div>
                 </div>
-              </div>
-              
-              <div className="my-3">
-                <Separator />
-              </div>
-              
-              <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                <Home className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                <span className="break-words leading-tight">{selectedConversation.properties?.title}</span>
               </div>
             </div>
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-              <ScrollArea className="h-full px-4">
+              <ScrollArea className="h-full">
                 {loading ? (
                   <div className="flex items-center justify-center h-32">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -575,38 +675,42 @@ export default function Messages() {
                     </div>
                   </div>
                 ) : (
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-1 py-1 px-1">
                      {/* Viewing Slot Notification for Tenants */}
                     {!isLandlord && selectedConversation && (
-                      <ViewingSlotNotification
-                        propertyId={selectedConversation.property_id}
-                        landlordId={selectedConversation.landlord_id}
-                        propertyTitle={selectedConversation.properties?.title || 'Property'}
-                      />
+                      <div className="w-full max-w-[85%] mx-auto">
+                        <ViewingSlotNotification
+                          propertyId={selectedConversation.property_id}
+                          landlordId={selectedConversation.landlord_id}
+                          propertyTitle={selectedConversation.properties?.title || 'Property'}
+                        />
+                      </div>
                     )}
 
                     {/* Create Viewing Slot Button for Landlords */}
                     {isLandlord && selectedConversation && (
-                      <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-sm font-medium">Schedule a viewing</p>
-                            <p className="text-xs text-muted-foreground">Create a viewing proposal for this tenant</p>
+                      <div className="w-full max-w-[85%] mx-auto">
+                        <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
+                          <div className="flex items-center justify-between">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium break-words">Schedule a viewing</p>
+                              <p className="text-xs text-muted-foreground break-words">Create a viewing request for this tenant</p>
+                            </div>
+                            <Button
+                              onClick={() => setShowViewingModal(true)}
+                              size="sm"
+                              className="bg-primary hover:bg-primary/90 flex-shrink-0 ml-2"
+                            >
+                              Create / Add Viewing Slot
+                            </Button>
                           </div>
-                          <Button
-                            onClick={() => setShowViewingModal(true)}
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90"
-                          >
-                            Create / Add Viewing Slot
-                          </Button>
                         </div>
                       </div>
                     )}
 
-                    {/* Viewing Proposals */}
+                    {/* Viewing Requests */}
                     {viewingProposals.map((proposal) => (
-                      <div key={proposal.id} className="flex justify-center">
+                      <div key={proposal.id} className="w-full max-w-[85%] mx-auto">
                         <ViewingProposalCard
                           proposal={proposal}
                           onUpdate={() => {
@@ -631,9 +735,9 @@ export default function Messages() {
                       return (
                         <div
                           key={message.id}
-                          className={`flex mb-3 ${isSender ? 'justify-end' : 'justify-start'}`}
+                          className={`flex mb-4 px-1 ${isSender ? 'justify-end' : 'justify-start'}`}
                         >
-                          <div className={`max-w-[70%] ${isSender ? 'order-2' : 'order-1'}`}>
+                          <div className={`max-w-[85%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
                             <div
                               className={`rounded-2xl px-4 py-3 ${
                                 isSender
@@ -641,21 +745,21 @@ export default function Messages() {
                                   : 'bg-muted text-foreground rounded-bl-md'
                               }`}
                             >
-                              <p className="text-sm leading-relaxed">{message.content}</p>
+                              <p className="text-sm leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{message.content}</p>
                             </div>
                             
                             <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
                               isSender ? 'justify-end' : 'justify-start'
                             }`}>
-                              <Clock className="h-3 w-3" />
-                              <span>
+                              <Clock className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">
                                 {new Date(message.created_at).toLocaleTimeString([], {
                                   hour: '2-digit',
                                   minute: '2-digit'
                                 })}
                               </span>
                               {isSender && (
-                                <div className="ml-1">
+                                <div className="ml-1 flex-shrink-0">
                                   {isRead ? (
                                     <CheckCheck className="h-3 w-3 text-blue-500" />
                                   ) : (

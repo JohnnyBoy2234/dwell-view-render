@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealtime } from './useRealtime';
 
 export function useUnreadMessages() {
   const { user, isLandlord } = useAuth();
@@ -62,42 +63,13 @@ export function useUnreadMessages() {
     fetchUnreadCount();
   }, [user, isLandlord]);
 
-  // Set up real-time subscription for new messages
-  useEffect(() => {
-    if (!user) return;
-
-    const channel = supabase
-      .channel('message-notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        () => {
-          // Refetch unread count when new messages arrive
-          fetchUnreadCount();
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'messages'
-        },
-        () => {
-          // Refetch unread count when messages are marked as read
-          fetchUnreadCount();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user]);
+  // Re-enable real-time subscription for unread messages
+  useRealtime({
+    onMessageChange: () => {
+      console.log('🔄 Refreshing unread messages due to real-time update');
+      fetchUnreadCount();
+    }
+  });
 
   return { unreadCount, loading, refetch: fetchUnreadCount };
 }

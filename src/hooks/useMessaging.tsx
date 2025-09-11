@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtime } from './useRealtime';
 
 interface Message {
   id: string;
@@ -38,7 +39,7 @@ interface Conversation {
   unread_count?: number;
 }
 
-export function useMessaging() {
+export function useMessaging(onViewingProposalChange?: () => void) {
   const { user, isLandlord } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
@@ -121,7 +122,12 @@ export function useMessaging() {
 
   // Fetch conversations
   const fetchConversations = async () => {
-    if (!user) return;
+    if (!user) {
+      console.log('❌ Cannot fetch conversations: no user');
+      return;
+    }
+
+    console.log('📋 Fetching conversations for user:', user.id);
 
     try {
       // First fetch conversations with property data
@@ -137,7 +143,12 @@ export function useMessaging() {
         .or(`landlord_id.eq.${user.id},tenant_id.eq.${user.id}`)
         .order('last_message_at', { ascending: false });
 
-      if (conversationsError) throw conversationsError;
+      if (conversationsError) {
+        console.error('❌ Error fetching conversations:', conversationsError);
+        throw conversationsError;
+      }
+
+      console.log('📋 Fetched conversations:', conversationsData?.length || 0, 'conversations');
 
       if (!conversationsData || conversationsData.length === 0) {
         setConversations([]);
@@ -198,6 +209,7 @@ export function useMessaging() {
 
   // Fetch messages for a conversation
   const fetchMessages = async (conversationId: string) => {
+    console.log('📥 Fetching messages for conversation:', conversationId);
     setLoading(true);
     try {
       // First fetch messages
@@ -207,9 +219,15 @@ export function useMessaging() {
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
-      if (messagesError) throw messagesError;
+      if (messagesError) {
+        console.error('❌ Error fetching messages:', messagesError);
+        throw messagesError;
+      }
+
+      console.log('📥 Fetched messages:', messagesData?.length || 0, 'messages');
 
       if (!messagesData || messagesData.length === 0) {
+        console.log('📥 No messages found for conversation');
         setMessages([]);
         setLoading(false);
         return;
@@ -257,20 +275,41 @@ export function useMessaging() {
 
   // Send a message
   const sendMessage = async (conversationId: string, content: string) => {
-    if (!user || !content.trim()) return;
+    if (!user || !content.trim()) {
+      console.log('❌ Cannot send message: missing user or content', { user: !!user, content: content.trim() });
+      return;
+    }
+
+    console.log('📤 Sending message:', { conversationId, content: content.trim(), senderId: user.id });
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
           message_type: 'text'
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error sending message:', error);
+        throw error;
+      }
+
+      console.log('✅ Message sent successfully:', data);
+
+      // Refresh messages and conversations immediately after sending
+      if (activeConversation === conversationId) {
+        console.log('🔄 Refreshing messages for active conversation');
+        fetchMessages(conversationId);
+      }
+      console.log('🔄 Refreshing conversations');
+      fetchConversations();
     } catch (error: any) {
+      console.error('❌ Final error in sendMessage:', error);
       toast({
         variant: "destructive",
         title: "Error sending message",
@@ -382,115 +421,23 @@ export function useMessaging() {
     }
   };
 
-  // Subscribe to real-time updates
-  useEffect(() => {
-    if (!user) return;
-
-    console.log('🔔 Setting up real-time subscriptions for user:', user.id);
-
-    // Subscribe to conversation changes - remove malformed filter
-    const conversationChannel = supabase
-      .channel('conversations-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'conversations'
-        },
-        (payload) => {
-          console.log('📨 Conversation change received:', payload);
-          // Only refetch if the change affects this user
-          const conversation = payload.new || payload.old;
-          if (conversation && 
-              typeof conversation === 'object' && 
-              'landlord_id' in conversation && 
-              'tenant_id' in conversation &&
-              (conversation.landlord_id === user.id || conversation.tenant_id === user.id)) {
-            console.log('✅ Conversation change affects current user, refetching...');
-            fetchConversations();
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Conversations subscription status:', status);
-        if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Conversations channel error, retrying...');
-        }
-      });
-
-    // Subscribe to message changes
-    const messageChannel = supabase
-      .channel('messages-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'messages'
-        },
-        (payload) => {
-          console.log('💬 Message change received:', payload);
-          const newMessage = payload.new as Message;
-          
-          // If this is for the active conversation, add it to messages
-          if (newMessage.conversation_id === activeConversation) {
-            setMessages(prev => [...prev, newMessage]);
-            
-            // Mark as read if it's not from current user
-            if (newMessage.sender_id !== user.id) {
-              markMessagesAsRead(newMessage.conversation_id);
-            }
-          } else {
-            // Update conversation list
-            fetchConversations();
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Messages subscription status:', status);
-        if (status === 'CHANNEL_ERROR') {
-          console.error('❌ Messages channel error, retrying...');
-        }
-      });
-
-    // Subscribe to viewing proposal changes
-    const viewingProposalChannel = supabase
-      .channel('viewing-proposals-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'viewing_proposals'
-        },
-        (payload) => {
-          console.log('🔍 Viewing proposal change received:', payload);
-          const proposal = payload.new || payload.old;
-          
-          // If this affects the active conversation, trigger a refresh
-          if (proposal && 
-              typeof proposal === 'object' && 
-              'conversation_id' in proposal &&
-              proposal.conversation_id === activeConversation) {
-            console.log('✅ Proposal change affects active conversation');
-            // You can add custom handling here in the Messages component
-            // For now, we'll just refetch conversations to update any counts
-            fetchConversations();
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('📡 Viewing proposals subscription status:', status);
-      });
-
-    return () => {
-      console.log('🔌 Cleaning up real-time subscriptions');
-      supabase.removeChannel(conversationChannel);
-      supabase.removeChannel(messageChannel);
-      supabase.removeChannel(viewingProposalChannel);
-    };
-  }, [user, activeConversation]);
+  // Re-enable real-time subscriptions for messaging
+  useRealtime({
+    onMessageChange: () => {
+      console.log('🔄 Refreshing messages due to real-time update');
+      if (activeConversation) {
+        fetchMessages(activeConversation);
+      }
+      fetchConversations();
+    },
+    onViewingProposalChange: () => {
+      console.log('🔄 Refreshing viewing proposals due to real-time update');
+      if (onViewingProposalChange) {
+        onViewingProposalChange();
+      }
+      fetchConversations();
+    }
+  });
 
   // Load conversations on mount
   useEffect(() => {
