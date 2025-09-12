@@ -25,7 +25,7 @@ export function DashboardLayout({ children, title, actions }: DashboardLayoutPro
         
         <div className="flex-1 flex flex-col">
           {/* Header */}
-          <header className="h-16 flex items-center border-b bg-background/80 backdrop-blur-sm sticky top-0 z-40 px-4 lg:px-6">
+          <header className="h-16 flex items-center border-b bg-background/95 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-6">
             <SidebarTrigger className="lg:hidden" />
             <div className="flex-1 ml-4 lg:ml-0">
               <h1 className="text-xl lg:text-2xl font-bold">{title}</h1>

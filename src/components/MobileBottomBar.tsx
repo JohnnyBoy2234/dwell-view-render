@@ -88,7 +88,11 @@ export function MobileBottomBar() {
           }`}
         >
           <div className="relative">
-            <div className="w-8 h-8 bg-primary/95 border border-white/30 rounded-lg flex items-center justify-center">
+            <div className={`w-8 h-8 border border-white/30 rounded-lg flex items-center justify-center ${
+              location.pathname === '/list-property' 
+                ? 'bg-black/20' 
+                : 'bg-primary/95'
+            }`}>
               <Plus className={`h-4 w-4 ${
                 location.pathname === '/list-property' ? 'text-white' : 'text-white'
               }`} />
