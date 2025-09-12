@@ -289,6 +289,50 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string | null
+          due_date: string
+          id: string
+          lease_id: string
+          number: string
+          pdf_url: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          due_date: string
+          id?: string
+          lease_id: string
+          number: string
+          pdf_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          lease_id?: string
+          number?: string
+          pdf_url?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_lease_id_fkey"
+            columns: ["lease_id"]
+            isOneToOne: false
+            referencedRelation: "leases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kyc_audit: {
         Row: {
           action: string
@@ -669,6 +713,74 @@ export type Database = {
         }
         Relationships: []
       }
+      maintenance_tickets: {
+        Row: {
+          actual_cost: number | null
+          category: string | null
+          contractor_contact: string | null
+          contractor_name: string | null
+          created_at: string | null
+          description: string
+          estimated_cost: number | null
+          id: string
+          landlord_id: string
+          media: Json | null
+          property_id: string
+          sla_hours: number | null
+          status: string | null
+          tenant_id: string
+          title: string
+          updated_at: string | null
+          urgency: string | null
+        }
+        Insert: {
+          actual_cost?: number | null
+          category?: string | null
+          contractor_contact?: string | null
+          contractor_name?: string | null
+          created_at?: string | null
+          description: string
+          estimated_cost?: number | null
+          id?: string
+          landlord_id: string
+          media?: Json | null
+          property_id: string
+          sla_hours?: number | null
+          status?: string | null
+          tenant_id: string
+          title: string
+          updated_at?: string | null
+          urgency?: string | null
+        }
+        Update: {
+          actual_cost?: number | null
+          category?: string | null
+          contractor_contact?: string | null
+          contractor_name?: string | null
+          created_at?: string | null
+          description?: string
+          estimated_cost?: number | null
+          id?: string
+          landlord_id?: string
+          media?: Json | null
+          property_id?: string
+          sla_hours?: number | null
+          status?: string | null
+          tenant_id?: string
+          title?: string
+          updated_at?: string | null
+          urgency?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_tickets_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           attachment_url: string | null
@@ -761,6 +873,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      offers: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          landlord_id: string
+          listing_id: string
+          status: string | null
+          tenant_id: string
+          terms_json: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          landlord_id: string
+          listing_id: string
+          status?: string | null
+          tenant_id: string
+          terms_json: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          landlord_id?: string
+          listing_id?: string
+          status?: string | null
+          tenant_id?: string
+          terms_json?: Json
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offers_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payments: {
         Row: {
@@ -1442,6 +1598,36 @@ export type Database = {
           tenant_id?: string
           updated_at?: string
           viewing_confirmed?: boolean | null
+        }
+        Relationships: []
+      }
+      workflow_runs: {
+        Row: {
+          created_at: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          meta: Json | null
+          step: string
+          workflow_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          meta?: Json | null
+          step: string
+          workflow_name: string
+        }
+        Update: {
+          created_at?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          meta?: Json | null
+          step?: string
+          workflow_name?: string
         }
         Relationships: []
       }
