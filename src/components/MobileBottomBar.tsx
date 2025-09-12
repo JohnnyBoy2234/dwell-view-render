@@ -10,14 +10,17 @@ export function MobileBottomBar() {
   const location = useLocation();
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
-  const { unreadCount: notificationUnread } = useNotifications();
+  const { unreadCount: notificationUnread, notifications } = useNotifications();
   
-  // Debug: Log the actual values
-  console.log('MobileBottomBar Debug:');
-  console.log('- messageUnread:', messageUnread, '(type:', typeof messageUnread, ')');
-  console.log('- notificationUnread:', notificationUnread, '(type:', typeof notificationUnread, ')');
-  console.log('- messageUnread || 0:', messageUnread || 0);
-  console.log('- notificationUnread || 0:', notificationUnread || 0);
+  // Temporary debug to see what's happening
+  if (notificationUnread > 0) {
+    console.log('Notification count debug:', {
+      notificationUnread,
+      totalNotifications: notifications?.length,
+      unreadNotifications: notifications?.filter(n => !n.is_read)?.length
+    });
+  }
+  
   const [searchParams] = useSearchParams();
   
   // Hide bottom bar only when in a specific conversation
@@ -64,15 +67,12 @@ export function MobileBottomBar() {
       >
         <div className="relative">
           <IconComponent className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
-            {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
+            {item.showBadge && item.badgeCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {(() => {
-                  console.log(`Badge for ${item.label}: badgeCount = ${item.badgeCount}, showBadge = ${item.showBadge}`);
-                  return item.badgeCount > 9 ? '9+' : item.badgeCount;
-                })()}
+                {item.badgeCount > 9 ? '9+' : item.badgeCount}
               </Badge>
             )}
         </div>

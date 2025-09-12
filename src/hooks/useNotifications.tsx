@@ -44,11 +44,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       );
       
       setNotifications(validNotifications as Notification[]);
-      const unreadCount = validNotifications.filter(n => !n.is_read).length || 0;
-      console.log('useNotifications - validNotifications:', validNotifications.length);
-      console.log('useNotifications - unreadCount:', unreadCount);
-      console.log('useNotifications - notifications with is_read=false:', validNotifications.filter(n => !n.is_read));
-      setUnreadCount(unreadCount);
+      setUnreadCount(validNotifications.filter(n => !n.is_read).length || 0);
       setError(null);
     } catch (err) {
       console.error('Error fetching notifications:', err);

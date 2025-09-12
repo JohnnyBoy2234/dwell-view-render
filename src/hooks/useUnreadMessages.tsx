@@ -50,9 +50,7 @@ export function useUnreadMessages() {
 
       if (messageError) throw messageError;
 
-      const unreadCount = count || 0;
-      console.log('useUnreadMessages - count:', count, 'unreadCount:', unreadCount);
-      setUnreadCount(unreadCount);
+      setUnreadCount(count || 0);
     } catch (error) {
       console.error('Error fetching unread count:', error);
       setUnreadCount(0);

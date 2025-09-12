@@ -55,7 +55,7 @@ export default function Notifications() {
     }
 
     fetchAllNotifications();
-  }, [user, navigate, notifications, messageUnread, leaseUnread]);
+  }, [user, navigate, messageUnread, leaseUnread]);
 
   const fetchAllNotifications = async () => {
     try {
