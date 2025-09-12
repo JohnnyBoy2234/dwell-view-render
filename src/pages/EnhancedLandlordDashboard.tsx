@@ -1891,90 +1891,235 @@ export default function EnhancedLandlordDashboard() {
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="bg-muted animate-pulse h-24 rounded-lg"></div>
-            ))}
+        <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white">
+          <div className="animate-pulse space-y-4 p-4">
+            <div className="h-20 bg-gray-300 rounded-ios"></div>
+            <div className="grid grid-cols-2 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-24 bg-gray-300 rounded-ios"></div>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-20 bg-gray-300 rounded-ios"></div>
+              ))}
+            </div>
           </div>
-          <div className="bg-muted animate-pulse h-96 rounded-lg"></div>
         </div>
       );
     }
 
+    const totalRevenue = tenants.reduce((sum, t) => sum + t.monthly_rent, 0);
+    const occupancyRate = properties.length > 0 ? Math.round((tenants.length / properties.length) * 100) : 0;
+    const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
+
     return (
-      <div className="space-y-8">
-        {/* Basic Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <Building className="h-8 w-8 text-ocean-blue" />
-              <div>
-                <p className="text-sm text-muted-foreground">Properties</p>
-                <p className="text-2xl font-bold">{properties.length}</p>
+      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
+        {/* iPhone-style Status Bar */}
+        <div className="px-4 pt-2 pb-1">
+          <div className="flex items-center justify-between text-xs font-medium text-ios-gray-dark">
+            <span>9:41</span>
+            <div className="flex items-center gap-1">
+              <div className="flex gap-0.5">
+                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
+                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
+                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
               </div>
+              <span>📶</span>
+              <span>📶</span>
+              <span>🔋</span>
             </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <Users className="h-8 w-8 text-green-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Tenants</p>
-                <p className="text-2xl font-bold">{tenants.length}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <Wrench className="h-8 w-8 text-orange-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Maintenance</p>
-                <p className="text-2xl font-bold">{maintenanceRequests.length}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <DollarSign className="h-8 w-8 text-blue-600" />
-              <div>
-                <p className="text-sm text-muted-foreground">Monthly Revenue</p>
-                <p className="text-2xl font-bold">R{tenants.reduce((sum, t) => sum + t.monthly_rent, 0).toLocaleString()}</p>
-              </div>
-            </div>
-          </Card>
+          </div>
         </div>
 
-        {/* Properties Section */}
-        <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-ocean-blue flex items-center gap-2">
-                <Building className="h-5 w-5" />
-                Your Properties
-              </CardTitle>
-              <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')} size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                Add Property
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {renderPropertiesGrid()}
-          </CardContent>
-        </Card>
-        {/* Tenants Section */}
-        <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
-          <CardHeader>
-            <CardTitle className="text-xl text-ocean-blue flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Active Tenants
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {renderTenantsGrid()}
-          </CardContent>
-        </Card>
+        <div className="px-4 space-y-6">
+          {/* Header */}
+          <div className="pt-4">
+            <h1 className="text-2xl font-bold text-ios-gray-dark mb-1">
+              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}
+            </h1>
+            <p className="text-ios-gray text-sm">
+              {user?.email?.split('@')[0] || 'Landlord'}
+            </p>
+          </div>
 
+          {/* Quick Stats Widget */}
+          <div className="bg-gradient-to-r from-ios-blue to-ios-blue-light rounded-ios-card p-6 shadow-ios-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-semibold text-lg">Portfolio Overview</h2>
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 rounded-ios p-3">
+                <p className="text-white/80 text-xs mb-1">Monthly Revenue</p>
+                <p className="text-white font-bold text-lg">R{totalRevenue.toLocaleString()}</p>
+              </div>
+              <div className="bg-white/10 rounded-ios p-3">
+                <p className="text-white/80 text-xs mb-1">Occupancy Rate</p>
+                <p className="text-white font-bold text-lg">{occupancyRate}%</p>
+              </div>
+            </div>
+          </div>
+
+          {/* App-style Feature Grid */}
+          <div>
+            <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {/* Properties */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/properties')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ios-blue-light rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Building className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Properties</p>
+                <p className="text-xs text-ios-gray">{properties.length}</p>
+              </button>
+
+              {/* Tenants */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-green to-ios-green-light rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Tenants</p>
+                <p className="text-xs text-ios-gray">{tenants.length}</p>
+              </button>
+
+              {/* Applications */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Applications</p>
+                <p className="text-xs text-ios-gray">{applications.length}</p>
+              </button>
+
+              {/* Maintenance */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100 relative"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Wrench className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Maintenance</p>
+                <p className="text-xs text-ios-gray">{activeMaintenanceRequests}</p>
+                {activeMaintenanceRequests > 0 && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-ios-red rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">{activeMaintenanceRequests}</span>
+                  </div>
+                )}
+              </button>
+
+              {/* Payments */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Payments</p>
+                <p className="text-xs text-ios-gray">Track</p>
+              </button>
+
+              {/* Reports */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Reports</p>
+                <p className="text-xs text-ios-gray">Analytics</p>
+              </button>
+
+              {/* Leases */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Leases</p>
+                <p className="text-xs text-ios-gray">Manage</p>
+              </button>
+
+              {/* Add Property */}
+              <button 
+                onClick={() => navigate('/add-property')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-gray to-ios-gray-dark rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Plus className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Add Property</p>
+                <p className="text-xs text-ios-gray">New</p>
+              </button>
+
+              {/* Quick Stats */}
+              <button 
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Calendar</p>
+                <p className="text-xs text-ios-gray">Schedule</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          {(properties.length > 0 || tenants.length > 0) && (
+            <div className="bg-white rounded-ios-card p-4 shadow-ios-sm border border-gray-100">
+              <h3 className="text-sm font-semibold text-ios-gray-dark mb-3">Recent Activity</h3>
+              
+              {tenants.length > 0 && (
+                <div className="space-y-3">
+                  {tenants.slice(0, 3).map((tenant) => (
+                    <div key={tenant.id} className="flex items-center gap-3 p-2 rounded-ios bg-ios-gray-light/30">
+                      <div className="w-8 h-8 bg-gradient-to-br from-ios-green to-ios-green-light rounded-full flex items-center justify-center">
+                        <Users className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-ios-gray-dark">{tenant.name}</p>
+                        <p className="text-xs text-ios-gray">R{tenant.monthly_rent.toLocaleString()}/month</p>
+                      </div>
+                      <div className="text-right">
+                        <div className={`w-2 h-2 rounded-full ${
+                          tenant.payment_status === 'paid' ? 'bg-ios-green' : 
+                          tenant.payment_status === 'pending' ? 'bg-ios-orange' : 'bg-ios-red'
+                        }`}></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {properties.length > 0 && tenants.length === 0 && (
+                <div className="text-center py-4">
+                  <Building className="w-8 h-8 text-ios-gray mx-auto mb-2" />
+                  <p className="text-sm text-ios-gray">No active tenants yet</p>
+                  <p className="text-xs text-ios-gray">Your tenants will appear here</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
