@@ -88,7 +88,7 @@ export function MobileBottomBar() {
           }`}
         >
           <div className="relative">
-            <Plus className={`h-4 w-4 ${location.pathname === '/list-property' ? 'text-white' : ''}`} />
+            <Plus className={`h-5 w-5 ${location.pathname === '/list-property' ? 'text-white' : ''}`} />
           </div>
           <span className="text-xs text-center">List</span>
         </Link>
