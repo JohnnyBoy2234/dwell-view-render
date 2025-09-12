@@ -12,14 +12,14 @@ export function MobileBottomBar() {
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { unreadCount: notificationUnread, notifications } = useNotifications();
   
-  // Temporary debug to see what's happening
-  if (notificationUnread > 0) {
-    console.log('Notification count debug:', {
-      notificationUnread,
-      totalNotifications: notifications?.length,
-      unreadNotifications: notifications?.filter(n => !n.is_read)?.length
-    });
-  }
+  // Debug: Always log the values to see what's happening
+  console.log('MobileBottomBar - All values:', {
+    messageUnread,
+    notificationUnread,
+    totalNotifications: notifications?.length,
+    unreadNotifications: notifications?.filter(n => !n.is_read)?.length,
+    notifications: notifications?.map(n => ({ id: n.id, is_read: n.is_read, title: n.title }))
+  });
   
   const [searchParams] = useSearchParams();
   
@@ -72,7 +72,14 @@ export function MobileBottomBar() {
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {item.badgeCount > 9 ? '9+' : item.badgeCount}
+                {(() => {
+                  console.log(`Rendering badge for ${item.label}:`, {
+                    badgeCount: item.badgeCount,
+                    showBadge: item.showBadge,
+                    condition: item.showBadge && item.badgeCount > 0
+                  });
+                  return item.badgeCount > 9 ? '9+' : item.badgeCount;
+                })()}
               </Badge>
             )}
         </div>
