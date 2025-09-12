@@ -27,13 +27,13 @@ interface SidebarItem {
 
 const tenantItems: SidebarItem[] = [
   { title: 'Overview', url: '/enhancedtenantdashboard', icon: Home },
-  { title: 'Property Viewings', url: '/enhancedtenantdashboard/viewings', icon: Eye },
-  { title: 'Inventory', url: '/enhancedtenantdashboard/inventory', icon: FileText },
-  { title: 'Maintenance', url: '/enhancedtenantdashboard/maintenance', icon: Settings },
-  { title: 'Proof of Payment', url: '/enhancedtenantdashboard/proof-of-payment', icon: Inbox },
-  { title: 'Contract', url: '/enhancedtenantdashboard/contracts', icon: FileText },
-  { title: 'Applications', url: '/enhancedtenantdashboard/applications', icon: Building },
-  { title: 'Profile', url: '/enhancedtenantdashboard/profile', icon: User },
+  { title: 'Property Viewings', url: '/tenant/viewings', icon: Eye },
+  { title: 'Inventory', url: '/tenant/inventory', icon: FileText },
+  { title: 'Maintenance', url: '/tenant/maintenance', icon: Settings },
+  { title: 'Proof of Payment', url: '/tenant/proof-of-payment', icon: Inbox },
+  { title: 'Contract', url: '/tenant/contracts', icon: FileText },
+  { title: 'Applications', url: '/tenant/applications', icon: Building },
+  { title: 'Profile', url: '/tenant/profile', icon: User },
 ];
 
 const landlordItems: SidebarItem[] = [

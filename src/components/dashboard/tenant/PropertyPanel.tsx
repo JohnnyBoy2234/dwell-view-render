@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 interface TenantProperty {
   id: string;
@@ -21,6 +22,8 @@ interface PropertyPanelProps {
 }
 
 export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelProps) {
+  const navigate = useNavigate();
+  
   if (!tenantProperty) {
     return (
       <Card className="shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-earth-light/20 animate-fade-in">
@@ -31,7 +34,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
             You don't have an active rental property at the moment.
           </p>
           <Button 
-            onClick={() => window.location.href = '/properties'}
+            onClick={() => navigate('/properties')}
             className="bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white"
           >
             Browse Properties
@@ -124,7 +127,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => window.location.href = '/tenant-messages'}
+              onClick={() => navigate('/messages')}
               className="border-success-green text-success-green hover:bg-success-green/10"
             >
               Contact Landlord
@@ -132,7 +135,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => window.location.href = '/tenant-dashboard/maintenance'}
+              onClick={() => navigate('/tenant/maintenance')}
               className="border-earth-warm text-earth-warm hover:bg-earth-warm/10"
             >
               Report Issue

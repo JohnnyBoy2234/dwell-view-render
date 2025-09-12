@@ -72,65 +72,13 @@ export default function EnhancedTenantDashboard() {
 
   const handleTabChange = (tab: string) => {
     setCurrentTab(tab);
-    // Update the URL when changing tabs
-    if (tab !== '/enhancedtenantdashboard') {
-      navigate(tab);
-    } else {
-      navigate('/enhancedtenantdashboard');
-    }
+    // Update the URL when changing tabs - navigate to absolute paths
+    navigate(tab);
   };
 
   const renderTabContent = () => {
-    switch (currentTab) {
-      case '/enhancedtenantdashboard/viewings':
-        return <TenantPropertyViewings />;
-      case '/enhancedtenantdashboard/inventory':
-        return <TenantInventory />;
-      case '/enhancedtenantdashboard/maintenance':
-        return <TenantMaintenance />;
-      case '/enhancedtenantdashboard/proof-of-payment':
-        return <TenantProofOfPayment />;
-      case '/enhancedtenantdashboard/contracts':
-        return (
-          <div className="space-y-6">
-            <SignedLeasesList role="tenant" />
-          </div>
-        );
-      case '/enhancedtenantdashboard/applications':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Applications</h2>
-            </div>
-            <TenantApplicationsSection />
-          </div>
-        );
-      case '/enhancedtenantdashboard/profile':
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <User className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Profile Settings</h2>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center">
-                <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Your Profile</h3>
-                <p className="text-muted-foreground mb-4">
-                  Manage your account settings and personal information
-                </p>
-                <Button onClick={() => navigate('/profile')}>
-                  <User className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        );
-      default:
-        return renderDashboardContent();
-    }
+    // Always show the dashboard overview - navigation handled by routing
+    return renderDashboardContent();
   };
 
   const renderDashboardContent = () => {
@@ -208,7 +156,7 @@ export default function EnhancedTenantDashboard() {
         <div className="mt-12">
           <SectionHeader title="Quick Actions" className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/viewings')}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/tenant/viewings')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-ocean-blue/10 text-ocean-blue grid place-content-center mb-2">
                   <Eye className="h-5 w-5" />
@@ -217,7 +165,7 @@ export default function EnhancedTenantDashboard() {
                 <p className="text-sm text-brand.gray500">Manage property viewings</p>
               </div>
             </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/inventory')}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/tenant/inventory')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-success-green/10 text-success-green grid place-content-center mb-2">
                   <Clipboard className="h-5 w-5" />
@@ -235,7 +183,7 @@ export default function EnhancedTenantDashboard() {
                 <p className="text-sm text-brand.gray500">Chat with landlords</p>
               </div>
             </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/proof-of-payment')}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/tenant/proof-of-payment')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-earth-warm/10 text-earth-warm grid place-content-center mb-2">
                   <Receipt className="h-5 w-5" />

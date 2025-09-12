@@ -36,7 +36,7 @@ export function TenantDashboardHeader() {
                 variant="ghost"
                 size="sm"
                 className="relative text-white hover:bg-white/10"
-                onClick={() => navigate('/tenant-dashboard?tab=notifications')}
+                onClick={() => navigate('/notifications')}
               >
                 <Bell className="h-5 w-5" />
                 {totalUnread > 0 && (
@@ -60,10 +60,10 @@ export function TenantDashboardHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => navigate('/tenant-dashboard')}>
+                <DropdownMenuItem onClick={() => navigate('/enhancedtenantdashboard')}>
                   Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/tenant-messages')}>
+                <DropdownMenuItem onClick={() => navigate('/messages')}>
                   Messages
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/properties')}>
