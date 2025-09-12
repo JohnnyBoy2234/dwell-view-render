@@ -13,6 +13,13 @@ import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Home, Building, FileText, Settings, User, Calendar, Eye, Receipt, Clipboard, MessageSquare } from 'lucide-react';
+
+// Custom R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M6 3h8a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4H8v4h6v2H6V3zm2 2v6h6a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H8z"/>
+  </svg>
+);
 import { SignedLeasesList } from '@/components/lease/SignedLeasesList';
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
@@ -126,7 +133,7 @@ export default function EnhancedTenantDashboard() {
       },
       {
         title: 'Proof of Payment',
-        icon: Receipt,
+        icon: RIcon,
         color: 'hsl(var(--ios-purple))',
         bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100/50',
         iconBg: 'bg-purple-500',
