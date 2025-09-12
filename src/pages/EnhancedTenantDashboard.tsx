@@ -84,115 +84,197 @@ export default function EnhancedTenantDashboard() {
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="space-y-6 relative">
-          {/* bg blobs */}
-          <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
-            <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
-            <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gradient-to-tr from-brand.green to-brand.blue blur-3xl opacity-10"></div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="rounded-xl bg-white/50 backdrop-blur-sm animate-pulse h-40 shadow-soft"></div>
+        <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+          <div className="p-4 space-y-4">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="bg-white/80 backdrop-blur-sm animate-pulse h-24 rounded-ios-card shadow-ios-sm border border-white/40"></div>
             ))}
           </div>
         </div>
       );
     }
 
+    const featureBlocks = [
+      {
+        title: 'Property Viewings',
+        icon: Eye,
+        color: 'hsl(var(--ios-blue))',
+        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
+        iconBg: 'bg-blue-500',
+        count: upcomingViewings?.length || 0,
+        subtitle: upcomingViewings?.length ? `${upcomingViewings.length} upcoming` : 'No viewings',
+        path: '/tenant/viewings'
+      },
+      {
+        title: 'Inventory',
+        icon: Clipboard,
+        color: 'hsl(var(--ios-green))',
+        bgColor: 'bg-gradient-to-br from-green-50 to-green-100/50',
+        iconBg: 'bg-green-500',
+        subtitle: 'Property condition',
+        path: '/tenant/inventory'
+      },
+      {
+        title: 'Maintenance',
+        icon: Settings,
+        color: 'hsl(var(--ios-orange))',
+        bgColor: 'bg-gradient-to-br from-orange-50 to-orange-100/50',
+        iconBg: 'bg-orange-500',
+        count: recentMaintenance?.length || 0,
+        subtitle: recentMaintenance?.length ? `${recentMaintenance.length} requests` : 'No issues',
+        path: '/tenant/maintenance'
+      },
+      {
+        title: 'Proof of Payment',
+        icon: Receipt,
+        color: 'hsl(var(--ios-purple))',
+        bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100/50',
+        iconBg: 'bg-purple-500',
+        subtitle: 'Upload documents',
+        path: '/tenant/proof-of-payment'
+      },
+      {
+        title: 'Contract',
+        icon: FileText,
+        color: 'hsl(var(--ios-indigo))',
+        bgColor: 'bg-gradient-to-br from-indigo-50 to-indigo-100/50',
+        iconBg: 'bg-indigo-500',
+        subtitle: 'Lease documents',
+        path: '/tenant/contracts'
+      },
+      {
+        title: 'Applications',
+        icon: Building,
+        color: 'hsl(var(--ios-teal))',
+        bgColor: 'bg-gradient-to-br from-teal-50 to-teal-100/50',
+        iconBg: 'bg-teal-500',
+        subtitle: 'Application status',
+        path: '/tenant/applications'
+      },
+      {
+        title: 'Profile',
+        icon: User,
+        color: 'hsl(var(--ios-pink))',
+        bgColor: 'bg-gradient-to-br from-pink-50 to-pink-100/50',
+        iconBg: 'bg-pink-500',
+        subtitle: 'Account settings',
+        path: '/tenant/profile'
+      }
+    ];
+
     return (
-      <div className="space-y-6 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* KPI Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard
-            label="Unread Messages"
-            value={unreadCount ?? 0}
-            icon={<div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
-              <div className="h-3 w-3 bg-blue-600 rounded-full"></div>
-            </div>}
-          />
-          <StatCard
-            label="Upcoming Viewings"
-            value={(upcomingViewings?.length ?? 0).toString()}
-            icon={<Calendar className="h-5 w-5" />}
-          />
-          <StatCard
-            label="Maintenance"
-            value={(recentMaintenance?.length ?? 0).toString()}
-            icon={<Settings className="h-5 w-5" />}
-          />
-          <StatCard
-            label="Rent"
-            value={rentDue ? 'Due' : 'Clear'}
-            icon={<FileText className="h-5 w-5" />}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Action Cards */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <RentDueCard 
-                rentDue={rentDue} 
-                onMakePayment={handleMakePayment} 
-              />
+      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+        {/* iPhone-style status bar simulation */}
+        <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+          <div className="px-4 py-2 flex justify-between items-center">
+            <div className="text-sm font-semibold text-gray-900">Dashboard</div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="text-xs text-gray-600">Online</div>
             </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <ViewingCard upcomingViewings={upcomingViewings} />
-              <MaintenanceCard recentMaintenance={recentMaintenance} />
-            </div>
-          </div>
-
-          {/* Right Panel - Property Information */}
-          <div className="lg:col-span-1">
-            <PropertyPanel 
-              tenantProperty={tenantProperty}
-              onMakePayment={handleMakePayment}
-            />
           </div>
         </div>
 
-        {/* Quick Actions Section */}
-        <div className="mt-12">
-          <SectionHeader title="Quick Actions" className="mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/tenant/viewings')}>
-              <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-ocean-blue/10 text-ocean-blue grid place-content-center mb-2">
-                  <Eye className="h-5 w-5" />
-                </div>
-                <h4 className="font-semibold">Viewings</h4>
-                <p className="text-sm text-brand.gray500">Manage property viewings</p>
+        <div className="p-4 space-y-4">
+          {/* Quick Stats - iPhone widget style */}
+          <div className="bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold text-gray-900">Overview</h3>
+              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Today</div>
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{unreadCount ?? 0}</div>
+                <div className="text-xs text-gray-500">Messages</div>
               </div>
-            </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/tenant/inventory')}>
-              <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-success-green/10 text-success-green grid place-content-center mb-2">
-                  <Clipboard className="h-5 w-5" />
-                </div>
-                <h4 className="font-semibold">Inventory</h4>
-                <p className="text-sm text-brand.gray500">Property condition records</p>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600">{upcomingViewings?.length || 0}</div>
+                <div className="text-xs text-gray-500">Viewings</div>
               </div>
-            </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/messages')}>
-              <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 grid place-content-center mb-2">
-                  <MessageSquare className="h-5 w-5" />
-                </div>
-                <h4 className="font-semibold">Messages</h4>
-                <p className="text-sm text-brand.gray500">Chat with landlords</p>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600">{recentMaintenance?.length || 0}</div>
+                <div className="text-xs text-gray-500">Issues</div>
               </div>
-            </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/tenant/proof-of-payment')}>
-              <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-earth-warm/10 text-earth-warm grid place-content-center mb-2">
-                  <Receipt className="h-5 w-5" />
+              <div className="text-center">
+                <div className={`text-2xl font-bold ${rentDue ? 'text-red-600' : 'text-green-600'}`}>
+                  {rentDue ? 'Due' : 'Paid'}
                 </div>
-                <h4 className="font-semibold">Proof of Payment</h4>
-                <p className="text-sm text-brand.gray500">Upload payment documents</p>
+                <div className="text-xs text-gray-500">Rent</div>
               </div>
-            </GlassCard>
+            </div>
           </div>
+
+          {/* Feature Blocks - iPhone app grid style */}
+          <div className="space-y-3">
+            {featureBlocks.map((block) => {
+              const IconComponent = block.icon;
+              return (
+                <button
+                  key={block.title}
+                  onClick={() => navigate(block.path)}
+                  className="w-full bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40 
+                           hover:shadow-ios-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 
+                           group text-left"
+                >
+                  <div className="flex items-center space-x-4">
+                    {/* iOS-style app icon */}
+                    <div className={`w-12 h-12 ${block.iconBg} rounded-ios-button shadow-ios-sm 
+                                   flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
+                      <IconComponent className="w-6 h-6 text-white" />
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-base font-semibold text-gray-900">{block.title}</h3>
+                          <p className="text-sm text-gray-500 mt-0.5">{block.subtitle}</p>
+                        </div>
+                        
+                        {/* iOS-style chevron */}
+                        <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+                      
+                      {/* Count badge if applicable */}
+                      {block.count !== undefined && block.count > 0 && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            {block.count}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Rent Status - Special card */}
+          {rentDue && (
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-ios-card p-4 shadow-ios-md border border-red-200/50">
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-red-500 rounded-ios-button flex items-center justify-center">
+                  <Receipt className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-red-900">Rent Due</h3>
+                  <p className="text-sm text-red-600">Payment required</p>
+                </div>
+                <button
+                  onClick={handleMakePayment}
+                  className="px-4 py-2 bg-red-500 text-white rounded-ios-button text-sm font-medium 
+                           hover:bg-red-600 active:scale-95 transition-all duration-200"
+                >
+                  Pay Now
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );

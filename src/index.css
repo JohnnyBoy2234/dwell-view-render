@@ -36,21 +36,37 @@ All colors MUST be HSL.
     --input: 214 31% 91%;
     --ring: 203 89% 45%;
 
-    /* Enhanced brand color palette from SwiftRent logo */
-    --ocean-blue: 203 89% 45%;
-    --ocean-blue-dark: 203 89% 35%;
-    --ocean-blue-light: 203 89% 55%;
-    --ocean-blue-glow: 203 89% 65%;
+    /* iOS-inspired color palette */
+    --ios-blue: 214 100% 59%;
+    --ios-blue-dark: 214 100% 49%;
+    --ios-blue-light: 214 100% 69%;
+    --ios-green: 142 72% 44%;
+    --ios-green-light: 142 72% 54%;
+    --ios-orange: 25 95% 53%;
+    --ios-red: 0 78% 62%;
+    --ios-purple: 275 84% 67%;
+    --ios-indigo: 235 85% 70%;
+    --ios-teal: 174 72% 56%;
+    --ios-pink: 332 83% 71%;
+    --ios-gray: 220 9% 46%;
+    --ios-gray-light: 220 14% 96%;
+    --ios-gray-dark: 220 20% 20%;
     
-    --earth-warm: 25 85% 65%;
-    --earth-warm-dark: 25 85% 55%;
-    --earth-light: 25 85% 95%;
+    /* Legacy brand colors for compatibility */
+    --ocean-blue: 214 100% 59%;
+    --ocean-blue-dark: 214 100% 49%;
+    --ocean-blue-light: 214 100% 69%;
+    --ocean-blue-glow: 214 100% 79%;
+    
+    --earth-warm: 25 95% 53%;
+    --earth-warm-dark: 25 95% 43%;
+    --earth-light: 25 95% 95%;
     --earth-muted: 25 40% 85%;
     
-    --success-green: 142 76% 47%;
-    --success-green-dark: 142 76% 37%;
-    --success-green-light: 142 76% 95%;
-    --success-green-glow: 142 76% 57%;
+    --success-green: 142 72% 44%;
+    --success-green-dark: 142 72% 34%;
+    --success-green-light: 142 72% 95%;
+    --success-green-glow: 142 72% 54%;
 
     /* SwiftRent design tokens */
     --sr-blue: 221 83% 53%;
@@ -59,20 +75,26 @@ All colors MUST be HSL.
     --sr-muted: 220 9% 46%;
     --sr-bg: 210 40% 98%;
     
-    /* Premium gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(var(--ocean-blue)), hsl(var(--ocean-blue-light)), hsl(var(--success-green)));
-    --gradient-hero-overlay: linear-gradient(135deg, hsl(var(--ocean-blue) / 0.9), hsl(var(--ocean-blue-dark) / 0.8));
-    --gradient-card: linear-gradient(135deg, hsl(var(--background)), hsl(var(--earth-light)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--success-green)), hsl(var(--success-green-glow)));
-    --gradient-warm: linear-gradient(135deg, hsl(var(--earth-warm)), hsl(var(--earth-warm-dark)));
+    /* iOS-style gradients */
+    --ios-gradient-blue: linear-gradient(135deg, hsl(var(--ios-blue)), hsl(var(--ios-blue-light)));
+    --ios-gradient-green: linear-gradient(135deg, hsl(var(--ios-green)), hsl(var(--ios-green-light)));
+    --ios-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 249, 250, 1));
+    --ios-gradient-subtle: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
     
-    /* Enhanced shadows with brand colors */
-    --shadow-soft: 0 4px 20px -4px hsl(var(--ocean-blue) / 0.12);
-    --shadow-medium: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18);
-    --shadow-strong: 0 12px 40px -12px hsl(var(--ocean-blue) / 0.25);
-    --shadow-glow: 0 0 40px hsl(var(--ocean-blue-glow) / 0.3);
-    --shadow-warm: 0 8px 25px -6px hsl(var(--earth-warm) / 0.15);
-    --shadow-success: 0 8px 25px -6px hsl(var(--success-green) / 0.15);
+    /* iOS-style shadows */
+    --ios-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --ios-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --ios-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --ios-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+    --ios-shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.06);
+    
+    /* Legacy shadows for compatibility */
+    --shadow-soft: var(--ios-shadow-sm);
+    --shadow-medium: var(--ios-shadow-md);
+    --shadow-strong: var(--ios-shadow-lg);
+    --shadow-glow: var(--ios-shadow-xl);
+    --shadow-warm: var(--ios-shadow-md);
+    --shadow-success: var(--ios-shadow-md);
     
     /* Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);

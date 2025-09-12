@@ -93,14 +93,23 @@ export default {
 			boxShadow: {
 				soft: '0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04)',
 				card: '0 6px 20px rgba(37,99,235,.08)',
-				pop: '0 12px 24px rgba(0,0,0,.12), 0 8px 12px rgba(37,99,235,.08)'
+				pop: '0 12px 24px rgba(0,0,0,.12), 0 8px 12px rgba(37,99,235,.08)',
+				'ios-xs': '0 1px 3px rgba(0, 0, 0, 0.08)',
+				'ios-sm': '0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08)',
+				'ios-md': '0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)',
+				'ios-lg': '0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04)',
+				'ios-xl': '0 16px 64px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.06)'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)',
-				xl: '0.9rem',
-				'2xl': '1.25rem'
+				xl: '1rem',
+				'2xl': '1.25rem',
+				'3xl': '1.5rem',
+				'ios': '1.25rem', // iOS-style rounded corners
+				'ios-card': '1rem',
+				'ios-button': '0.75rem'
 			},
 			transitionTimingFunction: {
 				'out-soft': 'cubic-bezier(.22,.61,.36,1)'
