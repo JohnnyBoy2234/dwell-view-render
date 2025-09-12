@@ -16,6 +16,7 @@ import { TenantApplicationsSection } from '@/components/tenant/TenantApplication
 import { FileText, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import ProfilePage from '@/components/profile/ProfilePage';
 
 export default function TenantDashboardRoutes() {
   return (
@@ -53,25 +54,7 @@ export default function TenantDashboardRoutes() {
       } />
       <Route path="/profile" element={
         <EnhancedDashboardLayout title="Profile Settings">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <User className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Profile Settings</h2>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center">
-                <User className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Your Profile</h3>
-                <p className="text-muted-foreground mb-4">
-                  Manage your account settings and personal information
-                </p>
-                <Button onClick={() => window.location.href = '/profile'}>
-                  <User className="h-4 w-4 mr-2" />
-                  Edit Profile
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+          <ProfilePage />
         </EnhancedDashboardLayout>
       } />
       <Route path="/maintenance" element={
