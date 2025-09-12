@@ -179,7 +179,6 @@ export default function EnhancedTenantDashboard() {
           {/* Quick Stats - iPhone widget style */}
           <div className="bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-gray-900">Overview</h3>
               <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Today</div>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
