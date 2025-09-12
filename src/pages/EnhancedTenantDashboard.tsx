@@ -30,6 +30,7 @@ import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
+import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -159,7 +160,7 @@ export default function EnhancedTenantDashboard() {
         path: '/tenant/applications'
       },
       {
-        title: 'Profile',
+        title: 'Settings',
         icon: User,
         color: 'hsl(var(--ios-pink))',
         bgColor: 'bg-gradient-to-br from-pink-50 to-pink-100/50',
@@ -255,6 +256,11 @@ export default function EnhancedTenantDashboard() {
               </div>
             </div>
           )}
+
+          {/* SwiftRent Support Section */}
+          <div className="mt-6">
+            <SwiftRentSupport />
+          </div>
         </div>
       </div>
     );

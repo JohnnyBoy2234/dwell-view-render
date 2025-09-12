@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Users, Shield, TrendingUp } from 'lucide-react';
+import { FileText, Users, Shield, TrendingUp, MessageSquare } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
+import { SupportMessagesAdmin } from '@/components/admin/SupportMessagesAdmin';
 
 export default function AdminDashboard() {
   return (
@@ -62,14 +63,14 @@ export default function AdminDashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
-                System Health
+                Support Messages
               </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">99.9%</div>
+              <div className="text-2xl font-bold">12</div>
               <p className="text-xs text-muted-foreground">
-                Uptime this month
+                +3 new today
               </p>
             </CardContent>
           </Card>
@@ -138,6 +139,9 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Support Messages Section */}
+        <SupportMessagesAdmin />
       </div>
     </AdminLayout>
   );
