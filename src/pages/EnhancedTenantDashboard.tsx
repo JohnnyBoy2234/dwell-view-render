@@ -170,32 +170,6 @@ export default function EnhancedTenantDashboard() {
 
     return (
       <div className="space-y-6 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* KPI Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-          <StatCard
-            label="Unread Messages"
-            value={unreadCount ?? 0}
-            icon={<div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
-              <div className="h-3 w-3 bg-blue-600 rounded-full"></div>
-            </div>}
-          />
-          <StatCard
-            label="Upcoming Viewings"
-            value={(upcomingViewings?.length ?? 0).toString()}
-            icon={<Calendar className="h-5 w-5" />}
-          />
-          <StatCard
-            label="Maintenance"
-            value={(recentMaintenance?.length ?? 0).toString()}
-            icon={<Settings className="h-5 w-5" />}
-          />
-          <StatCard
-            label="Rent"
-            value={rentDue ? 'Due' : 'Clear'}
-            icon={<FileText className="h-5 w-5" />}
-          />
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Panel - Action Cards */}
           <div className="lg:col-span-2 space-y-6">
