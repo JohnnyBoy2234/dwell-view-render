@@ -175,7 +175,7 @@ export default function EnhancedTenantDashboard() {
           </div>
         </div>
 
-        <div className="p-4 space-y-4">
+        <div className="p-4 pb-24 md:pb-4 space-y-4">
           {/* Quick Stats - iPhone widget style */}
           <div className="bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40">
             <div className="flex justify-between items-center mb-3">
