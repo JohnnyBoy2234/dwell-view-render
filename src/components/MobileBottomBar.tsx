@@ -11,6 +11,13 @@ export function MobileBottomBar() {
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { unreadCount: notificationUnread } = useNotifications();
+  
+  // Debug: Log the actual values
+  console.log('MobileBottomBar Debug:');
+  console.log('- messageUnread:', messageUnread, '(type:', typeof messageUnread, ')');
+  console.log('- notificationUnread:', notificationUnread, '(type:', typeof notificationUnread, ')');
+  console.log('- messageUnread || 0:', messageUnread || 0);
+  console.log('- notificationUnread || 0:', notificationUnread || 0);
   const [searchParams] = useSearchParams();
   
   // Hide bottom bar only when in a specific conversation
@@ -26,8 +33,8 @@ export function MobileBottomBar() {
   ];
 
   const rightNavItems = [
-    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread, authRequired: true },
+    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread || 0, authRequired: true },
     { path: '/auth', icon: User, label: 'Desk' }
   ];
 
@@ -57,12 +64,15 @@ export function MobileBottomBar() {
       >
         <div className="relative">
           <IconComponent className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
-            {item.showBadge && item.badgeCount > 0 && (
+            {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {item.badgeCount > 9 ? '9+' : item.badgeCount}
+                {(() => {
+                  console.log(`Badge for ${item.label}: badgeCount = ${item.badgeCount}, showBadge = ${item.showBadge}`);
+                  return item.badgeCount > 9 ? '9+' : item.badgeCount;
+                })()}
               </Badge>
             )}
         </div>
