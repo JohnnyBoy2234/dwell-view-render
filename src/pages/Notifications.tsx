@@ -55,7 +55,7 @@ export default function Notifications() {
     }
 
     fetchAllNotifications();
-  }, [user, navigate]);
+  }, [user, navigate, notifications, messageUnread, leaseUnread]);
 
   const fetchAllNotifications = async () => {
     try {
@@ -64,8 +64,8 @@ export default function Notifications() {
       // Combine different types of notifications
       const combinedNotifications: NotificationItem[] = [];
 
-      // Add general notifications
-      if (notifications) {
+      // Add general notifications from database
+      if (notifications && notifications.length > 0) {
         notifications.forEach(notification => {
           combinedNotifications.push({
             id: notification.id,
@@ -80,7 +80,7 @@ export default function Notifications() {
         });
       }
 
-      // Add message notifications
+      // Add message notifications if there are unread messages
       if (messageUnread > 0) {
         combinedNotifications.push({
           id: 'messages',
@@ -94,7 +94,7 @@ export default function Notifications() {
         });
       }
 
-      // Add lease notifications
+      // Add lease notifications if there are unread lease notifications
       if (leaseUnread > 0) {
         combinedNotifications.push({
           id: 'leases',
@@ -158,9 +158,21 @@ export default function Notifications() {
   };
 
   const handleNotificationClick = async (notification: NotificationItem) => {
-    // Mark as read
-    if (!notification.isRead) {
-      await markAsRead(notification.id);
+    // Mark as read (only for real notifications, not synthetic ones)
+    if (!notification.isRead && notification.id !== 'messages' && notification.id !== 'leases') {
+      try {
+        await markAsRead(notification.id);
+        // Update local state immediately
+        setAllNotifications(prev => 
+          prev.map(n => 
+            n.id === notification.id 
+              ? { ...n, isRead: true }
+              : n
+          )
+        );
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
     }
 
     // Navigate to action URL if available
@@ -170,8 +182,15 @@ export default function Notifications() {
   };
 
   const handleMarkAllAsRead = async () => {
-    await markAllAsRead();
-    fetchAllNotifications();
+    try {
+      await markAllAsRead();
+      // Update local state immediately
+      setAllNotifications(prev => 
+        prev.map(n => ({ ...n, isRead: true }))
+      );
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
   };
 
   if (loading) {

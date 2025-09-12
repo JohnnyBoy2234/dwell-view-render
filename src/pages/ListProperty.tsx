@@ -218,7 +218,7 @@ export default function ListProperty() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto p-6 max-w-4xl">
+      <div className="container mx-auto p-6 max-w-4xl pb-32 md:pb-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button variant="outline" onClick={() => navigate('/')}>

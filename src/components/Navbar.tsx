@@ -123,6 +123,9 @@ const Navbar = () => {
                 </>
               )}
             </div>
+
+            {/* Mobile Hamburger Menu - Right Side */}
+            <MobileSidebar />
           </div>
         </div>
       </nav>

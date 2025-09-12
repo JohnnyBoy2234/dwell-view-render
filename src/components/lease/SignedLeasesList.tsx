@@ -101,8 +101,8 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
     <section aria-labelledby="signed-leases-heading">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 id="signed-leases-heading" className="text-xl font-semibold">Leases</h2>
-          <p className="text-sm text-muted-foreground">Review, sign, and download your lease documents</p>
+          <h2 id="signed-leases-heading" className="text-xl font-semibold">Contract</h2>
+          <p className="text-sm text-muted-foreground">Review, sign, and download your contract documents</p>
         </div>
         <Badge variant="secondary">{leases.length}</Badge>
       </div>
@@ -114,8 +114,8 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
       ) : leases.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No leases yet</CardTitle>
-            <CardDescription>When a lease is sent to you for signing, it will appear here</CardDescription>
+            <CardTitle>No contracts yet</CardTitle>
+            <CardDescription>When a lease contract is sent to you for signing, it will appear here</CardDescription>
           </CardHeader>
         </Card>
       ) : (
@@ -126,9 +126,9 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
               <Badge variant="secondary">{pending.length}</Badge>
             </div>
             {pending.length === 0 ? (
-              <Card>
-                <CardContent className="p-6 text-sm text-muted-foreground">No pending leases</CardContent>
-              </Card>
+                <Card>
+                  <CardContent className="p-6 text-sm text-muted-foreground">No pending contracts</CardContent>
+                </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {pending.map((lease) => (
@@ -174,9 +174,9 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
               <Badge variant="secondary">{signed.length}</Badge>
             </div>
             {signed.length === 0 ? (
-              <Card>
-                <CardContent className="p-6 text-sm text-muted-foreground">No signed leases yet</CardContent>
-              </Card>
+                <Card>
+                  <CardContent className="p-6 text-sm text-muted-foreground">No signed contracts yet</CardContent>
+                </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {signed.map((lease) => (

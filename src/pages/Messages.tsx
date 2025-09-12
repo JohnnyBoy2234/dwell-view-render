@@ -357,7 +357,11 @@ export default function Messages() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => setShowConversations(true)}
+                  onClick={() => {
+                    setShowConversations(true);
+                    // Clear the conversation parameter from URL to show bottom bar
+                    navigate('/messages', { replace: true });
+                  }}
                   className="p-2"
                 >
                   <ArrowLeft className="h-4 w-4" />

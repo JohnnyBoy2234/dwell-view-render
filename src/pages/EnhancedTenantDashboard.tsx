@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, Building, FileText, Settings, User, Calendar } from 'lucide-react';
+import { Home, Building, FileText, Settings, User, Calendar, Eye, Receipt, Clipboard, MessageSquare } from 'lucide-react';
 import { SignedLeasesList } from '@/components/lease/SignedLeasesList';
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
@@ -20,6 +20,9 @@ import { SectionHeader } from '@/components/ui/SectionHeader';
 import { BUILD_TAG } from '@/version';
 import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
 import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
+import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
+import TenantInventory from '@/pages/tenant/TenantInventory';
+import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -79,26 +82,18 @@ export default function EnhancedTenantDashboard() {
 
   const renderTabContent = () => {
     switch (currentTab) {
-      case '/enhancedtenantdashboard/properties':
+      case '/enhancedtenantdashboard/viewings':
+        return <TenantPropertyViewings />;
+      case '/enhancedtenantdashboard/inventory':
+        return <TenantInventory />;
+      case '/enhancedtenantdashboard/maintenance':
+        return <TenantMaintenance />;
+      case '/enhancedtenantdashboard/proof-of-payment':
+        return <TenantProofOfPayment />;
+      case '/enhancedtenantdashboard/contracts':
         return (
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-6">
-              <Building className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Browse Properties</h2>
-            </div>
-            <Card>
-              <CardContent className="p-8 text-center">
-                <Building className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold mb-2">Available Properties</h3>
-                <p className="text-muted-foreground mb-4">
-                  Browse and apply for rental properties
-                </p>
-                <Button onClick={() => navigate('/properties')}>
-                  <Building className="h-4 w-4 mr-2" />
-                  View All Properties
-                </Button>
-              </CardContent>
-            </Card>
+            <SignedLeasesList role="tenant" />
           </div>
         );
       case '/enhancedtenantdashboard/applications':
@@ -109,18 +104,6 @@ export default function EnhancedTenantDashboard() {
               <h2 className="text-xl font-bold">Applications</h2>
             </div>
             <TenantApplicationsSection />
-          </div>
-        );
-      case '/enhancedtenantdashboard/leases':
-        return (
-          <div className="space-y-6">
-            <SignedLeasesList role="tenant" />
-          </div>
-        );
-      case '/enhancedtenantdashboard/maintenance':
-        return (
-          <div className="space-y-6">
-            <TenantMaintenance />
           </div>
         );
       case '/enhancedtenantdashboard/profile':
@@ -198,32 +181,41 @@ export default function EnhancedTenantDashboard() {
         {/* Quick Actions Section */}
         <div className="mt-12">
           <SectionHeader title="Quick Actions" className="mb-4" />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/properties')}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/viewings')}>
               <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-brand.blue/10 text-brand.blue grid place-content-center mb-2">
-                  <Home className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-xl bg-ocean-blue/10 text-ocean-blue grid place-content-center mb-2">
+                  <Eye className="h-5 w-5" />
                 </div>
-                <h4 className="font-semibold">Browse Properties</h4>
-                <p className="text-sm text-brand.gray500">Find your next home</p>
+                <h4 className="font-semibold">Viewings</h4>
+                <p className="text-sm text-brand.gray500">Manage property viewings</p>
+              </div>
+            </GlassCard>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/inventory')}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-success-green/10 text-success-green grid place-content-center mb-2">
+                  <Clipboard className="h-5 w-5" />
+                </div>
+                <h4 className="font-semibold">Inventory</h4>
+                <p className="text-sm text-brand.gray500">Property condition records</p>
               </div>
             </GlassCard>
             <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/messages')}>
               <div className="text-brand.gray900">
                 <div className="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 grid place-content-center mb-2">
-                  <div className="h-5 w-5 bg-blue-600 rounded-full"></div>
+                  <MessageSquare className="h-5 w-5" />
                 </div>
                 <h4 className="font-semibold">Messages</h4>
                 <p className="text-sm text-brand.gray500">Chat with landlords</p>
               </div>
             </GlassCard>
-            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/maintenance')}>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/proof-of-payment')}>
               <div className="text-brand.gray900">
-                <div className="h-10 w-10 rounded-xl bg-brand.blue/10 text-brand.blue grid place-content-center mb-2">
-                  <Settings className="h-5 w-5" />
+                <div className="h-10 w-10 rounded-xl bg-earth-warm/10 text-earth-warm grid place-content-center mb-2">
+                  <Receipt className="h-5 w-5" />
                 </div>
-                <h4 className="font-semibold">Report Issue</h4>
-                <p className="text-sm text-brand.gray500">Submit maintenance request</p>
+                <h4 className="font-semibold">Proof of Payment</h4>
+                <p className="text-sm text-brand.gray500">Upload payment documents</p>
               </div>
             </GlassCard>
           </div>

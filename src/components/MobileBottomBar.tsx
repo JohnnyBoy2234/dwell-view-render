@@ -11,6 +11,13 @@ export function MobileBottomBar() {
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { unreadCount: notificationUnread } = useNotifications();
+  
+  // Debug: Log the actual values
+  console.log('MobileBottomBar Debug:');
+  console.log('- messageUnread:', messageUnread, '(type:', typeof messageUnread, ')');
+  console.log('- notificationUnread:', notificationUnread, '(type:', typeof notificationUnread, ')');
+  console.log('- messageUnread || 0:', messageUnread || 0);
+  console.log('- notificationUnread || 0:', notificationUnread || 0);
   const [searchParams] = useSearchParams();
   
   // Hide bottom bar only when in a specific conversation
@@ -26,8 +33,8 @@ export function MobileBottomBar() {
   ];
 
   const rightNavItems = [
-    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread, authRequired: true },
+    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread || 0, authRequired: true },
     { path: '/auth', icon: User, label: 'Desk' }
   ];
 
@@ -38,7 +45,12 @@ export function MobileBottomBar() {
     const IconComponent = item.icon;
     const isActive = location.pathname === item.path || 
       (item.path === '/messages' && location.pathname.startsWith('/messages')) ||
-      (item.path === '/notifications' && location.pathname.startsWith('/notifications'));
+      (item.path === '/notifications' && location.pathname.startsWith('/notifications')) ||
+      (item.path === '/auth' && (location.pathname.startsWith('/auth') || 
+        location.pathname.startsWith('/enhancedlandlorddashboard') || 
+        location.pathname.startsWith('/enhancedtenantdashboard') ||
+        location.pathname.startsWith('/dashboard') ||
+        location.pathname.startsWith('/tenant-dashboard')));
 
     return (
       <Link
@@ -46,18 +58,21 @@ export function MobileBottomBar() {
         to={item.path}
         className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
           isActive
-            ? 'text-green-700'
+            ? 'text-white bg-black/20'
             : 'text-white/80 hover:text-white'
         }`}
       >
         <div className="relative">
-          <IconComponent className="h-5 w-5" />
-            {item.showBadge && item.badgeCount > 0 && (
+          <IconComponent className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
+            {item.showBadge && item.badgeCount && item.badgeCount > 0 && (
               <Badge 
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {item.badgeCount > 9 ? '9+' : item.badgeCount}
+                {(() => {
+                  console.log(`Badge for ${item.label}: badgeCount = ${item.badgeCount}, showBadge = ${item.showBadge}`);
+                  return item.badgeCount > 9 ? '9+' : item.badgeCount;
+                })()}
               </Badge>
             )}
         </div>
@@ -76,14 +91,14 @@ export function MobileBottomBar() {
           to="/list-property"
           className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
             location.pathname === '/list-property'
-              ? 'text-green-700'
+              ? 'text-white bg-black/20'
               : 'text-white/80 hover:text-white'
           }`}
         >
           <div className="relative">
             <div className="w-8 h-8 bg-primary/95 border border-white/30 rounded-lg flex items-center justify-center">
               <Plus className={`h-4 w-4 ${
-                location.pathname === '/list-property' ? 'text-green-700' : 'text-white'
+                location.pathname === '/list-property' ? 'text-white' : 'text-white'
               }`} />
             </div>
           </div>
