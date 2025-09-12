@@ -137,13 +137,8 @@ export default function EnhancedTenantDashboard() {
     if (loading) {
       return (
         <div className="space-y-6 relative">
-          {/* bg blobs */}
-          <div aria-hidden className="pointer-events-none absolute -z-10 inset-0 overflow-hidden">
-            <div className="absolute -top-16 -left-16 h-64 w-64 rounded-full bg-gradient-to-br from-brand.blue to-brand.green blur-3xl opacity-20"></div>
-            <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-gradient-to-tr from-brand.green to-brand.blue blur-3xl opacity-10"></div>
-          </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
+            {[...Array(3)].map((_, i) => (
               <div key={i} className="rounded-xl bg-white/50 backdrop-blur-sm animate-pulse h-40 shadow-soft"></div>
             ))}
           </div>
