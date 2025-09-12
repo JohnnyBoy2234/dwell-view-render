@@ -77,7 +77,8 @@ const App = () => (
             <Route path="/docusign-redirect" element={<DocuSignRedirect />} />
             
             {/* Enhanced Dashboard Routes */}
-            <Route path="/enhancedtenantdashboard/*" element={<EnhancedTenantDashboard />} />
+            <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
+            <Route path="/tenant/*" element={<TenantDashboardRoutes />} />
             <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
             {/* Standalone maintenance ticket route for cross-dashboard access */}
             <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
