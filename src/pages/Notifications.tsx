@@ -160,9 +160,19 @@ export default function Notifications() {
   const handleNotificationClick = async (notification: NotificationItem) => {
     // Mark as read (only for real notifications, not synthetic ones)
     if (!notification.isRead && notification.id !== 'messages' && notification.id !== 'leases') {
-      await markAsRead(notification.id);
-      // Refresh notifications to update the count
-      fetchAllNotifications();
+      try {
+        await markAsRead(notification.id);
+        // Update local state immediately
+        setAllNotifications(prev => 
+          prev.map(n => 
+            n.id === notification.id 
+              ? { ...n, isRead: true }
+              : n
+          )
+        );
+      } catch (error) {
+        console.error('Error marking notification as read:', error);
+      }
     }
 
     // Navigate to action URL if available
@@ -172,8 +182,15 @@ export default function Notifications() {
   };
 
   const handleMarkAllAsRead = async () => {
-    await markAllAsRead();
-    fetchAllNotifications();
+    try {
+      await markAllAsRead();
+      // Update local state immediately
+      setAllNotifications(prev => 
+        prev.map(n => ({ ...n, isRead: true }))
+      );
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
   };
 
   if (loading) {

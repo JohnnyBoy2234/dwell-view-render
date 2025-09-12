@@ -27,7 +27,7 @@ export function MobileBottomBar() {
 
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread + messageUnread, authRequired: true },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread, authRequired: true },
     { path: '/auth', icon: User, label: 'Desk' }
   ];
 
