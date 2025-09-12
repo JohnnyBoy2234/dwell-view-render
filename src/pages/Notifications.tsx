@@ -158,8 +158,8 @@ export default function Notifications() {
   };
 
   const handleNotificationClick = async (notification: NotificationItem) => {
-    // Mark as read
-    if (!notification.isRead) {
+    // Mark as read (only for real notifications, not synthetic ones)
+    if (!notification.isRead && notification.id !== 'messages' && notification.id !== 'leases') {
       await markAsRead(notification.id);
       // Refresh notifications to update the count
       fetchAllNotifications();
