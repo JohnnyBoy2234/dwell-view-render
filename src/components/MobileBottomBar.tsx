@@ -10,36 +10,8 @@ export function MobileBottomBar() {
   const location = useLocation();
   const { user } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
-  const { unreadCount: notificationUnread, notifications, markAllAsRead } = useNotifications();
+  const { unreadCount: notificationUnread } = useNotifications();
   
-  // Debug: Always log the values to see what's happening
-  console.log('MobileBottomBar - All values:', {
-    messageUnread,
-    notificationUnread,
-    totalNotifications: notifications?.length,
-    unreadNotifications: notifications?.filter(n => !n.is_read)?.length,
-    notifications: notifications?.map(n => ({ id: n.id, is_read: n.is_read, title: n.title }))
-  });
-
-  // If there are 9+ notifications, let's see what they are
-  if (notifications && notifications.length >= 9) {
-    console.log('Found 9+ notifications, details:', notifications.map(n => ({
-      id: n.id,
-      title: n.title,
-      is_read: n.is_read,
-      created_at: n.created_at
-    })));
-  }
-
-  // Temporary function to clear all notifications
-  const clearAllNotifications = async () => {
-    try {
-      await markAllAsRead();
-      console.log('All notifications marked as read');
-    } catch (error) {
-      console.error('Error clearing notifications:', error);
-    }
-  };
   
   const [searchParams] = useSearchParams();
   
@@ -57,7 +29,7 @@ export function MobileBottomBar() {
 
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: notificationUnread || 0, authRequired: true },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: 0, authRequired: true }, // Temporarily set to 0 to hide the 9+
     { path: '/auth', icon: User, label: 'Desk' }
   ];
 
@@ -92,14 +64,7 @@ export function MobileBottomBar() {
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {(() => {
-                  console.log(`Rendering badge for ${item.label}:`, {
-                    badgeCount: item.badgeCount,
-                    showBadge: item.showBadge,
-                    condition: item.showBadge && item.badgeCount > 0
-                  });
-                  return item.badgeCount > 9 ? '9+' : item.badgeCount;
-                })()}
+                {item.badgeCount > 9 ? '9+' : item.badgeCount}
               </Badge>
             )}
         </div>
@@ -110,15 +75,6 @@ export function MobileBottomBar() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-primary/95 backdrop-blur-md border-t border-primary/20 z-40 md:hidden">
-      {/* Temporary debug button */}
-      {notificationUnread > 0 && (
-        <div className="absolute top-0 left-0 right-0 bg-red-500 text-white text-xs p-1 text-center">
-          <button onClick={clearAllNotifications} className="underline">
-            Clear {notificationUnread} notifications
-          </button>
-        </div>
-      )}
-      
       <div className="flex items-center justify-between px-2 py-2">
         {/* All navigation items with consistent spacing */}
         {leftNavItems.map(renderNavItem)}
