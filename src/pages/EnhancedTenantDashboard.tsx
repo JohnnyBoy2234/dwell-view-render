@@ -16,9 +16,9 @@ import { Home, Building, FileText, Settings, User, Calendar, Eye, Receipt, Clipb
 
 // Custom R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M6 3h8a4 4 0 0 1 4 4v2a4 4 0 0 1-4 4H8v4h6v2H6V3zm2 2v6h6a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H8z"/>
-  </svg>
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
 );
 import { SignedLeasesList } from '@/components/lease/SignedLeasesList';
 import GlassCard from '@/components/ui/GlassCard';
