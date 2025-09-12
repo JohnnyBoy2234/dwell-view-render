@@ -176,32 +176,6 @@ export default function EnhancedTenantDashboard() {
         </div>
 
         <div className="p-4 pb-24 md:pb-4 space-y-4">
-          {/* Quick Stats - iPhone widget style */}
-          <div className="bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40">
-            <div className="flex justify-between items-center mb-3">
-              <div className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">Today</div>
-            </div>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{unreadCount ?? 0}</div>
-                <div className="text-xs text-gray-500">Messages</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{upcomingViewings?.length || 0}</div>
-                <div className="text-xs text-gray-500">Viewings</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{recentMaintenance?.length || 0}</div>
-                <div className="text-xs text-gray-500">Issues</div>
-              </div>
-              <div className="text-center">
-                <div className={`text-2xl font-bold ${rentDue ? 'text-red-600' : 'text-green-600'}`}>
-                  {rentDue ? 'Due' : 'Paid'}
-                </div>
-                <div className="text-xs text-gray-500">Rent</div>
-              </div>
-            </div>
-          </div>
 
           {/* Feature Blocks - iPhone app grid style */}
           <div className="space-y-3">
