@@ -106,8 +106,24 @@ export const TemplateLeaseWorkflow = ({
     customClauses: ''
   });
 
+  // Step-specific validation
+  const isStepValid = (stepNumber: number) => {
+    switch (stepNumber) {
+      case 1: // Basic Info
+        return leaseData.monthlyRent && leaseData.securityDeposit && leaseData.startDate;
+      case 2: // Property Details
+        return leaseData.propertyAddress && leaseData.propertyCity && leaseData.propertyProvince;
+      case 3: // Landlord Details
+        return leaseData.landlordName && leaseData.landlordIdNumber && leaseData.landlordEmail && leaseData.landlordPhone;
+      case 4: // Clauses
+        return true; // Clauses are optional
+      default:
+        return false;
+    }
+  };
+
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (isStepValid(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -181,7 +197,7 @@ export const TemplateLeaseWorkflow = ({
         tenant: {
           name: selectedTenant.name || '',
           id_number: selectedTenant.id_number || '',
-          email: selectedTenant.email || '',
+          email: selectedTenant.email || '', // Use selected tenant's email from application
           phone: selectedTenant.phone || '',
           current_address: selectedTenant.current_address || '',
           occupants: [],
@@ -234,8 +250,10 @@ export const TemplateLeaseWorkflow = ({
           annexures: leaseData.annexures || [],
         },
         branding: {
-          company_name: 'SwiftRent',
-          logo_url: '',
+          logo_url: 'https://swiftrent.co.za/logo.png',
+          primary_hex: '#2563eb',
+          secondary_hex: '#1d4ed8',
+          font_family: 'Helvetica'
         },
         clauses: customClausesPayload,
       };
@@ -252,8 +270,23 @@ export const TemplateLeaseWorkflow = ({
       });
 
       if (error) {
-        console.error('Error generating lease:', error);
-        throw new Error(`Failed to generate lease: ${error.message}`);
+        console.error('Lease generation error:', error);
+        let errorMessage = (error as any)?.message || 'Failed to generate lease';
+        try {
+          const body: any = (error as any)?.context?.body;
+          if (typeof body === 'string') {
+            try {
+              const parsed = JSON.parse(body);
+              errorMessage = parsed.error || parsed.message || errorMessage;
+            } catch {}
+          }
+        } catch {}
+        throw new Error(errorMessage);
+      }
+      
+      if ((data as any)?.error) {
+        console.error('Lease generation data error:', (data as any).error);
+        throw new Error((data as any).error);
       }
 
       console.log("Lease generated successfully:", data);
@@ -314,6 +347,7 @@ export const TemplateLeaseWorkflow = ({
                     value={leaseData.startDate}
                     onChange={(e) => setLeaseData(prev => ({ ...prev, startDate: e.target.value }))}
                     required
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -325,6 +359,7 @@ export const TemplateLeaseWorkflow = ({
                     onChange={(e) => setLeaseData(prev => ({ ...prev, endDate: e.target.value }))}
                     disabled={leaseData.leaseType === 'month-to-month'}
                     required={leaseData.leaseType === 'fixed'}
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -352,6 +387,7 @@ export const TemplateLeaseWorkflow = ({
                     value={leaseData.monthlyRent}
                     onChange={(e) => setLeaseData(prev => ({ ...prev, monthlyRent: e.target.value }))}
                     required
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -363,6 +399,7 @@ export const TemplateLeaseWorkflow = ({
                     value={leaseData.securityDeposit}
                     onChange={(e) => setLeaseData(prev => ({ ...prev, securityDeposit: e.target.value }))}
                     required
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -378,6 +415,7 @@ export const TemplateLeaseWorkflow = ({
                   value={leaseData.dueDay}
                   onChange={(e) => setLeaseData(prev => ({ ...prev, dueDay: e.target.value }))}
                   required
+                  className="border-2 border-gray-300 focus:border-blue-500"
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Enter the day of the month when rent is due (e.g., 1, 15, 30)
@@ -554,10 +592,15 @@ export const TemplateLeaseWorkflow = ({
         </Button>
         
         {currentStep < 4 && (
-          <Button onClick={handleNext}>
-            Next
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          <div className="flex flex-col items-end gap-2">
+            <Button onClick={handleNext} disabled={!isStepValid(currentStep)}>
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            {!isStepValid(currentStep) && (
+              <p className="text-xs text-muted-foreground">Complete required fields to continue</p>
+            )}
+          </div>
         )}
       </div>
     </div>

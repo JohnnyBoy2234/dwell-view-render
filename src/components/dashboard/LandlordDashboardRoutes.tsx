@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
 import LeaseSigningPage from '@/pages/LeaseSigningPage';
+import ProfilePage from '@/components/profile/ProfilePage';
 
 // Placeholder components for missing landlord pages
 function LandlordProperties() {
@@ -118,6 +119,11 @@ export default function LandlordDashboardRoutes() {
       <Route path="leases/:leaseId/sign" element={
         <EnhancedDashboardLayout title="Sign Lease">
           <LeaseSigningPage />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="profile" element={
+        <EnhancedDashboardLayout title="Profile Settings">
+          <ProfilePage />
         </EnhancedDashboardLayout>
       } />
     </Routes>

@@ -13,7 +13,7 @@ export function MessagesCard({ unreadCount }: MessagesCardProps) {
   const navigate = useNavigate();
 
   return (
-    <Card className="hover-scale cursor-pointer shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-success-green-light/30 animate-fade-in" onClick={() => navigate('/tenant-messages')}>
+    <Card className="hover-scale cursor-pointer shadow-medium border-ocean-blue/20 bg-gradient-to-br from-white to-success-green-light/30 animate-fade-in" onClick={() => navigate('/messages')}>
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <div className="relative">

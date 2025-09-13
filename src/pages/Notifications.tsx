@@ -55,7 +55,7 @@ export default function Notifications() {
     }
 
     fetchAllNotifications();
-  }, [user, navigate, notifications, messageUnread, leaseUnread]);
+  }, [user, navigate, messageUnread, leaseUnread]);
 
   const fetchAllNotifications = async () => {
     try {
@@ -103,7 +103,7 @@ export default function Notifications() {
           message: `You have ${leaseUnread} lease notification${leaseUnread > 1 ? 's' : ''}`,
           timestamp: new Date().toISOString(),
           isRead: false,
-          actionUrl: '/enhancedlandlorddashboard/leases',
+          actionUrl: '/enhancedtenantdashboard/leases',
           priority: 'high'
         });
       }
@@ -175,9 +175,38 @@ export default function Notifications() {
       }
     }
 
-    // Navigate to action URL if available
-    if (notification.actionUrl) {
-      navigate(notification.actionUrl);
+    // Navigate based on notification type and action URL
+    let targetUrl = notification.actionUrl;
+
+    // If no action URL, determine based on notification type
+    if (!targetUrl) {
+      switch (notification.type) {
+        case 'message':
+          targetUrl = '/messages';
+          break;
+        case 'lease':
+          targetUrl = '/enhancedtenantdashboard/leases';
+          break;
+        case 'maintenance':
+          targetUrl = '/enhancedtenantdashboard/maintenance';
+          break;
+        case 'payment':
+          targetUrl = '/enhancedtenantdashboard/payments';
+          break;
+        case 'viewing':
+          targetUrl = '/enhancedtenantdashboard/viewings';
+          break;
+        case 'application':
+          targetUrl = '/enhancedtenantdashboard/applications';
+          break;
+        default:
+          targetUrl = '/enhancedtenantdashboard';
+      }
+    }
+
+    // Navigate to the target URL
+    if (targetUrl) {
+      navigate(targetUrl);
     }
   };
 
@@ -242,7 +271,7 @@ export default function Notifications() {
               {allNotifications.map((notification, index) => (
                 <Card 
                   key={notification.id} 
-                  className={`cursor-pointer transition-colors hover:bg-muted/50 ${
+                  className={`cursor-pointer transition-all duration-200 hover:bg-muted/50 hover:shadow-md active:scale-[0.98] ${
                     !notification.isRead ? 'border-l-4 border-l-primary bg-primary/5' : ''
                   }`}
                   onClick={() => handleNotificationClick(notification)}

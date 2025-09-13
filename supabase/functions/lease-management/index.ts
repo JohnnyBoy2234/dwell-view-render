@@ -4,7 +4,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
 }
+
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), { status, headers: corsHeaders })
 
 interface LeaseData {
   landlord: {
@@ -83,50 +88,51 @@ interface LeaseData {
 }
 
 async function generateDefaultLeaseData(propertyId: string, landlordUserId: string, tenantUserId: string | null, supabaseClient: any): Promise<LeaseData> {
-  // Fetch property details
-  const { data: property, error: propertyError } = await supabaseClient
-    .from('properties')
-    .select('*')
-    .eq('id', propertyId)
-    .single()
-
-  if (propertyError) throw new Error(`Property not found: ${propertyError.message}`)
-
-  // Fetch landlord details
-  const { data: landlord, error: landlordError } = await supabaseClient
-    .from('profiles')
-    .select('*')
-    .eq('id', landlordUserId)
-    .single()
-
-  if (landlordError) throw new Error(`Landlord profile not found: ${landlordError.message}`)
-
-  // Fetch tenant details if provided
-  let tenant = null
-  if (tenantUserId) {
-    const { data: tenantData, error: tenantError } = await supabaseClient
-      .from('profiles')
+  try {
+    // Fetch property details
+    const { data: property, error: propertyError } = await supabaseClient
+      .from('properties')
       .select('*')
-      .eq('id', tenantUserId)
+      .eq('id', propertyId)
       .single()
 
-    if (!tenantError) {
-      tenant = tenantData
+    if (propertyError) throw new Error(`Property not found: ${propertyError.message}`)
+
+    // Fetch landlord details
+    const { data: landlord, error: landlordError } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('user_id', landlordUserId)
+      .single()
+
+    if (landlordError) throw new Error(`Landlord profile not found: ${landlordError.message}`)
+
+    // Fetch tenant details if provided
+    let tenant = null
+    if (tenantUserId) {
+      const { data: tenantData, error: tenantError } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('user_id', tenantUserId)
+        .single()
+
+      if (!tenantError) {
+        tenant = tenantData
+      }
     }
-  }
 
   // Default lease data
   const defaultLeaseData: LeaseData = {
     landlord: {
-      name: landlord.full_name || landlord.name || 'Landlord Name',
-      id_number: landlord.id_number || '',
-      company: landlord.company || '',
-      email: landlord.email || '',
-      phone: landlord.phone || '',
-      address: landlord.address || ''
+      name: landlord?.display_name || 'Landlord Name',
+      id_number: landlord?.id_number || '',
+      company: landlord?.company || '',
+      email: landlord?.email || '',
+      phone: landlord?.phone || '',
+      address: landlord?.address || ''
     },
     tenant: {
-      name: tenant?.full_name || tenant?.name || 'Tenant Name',
+      name: tenant?.display_name || 'Tenant Name',
       id_number: tenant?.id_number || '',
       email: tenant?.email || '',
       phone: tenant?.phone || '',
@@ -134,13 +140,13 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       occupants: []
     },
     property: {
-      address: property.address || '',
-      unit: property.unit || '',
-      city: property.city || '',
-      province: property.province || '',
-      postal_code: property.postal_code || '',
-      type: property.property_type || 'apartment',
-      parking: property.parking || 'N/A'
+      address: property?.location || '',
+      unit: property?.unit || '',
+      city: property?.city || '',
+      province: property?.province || '',
+      postal_code: property?.postal_code || '',
+      type: property?.property_type || 'apartment',
+      parking: (property?.parking_spaces && property.parking_spaces > 0) ? `${property.parking_spaces} bay` : 'N/A'
     },
     term: {
       start_date: new Date().toISOString().split('T')[0],
@@ -149,7 +155,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       notice_period_days: 30
     },
     rent: {
-      monthly_rent: property.rent_amount || 0,
+      monthly_rent: property?.price || 0,
       due_day: 1,
       payment_method: 'EFT',
       late_fee_policy: {
@@ -159,7 +165,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       }
     },
     deposit: {
-      amount: property.rent_amount ? property.rent_amount * 2 : 0, // 2 months rent
+      amount: property?.price ? property.price * 2 : 0, // 2 months rent
       return_days: 14
     },
     utilities: {
@@ -189,6 +195,10 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
   }
 
   return defaultLeaseData
+  } catch (error) {
+    console.error('Error in generateDefaultLeaseData:', error)
+    throw new Error(`Failed to generate default lease data: ${error.message}`)
+  }
 }
 
 async function logLeaseAction(supabaseClient: any, leaseId: string, actorUserId: string, action: string, metadata: any = null) {
@@ -204,7 +214,7 @@ async function logLeaseAction(supabaseClient: any, leaseId: string, actorUserId:
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return json(200, { ok: true })
   }
 
   try {
@@ -213,71 +223,97 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const url = new URL(req.url)
-    const pathParts = url.pathname.split('/').filter(part => part)
-    const action = pathParts[pathParts.length - 1]
+    // Parse request body first to get action
+    const requestBody = await req.json()
+    const { action } = requestBody
 
     // Get authorization header
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return new Response(
-        JSON.stringify({ error: 'Authorization header required' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      return json(401, { error: 'Authorization header required' })
     }
 
     // Verify user
+    console.log('Verifying user authentication...')
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
       authHeader.replace('Bearer ', '')
     )
 
     if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: 'Invalid authentication' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+      console.error('User authentication failed:', authError)
+      return json(401, { error: 'Invalid authentication' })
+    }
+    console.log('User authenticated successfully:', user.id)
+
+    if (!action) {
+      return json(400, { error: 'Action is required in request body' })
     }
 
-    const requestBody = await req.json()
-
     switch (action) {
-      case 'generate': {
+      case 'test': {
         const { property_id, tenant_user_id, lease_data } = requestBody
+        return json(200, { 
+          success: true, 
+          message: 'Test endpoint working',
+          received_data: {
+            property_id,
+            tenant_user_id,
+            lease_data_provided: !!lease_data
+          }
+        })
+      }
+      
+      case 'generate': {
+        try {
+          console.log('=== GENERATE CASE STARTED ===')
+          const { property_id, tenant_user_id, lease_data } = requestBody
 
-        if (!property_id) {
-          return new Response(
-            JSON.stringify({ error: 'property_id is required' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
+          console.log('Lease generation request:', { 
+            property_id, 
+            tenant_user_id, 
+            lease_data_provided: !!lease_data,
+            lease_data_keys: lease_data ? Object.keys(lease_data) : 'none'
+          })
+          
+          // 1) Property + owner check (null-safe)
+          if (!property_id) return json(400, { error: 'property_id is required' })
 
-        // Check if user is landlord of this property
-        const { data: property, error: propertyError } = await supabaseClient
-          .from('properties')
-          .select('landlord_id')
-          .eq('id', property_id)
-          .single()
+          const { data: property, error: propertyError } = await supabaseClient
+            .from('properties')
+            .select('landlord_id')
+            .eq('id', property_id)
+            .single()
 
-        if (propertyError || property.landlord_id !== user.id) {
-          return new Response(
-            JSON.stringify({ error: 'Property not found or access denied' }),
-            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
+          if (propertyError || !property) return json(404, { error: 'Property not found' })
+          if (property.landlord_id !== user.id) return json(403, { error: 'Access denied' })
+          
+          console.log('About to check if lease_data exists...')
+          
+          if (lease_data) {
+            console.log('Lease data structure:', {
+              landlord: lease_data.landlord ? Object.keys(lease_data.landlord) : 'missing',
+              tenant: lease_data.tenant ? Object.keys(lease_data.tenant) : 'missing',
+              property: lease_data.property ? Object.keys(lease_data.property) : 'missing',
+              term: lease_data.term ? Object.keys(lease_data.term) : 'missing',
+              rent: lease_data.rent ? Object.keys(lease_data.rent) : 'missing',
+              deposit: lease_data.deposit ? Object.keys(lease_data.deposit) : 'missing',
+              branding: lease_data.branding ? Object.keys(lease_data.branding) : 'missing'
+            })
+          }
 
         // Check for existing active lease
-        const { data: existingLease } = await supabaseClient
+        const { data: existingLease, error: existingErr } = await supabaseClient
           .from('leases')
           .select('*')
           .eq('property_id', property_id)
           .in('status', ['DRAFT', 'PENDING_TENANT_SIGNATURE', 'PENDING_LANDLORD_SIGNATURE'])
           .order('version', { ascending: false })
           .limit(1)
-          .single()
+          .maybeSingle()
 
         let version = 1
-        if (existingLease) {
-          version = existingLease.version + 1
+        if (!existingErr && existingLease) {
+          version = (existingLease.version ?? 0) + 1
           // Cancel existing lease
           await supabaseClient
             .from('leases')
@@ -287,15 +323,84 @@ serve(async (req) => {
 
         // Generate lease data
         const finalLeaseData = lease_data || await generateDefaultLeaseData(property_id, user.id, tenant_user_id, supabaseClient)
+        
+        // Validate lease data structure
+        if (lease_data) {
+          const requiredFields = ['landlord', 'tenant', 'property', 'term', 'rent', 'deposit', 'branding']
+          console.log('Validating required fields:', requiredFields)
+          console.log('lease_data keys:', Object.keys(lease_data))
+          console.log('lease_data values check:', {
+            landlord: !!lease_data.landlord,
+            tenant: !!lease_data.tenant,
+            property: !!lease_data.property,
+            term: !!lease_data.term,
+            rent: !!lease_data.rent,
+            deposit: !!lease_data.deposit,
+            branding: !!lease_data.branding
+          })
+          
+          const missingFields = requiredFields.filter(field => !lease_data[field])
+          
+          if (missingFields.length > 0) {
+            console.error('Missing required lease data fields:', missingFields)
+            return new Response(
+              JSON.stringify({ error: `Missing required fields: ${missingFields.join(', ')}` }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          // Validate numeric values
+          if (lease_data.rent && (isNaN(lease_data.rent.monthly_rent) || lease_data.rent.monthly_rent <= 0)) {
+            console.error('Invalid monthly rent:', lease_data.rent.monthly_rent)
+            return new Response(
+              JSON.stringify({ error: 'Invalid monthly rent amount' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          if (lease_data.deposit && (isNaN(lease_data.deposit.amount) || lease_data.deposit.amount < 0)) {
+            console.error('Invalid deposit amount:', lease_data.deposit.amount)
+            return new Response(
+              JSON.stringify({ error: 'Invalid deposit amount' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          // Validate branding structure
+          if (lease_data.branding) {
+            const requiredBrandingFields = ['logo_url', 'primary_hex', 'secondary_hex', 'font_family']
+            const missingBrandingFields = requiredBrandingFields.filter(field => !lease_data.branding[field])
+            
+            if (missingBrandingFields.length > 0) {
+              console.error('Missing required branding fields:', missingBrandingFields)
+              return new Response(
+                JSON.stringify({ error: `Missing branding fields: ${missingBrandingFields.join(', ')}` }),
+                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              )
+            }
+          }
+        }
 
         // Generate PDF
+        console.log('Generating PDF with data:', { 
+          version, 
+          lease_data_keys: Object.keys(finalLeaseData),
+          lease_data_structure: JSON.stringify(finalLeaseData, null, 2)
+        })
         const { data: pdfResponse, error: pdfError } = await supabaseClient.functions.invoke('generate-lease-pdf', {
           body: { lease_data: finalLeaseData, version }
         })
 
         if (pdfError) {
-          throw new Error(`PDF generation failed: ${pdfError.message}`)
+          console.error('PDF generation error:', pdfError)
+          return json(502, { error: `PDF generation failed: ${pdfError.message}` })
         }
+
+        if (!pdfResponse || typeof (pdfResponse as any).pdf_url !== 'string') {
+          return json(502, { error: 'PDF generation failed: no pdf_url in response' })
+        }
+
+        console.log('PDF generated successfully:', pdfResponse)
 
         // Create lease record
         const { data: lease, error: leaseError } = await supabaseClient
@@ -319,20 +424,22 @@ serve(async (req) => {
         // Log action
         await logLeaseAction(supabaseClient, lease.id, user.id, 'GENERATED', { version })
 
-        return new Response(
-          JSON.stringify({ success: true, lease }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return json(200, { success: true, lease })
+        } catch (error) {
+          console.error('Error in lease generation:', error)
+          console.error('Error stack:', error.stack)
+          return json(500, { 
+            error: (error as any)?.message || 'Lease generation failed',
+            details: (error as any)?.toString(),
+          })
+        }
       }
 
       case 'sign': {
         const { lease_id, role, signature_png_base64 } = requestBody
 
         if (!lease_id || !role || !signature_png_base64) {
-          return new Response(
-            JSON.stringify({ error: 'lease_id, role, and signature_png_base64 are required' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(400, { error: 'lease_id, role, and signature_png_base64 are required' })
         }
 
         // Get lease
@@ -343,10 +450,7 @@ serve(async (req) => {
           .single()
 
         if (leaseError) {
-          return new Response(
-            JSON.stringify({ error: 'Lease not found' }),
-            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(404, { error: 'Lease not found' })
         }
 
         // Verify user can sign for this role
@@ -354,10 +458,7 @@ serve(async (req) => {
                        (role === 'TENANT' && lease.tenant_user_id === user.id)
 
         if (!canSign) {
-          return new Response(
-            JSON.stringify({ error: 'Access denied' }),
-            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(403, { error: 'Access denied' })
         }
 
         // Check if already signed
@@ -369,10 +470,7 @@ serve(async (req) => {
           .single()
 
         if (existingSignature && existingSignature.signed_at) {
-          return new Response(
-            JSON.stringify({ error: 'Already signed' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(400, { error: 'Already signed' })
         }
 
         // Upload signature image
@@ -433,7 +531,8 @@ serve(async (req) => {
           .not('signed_at', 'is', null)
 
         let newStatus = lease.status
-        if (allSignatures.length === 2) {
+        const signedCount = Array.isArray(allSignatures) ? allSignatures.length : 0
+        if (signedCount === 2) {
           newStatus = 'COMPLETED'
           // TODO: Generate final signed PDF here
         } else if (role === 'LANDLORD') {
@@ -450,20 +549,14 @@ serve(async (req) => {
         // Log action
         await logLeaseAction(supabaseClient, lease_id, user.id, 'SIGNED', { role })
 
-        return new Response(
-          JSON.stringify({ success: true, status: newStatus }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return json(200, { success: true, status: newStatus })
       }
 
       case 'request-changes': {
         const { lease_id, reason } = requestBody
 
         if (!lease_id || !reason) {
-          return new Response(
-            JSON.stringify({ error: 'lease_id and reason are required' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(400, { error: 'lease_id and reason are required' })
         }
 
         // Get lease
@@ -474,20 +567,14 @@ serve(async (req) => {
           .single()
 
         if (leaseError) {
-          return new Response(
-            JSON.stringify({ error: 'Lease not found' }),
-            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(404, { error: 'Lease not found' })
         }
 
         // Verify user can request changes
         const canRequestChanges = lease.landlord_user_id === user.id || lease.tenant_user_id === user.id
 
         if (!canRequestChanges) {
-          return new Response(
-            JSON.stringify({ error: 'Access denied' }),
-            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(403, { error: 'Access denied' })
         }
 
         // Update status
@@ -499,20 +586,14 @@ serve(async (req) => {
         // Log action
         await logLeaseAction(supabaseClient, lease_id, user.id, 'REQUESTED_CHANGES', { reason })
 
-        return new Response(
-          JSON.stringify({ success: true }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return json(200, { success: true })
       }
 
       case 'cancel': {
         const { lease_id } = requestBody
 
         if (!lease_id) {
-          return new Response(
-            JSON.stringify({ error: 'lease_id is required' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(400, { error: 'lease_id is required' })
         }
 
         // Get lease
@@ -523,18 +604,12 @@ serve(async (req) => {
           .single()
 
         if (leaseError) {
-          return new Response(
-            JSON.stringify({ error: 'Lease not found' }),
-            { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(404, { error: 'Lease not found' })
         }
 
         // Only landlord can cancel
         if (lease.landlord_user_id !== user.id) {
-          return new Response(
-            JSON.stringify({ error: 'Only landlord can cancel lease' }),
-            { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+          return json(403, { error: 'Only landlord can cancel lease' })
         }
 
         // Can only cancel if no signatures yet
@@ -544,11 +619,9 @@ serve(async (req) => {
           .eq('lease_id', lease_id)
           .not('signed_at', 'is', null)
 
-        if (signatures.length > 0) {
-          return new Response(
-            JSON.stringify({ error: 'Cannot cancel lease with existing signatures' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
+        const hasSignatures = Array.isArray(signatures) && signatures.length > 0
+        if (hasSignatures) {
+          return json(400, { error: 'Cannot cancel lease with existing signatures' })
         }
 
         // Update status
@@ -560,23 +633,31 @@ serve(async (req) => {
         // Log action
         await logLeaseAction(supabaseClient, lease_id, user.id, 'CANCELED')
 
-        return new Response(
-          JSON.stringify({ success: true }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return json(200, { success: true })
       }
 
       default:
-        return new Response(
-          JSON.stringify({ error: 'Invalid action' }),
-          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        )
+        return json(400, { error: 'Invalid action' })
     }
 
   } catch (error) {
     console.error('Error in lease management:', error)
+    console.error('Error stack:', error.stack)
+    
+    // Ensure we always return valid JSON
+    let errorMessage = 'Unknown error occurred'
+    try {
+      errorMessage = error.message || error.toString() || 'Unknown error occurred'
+    } catch (e) {
+      errorMessage = 'Error occurred but could not be serialized'
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: errorMessage,
+        type: 'internal_server_error',
+        timestamp: new Date().toISOString()
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 

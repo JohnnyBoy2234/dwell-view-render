@@ -46,7 +46,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
-          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.10] via-background/80 to-success-green/[0.10] backdrop-blur-sm">
+          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.15] via-background/95 to-success-green/[0.15] backdrop-blur-md">
             <SidebarTrigger className="md:hidden mr-3">
               <Menu className="h-5 w-5" />
             </SidebarTrigger>

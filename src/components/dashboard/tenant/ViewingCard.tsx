@@ -64,7 +64,7 @@ export function ViewingCard({ upcomingViewings }: ViewingCardProps) {
               variant="ghost" 
               size="sm"
               className="w-full text-earth-warm hover:bg-earth-warm/10"
-              onClick={() => navigate('/tenant-dashboard?tab=viewings')}
+              onClick={() => navigate('/tenant/viewings')}
             >
               View All Viewings
               <ArrowRight className="h-4 w-4 ml-1" />
