@@ -168,7 +168,36 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
     return true;
   }, [landlord, tenants, premises, rent, deposit, term, landlordBank]);
 
-  const next = () => setStep((s) => Math.min(7, s + 1));
+  // Step-specific validation
+  const isStepValid = (stepNumber: number) => {
+    switch (stepNumber) {
+      case 1: // Parties
+        return landlord.fullName && landlord.idNumber && landlord.email && landlord.phone && landlord.address &&
+               tenants.length > 0 && tenants.every(t => t.fullName && t.idNumber && t.address);
+      case 2: // Premises
+        return premises.address && premises.maxOccupants && premises.maxOccupants >= 1;
+      case 3: // Rent
+        return rent.amount && deposit.amount;
+      case 4: // Term
+        return term.startDate && term.endDate;
+      case 5: // Banking
+        return landlordBank.bank && landlordBank.holder && landlordBank.number && landlordBank.branch && landlordBank.type;
+      case 6: // Clauses
+        return true; // Clauses are optional
+      case 7: // Review
+        return valid;
+      default:
+        return false;
+    }
+  };
+
+  const next = () => {
+    if (isStepValid(step) && step < 7) {
+      setStep(step + 1);
+    } else {
+      toast.error("Please complete all required fields before proceeding");
+    }
+  };
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   const handleAddTenant = () => setTenants((ts) => [...ts, { fullName: "", idNumber: "", email: "", phone: "", address: "" }]);
@@ -210,7 +239,7 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
         tenant: {
           name: tenants[0]?.fullName || '',
           id_number: tenants[0]?.idNumber || '',
-          email: tenants[0]?.email || '',
+          email: selectedTenant?.email || '', // Use selected tenant's email from application
           phone: tenants[0]?.phone || '',
           current_address: tenants[0]?.address || '',
           occupants: tenants.slice(1).map(t => ({
@@ -356,13 +385,12 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
                 <Button variant="outline" size="sm" onClick={handleAddTenant}>Add Tenant</Button>
               </div>
               {tenants.map((t, idx) => (
-                <div key={idx} className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3 border rounded-lg">
-                  <Input placeholder="Full Name" value={t.fullName} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, fullName: e.target.value }: x))} />
-                  <Input placeholder="ID/Passport" value={t.idNumber} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, idNumber: e.target.value }: x))} />
-                  <Input placeholder="Email" type="email" value={t.email} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, email: e.target.value }: x))} />
-                  <Input placeholder="Cell" value={t.phone} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, phone: e.target.value }: x))} />
+                <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 border rounded-lg">
+                  <Input placeholder="Full Name" value={t.fullName} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, fullName: e.target.value }: x))} required />
+                  <Input placeholder="ID/Passport" value={t.idNumber} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, idNumber: e.target.value }: x))} required />
+                  <Input placeholder="Cell (optional)" value={t.phone} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, phone: e.target.value }: x))} />
                   <div className="md:col-span-2">
-                    <Textarea placeholder="Tenant Address (domicilium)" value={t.address} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, address: e.target.value }: x))} />
+                    <Textarea placeholder="Tenant Address (domicilium)" value={t.address} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, address: e.target.value }: x))} required />
                   </div>
                 </div>
               ))}

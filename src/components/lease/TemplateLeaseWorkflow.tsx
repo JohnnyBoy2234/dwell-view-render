@@ -106,9 +106,27 @@ export const TemplateLeaseWorkflow = ({
     customClauses: ''
   });
 
+  // Step-specific validation
+  const isStepValid = (stepNumber: number) => {
+    switch (stepNumber) {
+      case 1: // Basic Info
+        return leaseData.monthlyRent && leaseData.securityDeposit && leaseData.startDate;
+      case 2: // Property Details
+        return leaseData.propertyAddress && leaseData.propertyCity && leaseData.propertyProvince;
+      case 3: // Landlord Details
+        return leaseData.landlordName && leaseData.landlordIdNumber && leaseData.landlordEmail && leaseData.landlordPhone;
+      case 4: // Clauses
+        return true; // Clauses are optional
+      default:
+        return false;
+    }
+  };
+
   const handleNext = () => {
-    if (currentStep < 4) {
+    if (isStepValid(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
+    } else {
+      toast.error("Please complete all required fields before proceeding");
     }
   };
 
@@ -181,7 +199,7 @@ export const TemplateLeaseWorkflow = ({
         tenant: {
           name: selectedTenant.name || '',
           id_number: selectedTenant.id_number || '',
-          email: selectedTenant.email || '',
+          email: selectedTenant.email || '', // Use selected tenant's email from application
           phone: selectedTenant.phone || '',
           current_address: selectedTenant.current_address || '',
           occupants: [],
