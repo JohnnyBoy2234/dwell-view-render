@@ -10,6 +10,7 @@ import { ArrowLeft, ArrowRight, Calendar, Banknote, Users, Home, FileText, Check
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { AddressAutocomplete } from "@/components/ui/address-autocomplete";
 
 interface SwiftRentLeaseWizardProps {
   propertyId: string;
@@ -333,7 +334,17 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
 
       if (error) {
         console.error('Lease generation error:', error);
-        throw new Error(error.message || 'Failed to generate lease');
+        // Try to get the actual error message from the response
+        let errorMessage = 'Failed to generate lease';
+        try {
+          if (error.context?.body) {
+            const errorBody = JSON.parse(error.context.body);
+            errorMessage = errorBody.error || errorMessage;
+          }
+        } catch (e) {
+          console.log('Could not parse error body:', e);
+        }
+        throw new Error(errorMessage);
       }
       
       if ((data as any)?.error) {
@@ -381,24 +392,50 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Landlord Full Name</Label>
-                <Input value={landlord.fullName} onChange={(e) => setLandlord({ ...landlord, fullName: e.target.value })} required />
+                <Label className="text-sm font-medium text-gray-700">Landlord Full Name</Label>
+                <Input 
+                  value={landlord.fullName} 
+                  onChange={(e) => setLandlord({ ...landlord, fullName: e.target.value })} 
+                  required 
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div>
-                <Label>Landlord ID/Passport</Label>
-                <Input value={landlord.idNumber} onChange={(e) => setLandlord({ ...landlord, idNumber: e.target.value })} required />
+                <Label className="text-sm font-medium text-gray-700">Landlord ID/Passport</Label>
+                <Input 
+                  value={landlord.idNumber} 
+                  onChange={(e) => setLandlord({ ...landlord, idNumber: e.target.value })} 
+                  required 
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div>
-                <Label>Landlord Email</Label>
-                <Input type="email" value={landlord.email} onChange={(e) => setLandlord({ ...landlord, email: e.target.value })} required />
+                <Label className="text-sm font-medium text-gray-700">Landlord Email</Label>
+                <Input 
+                  type="email" 
+                  value={landlord.email} 
+                  onChange={(e) => setLandlord({ ...landlord, email: e.target.value })} 
+                  required 
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div>
-                <Label>Landlord Cell</Label>
-                <Input value={landlord.phone} onChange={(e) => setLandlord({ ...landlord, phone: e.target.value })} required />
+                <Label className="text-sm font-medium text-gray-700">Landlord Cell</Label>
+                <Input 
+                  value={landlord.phone} 
+                  onChange={(e) => setLandlord({ ...landlord, phone: e.target.value })} 
+                  required 
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div className="md:col-span-2">
-                <Label>Landlord Address (domicilium)</Label>
-                <Textarea value={landlord.address} onChange={(e) => setLandlord({ ...landlord, address: e.target.value })} required />
+                <Label className="text-sm font-medium text-gray-700">Landlord Address (domicilium)</Label>
+                <AddressAutocomplete
+                  value={landlord.address}
+                  onChange={(value) => setLandlord({ ...landlord, address: value })}
+                  placeholder="Enter your full address"
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
             </div>
 
@@ -409,11 +446,34 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
               </div>
               {tenants.map((t, idx) => (
                 <div key={idx} className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 border rounded-lg">
-                  <Input placeholder="Full Name" value={t.fullName} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, fullName: e.target.value }: x))} required />
-                  <Input placeholder="ID/Passport" value={t.idNumber} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, idNumber: e.target.value }: x))} required />
-                  <Input placeholder="Cell (optional)" value={t.phone} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, phone: e.target.value }: x))} />
+                  <Input 
+                    placeholder="Full Name" 
+                    value={t.fullName} 
+                    onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, fullName: e.target.value }: x))} 
+                    required 
+                    className="border-2 border-gray-300 focus:border-blue-500"
+                  />
+                  <Input 
+                    placeholder="ID/Passport" 
+                    value={t.idNumber} 
+                    onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, idNumber: e.target.value }: x))} 
+                    required 
+                    className="border-2 border-gray-300 focus:border-blue-500"
+                  />
+                  <Input 
+                    placeholder="Cell (optional)" 
+                    value={t.phone} 
+                    onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, phone: e.target.value }: x))} 
+                    className="border-2 border-gray-300 focus:border-blue-500"
+                  />
                   <div className="md:col-span-2">
-                    <Textarea placeholder="Tenant Address (domicilium)" value={t.address} onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, address: e.target.value }: x))} required />
+                    <Textarea 
+                      placeholder="Tenant Address (domicilium)" 
+                      value={t.address} 
+                      onChange={(e) => setTenants(ts => ts.map((x,i) => i===idx? { ...x, address: e.target.value }: x))} 
+                      required 
+                      className="border-2 border-gray-300 focus:border-blue-500"
+                    />
                   </div>
                 </div>
               ))}
@@ -428,16 +488,32 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Premises Address</Label>
-                <Input value={premises.address} onChange={(e) => setPremises({ ...premises, address: e.target.value })} required />
+                <Label className="text-sm font-medium text-gray-700">Premises Address</Label>
+                <AddressAutocomplete
+                  value={premises.address}
+                  onChange={(value) => setPremises({ ...premises, address: value })}
+                  placeholder="Enter property address"
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div>
-                <Label>Garage/Parking No.</Label>
-                <Input value={premises.parkingNo} onChange={(e) => setPremises({ ...premises, parkingNo: e.target.value })} />
+                <Label className="text-sm font-medium text-gray-700">Garage/Parking No.</Label>
+                <Input 
+                  value={premises.parkingNo} 
+                  onChange={(e) => setPremises({ ...premises, parkingNo: e.target.value })} 
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div>
-                <Label>Max Occupants</Label>
-                <Input type="number" min={1} value={premises.maxOccupants} onChange={(e) => setPremises({ ...premises, maxOccupants: parseInt(e.target.value || '1', 10) })} required />
+                <Label className="text-sm font-medium text-gray-700">Max Occupants</Label>
+                <Input 
+                  type="number" 
+                  min={1} 
+                  value={premises.maxOccupants} 
+                  onChange={(e) => setPremises({ ...premises, maxOccupants: parseInt(e.target.value || '1', 10) })} 
+                  required 
+                  className="border-2 border-gray-300 focus:border-blue-500"
+                />
               </div>
               <div className="flex items-center gap-2">
                 <Checkbox checked={premises.petsAllowed} onCheckedChange={(v: any) => setPremises({ ...premises, petsAllowed: !!v })} />

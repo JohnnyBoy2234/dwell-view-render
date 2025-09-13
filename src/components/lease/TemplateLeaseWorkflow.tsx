@@ -337,6 +337,7 @@ export const TemplateLeaseWorkflow = ({
                     value={leaseData.startDate}
                     onChange={(e) => setLeaseData(prev => ({ ...prev, startDate: e.target.value }))}
                     required
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -348,6 +349,7 @@ export const TemplateLeaseWorkflow = ({
                     onChange={(e) => setLeaseData(prev => ({ ...prev, endDate: e.target.value }))}
                     disabled={leaseData.leaseType === 'month-to-month'}
                     required={leaseData.leaseType === 'fixed'}
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -375,6 +377,7 @@ export const TemplateLeaseWorkflow = ({
                     value={leaseData.monthlyRent}
                     onChange={(e) => setLeaseData(prev => ({ ...prev, monthlyRent: e.target.value }))}
                     required
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
                 <div>
@@ -386,6 +389,7 @@ export const TemplateLeaseWorkflow = ({
                     value={leaseData.securityDeposit}
                     onChange={(e) => setLeaseData(prev => ({ ...prev, securityDeposit: e.target.value }))}
                     required
+                    className="border-2 border-gray-300 focus:border-blue-500"
                   />
                 </div>
               </div>
@@ -401,6 +405,7 @@ export const TemplateLeaseWorkflow = ({
                   value={leaseData.dueDay}
                   onChange={(e) => setLeaseData(prev => ({ ...prev, dueDay: e.target.value }))}
                   required
+                  className="border-2 border-gray-300 focus:border-blue-500"
                 />
                 <p className="text-sm text-muted-foreground mt-1">
                   Enter the day of the month when rent is due (e.g., 1, 15, 30)
