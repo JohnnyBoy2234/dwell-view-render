@@ -194,8 +194,6 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
   const next = () => {
     if (isStepValid(step) && step < 7) {
       setStep(step + 1);
-    } else {
-      toast.error("Please complete all required fields before proceeding");
     }
   };
   const prev = () => setStep((s) => Math.max(1, s - 1));
@@ -591,7 +589,14 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
       <div className="flex justify-between">
         <Button variant="outline" onClick={prev} disabled={step === 1}>Previous</Button>
         {step < 7 && (
-          <Button onClick={next}>Next<ArrowRight className="h-4 w-4 ml-2" /></Button>
+          <div className="flex flex-col items-end gap-2">
+            <Button onClick={next} disabled={!isStepValid(step)}>
+              Next<ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            {!isStepValid(step) && (
+              <p className="text-xs text-muted-foreground">Complete required fields to continue</p>
+            )}
+          </div>
         )}
       </div>
     </div>

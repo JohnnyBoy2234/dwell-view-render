@@ -125,8 +125,6 @@ export const TemplateLeaseWorkflow = ({
   const handleNext = () => {
     if (isStepValid(currentStep) && currentStep < 4) {
       setCurrentStep(currentStep + 1);
-    } else {
-      toast.error("Please complete all required fields before proceeding");
     }
   };
 
@@ -574,10 +572,15 @@ export const TemplateLeaseWorkflow = ({
         </Button>
         
         {currentStep < 4 && (
-          <Button onClick={handleNext}>
-            Next
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
+          <div className="flex flex-col items-end gap-2">
+            <Button onClick={handleNext} disabled={!isStepValid(currentStep)}>
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+            {!isStepValid(currentStep) && (
+              <p className="text-xs text-muted-foreground">Complete required fields to continue</p>
+            )}
+          </div>
         )}
       </div>
     </div>
