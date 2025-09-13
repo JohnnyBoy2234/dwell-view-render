@@ -232,16 +232,19 @@ serve(async (req) => {
     }
 
     // Verify user
+    console.log('Verifying user authentication...')
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
       authHeader.replace('Bearer ', '')
     )
 
     if (authError || !user) {
+      console.error('User authentication failed:', authError)
       return new Response(
         JSON.stringify({ error: 'Invalid authentication' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+    console.log('User authenticated successfully:', user.id)
 
     if (!action) {
       return new Response(
@@ -269,6 +272,7 @@ serve(async (req) => {
       
       case 'generate': {
         try {
+          console.log('=== GENERATE CASE STARTED ===')
           const { property_id, tenant_user_id, lease_data } = requestBody
 
           console.log('Lease generation request:', { 
@@ -278,6 +282,23 @@ serve(async (req) => {
             lease_data_keys: lease_data ? Object.keys(lease_data) : 'none'
           })
           
+          // For now, just return success to test if the function is reachable
+          return new Response(
+            JSON.stringify({ 
+              success: true, 
+              message: 'Lease generation endpoint reached successfully',
+              received_data: {
+                property_id,
+                tenant_user_id,
+                has_lease_data: !!lease_data
+              }
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+          
+          console.log('About to check if lease_data exists...')
+          
+          /* COMMENTED OUT FOR TESTING
           if (lease_data) {
             console.log('Lease data structure:', {
               landlord: lease_data.landlord ? Object.keys(lease_data.landlord) : 'missing',
@@ -448,6 +469,7 @@ serve(async (req) => {
           )
         }
       }
+      */ // END COMMENTED OUT FOR TESTING
 
       case 'sign': {
         const { lease_id, role, signature_png_base64 } = requestBody
@@ -699,8 +721,22 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in lease management:', error)
+    console.error('Error stack:', error.stack)
+    
+    // Ensure we always return valid JSON
+    let errorMessage = 'Unknown error occurred'
+    try {
+      errorMessage = error.message || error.toString() || 'Unknown error occurred'
+    } catch (e) {
+      errorMessage = 'Error occurred but could not be serialized'
+    }
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: errorMessage,
+        type: 'internal_server_error',
+        timestamp: new Date().toISOString()
+      }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
