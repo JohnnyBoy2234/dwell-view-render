@@ -1,28 +1,51 @@
-import { useState } from 'react';
-import { FileText, Download, Eye, Calendar, MapPin } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { FileText, Eye, Calendar, MapPin } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function TenantLeaseDocuments() {
   const { tenantProperty, loading } = useTenantDashboard();
-  const [downloading, setDownloading] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [loadingLeases, setLoadingLeases] = useState(false);
+  const [leases, setLeases] = useState<Array<{ id: string; status: string; created_at: string; pdf_draft_url?: string; property?: { title?: string; location?: string } }>>([]);
 
-  const handleDownload = async (documentType: string) => {
-    setDownloading(documentType);
-    // Simulate download process
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setDownloading(null);
+  useEffect(() => {
+    const fetchLeases = async () => {
+      if (!user) return;
+      setLoadingLeases(true);
+      try {
+        const { data, error } = await supabase
+          .from('leases')
+          .select('id, status, created_at, pdf_draft_url, properties:property_id(title, location)')
+          .eq('tenant_user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (!error && data) {
+          // Map property relation to a simple object key 'property'
+          const mapped = (data as any[]).map((row) => ({
+            id: row.id,
+            status: row.status,
+            created_at: row.created_at,
+            pdf_draft_url: row.pdf_draft_url,
+            property: row.properties ? { title: row.properties.title, location: row.properties.location } : undefined,
+          }));
+          setLeases(mapped);
+        }
+      } finally {
+        setLoadingLeases(false);
+      }
+    };
+    fetchLeases();
+  }, [user?.id]);
+
+  const handleView = (url?: string) => {
+    if (url) window.open(url, '_blank');
   };
 
-  const handleViewDocument = (documentType: string) => {
-    // In a real app, this would open a PDF viewer or navigate to a document viewer page
-    console.log('Viewing document:', documentType);
-  };
-
-  if (loading) {
+  if (loading || loadingLeases) {
     return (
       <div className="space-y-6">
         <div className="h-8 bg-muted animate-pulse rounded"></div>
@@ -35,38 +58,7 @@ export default function TenantLeaseDocuments() {
     );
   }
 
-  const documents = [
-    {
-      id: 'lease-agreement',
-      title: 'Lease Agreement',
-      description: 'Your signed rental lease agreement',
-      type: 'PDF',
-      size: '2.4 MB',
-      lastModified: '2024-01-15',
-      status: 'signed',
-      icon: FileText,
-    },
-    {
-      id: 'property-inspection',
-      title: 'Move-in Inspection Report',
-      description: 'Property condition report from move-in date',
-      type: 'PDF',
-      size: '1.8 MB',
-      lastModified: '2024-01-10',
-      status: 'completed',
-      icon: Eye,
-    },
-    {
-      id: 'insurance-docs',
-      title: 'Rental Insurance Information',
-      description: 'Required insurance documentation and guidelines',
-      type: 'PDF',
-      size: '0.9 MB',
-      lastModified: '2024-01-08',
-      status: 'active',
-      icon: FileText,
-    },
-  ];
+  const documents = leases;
 
   return (
     <div className="space-y-6">
@@ -112,77 +104,59 @@ export default function TenantLeaseDocuments() {
 
       {/* Documents Grid */}
       <div className="grid gap-6">
-        {documents.map((document) => {
-          const Icon = document.icon;
-          const isDownloading = downloading === document.id;
-          
-          return (
-            <Card key={document.id} className="hover:shadow-medium transition-all duration-200">
+        {documents.length === 0 ? (
+          <Card className="border-dashed">
+            <CardHeader>
+              <CardTitle className="text-lg">No leases yet</CardTitle>
+              <CardDescription>When a landlord generates a lease for you, it will appear here.</CardDescription>
+            </CardHeader>
+          </Card>
+        ) : (
+          documents.map((lease) => (
+            <Card key={lease.id} className="hover:shadow-medium transition-all duration-200">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-ocean-blue/10 rounded-lg flex items-center justify-center">
-                      <Icon className="h-6 w-6 text-ocean-blue" />
+                      <FileText className="h-6 w-6 text-ocean-blue" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{document.title}</CardTitle>
-                      <CardDescription>{document.description}</CardDescription>
+                      <CardTitle className="text-lg">Lease Agreement</CardTitle>
+                      <CardDescription>
+                        {lease.property?.title || 'Property'} • {lease.property?.location || 'Address'}
+                      </CardDescription>
                     </div>
                   </div>
                   <Badge 
-                    variant={document.status === 'signed' ? 'default' : 'secondary'}
-                    className={document.status === 'signed' ? 'bg-success-green text-white' : ''}
+                    variant={lease.status?.toLowerCase() === 'completed' ? 'default' : 'secondary'}
+                    className={lease.status?.toLowerCase() === 'completed' ? 'bg-success-green text-white' : ''}
                   >
-                    {document.status}
+                    {lease.status || 'draft'}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-6 text-sm text-muted-foreground">
-                    <span>{document.type} • {document.size}</span>
-                    <span>Updated: {new Date(document.lastModified).toLocaleDateString()}</span>
+                    <span>Updated: {new Date(lease.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleViewDocument(document.id)}
+                      onClick={() => handleView(lease.pdf_draft_url)}
+                      disabled={!lease.pdf_draft_url}
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handleDownload(document.id)}
-                      disabled={isDownloading}
-                      className="bg-ocean-blue hover:bg-ocean-blue-dark"
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      {isDownloading ? 'Downloading...' : 'Download'}
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          );
-        })}
+          ))
+        )}
       </div>
-
-      {/* Help Section */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="text-lg">Need Help?</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">
-            If you can't find a document or need help accessing your lease information, our support team is here to help.
-          </p>
-          <Button variant="outline">
-            Contact Support
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 }
