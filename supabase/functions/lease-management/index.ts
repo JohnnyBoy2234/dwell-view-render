@@ -264,7 +264,8 @@ serve(async (req) => {
             property_id, 
             tenant_user_id, 
             lease_data_provided: !!lease_data,
-            lease_data_keys: lease_data ? Object.keys(lease_data) : 'none'
+            lease_data_keys: lease_data ? Object.keys(lease_data) : 'none',
+            full_lease_data: JSON.stringify(lease_data, null, 2)
           })
           
           if (lease_data) {
@@ -327,7 +328,19 @@ serve(async (req) => {
         // Validate lease data structure
         if (lease_data) {
           const requiredFields = ['landlord', 'tenant', 'property', 'term', 'rent', 'deposit', 'branding']
-          const missingFields = requiredFields.filter(field => !finalLeaseData[field])
+          console.log('Validating required fields:', requiredFields)
+          console.log('lease_data keys:', Object.keys(lease_data))
+          console.log('lease_data values check:', {
+            landlord: !!lease_data.landlord,
+            tenant: !!lease_data.tenant,
+            property: !!lease_data.property,
+            term: !!lease_data.term,
+            rent: !!lease_data.rent,
+            deposit: !!lease_data.deposit,
+            branding: !!lease_data.branding
+          })
+          
+          const missingFields = requiredFields.filter(field => !lease_data[field])
           
           if (missingFields.length > 0) {
             console.error('Missing required lease data fields:', missingFields)
@@ -338,16 +351,16 @@ serve(async (req) => {
           }
           
           // Validate numeric values
-          if (finalLeaseData.rent && (isNaN(finalLeaseData.rent.monthly_rent) || finalLeaseData.rent.monthly_rent <= 0)) {
-            console.error('Invalid monthly rent:', finalLeaseData.rent.monthly_rent)
+          if (lease_data.rent && (isNaN(lease_data.rent.monthly_rent) || lease_data.rent.monthly_rent <= 0)) {
+            console.error('Invalid monthly rent:', lease_data.rent.monthly_rent)
             return new Response(
               JSON.stringify({ error: 'Invalid monthly rent amount' }),
               { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
             )
           }
           
-          if (finalLeaseData.deposit && (isNaN(finalLeaseData.deposit.amount) || finalLeaseData.deposit.amount < 0)) {
-            console.error('Invalid deposit amount:', finalLeaseData.deposit.amount)
+          if (lease_data.deposit && (isNaN(lease_data.deposit.amount) || lease_data.deposit.amount < 0)) {
+            console.error('Invalid deposit amount:', lease_data.deposit.amount)
             return new Response(
               JSON.stringify({ error: 'Invalid deposit amount' }),
               { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -355,9 +368,9 @@ serve(async (req) => {
           }
           
           // Validate branding structure
-          if (finalLeaseData.branding) {
+          if (lease_data.branding) {
             const requiredBrandingFields = ['logo_url', 'primary_hex', 'secondary_hex', 'font_family']
-            const missingBrandingFields = requiredBrandingFields.filter(field => !finalLeaseData.branding[field])
+            const missingBrandingFields = requiredBrandingFields.filter(field => !lease_data.branding[field])
             
             if (missingBrandingFields.length > 0) {
               console.error('Missing required branding fields:', missingBrandingFields)
@@ -370,7 +383,11 @@ serve(async (req) => {
         }
 
         // Generate PDF
-        console.log('Generating PDF with data:', { version, lease_data_keys: Object.keys(finalLeaseData) })
+        console.log('Generating PDF with data:', { 
+          version, 
+          lease_data_keys: Object.keys(finalLeaseData),
+          lease_data_structure: JSON.stringify(finalLeaseData, null, 2)
+        })
         const { data: pdfResponse, error: pdfError } = await supabaseClient.functions.invoke('generate-lease-pdf', {
           body: { lease_data: finalLeaseData, version }
         })
