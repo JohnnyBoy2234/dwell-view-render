@@ -90,21 +90,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, isAdmin, isLandlord } = useAuth();
 
-  // Redirect authenticated users to their respective dashboards
-  useEffect(() => {
-    if (user) {
-      if (isAdmin) {
-        navigate('/admin/dashboard');
-        return;
-      }
-      if (isLandlord) {
-        navigate('/enhancedlandlorddashboard');
-        return;
-      }
-      // Default to tenant dashboard for authenticated users
-      navigate('/enhancedtenantdashboard');
-    }
-  }, [user, isAdmin, isLandlord, navigate]);
+  // Stay on Home page even if authenticated (no auto-redirect)
 
   // Use the unified search filters hook
   const { filters, updateFilters, executeSearch } = usePropertySearchFilters();
