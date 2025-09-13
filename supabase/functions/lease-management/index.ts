@@ -276,7 +276,7 @@ serve(async (req) => {
           })
           
           // 1) Property + owner check (null-safe)
-          if (!property_id) return json(400, { error: 'property_id is required' })
+          if (!property_id) return json(200, { error: 'property_id is required' })
 
           const { data: property, error: propertyError } = await supabaseClient
             .from('properties')
@@ -284,8 +284,8 @@ serve(async (req) => {
             .eq('id', property_id)
             .single()
 
-          if (propertyError || !property) return json(404, { error: 'Property not found' })
-          if (property.landlord_id !== user.id) return json(403, { error: 'Access denied' })
+          if (propertyError || !property) return json(200, { error: 'Property not found' })
+          if (property.landlord_id !== user.id) return json(200, { error: 'Access denied' })
           
           console.log('About to check if lease_data exists...')
           
@@ -343,27 +343,18 @@ serve(async (req) => {
           
           if (missingFields.length > 0) {
             console.error('Missing required lease data fields:', missingFields)
-            return new Response(
-              JSON.stringify({ error: `Missing required fields: ${missingFields.join(', ')}` }),
-              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            )
+            return json(200, { error: `Missing required fields: ${missingFields.join(', ')}` })
           }
           
           // Validate numeric values
           if (lease_data.rent && (isNaN(lease_data.rent.monthly_rent) || lease_data.rent.monthly_rent <= 0)) {
             console.error('Invalid monthly rent:', lease_data.rent.monthly_rent)
-            return new Response(
-              JSON.stringify({ error: 'Invalid monthly rent amount' }),
-              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            )
+            return json(200, { error: 'Invalid monthly rent amount' })
           }
           
           if (lease_data.deposit && (isNaN(lease_data.deposit.amount) || lease_data.deposit.amount < 0)) {
             console.error('Invalid deposit amount:', lease_data.deposit.amount)
-            return new Response(
-              JSON.stringify({ error: 'Invalid deposit amount' }),
-              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-            )
+            return json(200, { error: 'Invalid deposit amount' })
           }
           
           // Validate branding structure
@@ -373,10 +364,7 @@ serve(async (req) => {
             
             if (missingBrandingFields.length > 0) {
               console.error('Missing required branding fields:', missingBrandingFields)
-              return new Response(
-                JSON.stringify({ error: `Missing branding fields: ${missingBrandingFields.join(', ')}` }),
-                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-              )
+              return json(200, { error: `Missing branding fields: ${missingBrandingFields.join(', ')}` })
             }
           }
         }
@@ -393,11 +381,11 @@ serve(async (req) => {
 
         if (pdfError) {
           console.error('PDF generation error:', pdfError)
-          return json(502, { error: `PDF generation failed: ${pdfError.message}` })
+          return json(200, { error: `PDF generation failed: ${pdfError.message}` })
         }
 
         if (!pdfResponse || typeof (pdfResponse as any).pdf_url !== 'string') {
-          return json(502, { error: 'PDF generation failed: no pdf_url in response' })
+          return json(200, { error: 'PDF generation failed: no pdf_url in response' })
         }
 
         console.log('PDF generated successfully:', pdfResponse)

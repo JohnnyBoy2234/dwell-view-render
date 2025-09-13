@@ -152,7 +152,7 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   }
   
   // Helper function to add header to first page only
-  function addFirstPageHeader(page: any) {
+  async function addFirstPageHeader(page: any) {
     // Try to load SwiftRent logo from Storage
     let logoImage: any = null;
     try {
@@ -223,7 +223,7 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   }
   
   // Add header to first page only
-  addFirstPageHeader(currentPage);
+  await addFirstPageHeader(currentPage);
   
   // Start content below header
   yPosition = pageHeight - margin - 100;
@@ -432,9 +432,10 @@ serve(async (req) => {
     }
 
     // Upload to Supabase Storage
+    const fileBlob = new Blob([pdfBytes], { type: 'application/pdf' })
     const { data: uploadData, error: uploadError } = await supabaseClient.storage
       .from(BUCKET)
-      .upload(filename, pdfBytes, {
+      .upload(filename, fileBlob, {
         contentType: 'application/pdf',
         upsert: true
       })
