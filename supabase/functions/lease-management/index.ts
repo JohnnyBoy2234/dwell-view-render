@@ -96,7 +96,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
   const { data: landlord, error: landlordError } = await supabaseClient
     .from('profiles')
     .select('*')
-    .eq('id', landlordUserId)
+    .eq('user_id', landlordUserId)
     .single()
 
   if (landlordError) throw new Error(`Landlord profile not found: ${landlordError.message}`)
@@ -107,7 +107,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
     const { data: tenantData, error: tenantError } = await supabaseClient
       .from('profiles')
       .select('*')
-      .eq('id', tenantUserId)
+      .eq('user_id', tenantUserId)
       .single()
 
     if (!tenantError) {
@@ -118,7 +118,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
   // Default lease data
   const defaultLeaseData: LeaseData = {
     landlord: {
-      name: landlord.full_name || landlord.name || 'Landlord Name',
+      name: landlord.display_name || 'Landlord Name',
       id_number: landlord.id_number || '',
       company: landlord.company || '',
       email: landlord.email || '',
@@ -126,7 +126,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       address: landlord.address || ''
     },
     tenant: {
-      name: tenant?.full_name || tenant?.name || 'Tenant Name',
+      name: tenant?.display_name || 'Tenant Name',
       id_number: tenant?.id_number || '',
       email: tenant?.email || '',
       phone: tenant?.phone || '',
@@ -134,13 +134,13 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       occupants: []
     },
     property: {
-      address: property.address || '',
+      address: property.location || '',
       unit: property.unit || '',
       city: property.city || '',
       province: property.province || '',
       postal_code: property.postal_code || '',
       type: property.property_type || 'apartment',
-      parking: property.parking || 'N/A'
+      parking: property.parking_spaces > 0 ? `${property.parking_spaces} bay` : 'N/A'
     },
     term: {
       start_date: new Date().toISOString().split('T')[0],
@@ -149,7 +149,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       notice_period_days: 30
     },
     rent: {
-      monthly_rent: property.rent_amount || 0,
+      monthly_rent: property.price || 0,
       due_day: 1,
       payment_method: 'EFT',
       late_fee_policy: {
@@ -159,7 +159,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       }
     },
     deposit: {
-      amount: property.rent_amount ? property.rent_amount * 2 : 0, // 2 months rent
+      amount: property.price ? property.price * 2 : 0, // 2 months rent
       return_days: 14
     },
     utilities: {
