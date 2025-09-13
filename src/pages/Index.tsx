@@ -88,7 +88,23 @@ function useMagnet(intensity = 12) {
 const Index = () => {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, isLandlord } = useAuth();
+
+  // Redirect authenticated users to their respective dashboards
+  useEffect(() => {
+    if (user) {
+      if (isAdmin) {
+        navigate('/admin/dashboard');
+        return;
+      }
+      if (isLandlord) {
+        navigate('/enhancedlandlorddashboard');
+        return;
+      }
+      // Default to tenant dashboard for authenticated users
+      navigate('/enhancedtenantdashboard');
+    }
+  }, [user, isAdmin, isLandlord, navigate]);
 
   // Use the unified search filters hook
   const { filters, updateFilters, executeSearch } = usePropertySearchFilters();
