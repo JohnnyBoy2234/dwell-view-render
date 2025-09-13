@@ -234,8 +234,10 @@ export const TemplateLeaseWorkflow = ({
           annexures: leaseData.annexures || [],
         },
         branding: {
-          company_name: 'SwiftRent',
-          logo_url: '',
+          logo_url: 'https://swiftrent.co.za/logo.png',
+          primary_hex: '#2563eb',
+          secondary_hex: '#1d4ed8',
+          font_family: 'Helvetica'
         },
         clauses: customClausesPayload,
       };

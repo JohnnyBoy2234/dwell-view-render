@@ -242,14 +242,18 @@ serve(async (req) => {
 
     switch (action) {
       case 'generate': {
-        const { property_id, tenant_user_id, lease_data } = requestBody
+        try {
+          const { property_id, tenant_user_id, lease_data } = requestBody
 
-        if (!property_id) {
-          return new Response(
-            JSON.stringify({ error: 'property_id is required' }),
-            { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          )
-        }
+          console.log('Lease generation request:', { property_id, tenant_user_id, lease_data: lease_data ? 'provided' : 'not provided' })
+
+          if (!property_id) {
+            console.error('Missing property_id in request')
+            return new Response(
+              JSON.stringify({ error: 'property_id is required' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
 
         // Check if user is landlord of this property
         const { data: property, error: propertyError } = await supabaseClient
@@ -289,13 +293,17 @@ serve(async (req) => {
         const finalLeaseData = lease_data || await generateDefaultLeaseData(property_id, user.id, tenant_user_id, supabaseClient)
 
         // Generate PDF
+        console.log('Generating PDF with data:', { version, lease_data_keys: Object.keys(finalLeaseData) })
         const { data: pdfResponse, error: pdfError } = await supabaseClient.functions.invoke('generate-lease-pdf', {
           body: { lease_data: finalLeaseData, version }
         })
 
         if (pdfError) {
+          console.error('PDF generation error:', pdfError)
           throw new Error(`PDF generation failed: ${pdfError.message}`)
         }
+
+        console.log('PDF generated successfully:', pdfResponse)
 
         // Create lease record
         const { data: lease, error: leaseError } = await supabaseClient
@@ -323,6 +331,13 @@ serve(async (req) => {
           JSON.stringify({ success: true, lease }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         )
+        } catch (error) {
+          console.error('Error in lease generation:', error)
+          return new Response(
+            JSON.stringify({ error: error.message || 'Lease generation failed' }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          )
+        }
       }
 
       case 'sign': {
