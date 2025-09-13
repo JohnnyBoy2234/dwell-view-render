@@ -241,11 +241,43 @@ serve(async (req) => {
     const requestBody = await req.json()
 
     switch (action) {
+      case 'test': {
+        return new Response(
+          JSON.stringify({ 
+            success: true, 
+            message: 'Test endpoint working',
+            received_data: {
+              property_id,
+              tenant_user_id,
+              lease_data_provided: !!lease_data
+            }
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       case 'generate': {
         try {
           const { property_id, tenant_user_id, lease_data } = requestBody
 
-          console.log('Lease generation request:', { property_id, tenant_user_id, lease_data: lease_data ? 'provided' : 'not provided' })
+          console.log('Lease generation request:', { 
+            property_id, 
+            tenant_user_id, 
+            lease_data_provided: !!lease_data,
+            lease_data_keys: lease_data ? Object.keys(lease_data) : 'none'
+          })
+          
+          if (lease_data) {
+            console.log('Lease data structure:', {
+              landlord: lease_data.landlord ? Object.keys(lease_data.landlord) : 'missing',
+              tenant: lease_data.tenant ? Object.keys(lease_data.tenant) : 'missing',
+              property: lease_data.property ? Object.keys(lease_data.property) : 'missing',
+              term: lease_data.term ? Object.keys(lease_data.term) : 'missing',
+              rent: lease_data.rent ? Object.keys(lease_data.rent) : 'missing',
+              deposit: lease_data.deposit ? Object.keys(lease_data.deposit) : 'missing',
+              branding: lease_data.branding ? Object.keys(lease_data.branding) : 'missing'
+            })
+          }
 
           if (!property_id) {
             console.error('Missing property_id in request')
@@ -291,6 +323,51 @@ serve(async (req) => {
 
         // Generate lease data
         const finalLeaseData = lease_data || await generateDefaultLeaseData(property_id, user.id, tenant_user_id, supabaseClient)
+        
+        // Validate lease data structure
+        if (lease_data) {
+          const requiredFields = ['landlord', 'tenant', 'property', 'term', 'rent', 'deposit', 'branding']
+          const missingFields = requiredFields.filter(field => !finalLeaseData[field])
+          
+          if (missingFields.length > 0) {
+            console.error('Missing required lease data fields:', missingFields)
+            return new Response(
+              JSON.stringify({ error: `Missing required fields: ${missingFields.join(', ')}` }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          // Validate numeric values
+          if (finalLeaseData.rent && (isNaN(finalLeaseData.rent.monthly_rent) || finalLeaseData.rent.monthly_rent <= 0)) {
+            console.error('Invalid monthly rent:', finalLeaseData.rent.monthly_rent)
+            return new Response(
+              JSON.stringify({ error: 'Invalid monthly rent amount' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          if (finalLeaseData.deposit && (isNaN(finalLeaseData.deposit.amount) || finalLeaseData.deposit.amount < 0)) {
+            console.error('Invalid deposit amount:', finalLeaseData.deposit.amount)
+            return new Response(
+              JSON.stringify({ error: 'Invalid deposit amount' }),
+              { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+            )
+          }
+          
+          // Validate branding structure
+          if (finalLeaseData.branding) {
+            const requiredBrandingFields = ['logo_url', 'primary_hex', 'secondary_hex', 'font_family']
+            const missingBrandingFields = requiredBrandingFields.filter(field => !finalLeaseData.branding[field])
+            
+            if (missingBrandingFields.length > 0) {
+              console.error('Missing required branding fields:', missingBrandingFields)
+              return new Response(
+                JSON.stringify({ error: `Missing branding fields: ${missingBrandingFields.join(', ')}` }),
+                { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+              )
+            }
+          }
+        }
 
         // Generate PDF
         console.log('Generating PDF with data:', { version, lease_data_keys: Object.keys(finalLeaseData) })

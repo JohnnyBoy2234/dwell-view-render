@@ -209,6 +209,21 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
       toast.error("Please complete all required fields");
       return;
     }
+    
+    // Validate numeric values before sending
+    const rentAmount = parseFloat(rent.amount);
+    const depositAmount = parseFloat(deposit.amount);
+    
+    if (isNaN(rentAmount) || rentAmount <= 0) {
+      toast.error("Please enter a valid rent amount");
+      return;
+    }
+    
+    if (isNaN(depositAmount) || depositAmount < 0) {
+      toast.error("Please enter a valid deposit amount");
+      return;
+    }
+    
     setLoading(true);
     try {
       if (!selectedTenant?.id) {
@@ -262,17 +277,17 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
           notice_period_days: 30,
         },
         rent: {
-          monthly_rent: parseFloat(rent.amount),
+          monthly_rent: rentAmount,
           due_day: 1,
           payment_method: 'EFT' as 'EFT' | 'Cash' | 'Cheque',
           late_fee_policy: {
             grace_days: 7,
-            late_fee_fixed: parseFloat(rent.lateFee),
+            late_fee_fixed: parseFloat(rent.lateFee) || 250,
             late_fee_percent: 0,
           },
         },
         deposit: {
-          amount: parseFloat(deposit.amount),
+          amount: depositAmount,
           return_days: 30,
         },
         utilities: {
@@ -316,10 +331,20 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
         }
       });
 
-      if (error || (data as any)?.error) throw new Error((error as any)?.message || (data as any)?.error || 'Failed');
+      if (error) {
+        console.error('Lease generation error:', error);
+        throw new Error(error.message || 'Failed to generate lease');
+      }
+      
+      if ((data as any)?.error) {
+        console.error('Lease generation data error:', (data as any).error);
+        throw new Error((data as any).error);
+      }
+      
       toast.success("Lease generated and sent for signing");
       onComplete();
     } catch (e: any) {
+      console.error('Lease generation failed:', e);
       toast.error(e.message || "Failed to generate lease");
     } finally {
       setLoading(false);

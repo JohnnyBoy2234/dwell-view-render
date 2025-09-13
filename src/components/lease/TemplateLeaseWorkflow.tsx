@@ -270,8 +270,13 @@ export const TemplateLeaseWorkflow = ({
       });
 
       if (error) {
-        console.error('Error generating lease:', error);
-        throw new Error(`Failed to generate lease: ${error.message}`);
+        console.error('Lease generation error:', error);
+        throw new Error(error.message || 'Failed to generate lease');
+      }
+      
+      if ((data as any)?.error) {
+        console.error('Lease generation data error:', (data as any).error);
+        throw new Error((data as any).error);
       }
 
       console.log("Lease generated successfully:", data);
