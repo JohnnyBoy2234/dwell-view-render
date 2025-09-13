@@ -262,8 +262,19 @@ export default function EnhancedTenantDashboard() {
                   Pay Now
                 </button>
               </div>
+            </GlassCard>
+            <div>
+              <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/inventory')}>
+                <div className="text-brand.gray900">
+                  <div className="h-10 w-10 rounded-xl bg-success-green/10 text-success-green grid place-content-center mb-2">
+                    <Clipboard className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold">Inventory</h4>
+                  <p className="text-sm text-brand.gray500">Property condition records</p>
+                </div>
+              </GlassCard>
             </div>
-          )}
+          </div>
 
           {/* SwiftRent Support Section */}
           <div className="mt-6">
