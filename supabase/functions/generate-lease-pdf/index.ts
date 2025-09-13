@@ -5,7 +5,12 @@ import { PDFDocument, rgb, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1'
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json',
 }
+
+const json = (status: number, body: unknown) =>
+  new Response(JSON.stringify(body), { status, headers: corsHeaders })
 
 interface LeaseData {
   landlord: {
@@ -390,7 +395,7 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return json(200, { ok: true })
   }
 
   try {
@@ -402,13 +407,7 @@ serve(async (req) => {
     const { lease_data, version = 1 } = await req.json()
 
     if (!lease_data) {
-      return new Response(
-        JSON.stringify({ error: 'lease_data is required' }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      )
+      return json(400, { error: 'lease_data is required' })
     }
 
     // Generate PDF
@@ -420,42 +419,46 @@ serve(async (req) => {
     // Generate filename
     const filename = `Lease_${lease_data.property.city}_${lease_data.tenant.name.split(' ').pop()}_${lease_data.term.start_date}_v${version}.pdf`
     
+    // Ensure bucket exists
+    const BUCKET = 'lease-documents'
+    try {
+      const { data: buckets } = await (supabaseClient as any).storage.listBuckets?.()
+      const exists = Array.isArray(buckets) && buckets.some((b: any) => b.name === BUCKET)
+      if (!exists && (supabaseClient as any).storage.createBucket) {
+        await (supabaseClient as any).storage.createBucket(BUCKET, { public: true })
+      }
+    } catch (e) {
+      console.log('Bucket ensure skipped/failed:', e)
+    }
+
     // Upload to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabaseClient.storage
-      .from('lease-documents')
+      .from(BUCKET)
       .upload(filename, pdfBytes, {
         contentType: 'application/pdf',
         upsert: true
       })
 
     if (uploadError) {
-      throw new Error(`Upload failed: ${uploadError.message}`)
+      return json(502, { error: `Upload failed: ${uploadError.message}` })
     }
 
     // Get public URL
     const { data: urlData } = supabaseClient.storage
-      .from('lease-documents')
+      .from(BUCKET)
       .getPublicUrl(filename)
 
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        pdf_url: urlData.publicUrl,
-        filename: filename
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    const pdfUrl = (urlData as any)?.publicUrl
+    if (!pdfUrl) {
+      return json(502, { error: 'No public URL returned for uploaded PDF' })
+    }
+
+    return json(200, { success: true, pdf_url: pdfUrl, filename })
 
   } catch (error) {
     console.error('Error generating lease PDF:', error)
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    )
+    let msg = 'Unknown error'
+    try { msg = (error as any)?.message || String(error) } catch {}
+    return json(500, { error: msg })
   }
 })
