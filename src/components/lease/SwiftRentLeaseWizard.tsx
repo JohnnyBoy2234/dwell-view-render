@@ -176,14 +176,14 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
                tenants.length > 0 && tenants.every(t => t.fullName && t.idNumber && t.address);
       case 2: // Premises
         return premises.address && premises.maxOccupants && premises.maxOccupants >= 1;
-      case 3: // Rent
+      case 3: // Rent & Deposit
         return rent.amount && deposit.amount;
-      case 4: // Term
-        return term.startDate && term.endDate;
-      case 5: // Banking
-        return landlordBank.bank && landlordBank.holder && landlordBank.number && landlordBank.branch && landlordBank.type;
-      case 6: // Clauses
+      case 4: // Clauses & Additional Terms
         return true; // Clauses are optional
+      case 5: // Term
+        return term.startDate && term.endDate;
+      case 6: // Banking
+        return landlordBank.bank && landlordBank.holder && landlordBank.number && landlordBank.branch && landlordBank.type;
       case 7: // Review
         return valid;
       default:
