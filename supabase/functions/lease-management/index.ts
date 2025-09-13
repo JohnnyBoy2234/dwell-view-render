@@ -83,47 +83,48 @@ interface LeaseData {
 }
 
 async function generateDefaultLeaseData(propertyId: string, landlordUserId: string, tenantUserId: string | null, supabaseClient: any): Promise<LeaseData> {
-  // Fetch property details
-  const { data: property, error: propertyError } = await supabaseClient
-    .from('properties')
-    .select('*')
-    .eq('id', propertyId)
-    .single()
-
-  if (propertyError) throw new Error(`Property not found: ${propertyError.message}`)
-
-  // Fetch landlord details
-  const { data: landlord, error: landlordError } = await supabaseClient
-    .from('profiles')
-    .select('*')
-    .eq('user_id', landlordUserId)
-    .single()
-
-  if (landlordError) throw new Error(`Landlord profile not found: ${landlordError.message}`)
-
-  // Fetch tenant details if provided
-  let tenant = null
-  if (tenantUserId) {
-    const { data: tenantData, error: tenantError } = await supabaseClient
-      .from('profiles')
+  try {
+    // Fetch property details
+    const { data: property, error: propertyError } = await supabaseClient
+      .from('properties')
       .select('*')
-      .eq('user_id', tenantUserId)
+      .eq('id', propertyId)
       .single()
 
-    if (!tenantError) {
-      tenant = tenantData
+    if (propertyError) throw new Error(`Property not found: ${propertyError.message}`)
+
+    // Fetch landlord details
+    const { data: landlord, error: landlordError } = await supabaseClient
+      .from('profiles')
+      .select('*')
+      .eq('user_id', landlordUserId)
+      .single()
+
+    if (landlordError) throw new Error(`Landlord profile not found: ${landlordError.message}`)
+
+    // Fetch tenant details if provided
+    let tenant = null
+    if (tenantUserId) {
+      const { data: tenantData, error: tenantError } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('user_id', tenantUserId)
+        .single()
+
+      if (!tenantError) {
+        tenant = tenantData
+      }
     }
-  }
 
   // Default lease data
   const defaultLeaseData: LeaseData = {
     landlord: {
-      name: landlord.display_name || 'Landlord Name',
-      id_number: landlord.id_number || '',
-      company: landlord.company || '',
-      email: landlord.email || '',
-      phone: landlord.phone || '',
-      address: landlord.address || ''
+      name: landlord?.display_name || 'Landlord Name',
+      id_number: landlord?.id_number || '',
+      company: landlord?.company || '',
+      email: landlord?.email || '',
+      phone: landlord?.phone || '',
+      address: landlord?.address || ''
     },
     tenant: {
       name: tenant?.display_name || 'Tenant Name',
@@ -134,13 +135,13 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       occupants: []
     },
     property: {
-      address: property.location || '',
-      unit: property.unit || '',
-      city: property.city || '',
-      province: property.province || '',
-      postal_code: property.postal_code || '',
-      type: property.property_type || 'apartment',
-      parking: property.parking_spaces > 0 ? `${property.parking_spaces} bay` : 'N/A'
+      address: property?.location || '',
+      unit: property?.unit || '',
+      city: property?.city || '',
+      province: property?.province || '',
+      postal_code: property?.postal_code || '',
+      type: property?.property_type || 'apartment',
+      parking: (property?.parking_spaces && property.parking_spaces > 0) ? `${property.parking_spaces} bay` : 'N/A'
     },
     term: {
       start_date: new Date().toISOString().split('T')[0],
@@ -149,7 +150,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       notice_period_days: 30
     },
     rent: {
-      monthly_rent: property.price || 0,
+      monthly_rent: property?.price || 0,
       due_day: 1,
       payment_method: 'EFT',
       late_fee_policy: {
@@ -159,7 +160,7 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
       }
     },
     deposit: {
-      amount: property.price ? property.price * 2 : 0, // 2 months rent
+      amount: property?.price ? property.price * 2 : 0, // 2 months rent
       return_days: 14
     },
     utilities: {
@@ -189,6 +190,10 @@ async function generateDefaultLeaseData(propertyId: string, landlordUserId: stri
   }
 
   return defaultLeaseData
+  } catch (error) {
+    console.error('Error in generateDefaultLeaseData:', error)
+    throw new Error(`Failed to generate default lease data: ${error.message}`)
+  }
 }
 
 async function logLeaseAction(supabaseClient: any, leaseId: string, actorUserId: string, action: string, metadata: any = null) {
@@ -270,8 +275,7 @@ serve(async (req) => {
             property_id, 
             tenant_user_id, 
             lease_data_provided: !!lease_data,
-            lease_data_keys: lease_data ? Object.keys(lease_data) : 'none',
-            full_lease_data: JSON.stringify(lease_data, null, 2)
+            lease_data_keys: lease_data ? Object.keys(lease_data) : 'none'
           })
           
           if (lease_data) {
@@ -433,8 +437,13 @@ serve(async (req) => {
         )
         } catch (error) {
           console.error('Error in lease generation:', error)
+          console.error('Error stack:', error.stack)
           return new Response(
-            JSON.stringify({ error: error.message || 'Lease generation failed' }),
+            JSON.stringify({ 
+              error: error.message || 'Lease generation failed',
+              details: error.toString(),
+              stack: error.stack 
+            }),
             { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
           )
         }
