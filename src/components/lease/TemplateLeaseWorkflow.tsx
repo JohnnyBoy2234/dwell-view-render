@@ -271,7 +271,18 @@ export const TemplateLeaseWorkflow = ({
 
       if (error) {
         console.error('Lease generation error:', error);
-        throw new Error(error.message || 'Failed to generate lease');
+        let errorMessage = 'Failed to generate lease';
+        try {
+          const body: any = (error as any)?.context?.body;
+          if (typeof body === 'string') {
+            const parsed = JSON.parse(body);
+            errorMessage = parsed.error || parsed.message || errorMessage;
+          } else if (body && typeof body.text === 'function') {
+            const text = await body.text();
+            try { const parsed = JSON.parse(text); errorMessage = parsed.error || parsed.message || errorMessage; } catch {}
+          }
+        } catch {}
+        throw new Error(errorMessage);
       }
       
       if ((data as any)?.error) {

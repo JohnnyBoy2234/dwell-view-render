@@ -334,16 +334,17 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
 
       if (error) {
         console.error('Lease generation error:', error);
-        // Try to get the actual error message from the response
         let errorMessage = 'Failed to generate lease';
         try {
-          if (error.context?.body) {
-            const errorBody = JSON.parse(error.context.body);
-            errorMessage = errorBody.error || errorMessage;
+          const body: any = (error as any)?.context?.body;
+          if (typeof body === 'string') {
+            const parsed = JSON.parse(body);
+            errorMessage = parsed.error || parsed.message || errorMessage;
+          } else if (body && typeof body.text === 'function') {
+            const text = await body.text();
+            try { const parsed = JSON.parse(text); errorMessage = parsed.error || parsed.message || errorMessage; } catch {}
           }
-        } catch (e) {
-          console.log('Could not parse error body:', e);
-        }
+        } catch {}
         throw new Error(errorMessage);
       }
       
