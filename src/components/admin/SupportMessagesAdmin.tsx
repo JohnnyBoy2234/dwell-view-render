@@ -64,8 +64,7 @@ export function SupportMessagesAdmin() {
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.profiles?.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.profiles?.email?.toLowerCase().includes(searchTerm.toLowerCase());
+                         (message.profiles?.display_name || '').toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || message.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || message.priority === priorityFilter;
@@ -243,7 +242,7 @@ export function SupportMessagesAdmin() {
                         </div>
                         <div className="flex items-center gap-1">
                           <Mail className="h-3 w-3" />
-                          {message.profiles?.email || 'No email'}
+                          {message.user_id || 'No user ID'}
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
@@ -266,11 +265,11 @@ export function SupportMessagesAdmin() {
 
                   <div className="flex items-center justify-between mt-3">
                     <div className="flex gap-2">
-                      <Select
-                        value={message.status}
-                        onValueChange={(value) => handleStatusChange(message.id, value)}
-                        onClick={(e) => e.stopPropagation()}
-                      >
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <Select
+                          value={message.status}
+                          onValueChange={(value) => handleStatusChange(message.id, value)}
+                        >
                         <SelectTrigger className="h-8 text-xs">
                           <SelectValue />
                         </SelectTrigger>
@@ -281,7 +280,8 @@ export function SupportMessagesAdmin() {
                             </SelectItem>
                           ))}
                         </SelectContent>
-                      </Select>
+                        </Select>
+                      </div>
                     </div>
                   </div>
                 </div>

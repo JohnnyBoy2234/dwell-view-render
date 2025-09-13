@@ -253,7 +253,7 @@ export const SwiftRentLeaseWizard = ({ propertyId, onBack, onComplete, selectedT
         tenant: {
           name: tenants[0]?.fullName || '',
           id_number: tenants[0]?.idNumber || '',
-          email: selectedTenant?.email || '', // Use selected tenant's email from application
+          email: '', // Email will be populated from application data
           phone: tenants[0]?.phone || '',
           current_address: tenants[0]?.address || '',
           occupants: tenants.slice(1).map(t => ({
