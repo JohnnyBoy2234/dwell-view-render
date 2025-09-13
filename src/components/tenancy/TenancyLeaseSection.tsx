@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LeaseGenerator } from "../lease/LeaseGenerator";
+import { SwiftRentLeaseGenerator } from "../lease/SwiftRentLeaseGenerator";
 import { LeaseSigningDialog } from "../lease/LeaseSigningDialog";
 
 interface TenancyData {
@@ -40,10 +40,10 @@ export const TenancyLeaseSection = ({ tenancy, onUpdate }: TenancyLeaseSectionPr
 
   return (
     <>
-      <LeaseGenerator
-        tenancy={tenancy}
+      <SwiftRentLeaseGenerator
+        propertyId={tenancy.property_id}
+        tenantUserId={tenancy.tenant_id}
         onLeaseGenerated={onUpdate}
-        onSigningRequested={() => setShowSigning(true)}
       />
       
       <LeaseSigningDialog

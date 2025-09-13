@@ -1845,6 +1845,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      update_lease_status: {
+        Args: { p_lease_id: string; p_status: string }
+        Returns: boolean
+      }
       update_viewing_booking: {
         Args: {
           new_slot_uuid: string
