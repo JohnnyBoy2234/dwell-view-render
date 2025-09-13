@@ -435,6 +435,66 @@ export type Database = {
         }
         Relationships: []
       }
+      lease_agreements: {
+        Row: {
+          audit_trail: Json | null
+          created_at: string | null
+          html_content: string | null
+          id: string
+          immutable: boolean | null
+          landlord_id: string
+          landlord_signature_data: Json | null
+          landlord_signed_at: string | null
+          lease_data: Json
+          pdf_path: string | null
+          pdf_url: string | null
+          property_id: string
+          status: string
+          tenant_id: string | null
+          tenant_signature_data: Json | null
+          tenant_signed_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          audit_trail?: Json | null
+          created_at?: string | null
+          html_content?: string | null
+          id?: string
+          immutable?: boolean | null
+          landlord_id: string
+          landlord_signature_data?: Json | null
+          landlord_signed_at?: string | null
+          lease_data: Json
+          pdf_path?: string | null
+          pdf_url?: string | null
+          property_id: string
+          status?: string
+          tenant_id?: string | null
+          tenant_signature_data?: Json | null
+          tenant_signed_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          audit_trail?: Json | null
+          created_at?: string | null
+          html_content?: string | null
+          id?: string
+          immutable?: boolean | null
+          landlord_id?: string
+          landlord_signature_data?: Json | null
+          landlord_signed_at?: string | null
+          lease_data?: Json
+          pdf_path?: string | null
+          pdf_url?: string | null
+          property_id?: string
+          status?: string
+          tenant_id?: string | null
+          tenant_signature_data?: Json | null
+          tenant_signed_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       lease_audit_logs: {
         Row: {
           action: string
@@ -473,41 +533,50 @@ export type Database = {
       lease_signatures: {
         Row: {
           created_at: string | null
-          geo_meta: Json | null
           id: string
-          ip_address: string | null
+          ip_address: unknown | null
           lease_id: string
-          role: string
-          signature_hash: string | null
+          metadata: Json | null
+          otp_verified: boolean | null
+          pdf_hash: string | null
+          signature_data: Json | null
           signature_image_url: string | null
+          signature_type: string
           signed_at: string | null
-          signer_user_id: string
+          signer_id: string
+          signer_role: string
           user_agent: string | null
         }
         Insert: {
           created_at?: string | null
-          geo_meta?: Json | null
           id?: string
-          ip_address?: string | null
+          ip_address?: unknown | null
           lease_id: string
-          role: string
-          signature_hash?: string | null
+          metadata?: Json | null
+          otp_verified?: boolean | null
+          pdf_hash?: string | null
+          signature_data?: Json | null
           signature_image_url?: string | null
+          signature_type: string
           signed_at?: string | null
-          signer_user_id: string
+          signer_id: string
+          signer_role: string
           user_agent?: string | null
         }
         Update: {
           created_at?: string | null
-          geo_meta?: Json | null
           id?: string
-          ip_address?: string | null
+          ip_address?: unknown | null
           lease_id?: string
-          role?: string
-          signature_hash?: string | null
+          metadata?: Json | null
+          otp_verified?: boolean | null
+          pdf_hash?: string | null
+          signature_data?: Json | null
           signature_image_url?: string | null
+          signature_type?: string
           signed_at?: string | null
-          signer_user_id?: string
+          signer_id?: string
+          signer_role?: string
           user_agent?: string | null
         }
         Relationships: [
@@ -515,7 +584,7 @@ export type Database = {
             foreignKeyName: "lease_signatures_lease_id_fkey"
             columns: ["lease_id"]
             isOneToOne: false
-            referencedRelation: "leases"
+            referencedRelation: "lease_agreements"
             referencedColumns: ["id"]
           },
         ]

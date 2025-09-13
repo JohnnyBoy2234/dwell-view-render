@@ -85,11 +85,11 @@ export const SwiftRentLeaseGenerator = ({
     if (!currentLease) return;
 
     try {
-      // Update status to pending signatures
-      const { error } = await supabase
-        .from('lease_agreements')
-        .update({ status: 'pending_signatures' })
-        .eq('id', currentLease.id);
+      // Update status to pending signatures using raw SQL
+      const { error } = await supabase.rpc('execute_sql', {
+        query: `UPDATE lease_agreements SET status = 'pending_signatures' WHERE id = $1`,
+        params: [currentLease.id]
+      });
 
       if (error) throw error;
 

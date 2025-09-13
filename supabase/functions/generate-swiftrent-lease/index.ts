@@ -708,21 +708,17 @@ serve(async (req) => {
       .from('lease-documents')
       .getPublicUrl(filename)
 
-    // Store lease in database
+    // Store lease in database using raw SQL to avoid type issues
     const { data: lease, error: leaseError } = await supabaseClient
-      .from('lease_agreements')
-      .insert({
-        property_id,
-        landlord_id: user.id,
-        tenant_id: tenant_user_id,
-        lease_data: leaseData,
-        pdf_url: urlData.publicUrl,
-        pdf_path: uploadData.path,
-        status: 'draft',
-        html_content: generateFullLeaseTemplate(leaseData),
+      .rpc('insert_lease_agreement', {
+        p_property_id: property_id,
+        p_landlord_id: user.id,
+        p_tenant_id: tenant_user_id,
+        p_lease_data: leaseData,
+        p_pdf_url: urlData.publicUrl,
+        p_pdf_path: uploadData.path,
+        p_html_content: generateFullLeaseTemplate(leaseData)
       })
-      .select()
-      .single()
 
     if (leaseError) {
       return json(500, { error: `Database error: ${leaseError.message}` })
