@@ -381,26 +381,24 @@ serve(async (req) => {
           }
         }
 
-        // Generate PDF
-        console.log('Generating PDF with data:', { 
-          version, 
-          lease_data_keys: Object.keys(finalLeaseData),
-          lease_data_structure: JSON.stringify(finalLeaseData, null, 2)
-        })
-        const { data: pdfResponse, error: pdfError } = await supabaseClient.functions.invoke('generate-lease-pdf', {
-          body: { lease_data: finalLeaseData, version }
-        })
-
-        if (pdfError) {
-          console.error('PDF generation error:', pdfError)
-          return json(502, { error: `PDF generation failed: ${pdfError.message}` })
+        // Generate PDF (non-blocking)
+        let pdfUrl: string | undefined
+        try {
+          console.log('Generating PDF with data:', { version, lease_data_keys: Object.keys(finalLeaseData) })
+          const { data: pdfResponse, error: pdfError } = await supabaseClient.functions.invoke('generate-lease-pdf', {
+            body: { lease_data: finalLeaseData, version }
+          })
+          if (pdfError) {
+            console.error('PDF generation error (non-blocking):', pdfError)
+          } else if (pdfResponse && typeof (pdfResponse as any).pdf_url === 'string') {
+            pdfUrl = (pdfResponse as any).pdf_url
+            console.log('PDF generated successfully:', pdfUrl)
+          } else {
+            console.warn('PDF generation returned no url (non-blocking)')
+          }
+        } catch (e) {
+          console.error('PDF generation threw (non-blocking):', e)
         }
-
-        if (!pdfResponse || typeof (pdfResponse as any).pdf_url !== 'string') {
-          return json(502, { error: 'PDF generation failed: no pdf_url in response' })
-        }
-
-        console.log('PDF generated successfully:', pdfResponse)
 
         // Create lease record
         const { data: lease, error: leaseError } = await supabaseClient
@@ -412,7 +410,7 @@ serve(async (req) => {
             version,
             status: 'DRAFT',
             lease_data: finalLeaseData,
-            pdf_draft_url: pdfResponse.pdf_url
+            pdf_draft_url: pdfUrl
           })
           .select()
           .single()
