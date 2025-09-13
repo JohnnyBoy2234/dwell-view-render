@@ -21,9 +21,9 @@ export default function LeaseSigningPage() {
 
   const isLandlord = user?.id === lease?.landlord_user_id;
   const isTenant = user?.id === lease?.tenant_user_id;
-  const canSign = (isLandlord && lease?.status === 'DRAFT') || 
-                  (isLandlord && lease?.status === 'PENDING_LANDLORD_SIGNATURE') ||
-                  (isTenant && lease?.status === 'PENDING_TENANT_SIGNATURE');
+  // Enforce tenant-first signing order
+  const canSign = (isTenant && lease?.status === 'PENDING_TENANT_SIGNATURE') ||
+                  (isLandlord && lease?.status === 'PENDING_LANDLORD_SIGNATURE');
 
   const hasSigned = (role: 'LANDLORD' | 'TENANT') => {
     return lease?.signatures?.some(sig => sig.role === role && sig.signed_at);

@@ -142,14 +142,23 @@ export default function TenantLeaseDocuments() {
                   </div>
                   <div className="flex items-center gap-2">
                     {lease.pdf_draft_url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleView(lease.pdf_draft_url)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleView(lease.pdf_draft_url)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleView(lease.pdf_draft_url)}
+                        >
+                          Download
+                        </Button>
+                      </>
                     )}
                     <Button
                       size="sm"
