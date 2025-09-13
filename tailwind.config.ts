@@ -64,6 +64,23 @@ export default {
 				'success-green-dark': 'hsl(var(--success-green-dark))',
 				'success-green-light': 'hsl(var(--success-green-light))',
 				'success-green-glow': 'hsl(var(--success-green-glow))',
+				
+				// iOS-inspired colors
+				'ios-blue': 'hsl(var(--ios-blue))',
+				'ios-blue-dark': 'hsl(var(--ios-blue-dark))',
+				'ios-blue-light': 'hsl(var(--ios-blue-light))',
+				'ios-green': 'hsl(var(--ios-green))',
+				'ios-green-light': 'hsl(var(--ios-green-light))',
+				'ios-orange': 'hsl(var(--ios-orange))',
+				'ios-red': 'hsl(var(--ios-red))',
+				'ios-purple': 'hsl(var(--ios-purple))',
+				'ios-indigo': 'hsl(var(--ios-indigo))',
+				'ios-teal': 'hsl(var(--ios-teal))',
+				'ios-pink': 'hsl(var(--ios-pink))',
+				'ios-gray': 'hsl(var(--ios-gray))',
+				'ios-gray-light': 'hsl(var(--ios-gray-light))',
+				'ios-gray-dark': 'hsl(var(--ios-gray-dark))',
+				
         /* Brand-safe aliases used in new glass UI polish (deprecated - use semantic tokens) */
         brand: {
           blue: 'hsl(214 100% 59%)',

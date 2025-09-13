@@ -15,6 +15,10 @@ export interface SupportMessage {
   admin_responded_by?: string;
   created_at: string;
   updated_at: string;
+  profiles?: {
+    display_name: string;
+    email: string;
+  };
 }
 
 export interface CreateSupportMessage {
@@ -129,10 +133,7 @@ export function useAdminSupportMessages() {
         .from('support_messages')
         .select(`
           *,
-          profiles:user_id (
-            display_name,
-            email
-          )
+          profiles!inner(display_name)
         `)
         .order('created_at', { ascending: false });
 

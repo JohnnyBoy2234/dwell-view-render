@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { PropertyCardProps } from '@/types/dashboard';
 import { FindTenantsTab } from './FindTenantsTab';
 import { ManageTenantsTab } from './ManageTenantsTab';
+import { Home } from 'lucide-react';
 
 export function PropertyCard({ property, inquiriesCount, applicationsCount, activeTenancy }: PropertyCardProps) {
   // Determine default tab based on property status
@@ -14,32 +15,39 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'available':
-        return 'bg-green-500/10 text-green-700 border-green-200';
+        return 'bg-gradient-to-r from-success-green/10 to-success-green/20 text-success-green border-success-green/30 shadow-sm';
       case 'rented':
-        return 'bg-blue-500/10 text-blue-700 border-blue-200';
+        return 'bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/20 text-ocean-blue border-ocean-blue/30 shadow-sm';
       case 'occupied':
-        return 'bg-purple-500/10 text-purple-700 border-purple-200';
+        return 'bg-gradient-to-r from-earth-warm/10 to-earth-warm/20 text-earth-warm border-earth-warm/30 shadow-sm';
       default:
-        return 'bg-gray-500/10 text-gray-700 border-gray-200';
+        return 'bg-gradient-to-r from-muted/10 to-muted/20 text-muted-foreground border-muted/30 shadow-sm';
     }
   };
 
   return (
-    <Card className="rounded-2xl bg-white ring-1 ring-black/5 shadow-card overflow-hidden transition hover:shadow-lg hover:-translate-y-[1px] focus-within:ring-2 focus-within:ring-brand-blue/40">
-      <CardHeader className="pb-4">
+    <Card className="rounded-2xl bg-gradient-to-br from-white via-ocean-blue/5 to-success-green/10 ring-1 ring-ocean-blue/20 shadow-card overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:ring-ocean-blue/40 focus-within:ring-2 focus-within:ring-ocean-blue/40">
+      <CardHeader className="pb-4 bg-gradient-to-r from-ocean-blue/5 to-success-green/5">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
-              {property.images && property.images.length > 0 && (
-                <img
-                  src={property.images[0]}
-                  alt={`${property.property_type} in ${property.location}`}
-                  className="w-16 h-16 object-cover rounded-xl"
-                />
+              {property.images && property.images.length > 0 ? (
+                <div className="relative">
+                  <img
+                    src={property.images[0]}
+                    alt={`${property.property_type} in ${property.location}`}
+                    className="w-16 h-16 object-cover rounded-xl ring-2 ring-ocean-blue/20"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/10 to-success-green/10 rounded-xl"></div>
+                </div>
+              ) : (
+                <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue/20 to-success-green/20 rounded-xl flex items-center justify-center">
+                  <Home className="h-8 w-8 text-ocean-blue" />
+                </div>
               )}
               <div>
-                <h3 className="text-base font-semibold text-brand-gray-900">R{property.price.toLocaleString()}/month</h3>
-                <p className="text-sm text-brand-gray-500">{property.property_type} in {property.location}</p>
+                <h3 className="text-base font-semibold text-ocean-blue">R{property.price.toLocaleString()}/month</h3>
+                <p className="text-sm text-success-green/80">{property.property_type} in {property.location}</p>
               </div>
             </div>
           </div>
@@ -51,11 +59,21 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="bg-gradient-to-br from-white/50 to-ocean-blue/5">
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="find-tenants">Find tenants</TabsTrigger>
-            <TabsTrigger value="manage-tenants">Manage tenants</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 bg-gradient-to-r from-ocean-blue/10 to-success-green/10 p-1">
+            <TabsTrigger 
+              value="find-tenants" 
+              className="data-[state=active]:bg-ocean-blue data-[state=active]:text-white transition-all"
+            >
+              Find tenants
+            </TabsTrigger>
+            <TabsTrigger 
+              value="manage-tenants"
+              className="data-[state=active]:bg-success-green data-[state=active]:text-white transition-all"
+            >
+              Manage tenants
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="find-tenants" className="mt-4">
