@@ -15,10 +15,6 @@ export interface SupportMessage {
   admin_responded_by?: string;
   created_at: string;
   updated_at: string;
-  profiles?: {
-    display_name: string;
-    email: string;
-  };
 }
 
 export interface CreateSupportMessage {
@@ -46,7 +42,16 @@ export function useSupportMessages() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Cast the data to ensure type safety
+      const typedMessages: SupportMessage[] = (data || []).map(msg => ({
+        ...msg,
+        category: msg.category as SupportMessage['category'],
+        priority: msg.priority as SupportMessage['priority'],
+        status: msg.status as SupportMessage['status']
+      }));
+      
+      setMessages(typedMessages);
     } catch (error) {
       console.error('Error fetching support messages:', error);
     } finally {
@@ -131,14 +136,20 @@ export function useAdminSupportMessages() {
       setLoading(true);
       const { data, error } = await supabase
         .from('support_messages')
-        .select(`
-          *,
-          profiles!inner(display_name)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Cast the data to ensure type safety
+      const typedMessages: SupportMessage[] = (data || []).map(msg => ({
+        ...msg,
+        category: msg.category as SupportMessage['category'],
+        priority: msg.priority as SupportMessage['priority'],
+        status: msg.status as SupportMessage['status']
+      }));
+      
+      setMessages(typedMessages);
     } catch (error) {
       console.error('Error fetching all support messages:', error);
     } finally {

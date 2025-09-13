@@ -64,7 +64,7 @@ export function SupportMessagesAdmin() {
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          message.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (message.profiles?.display_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+                         message.user_id.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === 'all' || message.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || message.priority === priorityFilter;
@@ -238,7 +238,7 @@ export function SupportMessagesAdmin() {
                       <div className="flex items-center gap-4 text-xs text-gray-500">
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
-                          {message.profiles?.display_name || 'Unknown User'}
+                          User: {message.user_id.slice(0, 8)}...
                         </div>
                         <div className="flex items-center gap-1">
                           <Mail className="h-3 w-3" />
