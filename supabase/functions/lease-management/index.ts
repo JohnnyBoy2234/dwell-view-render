@@ -408,7 +408,7 @@ serve(async (req) => {
             landlord_user_id: user.id,
             tenant_user_id: tenant_user_id,
             version,
-            status: 'DRAFT',
+            status: 'PENDING_TENANT_SIGNATURE',
             lease_data: finalLeaseData,
             pdf_draft_url: pdfUrl
           })

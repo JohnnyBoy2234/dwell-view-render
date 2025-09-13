@@ -413,11 +413,16 @@ serve(async (req) => {
     // Generate PDF
     const pdfBytes = await generateLeasePDF(lease_data, version)
     
-    // Convert to base64 for storage
+    // Convert to base64 for storage (kept for potential email)
     const pdfBase64 = btoa(String.fromCharCode(...pdfBytes))
     
-    // Generate filename
-    const filename = `Lease_${lease_data.property.city}_${lease_data.tenant.name.split(' ').pop()}_${lease_data.term.start_date}_v${version}.pdf`
+    // Generate a unique, cache-busting filename
+    const safe = (s: string | undefined) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'document'
+    const city = safe((lease_data as any)?.property?.city)
+    const tenantLast = safe(((lease_data as any)?.tenant?.name || '').split(' ').pop() as string)
+    const start = safe((lease_data as any)?.term?.start_date)
+    const stamp = Date.now()
+    const filename = `Lease_${city}_${tenantLast}_${start}_v${version}_${stamp}.pdf`
     
     // Ensure bucket exists
     const BUCKET = 'lease-documents'
@@ -436,7 +441,8 @@ serve(async (req) => {
       .from(BUCKET)
       .upload(filename, pdfBytes, {
         contentType: 'application/pdf',
-        upsert: true
+        upsert: true,
+        cacheControl: 'no-store, max-age=0, must-revalidate'
       })
 
     if (uploadError) {
@@ -448,7 +454,7 @@ serve(async (req) => {
       .from(BUCKET)
       .getPublicUrl(filename)
 
-    const pdfUrl = (urlData as any)?.publicUrl
+    const pdfUrl = (urlData as any)?.publicUrl ? `${(urlData as any).publicUrl}?t=${stamp}` : undefined
     if (!pdfUrl) {
       return json(502, { error: 'No public URL returned for uploaded PDF' })
     }

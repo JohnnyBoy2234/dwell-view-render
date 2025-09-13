@@ -169,15 +169,14 @@ serve(async (req) => {
       meta: { offerId, autoSendForSignature }
     });
 
-    // 4) Generate PDF
+    // 4) Generate PDF using new pipeline
     let pdfUrl = null;
     try {
-      const renderResponse = await supabase.functions.invoke('lease-render', {
-        body: { leaseId: lease.id }
+      const genResponse = await supabase.functions.invoke('generate-lease-pdf', {
+        body: { lease_data: lease.lease_data, version: lease.version }
       });
-
-      if (renderResponse.data?.pdfUrl) {
-        pdfUrl = renderResponse.data.pdfUrl;
+      if (genResponse.data?.pdf_url) {
+        pdfUrl = genResponse.data.pdf_url;
         await supabase.from("leases").update({ pdf_draft_url: pdfUrl }).eq("id", lease.id);
       }
     } catch (pdfError) {
