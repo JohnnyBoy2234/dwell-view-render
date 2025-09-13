@@ -1805,6 +1805,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_lease_agreement: {
+        Args: {
+          p_html_content?: string
+          p_landlord_id: string
+          p_lease_data?: Json
+          p_pdf_path?: string
+          p_pdf_url?: string
+          p_property_id: string
+          p_tenant_id?: string
+        }
+        Returns: {
+          created_at: string
+          html_content: string
+          id: string
+          landlord_id: string
+          lease_data: Json
+          pdf_path: string
+          pdf_url: string
+          property_id: string
+          status: string
+          tenant_id: string
+          updated_at: string
+        }[]
+      }
       is_admin: {
         Args: { user_id?: string }
         Returns: boolean
