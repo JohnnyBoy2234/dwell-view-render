@@ -130,7 +130,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       });
 
       if (onSubmissionComplete) onSubmissionComplete();
-      else navigate("/enhancedtenantdashboard");
+      else navigate("/tenant/dashboard");
       return true;
     } catch (e) {
       console.error("Quick apply error", e);

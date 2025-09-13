@@ -171,76 +171,84 @@ export default function EnhancedTenantDashboard() {
     ];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-        {/* iPhone-style status bar simulation */}
-        <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50">
-          <div className="px-4 py-2 flex justify-between items-center">
-            <div className="text-sm font-semibold text-gray-900">Dashboard</div>
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div className="text-xs text-gray-600">Online</div>
+      <div className="space-y-6 relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* KPI Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard
+            label="Unread Messages"
+            value={unreadCount ?? 0}
+            icon={<div className="h-5 w-5 bg-blue-100 rounded flex items-center justify-center">
+              <div className="h-3 w-3 bg-blue-600 rounded-full"></div>
+            </div>}
+          />
+          <StatCard
+            label="Upcoming Viewings"
+            value={(upcomingViewings?.length ?? 0).toString()}
+            icon={<Calendar className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Maintenance"
+            value={(recentMaintenance?.length ?? 0).toString()}
+            icon={<Settings className="h-5 w-5" />}
+          />
+          <StatCard
+            label="Rent"
+            value={rentDue ? 'Due' : 'Clear'}
+            icon={<FileText className="h-5 w-5" />}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Panel - Action Cards */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <RentDueCard 
+                rentDue={rentDue} 
+                onMakePayment={handleMakePayment} 
+              />
             </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <ViewingCard upcomingViewings={upcomingViewings} />
+              <MaintenanceCard recentMaintenance={recentMaintenance} />
+            </div>
+          </div>
+
+          {/* Right Panel - Property Information */}
+          <div className="lg:col-span-1">
+            <PropertyPanel 
+              tenantProperty={tenantProperty}
+              onMakePayment={handleMakePayment}
+            />
           </div>
         </div>
 
-        <div className="p-4 pb-24 md:pb-4 space-y-4">
-
-          {/* Feature Blocks - iPhone app grid style */}
-          <div className="space-y-3">
-            {featureBlocks.map((block) => {
-              const IconComponent = block.icon;
-              return (
-                <button
-                  key={block.title}
-                  onClick={() => navigate(block.path)}
-                  className="w-full bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40 
-                           hover:shadow-ios-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 
-                           group text-left"
-                >
-                  <div className="flex items-center space-x-4">
-                    {/* iOS-style app icon */}
-                    <div className={`w-12 h-12 ${block.iconBg} rounded-ios-button shadow-ios-sm 
-                                   flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
-                      <IconComponent className="w-6 h-6 text-white" />
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="text-base font-semibold text-gray-900">{block.title}</h3>
-                          <p className="text-sm text-gray-500 mt-0.5">{block.subtitle}</p>
-                        </div>
-                        
-                        {/* iOS-style chevron */}
-                        <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </div>
-                      </div>
-                      
-                      {/* Count badge if applicable */}
-                      {block.count !== undefined && block.count > 0 && (
-                        <div className="mt-2">
-                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            {block.count}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Rent Status - Special card */}
-          {rentDue && (
-            <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-ios-card p-4 shadow-ios-md border border-red-200/50">
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-red-500 rounded-ios-button flex items-center justify-center">
-                  <Receipt className="w-5 h-5 text-white" />
+        {/* Quick Actions Section */}
+        <div className="mt-12">
+          <SectionHeader title="Quick Actions" className="mb-4" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/viewings')}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-ocean-blue/10 text-ocean-blue grid place-content-center mb-2">
+                  <Eye className="h-5 w-5" />
+                </div>
+                <h4 className="font-semibold">Viewings</h4>
+                <p className="text-sm text-brand.gray500">Manage property viewings</p>
+              </div>
+            </GlassCard>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/inventory')}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-success-green/10 text-success-green grid place-content-center mb-2">
+                  <Clipboard className="h-5 w-5" />
+                </div>
+                <h4 className="font-semibold">Inventory</h4>
+                <p className="text-sm text-brand.gray500">Property condition records</p>
+              </div>
+            </GlassCard>
+            <GlassCard className="p-4 cursor-pointer" onClick={() => navigate('/messages')}>
+              <div className="text-brand.gray900">
+                <div className="h-10 w-10 rounded-xl bg-blue-100 text-blue-600 grid place-content-center mb-2">
+                  <MessageSquare className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-base font-semibold text-red-900">Rent Due</h3>
@@ -254,8 +262,19 @@ export default function EnhancedTenantDashboard() {
                   Pay Now
                 </button>
               </div>
+            </GlassCard>
+            <div>
+              <GlassCard className="p-4 cursor-pointer" onClick={() => handleTabChange('/enhancedtenantdashboard/inventory')}>
+                <div className="text-brand.gray900">
+                  <div className="h-10 w-10 rounded-xl bg-success-green/10 text-success-green grid place-content-center mb-2">
+                    <Clipboard className="h-5 w-5" />
+                  </div>
+                  <h4 className="font-semibold">Inventory</h4>
+                  <p className="text-sm text-brand.gray500">Property condition records</p>
+                </div>
+              </GlassCard>
             </div>
-          )}
+          </div>
 
           {/* SwiftRent Support Section */}
           <div className="mt-6">
