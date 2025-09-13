@@ -213,9 +213,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const url = new URL(req.url)
-    const pathParts = url.pathname.split('/').filter(part => part)
-    const action = pathParts[pathParts.length - 1]
+    // Parse request body first to get action
+    const requestBody = await req.json()
+    const { action } = requestBody
 
     // Get authorization header
     const authHeader = req.headers.get('Authorization')
@@ -238,10 +238,16 @@ serve(async (req) => {
       )
     }
 
-    const requestBody = await req.json()
+    if (!action) {
+      return new Response(
+        JSON.stringify({ error: 'Action is required in request body' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
 
     switch (action) {
       case 'test': {
+        const { property_id, tenant_user_id, lease_data } = requestBody
         return new Response(
           JSON.stringify({ 
             success: true, 
