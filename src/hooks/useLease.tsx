@@ -26,20 +26,35 @@ export function useLease(leaseId: string | null) {
       setLoading(true);
       setError(null);
 
-      // Fetch lease with signatures and audit logs
-      const { data: leaseData, error: leaseError } = await supabase
+      // Fetch base lease first (avoid RLS issues on joined tables)
+      const { data: baseLease, error: leaseError } = await supabase
         .from('leases')
-        .select(`
-          *,
-          signatures:lease_signatures(*),
-          audit_logs:lease_audit_logs(*)
-        `)
+        .select('*')
         .eq('id', leaseId)
         .single();
 
       if (leaseError) throw leaseError;
 
-      setLease(leaseData as unknown as LeaseWithSignatures);
+      let signatures: any[] = [];
+      let audit_logs: any[] = [];
+      try {
+        const { data: sigs } = await supabase
+          .from('lease_signatures')
+          .select('*')
+          .eq('lease_id', leaseId);
+        signatures = sigs || [];
+      } catch {}
+
+      try {
+        const { data: logs } = await supabase
+          .from('lease_audit_logs')
+          .select('*')
+          .eq('lease_id', leaseId)
+          .order('created_at', { ascending: false });
+        audit_logs = logs || [];
+      } catch {}
+
+      setLease({ ...(baseLease as any), signatures, audit_logs } as unknown as LeaseWithSignatures);
     } catch (err) {
       console.error('Error fetching lease:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch lease');

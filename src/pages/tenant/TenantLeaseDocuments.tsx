@@ -141,15 +141,16 @@ export default function TenantLeaseDocuments() {
                     <span>Updated: {new Date(lease.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleView(lease.pdf_draft_url)}
-                      disabled={!lease.pdf_draft_url}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
+                    {lease.pdf_draft_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(lease.pdf_draft_url)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       onClick={() => window.location.href = `/tenant/contracts/${lease.id}/sign`}
