@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Eye, Calendar, MapPin } from 'lucide-react';
+import { FileText, Eye, Calendar, MapPin, PenTool } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -149,6 +149,14 @@ export default function TenantLeaseDocuments() {
                     >
                       <Eye className="h-4 w-4 mr-2" />
                       View
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => window.location.href = `/tenant/contracts/${lease.id}/sign`}
+                      className="bg-ocean-blue hover:bg-ocean-blue-dark"
+                    >
+                      <PenTool className="h-4 w-4 mr-2" />
+                      Review & Sign
                     </Button>
                   </div>
                 </div>
