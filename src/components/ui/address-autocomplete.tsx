@@ -21,6 +21,12 @@ export function AddressAutocomplete({
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<any>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const onChangeRef = useRef(onChange);
+  const onPlaceSelectRef = useRef(onPlaceSelect);
+
+  // Update refs when props change
+  onChangeRef.current = onChange;
+  onPlaceSelectRef.current = onPlaceSelect;
 
   useEffect(() => {
     const loadGoogleMapsScript = () => {
@@ -85,9 +91,11 @@ export function AddressAutocomplete({
 
       autocompleteRef.current.addListener('place_changed', () => {
         const place = autocompleteRef.current?.getPlace();
+        console.log('Place selected:', place);
         if (place && place.formatted_address) {
-          onChange(place.formatted_address);
-          onPlaceSelect?.(place);
+          console.log('Setting address to:', place.formatted_address);
+          onChangeRef.current(place.formatted_address);
+          onPlaceSelectRef.current?.(place);
         }
       });
     } catch (error) {
@@ -99,14 +107,14 @@ export function AddressAutocomplete({
         window.google?.maps?.event?.clearInstanceListeners(autocompleteRef.current);
       }
     };
-  }, [isLoaded, onChange, onPlaceSelect]);
+  }, [isLoaded]);
 
   return (
     <div className="relative">
       <Input
         ref={inputRef}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => onChangeRef.current(e.target.value)}
         placeholder={placeholder}
         className={className}
       />
