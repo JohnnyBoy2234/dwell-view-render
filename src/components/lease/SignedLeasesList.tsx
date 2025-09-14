@@ -63,9 +63,31 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
   const downloadLease = async (lease: SignedLease) => {
     const title = lease.properties?.title || 'Lease_Agreement';
     const safe = title.replace(/[^a-z0-9]/gi, '_');
-    const fileName = `${safe}.pdf`;
+    const fileName = `SwiftRent_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
     try {
-      // Prefer new leases table (27-section PDF)
+      // First try the new lease_agreements table (SwiftRent 28-section system)
+      const { data: swiftRentLease } = await supabase
+        .from('lease_agreements')
+        .select('pdf_url, pdf_path, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (swiftRentLease?.pdf_url) {
+        const a = document.createElement('a');
+        const joiner = swiftRentLease.pdf_url.includes('?') ? '&' : '?';
+        a.href = `${swiftRentLease.pdf_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast({ title: 'SwiftRent lease downloaded successfully!' });
+        return;
+      }
+
+      // Fallback to old leases table (legacy system)
       const { data: latestLease } = await supabase
         .from('leases')
         .select('id, pdf_draft_url, pdf_signed_url, created_at')
@@ -84,10 +106,11 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        toast({ title: 'Lease downloaded successfully!' });
         return;
       }
 
-      // Fallback to legacy tenancy document if no new PDF exists
+      // Final fallback to legacy tenancy document if no new PDF exists
       const ref = lease.lease_document_path || lease.lease_document_url || '';
       if (!ref) {
         toast({ variant: 'destructive', title: 'No document to download' });
@@ -102,6 +125,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+        toast({ title: 'Legacy lease downloaded successfully!' });
         return;
       }
       const { data, error } = await supabase.storage.from('lease-documents').download(ref);
@@ -115,6 +139,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
+      toast({ title: 'Lease downloaded successfully!' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Download failed', description: e.message });
     }
