@@ -1,16 +1,32 @@
 import { useState } from 'react';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
+import { InventoryDetailModal } from '@/components/inventory/InventoryDetailModal';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
+import { useInventory } from '@/hooks/useInventory';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 import { Home, FileText, Camera, Mic, Download, Eye } from 'lucide-react';
+import { InventoryRecordWithDetails } from '@/types/inventory';
 
 export default function TenantInventory() {
   const { tenantProperty, loading } = useTenantDashboard();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const { 
+    inventoryRecords, 
+    loading: inventoryLoading, 
+    error: inventoryError,
+    downloadInventoryReport,
+    viewInventoryRecord
+  } = useInventory();
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<InventoryRecordWithDetails | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  if (loading) {
+  if (loading || inventoryLoading) {
     return (
       <div className="space-y-6">
         <div className="h-8 bg-muted animate-pulse rounded"></div>
@@ -23,29 +39,26 @@ export default function TenantInventory() {
     );
   }
 
-  // Mock inventory records - in a real app, these would come from the database
-  const inventoryRecords = [
-    {
-      id: '1',
-      propertyTitle: tenantProperty?.title || 'Current Property',
-      createdDate: '2024-01-15',
-      status: 'completed',
-      roomsRecorded: 5,
-      photosCount: 23,
-      voiceNotesCount: 5,
-      landlordApproved: true
-    },
-    {
-      id: '2',
-      propertyTitle: 'Previous Property - Oak Street',
-      createdDate: '2023-08-20',
-      status: 'completed',
-      roomsRecorded: 3,
-      photosCount: 15,
-      voiceNotesCount: 3,
-      landlordApproved: true
+  const handleViewInventory = (record: InventoryRecordWithDetails) => {
+    setSelectedRecord(record);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleDownloadReport = async (recordId: string) => {
+    try {
+      await downloadInventoryReport(recordId);
+      toast({
+        title: "Report Download",
+        description: "Inventory report download initiated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download inventory report. Please try again.",
+        variant: "destructive",
+      });
     }
-  ];
+  };
 
   const handleStartNewInventory = () => {
     if (tenantProperty) {
@@ -62,6 +75,25 @@ export default function TenantInventory() {
       return <Badge variant="outline">In Progress</Badge>;
     }
   };
+
+  // Show error if there's an inventory error
+  if (inventoryError) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Property Inventory</h1>
+          <p className="text-muted-foreground">
+            Record and manage property condition documentation for your tenancies
+          </p>
+        </div>
+        <Card>
+          <CardContent className="py-12 text-center">
+            <p className="text-destructive">Error loading inventory records: {inventoryError}</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // If a property is selected for inventory, show the inventory panel
   if (selectedPropertyId) {
@@ -155,30 +187,33 @@ export default function TenantInventory() {
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-semibold text-lg">{record.propertyTitle}</h3>
+                      <h3 className="font-semibold text-lg">{record.property?.title || 'Property'}</h3>
                       <p className="text-muted-foreground">
-                        Created: {new Date(record.createdDate).toLocaleDateString()}
+                        Created: {new Date(record.created_at).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        Country: {record.country}
                       </p>
                     </div>
-                    {getStatusBadge(record.status, record.landlordApproved)}
+                    {getStatusBadge(record.status, record.landlord_approved)}
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-ocean-blue">{record.roomsRecorded}</div>
+                      <div className="text-2xl font-bold text-ocean-blue">{record.rooms_recorded}</div>
                       <div className="text-sm text-muted-foreground">Rooms</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-success-green">{record.photosCount}</div>
+                      <div className="text-2xl font-bold text-success-green">{record.photos_count}</div>
                       <div className="text-sm text-muted-foreground">Photos</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl font-bold text-earth-warm">{record.voiceNotesCount}</div>
+                      <div className="text-2xl font-bold text-earth-warm">{record.voice_notes_count}</div>
                       <div className="text-sm text-muted-foreground">Voice Notes</div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold text-muted-foreground">
-                        {record.landlordApproved ? '✓' : '⏳'}
+                        {record.landlord_approved ? '✓' : '⏳'}
                       </div>
                       <div className="text-sm text-muted-foreground">Status</div>
                     </div>
@@ -193,10 +228,7 @@ export default function TenantInventory() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // In real app, this would open a viewer for the inventory
-                          console.log('Viewing inventory:', record.id);
-                        }}
+                        onClick={() => handleViewInventory(record)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         View
@@ -204,10 +236,7 @@ export default function TenantInventory() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // In real app, this would download the inventory report
-                          console.log('Downloading inventory:', record.id);
-                        }}
+                        onClick={() => handleDownloadReport(record.id)}
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download Report
@@ -249,6 +278,17 @@ export default function TenantInventory() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Inventory Detail Modal */}
+      <InventoryDetailModal
+        record={selectedRecord}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedRecord(null);
+        }}
+        onDownloadReport={handleDownloadReport}
+      />
     </div>
   );
 }

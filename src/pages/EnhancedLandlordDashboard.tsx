@@ -1080,8 +1080,8 @@ export default function EnhancedLandlordDashboard() {
                     <DollarSign className="h-5 w-5 text-success-green" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Annual Revenue</p>
-                    <p className="text-xl font-bold text-success-green">
+                    <p className="text-sm text-black text-muted-foreground">Annual Revenue</p>
+                    <p className="text-xl text-black font-bold text-success-green">
                       R{(tenants.reduce((sum, tenant) => sum + tenant.monthly_rent, 0) * 12).toLocaleString()}
                     </p>
                   </div>
@@ -1096,8 +1096,8 @@ export default function EnhancedLandlordDashboard() {
                     <Building className="h-5 w-5 text-ocean-blue" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Occupancy Rate</p>
-                    <p className="text-xl font-bold text-ocean-blue">
+                    <p className="text-sm text-black text-muted-foreground">Occupancy Rate</p>
+                    <p className="text-xl text-black font-bold text-ocean-blue">
                       {properties.length > 0 ? Math.round((tenants.length / properties.length) * 100) : 0}%
                     </p>
                   </div>
