@@ -244,8 +244,31 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
                               .order('created_at', { ascending: false })
                               .limit(1)
                               .maybeSingle();
-                            const idToUse = latestLease?.id || lease.id;
-                            // Prefer dedicated signing route if available
+                            let idToUse = latestLease?.id;
+                            // If no lease exists yet and user is landlord, generate one on-demand
+                            if (!idToUse && role === 'landlord' && (lease as any).tenant_id && lease.property_id) {
+                              try {
+                                const { data: genLeaseResp, error: genErr }: any = await supabase.functions.invoke('lease-management', {
+                                  body: {
+                                    action: 'generate',
+                                    property_id: lease.property_id,
+                                    tenant_user_id: (lease as any).tenant_id,
+                                  }
+                                });
+                                if (!genErr && genLeaseResp?.lease?.id) {
+                                  idToUse = genLeaseResp.lease.id;
+                                }
+                              } catch (e) {}
+                            }
+                            if (!idToUse) {
+                              // Tenant cannot generate; show message
+                              if (role === 'tenant') {
+                                toast({ title: 'Lease not available yet', description: 'Waiting for landlord to generate the contract.' });
+                                return;
+                              }
+                              toast({ title: 'Could not create lease', description: 'Please try again.' });
+                              return;
+                            }
                             const base = '/swiftrent-lease';
                             window.location.href = `${base}/${idToUse}`;
                           } catch {

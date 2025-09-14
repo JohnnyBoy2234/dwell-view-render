@@ -2,15 +2,25 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { PDFDocument, rgb, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1'
 
-const corsHeaders = {
+const baseCorsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Content-Type': 'application/json',
 }
 
-const json = (status: number, body: unknown) =>
-  new Response(JSON.stringify(body), { status, headers: corsHeaders })
+function makeCors(originHeader: string | null, req: Request) {
+  const origin = originHeader || '*'
+  const requestedHeaders = req.headers.get('Access-Control-Request-Headers') || 'authorization, x-client-info, apikey, content-type'
+  return {
+    ...baseCorsHeaders,
+    'Access-Control-Allow-Origin': origin,
+    'Access-Control-Allow-Headers': requestedHeaders,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
+    'Vary': 'Origin',
+  }
+}
 
 interface LeaseData {
   landlord: {
@@ -394,8 +404,12 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
 }
 
 serve(async (req) => {
+  const corsHeaders = makeCors(req.headers.get('Origin'), req)
+  const json = (status: number, body: unknown) =>
+    new Response(JSON.stringify(body), { status, headers: corsHeaders })
+
   if (req.method === 'OPTIONS') {
-    return json(200, { ok: true })
+    return new Response(null, { status: 204, headers: corsHeaders })
   }
 
   try {
