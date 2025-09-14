@@ -198,6 +198,33 @@ export function LandlordLeasesList() {
         document.body.removeChild(a);
         return;
       }
+      // 4) On-demand generate from stored lease_data as a last resort
+      const { data: fullLease } = await supabase
+        .from('leases')
+        .select('lease_data, version')
+        .eq('id', lease.id)
+        .maybeSingle();
+
+      if (fullLease?.lease_data) {
+        const { data: genResp, error: genErr }: any = await supabase.functions.invoke('generate-lease-pdf', {
+          body: { lease_data: fullLease.lease_data, version: fullLease.version || 1 }
+        });
+        if (!genErr && genResp?.pdf_url) {
+          const url = String(genResp.pdf_url);
+          // Persist for next time
+          await supabase.from('leases').update({ pdf_draft_url: url }).eq('id', lease.id);
+          const a = document.createElement('a');
+          const joiner = url.includes('?') ? '&' : '?';
+          a.href = `${url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+          a.download = fileName;
+          a.target = '_blank';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          return;
+        }
+      }
+
       toast({ variant: 'destructive', title: 'No generated lease PDF yet', description: 'Please try again shortly or regenerate the lease PDF.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Download failed', description: e.message });
@@ -218,7 +245,7 @@ export function LandlordLeasesList() {
         toast({ title: 'No new lease found', description: 'Generate a lease first to proceed with signing.' });
         return;
       }
-      window.location.href = `/enhancedlandlorddashboard/leases/${latestLease.id}/sign`;
+      window.location.href = `/swiftrent-lease/${latestLease.id}`;
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to initiate signing', description: e.message });
     }
