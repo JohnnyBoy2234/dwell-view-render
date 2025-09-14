@@ -167,16 +167,26 @@ export function LandlordLeasesList() {
         return;
       }
 
-      // 2) Fallback to new leases table (27-section PDF)
-      const { data: latestLease } = await supabase
+      // 2) Try by this lease id first
+      let preferredUrl: string | undefined;
+      const { data: byId } = await supabase
         .from('leases')
-        .select('id, pdf_draft_url, pdf_signed_url, created_at')
-        .eq('property_id', lease.property_id)
-        .order('created_at', { ascending: false })
-        .limit(1)
+        .select('id, pdf_draft_url, pdf_signed_url')
+        .eq('id', lease.id)
         .maybeSingle();
+      preferredUrl = byId?.pdf_signed_url || byId?.pdf_draft_url;
 
-      const preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
+      // 3) Fallback to newest lease for this property
+      if (!preferredUrl) {
+        const { data: latestLease } = await supabase
+          .from('leases')
+          .select('id, pdf_draft_url, pdf_signed_url, created_at')
+          .eq('property_id', lease.property_id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
+      }
       if (preferredUrl) {
         const a = document.createElement('a');
         const joiner = preferredUrl.includes('?') ? '&' : '?';
