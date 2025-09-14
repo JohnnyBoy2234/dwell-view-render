@@ -6,12 +6,14 @@ import { Badge } from '@/components/ui/badge';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 
 export default function TenantLeaseDocuments() {
   const { tenantProperty, loading } = useTenantDashboard();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [loadingLeases, setLoadingLeases] = useState(false);
-  const [leases, setLeases] = useState<Array<{ id: string; status: string; created_at: string; pdf_draft_url?: string; property?: { title?: string; location?: string } }>>([]);
+  const [leases, setLeases] = useState<Array<{ id: string; status: string; created_at: string; pdf_draft_url?: string; property?: { title?: string; location?: string }; property_id?: string }>>([]);
 
   useEffect(() => {
     const fetchLeases = async () => {
@@ -20,7 +22,7 @@ export default function TenantLeaseDocuments() {
       try {
         const { data, error } = await supabase
           .from('leases')
-          .select('id, status, created_at, pdf_draft_url, properties:property_id(title, location)')
+          .select('id, status, created_at, pdf_draft_url, property_id, properties:property_id(title, location)')
           .eq('tenant_user_id', user.id)
           .order('created_at', { ascending: false });
         if (!error && data) {
@@ -30,6 +32,7 @@ export default function TenantLeaseDocuments() {
             status: row.status,
             created_at: row.created_at,
             pdf_draft_url: row.pdf_draft_url,
+            property_id: row.property_id,
             property: row.properties ? { title: row.properties.title, location: row.properties.location } : undefined,
           }));
           setLeases(mapped);
@@ -48,16 +51,52 @@ export default function TenantLeaseDocuments() {
     }
   };
 
-  const handleDownload = (url?: string, fileName: string = 'Lease_Agreement.pdf') => {
-    if (!url) return;
-    const a = document.createElement('a');
-    const joiner = url.includes('?') ? '&' : '?';
-    a.href = `${url}${joiner}ts=${Date.now()}`;
-    a.download = fileName;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  const handleDownload = async (lease: any) => {
+    const title = lease.property?.title || 'Lease_Agreement';
+    const safe = title.replace(/[^a-z0-9]/gi, '_');
+    const fileName = `SwiftRent_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
+    
+    try {
+      // First try the new lease_agreements table (SwiftRent 28-section system)
+      const { data: swiftRentLease } = await supabase
+        .from('lease_agreements')
+        .select('pdf_url, pdf_path, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (swiftRentLease?.pdf_url) {
+        const a = document.createElement('a');
+        const joiner = swiftRentLease.pdf_url.includes('?') ? '&' : '?';
+        a.href = `${swiftRentLease.pdf_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast({ title: 'SwiftRent lease downloaded successfully!' });
+        return;
+      }
+
+      // Fallback to old leases table (legacy system)
+      if (lease.pdf_draft_url) {
+        const a = document.createElement('a');
+        const joiner = lease.pdf_draft_url.includes('?') ? '&' : '?';
+        a.href = `${lease.pdf_draft_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        toast({ title: 'Lease downloaded successfully!' });
+        return;
+      }
+
+      toast({ variant: 'destructive', title: 'No document to download' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Download failed', description: e.message });
+    }
   };
 
   if (loading || loadingLeases) {
@@ -161,7 +200,7 @@ export default function TenantLeaseDocuments() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleDownload(lease.pdf_draft_url, 'Lease_Agreement.pdf')}
+                          onClick={() => handleDownload(lease)}
                         >
                           <Download className="h-4 w-4 mr-2" />
                           Download
