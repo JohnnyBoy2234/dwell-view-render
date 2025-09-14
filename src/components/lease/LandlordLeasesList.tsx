@@ -143,35 +143,7 @@ export function LandlordLeasesList() {
         document.body.removeChild(a);
         return;
       }
-
-      // Fallback to legacy tenancy document if no new PDF exists
-      const ref = lease.lease_document_path || lease.lease_document_url || '';
-      if (!ref) {
-        toast({ variant: 'destructive', title: 'No document to download' });
-        return;
-      }
-      if (ref.startsWith('http')) {
-        const a = document.createElement('a');
-        const joiner = ref.includes('?') ? '&' : '?';
-        a.href = `${ref}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
-      const { data, error } = await supabase.storage.from('lease-documents').download(ref);
-      if (error) throw error;
-      const blob = new Blob([data], { type: 'application/pdf' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      toast({ variant: 'destructive', title: 'No generated lease PDF yet', description: 'Generate a new lease to download the latest 27-section document.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Download failed', description: e.message });
     }
@@ -179,8 +151,19 @@ export function LandlordLeasesList() {
 
   const continueSigning = async (lease: LeaseRow) => {
     try {
-      // Navigate to the new in-app signing page
-      window.location.href = `/enhancedlandlorddashboard/leases/${lease.id}/sign`;
+      const { data: latestLease, error } = await supabase
+        .from('leases')
+        .select('id, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      if (!latestLease?.id) {
+        toast({ title: 'No new lease found', description: 'Generate a lease first to proceed with signing.' });
+        return;
+      }
+      window.location.href = `/enhancedlandlorddashboard/leases/${latestLease.id}/sign`;
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to initiate signing', description: e.message });
     }

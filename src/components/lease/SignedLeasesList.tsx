@@ -179,10 +179,23 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
                           <Download className="h-4 w-4 mr-2" />
                           Download
                         </Button>
-                        <Button className="flex-1" onClick={() => {
-                          // Navigate to the new in-app signing page
-                          const base = role === 'tenant' ? '/enhancedtenantdashboard/leases' : '/enhancedlandlorddashboard/leases';
-                          window.location.href = `${base}/${lease.id}/sign`;
+                        <Button className="flex-1" onClick={async () => {
+                          try {
+                            const { data: latestLease } = await supabase
+                              .from('leases')
+                              .select('id, created_at')
+                              .eq('property_id', lease.property_id)
+                              .order('created_at', { ascending: false })
+                              .limit(1)
+                              .maybeSingle();
+                            const idToUse = latestLease?.id || lease.id;
+                            // Prefer dedicated signing route if available
+                            const base = '/swiftrent-lease';
+                            window.location.href = `${base}/${idToUse}`;
+                          } catch {
+                            const base = '/swiftrent-lease';
+                            window.location.href = `${base}/${lease.id}`;
+                          }
                         }}>
                           Review & Sign
                         </Button>

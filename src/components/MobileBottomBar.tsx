@@ -17,7 +17,7 @@ export function MobileBottomBar() {
   
   // Hide bottom bar when in a specific conversation or on signing pages
   const isInConversation = location.pathname === '/messages' && searchParams.get('c');
-  const isSigningPage = /\/leases\/.+\/sign/.test(location.pathname) || /\/contracts\/.+\/sign/.test(location.pathname) || location.pathname.includes('/sign');
+  const isSigningPage = /\/leases\/.+\/sign/.test(location.pathname) || /\/contracts\/.+\/sign/.test(location.pathname) || location.pathname.includes('/sign') || location.pathname.startsWith('/swiftrent-lease/');
   
   if (isInConversation || isSigningPage) {
     return null;
