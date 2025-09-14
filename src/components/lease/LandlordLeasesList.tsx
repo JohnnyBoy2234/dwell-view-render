@@ -38,6 +38,7 @@ export function LandlordLeasesList() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardLease, setWizardLease] = useState<LeaseRow | null>(null);
   const [selectedDraftId, setSelectedDraftId] = useState<string>("");
+  const [newLeases, setNewLeases] = useState<any[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -55,6 +56,15 @@ export function LandlordLeasesList() {
           .order("created_at", { ascending: false });
         if (error) throw error;
         setLeases((data as any) || []);
+
+        // Load new SwiftRent leases (27/28-section)
+        const { data: latest, error: latestErr } = await supabase
+          .from('leases')
+          .select('id, property_id, landlord_user_id, tenant_user_id, status, created_at, properties:property_id(title, location)')
+          .eq('landlord_user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (latestErr) throw latestErr;
+        setNewLeases(latest || []);
       } catch (e: any) {
         toast({ variant: "destructive", title: "Failed to load leases", description: e.message });
       } finally {
@@ -65,9 +75,28 @@ export function LandlordLeasesList() {
   }, [user, toast]);
 
   const filtered = useMemo(() => {
+    // Normalize new leases to LeaseRow-like shape
+    const normalizedNew: LeaseRow[] = (newLeases || []).map((row: any) => ({
+      id: row.id,
+      property_id: row.property_id,
+      landlord_id: row.landlord_user_id,
+      tenant_id: row.tenant_user_id,
+      monthly_rent: null,
+      security_deposit: null,
+      start_date: row.created_at,
+      end_date: null,
+      lease_status: (row.status || '').toLowerCase(),
+      lease_document_path: null,
+      lease_document_url: null,
+      created_at: row.created_at,
+      properties: row.properties || null,
+      tenant_profile: null,
+    }));
+
+    const merged: LeaseRow[] = [...normalizedNew, ...leases];
     const byProperty = propertyFilter
-      ? leases.filter((l) => l.property_id === propertyFilter)
-      : leases;
+      ? merged.filter((l) => l.property_id === propertyFilter)
+      : merged;
     const query = search.trim().toLowerCase();
     if (!query) return byProperty;
     return byProperty.filter((l) => {
@@ -78,20 +107,15 @@ export function LandlordLeasesList() {
         title.includes(query) || loc.includes(query) || tenantName.includes(query)
       );
     });
-  }, [leases, propertyFilter, search]);
-
-  const withDocuments = useMemo(
-    () => filtered.filter((l) => Boolean(l.lease_document_path || l.lease_document_url)),
-    [filtered]
-  );
+  }, [leases, newLeases, propertyFilter, search]);
 
   const signed = useMemo(
-    () => withDocuments.filter((l) => l.lease_status === "completed"),
-    [withDocuments]
+    () => filtered.filter((l) => (l.lease_status || '').toLowerCase() === 'completed'),
+    [filtered]
   );
   const drafts = useMemo(
-    () => withDocuments.filter((l) => l.lease_status !== "completed"),
-    [withDocuments]
+    () => filtered.filter((l) => (l.lease_status || '').toLowerCase() !== 'completed'),
+    [filtered]
   );
   const draftTenancies = useMemo(
     () => leases.filter((l) => l.lease_status === 'draft'),
@@ -180,7 +204,7 @@ export function LandlordLeasesList() {
         <div className="flex items-center gap-3">
           <FileText className="h-6 w-6 text-ocean-blue" />
           <h2 id="leases-heading" className="text-xl font-bold">Leases</h2>
-          <Badge variant="secondary">{withDocuments.length}</Badge>
+          <Badge variant="secondary">{filtered.length}</Badge>
         </div>
         <div className="flex items-center gap-2 w-full max-w-xl">
           <Input
@@ -243,7 +267,7 @@ export function LandlordLeasesList() {
         <Card>
           <CardContent className="p-8 text-center text-muted-foreground">Loading leases…</CardContent>
         </Card>
-      ) : withDocuments.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle>No leases yet</CardTitle>

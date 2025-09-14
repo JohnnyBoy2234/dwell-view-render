@@ -79,11 +79,17 @@ export default function TenantLeaseDocuments() {
         return;
       }
 
-      // Fallback to old leases table (legacy system)
-      if (lease.pdf_draft_url) {
+      // Fallback to new leases table
+      const { data: latestLease } = await supabase
+        .from('leases')
+        .select('pdf_signed_url, pdf_draft_url, created_at')
+        .eq('id', lease.id)
+        .maybeSingle();
+      const preferred = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url || lease.pdf_draft_url;
+      if (preferred) {
         const a = document.createElement('a');
-        const joiner = lease.pdf_draft_url.includes('?') ? '&' : '?';
-        a.href = `${lease.pdf_draft_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        const joiner = preferred.includes('?') ? '&' : '?';
+        a.href = `${preferred}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
         a.download = fileName;
         a.target = '_blank';
         document.body.appendChild(a);
@@ -195,29 +201,27 @@ export default function TenantLeaseDocuments() {
                     <span>Updated: {new Date(lease.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(lease)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
                     {lease.pdf_draft_url && (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownload(lease)}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleView(lease.pdf_draft_url)}
-                        >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </Button>
-                      </>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleView(lease.pdf_draft_url)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        View
+                      </Button>
                     )}
                     <Button
                       size="sm"
-                      onClick={() => window.location.href = `/tenant/contracts/${lease.id}/sign`}
+                      onClick={() => window.location.href = `/swiftrent-lease/${lease.id}`}
                       className="bg-ocean-blue hover:bg-ocean-blue-dark"
                     >
                       <PenTool className="h-4 w-4 mr-2" />
