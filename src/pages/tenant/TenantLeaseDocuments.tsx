@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FileText, Eye, Calendar, MapPin, PenTool } from 'lucide-react';
+import { FileText, Eye, Calendar, MapPin, PenTool, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -42,7 +42,22 @@ export default function TenantLeaseDocuments() {
   }, [user?.id]);
 
   const handleView = (url?: string) => {
-    if (url) window.open(url, '_blank');
+    if (url) {
+      const joiner = url.includes('?') ? '&' : '?';
+      window.open(`${url}${joiner}ts=${Date.now()}`, '_blank');
+    }
+  };
+
+  const handleDownload = (url?: string, fileName: string = 'Lease_Agreement.pdf') => {
+    if (!url) return;
+    const a = document.createElement('a');
+    const joiner = url.includes('?') ? '&' : '?';
+    a.href = `${url}${joiner}ts=${Date.now()}`;
+    a.download = fileName;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   if (loading || loadingLeases) {
@@ -146,17 +161,18 @@ export default function TenantLeaseDocuments() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleView(lease.pdf_draft_url)}
+                          onClick={() => handleDownload(lease.pdf_draft_url, 'Lease_Agreement.pdf')}
                         >
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleView(lease.pdf_draft_url)}
                         >
-                          Download
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
                         </Button>
                       </>
                     )}

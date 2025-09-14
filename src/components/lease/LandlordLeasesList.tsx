@@ -120,29 +120,52 @@ export function LandlordLeasesList() {
   };
 
   const download = async (lease: LeaseRow) => {
-    const ref = lease.lease_document_path || lease.lease_document_url || "";
-    if (!ref) {
-      toast({ variant: "destructive", title: "No document to download" });
-      return;
-    }
     const fileName = computeFileName(lease);
     try {
-      if (ref.startsWith("http")) {
-        const a = document.createElement("a");
-        const joiner = ref.includes("?") ? "&" : "?";
-        a.href = `${ref}${joiner}download=${encodeURIComponent(fileName)}`;
+      // Prefer new leases table (27-section PDF)
+      const { data: latestLease } = await supabase
+        .from('leases')
+        .select('id, pdf_draft_url, pdf_signed_url, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
+      if (preferredUrl) {
+        const a = document.createElement('a');
+        const joiner = preferredUrl.includes('?') ? '&' : '?';
+        a.href = `${preferredUrl}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
         a.download = fileName;
-        a.target = "_blank";
+        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         return;
       }
-      const { data, error } = await supabase.storage.from("lease-documents").download(ref);
+
+      // Fallback to legacy tenancy document if no new PDF exists
+      const ref = lease.lease_document_path || lease.lease_document_url || '';
+      if (!ref) {
+        toast({ variant: 'destructive', title: 'No document to download' });
+        return;
+      }
+      if (ref.startsWith('http')) {
+        const a = document.createElement('a');
+        const joiner = ref.includes('?') ? '&' : '?';
+        a.href = `${ref}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+      const { data, error } = await supabase.storage.from('lease-documents').download(ref);
       if (error) throw error;
-      const blob = new Blob([data], { type: "application/pdf" });
+      const blob = new Blob([data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
       a.download = fileName;
       document.body.appendChild(a);
@@ -150,7 +173,7 @@ export function LandlordLeasesList() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Download failed", description: e.message });
+      toast({ variant: 'destructive', title: 'Download failed', description: e.message });
     }
   };
 

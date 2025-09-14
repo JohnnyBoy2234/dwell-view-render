@@ -216,7 +216,8 @@ export function useLease(leaseId: string | null) {
 
       // Create a temporary link to download the file
       const link = document.createElement('a');
-      link.href = url;
+      const joiner = url.includes('?') ? '&' : '?';
+      link.href = `${url}${joiner}ts=${Date.now()}`;
       link.download = `lease_${lease.id}_${type}.pdf`;
       document.body.appendChild(link);
       link.click();

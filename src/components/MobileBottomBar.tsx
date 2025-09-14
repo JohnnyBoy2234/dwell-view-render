@@ -15,10 +15,11 @@ export function MobileBottomBar() {
   
   const [searchParams] = useSearchParams();
   
-  // Hide bottom bar only when in a specific conversation
+  // Hide bottom bar when in a specific conversation or on signing pages
   const isInConversation = location.pathname === '/messages' && searchParams.get('c');
+  const isSigningPage = /\/leases\/.+\/sign/.test(location.pathname) || /\/contracts\/.+\/sign/.test(location.pathname) || location.pathname.includes('/sign');
   
-  if (isInConversation) {
+  if (isInConversation || isSigningPage) {
     return null;
   }
 

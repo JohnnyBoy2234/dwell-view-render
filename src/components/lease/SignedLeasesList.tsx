@@ -61,36 +61,62 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
   }, [role, user, toast]);
 
   const downloadLease = async (lease: SignedLease) => {
-    const title = lease.properties?.title || "Lease_Agreement";
-    const ref = lease.lease_document_path || lease.lease_document_url || "";
-    if (!ref) {
-      toast({ variant: "destructive", title: "No document to download" });
-      return;
-    }
+    const title = lease.properties?.title || 'Lease_Agreement';
+    const safe = title.replace(/[^a-z0-9]/gi, '_');
+    const fileName = `${safe}.pdf`;
     try {
-      if (ref.startsWith("http")) {
-        const a = document.createElement("a");
-        a.href = ref;
-        a.download = `${title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
-        a.target = "_blank";
+      // Prefer new leases table (27-section PDF)
+      const { data: latestLease } = await supabase
+        .from('leases')
+        .select('id, pdf_draft_url, pdf_signed_url, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
+      if (preferredUrl) {
+        const a = document.createElement('a');
+        const joiner = preferredUrl.includes('?') ? '&' : '?';
+        a.href = `${preferredUrl}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
         return;
       }
-      const { data, error } = await supabase.storage.from("lease-documents").download(ref);
+
+      // Fallback to legacy tenancy document if no new PDF exists
+      const ref = lease.lease_document_path || lease.lease_document_url || '';
+      if (!ref) {
+        toast({ variant: 'destructive', title: 'No document to download' });
+        return;
+      }
+      if (ref.startsWith('http')) {
+        const a = document.createElement('a');
+        const joiner = ref.includes('?') ? '&' : '?';
+        a.href = `${ref}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+      const { data, error } = await supabase.storage.from('lease-documents').download(ref);
       if (error) throw error;
-      const blob = new Blob([data], { type: "application/pdf" });
+      const blob = new Blob([data], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
+      const a = document.createElement('a');
       a.href = url;
-      a.download = `${title.replace(/[^a-z0-9]/gi, "_")}.pdf`;
+      a.download = fileName;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Download failed", description: e.message });
+      toast({ variant: 'destructive', title: 'Download failed', description: e.message });
     }
   };
 
@@ -148,19 +174,19 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
                         </div>
                         <Badge>{lease.lease_status?.replace(/_/g, ' ')}</Badge>
                       </div>
-                      {lease.lease_status === 'awaiting_tenant_signature' ? (
-                        <Button className="w-full" onClick={() => {
+                      <div className="flex gap-2">
+                        <Button variant="outline" className="flex-1" onClick={() => downloadLease(lease)}>
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                        <Button className="flex-1" onClick={() => {
                           // Navigate to the new in-app signing page
-                          window.location.href = `/enhancedtenantdashboard/leases/${lease.id}/sign`;
+                          const base = role === 'tenant' ? '/enhancedtenantdashboard/leases' : '/enhancedlandlorddashboard/leases';
+                          window.location.href = `${base}/${lease.id}/sign`;
                         }}>
                           Review & Sign
                         </Button>
-                      ) : (
-                        <Button className="w-full" onClick={() => downloadLease(lease)}>
-                          <Download className="h-4 w-4 mr-2" />
-                          Download PDF
-                        </Button>
-                      )}
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

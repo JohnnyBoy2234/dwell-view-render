@@ -210,21 +210,40 @@ export const LeaseGenerator = ({
             <Button 
               variant="outline" 
               onClick={() => {
-                // For in-progress leases, open the document for viewing
-                if (tenancy.lease_document_path) {
-                  supabase.storage.from('lease-documents').download(tenancy.lease_document_path).then(({ data, error }) => {
-                    if (error) throw error;
-                    const blob = new Blob([data], { type: 'application/pdf' });
-                    const url = window.URL.createObjectURL(blob);
-                    window.open(url, '_blank');
-                    window.URL.revokeObjectURL(url);
-                  }).catch((err) => {
-                    console.error('Error viewing lease:', err);
-                    toast.error("Failed to open document");
-                  });
-                } else if (tenancy.lease_document_url) {
-                  window.open(tenancy.lease_document_url, '_blank');
-                }
+                // Prefer new leases table (27-section) preview if available
+                (async () => {
+                  try {
+                    const { data: latestLease } = await supabase
+                      .from('leases')
+                      .select('id, pdf_draft_url, pdf_signed_url, created_at')
+                      .eq('property_id', tenancy.property_id)
+                      .order('created_at', { ascending: false })
+                      .limit(1)
+                      .maybeSingle();
+                    const preferred = latestLease?.pdf_draft_url || latestLease?.pdf_signed_url;
+                    if (preferred) {
+                      const joiner = preferred.includes('?') ? '&' : '?';
+                      window.open(`${preferred}${joiner}ts=${Date.now()}`, '_blank');
+                      return;
+                    }
+                  } catch {}
+                  // Fallback to legacy tenancy document
+                  if (tenancy.lease_document_path) {
+                    supabase.storage.from('lease-documents').download(tenancy.lease_document_path).then(({ data, error }) => {
+                      if (error) throw error;
+                      const blob = new Blob([data], { type: 'application/pdf' });
+                      const url = window.URL.createObjectURL(blob);
+                      window.open(url, '_blank');
+                      window.URL.revokeObjectURL(url);
+                    }).catch((err) => {
+                      console.error('Error viewing lease:', err);
+                      toast.error("Failed to open document");
+                    });
+                  } else if (tenancy.lease_document_url) {
+                    const joiner = tenancy.lease_document_url.includes('?') ? '&' : '?';
+                    window.open(`${tenancy.lease_document_url}${joiner}ts=${Date.now()}`, '_blank');
+                  }
+                })();
               }}
               className="flex items-center gap-2"
             >
