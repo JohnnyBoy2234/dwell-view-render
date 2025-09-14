@@ -36,6 +36,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
       if (!user) return;
       setLoading(true);
       try {
+        // Legacy tenancies (older system)
         const query = supabase
           .from("tenancies")
           .select(`*,
@@ -46,11 +47,41 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
           .in("lease_status", ["awaiting_tenant_signature", "awaiting_landlord_signature", "completed"]) 
           .order("created_at", { ascending: false });
 
-        const { data, error } = await (role === "landlord" ?
+        const { data: legacyData, error: legacyErr } = await (role === "landlord" ?
           query.eq("landlord_id", user.id) :
           query.eq("tenant_id", user.id));
-        if (error) throw error;
-        setLeases((data as any) || []);
+        if (legacyErr) throw legacyErr;
+
+        // New SwiftRent leases (27/28-section system)
+        const { data: newLeases, error: newErr } = await supabase
+          .from('leases')
+          .select('id, property_id, status, created_at, properties:property_id(title, location)')
+          .order('created_at', { ascending: false })
+          .match(role === 'landlord' ? { landlord_user_id: user.id } : { tenant_user_id: user.id });
+        if (newErr) throw newErr;
+
+        // Normalize new leases to SignedLease shape for UI
+        const normalizedNew: SignedLease[] = (newLeases as any[] || []).map((row) => ({
+          id: row.id,
+          property_id: row.property_id,
+          landlord_id: '',
+          tenant_id: '',
+          monthly_rent: 0,
+          security_deposit: null,
+          start_date: row.created_at,
+          end_date: null,
+          lease_document_path: null,
+          lease_document_url: null,
+          lease_status: (row.status || '').toLowerCase(),
+          created_at: row.created_at,
+          properties: row.properties ? { title: row.properties.title, location: row.properties.location } : null,
+          tenant_profile: null,
+          landlord_profile: null,
+        }));
+
+        // Merge: show new leases first, then legacy
+        const merged: SignedLease[] = [...normalizedNew, ...((legacyData as any[]) || [])];
+        setLeases(merged);
       } catch (e: any) {
         toast({ variant: "destructive", title: "Failed to load signed leases", description: e.message });
       } finally {
