@@ -2,24 +2,10 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { PDFDocument, rgb, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1'
 
-const baseCorsHeaders = {
+const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Content-Type': 'application/json',
-}
-
-function makeCors(originHeader: string | null, req: Request) {
-  const origin = originHeader || '*'
-  const requestedHeaders = req.headers.get('Access-Control-Request-Headers') || 'authorization, x-client-info, apikey, content-type'
-  return {
-    ...baseCorsHeaders,
-    'Access-Control-Allow-Origin': origin,
-    'Access-Control-Allow-Headers': requestedHeaders,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Credentials': 'true',
-    'Vary': 'Origin',
-  }
 }
 
 interface LeaseData {
@@ -404,12 +390,8 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
 }
 
 serve(async (req) => {
-  const corsHeaders = makeCors(req.headers.get('Origin'), req)
-  const json = (status: number, body: unknown) =>
-    new Response(JSON.stringify(body), { status, headers: corsHeaders })
-
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers: corsHeaders })
+    return new Response(null, { status: 200, headers: corsHeaders })
   }
 
   try {
@@ -421,7 +403,10 @@ serve(async (req) => {
     const { lease_data, version = 1 } = await req.json()
 
     if (!lease_data) {
-      return json(400, { error: 'lease_data is required' })
+      return new Response(JSON.stringify({ error: 'lease_data is required' }), { 
+        status: 400, 
+        headers: corsHeaders 
+      })
     }
 
     // Generate PDF
@@ -460,7 +445,10 @@ serve(async (req) => {
       })
 
     if (uploadError) {
-      return json(502, { error: `Upload failed: ${uploadError.message}` })
+      return new Response(JSON.stringify({ error: `Upload failed: ${uploadError.message}` }), { 
+        status: 502, 
+        headers: corsHeaders 
+      })
     }
 
     // Get public URL
@@ -470,15 +458,24 @@ serve(async (req) => {
 
     const pdfUrl = (urlData as any)?.publicUrl ? `${(urlData as any).publicUrl}?t=${stamp}` : undefined
     if (!pdfUrl) {
-      return json(502, { error: 'No public URL returned for uploaded PDF' })
+      return new Response(JSON.stringify({ error: 'No public URL returned for uploaded PDF' }), { 
+        status: 502, 
+        headers: corsHeaders 
+      })
     }
 
-    return json(200, { success: true, pdf_url: pdfUrl, filename })
+    return new Response(JSON.stringify({ success: true, pdf_url: pdfUrl, filename }), { 
+      status: 200, 
+      headers: corsHeaders 
+    })
 
   } catch (error) {
     console.error('Error generating lease PDF:', error)
     let msg = 'Unknown error'
     try { msg = (error as any)?.message || String(error) } catch {}
-    return json(500, { error: msg })
+    return new Response(JSON.stringify({ error: msg }), { 
+      status: 500, 
+      headers: corsHeaders 
+    })
   }
 })
