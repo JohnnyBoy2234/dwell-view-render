@@ -146,7 +146,28 @@ export function LandlordLeasesList() {
   const download = async (lease: LeaseRow) => {
     const fileName = computeFileName(lease);
     try {
-      // Prefer new leases table (27-section PDF)
+      // 1) Prefer SwiftRent lease_agreements (28-section system)
+      const { data: swiftRentLease } = await supabase
+        .from('lease_agreements')
+        .select('pdf_url, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (swiftRentLease?.pdf_url) {
+        const a = document.createElement('a');
+        const joiner = swiftRentLease.pdf_url.includes('?') ? '&' : '?';
+        a.href = `${swiftRentLease.pdf_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+
+      // 2) Fallback to new leases table (27-section PDF)
       const { data: latestLease } = await supabase
         .from('leases')
         .select('id, pdf_draft_url, pdf_signed_url, created_at')
@@ -167,7 +188,7 @@ export function LandlordLeasesList() {
         document.body.removeChild(a);
         return;
       }
-      toast({ variant: 'destructive', title: 'No generated lease PDF yet', description: 'Generate a new lease to download the latest 27-section document.' });
+      toast({ variant: 'destructive', title: 'No generated lease PDF yet', description: 'Please try again shortly or regenerate the lease PDF.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Download failed', description: e.message });
     }
