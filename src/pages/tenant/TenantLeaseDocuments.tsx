@@ -114,12 +114,12 @@ export default function TenantLeaseDocuments() {
       }
 
       // Fallback to new leases table
-      const { data: latestLease } = await supabase
+      const { data: fallbackLease } = await supabase
         .from('leases')
         .select('pdf_signed_url, pdf_draft_url, created_at')
         .eq('id', lease.id)
         .maybeSingle();
-      const preferred = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url || lease.pdf_draft_url;
+      const preferred = fallbackLease?.pdf_signed_url || fallbackLease?.pdf_draft_url || lease.pdf_draft_url;
       if (preferred) {
         await downloadFileFromUrl(preferred, fileName);
         toast({ title: 'Lease downloaded successfully!' });
