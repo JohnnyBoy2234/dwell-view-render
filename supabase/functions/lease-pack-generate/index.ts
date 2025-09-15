@@ -303,10 +303,18 @@ serve(async (req) => {
       });
     
     if (uploadError) {
-      console.error('Upload failed:', uploadError);
-      return new Response(JSON.stringify({ error: 'Upload failed', details: uploadError.message || uploadError }), { 
-        status: 500, 
-        headers 
+      console.error('Upload failed, falling back to data URL:', uploadError);
+      const base64 = btoa(String.fromCharCode(...pdfBytes));
+      return new Response(JSON.stringify({
+        success: true,
+        pdf_url: `data:application/pdf;base64,${base64}`,
+        pdf_path: null,
+        pdf_hash: pdfHash,
+        page_count: 0,
+        filename
+      }), {
+        status: 200,
+        headers: { ...headers, 'Content-Type': 'application/json' }
       });
     }
 
@@ -316,10 +324,18 @@ serve(async (req) => {
       .createSignedUrl(`lease-packs/${filename}`, 60 * 60 * 24);
 
     if (signedError) {
-      console.error('Signed URL failed:', signedError);
-      return new Response(JSON.stringify({ error: 'Signed URL failed', details: signedError.message || signedError }), { 
-        status: 500, 
-        headers 
+      console.error('Signed URL failed, falling back to data URL:', signedError);
+      const base64 = btoa(String.fromCharCode(...pdfBytes));
+      return new Response(JSON.stringify({
+        success: true,
+        pdf_url: `data:application/pdf;base64,${base64}`,
+        pdf_path: null,
+        pdf_hash: pdfHash,
+        page_count: 0,
+        filename
+      }), {
+        status: 200,
+        headers: { ...headers, 'Content-Type': 'application/json' }
       });
     }
 
