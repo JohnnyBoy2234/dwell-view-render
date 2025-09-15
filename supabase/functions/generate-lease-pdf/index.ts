@@ -474,12 +474,9 @@ serve(async (req) => {
         upsert: true,
         cacheControl: 'no-store, max-age=0, must-revalidate'
       })
-
+    
     if (uploadError) {
-      return new Response(JSON.stringify({ error: `Upload failed: ${uploadError.message}` }), { 
-        status: 502, 
-        headers 
-      })
+      console.log('Upload failed (will fall back to data URL):', uploadError.message)
     }
 
     // Get public or signed URL
