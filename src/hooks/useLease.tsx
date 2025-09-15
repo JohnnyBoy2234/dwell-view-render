@@ -204,7 +204,8 @@ export function useLease(leaseId: string | null) {
     if (!lease) return;
 
     try {
-      const url = type === 'signed' ? lease.pdf_signed_url : lease.pdf_draft_url;
+      let url = type === 'signed' ? lease.pdf_signed_url : lease.pdf_draft_url;
+      
       if (!url) {
         toast({
           title: "Error",
@@ -214,11 +215,37 @@ export function useLease(leaseId: string | null) {
         return;
       }
 
+      // Test if URL is still valid
+      try {
+        const testResponse = await fetch(url, { method: 'HEAD' });
+        if (!testResponse.ok) {
+          throw new Error('URL expired');
+        }
+      } catch (urlError) {
+        console.log('Stored URL expired, attempting to regenerate...');
+        
+        // If URL is expired, try to regenerate from lease_data
+        if (lease.lease_data?.pdf?.finalPath) {
+          const { data: signedData, error: signedError } = await supabase.storage
+            .from('lease-documents')
+            .createSignedUrl(lease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
+          
+          if (!signedError && signedData) {
+            url = signedData.signedUrl;
+          } else {
+            throw new Error('Failed to regenerate PDF URL');
+          }
+        } else {
+          throw new Error('No PDF path available for regeneration');
+        }
+      }
+
       // Create a temporary link to download the file
       const link = document.createElement('a');
       const joiner = url.includes('?') ? '&' : '?';
       link.href = `${url}${joiner}ts=${Date.now()}`;
       link.download = `lease_${lease.id}_${type}.pdf`;
+      link.target = '_blank'; // Open in new tab as fallback
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

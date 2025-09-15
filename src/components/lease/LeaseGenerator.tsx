@@ -215,16 +215,37 @@ export const LeaseGenerator = ({
                   try {
                     const { data: latestLease } = await supabase
                       .from('leases')
-                      .select('id, pdf_draft_url, pdf_signed_url, created_at')
+                      .select('id, pdf_draft_url, pdf_signed_url, lease_data, created_at')
                       .eq('property_id', tenancy.property_id)
                       .order('created_at', { ascending: false })
                       .limit(1)
                       .maybeSingle();
+                    
                     const preferred = latestLease?.pdf_draft_url || latestLease?.pdf_signed_url;
                     if (preferred) {
-                      const joiner = preferred.includes('?') ? '&' : '?';
-                      window.open(`${preferred}${joiner}ts=${Date.now()}`, '_blank');
-                      return;
+                      // Test if URL is still valid
+                      try {
+                        const testResponse = await fetch(preferred, { method: 'HEAD' });
+                        if (testResponse.ok) {
+                          const joiner = preferred.includes('?') ? '&' : '?';
+                          window.open(`${preferred}${joiner}ts=${Date.now()}`, '_blank');
+                          return;
+                        }
+                      } catch (urlError) {
+                        console.log('Stored URL expired, attempting to regenerate...');
+                      }
+                      
+                      // If URL is expired, try to regenerate from lease_data
+                      if (latestLease.lease_data?.pdf?.finalPath) {
+                        const { data: signedData, error: signedError } = await supabase.storage
+                          .from('lease-documents')
+                          .createSignedUrl(latestLease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
+                        
+                        if (!signedError && signedData) {
+                          window.open(signedData.signedUrl, '_blank');
+                          return;
+                        }
+                      }
                     }
                   } catch {}
                   // Fallback to legacy tenancy document

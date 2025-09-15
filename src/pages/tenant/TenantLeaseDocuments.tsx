@@ -58,7 +58,47 @@ export default function TenantLeaseDocuments() {
     const fileName = `SwiftRent_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
     
     try {
-      // First try the new lease_agreements table (SwiftRent 28-section system)
+      // First try the leases table (new lease pack system)
+      const { data: latestLease } = await supabase
+        .from('leases')
+        .select('id, pdf_draft_url, pdf_signed_url, lease_data, created_at')
+        .eq('property_id', lease.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (latestLease) {
+        const preferredUrl = latestLease.pdf_signed_url || latestLease.pdf_draft_url;
+        
+        if (preferredUrl) {
+          // Test if URL is still valid
+          try {
+            const testResponse = await fetch(preferredUrl, { method: 'HEAD' });
+            if (testResponse.ok) {
+              await downloadFileFromUrl(preferredUrl, fileName);
+              toast({ title: 'Lease downloaded successfully!' });
+              return;
+            }
+          } catch (urlError) {
+            console.log('Stored URL expired, attempting to regenerate...');
+          }
+          
+          // If URL is expired, try to regenerate from lease_data
+          if (latestLease.lease_data?.pdf?.finalPath) {
+            const { data: signedData, error: signedError } = await supabase.storage
+              .from('lease-documents')
+              .createSignedUrl(latestLease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
+            
+            if (!signedError && signedData) {
+              await downloadFileFromUrl(signedData.signedUrl, fileName);
+              toast({ title: 'Lease downloaded successfully!' });
+              return;
+            }
+          }
+        }
+      }
+
+      // Fallback to legacy lease_agreements table (if it exists)
       const { data: swiftRentLease } = await supabase
         .from('lease_agreements')
         .select('pdf_url, pdf_path, created_at')

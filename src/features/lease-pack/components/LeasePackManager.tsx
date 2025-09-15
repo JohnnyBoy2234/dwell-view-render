@@ -67,16 +67,17 @@ export function LeasePackManager() {
         ]
       };
 
-      // Store in existing lease_agreements table
+      // Store in leases table for consistency with download logic
       const { data: leaseRecord, error: dbError } = await supabase
-        .from('lease_agreements')
+        .from('leases')
         .insert({
-          landlord_id: user?.id,
+          landlord_user_id: user?.id,
           property_id: 'temp-property-id', // TODO: Get from context/props
+          tenant_user_id: leasePack.parties.tenant.userId || null,
           lease_data: finalLeasePack,
-          pdf_path: pdfResult.pdf_path,
-          pdf_url: pdfResult.pdf_url,
-          status: 'completed'
+          pdf_draft_url: pdfResult.pdf_url,
+          pdf_signed_url: pdfResult.pdf_url, // Same URL for now, will be updated when signed
+          status: 'COMPLETED'
         })
         .select()
         .single();
