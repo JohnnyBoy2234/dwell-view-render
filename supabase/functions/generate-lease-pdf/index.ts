@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { PDFDocument, rgb, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1'
+import { encode as b64encode } from "https://deno.land/std@0.168.0/encoding/base64.ts"
 
 const ALLOWED_ORIGINS = [
   "https://swiftrent.co.za",
@@ -440,8 +441,8 @@ serve(async (req) => {
     // Generate PDF
     const pdfBytes = await generateLeasePDF(lease_data, version)
     
-    // Convert to base64 for storage (kept for potential email)
-    const pdfBase64 = btoa(String.fromCharCode(...pdfBytes))
+    // Convert to base64 for storage or data URL
+    const pdfBase64 = b64encode(pdfBytes)
     
     // Generate a unique, cache-busting filename
     const safe = (s: string | undefined) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'document'
