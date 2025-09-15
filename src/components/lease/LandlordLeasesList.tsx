@@ -143,6 +143,22 @@ export function LandlordLeasesList() {
     return `SwiftRent_Lease_${safeAddress}_${dateStr}_${suffix}.pdf`;
   };
 
+  const triggerDownload = (url: string, fileName: string) => {
+    const a = document.createElement('a');
+    // For data URLs, do not append query parameters
+    if (url.startsWith('data:')) {
+      a.href = url;
+    } else {
+      const joiner = url.includes('?') ? '&' : '?';
+      a.href = `${url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+    }
+    a.download = fileName;
+    a.target = '_blank';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
   const download = async (lease: LeaseRow) => {
     const fileName = computeFileName(lease);
     try {
@@ -156,14 +172,7 @@ export function LandlordLeasesList() {
         .maybeSingle();
 
       if (swiftRentLease?.pdf_url) {
-        const a = document.createElement('a');
-        const joiner = swiftRentLease.pdf_url.includes('?') ? '&' : '?';
-        a.href = `${swiftRentLease.pdf_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        triggerDownload(swiftRentLease.pdf_url, fileName);
         return;
       }
 
@@ -188,14 +197,7 @@ export function LandlordLeasesList() {
         preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
       }
       if (preferredUrl) {
-        const a = document.createElement('a');
-        const joiner = preferredUrl.includes('?') ? '&' : '?';
-        a.href = `${preferredUrl}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        triggerDownload(preferredUrl, fileName);
         return;
       }
       // 4) On-demand generate from stored lease_data as a last resort
@@ -213,14 +215,7 @@ export function LandlordLeasesList() {
           const url = String(genResp.pdf_url);
           // Persist for next time
           await supabase.from('leases').update({ pdf_draft_url: url }).eq('id', lease.id);
-          const a = document.createElement('a');
-          const joiner = url.includes('?') ? '&' : '?';
-          a.href = `${url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-          a.download = fileName;
-          a.target = '_blank';
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
+          triggerDownload(url, fileName);
           return;
         }
       }
