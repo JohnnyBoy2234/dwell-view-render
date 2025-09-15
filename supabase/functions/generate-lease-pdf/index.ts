@@ -8,13 +8,13 @@ const ALLOWED_ORIGINS = [
   "https://localhost:5173"
 ];
 
-function corsHeaders(origin: string | null) {
+function corsHeaders(origin: string | null, allowHeaders?: string | null) {
   const allowOrigin = origin && ALLOWED_ORIGINS.includes(origin) ? origin : "https://swiftrent.co.za";
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Vary": "Origin", 
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Headers": allowHeaders || "authorization, x-client-info, apikey, content-type, x-requested-with",
     "Access-Control-Max-Age": "86400",
   };
 }
@@ -159,7 +159,7 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   }
   
   // Helper function to add header to first page only
-  function addFirstPageHeader(page: any) {
+  async function addFirstPageHeader(page: any) {
     // Try to load SwiftRent logo from Storage
     let logoImage: any = null;
     try {
@@ -230,7 +230,7 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   }
   
   // Add header to first page only
-  addFirstPageHeader(currentPage);
+  await addFirstPageHeader(currentPage);
   
   // Start content below header
   yPosition = pageHeight - margin - 100;
@@ -402,11 +402,13 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
 
 serve(async (req) => {
   const origin = req.headers.get("origin");
-  const headers = corsHeaders(origin);
+  // Echo requested headers to satisfy browser preflight
+  const requestedHeaders = req.headers.get("access-control-request-headers");
+  const headers = corsHeaders(origin, requestedHeaders);
 
   // Handle OPTIONS preflight
   if (req.method === 'OPTIONS') {
-    return new Response(null, { status: 204, headers });
+    return new Response('ok', { headers });
   }
 
   try {
