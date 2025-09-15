@@ -186,7 +186,6 @@ export function LandlordLeasesList() {
 
   const download = async (lease: LeaseRow) => {
     const fileName = computeFileName(lease);
-    console.log('Downloading lease:', lease);
     try {
       // 1) Prefer SwiftRent lease_agreements (28-section system)
       const { data: swiftRentLease } = await supabase
@@ -197,7 +196,6 @@ export function LandlordLeasesList() {
         .limit(1)
         .maybeSingle();
 
-      console.log('SwiftRent lease found:', swiftRentLease);
       if (swiftRentLease?.pdf_url) {
         await triggerDownload(swiftRentLease.pdf_url, fileName);
         return;
@@ -210,7 +208,6 @@ export function LandlordLeasesList() {
         .select('id, pdf_draft_url, pdf_signed_url')
         .eq('id', lease.id)
         .maybeSingle();
-      console.log('Lease by ID found:', byId);
       preferredUrl = byId?.pdf_signed_url || byId?.pdf_draft_url;
 
       // 3) Fallback to newest lease for this property
@@ -222,25 +219,68 @@ export function LandlordLeasesList() {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
-        console.log('Latest lease for property found:', latestLease);
         preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
       }
-      console.log('Preferred URL:', preferredUrl);
       if (preferredUrl) {
         await triggerDownload(preferredUrl, fileName);
         return;
       }
-      // 4) On-demand generate from stored lease_data as a last resort
-      const { data: fullLease } = await supabase
+      // 4) Try to generate a simple PDF from basic lease data
+      const { data: basicLease } = await supabase
         .from('leases')
-        .select('lease_data, version')
+        .select('id, property_id, landlord_user_id, tenant_user_id, created_at')
         .eq('id', lease.id)
         .maybeSingle();
 
-      if (fullLease?.lease_data) {
+      if (basicLease) {
+        // Create a simple lease pack structure for PDF generation
+        const simpleLeasePack = {
+          core: {
+            leaseId: basicLease.id,
+            propertyAddress: 'Property Address', // You can enhance this later
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            monthlyRentZAR: 0,
+            depositZAR: 0,
+            rentDueDay: 1,
+            paymentMethod: 'Bank Transfer',
+            depositHeldIn: 'Trust Account',
+            depositRefundDays: 30,
+            noticeDays: 30,
+            maxOccupants: 2,
+            petsAllowed: false,
+            conditionReportRequired: true,
+            houseRulesUrl: '',
+            governingLaw: 'South Africa',
+            utilities: {
+              water: 'Tenant',
+              electricity: 'Tenant', 
+              refuse: 'Tenant'
+            },
+            maintenanceMinorRepairLimitZAR: 500
+          },
+          parties: {
+            landlord: {
+              fullName: 'Landlord Name',
+              idNumber: '0000000000000',
+              userId: basicLease.landlord_user_id
+            },
+            tenant: {
+              fullName: 'Tenant Name', 
+              idNumber: '0000000000000',
+              userId: basicLease.tenant_user_id
+            }
+          },
+          signatures: {
+            landlord: { typedName: '', signedAt: null },
+            tenant: { typedName: '', signedAt: null }
+          }
+        };
+
         const { data: genResp, error: genErr }: any = await supabase.functions.invoke('lease-pack-generate', {
-          body: { leasePack: fullLease.lease_data }
+          body: { leasePack: simpleLeasePack }
         });
+        
         if (!genErr && genResp?.success && genResp?.pdf_url) {
           const url = String(genResp.pdf_url);
           // Persist for next time

@@ -107,40 +107,34 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         .maybeSingle();
 
       if (latestLease) {
-        console.log('Found lease in database:', latestLease);
         const preferredUrl = latestLease.pdf_signed_url || latestLease.pdf_draft_url;
-        console.log('Preferred URL:', preferredUrl);
         
         if (preferredUrl) {
           // Try the stored URL first
           try {
-            console.log('Attempting download with stored URL...');
             await downloadFileFromUrl(preferredUrl, fileName);
             toast({ title: 'Lease downloaded successfully!' });
             return;
           } catch (urlError) {
-            console.log('Stored URL failed, attempting to regenerate...', urlError);
+            // URL failed, try to regenerate
           }
         }
         
         // If no URL or URL failed, try to regenerate from lease_data
         const pdfPath = latestLease.lease_data?.pdf?.finalPath;
-        console.log('PDF path for regeneration:', pdfPath);
         if (pdfPath) {
           try {
-            console.log('Regenerating URL from path:', pdfPath);
             const { data: signedData, error: signedError } = await supabase.storage
               .from('lease-documents')
               .createSignedUrl(pdfPath, 60 * 60 * 24); // 24 hours
             
-            console.log('Regenerated URL result:', { signedData, signedError });
             if (!signedError && signedData) {
               await downloadFileFromUrl(signedData.signedUrl, fileName);
               toast({ title: 'Lease downloaded successfully!' });
               return;
             }
           } catch (regenerateError) {
-            console.log('URL regeneration failed:', regenerateError);
+            // Regeneration failed
           }
         }
       }
