@@ -107,7 +107,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         .maybeSingle();
 
       if (latestLease) {
-        const preferredUrl = latestLease.pdf_signed_url || latestLease.pdf_draft_url;
+        const preferredUrl = latestLease.pdf_draft_url || latestLease.pdf_signed_url;
         
         if (preferredUrl) {
           // Try the stored URL first

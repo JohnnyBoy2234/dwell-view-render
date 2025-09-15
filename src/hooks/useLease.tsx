@@ -205,7 +205,46 @@ export function useLease(leaseId: string | null) {
 
     try {
       let url = type === 'signed' ? lease.pdf_signed_url : lease.pdf_draft_url;
-      
+
+      // If draft requested and missing, try storage or generate now
+      if (!url && type === 'draft') {
+        const finalPath = lease.lease_data?.pdf?.finalPath;
+        if (finalPath) {
+          const { data: s, error: se } = await supabase
+            .storage
+            .from('lease-documents')
+            .createSignedUrl(finalPath, 60 * 60);
+          if (!se && s?.signedUrl) {
+            url = s.signedUrl;
+          }
+        }
+        if (!url && lease.lease_data) {
+          const { data: genResp, error: genErr }: any = await supabase.functions.invoke('lease-pack-generate', {
+            body: { leasePack: lease.lease_data }
+          });
+          if (!genErr && genResp?.success && genResp?.pdf_url) {
+            await supabase
+              .from('leases')
+              .update({
+                pdf_draft_url: genResp.pdf_url,
+                lease_data: {
+                  ...lease.lease_data,
+                  pdf: { ...(lease.lease_data.pdf || {}), finalPath: genResp.pdf_path }
+                }
+              })
+              .eq('id', lease.id);
+            url = genResp.pdf_url;
+          } else {
+            toast({
+              title: "No draft available",
+              description: "Please try again shortly or regenerate the lease.",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+      }
+
       if (!url) {
         toast({
           title: "Error",

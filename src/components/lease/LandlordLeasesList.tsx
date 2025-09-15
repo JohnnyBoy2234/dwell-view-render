@@ -208,7 +208,7 @@ export function LandlordLeasesList() {
         .select('id, pdf_draft_url, pdf_signed_url')
         .eq('id', lease.id)
         .maybeSingle();
-      preferredUrl = byId?.pdf_signed_url || byId?.pdf_draft_url;
+      preferredUrl = byId?.pdf_draft_url || byId?.pdf_signed_url;
 
       // 3) Fallback to newest lease for this property
       if (!preferredUrl) {
@@ -219,7 +219,7 @@ export function LandlordLeasesList() {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
-        preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
+        preferredUrl = latestLease?.pdf_draft_url || latestLease?.pdf_signed_url;
       }
       if (preferredUrl) {
         await triggerDownload(preferredUrl, fileName);
