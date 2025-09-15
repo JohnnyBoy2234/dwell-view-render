@@ -143,20 +143,45 @@ export function LandlordLeasesList() {
     return `SwiftRent_Lease_${safeAddress}_${dateStr}_${suffix}.pdf`;
   };
 
-  const triggerDownload = (url: string, fileName: string) => {
-    const a = document.createElement('a');
-    // For data URLs, do not append query parameters
+  const triggerDownload = async (url: string, fileName: string) => {
+    // Data URL: direct anchor download
     if (url.startsWith('data:')) {
+      const a = document.createElement('a');
       a.href = url;
-    } else {
+      a.download = fileName;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      return;
+    }
+
+    // Try fetch → blob → object URL for maximum reliability
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = fileName;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+      return;
+    } catch {
+      // Fallback to direct anchor with query params
+      const a = document.createElement('a');
       const joiner = url.includes('?') ? '&' : '?';
       a.href = `${url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
+      a.download = fileName;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
-    a.download = fileName;
-    a.target = '_blank';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
   };
 
   const download = async (lease: LeaseRow) => {
@@ -172,7 +197,7 @@ export function LandlordLeasesList() {
         .maybeSingle();
 
       if (swiftRentLease?.pdf_url) {
-        triggerDownload(swiftRentLease.pdf_url, fileName);
+        await triggerDownload(swiftRentLease.pdf_url, fileName);
         return;
       }
 
@@ -197,7 +222,7 @@ export function LandlordLeasesList() {
         preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
       }
       if (preferredUrl) {
-        triggerDownload(preferredUrl, fileName);
+        await triggerDownload(preferredUrl, fileName);
         return;
       }
       // 4) On-demand generate from stored lease_data as a last resort
@@ -215,7 +240,7 @@ export function LandlordLeasesList() {
           const url = String(genResp.pdf_url);
           // Persist for next time
           await supabase.from('leases').update({ pdf_draft_url: url }).eq('id', lease.id);
-          triggerDownload(url, fileName);
+          await triggerDownload(url, fileName);
           return;
         }
       }

@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Signature, Clock, CheckCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { downloadFileFromUrl } from "@/lib/download";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -66,15 +67,8 @@ export const SwiftRentLeaseGenerator = ({
 
   const downloadPDF = async () => {
     if (!currentLease?.pdf_url) return;
-    
     try {
-      const link = document.createElement('a');
-      link.href = currentLease.pdf_url;
-      link.download = `SwiftRent_Lease_${new Date().toISOString().split('T')[0]}.pdf`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      await downloadFileFromUrl(currentLease.pdf_url, `SwiftRent_Lease_${new Date().toISOString().split('T')[0]}.pdf`);
     } catch (error) {
       console.error('Error downloading PDF:', error);
       toast.error("Failed to download lease");

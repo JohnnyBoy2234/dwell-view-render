@@ -6,6 +6,7 @@ import { Download, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { downloadFileFromUrl } from "@/lib/download";
 
 interface SignedLease {
   id: string;
@@ -106,14 +107,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         .maybeSingle();
 
       if (swiftRentLease?.pdf_url) {
-        const a = document.createElement('a');
-        const joiner = swiftRentLease.pdf_url.includes('?') ? '&' : '?';
-        a.href = `${swiftRentLease.pdf_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await downloadFileFromUrl(swiftRentLease.pdf_url, fileName);
         toast({ title: 'SwiftRent lease downloaded successfully!' });
         return;
       }
@@ -129,14 +123,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
 
       const preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
       if (preferredUrl) {
-        const a = document.createElement('a');
-        const joiner = preferredUrl.includes('?') ? '&' : '?';
-        a.href = `${preferredUrl}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await downloadFileFromUrl(preferredUrl, fileName);
         toast({ title: 'Lease downloaded successfully!' });
         return;
       }
@@ -148,14 +135,7 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         return;
       }
       if (ref.startsWith('http')) {
-        const a = document.createElement('a');
-        const joiner = ref.includes('?') ? '&' : '?';
-        a.href = `${ref}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await downloadFileFromUrl(ref, fileName);
         toast({ title: 'Legacy lease downloaded successfully!' });
         return;
       }

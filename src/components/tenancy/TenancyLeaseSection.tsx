@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText, Download, Signature, CheckCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
+import { downloadFileFromUrl } from "@/lib/download";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -95,15 +96,8 @@ export const TenancyLeaseSection = ({ tenancy, onUpdate }: TenancyLeaseSectionPr
       toast.error("No PDF available for download");
       return;
     }
-    
     try {
-      const link = document.createElement('a');
-      link.href = currentLease.pdf_url;
-      link.download = `SwiftRent_Lease_${tenancy.properties?.title || 'Property'}_${new Date().toISOString().split('T')[0]}.pdf`;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      await downloadFileFromUrl(currentLease.pdf_url, `SwiftRent_Lease_${tenancy.properties?.title || 'Property'}_${new Date().toISOString().split('T')[0]}.pdf`);
       toast.success("Lease downloaded successfully!");
     } catch (error) {
       console.error('Error downloading PDF:', error);

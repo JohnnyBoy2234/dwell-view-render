@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
+import { downloadFileFromUrl, openUrlInNewTab } from '@/lib/download';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -67,14 +68,7 @@ export default function TenantLeaseDocuments() {
         .maybeSingle();
 
       if (swiftRentLease?.pdf_url) {
-        const a = document.createElement('a');
-        const joiner = swiftRentLease.pdf_url.includes('?') ? '&' : '?';
-        a.href = `${swiftRentLease.pdf_url}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await downloadFileFromUrl(swiftRentLease.pdf_url, fileName);
         toast({ title: 'SwiftRent lease downloaded successfully!' });
         return;
       }
@@ -87,14 +81,7 @@ export default function TenantLeaseDocuments() {
         .maybeSingle();
       const preferred = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url || lease.pdf_draft_url;
       if (preferred) {
-        const a = document.createElement('a');
-        const joiner = preferred.includes('?') ? '&' : '?';
-        a.href = `${preferred}${joiner}download=${encodeURIComponent(fileName)}&ts=${Date.now()}`;
-        a.download = fileName;
-        a.target = '_blank';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        await downloadFileFromUrl(preferred, fileName);
         toast({ title: 'Lease downloaded successfully!' });
         return;
       }
