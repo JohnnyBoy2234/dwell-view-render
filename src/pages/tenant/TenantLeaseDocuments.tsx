@@ -71,29 +71,31 @@ export default function TenantLeaseDocuments() {
         const preferredUrl = latestLease.pdf_signed_url || latestLease.pdf_draft_url;
         
         if (preferredUrl) {
-          // Test if URL is still valid
+          // Try the stored URL first
           try {
-            const testResponse = await fetch(preferredUrl, { method: 'HEAD' });
-            if (testResponse.ok) {
-              await downloadFileFromUrl(preferredUrl, fileName);
-              toast({ title: 'Lease downloaded successfully!' });
-              return;
-            }
+            await downloadFileFromUrl(preferredUrl, fileName);
+            toast({ title: 'Lease downloaded successfully!' });
+            return;
           } catch (urlError) {
-            console.log('Stored URL expired, attempting to regenerate...');
+            console.log('Stored URL failed, attempting to regenerate...');
           }
-          
-          // If URL is expired, try to regenerate from lease_data
-          if (latestLease.lease_data?.pdf?.finalPath) {
+        }
+        
+        // If no URL or URL failed, try to regenerate from lease_data
+        const pdfPath = latestLease.lease_data?.pdf?.finalPath;
+        if (pdfPath) {
+          try {
             const { data: signedData, error: signedError } = await supabase.storage
               .from('lease-documents')
-              .createSignedUrl(latestLease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
+              .createSignedUrl(pdfPath, 60 * 60 * 24); // 24 hours
             
             if (!signedError && signedData) {
               await downloadFileFromUrl(signedData.signedUrl, fileName);
               toast({ title: 'Lease downloaded successfully!' });
               return;
             }
+          } catch (regenerateError) {
+            console.log('URL regeneration failed:', regenerateError);
           }
         }
       }

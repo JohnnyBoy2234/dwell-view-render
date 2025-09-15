@@ -82,6 +82,22 @@ export function LeasePackManager() {
         .select()
         .single();
 
+      // Update the lease_data with the correct PDF path for URL regeneration
+      if (leaseRecord && !dbError) {
+        const updatedLeaseData = {
+          ...finalLeasePack,
+          pdf: {
+            ...finalLeasePack.pdf,
+            finalPath: pdfResult.pdf_path // Store the actual storage path
+          }
+        };
+        
+        await supabase
+          .from('leases')
+          .update({ lease_data: updatedLeaseData })
+          .eq('id', leaseRecord.id);
+      }
+
       if (dbError) {
         console.error('Database error:', dbError);
         // Continue even if DB save fails - PDF was generated

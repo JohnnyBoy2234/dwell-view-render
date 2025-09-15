@@ -107,32 +107,40 @@ export function SignedLeasesList({ role }: { role: "landlord" | "tenant" }) {
         .maybeSingle();
 
       if (latestLease) {
+        console.log('Found lease in database:', latestLease);
         const preferredUrl = latestLease.pdf_signed_url || latestLease.pdf_draft_url;
+        console.log('Preferred URL:', preferredUrl);
         
         if (preferredUrl) {
-          // Test if URL is still valid
+          // Try the stored URL first
           try {
-            const testResponse = await fetch(preferredUrl, { method: 'HEAD' });
-            if (testResponse.ok) {
-              await downloadFileFromUrl(preferredUrl, fileName);
-              toast({ title: 'Lease downloaded successfully!' });
-              return;
-            }
+            console.log('Attempting download with stored URL...');
+            await downloadFileFromUrl(preferredUrl, fileName);
+            toast({ title: 'Lease downloaded successfully!' });
+            return;
           } catch (urlError) {
-            console.log('Stored URL expired, attempting to regenerate...');
+            console.log('Stored URL failed, attempting to regenerate...', urlError);
           }
-          
-          // If URL is expired, try to regenerate from lease_data
-          if (latestLease.lease_data?.pdf?.finalPath) {
+        }
+        
+        // If no URL or URL failed, try to regenerate from lease_data
+        const pdfPath = latestLease.lease_data?.pdf?.finalPath;
+        console.log('PDF path for regeneration:', pdfPath);
+        if (pdfPath) {
+          try {
+            console.log('Regenerating URL from path:', pdfPath);
             const { data: signedData, error: signedError } = await supabase.storage
               .from('lease-documents')
-              .createSignedUrl(latestLease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
+              .createSignedUrl(pdfPath, 60 * 60 * 24); // 24 hours
             
+            console.log('Regenerated URL result:', { signedData, signedError });
             if (!signedError && signedData) {
               await downloadFileFromUrl(signedData.signedUrl, fileName);
               toast({ title: 'Lease downloaded successfully!' });
               return;
             }
+          } catch (regenerateError) {
+            console.log('URL regeneration failed:', regenerateError);
           }
         }
       }

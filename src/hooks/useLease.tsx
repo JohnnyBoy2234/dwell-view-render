@@ -215,37 +215,47 @@ export function useLease(leaseId: string | null) {
         return;
       }
 
-      // Test if URL is still valid
+      // Try the stored URL first
       try {
-        const testResponse = await fetch(url, { method: 'HEAD' });
-        if (!testResponse.ok) {
-          throw new Error('URL expired');
-        }
+        const link = document.createElement('a');
+        const joiner = url.includes('?') ? '&' : '?';
+        link.href = `${url}${joiner}ts=${Date.now()}`;
+        link.download = `lease_${lease.id}_${type}.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return; // Success, exit early
       } catch (urlError) {
-        console.log('Stored URL expired, attempting to regenerate...');
-        
-        // If URL is expired, try to regenerate from lease_data
-        if (lease.lease_data?.pdf?.finalPath) {
+        console.log('Stored URL failed, attempting to regenerate...');
+      }
+      
+      // If URL failed, try to regenerate from lease_data
+      const pdfPath = lease.lease_data?.pdf?.finalPath;
+      if (pdfPath) {
+        try {
           const { data: signedData, error: signedError } = await supabase.storage
             .from('lease-documents')
-            .createSignedUrl(lease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
+            .createSignedUrl(pdfPath, 60 * 60 * 24); // 24 hours
           
           if (!signedError && signedData) {
             url = signedData.signedUrl;
           } else {
             throw new Error('Failed to regenerate PDF URL');
           }
-        } else {
+        } catch (regenerateError) {
           throw new Error('No PDF path available for regeneration');
         }
+      } else {
+        throw new Error('No PDF path available for regeneration');
       }
 
-      // Create a temporary link to download the file
+      // Create a temporary link to download the regenerated file
       const link = document.createElement('a');
       const joiner = url.includes('?') ? '&' : '?';
       link.href = `${url}${joiner}ts=${Date.now()}`;
       link.download = `lease_${lease.id}_${type}.pdf`;
-      link.target = '_blank'; // Open in new tab as fallback
+      link.target = '_blank';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

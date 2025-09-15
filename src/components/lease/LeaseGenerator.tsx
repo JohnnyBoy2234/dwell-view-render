@@ -223,20 +223,19 @@ export const LeaseGenerator = ({
                     
                     const preferred = latestLease?.pdf_draft_url || latestLease?.pdf_signed_url;
                     if (preferred) {
-                      // Test if URL is still valid
+                      // Try the stored URL first
                       try {
-                        const testResponse = await fetch(preferred, { method: 'HEAD' });
-                        if (testResponse.ok) {
-                          const joiner = preferred.includes('?') ? '&' : '?';
-                          window.open(`${preferred}${joiner}ts=${Date.now()}`, '_blank');
-                          return;
-                        }
+                        const joiner = preferred.includes('?') ? '&' : '?';
+                        window.open(`${preferred}${joiner}ts=${Date.now()}`, '_blank');
+                        return;
                       } catch (urlError) {
-                        console.log('Stored URL expired, attempting to regenerate...');
+                        console.log('Stored URL failed, attempting to regenerate...');
                       }
-                      
-                      // If URL is expired, try to regenerate from lease_data
-                      if (latestLease.lease_data?.pdf?.finalPath) {
+                    }
+                    
+                    // If no URL or URL failed, try to regenerate from lease_data
+                    if (latestLease.lease_data?.pdf?.finalPath) {
+                      try {
                         const { data: signedData, error: signedError } = await supabase.storage
                           .from('lease-documents')
                           .createSignedUrl(latestLease.lease_data.pdf.finalPath, 60 * 60 * 24); // 24 hours
@@ -245,6 +244,8 @@ export const LeaseGenerator = ({
                           window.open(signedData.signedUrl, '_blank');
                           return;
                         }
+                      } catch (regenerateError) {
+                        console.log('URL regeneration failed:', regenerateError);
                       }
                     }
                   } catch {}
