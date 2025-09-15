@@ -52,7 +52,8 @@ async function generateProfessionalLeasePDF(leasePack: any): Promise<Uint8Array>
     .replace(/[\u2013\u2014]/g, '-')
     .replace(/[\u00A0]/g, ' ')
     .replace(/[\u2018\u2019]/g, "'")
-    .replace(/[\u201C\u201D]/g, '"');
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\r\n]+/g, ' ');
 
   // Footer function
   function addFooter(page: any, pageNum: number, totalPages: number) {
