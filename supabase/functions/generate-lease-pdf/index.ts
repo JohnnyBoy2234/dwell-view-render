@@ -263,12 +263,12 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   
   yPosition = addText(`The Landlord lets and the Tenant takes the property situated at:`, margin, yPosition, contentWidth, 11, font);
   yPosition = addText(`${leaseData.property.address}`, margin + 20, yPosition, contentWidth - 20, 11, boldFont);
-  if (leaseData.property.unit) {
+  if (leaseData.property?.unit) {
     yPosition = addText(`Unit: ${leaseData.property.unit}`, margin + 20, yPosition, contentWidth - 20, 11, font);
   }
-  yPosition = addText(`${leaseData.property.city}, ${leaseData.property.province} ${leaseData.property.postal_code}`, margin + 20, yPosition, contentWidth - 20, 11, font);
-  yPosition = addText(`Property Type: ${leaseData.property.type}`, margin + 20, yPosition, contentWidth - 20, 11, font);
-  yPosition = addText(`Parking: ${leaseData.property.parking}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  yPosition = addText(`${leaseData.property?.city || ''}, ${leaseData.property?.province || ''} ${leaseData.property?.postal_code || ''}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  yPosition = addText(`Property Type: ${leaseData.property?.type || 'apartment'}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  yPosition = addText(`Parking: ${leaseData.property?.parking || 'N/A'}`, margin + 20, yPosition, contentWidth - 20, 11, font);
   yPosition -= 20;
   
   // Term section
@@ -278,12 +278,12 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   yPosition = addText(`The lease shall commence on ${formatDate(leaseData.term.start_date)} and terminate on ${formatDate(leaseData.term.end_date)}.`, margin, yPosition, contentWidth, 11, font);
   yPosition -= 10;
   
-  if (leaseData.term.option_to_renew) {
+  if (leaseData.term?.option_to_renew) {
     yPosition = addText(`The Tenant shall have the option to renew this lease for a further period of 12 months, provided that written notice is given to the Landlord at least ${leaseData.term.notice_period_days} days before the expiration of the current term.`, margin, yPosition, contentWidth, 11, font);
     yPosition -= 10;
   }
   
-  yPosition = addText(`Either party may terminate this lease by giving ${leaseData.term.notice_period_days} days written notice to the other party.`, margin, yPosition, contentWidth, 11, font);
+  yPosition = addText(`Either party may terminate this lease by giving ${leaseData.term?.notice_period_days ?? 30} days written notice to the other party.`, margin, yPosition, contentWidth, 11, font);
   yPosition -= 20;
   
   // Rent section
@@ -293,16 +293,17 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   yPosition = addText(`The monthly rent is ${formatCurrency(leaseData.rent.monthly_rent)} and is due on the ${leaseData.rent.due_day}${leaseData.rent.due_day === 1 ? 'st' : leaseData.rent.due_day === 2 ? 'nd' : leaseData.rent.due_day === 3 ? 'rd' : 'th'} day of each month.`, margin, yPosition, contentWidth, 11, font);
   yPosition -= 10;
   
-  yPosition = addText(`Payment Method: ${leaseData.rent.payment_method}`, margin, yPosition, contentWidth, 11, font);
+  yPosition = addText(`Payment Method: ${leaseData.rent?.payment_method || 'EFT'}`, margin, yPosition, contentWidth, 11, font);
   yPosition -= 10;
   
-  if (leaseData.rent.late_fee_policy.late_fee_fixed > 0 || leaseData.rent.late_fee_policy.late_fee_percent > 0) {
-    yPosition = addText(`Late Payment: If rent is not paid within ${leaseData.rent.late_fee_policy.grace_days} days of the due date, a late fee will apply.`, margin, yPosition, contentWidth, 11, font);
-    if (leaseData.rent.late_fee_policy.late_fee_fixed > 0) {
-      yPosition = addText(`Fixed Late Fee: ${formatCurrency(leaseData.rent.late_fee_policy.late_fee_fixed)}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  const late = leaseData.rent?.late_fee_policy || { grace_days: 0, late_fee_fixed: 0, late_fee_percent: 0 };
+  if ((late.late_fee_fixed ?? 0) > 0 || (late.late_fee_percent ?? 0) > 0) {
+    yPosition = addText(`Late Payment: If rent is not paid within ${late.grace_days ?? 0} days of the due date, a late fee will apply.`, margin, yPosition, contentWidth, 11, font);
+    if ((late.late_fee_fixed ?? 0) > 0) {
+      yPosition = addText(`Fixed Late Fee: ${formatCurrency(late.late_fee_fixed)}`, margin + 20, yPosition, contentWidth - 20, 11, font);
     }
-    if (leaseData.rent.late_fee_policy.late_fee_percent > 0) {
-      yPosition = addText(`Percentage Late Fee: ${leaseData.rent.late_fee_policy.late_fee_percent}% of monthly rent`, margin + 20, yPosition, contentWidth - 20, 11, font);
+    if ((late.late_fee_percent ?? 0) > 0) {
+      yPosition = addText(`Percentage Late Fee: ${late.late_fee_percent}% of monthly rent`, margin + 20, yPosition, contentWidth - 20, 11, font);
     }
     yPosition -= 10;
   }
@@ -320,11 +321,11 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   yPosition -= 10;
   
   yPosition = addText(`Utilities are the responsibility of the Tenant unless otherwise specified:`, margin, yPosition, contentWidth, 11, font);
-  yPosition = addText(`• Water: ${leaseData.utilities.water}`, margin + 20, yPosition, contentWidth - 20, 11, font);
-  yPosition = addText(`• Electricity: ${leaseData.utilities.electricity}`, margin + 20, yPosition, contentWidth - 20, 11, font);
-  yPosition = addText(`• Internet: ${leaseData.utilities.internet}`, margin + 20, yPosition, contentWidth - 20, 11, font);
-  if (leaseData.utilities.other) {
-    yPosition = addText(`• Other: ${leaseData.utilities.other}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  yPosition = addText(`• Water: ${leaseData.utilities?.water || 'tenant'}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  yPosition = addText(`• Electricity: ${leaseData.utilities?.electricity || 'tenant'}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  yPosition = addText(`• Internet: ${leaseData.utilities?.internet || 'tenant'}`, margin + 20, yPosition, contentWidth - 20, 11, font);
+  if (leaseData.utilities?.other) {
+    yPosition = addText(`• Other: ${leaseData.utilities?.other}`, margin + 20, yPosition, contentWidth - 20, 11, font);
   }
   yPosition -= 20;
   
@@ -332,8 +333,8 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   yPosition = addText('7. MAINTENANCE', margin, yPosition, contentWidth, 14, boldFont, rgb(0.15, 0.39, 0.92));
   yPosition -= 10;
   
-  yPosition = addText(`The Tenant is responsible for minor repairs up to ${formatCurrency(leaseData.maintenance.tenant_minor_repairs_cap)}. The Landlord is responsible for:`, margin, yPosition, contentWidth, 11, font);
-  leaseData.maintenance.landlord_responsible.forEach(responsibility => {
+  yPosition = addText(`The Tenant is responsible for minor repairs up to ${formatCurrency(leaseData.maintenance?.tenant_minor_repairs_cap ?? 0)}. The Landlord is responsible for:`, margin, yPosition, contentWidth, 11, font);
+  (leaseData.maintenance?.landlord_responsible || []).forEach(responsibility => {
     yPosition = addText(`• ${responsibility}`, margin + 20, yPosition, contentWidth - 20, 11, font);
   });
   yPosition -= 20;
@@ -342,28 +343,28 @@ async function generateLeasePDF(leaseData: LeaseData, version: number): Promise<
   yPosition = addText('8. ACCESS', margin, yPosition, contentWidth, 14, boldFont, rgb(0.15, 0.39, 0.92));
   yPosition -= 10;
   
-  yPosition = addText(`The Landlord shall give at least ${leaseData.access.entry_notice_hours} hours notice before entering the property, except in cases of emergency.`, margin, yPosition, contentWidth, 11, font);
+  yPosition = addText(`The Landlord shall give at least ${leaseData.access?.entry_notice_hours ?? 24} hours notice before entering the property, except in cases of emergency.`, margin, yPosition, contentWidth, 11, font);
   yPosition -= 20;
   
   // Governing law section
   yPosition = addText('9. GOVERNING LAW', margin, yPosition, contentWidth, 14, boldFont, rgb(0.15, 0.39, 0.92));
   yPosition -= 10;
   
-  yPosition = addText(`This lease is governed by the laws of ${leaseData.governing_law}.`, margin, yPosition, contentWidth, 11, font);
+  yPosition = addText(`This lease is governed by the laws of ${leaseData.governing_law || 'South Africa'}.`, margin, yPosition, contentWidth, 11, font);
   yPosition -= 20;
   
   // Additional terms
   yPosition = addText('10. ADDITIONAL TERMS', margin, yPosition, contentWidth, 14, boldFont, rgb(0.15, 0.39, 0.92));
   yPosition -= 10;
   
-  if (leaseData.attachments.move_in_inspection_required) {
+  if (leaseData.attachments?.move_in_inspection_required) {
     yPosition = addText(`A move-in inspection is required and must be completed within 7 days of occupancy.`, margin, yPosition, contentWidth, 11, font);
     yPosition -= 10;
   }
   
-  if (leaseData.attachments.annexures.length > 0) {
+  if ((leaseData.attachments?.annexures || []).length > 0) {
     yPosition = addText(`The following annexures form part of this lease:`, margin, yPosition, contentWidth, 11, font);
-    leaseData.attachments.annexures.forEach((annexure, index) => {
+    (leaseData.attachments?.annexures || []).forEach((annexure, index) => {
       yPosition = addText(`• Annexure ${String.fromCharCode(65 + index)}: ${annexure}`, margin + 20, yPosition, contentWidth - 20, 11, font);
     });
     yPosition -= 10;
@@ -420,8 +421,11 @@ serve(async (req) => {
     }
 
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      Deno.env.get('SUPABASE_URL') ?? Deno.env.get('PROJECT_URL') ?? '',
+      Deno.env.get('SERVICE_ROLE_KEY') 
+        ?? Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+        ?? Deno.env.get('SUPABASE_ANON_KEY')
+        ?? ''
     )
 
     const { lease_data, version = 1 } = await req.json()
@@ -447,13 +451,16 @@ serve(async (req) => {
     const stamp = Date.now()
     const filename = `Lease_${city}_${tenantLast}_${start}_v${version}_${stamp}.pdf`
     
-    // Ensure bucket exists
+    // Ensure bucket exists and is public
     const BUCKET = 'lease-documents'
     try {
       const { data: buckets } = await (supabaseClient as any).storage.listBuckets?.()
       const exists = Array.isArray(buckets) && buckets.some((b: any) => b.name === BUCKET)
       if (!exists && (supabaseClient as any).storage.createBucket) {
         await (supabaseClient as any).storage.createBucket(BUCKET, { public: true })
+      } else if (exists && (supabaseClient as any).storage.updateBucket) {
+        // Make sure it's public if it already exists
+        try { await (supabaseClient as any).storage.updateBucket(BUCKET, { public: true }) } catch (_) {}
       }
     } catch (e) {
       console.log('Bucket ensure skipped/failed:', e)
@@ -475,14 +482,29 @@ serve(async (req) => {
       })
     }
 
-    // Get public URL
+    // Get public or signed URL
     const { data: urlData } = supabaseClient.storage
       .from(BUCKET)
       .getPublicUrl(filename)
 
-    const pdfUrl = (urlData as any)?.publicUrl ? `${(urlData as any).publicUrl}?t=${stamp}` : undefined
+    let pdfUrl = (urlData as any)?.publicUrl ? `${(urlData as any).publicUrl}?t=${stamp}` : undefined
+
     if (!pdfUrl) {
-      return new Response(JSON.stringify({ error: 'No public URL returned for uploaded PDF' }), { 
+      try {
+        // As a fallback, create a signed URL valid for 24 hours
+        const { data: signedData, error: signedErr } = await supabaseClient.storage
+          .from(BUCKET)
+          .createSignedUrl(filename, 60 * 60 * 24, { download: filename })
+        if (!signedErr && signedData?.signedUrl) {
+          pdfUrl = `${signedData.signedUrl}&t=${stamp}`
+        }
+      } catch (e) {
+        console.log('Signed URL generation failed:', e)
+      }
+    }
+
+    if (!pdfUrl) {
+      return new Response(JSON.stringify({ error: 'No URL returned for uploaded PDF' }), { 
         status: 502, 
         headers 
       })
