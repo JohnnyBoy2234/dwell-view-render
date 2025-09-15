@@ -59,12 +59,14 @@ export function LeasePackManager() {
       // Store in existing lease_agreements table
       const { data: leaseRecord, error: dbError } = await supabase
         .from('lease_agreements')
-        .insert([{
+        .insert({
           landlord_id: user?.id,
+          property_id: 'temp-property-id', // TODO: Get from context/props
           lease_data: finalLeasePack,
           pdf_path: pdfResult.pdf_path,
+          pdf_url: pdfResult.pdf_url,
           status: 'completed'
-        }])
+        })
         .select()
         .single();
 
@@ -119,7 +121,7 @@ export function LeasePackManager() {
         <div>
           <h1 className="text-3xl font-bold text-primary">Professional Lease Agreements</h1>
           <p className="text-muted-foreground mt-2">
-            Create Sanlam-grade residential lease agreements with embedded signatures and audit trails
+            Create professional residential lease agreements with embedded signatures and audit trails
           </p>
         </div>
         <Button onClick={() => setShowWizard(true)} className="gap-2">

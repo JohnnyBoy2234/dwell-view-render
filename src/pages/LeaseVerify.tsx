@@ -35,7 +35,8 @@ export default function LeaseVerify() {
       setLease(data);
       
       // Extract hash from lease data
-      const storedHash = data.lease_data?.pdf?.finalSha256;
+      const leaseData = data.lease_data as any;
+      const storedHash = leaseData?.pdf?.finalSha256;
       if (storedHash) {
         setVerification({ verified: false, hash: storedHash });
       }
