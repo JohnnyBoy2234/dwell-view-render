@@ -233,61 +233,10 @@ export function LandlordLeasesList() {
         .maybeSingle();
 
       if (basicLease) {
-        // Create a simple lease pack structure for PDF generation
-        const simpleLeasePack = {
-          core: {
-            leaseId: basicLease.id,
-            propertyAddress: 'Property Address', // You can enhance this later
-            startDate: new Date().toISOString().split('T')[0],
-            endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            monthlyRentZAR: 0,
-            depositZAR: 0,
-            rentDueDay: 1,
-            paymentMethod: 'Bank Transfer',
-            depositHeldIn: 'Trust Account',
-            depositRefundDays: 30,
-            noticeDays: 30,
-            maxOccupants: 2,
-            petsAllowed: false,
-            conditionReportRequired: true,
-            houseRulesUrl: '',
-            governingLaw: 'South Africa',
-            utilities: {
-              water: 'Tenant',
-              electricity: 'Tenant', 
-              refuse: 'Tenant'
-            },
-            maintenanceMinorRepairLimitZAR: 500
-          },
-          parties: {
-            landlord: {
-              fullName: 'Landlord Name',
-              idNumber: '0000000000000',
-              userId: basicLease.landlord_user_id
-            },
-            tenant: {
-              fullName: 'Tenant Name', 
-              idNumber: '0000000000000',
-              userId: basicLease.tenant_user_id
-            }
-          },
-          signatures: {
-            landlord: { typedName: '', signedAt: null },
-            tenant: { typedName: '', signedAt: null }
-          }
-        };
-
-        const { data: genResp, error: genErr }: any = await supabase.functions.invoke('lease-pack-generate', {
-          body: { leasePack: simpleLeasePack }
-        });
-        
-        if (!genErr && genResp?.success && genResp?.pdf_url) {
-          const url = String(genResp.pdf_url);
-          // Persist for next time
-          await supabase.from('leases').update({ pdf_draft_url: url }).eq('id', lease.id);
-          await triggerDownload(url, fileName);
-          return;
-        }
+        // Use central helper that avoids failing function and falls back locally
+        const { openDraftPdf } = await import('@/lib/leasePdf');
+        await openDraftPdf(lease.id, fileName);
+        return;
       }
 
       toast({ variant: 'destructive', title: 'No generated lease PDF yet', description: 'Please try again shortly or regenerate the lease PDF.' });

@@ -45,16 +45,25 @@ async function generateProfessionalLeasePDF(leasePack: any): Promise<Uint8Array>
   let yPosition = pageHeight - margin - 50;
   const primaryBlue = rgb(0.15, 0.39, 0.92); // Brand blue
   
+  // Sanitizer to replace non-WinAnsi glyphs
+  const sanitize = (s: string) => (s || '')
+    .replace(/[\u2192]/g, '->')
+    .replace(/[\u2022]/g, '-')
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/[\u00A0]/g, ' ')
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"');
+
   // Footer function
   function addFooter(page: any, pageNum: number, totalPages: number) {
-    page.drawText('SwiftRent.co.za – Safe, Simple, Commission-Free Renting', {
+    page.drawText(sanitize('SwiftRent.co.za – Safe, Simple, Commission-Free Renting'), {
       x: margin,
       y: 30,
       size: 8,
       font: font,
       color: rgb(0.5, 0.5, 0.5)
     });
-    page.drawText(`Lease ID • Page ${pageNum} of ${totalPages}`, {
+    page.drawText(sanitize(`Lease ID • Page ${pageNum} of ${totalPages}`), {
       x: pageWidth - margin - 120,
       y: 30,
       size: 8,
@@ -65,7 +74,7 @@ async function generateProfessionalLeasePDF(leasePack: any): Promise<Uint8Array>
 
   // Text wrapper with page breaks
   function addWrappedText(text: string, x: number, y: number, width: number, fontSize: number, fontType: any = font, color: any = rgb(0, 0, 0)) {
-    const words = text.split(' ');
+    const words = sanitize(text).split(' ');
     let line = '';
     let currentY = y;
     
@@ -115,11 +124,11 @@ async function generateProfessionalLeasePDF(leasePack: any): Promise<Uint8Array>
   yPosition -= 20;
   
   const scheduleData = [
-    ['Lease Term', `${leasePack.core.startDate} → ${leasePack.core.endDate} • Notice: ${leasePack.core.noticeDays} days`],
-    ['Monthly Rent', `R ${Number(leasePack.core.monthlyRentZAR || 0).toLocaleString()} • Due Day: ${leasePack.core.rentDueDay} • Method: ${leasePack.core.paymentMethod}`],
-    ['Deposit', `R ${Number(leasePack.core.depositZAR || 0).toLocaleString()} (Held in: ${leasePack.core.depositHeldIn}) • Refund: within ${leasePack.core.depositRefundDays} days`],
-    ['Utilities', `Water ${leasePack.core.utilities.water} • Electricity ${leasePack.core.utilities.electricity} • Refuse ${leasePack.core.utilities.refuse}`],
-    ['Pets', `${leasePack.core.petsAllowed ? 'Allowed per written consent' : 'Not allowed'} • Max Occupants: ${leasePack.core.maxOccupants}`],
+    ['Lease Term', `${leasePack.core.startDate} -> ${leasePack.core.endDate} - Notice: ${leasePack.core.noticeDays} days`],
+    ['Monthly Rent', `R ${Number(leasePack.core.monthlyRentZAR || 0).toLocaleString()} - Due Day: ${leasePack.core.rentDueDay} - Method: ${leasePack.core.paymentMethod}`],
+    ['Deposit', `R ${Number(leasePack.core.depositZAR || 0).toLocaleString()} (Held in: ${leasePack.core.depositHeldIn}) - Refund: within ${leasePack.core.depositRefundDays} days`],
+    ['Utilities', `Water ${leasePack.core.utilities.water} - Electricity ${leasePack.core.utilities.electricity} - Refuse ${leasePack.core.utilities.refuse}`],
+    ['Pets', `${leasePack.core.petsAllowed ? 'Allowed per written consent' : 'Not allowed'} - Max Occupants: ${leasePack.core.maxOccupants}`],
     ['Minor Repair Limit (Tenant)', `R ${Number(leasePack.core.maintenanceMinorRepairLimitZAR || 0).toLocaleString()}`],
     ['Condition Report Required', `${leasePack.core.conditionReportRequired ? 'Yes' : 'No'}`],
     ['House Rules', `${leasePack.core.houseRulesUrl || 'N/A'}`],
