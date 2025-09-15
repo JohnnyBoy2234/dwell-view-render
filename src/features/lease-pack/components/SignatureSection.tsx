@@ -23,10 +23,33 @@ export function SignatureSection({ title, signer, onSignature, disabled }: Signa
   };
 
   const handleComplete = () => {
-    if (signatureMethod === "type" && typedName) {
-      onSignature({ typedName });
-    } else if (signatureMethod === "draw" && signatureDataUrl) {
-      onSignature({ pngPath: signatureDataUrl, typedName });
+    console.log('Signature completion attempt:', { 
+      method: signatureMethod, 
+      typedName, 
+      hasDrawnSignature: !!signatureDataUrl 
+    });
+
+    if (!typedName.trim()) {
+      alert("Please enter your full legal name");
+      return;
+    }
+
+    if (signatureMethod === "type") {
+      console.log('Completing with typed signature');
+      onSignature({ 
+        typedName: typedName.trim(),
+        pngPath: undefined // Clear any previous drawn signature
+      });
+    } else if (signatureMethod === "draw") {
+      if (!signatureDataUrl) {
+        alert("Please provide your drawn signature");
+        return;
+      }
+      console.log('Completing with drawn signature');
+      onSignature({ 
+        pngPath: signatureDataUrl, 
+        typedName: typedName.trim()
+      });
     }
   };
 

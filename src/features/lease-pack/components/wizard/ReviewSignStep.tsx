@@ -25,6 +25,7 @@ export function ReviewSignStep({ data, onComplete }: ReviewSignStepProps) {
   });
 
   const handleLandlordSign = (signatureData: { pngPath?: string; typedName?: string }) => {
+    console.log('Landlord signature data:', signatureData);
     const updatedSignatures = {
       ...signatures,
       landlord: {
@@ -33,10 +34,12 @@ export function ReviewSignStep({ data, onComplete }: ReviewSignStepProps) {
       }
     };
     setSignatures(updatedSignatures);
-    setLandlordSigned(true);
+    // Valid if has typed name (both signature types require a name)
+    setLandlordSigned(!!signatureData.typedName);
   };
 
   const handleTenantSign = (signatureData: { pngPath?: string; typedName?: string }) => {
+    console.log('Tenant signature data:', signatureData);
     const updatedSignatures = {
       ...signatures,
       tenant: {
@@ -45,10 +48,18 @@ export function ReviewSignStep({ data, onComplete }: ReviewSignStepProps) {
       }
     };
     setSignatures(updatedSignatures);
-    setTenantSigned(true);
+    // Valid if has typed name (both signature types require a name)
+    setTenantSigned(!!signatureData.typedName);
   };
 
   const handleComplete = () => {
+    console.log('Review step completion attempt:', {
+      consentGiven,
+      landlordSigned,
+      tenantSigned,
+      signatures
+    });
+
     const now = new Date().toISOString();
     const updatedData: Partial<LeasePack> = {
       ...data,
@@ -82,10 +93,22 @@ export function ReviewSignStep({ data, onComplete }: ReviewSignStepProps) {
       ]
     };
 
+    console.log('Calling onComplete with data:', updatedData);
     onComplete(updatedData);
   };
 
   const isValid = consentGiven && landlordSigned && tenantSigned;
+  
+  console.log('Validation state:', {
+    consentGiven,
+    landlordSigned,
+    tenantSigned,
+    isValid,
+    landLordHasName: !!signatures.landlord.typedName,
+    landLordHasSignature: !!signatures.landlord.pngPath,
+    tenantHasName: !!signatures.tenant.typedName,
+    tenantHasSignature: !!signatures.tenant.pngPath
+  });
 
   return (
     <div className="space-y-6">
