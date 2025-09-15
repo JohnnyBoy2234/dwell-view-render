@@ -186,6 +186,7 @@ export function LandlordLeasesList() {
 
   const download = async (lease: LeaseRow) => {
     const fileName = computeFileName(lease);
+    console.log('Downloading lease:', lease);
     try {
       // 1) Prefer SwiftRent lease_agreements (28-section system)
       const { data: swiftRentLease } = await supabase
@@ -196,6 +197,7 @@ export function LandlordLeasesList() {
         .limit(1)
         .maybeSingle();
 
+      console.log('SwiftRent lease found:', swiftRentLease);
       if (swiftRentLease?.pdf_url) {
         await triggerDownload(swiftRentLease.pdf_url, fileName);
         return;
@@ -208,6 +210,7 @@ export function LandlordLeasesList() {
         .select('id, pdf_draft_url, pdf_signed_url')
         .eq('id', lease.id)
         .maybeSingle();
+      console.log('Lease by ID found:', byId);
       preferredUrl = byId?.pdf_signed_url || byId?.pdf_draft_url;
 
       // 3) Fallback to newest lease for this property
@@ -219,8 +222,10 @@ export function LandlordLeasesList() {
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
+        console.log('Latest lease for property found:', latestLease);
         preferredUrl = latestLease?.pdf_signed_url || latestLease?.pdf_draft_url;
       }
+      console.log('Preferred URL:', preferredUrl);
       if (preferredUrl) {
         await triggerDownload(preferredUrl, fileName);
         return;
@@ -233,10 +238,10 @@ export function LandlordLeasesList() {
         .maybeSingle();
 
       if (fullLease?.lease_data) {
-        const { data: genResp, error: genErr }: any = await supabase.functions.invoke('generate-lease-pdf', {
-          body: { lease_data: fullLease.lease_data, version: fullLease.version || 1 }
+        const { data: genResp, error: genErr }: any = await supabase.functions.invoke('lease-pack-generate', {
+          body: { leasePack: fullLease.lease_data }
         });
-        if (!genErr && genResp?.pdf_url) {
+        if (!genErr && genResp?.success && genResp?.pdf_url) {
           const url = String(genResp.pdf_url);
           // Persist for next time
           await supabase.from('leases').update({ pdf_draft_url: url }).eq('id', lease.id);
@@ -253,19 +258,12 @@ export function LandlordLeasesList() {
 
   const continueSigning = async (lease: LeaseRow) => {
     try {
-      const { data: latestLease, error } = await supabase
-        .from('leases')
-        .select('id, created_at')
-        .eq('property_id', lease.property_id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      if (!latestLease?.id) {
-        toast({ title: 'No new lease found', description: 'Generate a lease first to proceed with signing.' });
+      // Use the lease ID directly instead of searching by property_id
+      if (!lease.id) {
+        toast({ title: 'No lease ID found', description: 'Cannot proceed with signing.' });
         return;
       }
-      window.location.href = `/swiftrent-lease/${latestLease.id}`;
+      window.location.href = `/swiftrent-lease/${lease.id}`;
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to initiate signing', description: e.message });
     }
