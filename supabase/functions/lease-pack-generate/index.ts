@@ -6,6 +6,7 @@ import { PDFDocument, rgb, StandardFonts } from 'https://esm.sh/pdf-lib@1.17.1';
 
 const ALLOWED_ORIGINS = [
   "https://swiftrent.co.za",
+  "https://www.swiftrent.co.za",
   "http://localhost:5173",
   "https://localhost:5173"
 ];
@@ -210,6 +211,13 @@ serve(async (req) => {
       ?? Deno.env.get('SERVICE_ROLE_KEY')
       ?? Deno.env.get('SUPABASE_ANON_KEY')
       ?? '';
+    if (!supabaseUrl || !serviceRoleKey) {
+      console.error('Missing Supabase env. SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY not set');
+      return new Response(JSON.stringify({ error: 'Server not configured', details: 'Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY' }), {
+        status: 500,
+        headers
+      });
+    }
     const supabaseClient = createClient(supabaseUrl, serviceRoleKey);
 
     const { leasePack } = await req.json();
@@ -220,10 +228,50 @@ serve(async (req) => {
       });
     }
 
-    console.log('Generating professional lease PDF for:', leasePack.core?.leaseId);
+    // Normalize/validate leasePack shape to avoid undefined property access
+    const normalized = {
+      core: {
+        leaseId: leasePack?.core?.leaseId || crypto.randomUUID?.() || String(Date.now()),
+        propertyAddress: leasePack?.core?.propertyAddress || 'Property Address',
+        propertyType: leasePack?.core?.propertyType || 'Residential',
+        startDate: leasePack?.core?.startDate || new Date().toISOString().split('T')[0],
+        endDate: leasePack?.core?.endDate || new Date(Date.now() + 31536000000).toISOString().split('T')[0],
+        noticeDays: leasePack?.core?.noticeDays ?? 30,
+        monthlyRentZAR: leasePack?.core?.monthlyRentZAR ?? 0,
+        depositZAR: leasePack?.core?.depositZAR ?? 0,
+        rentDueDay: leasePack?.core?.rentDueDay ?? 1,
+        paymentMethod: leasePack?.core?.paymentMethod || 'Bank Transfer',
+        depositHeldIn: leasePack?.core?.depositHeldIn || 'Trust Account',
+        depositRefundDays: leasePack?.core?.depositRefundDays ?? 30,
+        utilities: leasePack?.core?.utilities || { water: 'Tenant', electricity: 'Tenant', refuse: 'Tenant' },
+        petsAllowed: !!leasePack?.core?.petsAllowed,
+        maxOccupants: leasePack?.core?.maxOccupants ?? 2,
+        maintenanceMinorRepairLimitZAR: leasePack?.core?.maintenanceMinorRepairLimitZAR ?? 500,
+        conditionReportRequired: leasePack?.core?.conditionReportRequired ?? true,
+        houseRulesUrl: leasePack?.core?.houseRulesUrl || '',
+        governingLaw: leasePack?.core?.governingLaw || 'South Africa'
+      },
+      parties: {
+        landlord: {
+          fullName: leasePack?.parties?.landlord?.fullName || 'Landlord',
+          idNumber: leasePack?.parties?.landlord?.idNumber || '0000000000000'
+        },
+        tenant: {
+          fullName: leasePack?.parties?.tenant?.fullName || 'Tenant',
+          idNumber: leasePack?.parties?.tenant?.idNumber || '0000000000000'
+        }
+      },
+      signatures: {
+        landlord: leasePack?.signatures?.landlord || { typedName: '', signedAt: null },
+        tenant: leasePack?.signatures?.tenant || { typedName: '', signedAt: null }
+      },
+      pdf: leasePack?.pdf || {}
+    };
+
+    console.log('Generating professional lease PDF for:', normalized.core?.leaseId);
 
     // Generate PDF
-    const pdfBytes = await generateProfessionalLeasePDF(leasePack);
+    const pdfBytes = await generateProfessionalLeasePDF(normalized);
     
     // Compute SHA-256 hash
     const pdfHash = await computeSHA256(pdfBytes);
@@ -231,7 +279,7 @@ serve(async (req) => {
     
     // Generate filename
     const safe = (s: string = '') => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'document';
-    const leaseId = safe(leasePack.core?.leaseId || '');
+    const leaseId = safe(normalized.core?.leaseId || '');
     const timestamp = Date.now();
     const filename = `lease-pack-${leaseId}-${timestamp}.pdf`;
     
