@@ -503,6 +503,13 @@ serve(async (req) => {
       }
     }
 
+    // Absolute last-resort fallback: return data URL so client can still download
+    if (!pdfUrl) {
+      try {
+        pdfUrl = `data:application/pdf;base64,${pdfBase64}`
+      } catch (_) {}
+    }
+
     if (!pdfUrl) {
       return new Response(JSON.stringify({ error: 'No URL returned for uploaded PDF' }), { 
         status: 502, 
