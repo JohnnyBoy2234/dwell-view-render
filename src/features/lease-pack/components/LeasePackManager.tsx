@@ -25,11 +25,22 @@ export function LeasePackManager() {
       });
 
       if (pdfError) {
+        console.error('PDF generation error:', pdfError);
         throw new Error(`PDF generation failed: ${pdfError.message}`);
       }
 
-      if (!pdfResult?.success) {
-        throw new Error('PDF generation failed');
+      if (!pdfResult) {
+        throw new Error('No response from PDF generation service');
+      }
+
+      if (!pdfResult.success) {
+        console.error('PDF generation not successful:', pdfResult);
+        throw new Error(pdfResult.error || 'PDF generation failed');
+      }
+
+      if (!pdfResult.pdf_url) {
+        console.error('No PDF URL in response:', pdfResult);
+        throw new Error('PDF URL not available - please try again');
       }
 
       // Update lease pack with PDF details
@@ -82,13 +93,40 @@ export function LeasePackManager() {
       });
 
       // Auto-download the PDF
-      if (pdfResult.pdf_url) {
+      console.log('PDF URL received:', pdfResult.pdf_url);
+      
+      try {
+        // Test if the URL is accessible before attempting download
+        const testResponse = await fetch(pdfResult.pdf_url, { method: 'HEAD' });
+        if (!testResponse.ok) {
+          throw new Error('PDF not ready for download');
+        }
+
         const link = document.createElement('a');
         link.href = pdfResult.pdf_url;
         link.download = `SwiftRent-Lease-${leasePack.core.leaseId}.pdf`;
+        link.target = '_blank'; // Open in new tab as fallback
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        
+        console.log('PDF download initiated successfully');
+      } catch (downloadError) {
+        console.error('Download error:', downloadError);
+        // Show the PDF URL for manual download
+        toast({
+          title: "PDF Generated Successfully",
+          description: "Click to download your lease agreement",
+          action: (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.open(pdfResult.pdf_url, '_blank')}
+            >
+              Download PDF
+            </Button>
+          ),
+        });
       }
 
       setShowWizard(false);
