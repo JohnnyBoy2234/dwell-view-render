@@ -31,7 +31,7 @@ const tenantItems: SidebarItem[] = [
   { title: 'Inventory', url: '/tenant/inventory', icon: FileText },
   { title: 'Maintenance', url: '/tenant/maintenance', icon: Settings },
   { title: 'Proof of Payment', url: '/tenant/proof-of-payment', icon: Inbox },
-  { title: 'Contract', url: '/tenant/contracts', icon: FileText },
+  { title: 'Lease Contracts', url: '/leases', icon: FileText },
   { title: 'Applications', url: '/tenant/applications', icon: Building },
   { title: 'Settings', url: '/tenant/profile', icon: User },
 ];
@@ -40,7 +40,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Landlord Dashboard', url: '/enhancedlandlorddashboard', icon: Home },
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
   { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
-  { title: 'Contracts', url: '/enhancedlandlorddashboard/leases', icon: FileText },
+  { title: 'Lease System', url: '/leases', icon: FileText },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
   { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: RandIcon },
   { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
