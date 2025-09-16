@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 // Types for inventory system (disabled until tables are created)
 export interface InventoryRecord {
@@ -61,48 +63,101 @@ export interface CreateInventoryItemData {
 
 // Disabled inventory hook until database tables are created
 export function useInventory() {
-  const [inventoryRecords] = useState<InventoryRecordWithDetails[]>([]);
-  const [loading] = useState(false);
-  const [error] = useState<string | null>(null);
+  const { user } = useAuth();
+  const [inventoryRecords, setInventoryRecords] = useState<InventoryRecordWithDetails[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const db = supabase as any;
 
   const fetchInventoryRecords = async () => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
+    if (!user) {
+      setInventoryRecords([]);
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      // RLS restricts to allowed rows; additionally filter by current user
+      const { data, error: selectError } = await db
+        .from('inventory_records')
+        .select('*')
+        .eq('tenant_id', user.id)
+        .order('created_at', { ascending: false });
+      if (selectError) throw selectError;
+      setInventoryRecords((data || []) as InventoryRecordWithDetails[]);
+    } catch (e: any) {
+      setError(e.message || String(e));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const createInventoryRecord = async (data: CreateInventoryRecordData): Promise<InventoryRecord | null> => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
-    return null;
+    const { data: created, error: err } = await db
+      .from('inventory_records')
+      .insert({
+        property_id: data.property_id,
+        tenant_id: data.tenant_id,
+        landlord_id: data.landlord_id,
+        country: data.country,
+        status: 'in_progress',
+      })
+      .select('*')
+      .single();
+    if (err) throw err;
+    await fetchInventoryRecords();
+    return created as InventoryRecord;
   };
 
   const updateInventoryRecord = async (id: string, data: UpdateInventoryRecordData): Promise<InventoryRecord | null> => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
-    return null;
+    const { data: updated, error: err } = await db
+      .from('inventory_records')
+      .update(data)
+      .eq('id', id)
+      .select('*')
+      .single();
+    if (err) throw err;
+    await fetchInventoryRecords();
+    return updated as InventoryRecord;
   };
 
   const createInventoryItem = async (data: CreateInventoryItemData): Promise<InventoryItem | null> => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
+    const { data: created, error: err } = await db
+      .from('inventory_items')
+      .insert({
+        inventory_record_id: data.inventory_record_id,
+        room_name: data.room_name,
+        item_name: data.item_name,
+        condition: data.condition,
+        description: data.description,
+        photos: data.photos || [],
+        voice_note_url: data.voice_note_url,
+      })
+      .select('*')
+      .single();
+    if (err) throw err;
+    await fetchInventoryRecords();
+    return created as InventoryItem;
+  };
+
+  const generateInventoryReport = async (_inventoryRecordId: string, _reportType: 'move_in' | 'move_out' | 'periodic' = 'move_in'): Promise<string | null> => {
+    // Placeholder for future function
     return null;
   };
 
-  const generateInventoryReport = async (inventoryRecordId: string, reportType: 'move_in' | 'move_out' | 'periodic' = 'move_in'): Promise<string | null> => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
-    return null;
+  const downloadInventoryReport = async (_inventoryRecordId: string): Promise<void> => {
+    // Placeholder for future download/report generation
   };
 
-  const downloadInventoryReport = async (inventoryRecordId: string): Promise<void> => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
+  const viewInventoryRecord = async (_inventoryRecordId: string): Promise<void> => {
+    // Placeholder for navigation
   };
 
-  const viewInventoryRecord = async (inventoryRecordId: string): Promise<void> => {
-    // Disabled until inventory tables are created
-    console.log('Inventory system disabled - tables not created');
-  };
+  useEffect(() => {
+    fetchInventoryRecords();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
   return {
     inventoryRecords,

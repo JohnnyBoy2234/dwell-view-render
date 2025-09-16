@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { X, Trash2 } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InventoryStartPanelProps {
   propertyId?: string;
@@ -21,6 +23,7 @@ interface Note {
   audioUrl: string;
   createdAt: number;
   photos: Photo[];
+  audioBlob?: Blob;
 }
 
 function useAnalytics() {
@@ -33,6 +36,7 @@ function useAnalytics() {
 export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const { toast } = useToast();
   const { track } = useAnalytics();
+  const { user } = useAuth();
 
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
@@ -40,6 +44,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [pendingQuickNoteId, setPendingQuickNoteId] = useState<string | null>(null);
   const quickPhotoInputRef = useRef<HTMLInputElement>(null);
+  const [saving, setSaving] = useState(false);
 
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -84,6 +89,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           audioUrl,
           createdAt: Date.now(),
           photos: [],
+          audioBlob: blob,
         };
         setNotes((prev) => [...prev, newNote]);
         track('inventory_voice_note_saved');
@@ -100,6 +106,145 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     }
   };
 
+  const uploadToInventoryBucket = async (path: string, file: File | Blob, contentType?: string): Promise<string> => {
+    // Use private KYC bucket with user-based RLS; store under inventory/{userId}/...
+    // This avoids landlord-only policies on property-images.
+    const bucket = 'kyc-uploads';
+    const finalPath = `inventory/${user!.id}/${path}`;
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(finalPath, file as any, {
+        cacheControl: '3600',
+        upsert: false,
+        contentType,
+      });
+    if (error) throw error;
+    // Return storage path for secure access later
+    return data.path;
+  };
+
+  const handleSave = async () => {
+    if (!user) {
+      toast({ title: 'Please sign in to save', variant: 'destructive' });
+      return;
+    }
+    if (!propertyId) {
+      toast({ title: 'Missing property', variant: 'destructive' });
+      return;
+    }
+    if (notes.length === 0) {
+      toast({ title: 'Nothing to save', description: 'Add a voice note or photos first.' });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Fetch landlord for the property
+      const { data: prop, error: propErr } = await supabase
+        .from('properties')
+        .select('landlord_id')
+        .eq('id', propertyId)
+        .maybeSingle();
+      if (propErr) throw propErr;
+      if (!prop) throw new Error('Property not found');
+
+      // Find or create inventory record for this property and tenant
+      const { data: existingRecords, error: findErr } = await supabase
+        .from('inventory_records')
+        .select('id, photos_count, voice_notes_count, rooms_recorded')
+        .eq('property_id', propertyId)
+        .eq('tenant_id', user.id)
+        .limit(1);
+      if (findErr) throw findErr;
+
+      let recordId: string;
+      if (!existingRecords || existingRecords.length === 0) {
+        const { data: created, error: insertErr } = await supabase
+          .from('inventory_records')
+          .insert({
+            property_id: propertyId,
+            tenant_id: user.id,
+            landlord_id: prop.landlord_id,
+            country: 'South Africa',
+            status: 'in_progress',
+          })
+          .select('id')
+          .single();
+        if (insertErr) throw insertErr;
+        recordId = created.id;
+      } else {
+        recordId = existingRecords[0].id as string;
+      }
+
+      // Upload all media and build items
+      const itemsPayload: Array<{
+        inventory_record_id: string;
+        room_name: string;
+        item_name: string;
+        condition: string;
+        description?: string;
+        photos: string[];
+        voice_note_url?: string;
+      }> = [];
+
+      for (const [index, note] of notes.entries()) {
+        const noteId = note.id;
+        const uploadedPhotoPaths: string[] = [];
+        for (const photo of note.photos) {
+          const file = photo.file;
+          const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+          const filename = `${crypto.randomUUID()}.${ext}`;
+          const path = `${propertyId}/${recordId}/${noteId}/${filename}`;
+          const storagePath = await uploadToInventoryBucket(path, file, file.type);
+          uploadedPhotoPaths.push(storagePath);
+        }
+
+        let audioPath: string | undefined;
+        if (note.audioBlob && note.audioBlob.size > 0) {
+          const filename = `${crypto.randomUUID()}.webm`;
+          const path = `${propertyId}/${recordId}/${noteId}/${filename}`;
+          audioPath = await uploadToInventoryBucket(path, note.audioBlob, 'audio/webm');
+        }
+
+        itemsPayload.push({
+          inventory_record_id: recordId,
+          room_name: 'General',
+          item_name: `Note ${index + 1}`,
+          condition: 'good',
+          photos: uploadedPhotoPaths,
+          voice_note_url: audioPath,
+        });
+      }
+
+      if (itemsPayload.length > 0) {
+        const { error: itemsErr } = await supabase.from('inventory_items').insert(itemsPayload);
+        if (itemsErr) throw itemsErr;
+      }
+
+      // Update counts on the record
+      const photosCount = notes.reduce((acc, n) => acc + n.photos.length, 0);
+      const voiceCount = notes.reduce((acc, n) => acc + (n.audioBlob && n.audioBlob.size > 0 ? 1 : 0), 0);
+      const { error: updErr } = await supabase
+        .from('inventory_records')
+        .update({
+          rooms_recorded: notes.length,
+          photos_count: photosCount,
+          voice_notes_count: voiceCount,
+          status: 'in_progress',
+        })
+        .eq('id', recordId);
+      if (updErr) throw updErr;
+
+      toast({ title: 'Inventory saved', description: new Date().toLocaleString() });
+      setNotes([]);
+    } catch (e: any) {
+      console.error('Save inventory failed:', e);
+      toast({ title: 'Failed to save inventory', description: e.message || String(e), variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const stopRecording = () => {
     mediaRecorder?.stop();
     mediaRecorder?.stream.getTracks().forEach((t) => t.stop());
@@ -110,6 +255,24 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     if (!files) return;
     const newPhotos: Photo[] = [];
     Array.from(files).forEach((file) => {
+      const name = (file.name || '').toLowerCase();
+      const ext = name.split('.').pop() || '';
+      const contentType = (file.type || '').toLowerCase();
+      const isHeic = contentType.includes('heic') || ext === 'heic' || ext === 'heif';
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+      const isAllowedType =
+        allowedTypes.includes(contentType) ||
+        ((contentType === '' || contentType === 'application/octet-stream') && allowedExts.includes(ext));
+
+      if (isHeic || !isAllowedType) {
+        toast({
+          title: 'Unsupported image format',
+          description: 'Please upload JPEG, PNG, or WebP images. HEIC is not supported.',
+          variant: 'destructive',
+        });
+        return;
+      }
       if (file.size > 5 * 1024 * 1024) {
         toast({ title: 'File too large', variant: 'destructive' });
         return;
@@ -218,7 +381,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
             <input
               ref={quickPhotoInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               capture="environment"
               className="hidden"
               onChange={(e) => {
@@ -234,12 +397,17 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
 
       <div>
         <h3 className="text-lg font-semibold mb-2">Voice Notes</h3>
+        <div className="flex items-center gap-2">
         <Button
           onClick={recording ? stopRecording : startRecording}
           aria-label={recording ? 'Stop recording' : 'Start recording'}
         >
           {recording ? 'Stop Recording' : 'Start Recording'}
         </Button>
+        <Button onClick={handleSave} disabled={saving || notes.length === 0}>
+          {saving ? 'Saving…' : 'Save'}
+        </Button>
+        </div>
         {error && <p className="text-destructive mt-2">{error}</p>}
         <div className="mt-4 space-y-4">
           {notes.map((note) => (
@@ -279,7 +447,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
               <Input
                 type="file"
                 multiple
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 capture="environment"
                 aria-label="Attach photos"
                 onChange={(e) => {
