@@ -289,6 +289,147 @@ export type Database = {
           },
         ]
       }
+      inventory_items: {
+        Row: {
+          condition: string
+          created_at: string | null
+          description: string | null
+          id: string
+          inventory_record_id: string
+          item_name: string
+          photos: string[] | null
+          room_name: string
+          updated_at: string | null
+          voice_note_url: string | null
+        }
+        Insert: {
+          condition: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          inventory_record_id: string
+          item_name: string
+          photos?: string[] | null
+          room_name: string
+          updated_at?: string | null
+          voice_note_url?: string | null
+        }
+        Update: {
+          condition?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          inventory_record_id?: string
+          item_name?: string
+          photos?: string[] | null
+          room_name?: string
+          updated_at?: string | null
+          voice_note_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_inventory_record_id_fkey"
+            columns: ["inventory_record_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_records: {
+        Row: {
+          approved_at: string | null
+          completed_at: string | null
+          country: string
+          created_at: string | null
+          id: string
+          landlord_approved: boolean | null
+          landlord_id: string
+          photos_count: number | null
+          property_id: string
+          rooms_recorded: number | null
+          status: string
+          tenant_id: string
+          updated_at: string | null
+          voice_notes_count: number | null
+        }
+        Insert: {
+          approved_at?: string | null
+          completed_at?: string | null
+          country?: string
+          created_at?: string | null
+          id?: string
+          landlord_approved?: boolean | null
+          landlord_id: string
+          photos_count?: number | null
+          property_id: string
+          rooms_recorded?: number | null
+          status?: string
+          tenant_id: string
+          updated_at?: string | null
+          voice_notes_count?: number | null
+        }
+        Update: {
+          approved_at?: string | null
+          completed_at?: string | null
+          country?: string
+          created_at?: string | null
+          id?: string
+          landlord_approved?: boolean | null
+          landlord_id?: string
+          photos_count?: number | null
+          property_id?: string
+          rooms_recorded?: number | null
+          status?: string
+          tenant_id?: string
+          updated_at?: string | null
+          voice_notes_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_records_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_reports: {
+        Row: {
+          created_at: string | null
+          generated_at: string | null
+          id: string
+          inventory_record_id: string
+          pdf_url: string | null
+          report_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          generated_at?: string | null
+          id?: string
+          inventory_record_id: string
+          pdf_url?: string | null
+          report_type: string
+        }
+        Update: {
+          created_at?: string | null
+          generated_at?: string | null
+          id?: string
+          inventory_record_id?: string
+          pdf_url?: string | null
+          report_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_reports_inventory_record_id_fkey"
+            columns: ["inventory_record_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number
