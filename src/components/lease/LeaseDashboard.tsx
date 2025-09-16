@@ -1,92 +1,260 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Plus, FileText, Users, Calendar } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, FileText, Eye, Edit, Send, PenTool, Users, Calendar } from 'lucide-react';
 import { useLeaseContracts } from '@/hooks/useLeaseContracts';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { LeaseDocumentViewer } from './LeaseDocumentViewer';
+import { LeaseSignaturePad } from './LeaseSignaturePad';
+import type { LeaseContract } from '@/types/lease';
 
 export function LeaseDashboard() {
-  const { contracts, loading } = useLeaseContracts();
-  const { isLandlord } = useAuth();
   const navigate = useNavigate();
+  const { contracts, loading } = useLeaseContracts();
+  const { user, isLandlord } = useAuth();
+  const [selectedContract, setSelectedContract] = useState<LeaseContract | null>(null);
+  const [showSignaturePad, setShowSignaturePad] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'draft': return 'secondary';
+      case 'pending_tenant': return 'destructive';
+      case 'pending_landlord': return 'destructive';
       case 'signed': return 'default';
-      case 'pending_tenant': return 'secondary';
-      case 'pending_landlord': return 'secondary';
-      case 'draft': return 'outline';
-      default: return 'outline';
+      case 'expired': return 'outline';
+      case 'terminated': return 'outline';
+      default: return 'secondary';
     }
   };
 
+  const getDraftContracts = () => contracts.filter(c => c.status === 'draft');
+  const getPendingContracts = () => contracts.filter(c => 
+    c.status === 'pending_tenant' || c.status === 'pending_landlord'
+  );
+  const getSignedContracts = () => contracts.filter(c => c.status === 'signed');
+
+  const handleViewContract = (contract: LeaseContract) => {
+    setSelectedContract(contract);
+  };
+
+  const handleSignContract = (contract: LeaseContract) => {
+    setSelectedContract(contract);
+    setShowSignaturePad(true);
+  };
+
+  const canSign = (contract: LeaseContract) => {
+    if (isLandlord && !contract.landlord_signed_at) return true;
+    if (!isLandlord && contract.tenant_id === user?.id && !contract.tenant_signed_at) return true;
+    return false;
+  };
+
   if (loading) {
-    return <div className="p-6">Loading contracts...</div>;
+    return <div className="flex justify-center items-center py-16">Loading contracts...</div>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Lease Contracts</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Lease Management</h1>
         {isLandlord && (
-          <Button onClick={() => navigate('/lease/builder')}>
+          <Button onClick={() => navigate('/lease/builder/new')}>
             <Plus className="h-4 w-4 mr-2" />
             Create Contract
           </Button>
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {contracts.map((contract) => (
-          <Card key={contract.id} className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <CardTitle className="text-base">{contract.title}</CardTitle>
-                <Badge variant={getStatusColor(contract.status)}>
-                  {contract.status.replace('_', ' ')}
-                </Badge>
+      <Tabs defaultValue="all" className="w-full">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="all">All ({contracts.length})</TabsTrigger>
+          <TabsTrigger value="draft">Draft ({getDraftContracts().length})</TabsTrigger>
+          <TabsTrigger value="pending">Pending ({getPendingContracts().length})</TabsTrigger>
+          <TabsTrigger value="signed">Signed ({getSignedContracts().length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="all" className="space-y-4">
+          <ContractsList 
+            contracts={contracts} 
+            onView={handleViewContract}
+            onSign={handleSignContract}
+            onEdit={(contract) => navigate(`/lease/builder/${contract.id}`)}
+            canSign={canSign}
+            isLandlord={isLandlord}
+          />
+        </TabsContent>
+
+        <TabsContent value="draft" className="space-y-4">
+          <ContractsList 
+            contracts={getDraftContracts()} 
+            onView={handleViewContract}
+            onSign={handleSignContract}
+            onEdit={(contract) => navigate(`/lease/builder/${contract.id}`)}
+            canSign={canSign}
+            isLandlord={isLandlord}
+          />
+        </TabsContent>
+
+        <TabsContent value="pending" className="space-y-4">
+          <ContractsList 
+            contracts={getPendingContracts()} 
+            onView={handleViewContract}
+            onSign={handleSignContract}
+            onEdit={(contract) => navigate(`/lease/builder/${contract.id}`)}
+            canSign={canSign}
+            isLandlord={isLandlord}
+          />
+        </TabsContent>
+
+        <TabsContent value="signed" className="space-y-4">
+          <ContractsList 
+            contracts={getSignedContracts()} 
+            onView={handleViewContract}
+            onSign={handleSignContract}
+            onEdit={(contract) => navigate(`/lease/builder/${contract.id}`)}
+            canSign={canSign}
+            isLandlord={isLandlord}
+          />
+        </TabsContent>
+      </Tabs>
+
+      {/* Contract Details Modal */}
+      {selectedContract && !showSignaturePad && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-end mb-4">
+              <Button variant="outline" onClick={() => setSelectedContract(null)}>
+                Close
+              </Button>
+            </div>
+            <LeaseDocumentViewer contract={selectedContract} />
+          </div>
+        </div>
+      )}
+
+      {/* Signature Pad Modal */}
+      {selectedContract && showSignaturePad && (
+        <LeaseSignaturePad
+          contract={selectedContract}
+          open={showSignaturePad}
+          onOpenChange={setShowSignaturePad}
+          onSigned={() => {
+            setShowSignaturePad(false);
+            setSelectedContract(null);
+            // Refresh contracts list
+            window.location.reload();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+interface ContractsListProps {
+  contracts: LeaseContract[];
+  onView: (contract: LeaseContract) => void;
+  onSign: (contract: LeaseContract) => void;
+  onEdit: (contract: LeaseContract) => void;
+  canSign: (contract: LeaseContract) => boolean;
+  isLandlord: boolean;
+}
+
+function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord }: ContractsListProps) {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft': return 'secondary';
+      case 'pending_tenant': return 'destructive';
+      case 'pending_landlord': return 'destructive';
+      case 'signed': return 'default';
+      case 'expired': return 'outline';
+      case 'terminated': return 'outline';
+      default: return 'secondary';
+    }
+  };
+
+  if (contracts.length === 0) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+          <h3 className="text-lg font-semibold mb-2">No contracts found</h3>
+          <p className="text-muted-foreground text-center mb-6">
+            {isLandlord 
+              ? "Get started by creating your first lease contract"
+              : "You don't have any lease contracts yet"
+            }
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="grid gap-4">
+      {contracts.map((contract) => (
+        <Card key={contract.id} className="hover:shadow-md transition-shadow">
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle>{contract.title}</CardTitle>
+                <CardDescription>
+                  <div className="flex items-center space-x-4 text-sm">
+                    <span className="flex items-center space-x-1">
+                      <FileText className="h-3 w-3" />
+                      <span>Version {contract.version}</span>
+                    </span>
+                    <span className="flex items-center space-x-1">
+                      <Calendar className="h-3 w-3" />
+                      <span>Created {new Date(contract.created_at).toLocaleDateString()}</span>
+                    </span>
+                  </div>
+                </CardDescription>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <FileText className="h-4 w-4" />
-                <span>Version {contract.version}</span>
+              <Badge variant={getStatusColor(contract.status)}>
+                {contract.status.replace('_', ' ').toUpperCase()}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="text-sm text-muted-foreground">
+                <p><strong>Property:</strong> {contract.contract_data?.propertyAddress || 'Not specified'}</p>
+                <div className="flex items-center space-x-1">
+                  <Users className="h-3 w-3" />
+                  <span><strong>Landlord:</strong> {contract.contract_data?.landlordName || 'Not specified'}</span>
+                </div>
+                {contract.tenant_id && (
+                  <p><strong>Tenant:</strong> {contract.contract_data?.tenantName || contract.contract_data?.tenantEmail}</p>
+                )}
+                <p><strong>Rent:</strong> {contract.contract_data?.rentCurrency || 'ZAR'} {contract.contract_data?.rentAmount?.toLocaleString() || 'Not specified'}</p>
               </div>
               
-              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                <Calendar className="h-4 w-4" />
-                <span>Created {new Date(contract.created_at).toLocaleDateString()}</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => onView(contract)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View Details
+                </Button>
+                
+                {contract.status === 'draft' && isLandlord && (
+                  <Button variant="outline" size="sm" onClick={() => onEdit(contract)}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+                
+                {canSign(contract) && (
+                  <Button size="sm" onClick={() => onSign(contract)}>
+                    <PenTool className="h-4 w-4 mr-2" />
+                    Sign Contract
+                  </Button>
+                )}
               </div>
-
-              {contract.contract_data && (
-                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-                  <Users className="h-4 w-4" />
-                  <span>{contract.contract_data.landlordName || 'Landlord'}</span>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {contracts.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-8">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No contracts yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Create your first lease contract to get started.
-            </p>
-            {isLandlord && (
-              <Button onClick={() => navigate('/lease/builder')}>
-                Create Contract
-              </Button>
-            )}
+            </div>
           </CardContent>
         </Card>
-      )}
+      ))}
     </div>
   );
 }
