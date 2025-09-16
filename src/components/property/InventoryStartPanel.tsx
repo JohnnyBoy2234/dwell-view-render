@@ -47,6 +47,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [pendingQuickNoteId, setPendingQuickNoteId] = useState<string | null>(null);
   const quickPhotoInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const webpSupportedRef = useRef<boolean | null>(null);
 
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -70,6 +71,23 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       window.removeEventListener('unhandledrejection', onUnhandled);
     };
   }, [track]);
+
+  // Detect WebP support (older iOS Safari doesn't support it)
+  useEffect(() => {
+    if (webpSupportedRef.current !== null) return;
+    try {
+      const img = new Image();
+      img.onload = () => {
+        webpSupportedRef.current = img.width > 0 && img.height > 0;
+      };
+      img.onerror = () => {
+        webpSupportedRef.current = false;
+      };
+      img.src = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEAAQAcJaQAA3AA/v89WAAA';
+    } catch {
+      webpSupportedRef.current = false;
+    }
+  }, []);
 
   const startRecording = async () => {
     if (!navigator.mediaDevices || typeof window.MediaRecorder === 'undefined') {
@@ -263,6 +281,35 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     });
   };
 
+  const convertToJpegDataUrl = (dataUrl: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxDim = 1600;
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const ratio = Math.min(maxDim / width, maxDim / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas not supported'));
+        ctx.drawImage(img, 0, 0, width, height);
+        try {
+          const jpegUrl = canvas.toDataURL('image/jpeg', 0.9);
+          resolve(jpegUrl);
+        } catch (e) {
+          reject(e);
+        }
+      };
+      img.onerror = () => reject(new Error('Image decode failed'));
+      img.src = dataUrl;
+    });
+  };
+
   const handleAddPhotos = async (noteId: string, files: FileList | null) => {
     if (!files) return;
     const newPhotos: Photo[] = [];
@@ -293,6 +340,10 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       try {
         // Use Data URL for broader compatibility across mobile browsers
         previewUrl = await readAsDataUrl(file);
+        if ((contentType === 'image/webp' || ext === 'webp') && webpSupportedRef.current === false) {
+          // Convert to JPEG preview if WebP unsupported
+          previewUrl = await convertToJpegDataUrl(previewUrl);
+        }
       } catch {
         // Fallback to object URL if FileReader fails
         try {
