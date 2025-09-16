@@ -671,6 +671,83 @@ export type Database = {
           },
         ]
       }
+      lease_contracts: {
+        Row: {
+          audit_trail: Json
+          contract_data: Json
+          created_at: string
+          encryption_key_id: string | null
+          expires_at: string | null
+          id: string
+          landlord_id: string
+          landlord_signature_data: Json | null
+          landlord_signed_at: string | null
+          pdf_hash: string | null
+          pdf_url: string | null
+          property_id: string | null
+          search_vector: unknown | null
+          status: string
+          tenant_id: string | null
+          tenant_signature_data: Json | null
+          tenant_signed_at: string | null
+          title: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          audit_trail?: Json
+          contract_data?: Json
+          created_at?: string
+          encryption_key_id?: string | null
+          expires_at?: string | null
+          id?: string
+          landlord_id: string
+          landlord_signature_data?: Json | null
+          landlord_signed_at?: string | null
+          pdf_hash?: string | null
+          pdf_url?: string | null
+          property_id?: string | null
+          search_vector?: unknown | null
+          status?: string
+          tenant_id?: string | null
+          tenant_signature_data?: Json | null
+          tenant_signed_at?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          audit_trail?: Json
+          contract_data?: Json
+          created_at?: string
+          encryption_key_id?: string | null
+          expires_at?: string | null
+          id?: string
+          landlord_id?: string
+          landlord_signature_data?: Json | null
+          landlord_signed_at?: string | null
+          pdf_hash?: string | null
+          pdf_url?: string | null
+          property_id?: string | null
+          search_vector?: unknown | null
+          status?: string
+          tenant_id?: string | null
+          tenant_signature_data?: Json | null
+          tenant_signed_at?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lease_contracts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lease_signatures: {
         Row: {
           created_at: string | null
@@ -1460,6 +1537,62 @@ export type Database = {
         }
         Relationships: []
       }
+      signature_audit: {
+        Row: {
+          consent_method: string
+          created_at: string
+          document_hash: string
+          geolocation: Json | null
+          id: string
+          ip_address: unknown | null
+          lease_contract_id: string
+          signature_hash: string
+          signer_id: string
+          signer_role: string
+          timestamp: string
+          user_agent: string | null
+          verification_data: Json | null
+        }
+        Insert: {
+          consent_method?: string
+          created_at?: string
+          document_hash: string
+          geolocation?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          lease_contract_id: string
+          signature_hash: string
+          signer_id: string
+          signer_role: string
+          timestamp?: string
+          user_agent?: string | null
+          verification_data?: Json | null
+        }
+        Update: {
+          consent_method?: string
+          created_at?: string
+          document_hash?: string
+          geolocation?: Json | null
+          id?: string
+          ip_address?: unknown | null
+          lease_contract_id?: string
+          signature_hash?: string
+          signer_id?: string
+          signer_role?: string
+          timestamp?: string
+          user_agent?: string | null
+          verification_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_audit_lease_contract_id_fkey"
+            columns: ["lease_contract_id"]
+            isOneToOne: false
+            referencedRelation: "lease_contracts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_messages: {
         Row: {
           category: string
@@ -1882,6 +2015,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_lease_audit_entry: {
+        Args: {
+          action: string
+          actor_id: string
+          contract_id: string
+          details?: Json
+        }
+        Returns: undefined
+      }
       can_access_application: {
         Args: { property_uuid: string; tenant_uuid: string }
         Returns: boolean
