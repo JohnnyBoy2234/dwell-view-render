@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, DollarSign, BarChart3, Calendar, Trash2, Save, User, Wrench, Play } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
