@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -38,6 +38,10 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const [notes, setNotes] = useState<Note[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [pendingQuickNoteId, setPendingQuickNoteId] = useState<string | null>(null);
+  const quickPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const deepLink = propertyId
     ? `https://app.swiftrent.co.za/inventory/start?propertyId=${propertyId}`
@@ -127,6 +131,19 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     }
   };
 
+  const createEmptyNote = (): string => {
+    const id = crypto.randomUUID();
+    const newNote: Note = { id, audioUrl: '', createdAt: Date.now(), photos: [] };
+    setNotes((prev) => [newNote, ...prev]);
+    return id;
+  };
+
+  const triggerQuickPhotoCapture = () => {
+    const id = createEmptyNote();
+    setPendingQuickNoteId(id);
+    quickPhotoInputRef.current?.click();
+  };
+
   const deleteNote = (noteId: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== noteId));
     toast({ title: 'Note deleted' });
@@ -174,18 +191,43 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         </Card>
         <Card className="w-full md:w-1/3 flex flex-col items-center justify-center bg-gradient-to-br from-white to-earth-light/40 border border-ocean-blue/20 shadow-medium rounded-2xl">
           <CardContent className="flex flex-col items-center gap-4 p-6">
-            <QRCode value={deepLink} size={160} />
-            <Button
-              onClick={() => {
-                track('inventory_qr_clicked');
-                window.open(deepLink, '_blank');
-              }}
-            >
-              Open on my phone
-            </Button>
+            {!isMobile && <QRCode value={deepLink} size={160} />}
+            {!isMobile ? (
+              <Button
+                onClick={() => {
+                  track('inventory_qr_clicked');
+                  window.open(deepLink, '_blank');
+                }}
+              >
+                Open on my phone
+              </Button>
+            ) : (
+              <Button
+                onClick={() => {
+                  track('inventory_quick_photo');
+                  triggerQuickPhotoCapture();
+                }}
+              >
+                Add quick photo note
+              </Button>
+            )}
             <p className="text-center text-sm text-muted-foreground">
-              Scan with your camera or tap to continue on mobile.
+              {isMobile ? 'Capture a photo note immediately.' : 'Scan with your camera or tap to continue on mobile.'}
             </p>
+            {/* hidden input to trigger camera on mobile */}
+            <input
+              ref={quickPhotoInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => {
+                if (!pendingQuickNoteId) return;
+                handleAddPhotos(pendingQuickNoteId, e.target.files);
+                setPendingQuickNoteId(null);
+                if (e.target) (e.target as HTMLInputElement).value = '';
+              }}
+            />
           </CardContent>
         </Card>
       </div>
