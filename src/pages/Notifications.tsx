@@ -91,19 +91,7 @@ export default function Notifications() {
         });
       }
 
-      // Add lease notifications if there are unread lease notifications
-      if (leaseUnread > 0) {
-        combinedNotifications.push({
-          id: 'leases',
-          type: 'lease',
-          title: 'Lease Updates',
-          message: `You have ${leaseUnread} lease notification${leaseUnread > 1 ? 's' : ''}`,
-          timestamp: new Date().toISOString(),
-          isRead: false,
-          actionUrl: '/enhancedtenantdashboard/leases',
-          priority: 'high'
-        });
-      }
+      // Lease notifications removed
 
       // Sort by timestamp (newest first)
       combinedNotifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());

@@ -618,24 +618,6 @@ export default function PropertyManagement() {
           <InventoryTab propertyId={property.id} />
         </TabsContent>
       </Tabs>
-
-      {/* Lease Creation Wizard */}
-      {showLeaseDialog && property && (
-        <LeaseCreationWizard
-          isOpen={showLeaseDialog}
-          onClose={handleLeaseDialogClose}
-          propertyId={property.id}
-          selectedTenant={selectedTenant}
-          onLeaseCreated={() => {
-            setShowLeaseDialog(false);
-            setSelectedTenant(null);
-            toast({
-              title: "Success",
-              description: "Lease created successfully and ready for signing",
-            });
-          }}
-        />
-      )}
       </div>
     </div>
   );

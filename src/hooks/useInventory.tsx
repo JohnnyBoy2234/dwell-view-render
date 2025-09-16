@@ -132,7 +132,6 @@ export function useInventory() {
         condition: data.condition,
         description: data.description,
         photos: data.photos || [],
-        voice_note_url: data.voice_note_url,
       })
       .select('*')
       .single();

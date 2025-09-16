@@ -82,7 +82,7 @@ export default function TenantLeaseDocuments() {
         }
         
         // If no URL or URL failed, try to regenerate from lease_data
-        const pdfPath = latestLease.lease_data?.pdf?.finalPath;
+        const pdfPath = (latestLease.lease_data as any)?.pdf?.finalPath;
         if (pdfPath) {
           try {
             const { data: signedData, error: signedError } = await supabase.storage

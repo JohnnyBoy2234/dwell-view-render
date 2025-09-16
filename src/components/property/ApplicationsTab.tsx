@@ -29,7 +29,6 @@ interface ApplicationsTabProps {
   propertyTitle?: string;
   propertyLocation?: string;
   onStartLease?: (tenantId: string, tenantName: string) => void;
-  onStartLease: (tenantId: string, tenantName: string) => void;
 }
 
 export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, onStartLease }: ApplicationsTabProps) {

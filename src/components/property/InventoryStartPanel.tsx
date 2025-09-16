@@ -170,7 +170,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
 
       // Find or create inventory record for this property and tenant
       const { data: existingRecords, error: findErr } = await supabase
-        .from('inventory_records')
+        .from('inventory_records' as any)
         .select('id, photos_count, voice_notes_count, rooms_recorded')
         .eq('property_id', propertyId)
         .eq('tenant_id', user.id)
@@ -180,7 +180,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       let recordId: string;
       if (!existingRecords || existingRecords.length === 0) {
         const { data: created, error: insertErr } = await supabase
-          .from('inventory_records')
+          .from('inventory_records' as any)
           .insert({
             property_id: propertyId,
             tenant_id: user.id,
@@ -191,9 +191,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           .select('id')
           .single();
         if (insertErr) throw insertErr;
-        recordId = created.id;
+        recordId = (created as any).id;
       } else {
-        recordId = existingRecords[0].id as string;
+        recordId = (existingRecords[0] as any).id;
       }
 
       // Upload all media and build items
@@ -238,7 +238,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       }
 
       if (itemsPayload.length > 0) {
-        const { error: itemsErr } = await supabase.from('inventory_items').insert(itemsPayload);
+        const { error: itemsErr } = await supabase.from('inventory_items' as any).insert(itemsPayload);
         if (itemsErr) throw itemsErr;
       }
 
@@ -246,7 +246,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       const photosCount = notes.reduce((acc, n) => acc + n.photos.length, 0);
       const voiceCount = notes.reduce((acc, n) => acc + (n.audioBlob && n.audioBlob.size > 0 ? 1 : 0), 0);
       const { error: updErr } = await supabase
-        .from('inventory_records')
+        .from('inventory_records' as any)
         .update({
           rooms_recorded: notes.length,
           photos_count: photosCount,
