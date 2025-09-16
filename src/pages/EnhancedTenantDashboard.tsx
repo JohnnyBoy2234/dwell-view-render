@@ -11,7 +11,8 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Home, Building, FileText, Settings, User, Calendar, Eye, Receipt, Clipboard, MessageSquare } from 'lucide-react';
+import { MessageCircle, Bell, Home, Activity, FileText } from "lucide-react";
+import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 
 // Custom R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (

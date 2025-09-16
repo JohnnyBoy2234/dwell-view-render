@@ -43,7 +43,10 @@ import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
 import InventoryStart from "@/pages/InventoryStart";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
+import { LeaseBuilder } from "@/pages/LeaseBuilder";
+import { LeaseSignature } from "@/pages/LeaseSignature";
+import { LeaseDashboard } from "@/pages/LeaseDashboard";
 
 const queryClient = new QueryClient();
 
@@ -87,6 +90,13 @@ const App = () => (
             <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
+            
+            {/* Lease System Routes */}
+            <Route path="/leases" element={<AuthenticatedRoute><LeaseDashboard /></AuthenticatedRoute>} />
+            <Route path="/lease/builder" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
+            <Route path="/lease/builder/:contractId" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
+            <Route path="/lease/builder/property/:propertyId" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
+            <Route path="/lease/sign/:contractId" element={<AuthenticatedRoute><LeaseSignature /></AuthenticatedRoute>} />
             <Route path="/messages" element={<AuthenticatedRoute><Messages /></AuthenticatedRoute>} />
             <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
             <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
