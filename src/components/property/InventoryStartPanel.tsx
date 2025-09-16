@@ -445,14 +445,6 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-              <Textarea
-                placeholder="Add a note or description about this room/item (optional)"
-                value={note.text || ''}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setNotes((prev) => prev.map((n) => n.id === note.id ? { ...n, text: value } : n));
-                }}
-              />
               {note.photos.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {note.photos.map((photo) => (
@@ -474,6 +466,14 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                   ))}
                 </div>
               )}
+              <Textarea
+                placeholder="Add a note or description about this room/item (optional)"
+                value={note.text || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNotes((prev) => prev.map((n) => n.id === note.id ? { ...n, text: value } : n));
+                }}
+              />
               <Input
                 type="file"
                 multiple
