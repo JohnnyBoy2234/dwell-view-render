@@ -251,10 +251,19 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     setRecording(false);
   };
 
-  const handleAddPhotos = (noteId: string, files: FileList | null) => {
+  const readAsDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleAddPhotos = async (noteId: string, files: FileList | null) => {
     if (!files) return;
     const newPhotos: Photo[] = [];
-    Array.from(files).forEach((file) => {
+    for (const file of Array.from(files)) {
       const name = (file.name || '').toLowerCase();
       const ext = name.split('.').pop() || '';
       const contentType = (file.type || '').toLowerCase();
@@ -271,19 +280,29 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           description: 'Please upload JPEG, PNG, or WebP images. HEIC is not supported.',
           variant: 'destructive',
         });
-        return;
+        continue;
       }
       if (file.size > 5 * 1024 * 1024) {
         toast({ title: 'File too large', variant: 'destructive' });
-        return;
+        continue;
       }
-      newPhotos.push({
-        id: crypto.randomUUID(),
-        file,
-        previewUrl: URL.createObjectURL(file),
-      });
+      let previewUrl = '';
+      try {
+        // Use Data URL for broader compatibility across mobile browsers
+        previewUrl = await readAsDataUrl(file);
+      } catch {
+        // Fallback to object URL if FileReader fails
+        try {
+          previewUrl = URL.createObjectURL(file);
+        } catch {}
+      }
+      if (!previewUrl) {
+        toast({ title: 'Preview failed', description: 'Could not generate image preview', variant: 'destructive' });
+        continue;
+      }
+      newPhotos.push({ id: crypto.randomUUID(), file, previewUrl });
       track('inventory_photo_attached');
-    });
+    }
     if (newPhotos.length) {
       setNotes((prev) =>
         prev.map((n) =>
