@@ -9,7 +9,6 @@ import { PropertyPanel } from '@/components/dashboard/tenant/PropertyPanel';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
-import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Home, Building, FileText, Settings, User, Calendar, Eye, Receipt, Clipboard, MessageSquare } from 'lucide-react';
@@ -20,7 +19,6 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { SignedLeasesList } from '@/components/lease/SignedLeasesList';
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
@@ -37,9 +35,6 @@ export default function EnhancedTenantDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
-  
-  // Initialize lease notifications
-  useLeaseNotifications();
   
   const [currentTab, setCurrentTab] = useState('/enhancedtenantdashboard');
   const {

@@ -5,24 +5,20 @@ import { FileText, Upload, CreditCard, Wrench, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ManageTenantsTabProps } from '@/types/dashboard';
 import { useState } from 'react';
-import { LeaseSigningDialog } from '@/components/lease/LeaseSigningDialog';
+
 import { PaymentRequestButton } from '@/components/payments/PaymentRequestButton';
 
 export function ManageTenantsTab({ property, activeTenancy }: ManageTenantsTabProps) {
   const navigate = useNavigate();
-  const [leaseDialogOpen, setLeaseDialogOpen] = useState(false);
 
   const handleUploadLease = () => {
-    setLeaseDialogOpen(true);
+    // Navigate to the leases tab for this property
+    navigate(`/manage-property/${property.id}?tab=leases`);
   };
 
   const handleCreateLease = () => {
-    if (activeTenancy) {
-      setLeaseDialogOpen(true);
-    } else {
-      // Navigate to the leases tab for this property
-      navigate(`/manage-property/${property.id}?tab=leases`);
-    }
+    // Navigate to the leases tab for this property
+    navigate(`/manage-property/${property.id}?tab=leases`);
   };
 
   const handleViewPayments = () => {
@@ -168,19 +164,6 @@ export function ManageTenantsTab({ property, activeTenancy }: ManageTenantsTabPr
         </CardContent>
       </Card>
 
-      {activeTenancy && activeTenancy.lease_document_url && (
-        <LeaseSigningDialog
-          isOpen={leaseDialogOpen}
-          onClose={() => setLeaseDialogOpen(false)}
-          onSigned={() => {
-            setLeaseDialogOpen(false);
-            // Handle successful signing
-          }}
-          tenancyId={activeTenancy.id}
-          leaseDocumentUrl={activeTenancy.lease_document_url}
-          currentStatus={activeTenancy.lease_status || 'draft'}
-        />
-      )}
     </div>
   );
 }

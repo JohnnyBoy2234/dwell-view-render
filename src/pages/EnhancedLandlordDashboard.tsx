@@ -10,11 +10,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Home, Eye, Plus, Users, FileText, Building, BarChart3, DollarSign, Calendar, User, Check, X, AlertTriangle, Wrench, Play, Save, Trash2 } from 'lucide-react';
-import { LandlordLeasesList } from '@/components/lease/LandlordLeasesList';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@/types/maintenance';
-import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 
@@ -87,9 +85,6 @@ export default function EnhancedLandlordDashboard() {
   const location = useLocation();
   const { toast } = useToast();
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications();
-  
-  // Initialize lease notifications
-  useLeaseNotifications();
   
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
@@ -658,7 +653,7 @@ export default function EnhancedLandlordDashboard() {
   };
   const renderLeasesTab = () => (
     <div className="space-y-6">
-      <LandlordLeasesList />
+      <p>Leases management has been disabled.</p>
     </div>
   );
 

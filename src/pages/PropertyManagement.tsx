@@ -29,9 +29,6 @@ import {
   Calendar
 } from 'lucide-react';
 import { Property } from '@/types/dashboard';
-import { LeaseSigningDialog } from '@/components/lease/LeaseSigningDialog';
-import { LeaseCreationWizard } from '@/components/lease/LeaseCreationWizard';
-import { LeaseManagement } from '@/components/lease/LeaseManagement';
 import { ApplicationsTab } from '@/components/property/ApplicationsTab';
 import { PaymentsTab } from '@/components/property/PaymentsTab';
 import { InventoryTab } from '@/components/property/InventoryTab';
@@ -61,8 +58,6 @@ export default function PropertyManagement() {
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || 'overview');
   const [emailForInvite, setEmailForInvite] = useState('');
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
-  const [showLeaseDialog, setShowLeaseDialog] = useState(false);
-  const [selectedTenant, setSelectedTenant] = useState<{ id: string; name: string } | null>(null);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -160,15 +155,6 @@ export default function PropertyManagement() {
     }
   };
 
-  const handleStartLease = (tenantId: string, tenantName: string) => {
-    setSelectedTenant({ id: tenantId, name: tenantName });
-    setShowLeaseDialog(true);
-  };
-
-  const handleLeaseDialogClose = () => {
-    setShowLeaseDialog(false);
-    setSelectedTenant(null);
-  };
 
   if (loading) {
     return (
@@ -238,9 +224,6 @@ export default function PropertyManagement() {
       <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         {/* Mobile: Stacked dashboard cards (no slider) */}
         <div className="md:hidden space-y-4">
-          {/* Lease Management */}
-          <LeaseManagement propertyId={property.id} />
-
           {/* Messages */}
           <Card className="rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft">
             <CardHeader className="flex flex-row items-center gap-3">
@@ -403,11 +386,6 @@ export default function PropertyManagement() {
               <span className="hidden lg:inline">Applications</span>
               <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
             </TabsTrigger>
-            <TabsTrigger value="leases" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
-              <FileText className="h-4 w-4" />
-              <span className="hidden lg:inline">Leases</span>
-              <span className="absolute -bottom-1 left-2 right-2 h-0.5 rounded-full bg-gradient-to-r from-ocean-blue to-success-green opacity-0 scale-x-50 transition-all duration-300 data-[state=active]:opacity-100 data-[state=active]:scale-x-100" />
-            </TabsTrigger>
             <TabsTrigger value="payments" className="relative flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ocean-blue/40 focus-visible:ring-offset-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-ocean-blue data-[state=active]:to-success-green data-[state=active]:text-white data-[state=active]:shadow-sm">
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Payments</span>
@@ -488,9 +466,9 @@ export default function PropertyManagement() {
                   <Button 
                     variant="outline" 
                     className="w-full justify-between"
-                    onClick={() => setShowLeaseDialog(true)}
+                    disabled
                   >
-                    Upload a lease
+                    Lease management disabled
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                   <Button 
@@ -553,7 +531,6 @@ export default function PropertyManagement() {
         <TabsContent value="applications" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <ApplicationsTab 
             propertyId={property.id} 
-            onStartLease={handleStartLease}
           />
         </TabsContent>
 
@@ -562,10 +539,6 @@ export default function PropertyManagement() {
           <ViewingSlotsManager propertyId={property.id} />
         </TabsContent>
 
-        {/* Leases Tab (hidden on mobile) */}
-        <TabsContent value="leases" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <LeaseManagement propertyId={property.id} />
-        </TabsContent>
 
         {/* Payments Tab (hidden on mobile) */}
         <TabsContent value="payments" className="hidden md:block space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">

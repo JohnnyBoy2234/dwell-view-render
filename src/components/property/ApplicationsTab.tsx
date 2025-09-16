@@ -28,6 +28,7 @@ interface ApplicationsTabProps {
   propertyId: string;
   propertyTitle?: string;
   propertyLocation?: string;
+  onStartLease?: (tenantId: string, tenantName: string) => void;
   onStartLease: (tenantId: string, tenantName: string) => void;
 }
 

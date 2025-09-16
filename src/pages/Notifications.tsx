@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
-import { useLeaseNotifications } from '@/hooks/useLeaseNotifications';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -42,8 +41,6 @@ export default function Notifications() {
   const isMobile = useIsMobile();
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
   const { unreadCount: messageUnread } = useUnreadMessages();
-  const leaseNotifications = useLeaseNotifications();
-  const leaseUnread = 0; // Note: useLeaseNotifications doesn't return unread count
 
   const [allNotifications, setAllNotifications] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +52,7 @@ export default function Notifications() {
     }
 
     fetchAllNotifications();
-  }, [user, navigate, messageUnread, leaseUnread]);
+  }, [user, navigate, messageUnread]);
 
   const fetchAllNotifications = async () => {
     try {

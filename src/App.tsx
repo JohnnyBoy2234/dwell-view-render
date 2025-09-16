@@ -5,7 +5,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
-import { SwiftRentLeaseSigningPage } from "./components/lease/SwiftRentLeaseSigningPage";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
 import Navbar from "./components/Navbar";
@@ -15,8 +14,6 @@ import Properties from "./pages/Properties";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
 import Auth from "./pages/Auth";
-import LeaseSigningPage from "./pages/LeaseSigningPage";
-import LandlordLeaseSigningPage from "./pages/LandlordLeaseSigningPage";
 import ListProperty from "./pages/ListProperty";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
@@ -85,9 +82,6 @@ const App = () => (
             <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
             {/* Standalone maintenance ticket route for cross-dashboard access */}
             <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
-            <Route path="/lease-signing/:tenancyId" element={<RouteGuard><LeaseSigningPage /></RouteGuard>} />
-            <Route path="/landlord-lease-signing/:tenancyId" element={<RouteGuard><LandlordLeaseSigningPage /></RouteGuard>} />
-            <Route path="/swiftrent-lease/:leaseId" element={<RouteGuard><SwiftRentLeaseSigningPage /></RouteGuard>} />
             <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
             <Route path="/add-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
             <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />

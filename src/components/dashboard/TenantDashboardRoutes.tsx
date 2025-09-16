@@ -11,7 +11,7 @@ import TenantSupport from '@/pages/tenant/TenantSupport';
 import Messages from '@/pages/Messages';
 import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
-import LeaseSigningPage from '@/pages/LeaseSigningPage';
+
 import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
 import { FileText, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -85,11 +85,6 @@ export default function TenantDashboardRoutes() {
       <Route path="/support" element={
         <EnhancedDashboardLayout title="Support & Help">
           <TenantSupport />
-        </EnhancedDashboardLayout>
-      } />
-      <Route path="/contracts/:leaseId/sign" element={
-        <EnhancedDashboardLayout title="Sign Contract">
-          <LeaseSigningPage />
         </EnhancedDashboardLayout>
       } />
     </Routes>
