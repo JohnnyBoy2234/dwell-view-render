@@ -46,6 +46,18 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   useEffect(() => {
     track('inventory_instructions_viewed');
     track('inventory_qr_rendered');
+    // Suppress noisy extension errors like:
+    // "A listener indicated an asynchronous response ..."
+    const onUnhandled = (e: PromiseRejectionEvent) => {
+      const msg = (e?.reason && (e.reason.message || String(e.reason))) || '';
+      if (typeof msg === 'string' && msg.includes('A listener indicated an asynchronous response')) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener('unhandledrejection', onUnhandled);
+    return () => {
+      window.removeEventListener('unhandledrejection', onUnhandled);
+    };
   }, [track]);
 
   const startRecording = async () => {
@@ -142,7 +154,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 96px)' }}>
       <div className="flex flex-col md:flex-row gap-6">
         <Card className="flex-1 bg-gradient-to-br from-white to-earth-light/40 border border-ocean-blue/20 shadow-medium rounded-2xl">
           <CardHeader>

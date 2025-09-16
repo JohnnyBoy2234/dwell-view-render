@@ -59,6 +59,8 @@ export function useTenantDashboard() {
         `)
         .eq('tenant_id', user.id)
         .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
 
       if (tenancyError) {
@@ -66,16 +68,28 @@ export function useTenantDashboard() {
         // Don't throw here, just log the error and continue
       }
 
-      if (tenancyData && tenancyData.properties) {
-        setTenantProperty({
-          id: tenancyData.properties.id,
-          title: tenancyData.properties.title,
-          location: tenancyData.properties.location,
-          images: tenancyData.properties.images || [],
-          monthlyRent: tenancyData.monthly_rent,
-          leaseEndDate: tenancyData.end_date,
-          securityDeposit: tenancyData.security_deposit || 0,
-        });
+      if (tenancyData) {
+        // Ensure we have property details even if FK relationship isn't cached
+        let prop = tenancyData.properties as any;
+        if (!prop) {
+          const { data: p } = await supabase
+            .from('properties')
+            .select('id,title,location,images')
+            .eq('id', tenancyData.property_id)
+            .maybeSingle();
+          prop = p || null;
+        }
+        if (prop) {
+          setTenantProperty({
+            id: prop.id,
+            title: prop.title,
+            location: prop.location,
+            images: prop.images || [],
+            monthlyRent: tenancyData.monthly_rent,
+            leaseEndDate: tenancyData.end_date,
+            securityDeposit: tenancyData.security_deposit || 0,
+          });
+        }
 
         // Fetch next rent payment due
         const { data: rentData, error: rentError } = await supabase
@@ -127,17 +141,7 @@ export function useTenantDashboard() {
       // Fetch upcoming viewings (for viewing requests)
       const { data: viewingData, error: viewingError } = await supabase
         .from('viewing_slots')
-        .select(`
-          id, 
-          start_time, 
-          end_time, 
-          status, 
-          property_id,
-          properties (
-            title,
-            location
-          )
-        `)
+        .select('id,start_time,end_time,status,property_id')
         .eq('booked_by_tenant_id', user.id)
         .eq('status', 'booked')
         .gt('start_time', new Date().toISOString())
