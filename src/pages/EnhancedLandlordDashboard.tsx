@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, DollarSign, BarChart3, Calendar, Trash2, Save, User, Wrench, Play } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
+import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@/types/maintenance';
@@ -634,6 +635,7 @@ export default function EnhancedLandlordDashboard() {
         console.log('[Dashboard] Rendering applications tab');
         return renderApplicationsTab();
       case '/enhancedlandlorddashboard/leases':
+        console.log('[Dashboard] Rendering leases tab');
         return renderLeasesTab();
       case '/enhancedlandlorddashboard/tenants':
         console.log('[Dashboard] Rendering tenants tab');
@@ -654,7 +656,14 @@ export default function EnhancedLandlordDashboard() {
   };
   const renderLeasesTab = () => (
     <div className="space-y-6">
-      <p>Leases management has been disabled.</p>
+      <div className="flex items-center gap-3 mb-6">
+        <FileText className="h-6 w-6 text-ocean-blue" />
+        <h2 className="text-xl font-bold">Lease System</h2>
+        <Badge variant="secondary" className="ml-2">
+          Contract Management
+        </Badge>
+      </div>
+      <LeaseDashboardComponent />
     </div>
   );
 

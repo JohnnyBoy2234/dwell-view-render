@@ -10,9 +10,11 @@ import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
+import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 
 // Custom R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
@@ -82,6 +84,20 @@ export default function EnhancedTenantDashboard() {
 
   const renderTabContent = () => {
     // Always show the dashboard overview - navigation handled by routing
+    if (currentTab === '/enhancedtenantdashboard/leases') {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center gap-3 mb-6">
+            <FileText className="h-6 w-6 text-ocean-blue" />
+            <h2 className="text-xl font-bold">Lease System</h2>
+            <Badge variant="secondary" className="ml-2">
+              Contract Management
+            </Badge>
+          </div>
+          <LeaseDashboardComponent />
+        </div>
+      );
+    }
     return renderDashboardContent();
   };
 
@@ -138,13 +154,13 @@ export default function EnhancedTenantDashboard() {
         path: '/tenant/proof-of-payment'
       },
       {
-        title: 'Contract',
+        title: 'Lease Contracts',
         icon: FileText,
         color: 'hsl(var(--ios-indigo))',
         bgColor: 'bg-gradient-to-br from-indigo-50 to-indigo-100/50',
         iconBg: 'bg-indigo-500',
         subtitle: 'Lease documents',
-        path: '/tenant/contracts'
+        path: '/enhancedtenantdashboard/leases'
       },
       {
         title: 'Applications',

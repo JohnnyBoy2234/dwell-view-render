@@ -65,13 +65,6 @@ const Navbar = () => {
                   </Button>
                   <Button 
                     asChild 
-                    variant="outline"
-                    className="mr-2"
-                  >
-                    <Link to="/leases">Lease System</Link>
-                  </Button>
-                  <Button 
-                    asChild 
                     className="bg-success-green hover:bg-success-green-dark text-white"
                   >
                     <Link to="/list-property">List Property</Link>

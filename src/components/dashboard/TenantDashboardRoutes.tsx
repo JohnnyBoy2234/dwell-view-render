@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { EnhancedDashboardLayout } from './EnhancedDashboardLayout';
+import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
@@ -24,6 +25,11 @@ export default function TenantDashboardRoutes() {
       <Route path="/contracts" element={
         <EnhancedDashboardLayout title="Contract Documents">
           <TenantLeaseDocuments />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="/leases" element={
+        <EnhancedDashboardLayout title="Lease System">
+          <LeaseDashboardComponent />
         </EnhancedDashboardLayout>
       } />
       <Route path="/viewings" element={
