@@ -44,6 +44,7 @@ import VerifyId from "@/pages/VerifyId";
 import KycManagement from "@/pages/admin/KycManagement";
 import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
+import InventoryStart from "@/pages/InventoryStart";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { Analytics } from "@vercel/analytics/next"
 
@@ -76,6 +77,7 @@ const App = () => (
             <Route path="/auth/callback" element={<DocuSignCallback />} />
             <Route path="/docusign-callback" element={<DocuSignCallback />} />
             <Route path="/docusign-redirect" element={<DocuSignRedirect />} />
+            <Route path="/inventory/start" element={<InventoryStart />} />
             
             {/* Enhanced Dashboard Routes */}
             <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
