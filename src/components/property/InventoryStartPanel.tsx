@@ -3,6 +3,7 @@ import QRCode from 'react-qr-code';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { X, Trash2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -24,6 +25,7 @@ interface Note {
   createdAt: number;
   photos: Photo[];
   audioBlob?: Blob;
+  text?: string;
 }
 
 function useAnalytics() {
@@ -211,6 +213,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           room_name: 'General',
           item_name: `Note ${index + 1}`,
           condition: 'good',
+          description: note.text || undefined,
           photos: uploadedPhotoPaths,
           voice_note_url: audioPath,
         });
@@ -442,6 +445,14 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
+              <Textarea
+                placeholder="Add a note or description about this room/item (optional)"
+                value={note.text || ''}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNotes((prev) => prev.map((n) => n.id === note.id ? { ...n, text: value } : n));
+                }}
+              />
               {note.photos.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                   {note.photos.map((photo) => (
