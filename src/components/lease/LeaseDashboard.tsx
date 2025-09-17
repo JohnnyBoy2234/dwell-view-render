@@ -9,6 +9,7 @@ import { useLeaseContracts } from '@/hooks/useLeaseContracts';
 import { useAuth } from '@/hooks/useAuth';
 import { LeaseDocumentViewer } from './LeaseDocumentViewer';
 import { LeaseSignaturePad } from './LeaseSignaturePad';
+import { CreateLeaseModal } from './CreateLeaseModal';
 import type { LeaseContract } from '@/types/lease';
 
 export function LeaseDashboard() {
@@ -17,6 +18,7 @@ export function LeaseDashboard() {
   const { user, isLandlord } = useAuth();
   const [selectedContract, setSelectedContract] = useState<LeaseContract | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -60,7 +62,7 @@ export function LeaseDashboard() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Lease Management</h1>
         {isLandlord && (
-          <Button onClick={() => navigate('/lease/builder/new')}>
+          <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Create Contract
           </Button>
@@ -148,6 +150,12 @@ export function LeaseDashboard() {
           }}
         />
       )}
+
+      {/* Create Lease Modal */}
+      <CreateLeaseModal
+        open={showCreateModal}
+        onOpenChange={setShowCreateModal}
+      />
     </div>
   );
 }
