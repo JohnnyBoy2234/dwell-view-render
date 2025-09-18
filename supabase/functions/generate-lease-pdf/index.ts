@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -103,16 +104,238 @@ serve(async (req) => {
 });
 
 async function generatePDFDocument(contract: any): Promise<Uint8Array> {
-  // Create HTML content for the lease agreement
-  const htmlContent = generateLeaseHTML(contract);
-  
-  // For now, we'll create a simple text-based PDF
-  // In a production environment, you would use a proper PDF library
-  const pdfContent = createSimplePDF(contract);
-  
-  // Convert string to Uint8Array
-  const encoder = new TextEncoder();
-  return encoder.encode(pdfContent);
+	const data = contract.contract_data || {};
+	const today = new Date();
+	const doc = await PDFDocument.create();
+
+	// Document metadata
+	doc.setTitle(`Lease Agreement • ${contract.title || contract.id}`);
+	doc.setAuthor("SwiftRent");
+	doc.setCreator("SwiftRent Lease Generator");
+	doc.setProducer("pdf-lib");
+	doc.setCreationDate(today);
+	doc.setModificationDate(today);
+
+	const fontBody = await doc.embedFont(StandardFonts.Helvetica);
+	const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
+
+	const margin = 48;
+	const lineGap = 6;
+	const pageWidth = 612; // Letter width
+	const pageHeight = 792; // Letter height
+
+	let page = doc.addPage([pageWidth, pageHeight]);
+	let y = pageHeight - margin;
+	const pages: any[] = [page];
+
+	const colors = {
+		text: rgb(0, 0, 0),
+		muted: rgb(0.4, 0.4, 0.4),
+		brand: rgb(0.12, 0.45, 0.96),
+		rule: rgb(0.85, 0.85, 0.85),
+		invisible: rgb(1, 1, 1), // for DocuSign anchor text
+	};
+
+	const sizes = { h1: 18, h2: 13, h3: 11, body: 10, small: 9 } as const;
+
+	const drawBrandHeader = (p: any, firstPage: boolean) => {
+		p.drawRectangle({ x: 0, y: pageHeight - 28, width: pageWidth, height: 28, color: colors.brand });
+		const brandTitle = "SwiftRent Residential Lease Agreement";
+		p.drawText(brandTitle, { x: margin, y: pageHeight - 19, size: 11, font: fontBold, color: rgb(1,1,1) });
+		if (!firstPage) {
+			const meta = `Contract ${contract.id}`;
+			const w = fontBody.widthOfTextAtSize(meta, sizes.small);
+			p.drawText(meta, { x: pageWidth - margin - w, y: pageHeight - 20, size: sizes.small, font: fontBody, color: rgb(1,1,1) });
+		}
+	};
+
+	const drawFooter = (p: any, pageNumber: number) => {
+		const text = `Page ${pageNumber}`;
+		p.drawText(text, {
+			x: pageWidth - margin - fontBody.widthOfTextAtSize(text, sizes.small),
+			y: margin - 12,
+			size: sizes.small,
+			font: fontBody,
+			color: colors.muted,
+		});
+		// Optional initials anchors near footer
+		p.drawText("SWIFTRENT_INIT_LANDLORD", { x: margin, y: margin - 2, size: 8, font: fontBody, color: colors.invisible });
+		p.drawText("SWIFTRENT_INIT_TENANT_1", { x: margin + 160, y: margin - 2, size: 8, font: fontBody, color: colors.invisible });
+	};
+
+	const drawRule = () => {
+		page.drawLine({ start: { x: margin, y }, end: { x: pageWidth - margin, y }, thickness: 1, color: colors.rule });
+		y -= 14;
+	};
+
+	const newPage = () => {
+		drawFooter(page, pages.length);
+		page = doc.addPage([pageWidth, pageHeight]);
+		pages.push(page);
+		y = pageHeight - margin;
+		drawBrandHeader(page, false);
+		y -= 32;
+	};
+
+	const ensureSpace = (needed: number) => {
+		if (y - needed < margin + 40) newPage();
+	};
+
+	const drawHeading = (text: string) => {
+		ensureSpace(sizes.h2 + 10);
+		page.drawText(text.toUpperCase(), { x: margin, y, size: sizes.h2, font: fontBold, color: colors.text });
+		y -= sizes.h2 + 6;
+	};
+
+	const drawKeyValue = (label: string, value: string) => {
+		const lh = sizes.body + lineGap;
+		ensureSpace(lh);
+		page.drawText(label, { x: margin, y, size: sizes.body, font: fontBold, color: colors.text });
+		const labelWidth = fontBold.widthOfTextAtSize(label, sizes.body) + 6;
+		page.drawText(value || 'Not specified', { x: margin + labelWidth, y, size: sizes.body, font: fontBody, color: colors.text });
+		y -= lh;
+	};
+
+	const drawParagraph = (text: string, opts?: { bullet?: string }) => {
+		if (!text) return;
+		const maxWidth = pageWidth - margin * 2;
+		const words = text.split(/\s+/);
+		let line = '';
+		const bullet = opts?.bullet ? `${opts.bullet} ` : '';
+		const bulletWidth = opts?.bullet ? fontBody.widthOfTextAtSize(bullet, sizes.body) : 0;
+		const startX = margin + bulletWidth;
+		while (words.length) {
+			const candidate = (line ? `${line} ` : '') + words[0];
+			const w = fontBody.widthOfTextAtSize(candidate, sizes.body);
+			if (w > (maxWidth - bulletWidth)) {
+				ensureSpace(sizes.body + lineGap);
+				if (opts?.bullet) {
+					page.drawText(bullet, { x: margin, y, size: sizes.body, font: fontBody, color: colors.text });
+				}
+				page.drawText(line, { x: startX, y, size: sizes.body, font: fontBody, color: colors.text });
+				y -= sizes.body + lineGap;
+				line = '';
+			} else {
+				line = candidate;
+				words.shift();
+			}
+		}
+		if (line) {
+			ensureSpace(sizes.body + lineGap);
+			if (opts?.bullet) {
+				page.drawText(bullet, { x: margin, y, size: sizes.body, font: fontBody, color: colors.text });
+			}
+			page.drawText(line, { x: startX, y, size: sizes.body, font: fontBody, color: colors.text });
+			y -= sizes.body + lineGap;
+		}
+	};
+
+	// First page header
+	drawBrandHeader(page, true);
+	y -= 32;
+
+	// Title & meta
+	page.drawText(data.title || 'Lease Agreement', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
+	y -= sizes.h1 + 6;
+	const gen = today.toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' });
+	page.drawText(`Contract ID: ${contract.id}`, { x: margin, y, size: sizes.small, font: fontBody, color: colors.muted });
+	const genText = `Generated: ${gen}`;
+	page.drawText(genText, { x: pageWidth - margin - fontBody.widthOfTextAtSize(genText, sizes.small), y, size: sizes.small, font: fontBody, color: colors.muted });
+	y -= sizes.small + 10;
+	drawRule();
+
+	// Property Information
+	drawHeading('Property Information');
+	drawKeyValue('Property Address:', data.propertyAddress || '');
+	drawKeyValue('Property Type:', data.propertyType || '');
+	if (data.propertyDescription) drawParagraph(data.propertyDescription);
+	drawRule();
+
+	// Parties
+	drawHeading('Parties');
+	drawKeyValue('Landlord:', data.landlordName || '');
+	drawKeyValue('Landlord Email:', data.landlordEmail || '');
+	if (data.landlordPhone) drawKeyValue('Landlord Phone:', data.landlordPhone);
+	if (data.landlordAddress) drawKeyValue('Landlord Address:', data.landlordAddress);
+	drawKeyValue('Tenant:', data.tenantName || 'To be filled');
+	if (data.tenantEmail) drawKeyValue('Tenant Email:', data.tenantEmail);
+	if (data.tenantPhone) drawKeyValue('Tenant Phone:', data.tenantPhone);
+	if (data.tenantAddress) drawKeyValue('Tenant Address:', data.tenantAddress);
+	drawRule();
+
+	// Lease Terms
+	drawHeading('Lease Terms');
+	drawKeyValue('Lease Start Date:', data.leaseStartDate || '');
+	drawKeyValue('Lease End Date:', data.leaseEndDate || '');
+	drawKeyValue('Monthly Rent:', `${data.rentCurrency || 'ZAR'} ${Number(data.rentAmount || 0).toLocaleString('en-ZA')}`);
+	drawKeyValue('Payment Schedule:', (data.rentPaymentFrequency || 'Monthly').toString());
+	const dueDay = data.rentDueDay || 1;
+	const suffix = getOrdinalSuffix(dueDay);
+	drawKeyValue('Rent Due Day:', `${dueDay}${suffix} of each month`);
+	drawRule();
+
+	// Deposits and Fees
+	drawHeading('Deposits and Fees');
+	drawKeyValue('Security Deposit:', `${data.rentCurrency || 'ZAR'} ${Number(data.securityDeposit || 0).toLocaleString('en-ZA')}`);
+	if (data.petDeposit) drawKeyValue('Pet Deposit:', `${data.rentCurrency || 'ZAR'} ${Number(data.petDeposit).toLocaleString('en-ZA')}`);
+	if (data.keyDeposit) drawKeyValue('Key Deposit:', `${data.rentCurrency || 'ZAR'} ${Number(data.keyDeposit).toLocaleString('en-ZA')}`);
+	drawRule();
+
+	// Property Rules
+	drawHeading('Property Rules');
+	drawKeyValue('Pets Allowed:', data.petsAllowed ? 'Yes' : 'No');
+	drawKeyValue('Smoking Allowed:', data.smokingAllowed ? 'Yes' : 'No');
+	drawKeyValue('Guests Allowed:', data.guestsAllowed ? 'Yes' : 'No');
+	drawKeyValue('Subletting Allowed:', data.sublettingAllowed ? 'Yes' : 'No');
+	drawRule();
+
+	// Utilities and Services
+	drawHeading('Utilities and Services');
+	drawParagraph(Array.isArray(data.utilitiesIncluded) && data.utilitiesIncluded.length ? `Included: ${data.utilitiesIncluded.join(', ')}` : 'Included: None specified');
+	if (Array.isArray(data.utilitiesExcluded) && data.utilitiesExcluded.length) {
+		drawParagraph(`Excluded: ${data.utilitiesExcluded.join(', ')}`);
+	}
+	drawRule();
+
+	// Additional Clauses
+	if (Array.isArray(data.additionalClauses) && data.additionalClauses.length > 0) {
+		drawHeading('Additional Terms and Conditions');
+		data.additionalClauses.forEach((cl: any, i: number) => {
+			drawParagraph(`${i + 1}. ${cl.title || 'Clause'}`, { bullet: '•' });
+			if (cl.content) drawParagraph(cl.content);
+			y -= 4;
+		});
+		drawRule();
+	}
+
+	// Legal and Compliance
+	drawHeading('Legal and Compliance');
+	const jurisdiction = data.jurisdiction || 'South Africa';
+	drawParagraph(`Governing Jurisdiction: ${jurisdiction}`);
+	drawParagraph(`This lease agreement is governed by the laws of ${jurisdiction} and any disputes shall be resolved in the courts of said jurisdiction.`);
+
+	// Signatures
+	ensureSpace(130);
+	drawHeading('Signatures');
+
+	const sigLine = (label: string, anchor: string) => {
+		const lineWidth = 240;
+		const lineY = y - 10;
+		page.drawLine({ start: { x: margin, y: lineY }, end: { x: margin + lineWidth, y: lineY }, thickness: 1, color: colors.text });
+		page.drawText(label, { x: margin, y: lineY - 14, size: sizes.small, font: fontBody, color: colors.muted });
+		// Invisible DocuSign anchor text near the line
+		page.drawText(anchor, { x: margin + lineWidth / 2 - 40, y: lineY + 4, size: 8, font: fontBody, color: colors.invisible });
+		y -= 42;
+	};
+
+	sigLine('Landlord Signature', 'SWIFTRENT_SIGN_LANDLORD');
+	sigLine('Tenant Signature', 'SWIFTRENT_SIGN_TENANT_1');
+
+	// Footer on last page
+	drawFooter(page, pages.length);
+
+	const pdfBytes = await doc.save();
+	return pdfBytes;
 }
 
 function generateLeaseHTML(contract: any): string {
