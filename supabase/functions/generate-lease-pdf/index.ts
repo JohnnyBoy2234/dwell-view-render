@@ -120,7 +120,7 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
 
 	const margin = 48;
-	const lineGap = 6;
+	const lineGap = 8;
 	const pageWidth = 612; // Letter width
 	const pageHeight = 792; // Letter height
 
@@ -187,6 +187,18 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		y -= sizes.h2 + 6;
 	};
 
+	const drawLineMixed = (segments: { text: string; bold?: boolean }[]) => {
+		const lineHeight = sizes.body + lineGap;
+		ensureSpace(lineHeight);
+		let x = margin;
+		for (const seg of segments) {
+			const font = seg.bold ? fontBold : fontBody;
+			page.drawText(seg.text, { x, y, size: sizes.body, font, color: colors.text });
+			x += font.widthOfTextAtSize(seg.text, sizes.body);
+		}
+		y -= lineHeight;
+	};
+
 	const drawKeyValue = (label: string, value: string) => {
 		const lh = sizes.body + lineGap;
 		ensureSpace(lh);
@@ -244,8 +256,8 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	y -= sizes.small + 10;
 	drawRule();
 
-	// BETWEEN
-	drawHeading('Between:');
+	// 1. BETWEEN
+	drawHeading('1. Between:');
 	const splitName = (full: string) => {
 		if (!full) return { firstNames: 'Not specified', surname: '' };
 		const parts = full.trim().split(/\s+/);
@@ -267,8 +279,22 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		data.tenantPostalCode || '',
 		data.tenantCountry || data.jurisdiction || ''
 	]);
-	drawParagraph(`(1) ${landlordNameParts.firstNames} ${landlordNameParts.surname} of ${landlordAddress || 'Not specified'} (the "Landlord");`);
-	drawParagraph(`(2) ${renterNameParts.firstNames} ${renterNameParts.surname} of ${renterAddress || 'Not specified'} (the "Renter").`);
+	drawLineMixed([
+		{ text: '(1) ' },
+		{ text: landlordNameParts.firstNames + ' ', bold: true },
+		{ text: landlordNameParts.surname + ' ', bold: true },
+		{ text: 'of ' },
+		{ text: (landlordAddress || 'Not specified'), bold: true },
+		{ text: ' (the "Landlord");' },
+	]);
+	drawLineMixed([
+		{ text: '(2) ' },
+		{ text: renterNameParts.firstNames + ' ', bold: true },
+		{ text: renterNameParts.surname + ' ', bold: true },
+		{ text: 'of ' },
+		{ text: (renterAddress || 'Not specified'), bold: true },
+		{ text: ' (the "Renter").' },
+	]);
 	drawRule();
 
 	// IT IS AGREED as follows:
