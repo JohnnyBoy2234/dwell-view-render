@@ -138,6 +138,19 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 
 	const sizes = { h1: 18, h2: 13, h3: 11, body: 10, small: 9 } as const;
 
+	const labelColumnWidth = 36;
+	const contentIndent = 6;
+
+	const drawSectionTitle = (label: string, title: string) => {
+		ensureSpace(sizes.h2 + 12);
+		// Label (bold) in left column
+		page.drawText(label, { x: margin, y, size: sizes.h2, font: fontBold, color: colors.text });
+		// Title in content column
+		const contentX = margin + labelColumnWidth + contentIndent;
+		page.drawText(title.toUpperCase(), { x: contentX, y, size: sizes.h2, font: fontBold, color: colors.text });
+		y -= sizes.h2 + 6;
+	};
+
 	const drawBrandHeader = (p: any, firstPage: boolean) => {
 		p.drawRectangle({ x: 0, y: pageHeight - 28, width: pageWidth, height: 28, color: colors.brand });
 		const brandTitle = "SwiftRent Residential Lease Agreement";
@@ -242,6 +255,52 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		}
 	};
 
+	// Draw a paragraph with a bold label in the margin (e.g., "3.1", "(i)") and rich text segments
+	const drawNumberedSegments = (label: string, segments: { text: string; bold?: boolean }[]) => {
+		const contentX = margin + labelColumnWidth + contentIndent;
+		const maxWidth = pageWidth - margin - contentX;
+		// Tokenize segments by words and spaces to wrap properly
+		const tokens: { text: string; bold?: boolean }[] = [];
+		for (const seg of segments) {
+			const parts = seg.text.match(/\S+|\s+/g) || [];
+			for (const part of parts) tokens.push({ text: part, bold: seg.bold });
+		}
+		let lineTokens: { text: string; bold?: boolean }[] = [];
+		let lineWidth = 0;
+		const drawLine = (line: { text: string; bold?: boolean }[]) => {
+			ensureSpace(sizes.body + lineGap);
+			// draw label only on the first visual line
+			if (line === lineTokens) {
+				page.drawText(label, { x: margin, y, size: sizes.body, font: fontBold, color: colors.text });
+			}
+			let x = contentX;
+			for (const t of line) {
+				const f = t.bold ? fontBold : fontBody;
+				page.drawText(t.text, { x, y, size: sizes.body, font: f, color: colors.text });
+				x += f.widthOfTextAtSize(t.text, sizes.body);
+			}
+			y -= sizes.body + lineGap;
+		};
+		for (const t of tokens) {
+			const f = t.bold ? fontBold : fontBody;
+			const w = f.widthOfTextAtSize(t.text, sizes.body);
+			if (lineWidth + w > maxWidth && lineTokens.length > 0) {
+				drawLine(lineTokens);
+				lineTokens = [];
+				lineWidth = 0;
+			}
+			lineTokens.push(t);
+			lineWidth += w;
+		}
+		if (lineTokens.length) {
+			drawLine(lineTokens);
+		}
+	};
+
+	const drawNumberedText = (label: string, text: string) => {
+		drawNumberedSegments(label, [{ text }]);
+	};
+
 	// First page header
 	drawBrandHeader(page, true);
 	y -= 32;
@@ -257,7 +316,7 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	drawRule();
 
 	// 1. BETWEEN
-	drawHeading('1. Between:');
+	drawSectionTitle('1.', 'Between:');
 	const splitName = (full: string) => {
 		if (!full) return { firstNames: 'Not specified', surname: '' };
 		const parts = full.trim().split(/\s+/);
@@ -279,16 +338,14 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		data.tenantPostalCode || '',
 		data.tenantCountry || data.jurisdiction || ''
 	]);
-	drawLineMixed([
-		{ text: '(1) ' },
+	drawNumberedSegments('(1)', [
 		{ text: landlordNameParts.firstNames + ' ', bold: true },
 		{ text: landlordNameParts.surname + ' ', bold: true },
 		{ text: 'of ' },
 		{ text: (landlordAddress || 'Not specified'), bold: true },
 		{ text: ' (the "Landlord");' },
 	]);
-	drawLineMixed([
-		{ text: '(2) ' },
+	drawNumberedSegments('(2)', [
 		{ text: renterNameParts.firstNames + ' ', bold: true },
 		{ text: renterNameParts.surname + ' ', bold: true },
 		{ text: 'of ' },
@@ -300,19 +357,23 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	// IT IS AGREED as follows:
 	drawHeading('It is agreed as follows:');
 
-	// Rental Property
-	drawHeading('Rental Property');
+	// 2. Rental Property
+	drawSectionTitle('2.', 'Rental Property');
 	const propertyAddress = joinParts([
 		data.propertyStreetAddress || data.propertyAddress || '',
 		data.propertyCity || '',
 		data.propertyPostalCode || '',
 		data.propertyCountry || data.jurisdiction || ''
 	]);
-	drawParagraph(`The Landlord agrees to rent and the Renter agrees to take the property known as ${propertyAddress || 'Not specified'} (the "Property").`);
+	drawNumberedSegments('2.1', [
+		{ text: 'The Landlord agrees to rent and the Renter agrees to take the property known as ' },
+		{ text: (propertyAddress || 'Not specified'), bold: true },
+		{ text: ' (the "Property").' },
+	]);
 	drawRule();
 
-	// Rental Duration
-	drawHeading('Rental Duration');
+	// 3. Rental Duration
+	drawSectionTitle('3.', 'Rental Duration');
 	const calcMonths = (start?: string, end?: string) => {
 		if (!start || !end) return '';
 		const s = new Date(start).getTime();
@@ -322,33 +383,39 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		return `${m} month${m === 1 ? '' : 's'}`;
 	};
 	const rentalPeriod = data.rentalPeriod || calcMonths(data.leaseStartDate, data.leaseEndDate) || 'Not specified';
-	drawParagraph(`The rental agreement shall be for a fixed term of ${rentalPeriod}.`);
-	drawParagraph(`The rental period will commence on ${data.leaseStartDate || 'Not specified'} and will end on ${data.leaseEndDate || 'Not specified'}, unless terminated earlier or extended in accordance with the terms of this Agreement.`);
-	drawParagraph('The Move-out day under this Rental Agreement shall be the final day of the rental term. By this date, the Renter must vacate the Property unless the Agreement is terminated earlier or extended in accordance with its terms.');
-	drawParagraph('On the Move-out day, the Renter is required to vacate the Property, ensuring it is cleaned to the Landlord’s satisfaction and returned to its original condition as per the commencement of the Rental Agreement.');
-	drawParagraph('On the Move-out day, the Renter must leave the Property under the Landlord’s control.');
-	drawParagraph('Should the rental period continue after the end date without a new agreement, it will automatically become a periodic rental agreement, rolling on a monthly basis.');
+	drawNumberedText('3.1', `The rental agreement shall be for a fixed term of ${rentalPeriod}.`);
+	drawNumberedSegments('3.2', [
+		{ text: 'The rental period will commence on ' },
+		{ text: (data.leaseStartDate || 'Not specified'), bold: true },
+		{ text: ' and will end on ' },
+		{ text: (data.leaseEndDate || 'Not specified'), bold: true },
+		{ text: ', unless terminated earlier or extended in accordance with the terms of this Agreement.' },
+	]);
+	drawNumberedText('3.3', 'The Move-out day under this Rental Agreement shall be the final day of the rental term. By this date, the Renter must vacate the Property unless the Agreement is terminated earlier or extended in accordance with its terms.');
+	drawNumberedText('3.4', 'On the Move-out day, the Renter is required to vacate the Property, ensuring it is cleaned to the Landlord’s satisfaction and returned to its original condition as per the commencement of the Rental Agreement.');
+	drawNumberedText('3.5', 'On the Move-out day, the Renter must leave the Property under the Landlord’s control.');
+	drawNumberedText('3.6', 'Should the rental period continue after the end date without a new agreement, it will automatically become a periodic rental agreement, rolling on a monthly basis.');
 	drawRule();
 
-	// Rent Amount and Payment
-	drawHeading('Rent Amount and Payment');
+	// 4. Rent Amount and Payment
+	drawSectionTitle('4.', 'Rent Amount and Payment');
 	const rentAmountText = `${data.rentAmount ? Number(data.rentAmount).toLocaleString('en-ZA') : 'Not specified'} ${data.rentCurrency || ''}`.trim();
-	drawParagraph(`The rent amount is ${rentAmountText} per month (the "Rent").`);
+	drawNumberedSegments('4.1', [ { text: 'The rent amount is ' }, { text: rentAmountText, bold: true }, { text: ' per month (the "Rent").' } ]);
 	const dueDay = data.rentDueDay || 'Not specified';
 	const suffix = typeof dueDay === 'number' ? getOrdinalSuffix(dueDay) : '';
-	drawParagraph(`The Rent shall be payable in advance on the ${dueDay}${suffix} of each month (the "Due Date"). Payment shall be made by bank transfer to the Landlord’s designated account. The Landlord will provide the Renter with the necessary bank details before the first payment is due.`);
-	drawParagraph('The Renter shall be in breach of this agreement if the Renter fails to pay the Rent in accordance with this clause. In such a case, the Landlord shall be entitled to use the relevant statutory provisions or any other statutory remedies available in the applicable jurisdiction to recover possession of the Property.');
-	drawParagraph('If the Property is damaged or destroyed by an insured risk, making it unfit for occupation and use, the payment of Rent shall be suspended until the Property is fit for occupation and use, unless the damage or destruction was caused by the wilful actions, negligence, or default of the Renter.');
-	drawParagraph('No increase in Rent shall occur during the fixed term unless both parties agree in writing.');
-	drawParagraph('If the rental agreement becomes a rolling contract or is renewed after the fixed term, the Landlord reserves the right to review and increase the Rent once every 12 months.');
-	drawParagraph('The Landlord shall provide the Renter with at least one month’s notice for monthly rolling agreements or two months’ notice for annual rent reviews regarding any proposed rent increase.');
-	drawParagraph('Any rent increase must be reasonable and reflect current market conditions for similar properties in the area and shall comply with all relevant legislation.');
+	drawNumberedSegments('4.2', [ { text: 'The Rent shall be payable in advance on the ' }, { text: `${dueDay}${suffix}`, bold: true }, { text: ' of each month (the "Due Date"). Payment shall be made by bank transfer to the Landlord’s designated account. The Landlord will provide the Renter with the necessary bank details before the first payment is due.' } ]);
+	drawNumberedText('4.3', 'The Renter shall be in breach of this agreement if the Renter fails to pay the Rent in accordance with this clause. In such a case, the Landlord shall be entitled to use the relevant statutory provisions or any other statutory remedies available in the applicable jurisdiction to recover possession of the Property.');
+	drawNumberedText('4.4', 'If the Property is damaged or destroyed by an insured risk, making it unfit for occupation and use, the payment of Rent shall be suspended until the Property is fit for occupation and use, unless the damage or destruction was caused by the wilful actions, negligence, or default of the Renter.');
+	drawNumberedText('4.5', 'No increase in Rent shall occur during the fixed term unless both parties agree in writing.');
+	drawNumberedText('4.6', 'If the rental agreement becomes a rolling contract or is renewed after the fixed term, the Landlord reserves the right to review and increase the Rent once every 12 months.');
+	drawNumberedText('4.7', 'The Landlord shall provide the Renter with at least one month’s notice for monthly rolling agreements or two months’ notice for annual rent reviews regarding any proposed rent increase.');
+	drawNumberedText('4.8', 'Any rent increase must be reasonable and reflect current market conditions for similar properties in the area and shall comply with all relevant legislation.');
 	drawRule();
 
-	// Rent Default
-	drawHeading('Rent Default');
-	drawParagraph('The Renter shall pay interest on any Rent lawfully due that is paid more than 10 calendar days after the Due Date, at a rate of 5% per annum above the applicable central bank base rate in the country where the Property is located.');
-	drawParagraph('The interest shall be payable from the Due Date until the date the Rent is actually paid.');
+	// 5. Rent Default
+	drawSectionTitle('5.', 'Rent Default');
+	drawNumberedText('5.1', 'The Renter shall pay interest on any Rent lawfully due that is paid more than 10 calendar days after the Due Date, at a rate of 5% per annum above the applicable central bank base rate in the country where the Property is located.');
+	drawNumberedText('5.2', 'The interest shall be payable from the Due Date until the date the Rent is actually paid.');
 	drawRule();
 
 	// Condition of the Property
