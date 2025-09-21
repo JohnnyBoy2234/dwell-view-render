@@ -439,16 +439,16 @@ const Index = () => {
                 <div
                   ref={trackRef}
                   onScroll={handleScroll}
-                  className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 scroll-smooth"
+                  className="flex gap-0 sm:gap-6 overflow-x-auto snap-x snap-mandatory snap-always pb-2 -mx-0 sm:-mx-4 px-0 sm:px-4 scroll-smooth"
                   style={{ scrollBehavior: 'smooth' }}
                 >
                   {features.map((feature, i) => (
                     <div
                       key={feature.title}
-                      className="snap-center flex-none w-[85%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[45%]"
+                      className="snap-center flex-none w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[45%]"
                     >
                       <div
-                        className="group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] h-full flex flex-col"
+                        className="group relative p-6 sm:p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 md:hover:scale-[1.02] h-full flex flex-col"
                         style={{ animationDelay: `${100 + i * 120}ms` }}
                         onMouseMove={tilt.onMove}
                         onMouseLeave={tilt.onLeave}
@@ -456,15 +456,15 @@ const Index = () => {
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl" />
                         <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                        <div className="relative z-10 flex gap-6 flex-1">
-                          <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                        <div className="relative z-10 flex flex-col md:flex-row gap-4 md:gap-6 flex-1 items-center md:items-start text-center md:text-left">
+                          <div className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-xl sm:text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                             {feature.icon}
                           </div>
                           <div className="flex-1 flex flex-col">
-                            <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
+                            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3 group-hover:text-primary transition-colors duration-300">
                               {feature.title}
                             </h3>
-                            <p className="text-muted-foreground leading-relaxed text-sm flex-1">
+                            <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
                               {feature.desc}
                             </p>
                           </div>
