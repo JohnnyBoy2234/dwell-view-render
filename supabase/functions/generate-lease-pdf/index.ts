@@ -339,10 +339,13 @@ const newPage = () => {
 		y -= rowHeight;
 	};
 
+	// Coerce unknown values to string for safe rendering
+	const toText = (v?: unknown) => (v === undefined || v === null) ? '' : String(v);
+
 // First page header intentionally omitted (branding spec: footer-only logo)
 
 // Title & meta
-page.drawText('RENTAL AGREEMENT', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
+page.drawText('AGREEMENT OF LEASE (RESIDENTIAL)', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
 	y -= sizes.h1 + 2;
 drawCentered('(“Agreement”)', sizes.small, fontBody);
 
@@ -352,6 +355,28 @@ drawRule();
 // Remove old BETWEEN block entirely per new structure
 
 // Start of new legal content
+// Preamble block (before Interpretation)
+drawParagraph('Made and entered into by and between:');
+drawFormRow('FULL NAMES', toText(data.landlordName || data.landlordFullName));
+drawFormRow('IDENTITY NUMBER', toText(data.landlordIdNumber || data.landlordId));
+drawFormRow('EMAIL ADDRESS', toText(data.landlordEmail));
+drawFormRow('PHYSICAL ADDRESS', toText(data.landlordAddress));
+drawParagraph('(“Landlord”)');
+
+drawParagraph('AND');
+drawFormRow('FULL NAMES', toText(data.tenantName || data.tenantFullName));
+drawFormRow('IDENTITY NUMBER', toText(data.tenantIdNumber || data.tenantId));
+drawFormRow('EMAIL ADDRESS', toText(data.tenantEmail));
+drawFormRow('PHYSICAL ADDRESS', toText(data.tenantAddress));
+drawParagraph('(“Tenant”)');
+
+drawParagraph('in respect of');
+drawFormRow('Street Address', toText(data.propertyAddress));
+drawFormRow('Garage Number', toText(data.garageNumber));
+drawFormRow('Parking Bay Number', toText(data.parkingBayNumber));
+drawFormRow('Other (specify):', toText(data.otherPropertyNotes));
+drawParagraph('together with the use of an undivided share in any common property (“the Property”).');
+
 drawRule();
 
 // 1. INTERPRETATION
