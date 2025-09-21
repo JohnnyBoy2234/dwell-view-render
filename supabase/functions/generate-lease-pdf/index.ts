@@ -174,11 +174,8 @@ async function generatePDFDocument(contract: any, requestOrigin?: string): Promi
 		if (brandLogo) {
 			const logoHeight = 24;
 			const logoWidth = (brandLogo.width / brandLogo.height) * logoHeight;
-			const pad = 4;
 			const lx = margin;
 			const ly = bandY + (headerHeight - logoHeight) / 2;
-			// white border rectangle
-			p.drawRectangle({ x: lx - pad, y: ly - pad, width: logoWidth + pad * 2, height: logoHeight + pad * 2, color: rgb(1, 1, 1) });
 			p.drawImage(brandLogo, { x: lx, y: ly, width: logoWidth, height: logoHeight });
 		}
 	};
