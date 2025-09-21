@@ -341,6 +341,18 @@ const newPage = () => {
 
 	// Coerce unknown values to string for safe rendering
 	const toText = (v?: unknown) => (v === undefined || v === null) ? '' : String(v);
+	const formatMoney = (amount?: unknown, currency?: string) => {
+		if (amount === undefined || amount === null) return '';
+		const n = Number(amount);
+		if (Number.isNaN(n)) return '';
+		return `${currency || 'ZAR'} ${n.toLocaleString()}`;
+	};
+	const formatDateStr = (value?: string) => {
+		if (!value) return '';
+		const dt = new Date(value);
+		if (Number.isNaN(dt.getTime())) return toText(value);
+		return dt.toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: '2-digit' });
+	};
 
 // First page header intentionally omitted (branding spec: footer-only logo)
 
@@ -414,11 +426,12 @@ drawRule();
 
 // 4. RENTAL AND PAYMENTS (new)
 drawSectionTitle('4.', 'Rental and Payments');
-drawNumberedText('4.1.', 'The monthly rental (“Rent” or “Rental”) payable by the Tenant to the Landlord for the Property is');
-ensureSpace(sizes.body + lineGap);
-page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
-y -= sizes.body + lineGap;
-drawNumberedText('', '(in words: ____________________________________).');
+drawNumberedSegments('4.1.', [
+	{ text: 'The monthly rental (“Rent” or “Rental”) payable by the Tenant to the Landlord for the Property is ' },
+	{ text: formatMoney(data.rentAmount, data.rentCurrency) || '________________', bold: true },
+	{ text: ' per month.' }
+]);
+drawNumberedSegments('', [ { text: '(in words: ' }, { text: toText(data.rentInWords) || '____________________________________', bold: true }, { text: ').' } ]);
 drawNumberedText('4.2.', 'All Rental payments shall be made monthly in advance before the seventh (7TH) day of each and every month, free from any deductions or set off for any reason whatsoever, directly into the Landlord’s bank account reflected below.');
 drawFormRow('Bank:', data.bankName);
 drawFormRow('Branch Code:', data.branchCode);
@@ -452,14 +465,13 @@ drawRule();
 
 // 5. DURATION OF LEASE (new)
 drawSectionTitle('5.', 'Duration of Lease');
-drawNumberedText('5.1.', 'This Agreement shall commence on:');
-ensureSpace(sizes.body + lineGap);
-page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
-y -= sizes.body + lineGap;
-drawParagraph('and shall thereafter continue and endure for a period of _____ months and terminate at 12:00 midday on:');
-ensureSpace(sizes.body + lineGap);
-page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
-y -= sizes.body + lineGap;
+drawNumberedSegments('5.1.', [
+	{ text: 'This Agreement shall commence on ' },
+	{ text: formatDateStr(data.leaseStartDate) || '________________', bold: true },
+	{ text: '.' }
+]);
+drawParagraph(`and shall thereafter continue and endure for a period of ${toText(data.leaseMonths) || '_____'} months and terminate at 12:00 midday on:`);
+drawParagraph(formatDateStr(data.leaseEndDate) || '________________');
 drawParagraph('(hereinafter referred to as "the Initial Period").');
 drawNumberedText('5.2.', 'The Tenants shall be entitled to, subject to reasonable negotiations and written consent by the Landlord, renew this Lease for a further period that is still to be determined (hereinafter referred to as "the Renewal Period ") on the same terms and conditions as in this Lease contained (save in respect of the rental as hereinafter set out), provided they shall have complied faithfully and regularly with each and every condition and obligation imposed on it in terms of this Lease and provided further that they shall have given to the Landlord at least 3 (Three) calender months notice in writing prior to the expiry of the main period of the Lease of their intention to renew.');
 drawNumberedText('5.3.', 'Either party shall be entitled to, upon material breach of this lease, terminate this Lease prior to the expiry of the main period or any subsequent renewal period by providing the other party with at least 2 (two) calendar months’ notice, in writing.');
