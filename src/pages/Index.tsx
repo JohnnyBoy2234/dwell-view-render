@@ -364,15 +364,12 @@ const Index = () => {
       {/* Why SwiftRent - Enhanced Feature Carousel */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-16">
+          <div className="text-center mb-6 md:mb-10">
             <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
               Why SwiftRent
             </h2>
-            <p className="text-lg font-medium text-muted-foreground mb-4">
+            <p className="text-lg font-medium text-muted-foreground">
               From Listing to Lease, Made Easy
-            </p>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring giving you confidence every time.
             </p>
           </div>
 
@@ -476,21 +473,12 @@ const Index = () => {
               if (!el) return;
               const delta = el.scrollLeft - startScrollLeft.current;
               const { width } = getSlideMetrics();
-              // If swiped more than ~10% of slide width, move one step in that direction, else snap back
               const threshold = width * 0.1;
               if (Math.abs(delta) > threshold) {
                 scrollTo(active + (delta > 0 ? 1 : -1));
               } else {
                 forceSnap();
               }
-            };
-
-            const onWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
-              // Convert wheel to discrete slide step
-              const direction = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
-              if (Math.abs(direction) < 5) return;
-              e.preventDefault();
-              scrollTo(active + (direction > 0 ? 1 : -1));
             };
 
             return (
@@ -500,7 +488,6 @@ const Index = () => {
                   onScroll={handleScroll}
                   onTouchStart={onTouchStart}
                   onTouchEnd={onTouchEnd}
-                  onWheel={onWheel}
                   className="flex gap-0 sm:gap-6 overflow-x-auto snap-x snap-mandatory snap-always pb-2 -mx-0 sm:-mx-4 px-0 sm:px-4 scroll-smooth"
                   style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
                 >
