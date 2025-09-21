@@ -11,7 +11,7 @@ import { MobileSidebar } from "@/components/MobileSidebar";
 
 const Navbar = () => {
   const location = useLocation();
-  const { user, signOut, isLandlord, isAdmin } = useAuth();
+  const { user, signOut, isLandlord, isAdmin, loading } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { hasProperties } = useUserProperties();
 
@@ -47,7 +47,10 @@ const Navbar = () => {
 
             {/* Desktop Action Buttons */}
             <div className="hidden md:flex items-center space-x-4">
-              {user ? (
+              {loading ? (
+                // Reserve space to avoid layout shift while auth resolves
+                <div className="h-9 w-[280px]" />
+              ) : user ? (
                 <>
                   <Button 
                     asChild 
