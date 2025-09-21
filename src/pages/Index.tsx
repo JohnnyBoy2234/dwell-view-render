@@ -418,20 +418,79 @@ const Index = () => {
 
             const trackRef = useRef<HTMLDivElement | null>(null);
             const [active, setActive] = useState(0);
+            const snapTimeout = useRef<number | null>(null);
+            const startScrollLeft = useRef(0);
+
+            const getSlideMetrics = () => {
+              const el = trackRef.current as HTMLDivElement | null;
+              if (!el) return { width: 1, gap: 0 };
+              const first = el.firstElementChild as HTMLElement | null;
+              const style = getComputedStyle(el);
+              const gap = parseFloat(style.columnGap || style.gap || '0') || 0;
+              const width = first ? first.clientWidth : el.clientWidth;
+              return { width, gap };
+            };
+
+            const forceSnap = () => {
+              const el = trackRef.current;
+              if (!el) return;
+              const { width, gap } = getSlideMetrics();
+              const step = width + gap;
+              const idx = Math.round(el.scrollLeft / step);
+              scrollTo(idx);
+            };
 
             const handleScroll = () => {
               const el = trackRef.current;
               if (!el) return;
-              const childWidth = el.clientWidth * 0.8; // matches w- classes below
-              const idx = Math.round(el.scrollLeft / childWidth);
+              const { width, gap } = getSlideMetrics();
+              const step = width + gap;
+              const idx = Math.round(el.scrollLeft / step);
               setActive(Math.max(0, Math.min(features.length - 1, idx)));
+
+              if (snapTimeout.current) window.clearTimeout(snapTimeout.current);
+              snapTimeout.current = window.setTimeout(() => {
+                forceSnap();
+              }, 120) as unknown as number;
             };
 
             const scrollTo = (idx: number) => {
               const el = trackRef.current;
               if (!el) return;
-              const childWidth = el.clientWidth * 0.8;
-              el.scrollTo({ left: idx * childWidth, behavior: 'smooth' });
+              const { width, gap } = getSlideMetrics();
+              const step = width + gap;
+              const clamped = Math.max(0, Math.min(features.length - 1, idx));
+              el.scrollTo({ left: clamped * step, behavior: 'smooth' });
+              setActive(clamped);
+            };
+
+            const onTouchStart: React.TouchEventHandler<HTMLDivElement> = () => {
+              const el = trackRef.current;
+              if (!el) return;
+              startScrollLeft.current = el.scrollLeft;
+              if (snapTimeout.current) window.clearTimeout(snapTimeout.current);
+            };
+
+            const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = () => {
+              const el = trackRef.current;
+              if (!el) return;
+              const delta = el.scrollLeft - startScrollLeft.current;
+              const { width } = getSlideMetrics();
+              // If swiped more than ~10% of slide width, move one step in that direction, else snap back
+              const threshold = width * 0.1;
+              if (Math.abs(delta) > threshold) {
+                scrollTo(active + (delta > 0 ? 1 : -1));
+              } else {
+                forceSnap();
+              }
+            };
+
+            const onWheel: React.WheelEventHandler<HTMLDivElement> = (e) => {
+              // Convert wheel to discrete slide step
+              const direction = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+              if (Math.abs(direction) < 5) return;
+              e.preventDefault();
+              scrollTo(active + (direction > 0 ? 1 : -1));
             };
 
             return (
@@ -439,8 +498,11 @@ const Index = () => {
                 <div
                   ref={trackRef}
                   onScroll={handleScroll}
+                  onTouchStart={onTouchStart}
+                  onTouchEnd={onTouchEnd}
+                  onWheel={onWheel}
                   className="flex gap-0 sm:gap-6 overflow-x-auto snap-x snap-mandatory snap-always pb-2 -mx-0 sm:-mx-4 px-0 sm:px-4 scroll-smooth"
-                  style={{ scrollBehavior: 'smooth' }}
+                  style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
                 >
                   {features.map((feature, i) => (
                     <div
