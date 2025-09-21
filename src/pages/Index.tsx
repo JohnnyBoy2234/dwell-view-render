@@ -457,7 +457,7 @@ const Index = () => {
               const { width, gap } = getSlideMetrics();
               const step = width + gap;
               const clamped = Math.max(0, Math.min(features.length - 1, idx));
-              el.scrollTo({ left: clamped * step, behavior: 'smooth' });
+              el.scrollTo({ left: clamped * step, behavior: 'auto' });
               setActive(clamped);
             };
 
@@ -489,12 +489,12 @@ const Index = () => {
                   onTouchStart={onTouchStart}
                   onTouchEnd={onTouchEnd}
                   className="flex gap-0 sm:gap-6 overflow-x-auto snap-x snap-mandatory snap-always pb-2 -mx-0 sm:-mx-4 px-0 sm:px-4 scroll-smooth"
-                  style={{ scrollBehavior: 'smooth', overscrollBehaviorX: 'contain' }}
+                  style={{ scrollBehavior: 'auto', overscrollBehaviorX: 'contain' }}
                 >
                   {features.map((feature, i) => (
                     <div
                       key={feature.title}
-                      className="snap-center flex-none w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[45%]"
+                      className="snap-center snap-always flex-none w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[45%]"
                     >
                       <div
                         className="group relative p-6 sm:p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 md:hover:scale-[1.02] h-full flex flex-col"
