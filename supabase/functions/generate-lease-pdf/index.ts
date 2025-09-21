@@ -119,6 +119,21 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	const fontBody = await doc.embedFont(StandardFonts.Helvetica);
 	const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
 
+	// Try to embed brand logo from env URL
+	let brandLogo: any = null;
+	try {
+		const logoUrl = Deno.env.get('BRAND_LOGO_URL');
+		if (logoUrl) {
+			const res = await fetch(logoUrl);
+			const bytes = new Uint8Array(await res.arrayBuffer());
+			try {
+				brandLogo = await doc.embedPng(bytes);
+			} catch {
+				brandLogo = await doc.embedJpg(bytes);
+			}
+		}
+	} catch {}
+
 	const margin = 48;
 	const lineGap = 8;
 	const pageWidth = 612; // Letter width
@@ -164,6 +179,12 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 
 	const drawFooter = (p: any, pageNumber: number) => {
 		const text = `Page ${pageNumber}`;
+		// Draw brand logo if available
+		if (brandLogo) {
+			const logoHeight = 18;
+			const logoWidth = (brandLogo.width / brandLogo.height) * logoHeight;
+			p.drawImage(brandLogo, { x: margin, y: margin - 8, width: logoWidth, height: logoHeight });
+		}
 		p.drawText(text, {
 			x: pageWidth - margin - fontBody.widthOfTextAtSize(text, sizes.small),
 			y: margin - 12,
@@ -172,8 +193,8 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 			color: colors.muted,
 		});
 		// Optional initials anchors near footer
-		p.drawText("SWIFTRENT_INIT_LANDLORD", { x: margin, y: margin - 2, size: 8, font: fontBody, color: colors.invisible });
-		p.drawText("SWIFTRENT_INIT_TENANT_1", { x: margin + 160, y: margin - 2, size: 8, font: fontBody, color: colors.invisible });
+		p.drawText("SWIFTRENT_INIT_LANDLORD", { x: margin + 60, y: margin - 2, size: 8, font: fontBody, color: colors.invisible });
+		p.drawText("SWIFTRENT_INIT_TENANT_1", { x: margin + 220, y: margin - 2, size: 8, font: fontBody, color: colors.invisible });
 	};
 
 	const drawRule = () => {
@@ -301,18 +322,67 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		drawNumberedSegments(label, [{ text }]);
 	};
 
+	const drawCentered = (text: string, size: number, font: any) => {
+		const w = font.widthOfTextAtSize(text, size);
+		const x = (pageWidth - w) / 2;
+		ensureSpace(size + 8);
+		page.drawText(text, { x, y, size, font, color: colors.text });
+		y -= size + 8;
+	};
+
+	const drawFormRow = (label: string, value?: string) => {
+		const labelWidth = 170;
+		const rowHeight = sizes.body + lineGap;
+		ensureSpace(rowHeight);
+		page.drawText(label, { x: margin, y, size: sizes.body, font: fontBody, color: colors.text });
+		const vx = margin + labelWidth;
+		if (value && value.trim().length > 0) {
+			page.drawText(value, { x: vx, y, size: sizes.body, font: fontBold, color: colors.text });
+		} else {
+			// draw a line to fill in
+			page.drawLine({ start: { x: vx, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
+		}
+		y -= rowHeight;
+	};
+
 	// First page header
 	drawBrandHeader(page, true);
 	y -= 32;
 
 	// Title & meta
-	page.drawText('Rental Agreement', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
-	y -= sizes.h1 + 6;
-	const gen = today.toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' });
-	page.drawText(`Contract ID: ${contract.id}`, { x: margin, y, size: sizes.small, font: fontBody, color: colors.muted });
-	const genText = `Generated: ${gen}`;
-	page.drawText(genText, { x: pageWidth - margin - fontBody.widthOfTextAtSize(genText, sizes.small), y, size: sizes.small, font: fontBody, color: colors.muted });
-	y -= sizes.small + 10;
+	page.drawText('AGREEMENT OF LEASE (RESIDENTIAL)', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
+	y -= sizes.h1 + 2;
+	drawCentered('(“Agreement”)', sizes.small, fontBody);
+
+	drawCentered('Made and entered into by and between:', sizes.body, fontBold);
+
+	// Landlord block
+	drawFormRow('FULL NAMES', data.landlordName);
+	drawFormRow('IDENTITY NUMBER', data.landlordIdNumber);
+	drawFormRow('EMAIL ADDRESS', data.landlordEmail);
+	drawFormRow('PHYSICAL ADDRESS', data.landlordAddress);
+
+	drawCentered('(“Landlord”)', sizes.body, fontBody);
+
+	drawCentered('AND', sizes.body, fontBold);
+
+	// Tenant block
+	drawFormRow('FULL NAMES', data.tenantName);
+	drawFormRow('IDENTITY NUMBER', data.tenantIdNumber);
+	drawFormRow('EMAIL ADDRESS', data.tenantEmail);
+	drawFormRow('PHYSICAL ADDRESS', data.tenantAddress);
+
+	drawCentered('(“Tenant”)', sizes.body, fontBody);
+
+	drawCentered('in respect of', sizes.body, fontBody);
+
+	drawFormRow('Street Address', data.propertyStreetAddress || data.propertyAddress);
+	drawFormRow('Garage Number', data.garageNumber);
+	drawFormRow('Parking Bay Number', data.parkingBayNumber);
+	drawFormRow('Other (specify):', data.otherSpecification);
+
+	drawParagraph('together with the use of an undivided share in any common property (“the Property”).');
+
 	drawRule();
 
 	// 1. BETWEEN
