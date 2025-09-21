@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,8 @@ import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
 import Navbar from "./components/Navbar";
 import { MobileBottomBar } from "./components/MobileBottomBar";
+import { MobileServices } from "@/services/mobileServices";
+import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import About from "./pages/About";
@@ -51,15 +54,22 @@ import { AuthBootstrap } from "@/components/AuthBootstrap";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <AuthProvider>
-        <AuthBootstrap>
-          <BrowserRouter>
-            <Routes>
+const App = () => {
+  useEffect(() => {
+    // Initialize mobile services when app starts
+    MobileServices.initialize();
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <AuthBootstrap>
+            <BrowserRouter>
+              <MobileNetworkStatus />
+              <Routes>
               {/* Admin Routes - No Navbar */}
               <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
               <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
@@ -121,6 +131,7 @@ const App = () => (
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
