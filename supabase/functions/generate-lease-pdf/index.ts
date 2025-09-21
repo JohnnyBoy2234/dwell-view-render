@@ -391,7 +391,7 @@ drawRule();
 drawSectionTitle('4.', 'Rental and Payments');
 drawNumberedText('4.1.', 'The monthly rental (“Rent” or “Rental”) payable by the Tenant to the Landlord for the Property is');
 ensureSpace(sizes.body + lineGap);
-page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
 y -= sizes.body + lineGap;
 drawNumberedText('', '(in words: ____________________________________).');
 drawNumberedText('4.2.', 'All Rental payments shall be made monthly in advance before the seventh (7TH) day of each and every month, free from any deductions or set off for any reason whatsoever, directly into the Landlord’s bank account reflected below.');
@@ -404,7 +404,7 @@ drawNumberedText('4.3.', 'Should the Agreement be renewed or extended, the Tenan
 drawNumberedText('4.4.', 'The Tenant agrees to pay a deposit of');
 ensureSpace(sizes.body + lineGap);
 page.drawText('R ', { x: margin, y, size: sizes.body, font: fontBody, color: colors.text });
-page.drawLine({ start: { x: margin + 12, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+page.drawLine({ start: { x: margin + 12, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
 y -= sizes.body + lineGap;
 drawParagraph('(in words: _____________________________________________________________________)');
 drawParagraph('before ___________________________________ 20___ (“deposit date”)');
@@ -416,7 +416,7 @@ page.drawText('ITEM', { x: col1X, y, size: sizes.body, font: fontBold, color: co
 page.drawText('AMOUNT', { x: col2X, y, size: sizes.body, font: fontBold, color: colors.text });
 y -= rowH;
 const items = ['Admin fee (incl VAT)', 'Application fee (incl VAT)', "First month’s rent", 'Damages deposit ( _____ months rental)', 'Other (specify):', 'TOTAL'];
-for (const it of items) { page.drawText(it, { x: col1X, y, size: sizes.body, font: fontBody, color: colors.text }); page.drawLine({ start: { x: col2X, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= rowH; }
+for (const it of items) { page.drawText(it, { x: col1X, y, size: sizes.body, font: fontBody, color: colors.text }); page.drawLine({ start: { x: col2X, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule }); y -= rowH; }
 drawNumberedText('4.6.', 'Should the Rent increase, the Tenant agrees to increase the deposit proportionately. Further, The Tenant agrees to restore and top up the deposit within 3 business days of being requested to do so whenever required in terms of this Agreement.');
 drawNumberedText('4.7.', 'Should the Tenant attempt to set off the deposit against any payments due, including the final month’s Rental, this shall be deemed as an attempt to vacate the Property and avoid the payment of Rent, in which event the Tenant agrees to the Landlord taking steps to have the Tenant’s goods attached and removed from the Property as security for such payments.');
 drawNumberedText('4.8.', 'The Tenant agrees to pay interest on all overdue amounts at the rate of two percent (2%) above the prime overdraft rate (percent, per annum) charged by leading financial institutions, calculated from the due dates of such amounts until payment. The Tenant will further be liable to pay the Landlord a penalty admin fee of R500.00 (excl VAT) for any payments made after the due date.');
@@ -429,11 +429,11 @@ drawRule();
 drawSectionTitle('5.', 'Duration of Lease');
 drawNumberedText('5.1.', 'This Agreement shall commence on:');
 ensureSpace(sizes.body + lineGap);
-page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
 y -= sizes.body + lineGap;
 drawParagraph('and shall thereafter continue and endure for a period of _____ months and terminate at 12:00 midday on:');
 ensureSpace(sizes.body + lineGap);
-page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule });
 y -= sizes.body + lineGap;
 drawParagraph('(hereinafter referred to as "the Initial Period").');
 drawNumberedText('5.2.', 'The Tenants shall be entitled to, subject to reasonable negotiations and written consent by the Landlord, renew this Lease for a further period that is still to be determined (hereinafter referred to as "the Renewal Period ") on the same terms and conditions as in this Lease contained (save in respect of the rental as hereinafter set out), provided they shall have complied faithfully and regularly with each and every condition and obligation imposed on it in terms of this Lease and provided further that they shall have given to the Landlord at least 3 (Three) calender months notice in writing prior to the expiry of the main period of the Lease of their intention to renew.');
@@ -544,15 +544,15 @@ ensureSpace(180);
 drawParagraph('SIGNED at __________________ this _____day of __________________________ 20__.');
 drawParagraph('As witnesses:');
 ensureSpace(3 * (sizes.body + lineGap));
-for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
+for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
 drawParagraph('_________________________________');
 drawParagraph('                    LANDLORD');
 ensureSpace(2 * (sizes.body + lineGap));
-for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
+for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
 drawParagraph('SIGNED at __________________ this _____day of __________________________ 20__.');
 drawParagraph('As witnesses:');
 ensureSpace(3 * (sizes.body + lineGap));
-for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
+for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin, y: y - 2 }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
 drawParagraph('_________________________________');
 drawParagraph('                             TENANT');
 
