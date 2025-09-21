@@ -140,8 +140,10 @@ async function generatePDFDocument(contract: any, requestOrigin?: string): Promi
 	const pageWidth = 612; // Letter width
 	const pageHeight = 792; // Letter height
 
-	let page = doc.addPage([pageWidth, pageHeight]);
-	let y = pageHeight - margin;
+let page = doc.addPage([pageWidth, pageHeight]);
+// Draw branded header on first page
+drawBrandHeader(page, true);
+let y = pageHeight - margin - headerHeight - 8;
 	const pages: any[] = [page];
 
 	const colors = {
@@ -156,6 +158,7 @@ async function generatePDFDocument(contract: any, requestOrigin?: string): Promi
 
 	const labelColumnWidth = 36;
 	const contentIndent = 6;
+	const headerHeight = 60;
 
 	const drawSectionTitle = (label: string, title: string) => {
 		ensureSpace(sizes.h2 + 12);
@@ -167,18 +170,37 @@ async function generatePDFDocument(contract: any, requestOrigin?: string): Promi
 		y -= sizes.h2 + 6;
 	};
 
-const drawBrandHeader = (_p: any, _firstPage: boolean) => {
-    // Intentionally no visible header. Per branding spec: only logo in footer, no header text.
+const drawBrandHeader = (p: any, _firstPage: boolean) => {
+    // Draw a horizontal gradient band across the top (full-bleed)
+    const bandY = pageHeight - headerHeight;
+    const steps = 36;
+    // Brand gradient: blue -> green
+    const start = { r: 0.12, g: 0.45, b: 0.96 }; // existing brand blue
+    const end = { r: 0.16, g: 0.73, b: 0.52 };   // emerald/green
+    const stepWidth = pageWidth / steps;
+    for (let i = 0; i < steps; i++) {
+        const t = i / Math.max(steps - 1, 1);
+        const r = start.r + (end.r - start.r) * t;
+        const g = start.g + (end.g - start.g) * t;
+        const b = start.b + (end.b - start.b) * t;
+        p.drawRectangle({ x: i * stepWidth, y: bandY, width: stepWidth + 0.5, height: headerHeight, color: rgb(r, g, b) });
+    }
+
+    // Draw logo at top-left with a slight white border
+    if (brandLogo) {
+        const logoHeight = 24;
+        const logoWidth = (brandLogo.width / brandLogo.height) * logoHeight;
+        const pad = 4;
+        const lx = margin;
+        const ly = bandY + (headerHeight - logoHeight) / 2;
+        // white border rectangle
+        p.drawRectangle({ x: lx - pad, y: ly - pad, width: logoWidth + pad * 2, height: logoHeight + pad * 2, color: rgb(1, 1, 1) });
+        p.drawImage(brandLogo, { x: lx, y: ly, width: logoWidth, height: logoHeight });
+    }
 };
 
 	const drawFooter = (p: any, pageNumber: number) => {
 		const text = `Page ${pageNumber}`;
-		// Draw brand logo if available
-		if (brandLogo) {
-			const logoHeight = 18;
-			const logoWidth = (brandLogo.width / brandLogo.height) * logoHeight;
-			p.drawImage(brandLogo, { x: margin, y: margin - 8, width: logoWidth, height: logoHeight });
-		}
 		p.drawText(text, {
 			x: pageWidth - margin - fontBody.widthOfTextAtSize(text, sizes.small),
 			y: margin - 12,
@@ -200,7 +222,8 @@ const newPage = () => {
     drawFooter(page, pages.length);
     page = doc.addPage([pageWidth, pageHeight]);
     pages.push(page);
-    y = pageHeight - margin;
+    drawBrandHeader(page, false);
+    y = pageHeight - margin - headerHeight - 8;
 };
 
 	const ensureSpace = (needed: number) => {
