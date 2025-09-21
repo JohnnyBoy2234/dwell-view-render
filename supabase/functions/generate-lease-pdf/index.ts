@@ -166,16 +166,9 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		y -= sizes.h2 + 6;
 	};
 
-	const drawBrandHeader = (p: any, firstPage: boolean) => {
-		p.drawRectangle({ x: 0, y: pageHeight - 28, width: pageWidth, height: 28, color: colors.brand });
-		const brandTitle = "SwiftRent Residential Lease Agreement";
-		p.drawText(brandTitle, { x: margin, y: pageHeight - 19, size: 11, font: fontBold, color: rgb(1,1,1) });
-		if (!firstPage) {
-			const meta = `Contract ${contract.id}`;
-			const w = fontBody.widthOfTextAtSize(meta, sizes.small);
-			p.drawText(meta, { x: pageWidth - margin - w, y: pageHeight - 20, size: sizes.small, font: fontBody, color: rgb(1,1,1) });
-		}
-	};
+const drawBrandHeader = (_p: any, _firstPage: boolean) => {
+    // Intentionally no visible header. Per branding spec: only logo in footer, no header text.
+};
 
 	const drawFooter = (p: any, pageNumber: number) => {
 		const text = `Page ${pageNumber}`;
@@ -202,14 +195,12 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		y -= 14;
 	};
 
-	const newPage = () => {
-		drawFooter(page, pages.length);
-		page = doc.addPage([pageWidth, pageHeight]);
-		pages.push(page);
-		y = pageHeight - margin;
-		drawBrandHeader(page, false);
-		y -= 32;
-	};
+const newPage = () => {
+    drawFooter(page, pages.length);
+    page = doc.addPage([pageWidth, pageHeight]);
+    pages.push(page);
+    y = pageHeight - margin;
+};
 
 	const ensureSpace = (needed: number) => {
 		if (y - needed < margin + 40) newPage();
@@ -288,12 +279,14 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		}
 		let lineTokens: { text: string; bold?: boolean }[] = [];
 		let lineWidth = 0;
-		const drawLine = (line: { text: string; bold?: boolean }[]) => {
-			ensureSpace(sizes.body + lineGap);
-			// draw label only on the first visual line
-			if (line === lineTokens) {
-				page.drawText(label, { x: margin, y, size: sizes.body, font: fontBold, color: colors.text });
-			}
+    let isFirstVisualLine = true;
+    const drawLine = (line: { text: string; bold?: boolean }[]) => {
+        ensureSpace(sizes.body + lineGap);
+        // draw label only on the first visual line
+        if (isFirstVisualLine) {
+            page.drawText(label, { x: margin, y, size: sizes.body, font: fontBold, color: colors.text });
+            isFirstVisualLine = false;
+        }
 			let x = contentX;
 			for (const t of line) {
 				const f = t.bold ? fontBold : fontBody;
@@ -345,282 +338,226 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 		y -= rowHeight;
 	};
 
-	// First page header
-	drawBrandHeader(page, true);
-	y -= 32;
+// First page header intentionally omitted (branding spec: footer-only logo)
 
-	// Title & meta
-	page.drawText('AGREEMENT OF LEASE (RESIDENTIAL)', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
+// Title & meta
+page.drawText('RENTAL AGREEMENT', { x: margin, y, size: sizes.h1, font: fontBold, color: colors.text });
 	y -= sizes.h1 + 2;
-	drawCentered('(“Agreement”)', sizes.small, fontBody);
+drawCentered('(“Agreement”)', sizes.small, fontBody);
 
-	drawCentered('Made and entered into by and between:', sizes.body, fontBold);
+// Parties/old heading removed per new legal structure
+drawRule();
 
-	// Landlord block
-	drawFormRow('FULL NAMES', data.landlordName);
-	drawFormRow('IDENTITY NUMBER', data.landlordIdNumber);
-	drawFormRow('EMAIL ADDRESS', data.landlordEmail);
-	drawFormRow('PHYSICAL ADDRESS', data.landlordAddress);
+// Remove old BETWEEN block entirely per new structure
 
-	drawCentered('(“Landlord”)', sizes.body, fontBody);
+// Start of new legal content
+drawRule();
 
-	drawCentered('AND', sizes.body, fontBold);
+// 1. INTERPRETATION
+drawSectionTitle('1.', 'Interpretation');
+drawNumberedText('1.1.', 'The headings of clauses are for reference purposes only.');
+drawNumberedText('1.2.', 'References to notices, statements, and other communications by or from the Landlord include notices by or from the Landlord’s appointed Agency.');
+drawNumberedText('1.3.', 'Expressions in the singular also indicate the plural, and the other way round.');
+drawNumberedText('1.4.', 'Words and phrases indicating natural persons also refer to juristic persons, and the other way round, and pronouns of any gender include the pronouns of the other gender.');
+drawNumberedText('1.5.', 'Any provision of this Agreement placing a restraint, prohibition, or restriction on the Tenant must be interpreted to include the implied term that the Tenant must ensure that everybody occupying or entering the Property also complies with them, including the family, guests and domestic worker or other employees of the Tenant.');
+drawNumberedText('1.6.', 'The provisions of this Agreement shall be deemed severable, and the unenforceability of any one of the provisions shall not affect the enforceability of other provisions. In the event that a provision is found to be unenforceable, the parties shall substitute that provision with an enforceable provision that preserves the original intent and position of the parties.');
+drawRule();
 
-	// Tenant block
-	drawFormRow('FULL NAMES', data.tenantName);
-	drawFormRow('IDENTITY NUMBER', data.tenantIdNumber);
-	drawFormRow('EMAIL ADDRESS', data.tenantEmail);
-	drawFormRow('PHYSICAL ADDRESS', data.tenantAddress);
+// 2. RECITAL
+drawSectionTitle('2.', 'Recital');
+drawNumberedText('2.1.', 'The Landlord hereby lets, and the Tenant takes in hire the Property on the terms and conditions contained herein, and that the below Annexures shall form an integral part of this Agreement as if incorporated into the body thereof:');
+drawNumberedText('2.1.1.', 'Ingoing and Outgoing Inspection lists.');
+drawNumberedText('2.1.2.', 'Conduct Rules (if applicable).');
+drawNumberedText('2.1.3.', 'Immovable Property Condition Report.');
+drawNumberedText('2.1.4.', 'Fixtures and Fittings List.');
+drawRule();
 
-	drawCentered('(“Tenant”)', sizes.body, fontBody);
+// 3. CONSUMER PROTECTION ACT 68 OF 2008 (CPA)
+drawSectionTitle('3.', 'Consumer Protection Act 68 of 2008 (CPA)');
+drawNumberedText('3.1.', 'The Tenant’s attention is drawn to the following provisions of the CPA:');
+drawNumberedText('3.1.1.', 'The CPA will not apply to lease agreements entered into between juristic persons, regardless of their turnover or asset value.');
+drawNumberedText('3.1.2.', 'Section 14 of the CPA provides that the Tenant may cancel this Agreement on 20 business days’ notice, subject to the Landlord being entitled to a reasonable cancellation penalty. Section 14 only applies to fixed term agreements.');
+drawNumberedText('3.1.3.', 'Certain terms and conditions have been printed in bold font to ensure that the Tenant specifically takes note of these provisions which may:');
+drawNumberedText('3.1.4.', 'Limit the liability of the Landlord or other party.');
+drawNumberedText('3.1.5.', 'Constitute an assumption of risk by the Tenant.');
+drawNumberedText('3.1.6.', 'Impose an obligation on the Tenant to indemnify the Landlord or other person.');
+drawNumberedText('3.1.7.', 'Be an acknowledgement of a fact by the Tenant.');
+drawNumberedText('3.1.8.', 'In terms of section 16 of the CPA, if this Agreement was signed by the Tenant as a result of Direct Marketing, the Tenant will be entitled to cancel this Agreement on written notice to the Landlord without reason or penalty within 5 business days of signing the Agreement.');
+drawNumberedText('3.1.9.', 'The Tenant warrants that this Agreement was not entered into as a result of any Direct Marketing and that the Landlord enters into this Agreement relying upon such warranty.');
+drawRule();
 
-	drawCentered('in respect of', sizes.body, fontBody);
+// 4. RENTAL AND PAYMENTS (new)
+drawSectionTitle('4.', 'Rental and Payments');
+drawNumberedText('4.1.', 'The monthly rental (“Rent” or “Rental”) payable by the Tenant to the Landlord for the Property is');
+ensureSpace(sizes.body + lineGap);
+page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+y -= sizes.body + lineGap;
+drawNumberedText('', '(in words: ____________________________________).');
+drawNumberedText('4.2.', 'All Rental payments shall be made monthly in advance before the seventh (7TH) day of each and every month, free from any deductions or set off for any reason whatsoever, directly into the Landlord’s bank account reflected below.');
+drawFormRow('Bank:', data.bankName);
+drawFormRow('Branch Code:', data.branchCode);
+drawFormRow('Branch Name:', data.branchName);
+drawFormRow('Account Number:', data.accountNumber);
+drawFormRow('Reference:', data.paymentReference);
+drawNumberedText('4.3.', 'Should the Agreement be renewed or extended, the Tenant agrees to a Rental escalation of __ % per annum, or any other amount as may be agreed on between the parties.');
+drawNumberedText('4.4.', 'The Tenant agrees to pay a deposit of');
+ensureSpace(sizes.body + lineGap);
+page.drawText('R ', { x: margin, y, size: sizes.body, font: fontBody, color: colors.text });
+page.drawLine({ start: { x: margin + 12, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+y -= sizes.body + lineGap;
+drawParagraph('(in words: _____________________________________________________________________)');
+drawParagraph('before ___________________________________ 20___ (“deposit date”)');
+drawParagraph('to the Landlord, which may be appropriated by the Landlord against any amount(s) which may be outstanding at any time in terms of this Agreement and/or any other liability of whatsoever nature for which the Tenant is responsible to the Landlord, including damages, and which amount may be retained by the Landlord throughout the duration of this Agreement and until final determination of any such amounts due by the Tenant.  The Tenant shall not be entitled to set off against the deposit any rent or any other amount payable. The deposit will be kept in an interest-bearing trust account and the deposit amount plus accrued interest will be refunded to the Tenant upon termination of this Agreement, less bank charges and other administrative costs, and further less any amounts deductible in terms of this Agreement.');
+drawNumberedText('4.5.', 'The amounts payable by the Tenant before the above deposit date are as follows:');
+const col1X = margin; const col2X = margin + 300; const rowH = 18;
+ensureSpace(rowH * 8);
+page.drawText('ITEM', { x: col1X, y, size: sizes.body, font: fontBold, color: colors.text });
+page.drawText('AMOUNT', { x: col2X, y, size: sizes.body, font: fontBold, color: colors.text });
+y -= rowH;
+const items = ['Admin fee (incl VAT)', 'Application fee (incl VAT)', "First month’s rent", 'Damages deposit ( _____ months rental)', 'Other (specify):', 'TOTAL'];
+for (const it of items) { page.drawText(it, { x: col1X, y, size: sizes.body, font: fontBody, color: colors.text }); page.drawLine({ start: { x: col2X, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= rowH; }
+drawNumberedText('4.6.', 'Should the Rent increase, the Tenant agrees to increase the deposit proportionately. Further, The Tenant agrees to restore and top up the deposit within 3 business days of being requested to do so whenever required in terms of this Agreement.');
+drawNumberedText('4.7.', 'Should the Tenant attempt to set off the deposit against any payments due, including the final month’s Rental, this shall be deemed as an attempt to vacate the Property and avoid the payment of Rent, in which event the Tenant agrees to the Landlord taking steps to have the Tenant’s goods attached and removed from the Property as security for such payments.');
+drawNumberedText('4.8.', 'The Tenant agrees to pay interest on all overdue amounts at the rate of two percent (2%) above the prime overdraft rate (percent, per annum) charged by leading financial institutions, calculated from the due dates of such amounts until payment. The Tenant will further be liable to pay the Landlord a penalty admin fee of R500.00 (excl VAT) for any payments made after the due date.');
+drawNumberedText('4.9.', 'Should any amounts payable by the Landlord increase, the Landlord will be entitled to increase the Rental pro rata.');
+drawNumberedText('4.10.', 'Should the Tenant fail to effect timeous and proper payment of any of the amounts above, it will be construed a material breach of this Agreement. Should any supplier or service provider terminate a service due to the Tenant’s non-payment, the Tenant will be liable for any reconnection or reinstatement fees applicable.');
+drawNumberedText('4.11.', 'It is hereby specifically recorded that the above rental amount payable by the tenant is exclusive of Municipal charges. The Tenants shall be responsible for 90% of the monthly municipal account which amount the tenants shall be required to pay within 2 (two) calendar weeks from presentation to them by the Landlord.');
+drawRule();
 
-	drawFormRow('Street Address', data.propertyStreetAddress || data.propertyAddress);
-	drawFormRow('Garage Number', data.garageNumber);
-	drawFormRow('Parking Bay Number', data.parkingBayNumber);
-	drawFormRow('Other (specify):', data.otherSpecification);
+// 5. DURATION OF LEASE (new)
+drawSectionTitle('5.', 'Duration of Lease');
+drawNumberedText('5.1.', 'This Agreement shall commence on:');
+ensureSpace(sizes.body + lineGap);
+page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+y -= sizes.body + lineGap;
+drawParagraph('and shall thereafter continue and endure for a period of _____ months and terminate at 12:00 midday on:');
+ensureSpace(sizes.body + lineGap);
+page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule });
+y -= sizes.body + lineGap;
+drawParagraph('(hereinafter referred to as "the Initial Period").');
+drawNumberedText('5.2.', 'The Tenants shall be entitled to, subject to reasonable negotiations and written consent by the Landlord, renew this Lease for a further period that is still to be determined (hereinafter referred to as "the Renewal Period ") on the same terms and conditions as in this Lease contained (save in respect of the rental as hereinafter set out), provided they shall have complied faithfully and regularly with each and every condition and obligation imposed on it in terms of this Lease and provided further that they shall have given to the Landlord at least 3 (Three) calender months notice in writing prior to the expiry of the main period of the Lease of their intention to renew.');
+drawNumberedText('5.3.', 'Either party shall be entitled to, upon material breach of this lease, terminate this Lease prior to the expiry of the main period or any subsequent renewal period by providing the other party with at least 2 (two) calendar months’ notice, in writing.');
+drawRule();
 
-	drawParagraph('together with the use of an undivided share in any common property (“the Property”).');
+// 6. TERMINATION (new)
+drawSectionTitle('6.', 'Termination');
+drawNumberedText('6.1.', 'The Landlord will provide the Tenant with written notice reminding him of the termination of the Agreement no earlier than 80 and no less than 40 business days before the end date. The notice will also advise the Tenant whether the Landlord intends to renew the Agreement and the notice will advise of any changes should the Agreement be renewed.');
+drawNumberedText('6.2.', 'After receipt of a notice as per the above, the Tenant will have 10 business days to:');
+drawNumberedText('6.2.1.', 'Accept the terms proposed in the notice. Such new terms and conditions proposed pertaining to the renewal will only be effective once reduced to writing in a renewal addendum and signed by both the Landlord and the Tenant.');
+drawNumberedText('6.2.2.', 'Elect that the Agreement terminates at the end of the initial period as agreed. However, should the Tenant not advise of such election timeously, the Agreement will continue on a month-to-month basis on the same terms and conditions as contained herein, subject thereto that any renewal period proposed in any notice will not apply and either party will have the right to terminate the Agreement by giving one calendar month written notice to the other. In such event it is specifically recorded that the CPA will no longer apply.');
+drawNumberedText('6.3.', 'Should the Landlord and Tenant not renew or extend the Agreement and should the Landlord not provide the Tenant with any notice as envisaged directly above, the Agreement will continue on a month-to-month basis on the same terms and conditions.');
+drawNumberedText('6.4.', 'The Tenant agrees to vacate the Property timeously upon termination of this Agreement.');
+drawRule();
 
-	drawRule();
+// 7. TERMINATION BY DEATH OR INSOLVENCY
+drawSectionTitle('7.', 'Termination by Death or Insolvency');
+drawNumberedText('7.1.', 'This Agreement will not terminate with the death of either the Landlord or the Tenant. The executor of the deceased Tenant’s estate will have the option, depending upon the circumstances of the estate, either to:');
+drawNumberedText('7.1.1.', 'abide by the contract for the remainder period of the Agreement (the successor or successors of the Tenant assuming his rights and obligations) or');
+drawNumberedText('7.1.2.', 'to cancel this Agreement by giving the Landlord one month’s written notice of termination, such notice to be given not more than one month after the death of the Tenant.');
+drawNumberedText('7.2.', 'The insolvency of either the Landlord or the Tenant will not terminate this Agreement. However, the trustee of the Tenant’s insolvent estate will have the option to terminate this Agreement by giving the Landlord written notice. If the trustee does not within three months of his appointment as trustee notify the Landlord that he wants to continue with the Agreement on behalf of the estate, he will be deemed to have terminated the Agreement at the end of the three months.');
+drawRule();
 
-	// 1. BETWEEN
-	drawSectionTitle('1.', 'Between:');
-	const splitName = (full: string) => {
-		if (!full) return { firstNames: 'Not specified', surname: '' };
-		const parts = full.trim().split(/\s+/);
-		if (parts.length === 1) return { firstNames: parts[0], surname: '' };
-		return { firstNames: parts.slice(0, -1).join(' '), surname: parts[parts.length - 1] };
-	};
-	const landlordNameParts = splitName(data.landlordName || '');
-	const renterNameParts = splitName(data.tenantName || '');
-	const joinParts = (arr: string[]) => arr.filter(Boolean).join(', ');
-	const landlordAddress = joinParts([
-		data.landlordStreetAddress || data.landlordAddress || '',
-		data.landlordCity || '',
-		data.landlordPostalCode || '',
-		data.landlordCountry || data.jurisdiction || ''
-	]);
-	const renterAddress = joinParts([
-		data.tenantStreetAddress || data.tenantAddress || '',
-		data.tenantCity || '',
-		data.tenantPostalCode || '',
-		data.tenantCountry || data.jurisdiction || ''
-	]);
-	drawNumberedSegments('(1)', [
-		{ text: landlordNameParts.firstNames + ' ', bold: true },
-		{ text: landlordNameParts.surname + ' ', bold: true },
-		{ text: 'of ' },
-		{ text: (landlordAddress || 'Not specified'), bold: true },
-		{ text: ' (the "Landlord");' },
-	]);
-	drawNumberedSegments('(2)', [
-		{ text: renterNameParts.firstNames + ' ', bold: true },
-		{ text: renterNameParts.surname + ' ', bold: true },
-		{ text: 'of ' },
-		{ text: (renterAddress || 'Not specified'), bold: true },
-		{ text: ' (the "Renter").' },
-	]);
-	drawRule();
+// 8. USE AND NUISANCE
+drawSectionTitle('8.', 'Use and Nuisance');
+drawNumberedText('8.1.', 'The Property shall be used for residential purposes only by the Tenant and his bona fide guests.');
+drawNumberedText('8.2.', 'The Tenant shall not permit anything to be done or stored in or about the Property which may be or become an annoyance or nuisance to neighbours or which may damage the Property or prejudice or vitiate the insurance policies in respect of the Property or increase the rate of premium(s) payable in respect of such policies and any increase in the premium by reason of the act or neglect of the Tenant shall be borne by the Tenant in addition to the Rental.');
+drawNumberedText('8.3.', 'The Tenant specifically undertakes to return the Property in the same order and condition as when they received it. This specifically includes, but is not limited to, the garden, swimming pool, exterior walls, doors, and garage.');
+drawNumberedText('8.4.', 'The Landlord shall keep the Property insured against risk of damage by fire. The Tenant agrees to take out insurance for his household items at his own election and at his own cost.');
+drawNumberedText('8.5.', 'The Landlord shall not under any circumstances be liable to the Tenant, his family or any other person entering in or upon the Property for any death, injury, loss or damage suffered in or about the Property, irrespective of whether it was caused by fire, storm, riot, civil commotion, theft, robbery, accident, or any other cause whatsoever, and the Tenant hereby indemnifies the Landlord and holds harmless the Landlord in respect of any such claim.');
+drawRule();
 
-	// IT IS AGREED as follows:
-	drawHeading('It is agreed as follows:');
+// 9. BREACH BY THE TENANT
+drawSectionTitle('9.', 'Breach by the Tenant');
+drawNumberedText('9.1.', 'The Landlord will be entitled to, at his sole discretion and without prejudice to any other rights in law, either demand specific performance and/or to cancel this Agreement with immediate effect and/or in addition to either option claim damages, should the Tenant:');
+drawNumberedText('9.1.1.', 'Fail to make any payment on or before the due date.');
+drawNumberedText('9.1.2.', 'Breach the Agreement and remain in breach of the Agreement for 7 calendar days after dispatch of a notice to remedy breach.');
+drawNumberedText('9.2.', 'Should section 14 of the CPA not apply and should the Tenant be in breach of any provision of this Agreement on two or more occasions during any 12-month period, the Landlord may elect to cancel this Agreement with immediate effect and claim possession of the Property. This is an additional remedy without prejudice or exclusion to any other remedy available to the Landlord in terms of this Agreement.');
+drawRule();
 
-	// 2. Rental Property
-	drawSectionTitle('2.', 'Rental Property');
-	const propertyAddress = joinParts([
-		data.propertyStreetAddress || data.propertyAddress || '',
-		data.propertyCity || '',
-		data.propertyPostalCode || '',
-		data.propertyCountry || data.jurisdiction || ''
-	]);
-	drawNumberedSegments('2.1', [
-		{ text: 'The Landlord agrees to rent and the Renter agrees to take the property known as ' },
-		{ text: (propertyAddress || 'Not specified'), bold: true },
-		{ text: ' (the "Property").' },
-	]);
-	drawRule();
+// 10. BREACH BY THE LANDLORD
+drawSectionTitle('10.', 'Breach by the Landlord');
+drawNumberedText('10.1.', 'Should the Landlord commit a material breach of this Agreement, the Tenant may:');
+drawNumberedText('10.1.1.', 'Apply to court to recover damages suffered.');
+drawNumberedText('10.1.2.', 'Demand specific performance.');
+drawNumberedText('10.2.', 'The Tenant may cancel this Agreement without penalty if the Landlord does not remedy the material breach within 20 business days of receiving a notice to remedy breach.');
+drawRule();
 
-	// 3. Rental Duration
-	drawSectionTitle('3.', 'Rental Duration');
-	const calcMonths = (start?: string, end?: string) => {
-		if (!start || !end) return '';
-		const s = new Date(start).getTime();
-		const e = new Date(end).getTime();
-		if (!Number.isFinite(s) || !Number.isFinite(e) || e <= s) return '';
-		const m = Math.ceil((e - s) / (1000 * 60 * 60 * 24 * 30.44));
-		return `${m} month${m === 1 ? '' : 's'}`;
-	};
-	const rentalPeriod = data.rentalPeriod || calcMonths(data.leaseStartDate, data.leaseEndDate) || 'Not specified';
-	drawNumberedText('3.1', `The rental agreement shall be for a fixed term of ${rentalPeriod}.`);
-	drawNumberedSegments('3.2', [
-		{ text: 'The rental period will commence on ' },
-		{ text: (data.leaseStartDate || 'Not specified'), bold: true },
-		{ text: ' and will end on ' },
-		{ text: (data.leaseEndDate || 'Not specified'), bold: true },
-		{ text: ', unless terminated earlier or extended in accordance with the terms of this Agreement.' },
-	]);
-	drawNumberedText('3.3', 'The Move-out day under this Rental Agreement shall be the final day of the rental term. By this date, the Renter must vacate the Property unless the Agreement is terminated earlier or extended in accordance with its terms.');
-	drawNumberedText('3.4', 'On the Move-out day, the Renter is required to vacate the Property, ensuring it is cleaned to the Landlord’s satisfaction and returned to its original condition as per the commencement of the Rental Agreement.');
-	drawNumberedText('3.5', 'On the Move-out day, the Renter must leave the Property under the Landlord’s control.');
-	drawNumberedText('3.6', 'Should the rental period continue after the end date without a new agreement, it will automatically become a periodic rental agreement, rolling on a monthly basis.');
-	drawRule();
+// 11. CANCELLATION BY THE TENANT BEFORE TERMINATION OF THE AGREEMENT
+drawSectionTitle('11.', 'Cancellation by the Tenant Before Termination of the Agreement');
+drawNumberedText('11.1.', 'The Tenant is entitled to cancel this Agreement on 20 business days’ written notice if the CPA applies to this Agreement. In such event the Landlord will be entitled to a reasonable cancellation penalty.');
+drawNumberedText('11.2.', 'The Tenant agrees that such reasonable cancellation shall include at least:');
+drawNumberedText('11.2.1.', 'An amount equal to three months Rental, notwithstanding how far in advance or when the cancellation notice is provided.');
+drawNumberedText('11.2.2.', 'R1 500.00 plus VAT for advertisement costs, which the Tenant agrees is reasonable and necessary.');
+drawNumberedText('11.3.', 'In the event that the CPA does not apply, the Tenant is entitled to cancel this Agreement on 2 months\' notice and will be liable to the Landlord for the associated cost of replacing the Tenant which includes but is not limited to advertising costs, administrative expenses, Agent’s fees etc.');
+drawRule();
 
-	// 4. Rent Amount and Payment
-	drawSectionTitle('4.', 'Rent Amount and Payment');
-	const rentAmountText = `${data.rentAmount ? Number(data.rentAmount).toLocaleString('en-ZA') : 'Not specified'} ${data.rentCurrency || ''}`.trim();
-	drawNumberedSegments('4.1', [ { text: 'The rent amount is ' }, { text: rentAmountText, bold: true }, { text: ' per month (the "Rent").' } ]);
-	const dueDay = data.rentDueDay || 'Not specified';
-	const suffix = typeof dueDay === 'number' ? getOrdinalSuffix(dueDay) : '';
-	drawNumberedSegments('4.2', [ { text: 'The Rent shall be payable in advance on the ' }, { text: `${dueDay}${suffix}`, bold: true }, { text: ' of each month (the "Due Date"). Payment shall be made by bank transfer to the Landlord’s designated account. The Landlord will provide the Renter with the necessary bank details before the first payment is due.' } ]);
-	drawNumberedText('4.3', 'The Renter shall be in breach of this agreement if the Renter fails to pay the Rent in accordance with this clause. In such a case, the Landlord shall be entitled to use the relevant statutory provisions or any other statutory remedies available in the applicable jurisdiction to recover possession of the Property.');
-	drawNumberedText('4.4', 'If the Property is damaged or destroyed by an insured risk, making it unfit for occupation and use, the payment of Rent shall be suspended until the Property is fit for occupation and use, unless the damage or destruction was caused by the wilful actions, negligence, or default of the Renter.');
-	drawNumberedText('4.5', 'No increase in Rent shall occur during the fixed term unless both parties agree in writing.');
-	drawNumberedText('4.6', 'If the rental agreement becomes a rolling contract or is renewed after the fixed term, the Landlord reserves the right to review and increase the Rent once every 12 months.');
-	drawNumberedText('4.7', 'The Landlord shall provide the Renter with at least one month’s notice for monthly rolling agreements or two months’ notice for annual rent reviews regarding any proposed rent increase.');
-	drawNumberedText('4.8', 'Any rent increase must be reasonable and reflect current market conditions for similar properties in the area and shall comply with all relevant legislation.');
-	drawRule();
+// 12. CANCELLATION BY THE LANDLORD
+drawSectionTitle('12.', 'Cancellation by the Landlord');
+drawNumberedText('12.1.', 'Should the Landlord or body corporate become aware that the Tenant is conducting any illegal or criminal activity from the Property or is in contravention of any law or regulation, the Landlord may cancel this Agreement with immediate effect and the Tenant will have to vacate the Property immediately and at most within 24 hours from dispatch of the notice.');
+drawNumberedText('12.2.', 'The Landlord may cancel this Agreement if he becomes aware that the Tenant has provided incorrect information at any stage, including the application process. The Tenant warrants that all information provided is true and correct.');
+drawRule();
 
-	// 5. Rent Default
-	drawSectionTitle('5.', 'Rent Default');
-	drawNumberedText('5.1', 'The Renter shall pay interest on any Rent lawfully due that is paid more than 10 calendar days after the Due Date, at a rate of 5% per annum above the applicable central bank base rate in the country where the Property is located.');
-	drawNumberedText('5.2', 'The interest shall be payable from the Due Date until the date the Rent is actually paid.');
-	drawRule();
+// 13. CONSEQUENCES OF ELECTION TO CANCEL
+drawSectionTitle('13.', 'Consequences of Election to Cancel');
+drawNumberedText('13.1.', 'If the Landlord cancels the Agreement, the Tenant agrees to vacate the Property immediately and the Landlord will be entitled to retake possession thereof and may take any legal action to evict the Tenant and other occupiers.');
+drawNumberedText('13.2.', 'Should the Tenant be in default and dispute the Landlord’s right to cancel, the Tenant agrees to continue paying Rent and all amounts in terms of this Agreement as if the Agreement is still in full force and effect. Acceptance of any payments by the Landlord under these circumstances will not be construed as waiver of any right and will not prejudice any other rights that the Landlord may have. Should the matter be resolved in the Landlord’s favour, the Landlord will be entitled to retain the amounts paid, alternatively, will be entitled to the outstanding amounts, as damages for holding over.');
+drawRule();
 
-	// 6. Condition of the Property
-	drawSectionTitle('6.', 'Condition of the Property');
-	drawNumberedText('6.1', 'The Property is rented in the condition it is in at the commencement of this Rental Agreement, as documented in the accompanying property inventory/condition report.');
-	drawNumberedText('6.2', 'The Renter accepts the Property in its current condition at the time of signing this Agreement.');
-	drawRule();
+// 14. INSPECTION AND ACCESS
+drawSectionTitle('14.', 'Inspection and Access');
+drawNumberedText('14.1.', 'The parties or their representatives will hold a joint ingoing inspection, in terms of section 5(3) of the Rental Housing Act of 1999, prior to the Tenant taking occupation of the Property. an ingoing inspection list will be annexed hereto and initialled by all parties. Should the Tenant fail to attend the inspection the Property will be deemed to be in good condition.');
+drawNumberedText('14.2.', 'The Tenant shall advise the Landlord in writing within 7 (SEVEN) calendar days of commencement of the Agreement of the details of any defects in or about the Property and if such notice is not given by the Tenant, then the Tenant shall be deemed to have accepted the Property as being complete and free from defects. Any recordal of a defect in writing shall not constitute an acknowledgement or undertaking by the Landlord to have the defect repaired.');
+drawNumberedText('14.3.', 'An outgoing inspection will be attended to by the parties upon termination of this Agreement. The Tenant agrees to have the Property and the carpets professionally cleaned at his own costs prior to such inspection.');
+drawNumberedText('14.4.', 'The Landlord, either personally or through nominated representatives, shall have the right to inspect and to enter the Property at all reasonable times and after reasonable notice to the Tenant for the purpose of ensuring that the Tenant is complying with his obligations in terms of the Agreement.');
+drawNumberedText('14.5.', 'During the duration of the Agreement, the Landlord shall be entitled to bring any prospective purchasers of the Property to inspect the Property and the Tenant undertakes and agrees to assist the Landlord in this regard and not to do anything which will interfere with the sale of the Property during such period. The Tenant further agrees to “for sale”, “sold” and “to let” signs being put up for display at the Property.');
+drawNumberedText('14.6.', 'The Tenant agrees to allow the Landlord access to the Property on reasonable notice to attend to any repairs or alterations necessary for the safety or improvement of the Property.');
+drawRule();
 
-	// 7. Property Furnishings
-	drawSectionTitle('7.', 'Property Furnishings');
-	drawNumberedText('7.1', 'The Property is let on an unfurnished basis. The Renter acknowledges that no furniture, fixtures, or fittings are provided by the Landlord, except for any essential fixtures required by law, such as smoke alarms, carbon monoxide detectors, or other legally required safety features in the country where the Property is located.');
-	drawNumberedText('7.2', 'The Renter is responsible for providing their own furniture and furnishings during the Rental Agreement and must ensure that any such items comply with relevant safety regulations applicable in the jurisdiction of the Property.');
-	drawNumberedText('7.3', 'At the end of the Rental Agreement, the Property must be returned in the same condition as at the start of the Rental Agreement, subject to fair wear and tear.');
-	drawRule();
+// 15. MAINTENANCE
+drawSectionTitle('15.', 'Maintenance');
+drawNumberedText('15.1.', 'The Tenant shall notify the Landlord in writing in the event of any defect occurring in the main walls and/or roof, guttering or drainpipes and the Landlord shall be given a reasonable opportunity to remedy such defect (or have the Body Corporate remedy such defect if it is responsible therefor) and only if the Landlord fails to do so within a reasonable time, will the Tenant be entitled to have such defect remedied and to recover the reasonable cost thereof from the Landlord.');
+drawNumberedText('15.2.', 'Maintenance of the swimming pool and garden (if applicable) will be for the responsibility and expense of the following party (mark with X):');
+drawParagraph('ITEM\tLANDLORD\tTENANT');
+drawParagraph('SWIMMING POOL\t\t');
+drawParagraph('GARDEN\t\t');
+drawNumberedText('15.3.', 'The Landlord shall be responsible for the maintenance of the exterior of the Property, but specifically excluding the swimming pool and garden (if these are the Tenant’s responsibility).');
+drawNumberedText('15.4.', 'The Tenant shall be responsible for the maintenance of the interior of the Property, which shall include but not be limited to all appliances, furniture, floors, fitted carpets (if any), locks and keys, electric light fittings and light bulbs, doors, door frames, windows, window frames and window panes, and shall make good and repair any damage which may occur thereto, howsoever arising, and shall at the conclusion of the Agreement return the Property in the same good order and condition (fair wear and tear excepted).');
+drawNumberedText('15.5.1.', 'The Tenant shall be responsible for the maintenance and upkeeping, at their own costs, of the swimming pool and shall make good and repair any damage which may occur thereto, howsoever arising, and shall at the conclusion of the Agreement return it in good order and condition.');
+drawNumberedText('15.5.2.', 'The Tenant undertakes to take good and proper care of the garden on the Property, including, but not limited to, all lawns, plants, shrubs, trees and hedges, replacing all such as may die or be damaged (taking seasonal factors into account), and carrying out such watering, cutting, trimming, mowing, pruning, fertilising and other gardening activities as may reasonably be required, and supplying all the fertiliser and other substances necessary for these purposes.');
+drawRule();
 
-	// 8. Landlord Obligations
-	drawSectionTitle('8.', 'Landlord Obligations');
-	const roman = (i: number) => ['(i)', '(ii)', '(iii)', '(iv)', '(v)', '(vi)', '(vii)', '(viii)', '(ix)', '(x)'][i] || `(${i + 1})`;
-	['Ensuring that the Property is equipped with functional and appropriately placed smoke detectors.',
-	 'Maintaining the structure and exterior of the Property in good condition.',
-	 'Providing the Renter with safe and suitable means of access to and from the Property.',
-	 'Allowing the Renter the quiet enjoyment of the Property without undue interruption.',
-	 'Keeping in repair and proper working order the installations in the Property for:'].forEach((item, idx) => drawNumberedText(roman(idx), item));
-	drawNumberedText(roman(5), 'The supply of water, gas, and electricity;');
-	drawNumberedText(roman(6), 'Sanitation, including basins, sinks, baths, and sanitary conveniences (excluding other fixtures, fittings, and appliances used in connection with these supplies);');
-	drawNumberedText(roman(7), 'Space heating and water heating.');
-	drawNumberedText(roman(8), 'The Landlord is not required to:');
-	['Carry out any works or repairs for which the Renter is liable under this Rental Agreement.',
-	 'Keep in repair or maintain any items that the Renter is entitled to remove from the Property.'].forEach((item, idx) => drawNumberedText(roman(9 + idx), item));
-	drawRule();
+// 16. DESTRUCTION OF PROPERTY
+drawSectionTitle('16.', 'Destruction of Property');
+drawNumberedText('16.1.', 'In the event of the destruction of the Property, or part of it, so as to render it substantially untenantable as a residence and whether such destruction is due to an act of God, war, riot, insurrection, civil strife or civil disturbance or any other cause including fire, flood, lightning or storm, the Agreement shall terminate on the happening of such event and no Rental shall be payable to the Landlord for the unexpired period of the Agreement from the happening of such event, and neither party shall have any claim against the other apart from any claims which may have existed immediately preceding the occurrence of such event.');
+drawNumberedText('16.2.', 'In the event however of partial destruction from the same or similar causes, the Agreement shall remain in full force and effect at the election of the Landlord, and the Landlord shall take steps as soon as may be reasonably possible for the repair of the Property and the Tenant shall be entitled to an abatement of the Rental commensurate with the extent to which he has been deprived of the use of the Property.');
+drawRule();
 
-	// 9. Renter Obligations
-	drawSectionTitle('9.', 'Renter Obligations');
-	const renterObligations = [
-		'Pay the Rent promptly on the Due Date, without any deduction, set-off, or delay, and in the manner specified by the Landlord. The Renter acknowledges that timely payment of Rent is a fundamental obligation under this Agreement. If the Rent is not received by the Landlord on or before the Due Date, the Renter shall be considered in breach of this Agreement, and the Landlord may take appropriate action as set out in this Agreement or under applicable law, including the right to charge interest on overdue amounts.',
-		'Keep the Property clean and tidy at all times, ensuring that it is free from waste and refuse, and maintaining the general upkeep of the Property, including but not limited to the interior, carpets, and furnishings.',
-		'Notify the Landlord promptly of any damage, defects, or issues with the Property, including plumbing, electrical, or heating problems, to allow for necessary repairs or maintenance.',
-		'Ensure that the Property is used solely for residential purposes and not for any commercial or business activities, without the prior written consent of the Landlord.',
-		'Comply with all applicable laws and regulations in relation to the use and occupation of the Property, including but not limited to those concerning health and safety, waste disposal, and noise.',
-		'Permit the Landlord or their representatives to access the Property at reasonable times (with notice, as per the terms of this Agreement), for the purpose of inspecting the Property, carrying out repairs, or showing the Property to prospective renters or buyers.',
-		'Not make any alterations or additions to the Property, including installing or removing fixtures or fittings, without the prior written consent of the Landlord.',
-		'Ensure that all keys, security devices, and access codes provided by the Landlord remain in the Renter’s possession and are not given to unauthorised persons. The Renter must return all keys and devices upon vacating the Property.',
-		'Maintain appropriate insurance coverage for any personal belongings within the Property. The Landlord is not liable for any loss or damage to the Renter’s personal property.',
-		'Dispose of refuse and recycling in accordance with local council guidelines and any instructions provided by the Landlord.',
-		'Not sublet or assign the rental or allow anyone to occupy the Property without the prior written consent of the Landlord.',
-		'Allow the Landlord to inspect the Property, with reasonable notice, to ensure compliance with the terms of this Agreement.',
-		'Pay for all utilities and services connected to the Property, including but not limited to gas, electricity, water, council tax, and any other charges relating to the Property, unless otherwise agreed in writing.',
-	];
-	renterObligations.forEach((text, idx) => drawParagraph(`(${idx + 1}) ${text}`));
-	drawRule();
+// 17. ALTERATIONS
+drawSectionTitle('17.', 'Alterations');
+drawNumberedText('17.1.', 'The Tenant shall not make any alternations or additions, whether structural or otherwise, to the Property or any portion thereof without the Landlord’s prior written consent and in any event shall not be entitled to any compensation therefor and such improvements and/or additions shall belong to the Landlord upon termination of the Agreement. The Tenant further agrees not to interfere with any electrical installations or to connect any lamps, motors, or heaters other than those designed for use for the electric current.');
+drawNumberedText('17.2.', 'The Tenant shall not drive any screws or nails into the walls or ceilings without the Landlord’s prior approval.');
+drawNumberedText('17.3.', 'On termination of this Agreement, the Tenant agrees to restore the Property to the condition that the Tenant received it in at his own expense. Should the Tenant fail to do so within a reasonable time, the Landlord may have the Property repaired or restored and deduct such amounts payable from the deposit.');
 
-	// 10. Use of the Property
-	drawSectionTitle('10.', 'Use of the Property');
-	const occupants: string[] = Array.isArray(data.lawfulOccupants) ? data.lawfulOccupants : [data.tenantName || 'Renter'];
-	occupants.forEach((name, i) => drawNumberedText(`(${i + 1})`, `${name};`));
-	drawNumberedText('(n)', '(the "Lawful Occupiers").');
-	drawNumberedText('(n+1)', 'The Renter agrees not to permit any individuals other than the Lawful Occupiers to reside in the Property without obtaining the Landlord\'s prior written consent, which shall not be unreasonably withheld.');
-	drawRule();
+// Signatures section – formatted per new spec
+ensureSpace(180);
+drawParagraph('SIGNED at __________________ this _____day of __________________________ 20__.');
+drawParagraph('As witnesses:');
+ensureSpace(3 * (sizes.body + lineGap));
+for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
+drawParagraph('_________________________________');
+drawParagraph('                    LANDLORD');
+ensureSpace(2 * (sizes.body + lineGap));
+for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
+drawParagraph('SIGNED at __________________ this _____day of __________________________ 20__.');
+drawParagraph('As witnesses:');
+ensureSpace(3 * (sizes.body + lineGap));
+for (let i=0;i<1;i++){ page.drawLine({ start: { x: margin, y: y - 2 }, end: { x: pageWidth - margin }, thickness: 0.8, color: colors.rule }); y -= sizes.body + lineGap; }
+drawParagraph('_________________________________');
+drawParagraph('                             TENANT');
 
-	// 11. Landlord's Right to Enter the Property
-	drawSectionTitle('11.', "Landlord's Right to Enter the Property");
-	drawNumberedText('(i)', 'The Landlord, or any person acting on behalf of the Landlord, reserves the right to enter the Property upon providing the Renter with at least 24 hours’ prior notice in writing for the following purposes:');
-	['To inspect the condition and state of repair of the Property;', 'To carry out necessary repairs or maintenance as required under this Agreement;', 'To show the Property to prospective renters, buyers, or contractors (with reasonable notice);', 'To carry out any other actions permitted under the terms of this Agreement.'].forEach((item, idx) => drawNumberedText(`(${['i','ii','iii','iv'][idx]})`, item));
-	drawNumberedText('(v)', 'The Landlord shall retain a set of keys to the Property. These keys may only be used with the prior consent of the Renter, except in cases of emergency, such as a gas leak, electrical faults, or other urgent situations where immediate access is required to prevent harm or damage.');
-	drawNumberedText('(vi)', 'The Landlord reserves the right to display a “for sale” or “to let” sign on the Property during the last two months of the rental period, in accordance with local laws and regulations.');
-	drawNumberedText('(vii)', 'The Landlord reserves the right to re-enter the Property if:');
-	['the Rent is unpaid 21 days after becoming payable, whether it has been formally demanded or not;', 'the Renter is declared bankrupt or insolvent under applicable law; or', 'the Renter has breached this Agreement.'].forEach((item, idx) => drawNumberedText(`(${['viii','ix','x'][idx]})`, item));
-	drawRule();
-
-	// 12. Security Deposit
-	drawSectionTitle('12.', 'Security Deposit');
-	drawNumberedText('12.1', `Deposit Payment — The Renter shall pay a deposit of ${data.securityDeposit ? `${data.rentCurrency || 'ZAR'} ${Number(data.securityDeposit).toLocaleString('en-ZA')}` : '[SECURITY DEPOSIT AMOUNT]'} (the "Deposit") to the Landlord on or before the commencement of the Rental Agreement. The Deposit is held as security for any damage to the Property, unpaid rent, or other breaches of the terms of this Agreement.`);
-	drawNumberedText('12.2', 'Use of Deposit — (i) To cover any unpaid rent or other financial obligations arising under this Agreement. (ii) To repair any damage to the Property caused by the Renter, their guests, or visitors, beyond reasonable wear and tear. (iii) To cover any cleaning costs if the Property is not returned in a clean and acceptable condition. (iv) Any other costs directly related to the Renter’s breach of the Rental Agreement.');
-	drawNumberedText('12.3', 'Notification of Deposit Protection — The Landlord shall ensure that the Deposit is held securely during the term of the rental agreement. The Renter will be provided with the details of where the Deposit is held, including the name of the holding party, contact details, and how to make a claim, within 30 days of receiving the Deposit.');
-	drawNumberedText('12.4', 'Notification of Withholding — If the Landlord intends to withhold any portion of the Deposit, they shall provide written notice to the Renter within 10 days of the end of the rental period, detailing the amount withheld and the reasons for the withholding. Any dispute regarding the amount to be withheld shall be resolved in accordance with the dispute resolution procedure outlined in this Agreement.');
-	drawNumberedText('12.5', 'Transferring the Rental Agreement — This Agreement may not be transferred to a third party, nor may the Property be sublet or reassigned without the Landlord\'s permission.');
-	drawRule();
-
-	// 13. Termination of Agreement
-	drawSectionTitle('13.', 'Termination of Agreement');
-	drawNumberedText('13.1', 'Either party may terminate this Agreement early, subject to the following notice requirements:');
-	drawNumberedText('13.1.1', 'Landlord’s Notice Requirement: The Landlord must provide at least two months’ written notice to the Renter for termination of this Agreement, with the notice ending on the last day of a rental period.');
-	drawNumberedText('13.1.2', 'Renter’s Notice Requirement: The Renter must provide at least one month’s written notice to the Landlord for termination of this Agreement, with the notice ending on the last day of a rental period.');
-	drawNumberedText('13.2', 'Either party may terminate this Agreement immediately under the following conditions:');
-	drawNumberedText('13.2.1', 'If the Property is unfit for habitation.');
-	drawNumberedText('13.2.2', 'If the Landlord fails to make necessary repairs or meet legal obligations.');
-	drawNumberedText('13.2.3', 'If there is a serious breach of contract by the other party.');
-	drawRule();
-
-	// 14. Pets
-	drawSectionTitle('14.', 'Pets');
-	drawNumberedText('14.1', 'Pets are allowed in the Property, subject to the Renter obtaining prior written approval from the Landlord.');
-	drawRule();
-
-	// 15. Notices
-	drawSectionTitle('15.', 'Notices');
-	drawNumberedText('15.1', 'Notice to the Landlord — Any notice sent to the Landlord under or in connection with this Agreement shall be deemed to have been properly served if:');
-	['Sent by first-class post to the Landlord\'s address for service as specified in this Agreement;', 'Left at the Landlord\'s address for service;', 'Sent to the Landlord\'s provided email address; or', 'Sent to any other contact details the Landlord has provided to the Renter during the term of this Agreement.'].forEach((item, idx) => drawNumberedText(`15.1.${idx + 1}`, item));
-	drawNumberedText('15.2', 'Notice to the Renter — Any notice sent to the Renter under or in connection with this Agreement shall be deemed to have been properly served if:');
-	['Sent by first-class post to the Property;', 'Left at the Property; or', 'Sent to the Renter\'s provided email address.'].forEach((item, idx) => drawNumberedText(`15.2.${idx + 1}`, item));
-	drawNumberedText('15.3', 'Deemed Receipt — Notice shall be deemed to have been received:');
-	['If delivered by hand, at the time the notice is left at the proper address;', 'If sent by first-class post, on the second working day after posting;', 'If sent by email, at 9:00 am on the next working day after sending.'].forEach((item, idx) => drawNumberedText(`15.3.${idx + 1}`, item));
-	drawNumberedText('15.4', 'Landlord\'s Address for Service — The Landlord\'s address for service is the address specified in this Agreement.');
-	drawRule();
-
-	// 16. Dispute Resolution
-	drawSectionTitle('16.', 'Dispute Resolution');
-	drawNumberedText('16.1', 'If any dispute arises out of or in connection with this Agreement, including any question regarding its existence, validity, or termination, the parties shall first attempt to resolve the dispute through good-faith negotiations between themselves.');
-	drawNumberedText('16.2', 'If the parties are unable to resolve the dispute through negotiation within 28 days of the dispute arising, either party may initiate mediation by serving written notice to the other party, specifying the nature of the dispute and the intention to mediate.');
-	drawNumberedText('16.3', 'The mediation shall be conducted by a mediator appointed by mutual agreement of the parties.');
-	drawNumberedText('16.4', 'If mediation does not resolve the dispute within 28 days of the mediator’s appointment (or any other agreed period), either party may then pursue the dispute through the courts or other legal channels available to them.');
-	drawRule();
-
-	// 17. Governing Law and Jurisdiction
-	drawSectionTitle('17.', 'Governing Law and Jurisdiction');
-	const jurisdiction = data.jurisdiction || 'South Africa';
-	drawNumberedText('17.1', 'This Agreement shall be governed by and construed in accordance with the laws of South Africa.');
-	drawNumberedText('17.2', `Each party irrevocably agrees that the courts of ${jurisdiction} shall have exclusive jurisdiction to settle any dispute or claim (including non-contractual disputes or claims) arising out of or in connection with this agreement or its subject matter or formation.`);
-
-	// Signatures
-	ensureSpace(130);
-	drawHeading('Signatures');
-
-	const sigLine = (label: string, anchor: string) => {
-		const lineWidth = 240;
-		const lineY = y - 10;
-		page.drawLine({ start: { x: margin, y: lineY }, end: { x: margin + lineWidth, y: lineY }, thickness: 1, color: colors.text });
-		page.drawText(label, { x: margin, y: lineY - 14, size: sizes.small, font: fontBody, color: colors.muted });
-		// Invisible DocuSign anchor text near the line
-		page.drawText(anchor, { x: margin + lineWidth / 2 - 40, y: lineY + 4, size: 8, font: fontBody, color: colors.invisible });
-		y -= 42;
-	};
-
-	sigLine('Landlord Signature', 'SWIFTRENT_SIGN_LANDLORD');
-	sigLine('Tenant Signature', 'SWIFTRENT_SIGN_TENANT_1');
+// Invisible DocuSign anchors near bottom for placement
+page.drawText('SWIFTRENT_SIGN_LANDLORD', { x: margin + 120, y: margin + 80, size: 8, font: fontBody, color: colors.invisible });
+page.drawText('SWIFTRENT_SIGN_TENANT_1', { x: margin + 120, y: margin + 40, size: 8, font: fontBody, color: colors.invisible });
 
 	// Footer on last page
 	drawFooter(page, pages.length);
