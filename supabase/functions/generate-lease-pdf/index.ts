@@ -30,8 +30,9 @@ serve(async (req) => {
 
     console.log(`Generating PDF for contract ${contractId}`);
 
-    // Generate PDF document
-    const pdfBuffer = await generatePDFDocument(contract);
+    // Generate PDF document (pass origin for logo fallback)
+    const requestOrigin = req.headers.get('origin') || undefined;
+    const pdfBuffer = await generatePDFDocument(contract, requestOrigin);
     
     // Upload PDF to storage
     const fileName = `${contractId}/lease_${contract.version}_${Date.now()}.pdf`;
@@ -103,7 +104,7 @@ serve(async (req) => {
   }
 });
 
-async function generatePDFDocument(contract: any): Promise<Uint8Array> {
+async function generatePDFDocument(contract: any, requestOrigin?: string): Promise<Uint8Array> {
 	const data = contract.contract_data || {};
 	const today = new Date();
 	const doc = await PDFDocument.create();
@@ -122,16 +123,16 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	// Try to embed brand logo from env URL
 	let brandLogo: any = null;
 	try {
-		const logoUrl = Deno.env.get('BRAND_LOGO_URL');
-		if (logoUrl) {
-			const res = await fetch(logoUrl);
-			const bytes = new Uint8Array(await res.arrayBuffer());
-			try {
-				brandLogo = await doc.embedPng(bytes);
-			} catch {
-				brandLogo = await doc.embedJpg(bytes);
-			}
-		}
+    const logoUrl = Deno.env.get('BRAND_LOGO_URL') || (requestOrigin ? `${requestOrigin}/favicon_io/favicon-32x32.png` : undefined);
+    if (logoUrl) {
+      const res = await fetch(logoUrl, { cache: 'no-store' });
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      try {
+        brandLogo = await doc.embedPng(bytes);
+      } catch {
+        brandLogo = await doc.embedJpg(bytes);
+      }
+    }
 	} catch {}
 
 	const margin = 48;
@@ -798,7 +799,11 @@ function getOrdinalSuffix(day: number): string {
 }
 
 async function generatePDFHash(pdfBuffer: Uint8Array): Promise<string> {
-  const hashBuffer = await crypto.subtle.digest('SHA-256', pdfBuffer);
+  // Ensure we pass a plain ArrayBuffer to SubtleCrypto
+  const start = pdfBuffer.byteOffset;
+  const end = start + pdfBuffer.byteLength;
+  const ab = (pdfBuffer.buffer as ArrayBuffer).slice(start, end);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', ab as ArrayBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
