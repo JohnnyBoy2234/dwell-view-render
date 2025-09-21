@@ -361,7 +361,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
+      {/* Why SwiftRent - Enhanced Feature Carousel */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
@@ -376,104 +376,119 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {[
+          {(() => {
+            const features = [
               {
                 title: 'Tenant Applications and Screening',
                 desc: 'Apply online in minutes with a simple form capturing your details, employment, and rental history. Credit checks are powered by Experian, with references and employment verified for trust. Our smart risk scoring and real-time updates give landlords clear insights, while tenants enjoy a smooth, effortless rental journey',
                 icon: '👥',
-                gradient: 'from-blue-500/20 to-indigo-500/20',
-                border: 'border-blue-500/30',
                 iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
               },
               {
                 title: 'Viewings and Scheduling',
                 desc: 'Simplify the viewing process with an integrated calendar system that lets tenants and agents book available times instantly. Automated reminders and notifications keep everyone informed, reduce missed appointments, and make scheduling seamless for landlords managing multiple properties.',
                 icon: '📅',
-                gradient: 'from-green-500/20 to-emerald-500/20',
-                border: 'border-green-500/30',
                 iconBg: 'bg-gradient-to-br from-green-500 to-emerald-600',
               },
               {
                 title: 'Lease & Compliance Hub',
                 desc: 'Simplify rentals with digital lease agreements that can be signed online. Tenants and landlords can easily download compliance certificates and legal documents, while smart alerts ensure renewals and expiries are never missed.',
                 icon: '📋',
-                gradient: 'from-purple-500/20 to-violet-500/20',
-                border: 'border-purple-500/30',
                 iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600',
               },
               {
                 title: 'Maintenance Management',
                 desc: 'Make maintenance hassle-free with a simple request portal for tenants and an easy-to-track ticketing system for landlords. Every issue can be monitored from open to resolved, costs are logged for full transparency, and urgent requests trigger instant alerts.',
                 icon: '🔧',
-                gradient: 'from-orange-500/20 to-red-500/20',
-                border: 'border-orange-500/30',
                 iconBg: 'bg-gradient-to-br from-orange-500 to-red-600',
               },
               {
                 title: 'Property Portfolio Management',
                 desc: 'Manage your entire property portfolio in one place. From tracking rent and expenses to communicating with tenants and accessing performance insights, everything you need to stay in control is organized into one powerful dashboard.',
                 icon: '🏢',
-                gradient: 'from-cyan-500/20 to-teal-500/20',
-                border: 'border-cyan-500/30',
                 iconBg: 'bg-gradient-to-br from-cyan-500 to-teal-600',
               },
               {
                 title: 'Smart Notifications & Alerts',
                 desc: 'Stay on top of every detail with real-time notifications. From new applications and maintenance updates to rent reminders and expiring documents, our customizable alerts keep landlords and tenants informed instantly through email, WhatsApp, and in-app messaging.',
                 icon: '🔔',
-                gradient: 'from-pink-500/20 to-rose-500/20',
-                border: 'border-pink-500/30',
                 iconBg: 'bg-gradient-to-br from-pink-500 to-rose-600',
               },
-            ].map((feature, i) => (
-              <div
-                key={feature.title}
-                className={`group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] reveal-up hover:bg-white/20 h-full flex flex-col`}
-                style={{ animationDelay: `${100 + i * 120}ms` }}
-                onMouseMove={tilt.onMove}
-                onMouseLeave={tilt.onLeave}
-              >
-                {/* Enhanced glass effect overlay */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl" />
-                
-                {/* Animated border glow */}
-                <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Content */}
-                <div className="relative z-10 flex gap-6 flex-1">
-                  {/* Enhanced Icon */}
-                  <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                    {feature.icon}
-                  </div>
-                  
-                  {/* Text content */}
-                  <div className="flex-1 flex flex-col">
-                    <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
-                      {feature.title}
-                    </h3>
-                    {Array.isArray(feature.desc) ? (
-                      <ul className="text-muted-foreground leading-relaxed text-sm space-y-1 flex-1">
-                        {feature.desc.map((item, index) => (
-                          <li key={index} className="flex items-start">
-                            <span className="text-primary mr-2 mt-1">•</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-muted-foreground leading-relaxed text-sm flex-1">
-                        {feature.desc}
-                      </p>
-                    )}
-                  </div>
+            ];
+
+            const trackRef = useRef<HTMLDivElement | null>(null);
+            const [active, setActive] = useState(0);
+
+            const handleScroll = () => {
+              const el = trackRef.current;
+              if (!el) return;
+              const childWidth = el.clientWidth * 0.8; // matches w- classes below
+              const idx = Math.round(el.scrollLeft / childWidth);
+              setActive(Math.max(0, Math.min(features.length - 1, idx)));
+            };
+
+            const scrollTo = (idx: number) => {
+              const el = trackRef.current;
+              if (!el) return;
+              const childWidth = el.clientWidth * 0.8;
+              el.scrollTo({ left: idx * childWidth, behavior: 'smooth' });
+            };
+
+            return (
+              <div>
+                <div
+                  ref={trackRef}
+                  onScroll={handleScroll}
+                  className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-2 -mx-4 px-4 scroll-smooth"
+                  style={{ scrollBehavior: 'smooth' }}
+                >
+                  {features.map((feature, i) => (
+                    <div
+                      key={feature.title}
+                      className="snap-center flex-none w-[85%] sm:w-[70%] md:w-[60%] lg:w-[50%] xl:w-[45%]"
+                    >
+                      <div
+                        className="group relative p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02] h-full flex flex-col"
+                        style={{ animationDelay: `${100 + i * 120}ms` }}
+                        onMouseMove={tilt.onMove}
+                        onMouseLeave={tilt.onLeave}
+                      >
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl" />
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                        <div className="relative z-10 flex gap-6 flex-1">
+                          <div className={`flex-shrink-0 w-16 h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+                            {feature.icon}
+                          </div>
+                          <div className="flex-1 flex flex-col">
+                            <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors duration-300">
+                              {feature.title}
+                            </h3>
+                            <p className="text-muted-foreground leading-relaxed text-sm flex-1">
+                              {feature.desc}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                
-                {/* Subtle inner glow */}
-                <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+                {/* Dots */}
+                <div className="mt-6 flex items-center justify-center gap-2">
+                  {features.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => scrollTo(i)}
+                      className={`h-2 rounded-full transition-all ${active === i ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/40'} focus:outline-none`}
+                      aria-label={`Go to slide ${i + 1}`}
+                    />)
+                  )}
+                </div>
               </div>
-            ))}
-          </div>
+            );
+          })()}
         </div>
       </section>
 
