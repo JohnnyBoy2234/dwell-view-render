@@ -418,41 +418,37 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	drawNumberedText('5.2', 'The interest shall be payable from the Due Date until the date the Rent is actually paid.');
 	drawRule();
 
-	// Condition of the Property
-	drawHeading('Condition of the Property');
-	drawParagraph('The Property is rented in the condition it is in at the commencement of this Rental Agreement, as documented in the accompanying property inventory/condition report.');
-	drawParagraph('The Renter accepts the Property in its current condition at the time of signing this Agreement.');
+	// 6. Condition of the Property
+	drawSectionTitle('6.', 'Condition of the Property');
+	drawNumberedText('6.1', 'The Property is rented in the condition it is in at the commencement of this Rental Agreement, as documented in the accompanying property inventory/condition report.');
+	drawNumberedText('6.2', 'The Renter accepts the Property in its current condition at the time of signing this Agreement.');
 	drawRule();
 
-	// Property Furnishings
-	drawHeading('Property Furnishings');
-	drawParagraph('The Property is let on an unfurnished basis. The Renter acknowledges that no furniture, fixtures, or fittings are provided by the Landlord, except for any essential fixtures required by law, such as smoke alarms, carbon monoxide detectors, or other legally required safety features in the country where the Property is located.');
-	drawParagraph('The Renter is responsible for providing their own furniture and furnishings during the Rental Agreement and must ensure that any such items comply with relevant safety regulations applicable in the jurisdiction of the Property.');
-	drawParagraph('At the end of the Rental Agreement, the Property must be returned in the same condition as at the start of the Rental Agreement, subject to fair wear and tear.');
+	// 7. Property Furnishings
+	drawSectionTitle('7.', 'Property Furnishings');
+	drawNumberedText('7.1', 'The Property is let on an unfurnished basis. The Renter acknowledges that no furniture, fixtures, or fittings are provided by the Landlord, except for any essential fixtures required by law, such as smoke alarms, carbon monoxide detectors, or other legally required safety features in the country where the Property is located.');
+	drawNumberedText('7.2', 'The Renter is responsible for providing their own furniture and furnishings during the Rental Agreement and must ensure that any such items comply with relevant safety regulations applicable in the jurisdiction of the Property.');
+	drawNumberedText('7.3', 'At the end of the Rental Agreement, the Property must be returned in the same condition as at the start of the Rental Agreement, subject to fair wear and tear.');
 	drawRule();
 
-	// Landlord Obligations
-	drawHeading('Landlord Obligations');
+	// 8. Landlord Obligations
+	drawSectionTitle('8.', 'Landlord Obligations');
 	const roman = (i: number) => ['(i)', '(ii)', '(iii)', '(iv)', '(v)', '(vi)', '(vii)', '(viii)', '(ix)', '(x)'][i] || `(${i + 1})`;
-	[
-		'Ensuring that the Property is equipped with functional and appropriately placed smoke detectors.',
-		'Maintaining the structure and exterior of the Property in good condition.',
-		'Providing the Renter with safe and suitable means of access to and from the Property.',
-		'Allowing the Renter the quiet enjoyment of the Property without undue interruption.',
-		'Keeping in repair and proper working order the installations in the Property for:',
-	].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawParagraph('The supply of water, gas, and electricity;');
-	drawParagraph('Sanitation, including basins, sinks, baths, and sanitary conveniences (excluding other fixtures, fittings, and appliances used in connection with these supplies);');
-	drawParagraph('Space heating and water heating.');
-	drawParagraph('The Landlord is not required to:');
-	[
-		'Carry out any works or repairs for which the Renter is liable under this Rental Agreement.',
-		'Keep in repair or maintain any items that the Renter is entitled to remove from the Property.',
-	].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
+	['Ensuring that the Property is equipped with functional and appropriately placed smoke detectors.',
+	 'Maintaining the structure and exterior of the Property in good condition.',
+	 'Providing the Renter with safe and suitable means of access to and from the Property.',
+	 'Allowing the Renter the quiet enjoyment of the Property without undue interruption.',
+	 'Keeping in repair and proper working order the installations in the Property for:'].forEach((item, idx) => drawNumberedText(roman(idx), item));
+	drawNumberedText(roman(5), 'The supply of water, gas, and electricity;');
+	drawNumberedText(roman(6), 'Sanitation, including basins, sinks, baths, and sanitary conveniences (excluding other fixtures, fittings, and appliances used in connection with these supplies);');
+	drawNumberedText(roman(7), 'Space heating and water heating.');
+	drawNumberedText(roman(8), 'The Landlord is not required to:');
+	['Carry out any works or repairs for which the Renter is liable under this Rental Agreement.',
+	 'Keep in repair or maintain any items that the Renter is entitled to remove from the Property.'].forEach((item, idx) => drawNumberedText(roman(9 + idx), item));
 	drawRule();
 
-	// Renter Obligations
-	drawHeading('Renter Obligations');
+	// 9. Renter Obligations
+	drawSectionTitle('9.', 'Renter Obligations');
 	const renterObligations = [
 		'Pay the Rent promptly on the Due Date, without any deduction, set-off, or delay, and in the manner specified by the Landlord. The Renter acknowledges that timely payment of Rent is a fundamental obligation under this Agreement. If the Rent is not received by the Landlord on or before the Due Date, the Renter shall be considered in breach of this Agreement, and the Landlord may take appropriate action as set out in this Agreement or under applicable law, including the right to charge interest on overdue amounts.',
 		'Keep the Property clean and tidy at all times, ensuring that it is free from waste and refuse, and maintaining the general upkeep of the Property, including but not limited to the interior, carpets, and furnishings.',
@@ -471,79 +467,73 @@ async function generatePDFDocument(contract: any): Promise<Uint8Array> {
 	renterObligations.forEach((text, idx) => drawParagraph(`(${idx + 1}) ${text}`));
 	drawRule();
 
-	// Use of the Property
-	drawHeading('Use of the Property');
+	// 10. Use of the Property
+	drawSectionTitle('10.', 'Use of the Property');
 	const occupants: string[] = Array.isArray(data.lawfulOccupants) ? data.lawfulOccupants : [data.tenantName || 'Renter'];
-	occupants.forEach((name) => drawParagraph(`${name};`));
-	drawParagraph('(the "Lawful Occupiers").');
-	drawParagraph('The Renter agrees not to permit any individuals other than the Lawful Occupiers to reside in the Property without obtaining the Landlord\'s prior written consent, which shall not be unreasonably withheld.');
+	occupants.forEach((name, i) => drawNumberedText(`(${i + 1})`, `${name};`));
+	drawNumberedText('(n)', '(the "Lawful Occupiers").');
+	drawNumberedText('(n+1)', 'The Renter agrees not to permit any individuals other than the Lawful Occupiers to reside in the Property without obtaining the Landlord\'s prior written consent, which shall not be unreasonably withheld.');
 	drawRule();
 
-	// Landlord\'s Right to Enter the Property
-	drawHeading('Landlord\'s Right to Enter the Property');
-	drawParagraph('The Landlord, or any person acting on behalf of the Landlord, reserves the right to enter the Property upon providing the Renter with at least 24 hours’ prior notice in writing for the following purposes:');
-	['To inspect the condition and state of repair of the Property;', 'To carry out necessary repairs or maintenance as required under this Agreement;', 'To show the Property to prospective renters, buyers, or contractors (with reasonable notice);', 'To carry out any other actions permitted under the terms of this Agreement.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawParagraph('The Landlord shall retain a set of keys to the Property. These keys may only be used with the prior consent of the Renter, except in cases of emergency, such as a gas leak, electrical faults, or other urgent situations where immediate access is required to prevent harm or damage.');
-	drawParagraph('The Landlord reserves the right to display a “for sale” or “to let” sign on the Property during the last two months of the rental period, in accordance with local laws and regulations.');
-	drawParagraph('The Landlord reserves the right to re-enter the Property if:');
-	['the Rent is unpaid 21 days after becoming payable, whether it has been formally demanded or not;', 'the Renter is declared bankrupt or insolvent under applicable law; or', 'the Renter has breached this Agreement.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
+	// 11. Landlord's Right to Enter the Property
+	drawSectionTitle('11.', "Landlord's Right to Enter the Property");
+	drawNumberedText('(i)', 'The Landlord, or any person acting on behalf of the Landlord, reserves the right to enter the Property upon providing the Renter with at least 24 hours’ prior notice in writing for the following purposes:');
+	['To inspect the condition and state of repair of the Property;', 'To carry out necessary repairs or maintenance as required under this Agreement;', 'To show the Property to prospective renters, buyers, or contractors (with reasonable notice);', 'To carry out any other actions permitted under the terms of this Agreement.'].forEach((item, idx) => drawNumberedText(`(${['i','ii','iii','iv'][idx]})`, item));
+	drawNumberedText('(v)', 'The Landlord shall retain a set of keys to the Property. These keys may only be used with the prior consent of the Renter, except in cases of emergency, such as a gas leak, electrical faults, or other urgent situations where immediate access is required to prevent harm or damage.');
+	drawNumberedText('(vi)', 'The Landlord reserves the right to display a “for sale” or “to let” sign on the Property during the last two months of the rental period, in accordance with local laws and regulations.');
+	drawNumberedText('(vii)', 'The Landlord reserves the right to re-enter the Property if:');
+	['the Rent is unpaid 21 days after becoming payable, whether it has been formally demanded or not;', 'the Renter is declared bankrupt or insolvent under applicable law; or', 'the Renter has breached this Agreement.'].forEach((item, idx) => drawNumberedText(`(${['viii','ix','x'][idx]})`, item));
 	drawRule();
 
-	// Security Deposit
-	drawHeading('Security Deposit');
-	drawHeading('Deposit Payment');
-	drawParagraph(`The Renter shall pay a deposit of ${data.securityDeposit ? `${data.rentCurrency || 'ZAR'} ${Number(data.securityDeposit).toLocaleString('en-ZA')}` : '[SECURITY DEPOSIT AMOUNT]'} (the "Deposit") to the Landlord on or before the commencement of the Rental Agreement. The Deposit is held as security for any damage to the Property, unpaid rent, or other breaches of the terms of this Agreement.`);
-	drawHeading('Use of Deposit');
-	['To cover any unpaid rent or other financial obligations arising under this Agreement.', 'To repair any damage to the Property caused by the Renter, their guests, or visitors, beyond reasonable wear and tear.', 'To cover any cleaning costs if the Property is not returned in a clean and acceptable condition.', 'Any other costs directly related to the Renter’s breach of the Rental Agreement.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawHeading('Notification of Deposit Protection');
-	drawParagraph('The Landlord shall ensure that the Deposit is held securely during the term of the rental agreement. The Renter will be provided with the details of where the Deposit is held, including the name of the holding party, contact details, and how to make a claim, within 30 days of receiving the Deposit.');
-	drawHeading('Notification of Withholding');
-	drawParagraph('If the Landlord intends to withhold any portion of the Deposit, they shall provide written notice to the Renter within 10 days of the end of the rental period, detailing the amount withheld and the reasons for the withholding. Any dispute regarding the amount to be withheld shall be resolved in accordance with the dispute resolution procedure outlined in this Agreement.');
-	drawHeading('Transferring the Rental Agreement');
-	drawParagraph('This Agreement may not be transferred to a third party, nor may the Property be sublet or reassigned without the Landlord\'s permission.');
+	// 12. Security Deposit
+	drawSectionTitle('12.', 'Security Deposit');
+	drawNumberedText('12.1', `Deposit Payment — The Renter shall pay a deposit of ${data.securityDeposit ? `${data.rentCurrency || 'ZAR'} ${Number(data.securityDeposit).toLocaleString('en-ZA')}` : '[SECURITY DEPOSIT AMOUNT]'} (the "Deposit") to the Landlord on or before the commencement of the Rental Agreement. The Deposit is held as security for any damage to the Property, unpaid rent, or other breaches of the terms of this Agreement.`);
+	drawNumberedText('12.2', 'Use of Deposit — (i) To cover any unpaid rent or other financial obligations arising under this Agreement. (ii) To repair any damage to the Property caused by the Renter, their guests, or visitors, beyond reasonable wear and tear. (iii) To cover any cleaning costs if the Property is not returned in a clean and acceptable condition. (iv) Any other costs directly related to the Renter’s breach of the Rental Agreement.');
+	drawNumberedText('12.3', 'Notification of Deposit Protection — The Landlord shall ensure that the Deposit is held securely during the term of the rental agreement. The Renter will be provided with the details of where the Deposit is held, including the name of the holding party, contact details, and how to make a claim, within 30 days of receiving the Deposit.');
+	drawNumberedText('12.4', 'Notification of Withholding — If the Landlord intends to withhold any portion of the Deposit, they shall provide written notice to the Renter within 10 days of the end of the rental period, detailing the amount withheld and the reasons for the withholding. Any dispute regarding the amount to be withheld shall be resolved in accordance with the dispute resolution procedure outlined in this Agreement.');
+	drawNumberedText('12.5', 'Transferring the Rental Agreement — This Agreement may not be transferred to a third party, nor may the Property be sublet or reassigned without the Landlord\'s permission.');
 	drawRule();
 
-	// Termination of Agreement
-	drawHeading('Termination of Agreement');
-	drawParagraph('Either party may terminate this Agreement early, subject to the following notice requirements:');
-	['Landlord’s Notice Requirement: The Landlord must provide at least two months’ written notice to the Renter for termination of this Agreement, with the notice ending on the last day of a rental period.', 'Renter’s Notice Requirement: The Renter must provide at least one month’s written notice to the Landlord for termination of this Agreement, with the notice ending on the last day of a rental period.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawParagraph('Either party may terminate this Agreement immediately under the following conditions:');
-	['If the Property is unfit for habitation.', 'If the Landlord fails to make necessary repairs or meet legal obligations.', 'If there is a serious breach of contract by the other party.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
+	// 13. Termination of Agreement
+	drawSectionTitle('13.', 'Termination of Agreement');
+	drawNumberedText('13.1', 'Either party may terminate this Agreement early, subject to the following notice requirements:');
+	drawNumberedText('13.1.1', 'Landlord’s Notice Requirement: The Landlord must provide at least two months’ written notice to the Renter for termination of this Agreement, with the notice ending on the last day of a rental period.');
+	drawNumberedText('13.1.2', 'Renter’s Notice Requirement: The Renter must provide at least one month’s written notice to the Landlord for termination of this Agreement, with the notice ending on the last day of a rental period.');
+	drawNumberedText('13.2', 'Either party may terminate this Agreement immediately under the following conditions:');
+	drawNumberedText('13.2.1', 'If the Property is unfit for habitation.');
+	drawNumberedText('13.2.2', 'If the Landlord fails to make necessary repairs or meet legal obligations.');
+	drawNumberedText('13.2.3', 'If there is a serious breach of contract by the other party.');
 	drawRule();
 
-	// Pets
-	drawHeading('Pets');
-	drawParagraph('Pets are allowed in the Property, subject to the Renter obtaining prior written approval from the Landlord.');
+	// 14. Pets
+	drawSectionTitle('14.', 'Pets');
+	drawNumberedText('14.1', 'Pets are allowed in the Property, subject to the Renter obtaining prior written approval from the Landlord.');
 	drawRule();
 
-	// Notices
-	drawHeading('Notices');
-	drawHeading('Notice to the Landlord');
-	drawParagraph('Any notice sent to the Landlord under or in connection with this Agreement shall be deemed to have been properly served if:');
-	['Sent by first-class post to the Landlord\'s address for service as specified in this Agreement;', 'Left at the Landlord\'s address for service;', 'Sent to the Landlord\'s provided email address; or', 'Sent to any other contact details the Landlord has provided to the Renter during the term of this Agreement.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawHeading('Notice to the Renter');
-	drawParagraph('Any notice sent to the Renter under or in connection with this Agreement shall be deemed to have been properly served if:');
-	['Sent by first-class post to the Property;', 'Left at the Property; or', 'Sent to the Renter\'s provided email address.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawHeading('Deemed Receipt');
-	drawParagraph('Notice shall be deemed to have been received:');
-	['If delivered by hand, at the time the notice is left at the proper address;', 'If sent by first-class post, on the second working day after posting;', 'If sent by email, at 9:00 am on the next working day after sending.'].forEach((item, idx) => drawParagraph(`${roman(idx)} ${item}`));
-	drawHeading('Landlord\'s Address for Service');
-	drawParagraph('The Landlord\'s address for service is the address specified in this Agreement.');
+	// 15. Notices
+	drawSectionTitle('15.', 'Notices');
+	drawNumberedText('15.1', 'Notice to the Landlord — Any notice sent to the Landlord under or in connection with this Agreement shall be deemed to have been properly served if:');
+	['Sent by first-class post to the Landlord\'s address for service as specified in this Agreement;', 'Left at the Landlord\'s address for service;', 'Sent to the Landlord\'s provided email address; or', 'Sent to any other contact details the Landlord has provided to the Renter during the term of this Agreement.'].forEach((item, idx) => drawNumberedText(`15.1.${idx + 1}`, item));
+	drawNumberedText('15.2', 'Notice to the Renter — Any notice sent to the Renter under or in connection with this Agreement shall be deemed to have been properly served if:');
+	['Sent by first-class post to the Property;', 'Left at the Property; or', 'Sent to the Renter\'s provided email address.'].forEach((item, idx) => drawNumberedText(`15.2.${idx + 1}`, item));
+	drawNumberedText('15.3', 'Deemed Receipt — Notice shall be deemed to have been received:');
+	['If delivered by hand, at the time the notice is left at the proper address;', 'If sent by first-class post, on the second working day after posting;', 'If sent by email, at 9:00 am on the next working day after sending.'].forEach((item, idx) => drawNumberedText(`15.3.${idx + 1}`, item));
+	drawNumberedText('15.4', 'Landlord\'s Address for Service — The Landlord\'s address for service is the address specified in this Agreement.');
 	drawRule();
 
-	// Dispute Resolution
-	drawHeading('Dispute Resolution');
-	drawParagraph('If any dispute arises out of or in connection with this Agreement, including any question regarding its existence, validity, or termination, the parties shall first attempt to resolve the dispute through good-faith negotiations between themselves.');
-	drawParagraph('If the parties are unable to resolve the dispute through negotiation within 28 days of the dispute arising, either party may initiate mediation by serving written notice to the other party, specifying the nature of the dispute and the intention to mediate.');
-	drawParagraph('The mediation shall be conducted by a mediator appointed by mutual agreement of the parties.');
-	drawParagraph('If mediation does not resolve the dispute within 28 days of the mediator’s appointment (or any other agreed period), either party may then pursue the dispute through the courts or other legal channels available to them.');
+	// 16. Dispute Resolution
+	drawSectionTitle('16.', 'Dispute Resolution');
+	drawNumberedText('16.1', 'If any dispute arises out of or in connection with this Agreement, including any question regarding its existence, validity, or termination, the parties shall first attempt to resolve the dispute through good-faith negotiations between themselves.');
+	drawNumberedText('16.2', 'If the parties are unable to resolve the dispute through negotiation within 28 days of the dispute arising, either party may initiate mediation by serving written notice to the other party, specifying the nature of the dispute and the intention to mediate.');
+	drawNumberedText('16.3', 'The mediation shall be conducted by a mediator appointed by mutual agreement of the parties.');
+	drawNumberedText('16.4', 'If mediation does not resolve the dispute within 28 days of the mediator’s appointment (or any other agreed period), either party may then pursue the dispute through the courts or other legal channels available to them.');
 	drawRule();
 
-	// Governing Law and Jurisdiction
-	drawHeading('Governing Law and Jurisdiction');
+	// 17. Governing Law and Jurisdiction
+	drawSectionTitle('17.', 'Governing Law and Jurisdiction');
 	const jurisdiction = data.jurisdiction || 'South Africa';
-	drawParagraph('This Agreement shall be governed by and construed in accordance with the laws of South Africa.');
-	drawParagraph(`Each party irrevocably agrees that the courts of ${jurisdiction} shall have exclusive jurisdiction to settle any dispute or claim (including non-contractual disputes or claims) arising out of or in connection with this agreement or its subject matter or formation.`);
+	drawNumberedText('17.1', 'This Agreement shall be governed by and construed in accordance with the laws of South Africa.');
+	drawNumberedText('17.2', `Each party irrevocably agrees that the courts of ${jurisdiction} shall have exclusive jurisdiction to settle any dispute or claim (including non-contractual disputes or claims) arising out of or in connection with this agreement or its subject matter or formation.`);
 
 	// Signatures
 	ensureSpace(130);
