@@ -1,81 +1,128 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import "@/styles/animations.css";
-import { Property24SearchBar } from "@/components/search/Property24SearchBar";
-import {MoreFiltersModal} from "@/components/search/MoreFiltersModal";
-import PropertyCard from "@/components/PropertyCard";
-import {
-  usePropertySearchFilters,
-} from "@/hooks/usePropertySearchFilters";
-import { ArrowRight, CheckCircle, Home, Star, Zap, Shield, Users, Calendar, FileText, Wrench, Building, Bell } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
-import HowItWorks from "@/components/HowItWorks";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Property24SearchBar } from "@/components/search/Property24SearchBar";
+import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
+import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { useAuth } from "@/hooks/useAuth";
+import HowItWorks from "@/components/HowItWorks";
+import { SafeRentingSection } from "@/components/SafeRentingSection";
+import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
+import { Footer } from "@/components/Footer";
+import PropertyCard from "@/components/PropertyCard";
+import { 
+  Shield, 
+  CheckCircle, 
+  Lock, 
+  Wrench, 
+  DollarSign, 
+  Users,
+  Home,
+  TrendingUp,
+  ArrowRight,
+  Star,
+  Award,
+  UserCheck,
+  MessageSquare,
+  Search,
+  MapPin
+} from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
-// Animated counter component
-function AnimatedCounter({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const [val, setVal] = useState(from);
+// AnimatedCounter component for stats
+const AnimatedCounter = ({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) => {
+  const [count, setCount] = useState(from);
+  const [isVisible, setIsVisible] = useState(false);
+
   useEffect(() => {
-    let raf = 0;
-    let start = 0;
-    const obs = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting) {
-        start = performance.now();
-        const step = (t: number) => {
-          const p = Math.min(1, (t - start) / duration);
-          const eased = 1 - Math.pow(1 - p, 3);
-          setVal(Math.round(from + (to - from) * eased));
-          if (p < 1) raf = requestAnimationFrame(step);
-        };
-        raf = requestAnimationFrame(step);
-        obs.disconnect();
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const element = document.getElementById(`counter-${to}`);
+    if (element) observer.observe(element);
+
+    return () => observer.disconnect();
+  }, [to]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    let startTime: number;
+    const startValue = from;
+    const endValue = to;
+
+    const animate = (currentTime: number) => {
+      if (!startTime) startTime = currentTime;
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+      const currentCount = Math.round(startValue + (endValue - startValue) * easeOutQuart);
+
+      setCount(currentCount);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
       }
-    }, { threshold: 0.3 });
-    if (ref.current) obs.observe(ref.current);
-    return () => { cancelAnimationFrame(raf); obs.disconnect(); };
-  }, [from, to, duration]);
-  return <div ref={ref}>{val.toLocaleString()}</div>;
-}
+    };
+
+    requestAnimationFrame(animate);
+  }, [isVisible, from, to, duration]);
+
+  return <span id={`counter-${to}`}>{count.toLocaleString()}</span>;
+};
 
 const Index = () => {
-  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const navigate = useNavigate();
-  const { user, isAdmin, isLandlord } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { filters, updateFilters, executeSearch, clearFilters } = usePropertySearchFilters();
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
-  // Use the unified search filters hook
-  const { filters, updateFilters, executeSearch } = usePropertySearchFilters();
-
-  // Advanced filters state
-  const [advancedFilters, setAdvancedFilters] = useState({
-    propertyTypes: [] as string[],
-    amenities: [] as string[],
-    bathrooms: "Any" as string,
-    availableFrom: null as Date | null,
-  });
-
-  // No results state for hero section
-  const [showNoResults, setShowNoResults] = useState(false);
-
-  // merge partial updates coming from Property24SearchBar
   const onFiltersChange = (patch: Partial<typeof filters>) => {
     updateFilters(patch);
-    setShowNoResults(false);
-  };
-
-  // Execute search using the hook
-  const applyFilters = () => {
-    executeSearch();
   };
 
   const handleSearch = () => {
-    setShowNoResults(false);
-    applyFilters();
+    executeSearch();
   };
 
-  // Featured properties for the homepage
+  // Features data
+  const features = [
+    {
+      icon: DollarSign,
+      title: "No Commission",
+      description: "Save thousands by cutting out agent fees. Connect directly with landlords and tenants.",
+      gradient: "from-success-green to-success-green-glow"
+    },
+    {
+      icon: UserCheck,
+      title: "Verified & Secure",
+      description: "ID & email verification for all users. Safe messaging and verified listings only.",
+      gradient: "from-ocean-blue to-ocean-blue-glow"
+    },
+    {
+      icon: Shield,
+      title: "Safe Renting",
+      description: "Built-in trust with transparent processes and protected digital agreements.",
+      gradient: "from-earth-warm to-earth-warm"
+    },
+    {
+      icon: Wrench,
+      title: "Maintenance Manager",
+      description: "Track and resolve property issues online with our integrated maintenance system.",
+      gradient: "from-muted-foreground to-muted"
+    }
+  ];
+
+  // Featured properties using the existing format
   const featuredProperties = [
     {
       id: "1",
@@ -114,299 +161,279 @@ const Index = () => {
     },
   ];
 
+  const stats = [
+    { label: "Active Listings", value: 2500, icon: Home },
+    { label: "Happy Tenants", value: 1200, icon: Users },
+    { label: "Verified Landlords", value: 850, icon: Award },
+    { label: "5-Star Reviews", value: 4.8, icon: Star, isRating: true }
+  ];
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Background Image */}
+      {/* Hero Section */}
       <section 
-        className="relative h-screen flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${heroBackground})` }}
+        className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
+        style={{
+          backgroundImage: `linear-gradient(rgba(33, 79, 197, 0.8), rgba(34, 197, 94, 0.8)), url(${heroBackground})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/80 via-ocean-blue-dark/75 to-success-green/70" />
-        
-        {/* Content */}
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
-          <div className="mb-8 animate-fade-in">
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
-              <span className="block">Find Your Perfect</span>
-              <span className="block text-success-green">Rental Home</span>
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 -left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-10 -right-10 w-96 h-96 bg-success-green/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Hero Content */}
+          <div className="mb-12">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              Safe, Simple,<br />
+              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+                Commission-Free
+              </span><br />
+              Renting
             </h1>
-            <p className="text-xl sm:text-2xl lg:text-3xl font-light text-white/90 max-w-4xl mx-auto">
-              Connect directly with landlords. No agents. No commission. 
-              <span className="block mt-2">Just seamless renting in South Africa.</span>
+            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Direct landlord-tenant connections with full verification and peace of mind
             </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+              <Button 
+                asChild 
+                size="lg" 
+                className="bg-white text-ocean-blue hover:bg-white/90 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
+              >
+                <Link to="/list-property">List Your Property</Link>
+              </Button>
+              <Button 
+                asChild 
+                size="lg" 
+                variant="outline" 
+                className="border-white text-white hover:bg-white/10 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm"
+              >
+                <Link to="/properties">Find a Rental</Link>
+              </Button>
+            </div>
           </div>
 
-          {/* Search Bar */}
-          <div className="max-w-4xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
-            <div className="backdrop-blur-xl bg-white/15 border border-white/30 rounded-3xl p-6 shadow-2xl">
-              <Property24SearchBar
-                filters={filters}
-                onFiltersChange={onFiltersChange}
-                onSearch={handleSearch}
-                onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
-              />
+          {/* Search Module */}
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl">
+              <div className="flex items-center gap-3 mb-6">
+                <Search className="h-6 w-6 text-white" />
+                <h2 className="text-xl font-semibold text-white">Find Your Perfect Rental</h2>
+              </div>
+              <div className="space-y-4">
+                <Property24SearchBar
+                  onSearch={handleSearch}
+                  onFiltersChange={onFiltersChange}
+                  onMoreFiltersOpen={() => setShowMoreFilters(true)}
+                  filters={filters}
+                />
+                <div className="flex flex-wrap gap-2 justify-center">
+                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Cape Town
+                  </Badge>
+                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Johannesburg
+                  </Badge>
+                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
+                    <MapPin className="h-3 w-3 mr-1" />
+                    Durban
+                  </Badge>
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Quick Stats */}
-          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '400ms' }}>
-            <div className="text-center">
-              <div className="text-2xl sm:text-4xl font-bold text-success-green mb-1">1000+</div>
-              <div className="text-sm sm:text-base text-white/80">Properties</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-4xl font-bold text-success-green mb-1">0%</div>
-              <div className="text-sm sm:text-base text-white/80">Commission</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl sm:text-4xl font-bold text-success-green mb-1">24/7</div>
-              <div className="text-sm sm:text-base text-white/80">Support</div>
-            </div>
-          </div>
-
-          {/* Admin Quick Access */}
-          {user && isAdmin && (
-            <div className="mt-8 animate-fade-in" style={{ animationDelay: '600ms' }}>
-              <Button 
-                onClick={() => navigate('/admin/dashboard')}
-                variant="outline"
-                className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
-              >
-                <Shield className="h-4 w-4 mr-2" />
-                Admin Panel
-              </Button>
+          {user && (
+            <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold">2,500+</div>
+                <div className="text-white/80">Active Listings</div>
+              </div>
+              <div className="hidden sm:block w-px h-12 bg-white/30"></div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">1,200+</div>
+                <div className="text-white/80">Happy Tenants</div>
+              </div>
+              {isAdmin && (
+                <>
+                  <div className="hidden sm:block w-px h-12 bg-white/30"></div>
+                  <Button 
+                    asChild
+                    variant="outline" 
+                    className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
+                  >
+                    <Link to="/admin/dashboard">Admin Panel</Link>
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>
-
-        {/* More Filters Modal */}
-        <MoreFiltersModal
-          open={moreFiltersOpen}
-          onClose={() => setMoreFiltersOpen(false)}
-          filters={advancedFilters}
-          onFiltersChange={(newFilters) => {
-            setAdvancedFilters(prev => ({ ...prev, ...newFilters }));
-          }}
-          onApplyFilters={applyFilters}
-          onClearFilters={() => {
-            setAdvancedFilters({
-              propertyTypes: [],
-              amenities: [],
-              bathrooms: "Any",
-              availableFrom: null
-            });
-            updateFilters({
-              searchTerm: "",
-              propertyType: "Any",
-              minPrice: "",
-              maxPrice: "",
-              bedrooms: "Any",
-              bathrooms: "Any",
-              propertyTypes: [],
-              amenities: [],
-              availableFrom: null
-            });
-          }}
-        />
       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gradient-to-br from-background to-secondary/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Why Choose SwiftRent?
-            </h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              From listing to lease signing, we've got you covered with cutting-edge technology
-            </p>
-          </div>
+      {/* Feature Highlights */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Why Choose SwiftRent?
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            The complete rental platform designed for South African landlords and tenants
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Users,
-                title: "Smart Applications",
-                description: "Online applications with credit checks and automated screening powered by Experian."
-              },
-              {
-                icon: Calendar,
-                title: "Easy Scheduling",
-                description: "Integrated calendar system for seamless property viewings and appointments."
-              },
-              {
-                icon: FileText,
-                title: "Digital Contracts",
-                description: "Sign lease agreements online with full legal compliance and document management."
-              },
-              {
-                icon: Wrench,
-                title: "Maintenance Hub",
-                description: "Track maintenance requests from submission to completion with full transparency."
-              },
-              {
-                icon: Building,
-                title: "Portfolio Management",
-                description: "Manage your entire property portfolio from one powerful dashboard."
-              },
-              {
-                icon: Bell,
-                title: "Smart Notifications",
-                description: "Real-time alerts via email, WhatsApp, and in-app messaging for everything important."
-              }
-            ].map((feature, index) => (
-              <div 
-                key={index}
-                className="bg-card/80 backdrop-blur-sm p-8 rounded-3xl border border-border/50 hover:shadow-ios-lg transition-all duration-300 hover:-translate-y-2"
-              >
-                <div className="mb-6">
-                  <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mb-4">
-                    <feature.icon className="w-8 h-8 text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold text-foreground mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+              <CardContent className="p-8">
+                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
+                  <feature.icon className="h-8 w-8 text-white" />
                 </div>
-              </div>
-            ))}
-          </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {feature.description}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20">
+      {/* Safe Renting Section */}
+      <SafeRentingSection />
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-br from-muted/20 to-accent/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              How It Works
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Simple steps to find your perfect rental
-            </p>
-          </div>
           <HowItWorks />
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="py-20 bg-gradient-to-br from-secondary/30 to-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Featured Properties
-            </h2>
-            <p className="text-xl text-muted-foreground">
-              Discover amazing rental opportunities
-            </p>
-          </div>
+      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Featured Properties
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Discover verified properties from trusted landlords across South Africa
+          </p>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {featuredProperties.map((property) => (
-              <PropertyCard key={property.id} {...property} />
-            ))}
-          </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+          {featuredProperties.map((property) => (
+            <PropertyCard 
+              key={property.id} 
+              {...property}
+            />
+          ))}
+        </div>
 
-          <div className="text-center">
-            <Button 
-              onClick={() => navigate('/properties')}
-              size="lg"
-              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white px-8 py-4 text-lg rounded-2xl"
-            >
+        <div className="text-center">
+          <Button 
+            asChild 
+            size="lg"
+            className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue-dark hover:to-success-green-dark text-white rounded-xl px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          >
+            <Link to="/properties" className="flex items-center gap-2">
               View All Properties
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-          </div>
+              <ArrowRight className="h-5 w-5" />
+            </Link>
+          </Button>
         </div>
       </section>
 
       {/* Success Stats */}
-      <section className="py-20">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-ocean-blue/5 to-success-green/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-              Trusted by Thousands
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Trusted Across South Africa
             </h2>
-            <p className="text-xl text-muted-foreground">
-              Join the fastest-growing rental platform in South Africa
+            <p className="text-lg text-muted-foreground">
+              Join thousands of satisfied landlords and tenants
             </p>
           </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {[
-              { number: <AnimatedCounter to={1200} />, suffix: '+', label: "Properties Listed" },
-              { number: <AnimatedCounter to={850} />, suffix: '+', label: "Happy Tenants" },
-              { number: "0", suffix: '%', label: "Commission Fee" },
-              { number: "24/7", suffix: '', label: "Support Available" }
-            ].map((stat, index) => (
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl sm:text-5xl font-bold text-ocean-blue mb-2">
-                  {stat.number}{stat.suffix}
+                <div className="w-20 h-20 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                  <stat.icon className="h-10 w-10 text-white" />
                 </div>
-                <div className="text-muted-foreground text-sm sm:text-base">{stat.label}</div>
+                <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
+                  {stat.isRating ? (
+                    <span>{stat.value}</span>
+                  ) : (
+                    <AnimatedCounter to={stat.value} />
+                  )}
+                  {stat.isRating && <Star className="inline h-6 w-6 text-earth-warm fill-current ml-1" />}
+                </div>
+                <div className="text-muted-foreground font-medium">
+                  {stat.label}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Trust Indicators */}
-      <section className="py-16 bg-gradient-to-r from-ocean-blue/5 to-success-green/5">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12">
-            {[
-              'No Agent Commission',
-              'Secure Payments',
-              'Instant Messaging',
-              'Maintenance Manager',
-              'Digital Lease Signing',
-              'Verified Listings',
-              'Smart Search',
-              '24/7 Support'
-            ].map((tag, index) => (
-              <div 
-                key={index}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-ocean-blue/20 shadow-soft"
-              >
-                <CheckCircle className="w-4 h-4 text-success-green" />
-                <span className="text-sm font-medium text-foreground">{tag}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Testimonials */}
+      <TestimonialsCarousel />
 
-      {/* Call to Action */}
-      <section className="py-20 bg-gradient-to-br from-ocean-blue to-success-green text-white">
+      {/* Final CTA Block */}
+      <section className="py-16 md:py-24 bg-gradient-to-r from-ocean-blue to-success-green text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-            Ready to Find Your Dream Home?
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+            Rent Smarter. Rent Safer.<br />
+            <span className="text-white/90">With SwiftRent.</span>
           </h2>
-          <p className="text-xl sm:text-2xl mb-8 text-white/90">
-            Join thousands of South Africans who've found their perfect rental through SwiftRent
+          <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            Join South Africa's most trusted rental platform today
           </p>
-          
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
-              onClick={() => navigate('/properties')}
-              size="lg"
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm px-8 py-4 text-lg rounded-2xl"
+              asChild
+              size="lg" 
+              className="bg-white text-ocean-blue hover:bg-white/90 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              Browse Properties
+              <Link to="/auth">Join as Landlord</Link>
             </Button>
-            {!user && (
-              <Button 
-                onClick={() => navigate('/auth')}
-                size="lg"
-                className="bg-white text-ocean-blue hover:bg-white/90 px-8 py-4 text-lg rounded-2xl"
-              >
-                Sign Up Today
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            )}
+            <Button 
+              asChild
+              size="lg" 
+              variant="outline"
+              className="border-white text-white hover:bg-white/10 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm"
+            >
+              <Link to="/auth">Join as Tenant</Link>
+            </Button>
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <Footer />
+
+      {/* More Filters Modal */}
+      <MoreFiltersModal
+        open={showMoreFilters}
+        onClose={() => setShowMoreFilters(false)}
+        filters={filters}
+        onFiltersChange={onFiltersChange}
+        onClearFilters={clearFilters}
+        onApplyFilters={handleSearch}
+      />
     </div>
   );
 };

@@ -51,6 +51,7 @@ import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
+import SafeRenting from "./pages/SafeRenting";
 
 const queryClient = new QueryClient();
 
@@ -82,6 +83,7 @@ const App = () => {
               <Route path="/properties" element={<><Navbar /><Properties /></>} />
               <Route path="/about" element={<><Navbar /><About /></>} />
               <Route path="/blog" element={<><Navbar /><Blog /></>} />
+              <Route path="/safe-renting" element={<><Navbar /><SafeRenting /></>} />
 
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />

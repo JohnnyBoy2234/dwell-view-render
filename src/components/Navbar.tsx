@@ -17,9 +17,10 @@ const Navbar = () => {
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/properties", label: "Properties", icon: Search },
-    { path: "/blog", label: "Blog", icon: User },
-    { path: "/about", label: "About", icon: User }
+    { path: "/#how-it-works", label: "How It Works", icon: Search },
+    { path: "/safe-renting", label: "Safe Renting", icon: Shield },
+    { path: "/properties", label: "Find Rental", icon: Search },
+    { path: "/about", label: "Contact", icon: Send }
   ];
 
   return (
@@ -119,7 +120,8 @@ const Navbar = () => {
                   >
                     <Link to="/list-property">List Property</Link>
                   </Button>
-                  <Button asChild><Link to="/auth">Sign In</Link></Button>
+                  <Button asChild><Link to="/auth">Tenant Login</Link></Button>
+                  <Button variant="outline" asChild><Link to="/auth">Landlord Login</Link></Button>
                 </>
               )}
             </div>
