@@ -6,26 +6,15 @@ import PropertyCard from "@/components/PropertyCard";
 import {
   usePropertySearchFilters,
 } from "@/hooks/usePropertySearchFilters";
-import { ArrowRight, CheckCircle, Home, Star, Zap, Shield } from "lucide-react";
+import { ArrowRight, CheckCircle, Home, Star, Zap, Shield, Users, Calendar, FileText, Wrench, Building, Bell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { useAuth } from "@/hooks/useAuth";
+import heroBackground from "@/assets/hero-background-new.jpg";
 
-// Lightweight utilities for homepage motion without new deps
-function useParallax() {
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-  const onMouseMove = (e: React.MouseEvent) => {
-    const { currentTarget, clientX, clientY } = e;
-    const rect = (currentTarget as HTMLElement).getBoundingClientRect();
-    const x = ((clientX - rect.left) / rect.width - 0.5) * 2; // -1..1
-    const y = ((clientY - rect.top) / rect.height - 0.5) * 2; // -1..1
-    setPos({ x, y });
-  };
-  return { pos, onMouseMove };
-}
-
+// Animated counter component
 function AnimatedCounter({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [val, setVal] = useState(from);
@@ -51,46 +40,10 @@ function AnimatedCounter({ from = 0, to, duration = 1200 }: { from?: number; to:
   return <div ref={ref}>{val.toLocaleString()}</div>;
 }
 
-// 3D tilt helper (no deps)
-function useTilt() {
-  const onMove = (e: React.MouseEvent<HTMLElement>) => {
-    const el = e.currentTarget as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    const px = (e.clientX - rect.left) / rect.width; // 0..1
-    const py = (e.clientY - rect.top) / rect.height; // 0..1
-    const rx = (0.5 - py) * 10; // rotateX
-    const ry = (px - 0.5) * 10; // rotateY
-    el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0)`;
-  };
-  const onLeave = (e: React.MouseEvent<HTMLElement>) => {
-    const el = e.currentTarget as HTMLElement;
-    el.style.transform = `perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0)`;
-  };
-  return { onMove, onLeave };
-}
-
-// Magnetic hover helper (no deps)
-function useMagnet(intensity = 12) {
-  const onMove = (e: React.MouseEvent<HTMLElement>) => {
-    const el = e.currentTarget as HTMLElement;
-    const rect = el.getBoundingClientRect();
-    const dx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
-    const dy = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-    el.style.transform = `translate(${dx * intensity}px, ${dy * intensity}px)`;
-  };
-  const onLeave = (e: React.MouseEvent<HTMLElement>) => {
-    const el = e.currentTarget as HTMLElement;
-    el.style.transform = `translate(0, 0)`;
-  };
-  return { onMove, onLeave };
-}
-
 const Index = () => {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
   const navigate = useNavigate();
   const { user, isAdmin, isLandlord } = useAuth();
-
-  // Stay on Home page even if authenticated (no auto-redirect)
 
   // Use the unified search filters hook
   const { filters, updateFilters, executeSearch } = usePropertySearchFilters();
@@ -109,7 +62,7 @@ const Index = () => {
   // merge partial updates coming from Property24SearchBar
   const onFiltersChange = (patch: Partial<typeof filters>) => {
     updateFilters(patch);
-    setShowNoResults(false); // Clear no results when filters change
+    setShowNoResults(false);
   };
 
   // Execute search using the hook
@@ -118,18 +71,9 @@ const Index = () => {
   };
 
   const handleSearch = () => {
-    // Clear any previous no results state
     setShowNoResults(false);
-    // ensure latest filters (including location) are used
     applyFilters();
   };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleSearch();
-    }
-  };
-  
 
   // Featured properties for the homepage
   const featuredProperties = [
@@ -170,517 +114,299 @@ const Index = () => {
     },
   ];
 
-  const heroParallax = useParallax();
-  const tilt = useTilt();
-  const magnet = useMagnet();
-
   return (
-    <div className="min-h-screen relative overflow-hidden">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 -z-10">
-        {/* Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50 to-emerald-50" />
+    <div className="min-h-screen">
+      {/* Hero Section with Background Image */}
+      <section 
+        className="relative h-screen flex items-center justify-center overflow-hidden bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${heroBackground})` }}
+      >
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/80 via-ocean-blue-dark/75 to-success-green/70" />
         
-
-      </div>
-      
-      {/* Hero Section */}
-     
-      <section className="relative text-white overflow-hidden">
-        {/* Premium Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-ocean-blue/90 via-ocean-blue-dark/85 to-success-green/80" />
-        
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 min-h-[70vh] sm:min-h-[80vh] lg:min-h-screen flex items-center justify-center" onMouseMove={heroParallax.onMouseMove}>
-          <div
-            className="text-center max-w-5xl mx-auto w-full"
-            style={{
-              transform: `perspective(1200px) translate3d(${heroParallax.pos.x * 6}px, ${heroParallax.pos.y * 6}px, 0)`,
-              transition: 'transform 120ms ease-out',
-            }}
-          >
-            {/* Enhanced Title */}
-            <div className="mb-4 reveal-up">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                <span className="block">Renting the way</span>
-                <span className="block text-success-green">it should be</span>
-              </h1>
-            </div>
-            
-            <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
-              Find your perfect rental home in South Africa connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
+        {/* Content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+          <div className="mb-8 animate-fade-in">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
+              <span className="block">Find Your Perfect</span>
+              <span className="block text-success-green">Rental Home</span>
+            </h1>
+            <p className="text-xl sm:text-2xl lg:text-3xl font-light text-white/90 max-w-4xl mx-auto">
+              Connect directly with landlords. No agents. No commission. 
+              <span className="block mt-2">Just seamless renting in South Africa.</span>
             </p>
+          </div>
 
-            {/* Glass Search Bar */}
-            <div className="reveal-up" style={{ animationDelay: '200ms' }}>
-              <div className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-1 shadow-2xl">
-                <Property24SearchBar
-                  filters={filters}
-                  onFiltersChange={onFiltersChange}
-                  onSearch={handleSearch}
-                  onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
-                />
-              </div>
-
-              <MoreFiltersModal
-                open={moreFiltersOpen}
-                onClose={() => setMoreFiltersOpen(false)}
-                filters={advancedFilters}
-                onFiltersChange={(newFilters) => {
-                  setAdvancedFilters(prev => ({ ...prev, ...newFilters }));
-                }}
-                onApplyFilters={applyFilters}
-                onClearFilters={() => {
-                  setAdvancedFilters({
-                    propertyTypes: [],
-                    amenities: [],
-                    bathrooms: "Any",
-                    availableFrom: null
-                  });
-                  updateFilters({
-                    searchTerm: "",
-                    propertyType: "Any",
-                    minPrice: "",
-                    maxPrice: "",
-                    bedrooms: "Any",
-                    bathrooms: "Any",
-                    propertyTypes: [],
-                    amenities: [],
-                    availableFrom: null
-                  });
-                }}
+          {/* Search Bar */}
+          <div className="max-w-4xl mx-auto mb-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
+            <div className="backdrop-blur-xl bg-white/15 border border-white/30 rounded-3xl p-6 shadow-2xl">
+              <Property24SearchBar
+                filters={filters}
+                onFiltersChange={onFiltersChange}
+                onSearch={handleSearch}
+                onMoreFiltersOpen={() => setMoreFiltersOpen(true)}
               />
             </div>
-
-            {/* No Results Message in Hero Section */}
-            {showNoResults && (
-              <div className="mt-6 p-4 backdrop-blur-xl bg-white/10 rounded-lg border border-white/20 reveal-up" style={{ animationDelay: '300ms' }}>
-                <div className="text-center">
-                  <h3 className="text-lg font-semibold text-white mb-2">No properties match your filters</h3>
-                  <p className="text-white/80 mb-4">Try adjusting your search criteria or browse all available properties.</p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Button 
-                      variant="outline"  
-                      onClick={() => {
-                        updateFilters({
-                          searchTerm: "",
-                          propertyType: "Any",
-                          minPrice: "",
-                          maxPrice: "",
-                          bedrooms: "Any",
-                          bathrooms: "Any",
-                          propertyTypes: [],
-                          amenities: [],
-                          availableFrom: null
-                        });
-                        setAdvancedFilters({
-                          propertyTypes: [],
-                          amenities: [],
-                          bathrooms: "Any",
-                          availableFrom: null
-                        });
-                        setShowNoResults(false);
-                      }}
-                      className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
-                    >
-                      Clear Filters
-                    </Button>
-                    <Button 
-                      onClick={() => navigate('/properties')}
-                      className="bg-white text-ocean-blue hover:bg-white/90"
-                    >
-                      Browse All Properties
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Admin Quick Access Button */}
-            {user && isAdmin && (
-              <div className="mt-8 reveal-up" style={{ animationDelay: '400ms' }}>
-                <Button 
-                  onClick={() => navigate('/admin/dashboard')}
-                  variant="outline"
-                  className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
-                  {...magnet}
-                >
-                  <Shield className="h-4 w-4 mr-2" />
-                  Admin Panel
-                </Button>
-              </div>
-            )}
-
-
           </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '400ms' }}>
+            <div className="text-center">
+              <div className="text-2xl sm:text-4xl font-bold text-success-green mb-1">1000+</div>
+              <div className="text-sm sm:text-base text-white/80">Properties</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-4xl font-bold text-success-green mb-1">0%</div>
+              <div className="text-sm sm:text-base text-white/80">Commission</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl sm:text-4xl font-bold text-success-green mb-1">24/7</div>
+              <div className="text-sm sm:text-base text-white/80">Support</div>
+            </div>
+          </div>
+
+          {/* Admin Quick Access */}
+          {user && isAdmin && (
+            <div className="mt-8 animate-fade-in" style={{ animationDelay: '600ms' }}>
+              <Button 
+                onClick={() => navigate('/admin/dashboard')}
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm"
+              >
+                <Shield className="h-4 w-4 mr-2" />
+                Admin Panel
+              </Button>
+            </div>
+          )}
         </div>
+
+        {/* More Filters Modal */}
+        <MoreFiltersModal
+          open={moreFiltersOpen}
+          onClose={() => setMoreFiltersOpen(false)}
+          filters={advancedFilters}
+          onFiltersChange={(newFilters) => {
+            setAdvancedFilters(prev => ({ ...prev, ...newFilters }));
+          }}
+          onApplyFilters={applyFilters}
+          onClearFilters={() => {
+            setAdvancedFilters({
+              propertyTypes: [],
+              amenities: [],
+              bathrooms: "Any",
+              availableFrom: null
+            });
+            updateFilters({
+              searchTerm: "",
+              propertyType: "Any",
+              minPrice: "",
+              maxPrice: "",
+              bedrooms: "Any",
+              bathrooms: "Any",
+              propertyTypes: [],
+              amenities: [],
+              availableFrom: null
+            });
+          }}
+        />
       </section>
 
-      {/* Trusted by + value props marquee */}
-      <section className="py-6 backdrop-blur-xl bg-white/5 border-t border-b border-white/10">
-        <div className="home-marquee">
-          <div className="home-marquee-track gap-8 px-4 sm:px-8">
-            {Array.from({ length: 2 }).map((_, loop) => (
-              <div className="flex gap-8 pr-8" key={loop}>
-                {[
-                  'No Agent Commission',
-                  'Secure Payments',
-                  'Instant Messaging',
-                  'Maintenance Manager',
-                  'No Agent Commission',
-                  'Digital Lease Signing',
-                  'Verified Listings',
-                  'Smart Search',
-                  'No Agents',
-                  'Secure Payments',
-                  'Instant Messaging',
-                  'Maintenance Manager',
-                  'No Agent Commission',
-                  'Digital Lease Signing',
-                  'Verified Listings',
-                  'Smart Search',
-                ].map((tag, index) => {
-                  const isBlueItem = tag === 'No Agent Commission' || tag === 'No Agents';
-                  
-                  return (
-                    <span 
-                      key={`${loop}-${tag}-${index}`} 
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl text-foreground/80 border transition-colors duration-300 ${
-                        isBlueItem 
-                          ? 'bg-ocean-blue text-white border-ocean-blue hover:bg-ocean-blue-dark' 
-                          : 'bg-white/10 border-gray-300/50 hover:bg-white/20'
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-success-green" /> 
-                      {tag}
-                    </span>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why SwiftRent - Enhanced Feature Carousel */}
-      <section className="py-20 relative">
+      {/* Features Section */}
+      <section className="py-20 bg-gradient-to-br from-background to-secondary/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-6 md:mb-10">
-            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
-              Why SwiftRent
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Why Choose SwiftRent?
             </h2>
-            <p className="text-lg font-medium text-muted-foreground">
-              From Listing to Lease, Made Easy
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              From listing to lease signing, we've got you covered with cutting-edge technology
             </p>
           </div>
 
-          {(() => {
-            const features = [
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
               {
-                title: 'Tenant Applications and Screening',
-                desc: 'Apply online in minutes with a simple form capturing your details, employment, and rental history. Credit checks are powered by Experian, with references and employment verified for trust. Our smart risk scoring and real-time updates give landlords clear insights, while tenants enjoy a smooth, effortless rental journey',
-                icon: '👥',
-                iconBg: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+                icon: Users,
+                title: "Smart Applications",
+                description: "Online applications with credit checks and automated screening powered by Experian."
               },
               {
-                title: 'Viewings and Scheduling',
-                desc: 'Simplify the viewing process with an integrated calendar system that lets tenants and agents book available times instantly. Automated reminders and notifications keep everyone informed, reduce missed appointments, and make scheduling seamless for landlords managing multiple properties.',
-                icon: '📅',
-                iconBg: 'bg-gradient-to-br from-green-500 to-emerald-600',
+                icon: Calendar,
+                title: "Easy Scheduling",
+                description: "Integrated calendar system for seamless property viewings and appointments."
               },
               {
-                title: 'Lease & Compliance Hub',
-                desc: 'Simplify rentals with digital lease agreements that can be signed online. Tenants and landlords can easily download compliance certificates and legal documents, while smart alerts ensure renewals and expiries are never missed.',
-                icon: '📋',
-                iconBg: 'bg-gradient-to-br from-purple-500 to-violet-600',
+                icon: FileText,
+                title: "Digital Contracts",
+                description: "Sign lease agreements online with full legal compliance and document management."
               },
               {
-                title: 'Maintenance Management',
-                desc: 'Make maintenance hassle-free with a simple request portal for tenants and an easy-to-track ticketing system for landlords. Every issue can be monitored from open to resolved, costs are logged for full transparency, and urgent requests trigger instant alerts.',
-                icon: '🔧',
-                iconBg: 'bg-gradient-to-br from-orange-500 to-red-600',
+                icon: Wrench,
+                title: "Maintenance Hub",
+                description: "Track maintenance requests from submission to completion with full transparency."
               },
               {
-                title: 'Property Portfolio Management',
-                desc: 'Manage your entire property portfolio in one place. From tracking rent and expenses to communicating with tenants and accessing performance insights, everything you need to stay in control is organized into one powerful dashboard.',
-                icon: '🏢',
-                iconBg: 'bg-gradient-to-br from-cyan-500 to-teal-600',
+                icon: Building,
+                title: "Portfolio Management",
+                description: "Manage your entire property portfolio from one powerful dashboard."
               },
               {
-                title: 'Smart Notifications & Alerts',
-                desc: 'Stay on top of every detail with real-time notifications. From new applications and maintenance updates to rent reminders and expiring documents, our customizable alerts keep landlords and tenants informed instantly through email, WhatsApp, and in-app messaging.',
-                icon: '🔔',
-                iconBg: 'bg-gradient-to-br from-pink-500 to-rose-600',
-              },
-            ];
-
-            const trackRef = useRef<HTMLDivElement | null>(null);
-            const [active, setActive] = useState(0);
-            const snapTimeout = useRef<number | null>(null);
-            const startScrollLeft = useRef(0);
-
-            const getSlideMetrics = () => {
-              const el = trackRef.current as HTMLDivElement | null;
-              if (!el) return { width: 1, gap: 0 };
-              const first = el.firstElementChild as HTMLElement | null;
-              const style = getComputedStyle(el);
-              const gap = parseFloat(style.columnGap || style.gap || '0') || 0;
-              const width = first ? first.clientWidth : el.clientWidth;
-              return { width, gap };
-            };
-
-            const forceSnap = () => {
-              const el = trackRef.current;
-              if (!el) return;
-              const { width, gap } = getSlideMetrics();
-              const step = width + gap;
-              const idx = Math.round(el.scrollLeft / step);
-              scrollTo(idx);
-            };
-
-            const handleScroll = () => {
-              const el = trackRef.current;
-              if (!el) return;
-              const { width, gap } = getSlideMetrics();
-              const step = width + gap;
-              const idx = Math.round(el.scrollLeft / step);
-              setActive(Math.max(0, Math.min(features.length - 1, idx)));
-
-              if (snapTimeout.current) window.clearTimeout(snapTimeout.current);
-              snapTimeout.current = window.setTimeout(() => {
-                forceSnap();
-              }, 120) as unknown as number;
-            };
-
-            const scrollTo = (idx: number) => {
-              const el = trackRef.current;
-              if (!el) return;
-              const { width, gap } = getSlideMetrics();
-              const step = width + gap;
-              const clamped = Math.max(0, Math.min(features.length - 1, idx));
-              el.scrollTo({ left: clamped * step, behavior: 'auto' });
-              setActive(clamped);
-            };
-
-            const onTouchStart: React.TouchEventHandler<HTMLDivElement> = () => {
-              const el = trackRef.current;
-              if (!el) return;
-              startScrollLeft.current = el.scrollLeft;
-              if (snapTimeout.current) window.clearTimeout(snapTimeout.current);
-            };
-
-            const onTouchEnd: React.TouchEventHandler<HTMLDivElement> = () => {
-              const el = trackRef.current;
-              if (!el) return;
-              const delta = el.scrollLeft - startScrollLeft.current;
-              const { width } = getSlideMetrics();
-              const threshold = width * 0.1;
-              if (Math.abs(delta) > threshold) {
-                scrollTo(active + (delta > 0 ? 1 : -1));
-              } else {
-                forceSnap();
+                icon: Bell,
+                title: "Smart Notifications",
+                description: "Real-time alerts via email, WhatsApp, and in-app messaging for everything important."
               }
-            };
-
-            return (
-              <div>
-                <div
-                  ref={trackRef}
-                  onScroll={handleScroll}
-                  onTouchStart={onTouchStart}
-                  onTouchEnd={onTouchEnd}
-                  className="flex gap-0 sm:gap-6 overflow-x-auto snap-x snap-mandatory snap-always pb-2 -mx-0 sm:-mx-4 px-0 sm:px-4 scroll-smooth"
-                  style={{ scrollBehavior: 'auto', overscrollBehaviorX: 'contain' }}
-                >
-                  {features.map((feature, i) => (
-                    <div
-                      key={feature.title}
-                      className="snap-center snap-always flex-none w-full sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[45%]"
-                    >
-                      <div
-                        className="group relative p-6 sm:p-8 rounded-2xl backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl hover:shadow-3xl transition-all duration-500 md:hover:scale-[1.02] h-full flex flex-col"
-                        style={{ animationDelay: `${100 + i * 120}ms` }}
-                        onMouseMove={tilt.onMove}
-                        onMouseLeave={tilt.onLeave}
-                      >
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/5 to-white/10 backdrop-blur-xl" />
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                        <div className="relative z-10 flex flex-col md:flex-row gap-4 md:gap-6 flex-1 items-center md:items-start text-center md:text-left">
-                          <div className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl ${feature.iconBg} flex items-center justify-center text-xl sm:text-2xl text-white transform group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                            {feature.icon}
-                          </div>
-                          <div className="flex-1 flex flex-col">
-                            <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 sm:mb-3 group-hover:text-primary transition-colors duration-300">
-                              {feature.title}
-                            </h3>
-                            <p className="text-muted-foreground leading-relaxed text-sm sm:text-base flex-1">
-                              {feature.desc}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                      </div>
-                    </div>
-                  ))}
+            ].map((feature, index) => (
+              <div 
+                key={index}
+                className="bg-card/80 backdrop-blur-sm p-8 rounded-3xl border border-border/50 hover:shadow-ios-lg transition-all duration-300 hover:-translate-y-2"
+              >
+                <div className="mb-6">
+                  <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mb-4">
+                    <feature.icon className="w-8 h-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
                 </div>
-
-                {/* Dots */}
-                <div className="mt-6 flex items-center justify-center gap-2">
-                  {features.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => scrollTo(i)}
-                      className={`h-2 rounded-full transition-all ${active === i ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/40'} focus:outline-none`}
-                      aria-label={`Go to slide ${i + 1}`}
-                    />)
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <HowItWorks />
-
-      {/* Featured Properties with Glass Cards */}
-      <section className="py-16 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="Featured Properties"
-            subtitle="Discover handpicked properties across South Africa's major cities"
-            showTagline={false}
-          />
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {featuredProperties.map((property) => (
-              <div key={property.id} className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-500 hover:scale-[1.02]">
-                <PropertyCard {...property} />
               </div>
             ))}
           </div>
-          
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              How It Works
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Simple steps to find your perfect rental
+            </p>
+          </div>
+          <HowItWorks />
+        </div>
+      </section>
+
+      {/* Featured Properties */}
+      <section className="py-20 bg-gradient-to-br from-secondary/30 to-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Featured Properties
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Discover amazing rental opportunities
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {featuredProperties.map((property) => (
+              <PropertyCard key={property.id} {...property} />
+            ))}
+          </div>
+
           <div className="text-center">
-            <Link to="/properties">
-              <Button size="lg" variant="outline" className="backdrop-blur-xl bg-white/10 border-white/20 hover:bg-white/20 text-foreground">
-                View All Properties
-                <ArrowRight className="h-5 w-5 ml-2" />
-              </Button>
-            </Link>
+            <Button 
+              onClick={() => navigate('/properties')}
+              size="lg"
+              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white px-8 py-4 text-lg rounded-2xl"
+            >
+              View All Properties
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Stats Section with animated counters and glass cards */}
-      <section className="py-16 relative">
+      {/* Success Stats */}
+      <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              Trusted by Thousands
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Join the fastest-growing rental platform in South Africa
+            </p>
+          </div>
+          
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { number: 5000, label: "Active Properties", icon: Home },
-              { number: 15000, label: "Happy Tenants", icon: Star },
-              { number: 98, label: "Success Rate", icon: CheckCircle, suffix: "%" },
-              { number: 24, label: "Support", icon: Zap, suffix: "/7" }
-            ].map((stat, i) => (
-              <div key={stat.label} className="text-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                <div className="text-4xl font-bold text-primary mb-2 flex items-center justify-center gap-2">
-                  {stat.icon && <stat.icon className="h-8 w-8 text-primary/60" />}
-                  <span>
-                    {stat.number !== 98 ? <AnimatedCounter to={stat.number} /> : stat.number}
-                    {stat.suffix}
-                  </span>
+              { number: <AnimatedCounter to={1200} />, suffix: '+', label: "Properties Listed" },
+              { number: <AnimatedCounter to={850} />, suffix: '+', label: "Happy Tenants" },
+              { number: "0", suffix: '%', label: "Commission Fee" },
+              { number: "24/7", suffix: '', label: "Support Available" }
+            ].map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl sm:text-5xl font-bold text-ocean-blue mb-2">
+                  {stat.number}{stat.suffix}
                 </div>
-                <div className="text-muted-foreground">{stat.label}</div>
+                <div className="text-muted-foreground text-sm sm:text-base">{stat.label}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section with enhanced glass effects */}
-      <section className="py-20 bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Find Your Next Home?</h2>
-          <p className="text-xl mb-8 text-white/90">
-            Join thousands of satisfied customers who found their perfect rental through SwiftRent
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/properties">
-              <Button size="lg" variant="secondary" className="relative overflow-hidden backdrop-blur-xl bg-white/20 border border-white/30 hover:bg-white/30 text-ocean-blue">
-                <span
-                  className="magnet"
-                  onMouseMove={magnet.onMove}
-                  onMouseLeave={magnet.onLeave}
-                >
-                  Browse Properties
-                </span>
-              </Button>
-            </Link>
-            <Link to="/list-property">
-              <Button size="lg" variant="outline" className="relative overflow-hidden text-white border-white/80 hover:bg-white hover:text-ocean-blue backdrop-blur-xl bg-white/10">
-                <span
-                  className="magnet"
-                  onMouseMove={magnet.onMove}
-                  onMouseLeave={magnet.onLeave}
-                >
-                  List Your Property
-                </span>
-              </Button>
-            </Link>
+      {/* Trust Indicators */}
+      <section className="py-16 bg-gradient-to-r from-ocean-blue/5 to-success-green/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap justify-center items-center gap-8 sm:gap-12">
+            {[
+              'No Agent Commission',
+              'Secure Payments',
+              'Instant Messaging',
+              'Maintenance Manager',
+              'Digital Lease Signing',
+              'Verified Listings',
+              'Smart Search',
+              '24/7 Support'
+            ].map((tag, index) => (
+              <div 
+                key={index}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 backdrop-blur-sm border border-ocean-blue/20 shadow-soft"
+              >
+                <CheckCircle className="w-4 h-4 text-success-green" />
+                <span className="text-sm font-medium text-foreground">{tag}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Footer with glass effect */}
-      <footer className="backdrop-blur-xl bg-white/5 border-t border-white/10 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-xl font-bold">SwiftRent</span>
-              </div>
-              <p className="text-muted-foreground">
-                Connecting landlords and tenants directly across South Africa.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">For Tenants</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/properties" className="hover:text-primary transition-colors duration-300">Browse Properties</Link></li>
-                <li><Link to="/how-it-works" className="hover:text-primary transition-colors duration-300">How It Works</Link></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-300">Rental Tips</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">For Landlords</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><a href="#" className="hover:text-primary transition-colors duration-300">List Property</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-300">Pricing Guide</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-300">Landlord Resources</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Support</h4>
-              <ul className="space-y-2 text-muted-foreground">
-                <li><Link to="/about" className="hover:text-primary transition-colors duration-300">About Us</Link></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-300">Contact</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-300">Help Center</a></li>
-              </ul>
-            </div>
-          </div>
+      {/* Call to Action */}
+      <section className="py-20 bg-gradient-to-br from-ocean-blue to-success-green text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+            Ready to Find Your Dream Home?
+          </h2>
+          <p className="text-xl sm:text-2xl mb-8 text-white/90">
+            Join thousands of South Africans who've found their perfect rental through SwiftRent
+          </p>
           
-          <div className="border-t border-white/10 mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 SwiftRent. All rights reserved.</p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/properties')}
+              size="lg"
+              variant="outline"
+              className="border-white/30 text-white hover:bg-white hover:text-ocean-blue backdrop-blur-sm px-8 py-4 text-lg rounded-2xl"
+            >
+              Browse Properties
+            </Button>
+            {!user && (
+              <Button 
+                onClick={() => navigate('/auth')}
+                size="lg"
+                className="bg-white text-ocean-blue hover:bg-white/90 px-8 py-4 text-lg rounded-2xl"
+              >
+                Sign Up Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            )}
           </div>
         </div>
-      </footer>
+      </section>
     </div>
   );
 };
