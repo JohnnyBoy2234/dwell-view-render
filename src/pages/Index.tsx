@@ -181,13 +181,12 @@ const Index = () => {
       >
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-10 -left-10 w-96 h-96 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
           <div className="absolute -bottom-10 -right-10 w-96 h-96 bg-success-green/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 sm:pt-8">
           {/* Hero Content */}
-          <div className="mb-12">
+          <div className="mb-8 sm:mb-12">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
               Safe, Simple,<br />
               <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
@@ -200,7 +199,7 @@ const Index = () => {
             </p>
             
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-16">
               <Button 
                 asChild 
                 size="lg" 
