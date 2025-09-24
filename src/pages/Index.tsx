@@ -203,15 +203,14 @@ const Index = () => {
               <Button 
                 asChild 
                 size="lg" 
-                className="bg-white text-ocean-blue hover:bg-white/90 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
+                className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
               >
                 <Link to="/list-property">List Your Property</Link>
               </Button>
               <Button 
                 asChild 
                 size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white/10 rounded-xl px-8 py-4 text-lg font-bold backdrop-blur-sm"
+                className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <Link to="/properties">Find Rental</Link>
               </Button>
@@ -405,15 +404,14 @@ const Index = () => {
             <Button 
               asChild
               size="lg" 
-              className="bg-white text-ocean-blue hover:bg-white/90 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               <Link to="/auth">Join as Landlord</Link>
             </Button>
             <Button 
               asChild
-              size="lg" 
-              variant="outline"
-              className="border-white text-white hover:bg-white/10 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm"
+              size="lg"
+              className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Link to="/auth">Join as Tenant</Link>
             </Button>
