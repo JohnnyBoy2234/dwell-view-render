@@ -293,16 +293,16 @@ const Index = () => {
         <div className="md:hidden -mx-4 px-4">
           <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
             {features.map((feature, index) => (
-              <div key={index} className="min-w-[260px] snap-start shrink-0">
-                <Card className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className={`w-14 h-14 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
-                      <feature.icon className="h-7 w-7 text-white" />
+              <div key={index} className="w-[calc(100vw-2rem)] snap-center shrink-0">
+                <Card className="text-center border-0 shadow-lg transition-all duration-300 aspect-square">
+                  <CardContent className="p-5 h-full flex flex-col items-center justify-center">
+                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg`}>
+                      <feature.icon className="h-8 w-8 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">
+                    <h3 className="text-base font-semibold text-foreground mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
+                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-4">
                       {feature.description}
                     </p>
                   </CardContent>
