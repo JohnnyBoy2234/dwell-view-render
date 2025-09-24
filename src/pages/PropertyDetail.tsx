@@ -598,9 +598,10 @@ export default function PropertyDetail() {
       {/* Booking Dialog */}
       {showBooking && property && (
         <BookViewingDialog
+          propertyId={property.id}
+          landlordId={property.landlord_id}
           open={showBooking}
           onOpenChange={setShowBooking}
-          property={property}
         />
       )}
     </div>
