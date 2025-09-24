@@ -198,83 +198,20 @@ const Index = () => {
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
             
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-16">
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-              >
-                <Link to="/list-property">List Your Property</Link>
-              </Button>
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <Link to="/properties">Find Rental</Link>
-              </Button>
-            </div>
+            {/* CTA Buttons removed per request */}
           </div>
 
-          {/* Search Module */}
+          {/* Search Module wrapper removed; keep only the search bar */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <Search className="h-6 w-6 text-white" />
-                <h2 className="text-xl font-semibold text-white">Find Your Perfect Rental</h2>
-              </div>
-              <div className="space-y-4">
-                <Property24SearchBar
-                  onSearch={handleSearch}
-                  onFiltersChange={onFiltersChange}
-                  onMoreFiltersOpen={() => setShowMoreFilters(true)}
-                  filters={filters}
-                />
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Cape Town
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Johannesburg
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Durban
-                  </Badge>
-                </div>
-              </div>
-            </div>
+            <Property24SearchBar
+              onSearch={handleSearch}
+              onFiltersChange={onFiltersChange}
+              onMoreFiltersOpen={() => setShowMoreFilters(true)}
+              filters={filters}
+            />
           </div>
 
-          {/* Quick Stats */}
-          {user && (
-            <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold">2,500+</div>
-                <div className="text-white/80">Active Listings</div>
-              </div>
-              <div className="hidden sm:block w-px h-12 bg-white/30"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">1,200+</div>
-                <div className="text-white/80">Happy Tenants</div>
-              </div>
-              {isAdmin && (
-                <>
-                  <div className="hidden sm:block w-px h-12 bg-white/30"></div>
-                  <Button 
-                    asChild
-                    variant="outline" 
-                    className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
-                  >
-                    <Link to="/admin/dashboard">Admin Panel</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+          {/* Quick Stats removed per request */}
         </div>
       </section>
 
