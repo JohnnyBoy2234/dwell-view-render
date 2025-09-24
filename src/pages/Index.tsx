@@ -165,7 +165,7 @@ const Index = () => {
   const stats: never[] = [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-foreground to-muted-foreground">
+    <div className="min-h-screen bg-muted">
       {/* Hero Section */}
       <section 
         className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
@@ -214,10 +214,10 @@ const Index = () => {
       {/* Feature Highlights */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose SwiftRent?
           </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             The complete rental platform designed for South African landlords and tenants
           </p>
         </div>
@@ -233,7 +233,7 @@ const Index = () => {
                 animationFillMode: 'forwards'
               }}
             >
-              <Card className="text-center border-0 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+              <Card className="text-center bg-muted border border-border shadow-lg transition-all duration-300 hover:shadow-xl">
                 <CardContent className="p-6">
                   <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
                     <feature.icon className="h-8 w-8 text-white" />
@@ -253,7 +253,7 @@ const Index = () => {
         {/* Desktop/Tablet: original grid */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => (
-            <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <Card key={index} className="text-center bg-muted border border-border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardContent className="p-8">
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
                   <feature.icon className="h-8 w-8 text-white" />
@@ -283,10 +283,10 @@ const Index = () => {
       {/* Featured Properties */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Featured Properties
           </h2>
-          <p className="text-lg text-white/80 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             Discover verified properties from trusted landlords across South Africa
           </p>
         </div>
