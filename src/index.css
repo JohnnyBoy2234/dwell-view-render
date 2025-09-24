@@ -314,9 +314,8 @@ All colors MUST be HSL.
     color: hsl(215 20% 40%) !important;
   }
   
-  /* Card backgrounds with better contrast - limit to exact utility classes
-     so we don't override translucent variants like bg-white/10 */
-  .bg-card, .bg-white, .bg-background {
+  /* Card backgrounds with better contrast */
+  .bg-card, [class*="bg-white"], [class*="bg-background"] {
     background: rgba(255, 255, 255, 0.85) !important;
     backdrop-filter: blur(10px);
   }
