@@ -161,12 +161,8 @@ const Index = () => {
     },
   ];
 
-  const stats = [
-    { label: "Active Listings", value: 2500, icon: Home },
-    { label: "Happy Tenants", value: 1200, icon: Users },
-    { label: "Verified Landlords", value: 850, icon: Award },
-    { label: "5-Star Reviews", value: 4.8, icon: Star, isRating: true }
-  ];
+  // Stats removed per request
+  const stats: never[] = [];
 
   return (
     <div className="min-h-screen">
