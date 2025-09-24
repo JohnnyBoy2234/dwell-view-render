@@ -229,11 +229,46 @@ export function useAccounting() {
     }
   }, [user]);
 
+  const createBatchTransactions = async (transactionsData: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>[]) => {
+    if (!user || transactionsData.length === 0) return null;
+
+    try {
+      const transactionsToInsert = transactionsData.map(transaction => ({
+        ...transaction,
+        user_id: user.id,
+      }));
+
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert(transactionsToInsert)
+        .select();
+
+      if (error) throw error;
+
+      setTransactions(prev => [...(data as Transaction[]), ...prev]);
+      toast({
+        title: "Success",
+        description: `${data.length} transaction${data.length !== 1 ? 's' : ''} saved successfully`,
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error creating batch transactions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save transactions",
+        variant: "destructive",
+      });
+      return null;
+    }
+  };
+
   return {
     transactions,
     loading,
     fetchTransactions,
     createTransaction,
+    createBatchTransactions,
     updateTransaction,
     deleteTransaction,
     calculateKPIs,

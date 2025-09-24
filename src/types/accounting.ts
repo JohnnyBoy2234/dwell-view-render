@@ -62,3 +62,46 @@ export const getDefaultVATPercent = (category: string): number => {
   const highVATCategories = ['Maintenance', 'Insurance', 'SwiftRent Subscription'];
   return highVATCategories.includes(category) ? 15 : 0;
 };
+
+// VAT calculation utilities
+export const calculateVATExclusive = (inclusive: number, vatPercent: number): number => {
+  return inclusive / (1 + vatPercent / 100);
+};
+
+export const calculateVATInclusive = (exclusive: number, vatPercent: number): number => {
+  return exclusive * (1 + vatPercent / 100);
+};
+
+export const calculateVATAmount = (inclusive: number, exclusive: number): number => {
+  return inclusive - exclusive;
+};
+
+// Wizard types
+export interface WizardIncomeData {
+  date: string;
+  amount: number;
+  vatPercent: number;
+  isVATInclusive: boolean;
+  category: string;
+  property_id: string | null;
+  vendor?: string;
+  description?: string;
+}
+
+export interface WizardExpenseData {
+  date: string;
+  amount: number;
+  vatPercent: number;
+  isVATInclusive: boolean;
+  category: string;
+  property_id: string | null;
+  vendor?: string;
+  description?: string;
+  billable: boolean;
+}
+
+export interface TransactionWizardState {
+  currentStep: 'income' | 'expenses' | 'summary';
+  income: WizardIncomeData | null;
+  expenses: WizardExpenseData[];
+}
