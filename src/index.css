@@ -366,6 +366,13 @@ All colors MUST be HSL.
   display: none;
 }
 
+/* When the mobile bottom bar is present, add safe padding at the bottom */
+@media (max-width: 768px) {
+  body.has-mobile-bottom-bar {
+    padding-bottom: 72px; /* height of bottom bar plus a bit of spacing */
+  }
+}
+
 /* Enhanced dropdown and popover styling for visibility */
 [data-radix-popper-content-wrapper] {
   z-index: 9999 !important;

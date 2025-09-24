@@ -1,4 +1,5 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Home, Search, Heart, Send, User, Plus, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,14 @@ export function MobileBottomBar() {
   if (isInConversation || isSigningPage) {
     return null;
   }
+
+  // Ensure pages have enough bottom padding when the bar is visible
+  useEffect(() => {
+    document.body.classList.add('has-mobile-bottom-bar');
+    return () => {
+      document.body.classList.remove('has-mobile-bottom-bar');
+    };
+  }, []);
 
   const leftNavItems = [
     { path: '/', icon: Home, label: 'Home' },
