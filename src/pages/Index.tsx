@@ -8,7 +8,6 @@ import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { useAuth } from "@/hooks/useAuth";
 import HowItWorks from "@/components/HowItWorks";
-import { SafeRentingSection } from "@/components/SafeRentingSection";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { Footer } from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
@@ -267,8 +266,8 @@ const Index = () => {
             >
               <Card className="text-center bg-white/10 border border-white/20 shadow-lg transition-all duration-300 hover:shadow-xl">
                 <CardContent className="p-6">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
-                    <feature.icon className="h-8 w-8 text-white" />
+                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
+                  <feature.icon className={`h-8 w-8 ${feature.title === 'Unlimited Property Management' ? 'text-yellow-300' : 'text-white'}`} />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground mb-3">
                     {feature.title}
@@ -288,7 +287,7 @@ const Index = () => {
             <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardContent className="p-8">
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
-                  <feature.icon className="h-8 w-8 text-white" />
+                  <feature.icon className={`h-8 w-8 ${feature.title === 'Unlimited Property Management' ? 'text-yellow-300' : 'text-white'}`} />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">
                   {feature.title}
@@ -302,8 +301,7 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Safe Renting Section */}
-      <SafeRentingSection />
+      {/* Safe Renting Section removed by request */}
 
       {/* How It Works Section */}
       <section id="how-it-works" className="py-16 md:py-24">
