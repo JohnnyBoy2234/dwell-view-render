@@ -244,8 +244,8 @@ const Index = () => {
       </section>
 
       {/* Feature Highlights */}
-      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+      <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose SwiftRent?
           </h2>
@@ -305,7 +305,7 @@ const Index = () => {
       {/* Safe Renting Section removed by request */}
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 md:py-24">
+      <section id="how-it-works" className="pt-8 md:pt-12 pb-16 md:pb-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <HowItWorks />
         </div>

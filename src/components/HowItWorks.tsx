@@ -49,9 +49,9 @@ const landlordData = {
     },
     {
       icon: <DollarSign className="h-4 w-4 text-white" />,
-      title: "Manage & Collect",
+      title: "Manage Properties",
       description:
-        "Collect rent online with secure payments and track everything in one place.",
+      "Control all your rentals in one place—simple, fast, and effortless.",
       badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"],
     },
   ],
