@@ -66,8 +66,19 @@ export function ExpenseSummaryReport() {
   const grandTotal = Object.values(categoryTotals).reduce((sum, total) => sum + total, 0);
 
   const handleDownloadPDF = async () => {
-    // Placeholder for PDF generation
-    alert('PDF generation will be implemented with @react-pdf/renderer');
+    // Generate PDF using react-pdf
+    const { generateExpenseSummaryPDF } = await import('@/components/accounting/PDFGenerator');
+    
+    await generateExpenseSummaryPDF({
+      month: format(new Date(selectedMonth + '-01'), 'MMMM yyyy'),
+      landlordDetails,
+      transactions: expenseTransactions.map(t => ({
+        ...t,
+        property_title: properties.find(p => p.id === t.property_id)?.title,
+      })),
+      categoryTotals,
+      grandTotal,
+    });
   };
 
   const handleExportCSV = () => {

@@ -122,8 +122,13 @@ export function TaxInvoiceGenerator() {
   };
 
   const generatePDF = async () => {
-    // Placeholder for PDF generation
-    alert('PDF generation will be implemented with @react-pdf/renderer');
+    // Generate PDF using react-pdf
+    const { generateTaxInvoicePDF } = await import('@/components/accounting/PDFGenerator');
+    
+    await generateTaxInvoicePDF({
+      invoiceData,
+      totals,
+    });
   };
 
   const formatCurrency = (amount: number) => {

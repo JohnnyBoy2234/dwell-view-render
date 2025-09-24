@@ -8,6 +8,7 @@ import { Plus, FileText, Receipt, TrendingUp, TrendingDown, DollarSign, AlertCir
 import { format, startOfMonth, subMonths } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
+import { AccountingNavigation } from '@/components/dashboard/AccountingNavigation';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
 
@@ -80,6 +81,9 @@ export function AccountingOverview() {
 
   return (
     <div className="space-y-6">
+      {/* Navigation */}
+      <AccountingNavigation />
+      
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-3xl font-bold">Accounting Overview</h2>
