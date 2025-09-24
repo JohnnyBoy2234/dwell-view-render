@@ -2282,7 +2282,7 @@ export default function EnhancedLandlordDashboard() {
       currentTab={currentTab}
       onTabChange={handleTabChange}
     >
-      {renderTabContent()}
+      {renderDashboardContent()}
     </EnhancedDashboardLayout>
   );
 }

@@ -2,8 +2,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Lock, FileCheck, MessageSquareText, CheckCircle, AlertTriangle, UserCheck, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import { Footer } from "@/components/Footer";
 
 export default function SafeRenting() {
   const safetyMeasures = [
@@ -63,9 +61,7 @@ export default function SafeRenting() {
   ];
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen">
+    <div className="min-h-screen">
         {/* Hero Section */}
         <section className="bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -215,7 +211,5 @@ export default function SafeRenting() {
           </div>
         </section>
       </div>
-      <Footer />
-    </>
-  );
+    );
 }

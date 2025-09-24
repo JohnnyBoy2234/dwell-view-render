@@ -251,21 +251,22 @@ export const Property24SearchBar = ({
 
       {isMobile ? (
         <>
-          <div className="px-6 pb-6 flex gap-3 items-center">
+          <div className="px-6 pb-6 flex gap-3 items-center overflow-hidden">
             <Button
               variant="outline"
-              className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white"
+              className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white min-w-0"
               onClick={() => setFiltersSheetOpen(true)}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               All Filters
             </Button>
             <Button
-              className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg"
+              className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg flex-shrink-0"
               onClick={onSearch}
             >
               <Search className="h-4 w-4 mr-2" />
-              Search
+              <span className="hidden sm:inline">Search Property</span>
+              <span className="sm:hidden">Search</span>
             </Button>
           </div>
 
