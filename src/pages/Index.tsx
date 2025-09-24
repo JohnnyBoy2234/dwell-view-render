@@ -222,34 +222,32 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Mobile: horizontal sliding cards */}
-        <div className="md:hidden -mx-4 px-4">
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
-            {features.map((feature, index) => (
-              <div 
-                key={index} 
-                className="w-[calc(100vw-2rem)] snap-center shrink-0 animate-slide-in-right"
-                style={{ 
-                  animationDelay: `${index * 200}ms`,
-                  animationFillMode: 'both'
-                }}
-              >
-                <Card className="text-center border-0 shadow-lg transition-all duration-300 aspect-square hover:scale-105">
-                  <CardContent className="p-5 h-full flex flex-col items-center justify-center">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
-                      <feature.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-base font-semibold text-foreground mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-xs leading-relaxed line-clamp-4">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-            ))}
-          </div>
+        {/* Mobile: cards sliding in one by one */}
+        <div className="md:hidden space-y-6">
+          {features.map((feature, index) => (
+            <div 
+              key={index} 
+              className="animate-slide-in-right opacity-0"
+              style={{ 
+                animationDelay: `${index * 300}ms`,
+                animationFillMode: 'forwards'
+              }}
+            >
+              <Card className="text-center border-0 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <CardContent className="p-6">
+                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
+                    <feature.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    {feature.description}
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          ))}
         </div>
 
         {/* Desktop/Tablet: original grid */}
@@ -313,41 +311,6 @@ const Index = () => {
               <ArrowRight className="h-5 w-5" />
             </Link>
           </Button>
-        </div>
-      </section>
-
-      {/* Success Stats */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-ocean-blue/5 to-success-green/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Trusted Across South Africa
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Join thousands of satisfied landlords and tenants
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <stat.icon className="h-10 w-10 text-white" />
-                </div>
-                <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                  {stat.isRating ? (
-                    <span>{stat.value}</span>
-                  ) : (
-                    <AnimatedCounter to={stat.value} />
-                  )}
-                  {stat.isRating && <Star className="inline h-6 w-6 text-earth-warm fill-current ml-1" />}
-                </div>
-                <div className="text-muted-foreground font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
