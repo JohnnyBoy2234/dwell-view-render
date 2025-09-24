@@ -36,6 +36,11 @@ import {
 } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
+// Simple Rand icon for commission-free renting
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold`}>R</div>
+);
+
 // AnimatedCounter component for stats
 const AnimatedCounter = ({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) => {
   const [count, setCount] = useState(from);
@@ -102,7 +107,7 @@ const Index = () => {
   // Features data
   const features = [
     {
-      icon: ShoppingBag,
+      icon: RIcon,
       title: "Commission-Free Renting",
       description: "Renting the way it should be! Stop paying agents thousands. With SwiftRent, you keep 100% of your rental income always.",
       gradient: "from-success-green to-success-green-glow"

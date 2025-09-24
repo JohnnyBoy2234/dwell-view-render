@@ -158,11 +158,7 @@ const HowItWorks: React.FC = () => {
               onCheckedChange={() =>
                 setUserType(isTenant ? "landlord" : "tenant")
               }
-              className={`transition-colors ${
-                !isTenant
-                  ? "bg-[hsl(var(--sr-green))]"
-                  : "bg-[hsl(var(--sr-blue))]"
-              }`}
+              className={`transition-colors data-[state=checked]:!bg-[hsl(var(--sr-green))] data-[state=unchecked]:!bg-[hsl(var(--sr-blue))]`}
             />
             <Label
               htmlFor="user-type-toggle"
