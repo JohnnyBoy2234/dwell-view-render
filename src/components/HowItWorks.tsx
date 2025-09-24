@@ -87,7 +87,7 @@ const LandlordCard: React.FC = () => {
             </Badge>
           </div>
         </div>
-        <p className="text-sm text-white/80 sm:text-base">
+        <p className="text-sm text-foreground sm:text-base">
           {data.header.description}
         </p>
       </CardHeader>
