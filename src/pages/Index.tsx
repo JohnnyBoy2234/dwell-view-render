@@ -31,7 +31,8 @@ import {
   Smartphone,
   Zap,
   LayoutDashboard,
-  Calculator
+  Calculator,
+  Layers
 } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
@@ -141,6 +142,12 @@ const Index = () => {
       title: "Seamless On-Board Communication",
       description: "Landlords and tenants can chat, share documents, and track updates directly inside SwiftRent no lost WhatsApps, no messy email chains. Everything in one secure place.",
       gradient: "from-indigo-500 to-indigo-600"
+    },
+    {
+      icon: Layers,
+      title: "Unlimited Property Management",
+      description: "SwiftRent lets you manage one property or a hundred with ease scalable, simple, and hassle-free.",
+      gradient: "from-ocean-blue to-success-green"
     }
   ];
 
