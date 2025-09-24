@@ -15,9 +15,9 @@ import {
   Calendar,
   User,
   MapPin,
-  DollarSign,
   Clock
 } from 'lucide-react';
+import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import { useLeaseContracts } from '@/hooks/useLeaseContracts';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -212,7 +212,7 @@ export function LeaseManagement() {
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <MoneyBagCoinsIcon className="h-4 w-4 text-muted-foreground" />
                         <span>
                           {formatCurrency(
                             contract.contract_data?.rentAmount, 

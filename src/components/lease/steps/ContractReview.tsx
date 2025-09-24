@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { FileText, Download, Send, Eye, CheckCircle, AlertCircle, Calendar, DollarSign, Users, Home } from 'lucide-react';
+import { FileText, Download, Send, Eye, CheckCircle, AlertCircle, Calendar, Users, Home } from 'lucide-react';
+import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import type { LeaseContract, LeaseContractData } from '@/types/lease';
 
 interface ContractReviewProps {
@@ -148,7 +149,7 @@ export function ContractReview({ data, contract, onGeneratePDF }: ContractReview
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <DollarSign className="h-5 w-5" />
+            <MoneyBagCoinsIcon className="h-5 w-5" />
             <span>Financial Summary</span>
           </CardTitle>
         </CardHeader>

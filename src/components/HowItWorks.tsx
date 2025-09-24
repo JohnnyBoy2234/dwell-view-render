@@ -10,9 +10,9 @@ import {
   Building2,
   Mail,
   Shield,
-  DollarSign,
   ArrowRight,
 } from "lucide-react";
+import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import TenantCard from "./TenantCard";
 import React from "react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -48,7 +48,7 @@ const landlordData = {
       badges: ["Easy Applications", "Screening", "Fast Processing"],
     },
     {
-      icon: <DollarSign className="h-4 w-4 text-white" />,
+      icon: <MoneyBagCoinsIcon className="h-4 w-4 text-white" />,
       title: "Manage Properties",
       description:
       "Control all your rentals in one place simple, fast, and effortless.",

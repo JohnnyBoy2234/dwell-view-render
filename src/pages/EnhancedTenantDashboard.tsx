@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard, HelpCircle } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 
@@ -173,10 +173,10 @@ export default function EnhancedTenantDashboard() {
       },
       {
         title: 'Support',
-        icon: HelpCircle,
+        icon: Home,
         color: 'hsl(var(--ios-gray))',
-        bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100/50',
-        iconBg: 'bg-gray-700',
+        bgColor: 'bg-gradient-to-br from-ocean-blue to-success-green',
+        iconBg: 'bg-gradient-to-br from-ocean-blue to-success-green',
         subtitle: 'SwiftRent support',
         path: '/support'
       },

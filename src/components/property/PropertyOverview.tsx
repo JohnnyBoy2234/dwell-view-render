@@ -5,13 +5,13 @@ import {
   Home, 
   Users, 
   Calendar, 
-  DollarSign, 
   TrendingUp, 
   MessageSquare,
   Wrench,
   FileText,
   ArrowRight
 } from 'lucide-react';
+import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types/dashboard';
 
@@ -39,7 +39,7 @@ export function PropertyOverview({ property, maintenanceRequests }: PropertyOver
     {
       label: 'Monthly Rent',
       value: `R${property.price.toLocaleString()}`,
-      icon: DollarSign,
+      icon: MoneyBagCoinsIcon as any,
       color: 'ios-green',
       trend: '+5.2%'
     },

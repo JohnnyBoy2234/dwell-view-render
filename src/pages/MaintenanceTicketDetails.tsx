@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Wrench, Calendar, User, Building, DollarSign } from 'lucide-react';
+import { ArrowLeft, Wrench, Calendar, User, Building } from 'lucide-react';
+import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import { useState } from 'react';
 import type { MaintenanceRequest, MaintenanceStatus } from '@/types/maintenance';
 import { MaintenanceThread } from '@/components/maintenance/messaging/MaintenanceThread';
@@ -334,7 +335,7 @@ export default function MaintenanceTicketDetails() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5" />
+                  <MoneyBagCoinsIcon className="h-5 w-5" />
                   Cost Information
                 </CardTitle>
               </CardHeader>
