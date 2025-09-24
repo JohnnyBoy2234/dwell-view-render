@@ -173,12 +173,12 @@ export function AddTransaction() {
                 {/* Property */}
                 <div className="space-y-2">
                   <Label htmlFor="property">Property</Label>
-                  <Select value={formData.property_id || ''} onValueChange={(value) => handleInputChange('property_id', value || null)}>
+                  <Select value={formData.property_id || 'none'} onValueChange={(value) => handleInputChange('property_id', value === 'none' ? null : value)}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select property" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No Property</SelectItem>
+                      <SelectItem value="none">No Property</SelectItem>
                       {properties.map((property) => (
                         <SelectItem key={property.id} value={property.id}>
                           {property.title}
