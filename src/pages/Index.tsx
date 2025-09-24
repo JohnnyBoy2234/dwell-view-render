@@ -222,12 +222,12 @@ const Index = () => {
           </p>
         </div>
 
-        {/* Mobile: cards sliding in one by one */}
+        {/* Mobile: cards fading in one by one */}
         <div className="md:hidden space-y-6">
           {features.map((feature, index) => (
             <div 
               key={index} 
-              className="animate-slide-in-right opacity-0"
+              className="animate-fade-in"
               style={{ 
                 animationDelay: `${index * 300}ms`,
                 animationFillMode: 'forwards'
