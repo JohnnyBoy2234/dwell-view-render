@@ -345,6 +345,17 @@ All colors MUST be HSL.
   animation: fadeIn 0.5s ease-in-out forwards;
 }
 
+/* Subtle floating animation for mobile cards */
+@keyframes floatSlow {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
 /* Scrollbar hiding for mobile tabs */
 .scrollbar-hide {
   -ms-overflow-style: none;

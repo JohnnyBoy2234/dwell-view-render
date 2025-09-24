@@ -36,9 +36,29 @@ import {
 } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
-// Simple Rand icon for commission-free renting
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold`}>R</div>
+// Custom money bag icon (stroke follows currentColor)
+const MoneyBagIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    {/* Tie */}
+    <path d="M9 7h6" />
+    <path d="M8.5 9h7" />
+    {/* Sack top folds */}
+    <path d="M9.2 3.8c.9-.5 1.9-.8 2.8-.8 1 0 2 .3 2.9.8" />
+    {/* Sack body */}
+    <path d="M6 11c0-2.3 3.3-3 6-3s6 .7 6 3v4c0 3-3.7 5-6 5s-6-2-6-5v-4z" />
+    {/* Coins */}
+    <ellipse cx="18.2" cy="14.5" rx="2.2" ry="1.2" />
+    <path d="M16 14.5v3c0 .9 1 1.7 2.2 1.7s2.2-.8 2.2-1.7v-3" />
+  </svg>
 );
 
 // AnimatedCounter component for stats
@@ -107,7 +127,7 @@ const Index = () => {
   // Features data
   const features = [
     {
-      icon: RIcon,
+      icon: MoneyBagIcon,
       title: "Commission-Free Renting",
       description: "Renting the way it should be! Stop paying agents thousands. With SwiftRent, you keep 100% of your rental income always.",
       gradient: "from-success-green to-success-green-glow"
@@ -270,7 +290,7 @@ const Index = () => {
                 animationFillMode: 'forwards'
               }}
             >
-              <Card className="text-center bg-white/10 border border-white/20 shadow-lg transition-all duration-300 hover:shadow-xl">
+              <Card className="text-center bg-white/10 border border-white/20 shadow-lg transition-all duration-300 hover:shadow-xl animate-float-slow">
                 <CardContent className="p-6">
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
                   <feature.icon className="h-8 w-8 text-white" />

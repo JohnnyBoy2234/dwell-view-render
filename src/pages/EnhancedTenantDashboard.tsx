@@ -204,25 +204,23 @@ export default function EnhancedTenantDashboard() {
               return (
                 <div key={block.title}>
                   <Card
-                    className="cursor-pointer hover:shadow-lg transition-all duration-200"
+                    className="cursor-pointer rounded-2xl bg-white shadow-md border border-gray-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                     onClick={() => navigate(block.path)}
                   >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <div className={`w-12 h-12 ${block.iconBg} rounded-lg shadow-ios-sm flex items-center justify-center`}>
-                          <IconComponent className="w-6 h-6 text-white" />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-semibold text-gray-900 leading-snug line-clamp-2">{block.title}</h3>
-                          <p className="text-xs text-gray-500 mt-1 leading-snug line-clamp-2">{block.subtitle}</p>
+                    <CardContent className="p-5">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="relative">
+                          <div className={`w-12 h-12 ${block.iconBg} rounded-full shadow-md flex items-center justify-center`}>
+                            <IconComponent className="w-6 h-6 text-white" />
+                          </div>
                           {block.count !== undefined && block.count > 0 && (
-                            <div className="mt-2">
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-red-100 text-red-800">
-                                {block.count}
-                              </span>
-                            </div>
+                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full text-[10px] font-medium bg-red-500 text-white shadow-sm">
+                              {block.count}
+                            </span>
                           )}
                         </div>
+                        <h3 className="mt-3 text-sm font-semibold text-gray-900">{block.title}</h3>
+                        <p className="text-xs text-gray-500">{block.subtitle}</p>
                       </div>
                     </CardContent>
                   </Card>
