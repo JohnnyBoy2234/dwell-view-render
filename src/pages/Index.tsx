@@ -165,7 +165,7 @@ const Index = () => {
   const stats: never[] = [];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-foreground to-muted-foreground">
       {/* Hero Section */}
       <section 
         className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
@@ -214,10 +214,10 @@ const Index = () => {
       {/* Feature Highlights */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Why Choose SwiftRent?
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 max-w-2xl mx-auto">
             The complete rental platform designed for South African landlords and tenants
           </p>
         </div>
@@ -274,7 +274,7 @@ const Index = () => {
       <SafeRentingSection />
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-br from-muted/20 to-accent/5">
+      <section id="how-it-works" className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <HowItWorks />
         </div>
@@ -283,10 +283,10 @@ const Index = () => {
       {/* Featured Properties */}
       <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Featured Properties
           </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-white/80 max-w-2xl mx-auto">
             Discover verified properties from trusted landlords across South Africa
           </p>
         </div>

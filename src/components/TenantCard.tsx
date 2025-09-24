@@ -61,22 +61,22 @@ const TenantCard: React.FC = () => {
   const colors = tenantColors;
   
   return (
-    <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-ocean-blue/20 bg-gradient-to-br from-white via-white to-ocean-blue/5">
-      <CardHeader className="pb-6 bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/5">
+    <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-white/10 bg-white/5">
+      <CardHeader className="pb-6 bg-white/5">
         <div className="mb-2 flex items-center gap-3">
-          <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-blue to-ocean-blue-light sm:h-12 sm:w-12">
+          <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-blue to-success-green sm:h-12 sm:w-12">
             {data.header.icon}
           </div>
           <div>
-            <CardTitle className="text-xl text-ocean-blue-dark sm:text-2xl">
+            <CardTitle className="text-xl text-white sm:text-2xl">
               {data.header.title}
             </CardTitle>
-            <Badge variant="outline" className="mt-1 text-xs">
+            <Badge variant="outline" className="mt-1 text-xs text-white border-white/30">
               {data.header.subtitle}
             </Badge>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground sm:text-base">
+        <p className="text-sm text-white/80 sm:text-base">
           {data.header.description}
         </p>
       </CardHeader>
@@ -84,7 +84,7 @@ const TenantCard: React.FC = () => {
         {data.steps.map((step, index) => (
           <div className="flex gap-3" key={index}>
             <div
-              className={`shadow-soft flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]}`}
+              className={`shadow-soft flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]} shadow-glow`}
             >
               {step.icon}
             </div>
@@ -92,12 +92,12 @@ const TenantCard: React.FC = () => {
               <h3 className="mb-2 text-base font-semibold sm:text-lg">
                 {step.title}
               </h3>
-              <p className="mb-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mb-3 text-sm leading-relaxed text-white/80 sm:text-base">
                 {step.description}
               </p>
               <div className="flex flex-wrap gap-1">
                 {step.badges.map((badge, i) => (
-                  <Badge variant="secondary" className="text-xs" key={i}>
+                  <Badge variant="secondary" className="text-xs bg-white/10 text-white border-white/20" key={i}>
                     {badge}
                   </Badge>
                 ))}
@@ -107,7 +107,7 @@ const TenantCard: React.FC = () => {
         ))}
         <div className="border-t pt-3">
           <Link to={data.cta.link}>
-            <Button className="w-full bg-ocean-blue text-white shadow-soft hover:bg-ocean-blue-dark text-sm">
+            <Button className="w-full bg-gradient-to-r from-ocean-blue to-success-green text-white shadow-soft hover:from-ocean-blue-dark hover:to-success-green-dark text-sm">
               {data.cta.text}
               <ArrowRight className="ml-2 h-3 w-3" />
             </Button>
