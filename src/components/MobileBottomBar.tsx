@@ -75,7 +75,7 @@ export function MobileBottomBar() {
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-primary/95 backdrop-blur-md border-t border-primary/20 z-40 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-[#4169e1] backdrop-blur-md border-t border-white/20 z-40 md:hidden">
       <div className="flex items-center justify-between px-2 py-2">
         {/* All navigation items with consistent spacing */}
         {leftNavItems.map(renderNavItem)}

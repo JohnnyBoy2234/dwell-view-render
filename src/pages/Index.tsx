@@ -231,6 +231,9 @@ const Index = () => {
 
           {/* Quick Stats removed per request */}
         </div>
+
+        {/* Seamless fade into page background */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-ocean-blue/80"></div>
       </section>
 
       {/* Feature Highlights */}
