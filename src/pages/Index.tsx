@@ -325,15 +325,15 @@ const Index = () => {
       {/* Safe Renting Section removed by request */}
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="pt-8 md:pt-12 pb-8 md:pb-12">
+      <section id="how-it-works" className="pt-6 md:pt-8 pb-4 md:pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <HowItWorks />
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="pt-8 md:pt-12 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+      <section className="pt-4 md:pt-6 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Featured Properties
           </h2>
@@ -389,7 +389,7 @@ const Index = () => {
             <Button 
               asChild
               size="lg"
-              className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white/20 text-ocean-blue-dark border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Link to="/auth">Join as Tenant</Link>
             </Button>

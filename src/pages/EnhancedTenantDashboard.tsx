@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard, HelpCircle } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 
@@ -172,6 +172,15 @@ export default function EnhancedTenantDashboard() {
         path: '/tenant/applications'
       },
       {
+        title: 'Support',
+        icon: HelpCircle,
+        color: 'hsl(var(--ios-gray))',
+        bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100/50',
+        iconBg: 'bg-gray-700',
+        subtitle: 'SwiftRent support',
+        path: '/support'
+      },
+      {
         title: 'Settings',
         icon: User,
         color: 'hsl(var(--ios-pink))',
@@ -198,7 +207,7 @@ export default function EnhancedTenantDashboard() {
         <div className="p-4 pb-24 md:pb-4 space-y-4">
 
           {/* Feature Blocks - Management tools style grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {featureBlocks.map((block) => {
               const IconComponent = block.icon;
               return (
@@ -207,11 +216,11 @@ export default function EnhancedTenantDashboard() {
                     className="cursor-pointer rounded-2xl bg-white shadow-md border border-gray-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                     onClick={() => navigate(block.path)}
                   >
-                    <CardContent className="p-5">
-                      <div className="flex flex-col items-center text-center">
+                    <CardContent className="p-4 h-[120px] md:h-[132px]">
+                      <div className="flex flex-col items-center text-center h-full justify-center">
                         <div className="relative">
-                          <div className={`w-12 h-12 ${block.iconBg} rounded-full shadow-md flex items-center justify-center`}>
-                            <IconComponent className="w-6 h-6 text-white" />
+                          <div className={`w-10 h-10 ${block.iconBg} rounded-full shadow-md flex items-center justify-center`}>
+                            <IconComponent className="w-5 h-5 text-white" />
                           </div>
                           {block.count !== undefined && block.count > 0 && (
                             <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full text-[10px] font-medium bg-red-500 text-white shadow-sm">
@@ -219,8 +228,8 @@ export default function EnhancedTenantDashboard() {
                             </span>
                           )}
                         </div>
-                        <h3 className="mt-3 text-sm font-semibold text-gray-900">{block.title}</h3>
-                        <p className="text-xs text-gray-500">{block.subtitle}</p>
+                        <h3 className="mt-2 text-[13px] font-semibold text-gray-900 leading-tight">{block.title}</h3>
+                        <p className="text-[11px] text-gray-500 leading-tight">{block.subtitle}</p>
                       </div>
                     </CardContent>
                   </Card>
@@ -251,10 +260,7 @@ export default function EnhancedTenantDashboard() {
             </div>
           )}
 
-          {/* SwiftRent Support Section */}
-          <div className="mt-6">
-            <SwiftRentSupport />
-          </div>
+          {/* Support is now part of the grid */}
         </div>
       </div>
     );
