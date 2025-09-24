@@ -50,6 +50,12 @@ import { Analytics } from "@vercel/analytics/next";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
+// Accounting imports
+import AccountingDashboard from "@/pages/accounting/AccountingDashboard";
+import AddTransactionPage from "@/pages/accounting/AddTransactionPage";
+import TransactionsPage from "@/pages/accounting/TransactionsPage";
+import ExpenseSummaryPage from "@/pages/accounting/ExpenseSummaryPage";
+import TaxInvoicePage from "@/pages/accounting/TaxInvoicePage";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import SafeRenting from "./pages/SafeRenting";
 
@@ -112,6 +118,14 @@ const App = () => {
               <Route path="/lease/builder/:contractId" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
               <Route path="/lease/builder/property/:propertyId" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
               <Route path="/lease/sign/:contractId" element={<AuthenticatedRoute><LeaseSignature /></AuthenticatedRoute>} />
+              
+              {/* Accounting Routes */}
+              <Route path="/dashboard/accounting" element={<AuthenticatedRoute><AccountingDashboard /></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting/new" element={<AuthenticatedRoute><AddTransactionPage /></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting/transactions" element={<AuthenticatedRoute><TransactionsPage /></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting/reports/expense-summary" element={<AuthenticatedRoute><ExpenseSummaryPage /></AuthenticatedRoute>} />
+              <Route path="/dashboard/invoices/tax" element={<AuthenticatedRoute><TaxInvoicePage /></AuthenticatedRoute>} />
+              
               <Route path="/messages" element={<AuthenticatedRoute><Messages /></AuthenticatedRoute>} />
               <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
               <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
