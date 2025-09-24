@@ -187,7 +187,7 @@ const Index = () => {
   const stats: never[] = [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-foreground/80 to-muted-foreground/80">
+    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/80 to-ocean-blue-light/70">
       {/* Hero Section */}
       <section 
         className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
