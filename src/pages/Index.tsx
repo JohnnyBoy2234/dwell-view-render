@@ -187,7 +187,7 @@ const Index = () => {
   const stats: never[] = [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/80 to-ocean-blue-light/70">
+    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/40 to-ocean-blue-light/30">
       {/* Hero Section */}
       <section 
         className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
@@ -233,7 +233,7 @@ const Index = () => {
         </div>
 
         {/* Seamless fade into page background */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-ocean-blue/80"></div>
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-ocean-blue/40"></div>
       </section>
 
       {/* Feature Highlights */}
