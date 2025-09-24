@@ -51,7 +51,7 @@ const landlordData = {
       icon: <DollarSign className="h-4 w-4 text-white" />,
       title: "Manage Properties",
       description:
-      "Control all your rentals in one place—simple, fast, and effortless.",
+      "Control all your rentals in one place simple, fast, and effortless.",
       badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"],
     },
   ],
