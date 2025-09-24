@@ -27,7 +27,11 @@ import {
   UserCheck,
   MessageSquare,
   Search,
-  MapPin
+    MapPin,
+    Cpu,
+    Zap,
+    LayoutDashboard,
+    ShieldCheck
 } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
@@ -94,31 +98,49 @@ const Index = () => {
     executeSearch();
   };
 
-  // Features data
+  // Features data - Why Choose SwiftRent?
   const features = [
     {
       icon: DollarSign,
-      title: "No Commission",
-      description: "Save thousands by cutting out agent fees. Connect directly with landlords and tenants.",
+      title: "Commission-Free Renting",
+      description: "Renting the way it should be! Stop paying agents thousands. With SwiftRent, you keep 100% of your rental income always.",
       gradient: "from-success-green to-success-green-glow"
     },
     {
-      icon: UserCheck,
-      title: "Verified & Secure",
-      description: "ID & email verification for all users. Safe messaging and verified listings only.",
+      icon: Cpu,
+      title: "State-of-the-Art Platform",
+      description: "Cutting-edge tech built for landlords and tenants: smart dashboards, digital leases, e-signatures",
       gradient: "from-ocean-blue to-ocean-blue-glow"
     },
     {
-      icon: Shield,
-      title: "Safe Renting",
-      description: "Built-in trust with transparent processes and protected digital agreements.",
-      gradient: "from-earth-warm to-earth-warm"
+      icon: Zap,
+      title: "Speed & Simplicity",
+      description: "List, screen, and sign in minutes. No delays, no middlemen — just fast, simple renting.",
+      gradient: "from-earth-warm to-earth-warm-dark"
     },
     {
-      icon: Wrench,
-      title: "Maintenance Manager",
-      description: "Track and resolve property issues online with our integrated maintenance system.",
+      icon: LayoutDashboard,
+      title: "All-in-One Dashboard",
+      description: "Manage listings, leases, rent, maintenance and even accounting from one clean dashboard.",
+      gradient: "from-purple-500 to-purple-600"
+    },
+    {
+      icon: FileText,
+      title: "Built-In Accounting & Tax Invoices",
+      description: "SwiftRent generates professional tax invoices, saving you time and giving you peace of mind.",
       gradient: "from-muted-foreground to-muted"
+    },
+    {
+      icon: ShieldCheck,
+      title: "Safety & Trust",
+      description: "Verified users. Credit-checked tenants. Legally binding contracts. Your rental, secured.",
+      gradient: "from-ocean-blue to-success-green"
+    },
+    {
+      icon: MessageSquare,
+      title: "Seamless On-Board Communication",
+      description: "Landlords and tenants can chat, share documents, and track updates directly inside SwiftRent — no lost WhatsApps, no messy email chains.",
+      gradient: "from-ocean-blue to-ocean-blue-light"
     }
   ];
 
