@@ -50,10 +50,10 @@ export function SafeRentingSection() {
               <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
                 <feature.icon className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-xl font-semibold text-foreground mb-2">
                 {feature.title}
               </h3>
-              <p className="text-white/80 text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed">
                 {feature.description}
               </p>
             </CardContent>
