@@ -1,48 +1,49 @@
-import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { 
   ArrowLeft, 
-  Heart, 
-  Share2, 
   MapPin, 
   Bed, 
   Bath, 
   Car, 
-  Wifi, 
-  AirVent, 
-  Zap,
-  Shield,
-  MessageCircle,
+  Home, 
+  Heart,
+  Share2,
   Calendar,
-  Eye,
+  User,
   Phone,
   Mail,
-  User,
-  Home,
-  Star,
-  CheckCircle,
-  Send
-} from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+  FileText,
+  CheckCircle
+} from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { useForm } from 'react-hook-form';
+import { useApplications } from '@/hooks/useApplications';
+import { useMessaging } from '@/hooks/useMessaging';
+import { TenantApplicationButton } from '@/components/tenant/TenantApplicationButton';
 import { BookViewingDialog } from "@/components/viewing/BookViewingDialog";
+import { useViewingBooking } from "@/hooks/useViewingBooking";
+import { format } from "date-fns";
+import StartConversation from '@/components/StartConversation';
+import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
 
 interface Property {
   id: string;
   title: string;
   description: string;
-  price: number;
   location: string;
+  price: number;
   property_type: string;
   bedrooms: number;
   bathrooms: number;
@@ -57,16 +58,17 @@ interface Property {
   featured: boolean;
   created_at: string;
   landlord_id: string;
-  profiles?: {
+  profiles: {
     display_name: string;
     phone: string | null;
   } | null;
 }
 
 interface MessageFormData {
+  name: string;
+  email: string;
+  phone?: string;
   message: string;
-  viewing_date?: string;
-  viewing_time?: string;
 }
 
 export default function PropertyDetail() {
@@ -74,15 +76,18 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sendingMessage, setSendingMessage] = useState(false);
-  const [showBooking, setShowBooking] = useState(false);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [messageFormData, setMessageFormData] = useState<MessageFormData>({
-    message: ""
-  });
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  
+  const { activeBooking } = useViewingBooking(property?.id || '', property?.landlord_id || '');
+  const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<MessageFormData>();
+  const { hasAppliedToProperty, submitApplication, loading: applicationLoading } = useApplications();
+  const { createConversation, sendMessage } = useMessaging();
 
   useEffect(() => {
     if (id) {
@@ -90,10 +95,33 @@ export default function PropertyDetail() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (user) {
+      fetchUserProfile();
+    }
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('display_name, phone')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+
   const fetchProperty = async () => {
     if (!id) return;
-    
-    setLoading(true);
+
     try {
       // First, fetch the property
       const { data: propertyData, error: propertyError } = await supabase
@@ -121,487 +149,575 @@ export default function PropertyDetail() {
         profiles: profileData || null
       };
 
-      setProperty(combinedData as Property);
+      setProperty(combinedData as unknown as Property);
     } catch (error: any) {
-      console.error("Error fetching property:", error);
       toast({
-        title: "Error",
-        description: "Property not found",
         variant: "destructive",
+        title: "Error loading property",
+        description: error.message
       });
-      navigate("/properties");
-      return;
+      navigate('/properties');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendMessage = async () => {
-    if (!user) {
-      navigate("/auth?redirect=" + window.location.pathname);
-      return;
-    }
-
-    if (!property || !messageFormData.message.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a message",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setSendingMessage(true);
+  const onSubmitMessage = async (data: MessageFormData) => {
+    if (!property || !user) return;
+    
+    setMessageLoading(true);
+    
     try {
-      // Create or get existing conversation
-      const { data: existingConversation } = await supabase
-        .from("conversations")
-        .select("id")
-        .eq("property_id", property.id)
-        .eq("tenant_id", user.id)
-        .eq("landlord_id", property.landlord_id)
+      // First, check if a conversation already exists between this tenant and landlord for this property
+      const { data: existingConversation, error: conversationCheckError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('property_id', property.id)
+        .eq('tenant_id', user.id)
+        .eq('landlord_id', property.landlord_id)
         .single();
 
-      let conversationId = existingConversation?.id;
+      let conversationId: string;
 
-      if (!conversationId) {
+      if (existingConversation) {
+        // Use existing conversation
+        conversationId = existingConversation.id;
+      } else {
+        // Create a new conversation
         const { data: newConversation, error: conversationError } = await supabase
-          .from("conversations")
+          .from('conversations')
           .insert({
             property_id: property.id,
             tenant_id: user.id,
             landlord_id: property.landlord_id,
+            status: 'active'
           })
-          .select("id")
+          .select('id')
           .single();
 
-        if (conversationError) {
-          throw conversationError;
-        }
+        if (conversationError) throw conversationError;
         conversationId = newConversation.id;
       }
 
-      // Send message
+      // Create the message
       const { error: messageError } = await supabase
-        .from("messages")
+        .from('messages')
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
-          content: messageFormData.message,
+          content: data.message,
+          message_type: 'text'
         });
 
-      if (messageError) {
-        throw messageError;
+      if (messageError) throw messageError;
+
+      // Also create an inquiry record for backward compatibility
+      const { error: inquiryError } = await supabase
+        .from('inquiries')
+        .insert({
+          property_id: property.id,
+          tenant_id: user.id,
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          message: data.message
+        });
+
+      if (inquiryError) {
+        console.warn('Could not create inquiry record:', inquiryError);
       }
 
       toast({
-        title: "Message Sent",
-        description: "Your message has been sent to the landlord",
+        title: "Message sent successfully!",
+        description: "The landlord will receive your message and can respond in their Messages section."
       });
 
-      setMessageFormData({ message: "" });
-    } catch (error) {
-      console.error("Error sending message:", error);
+      setMessageOpen(false);
+      reset();
+    } catch (error: any) {
       toast({
-        title: "Error",
-        description: "Failed to send message",
         variant: "destructive",
+        title: "Error sending message",
+        description: error.message
       });
     } finally {
-      setSendingMessage(false);
+      setMessageLoading(false);
+    }
+  };
+
+
+  const handleContactLandlord = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Sign in required",
+        description: "Please sign in to message the landlord."
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!property) return;
+
+    const conv = await createConversation(property.id, property.landlord_id, user.id);
+    if (conv) {
+      navigate(`/messages?c=${conv.id}`);
+    }
+  };
+
+  const handleRequestViewing = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Sign in required",
+        description: "Please sign in to request a viewing."
+      });
+      navigate('/auth');
+      return;
+    }
+
+    if (!property) return;
+
+    // Create conversation and navigate to messages with pre-typed viewing request
+    const conv = await createConversation(property.id, property.landlord_id, user.id);
+    if (conv) {
+      // Navigate to messages with a pre-typed viewing request message
+      const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
+      navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
     }
   };
 
   const handleShare = async () => {
+    if (!property) return;
+
+    const shareData = {
+      title: "Check out this property on SwiftRent",
+      text: `${property.location} - R${property.price.toLocaleString()} per month. See more details here:`,
+      url: window.location.href
+    };
+
+    // Check if Web Share API is supported (mobile/modern browsers)
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: property?.title,
-          text: `Check out this property: ${property?.title}`,
-          url: window.location.href,
-        });
-      } catch (error) {
-        console.log("Error sharing:", error);
+        await navigator.share(shareData);
+      } catch (error: any) {
+        // User cancelled the share or an error occurred
+        if (error.name !== 'AbortError') {
+          console.error('Error sharing:', error);
+          // Fall back to clipboard
+          fallbackToClipboard();
+        }
       }
     } else {
-      // Fallback to copying to clipboard
-      navigator.clipboard.writeText(window.location.href);
+      // Fall back to clipboard for desktop browsers
+      fallbackToClipboard();
+    }
+  };
+
+  const fallbackToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
       toast({
-        title: "Link Copied",
-        description: "Property link copied to clipboard",
+        title: "Link copied to clipboard!",
+        description: "The property link has been copied to your clipboard."
+      });
+    } catch (error) {
+      console.error('Error copying to clipboard:', error);
+      toast({
+        variant: "destructive",
+        title: "Share failed",
+        description: "Unable to share or copy the link. Please copy the URL manually."
       });
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-96 bg-gray-200 rounded-2xl"></div>
-            <div className="space-y-4">
-              <div className="h-6 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center">
         <Card className="p-8 text-center">
-          <CardContent>
-            <h1 className="text-2xl font-bold mb-4">Property Not Found</h1>
-            <p className="mb-4">The property you're looking for doesn't exist.</p>
-            <Button onClick={() => navigate("/properties")}>
-              Browse Properties
-            </Button>
-          </CardContent>
+          <Home className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+          <h2 className="text-2xl font-bold mb-2">Property not found</h2>
+          <p className="text-muted-foreground mb-4">The property you're looking for doesn't exist.</p>
+          <Button asChild>
+            <Link to="/properties">Browse Properties</Link>
+          </Button>
         </Card>
       </div>
     );
   }
 
-  const isOwner = user?.id === property.landlord_id;
-  const featuredAmenities = property.amenities?.slice(0, 6) || [];
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-      {/* Header */}
-      <div className="bg-white/90 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
+      <div className="container mx-auto p-4 md:p-6 max-w-6xl pb-24 md:pb-6">
+
+        {/* Navigation */}
+        <div className="flex items-center gap-4 mb-6">
+          <Button variant="outline" onClick={() => navigate('/properties')}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Properties
           </Button>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" onClick={handleShare}>
-              <Share2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Heart className="h-4 w-4" />
-            </Button>
+          <div className="flex-1" />
+          <Button variant="outline" size="sm" onClick={handleShare}>
+            <Share2 className="h-4 w-4 mr-2" />
+            Share
+          </Button>
+        </div>
+
+        {/* Property Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-2 mb-2">
+            {property.featured && <Badge variant="secondary">Featured</Badge>}
+            <Badge>{property.status}</Badge>
+          </div>
+          <h1 className="text-3xl font-bold mb-2">R{property.price.toLocaleString()}/month</h1>
+          <div className="flex items-center text-muted-foreground mb-4">
+            <MapPin className="h-4 w-4 mr-1" />
+            {property.property_type} in {property.location}
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Property Header */}
-            <div className="mb-6">
-              <div className="flex items-center gap-2 mb-2">
-                {property.featured && <Badge variant="secondary">Featured</Badge>}
-                <Badge>{property.status}</Badge>
-              </div>
-              <h1 className="text-3xl font-bold mb-2">
-                {property.title}
-              </h1>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {property.location}
-                </div>
-                <div className="text-2xl font-bold text-ocean-blue">
-                  R{property.price.toLocaleString()}/month
-                </div>
-              </div>
-            </div>
-
             {/* Image Gallery */}
-            <div className="relative">
-              <div className="aspect-video bg-gray-200 rounded-2xl overflow-hidden shadow-ios-lg">
+            <Card className="bg-gradient-to-br from-card/80 via-card to-ocean-blue/5 border-ocean-blue/20 shadow-elegant">
+              <CardContent className="p-0">
                 {property.images && property.images.length > 0 ? (
-                  <img
-                    src={property.images[currentImageIndex]}
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
+                  <Carousel className="w-full" opts={{ loop: true }}>
+                    <CarouselContent>
+                      {property.images.map((image, index) => (
+                        <CarouselItem key={index}>
+                          <div className="relative h-96 rounded-lg overflow-hidden">
+                            <img
+                              src={image}
+                              alt={`${property.title} - Image ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-4" />
+                    <CarouselNext className="right-4" />
+                  </Carousel>
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <Home className="h-16 w-16 text-gray-400" />
+                  <div className="h-96 bg-muted rounded-lg flex items-center justify-center">
+                    <Home className="h-16 w-16 text-muted-foreground" />
                   </div>
                 )}
-              </div>
-              
-              {property.images && property.images.length > 1 && (
-                <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
-                  {property.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setCurrentImageIndex(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
-                        index === currentImageIndex 
-                          ? 'border-ocean-blue shadow-md' 
-                          : 'border-transparent'
-                      }`}
-                    >
-                      <img
-                        src={image}
-                        alt={`${property.title} ${index + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Property Info */}
-            <Card className="shadow-ios-md">
-              <CardContent className="p-6">
-                {/* Property Features */}
-                <div className="flex gap-6 mb-6 pb-6 border-b">
-                  <div className="flex items-center gap-2">
-                    <Bed className="h-5 w-5 text-ocean-blue" />
-                    <span className="font-medium">{property.bedrooms}</span>
-                    <span className="text-muted-foreground">beds</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Bath className="h-5 w-5 text-ocean-blue" />
-                    <span className="font-medium">{property.bathrooms}</span>
-                    <span className="text-muted-foreground">baths</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Car className="h-5 w-5 text-ocean-blue" />
-                    <span className="font-medium">{property.parking_spaces}</span>
-                    <span className="text-muted-foreground">parking</span>
-                  </div>
-                </div>
-
-                {/* Tabs */}
-                <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="amenities">Amenities</TabsTrigger>
-                    <TabsTrigger value="location">Location</TabsTrigger>
-                  </TabsList>
-                  
-                  <TabsContent value="overview" className="mt-6">
-                    <div className="space-y-4">
-                      <div>
-                        <h3 className="font-semibold mb-2">Description</h3>
-                        <p className="text-muted-foreground leading-relaxed">
-                          {property.description || "No description available."}
-                        </p>
-                      </div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="text-sm text-muted-foreground">Property Type</div>
-                          <div className="font-medium">{property.property_type}</div>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="text-sm text-muted-foreground">Size</div>
-                          <div className="font-medium">{property.size_sqm ? `${property.size_sqm} sqm` : 'N/A'}</div>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="text-sm text-muted-foreground">Furnished</div>
-                          <div className="font-medium">{property.furnished ? 'Yes' : 'No'}</div>
-                        </div>
-                        <div className="p-3 bg-gray-50 rounded-lg">
-                          <div className="text-sm text-muted-foreground">Pets Allowed</div>
-                          <div className="font-medium">{property.pets_allowed ? 'Yes' : 'No'}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="amenities" className="mt-6">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {featuredAmenities.length > 0 ? (
-                        featuredAmenities.map((amenity, index) => (
-                          <div key={index} className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                            <CheckCircle className="h-4 w-4 text-success-green" />
-                            <span className="text-sm">{amenity}</span>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="text-muted-foreground col-span-full">No amenities listed.</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="location" className="mt-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-5 w-5 text-ocean-blue" />
-                        <span className="font-medium">{property.location}</span>
-                      </div>
-                      <div className="bg-gray-100 rounded-lg p-4 text-center">
-                        <p className="text-muted-foreground">Interactive map coming soon</p>
-                      </div>
-                    </div>
-                  </TabsContent>
-                </Tabs>
               </CardContent>
             </Card>
+
+            {/* Property Details */}
+            <Tabs defaultValue="overview" className="w-full">
+              <div className="border-b border-brand-gray-200">
+                <TabsList className="bg-transparent p-0 h-auto">
+                  <div className="flex gap-2">
+                    <TabsTrigger
+                      value="overview"
+                      className="px-3 py-2 text-sm font-medium text-brand-gray-700 hover:text-brand-blue rounded-none border-b-2 border-transparent data-[state=active]:border-brand-blue data-[state=active]:text-brand-blue"
+                      aria-selected
+                    >
+                      Overview
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="features"
+                      className="px-3 py-2 text-sm font-medium text-brand-gray-700 hover:text-brand-blue rounded-none border-b-2 border-transparent data-[state=active]:border-brand-blue data-[state=active]:text-brand-blue"
+                    >
+                      Features
+                    </TabsTrigger>
+                  </div>
+                </TabsList>
+              </div>
+              
+              <TabsContent value="overview">
+                <Card className="bg-gradient-to-br from-card/80 via-card to-earth-warm/5 border-earth-warm/20 shadow-elegant">
+                  <CardHeader>
+                    <CardTitle>Property Description</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="max-w-none px-2 md:px-0">
+                      <p className="text-muted-foreground leading-relaxed break-words">{property.description}</p>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+                      <div className="text-center p-4 bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 border border-ocean-blue/20 rounded-lg shadow-sm">
+                        <Bed className="h-8 w-8 mx-auto mb-2 text-ocean-blue" />
+                        <div className="font-semibold">{property.bedrooms}</div>
+                        <div className="text-sm text-muted-foreground">Bedrooms</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-earth-warm/10 to-earth-warm/5 border border-earth-warm/20 rounded-lg shadow-sm">
+                        <Bath className="h-8 w-8 mx-auto mb-2 text-earth-warm" />
+                        <div className="font-semibold">{property.bathrooms}</div>
+                        <div className="text-sm text-muted-foreground">Bathrooms</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-success-green/10 to-success-green/5 border border-success-green/20 rounded-lg shadow-sm">
+                        <Car className="h-8 w-8 mx-auto mb-2 text-success-green" />
+                        <div className="font-semibold">{property.parking_spaces}</div>
+                        <div className="text-sm text-muted-foreground">Parking</div>
+                      </div>
+                      <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg shadow-sm">
+                        <Home className="h-8 w-8 mx-auto mb-2 text-primary" />
+                        <div className="font-semibold">{property.size_sqm || 'N/A'}</div>
+                        <div className="text-sm text-muted-foreground">Size (sqm)</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="features">
+                <Card className="bg-gradient-to-br from-card/80 via-card to-success-green/5 border-success-green/20 shadow-elegant">
+                  <CardHeader>
+                    <CardTitle>Property Features</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <Badge variant={property.furnished ? "default" : "outline"}>
+                          {property.furnished ? "Furnished" : "Unfurnished"}
+                        </Badge>
+                        <Badge variant={property.pets_allowed ? "default" : "outline"}>
+                          {property.pets_allowed ? "Pet Friendly" : "No Pets"}
+                        </Badge>
+                      </div>
+                      
+                      {property.amenities && property.amenities.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3">Amenities</h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {property.amenities.map((amenity, index) => (
+                              <div key={index} className="flex items-center gap-2">
+                                <CheckCircle className="h-4 w-4 text-green-500" />
+                                <span className="text-sm">{amenity}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {property.available_from && (
+                        <div>
+                          <h4 className="font-semibold mb-2">Available From</h4>
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-primary" />
+                            <span>{new Date(property.available_from).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="location">
+                <Card className="bg-gradient-to-br from-card/80 via-card to-ocean-blue/5 border-ocean-blue/20 shadow-elegant">
+                  <CardHeader>
+                    <CardTitle>Location</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center gap-2 mb-4">
+                      <MapPin className="h-5 w-5 text-primary" />
+                      <span className="text-lg">{property.location}</span>
+                    </div>
+                    <div className="h-64 bg-muted rounded-lg flex items-center justify-center">
+                      <p className="text-muted-foreground">Interactive map coming soon</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Landlord Info */}
-            <Card className="shadow-ios-md">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Property Owner</CardTitle>
+            {/* Contact Landlord */}
+            <Card className="bg-gradient-to-br from-ocean-blue/5 via-card to-earth-warm/5 border-ocean-blue/30 shadow-elegant">
+              <CardHeader>
+                <CardTitle>Contact</CardTitle>
+                <CardDescription>Message the landlord or book a viewing</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-ocean-blue to-success-green rounded-full flex items-center justify-center">
-                    <User className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-semibold">
-                      {property.profiles?.display_name || "Property Owner"}
+              <CardContent className="space-y-4">
+                {property.profiles && (
+                   <div className="flex items-center gap-3">
+                     <div className="w-10 h-10 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center shadow-md">
+                       <User className="h-5 w-5 text-white" />
                     </div>
-                    <div className="text-sm text-muted-foreground flex items-center gap-1">
-                      <CheckCircle className="h-3 w-3 text-success-green" />
-                      Verified Owner
+                    <div>
+                      <div className="font-semibold">{property.profiles.display_name}</div>
+                      {property.profiles.phone && (
+                        <div className="text-sm text-muted-foreground">{property.profiles.phone}</div>
+                      )}
                     </div>
-                  </div>
-                </div>
-
-                {!isOwner && (
-                  <div className="space-y-3">
-                    <Button 
-                      onClick={() => setShowBooking(true)} 
-                      className="w-full bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue"
-                    >
-                      <Calendar className="h-4 w-4 mr-2" />
-                      Request Viewing
-                    </Button>
-                    
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full">
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Message Owner
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="sm:max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>Send Message</DialogTitle>
-                          <DialogDescription>
-                            Send a message to the property owner
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="message">Message</Label>
-                            <Textarea
-                              id="message"
-                              placeholder="Hi, I'm interested in this property..."
-                              value={messageFormData.message}
-                              onChange={(e) => setMessageFormData({ ...messageFormData, message: e.target.value })}
-                              rows={4}
-                            />
-                          </div>
-                          <Button 
-                            onClick={handleSendMessage} 
-                            disabled={sendingMessage || !messageFormData.message.trim()}
-                            className="w-full"
-                          >
-                            <Send className="h-4 w-4 mr-2" />
-                            {sendingMessage ? "Sending..." : "Send Message"}
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
                   </div>
                 )}
+                
+                {user && property.landlord_id === user.id ? (
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <CheckCircle className="h-4 w-4 inline mr-1" />
+                      This is your property listing
+                    </p>
+                  </div>
+                 ) : user && property.landlord_id !== user.id ? (
+                   <div className="space-y-2">
+                      <GatedViewingButton
+                        propertyId={property.id}
+                        landlordId={property.landlord_id}
+                        propertyTitle={property.title}
+                        onRequestViewing={handleRequestViewing}
+                      />
+                      
+                      {/* Application Button */}
+                      <TenantApplicationButton 
+                        propertyId={property.id}
+                        className="w-full"
+                      />
+                    </div>
+                 ) : (
+                   <GatedViewingButton
+                     propertyId={property.id}
+                     landlordId={property.landlord_id}
+                     propertyTitle={property.title}
+                     onRequestViewing={handleRequestViewing}
+                   />
+                 )}
+
+                
               </CardContent>
             </Card>
 
-            {/* Safety Badge */}
-            <Card className="shadow-ios-md border-success-green/20 bg-success-green/5">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-success-green rounded-full flex items-center justify-center">
-                    <Shield className="h-5 w-5 text-white" />
+
+            {/* Sign In Prompt for Non-Authenticated Users */}
+            {!user && (
+              <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-ocean-blue/5 border-earth-warm/30 shadow-elegant">
+                <CardHeader>
+                  <CardTitle>Get Started</CardTitle>
+                <CardDescription>Sign in to message the landlord or book a viewing</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="text-center space-y-3">
+                    <p className="text-muted-foreground">Sign in to contact the landlord or book a viewing for this property</p>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => navigate('/auth')}
+                    >
+                      <Mail className="h-4 w-4 mr-2" />
+                      Sign In to Get Started
+                    </Button>
                   </div>
-                  <div>
-                    <div className="font-semibold text-success-green-dark">Safe Renting</div>
-                    <div className="text-sm text-muted-foreground">Verified property & owner</div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Property Owner Notice */}
+            {user && property.landlord_id === user.id && (
+              <Card className="bg-gradient-to-br from-success-green/5 via-card to-success-green/10 border-success-green/30 shadow-elegant">
+                <CardHeader>
+                  <CardTitle>Property Management</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <CheckCircle className="h-4 w-4 inline mr-1" />
+                      This is your property listing. Manage applications from your dashboard.
+                    </p>
                   </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Current Viewing Status */}
+            {user && property.landlord_id !== user.id && activeBooking && (
+              <Card className="bg-gradient-to-br from-ocean-blue/5 via-card to-ocean-blue/10 border-ocean-blue/30 shadow-elegant">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-ocean-blue" />
+                    Your Scheduled Viewing
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
+                    <div className="font-medium">
+                      {format(new Date(activeBooking.start_time), "EEEE, MMMM d, yyyy")}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {format(new Date(activeBooking.start_time), "h:mm a")} - {format(new Date(activeBooking.end_time), "h:mm a")}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => setBookingOpen(true)}
+                    >
+                      Manage Booking
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Property Info */}
+            <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-earth-warm/10 border-earth-warm/30 shadow-elegant">
+              <CardHeader>
+                <CardTitle>Property Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Property Type</span>
+                  <span className="font-medium">{property.property_type}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Listed</span>
+                  <span className="font-medium">{new Date(property.created_at).toLocaleDateString()}</span>
                 </div>
               </CardContent>
             </Card>
           </div>
         </div>
+
       </div>
 
-      {/* Mobile Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 p-4 lg:hidden z-30">
-        <div className="flex gap-3">
-          {!isOwner && (
-            <>
-              <Button 
-                onClick={() => setShowBooking(true)} 
-                className="flex-1 bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue"
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                View
-              </Button>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex-1">
-                    <MessageCircle className="h-4 w-4 mr-2" />
-                    Message
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Send Message</DialogTitle>
-                    <DialogDescription>
-                      Send a message to the property owner
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="mobile-message">Message</Label>
-                      <Textarea
-                        id="mobile-message"
-                        placeholder="Hi, I'm interested in this property..."
-                        value={messageFormData.message}
-                        onChange={(e) => setMessageFormData({ ...messageFormData, message: e.target.value })}
-                        rows={4}
-                      />
-                    </div>
-                    <Button 
-                      onClick={handleSendMessage} 
-                      disabled={sendingMessage || !messageFormData.message.trim()}
-                      className="w-full"
-                    >
-                      <Send className="h-4 w-4 mr-2" />
-                      {sendingMessage ? "Sending..." : "Send Message"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </>
-          )}
+      {/* Mobile glass sticky action bar */}
+      {property && (
+        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
+          <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
+            <button
+              onClick={handleRequestViewing}
+              className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
+            >
+              Request Viewing
+            </button>
+            <button
+              onClick={handleContactLandlord}
+              className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
+            >
+              Message
+            </button>
+            <button
+              onClick={handleShare}
+              className="rounded-xl bg-brand.green text-white px-3 py-2 text-sm hover:bg-brand.green/90 focus:outline-none focus:ring-2 focus:ring-brand.green/40"
+            >
+              Share
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Booking Dialog */}
-      {showBooking && property && (
+      {property && (
         <BookViewingDialog
           propertyId={property.id}
           landlordId={property.landlord_id}
-          open={showBooking}
-          onOpenChange={setShowBooking}
+          open={bookingOpen}
+          onOpenChange={setBookingOpen}
         />
       )}
     </div>

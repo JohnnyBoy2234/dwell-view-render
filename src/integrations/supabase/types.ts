@@ -1723,65 +1723,6 @@ export type Database = {
           },
         ]
       }
-      transactions: {
-        Row: {
-          amount: number
-          billable: boolean | null
-          category: string
-          created_at: string | null
-          date: string
-          description: string | null
-          id: string
-          property_id: string | null
-          receipt_url: string | null
-          type: string
-          updated_at: string | null
-          user_id: string
-          vat_percent: number
-          vendor: string | null
-        }
-        Insert: {
-          amount: number
-          billable?: boolean | null
-          category: string
-          created_at?: string | null
-          date: string
-          description?: string | null
-          id?: string
-          property_id?: string | null
-          receipt_url?: string | null
-          type: string
-          updated_at?: string | null
-          user_id: string
-          vat_percent?: number
-          vendor?: string | null
-        }
-        Update: {
-          amount?: number
-          billable?: boolean | null
-          category?: string
-          created_at?: string | null
-          date?: string
-          description?: string | null
-          id?: string
-          property_id?: string | null
-          receipt_url?: string | null
-          type?: string
-          updated_at?: string | null
-          user_id?: string
-          vat_percent?: number
-          vendor?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "transactions_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_presence: {
         Row: {
           is_online: boolean

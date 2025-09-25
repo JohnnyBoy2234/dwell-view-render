@@ -13,7 +13,7 @@ export function RoleGuard({
   requiredRole, 
   fallbackPath 
 }: RoleGuardProps) {
-  const { user, loading: isLoading, isLandlord } = useAuth();
+  const { user, loading: isLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -23,14 +23,17 @@ export function RoleGuard({
   }, [user, isLoading, navigate]);
 
   useEffect(() => {
-    if (!isLoading && user && requiredRole) {
-      const userIsLandlord = isLandlord;
-      const hasRequired = requiredRole === 'landlord' ? userIsLandlord : !userIsLandlord;
-      if (!hasRequired) {
-        navigate(userIsLandlord ? "/enhancedlandlorddashboard" : "/enhancedtenantdashboard");
+    if (!isLoading && user && requiredRole && user.role !== requiredRole) {
+      // Redirect to appropriate dashboard based on user's actual role
+      if (user.role === "landlord") {
+        navigate("/enhancedlandlorddashboard");
+      } else if (user.role === "tenant") {
+        navigate("/enhancedtenantdashboard");
+      } else {
+        navigate(fallbackPath || "/");
       }
     }
-  }, [user, isLoading, requiredRole, navigate, fallbackPath, isLandlord]);
+  }, [user, isLoading, requiredRole, navigate, fallbackPath]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -46,8 +49,7 @@ export function RoleGuard({
   }
 
   // Check if user has the required role
-  const userHasRequiredRole = requiredRole === 'landlord' ? isLandlord : !isLandlord;
-  if (!userHasRequiredRole) {
+  if (user.role !== requiredRole) {
     return null;
   }
 

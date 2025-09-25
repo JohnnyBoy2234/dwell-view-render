@@ -157,6 +157,7 @@ export const Property24SearchBar = ({
   const handlePlaceSelect = (place: any) => {
     if (place?.formattedAddress) {
       onFiltersChange({ searchTerm: place.formattedAddress });
+      // minor debounce to ensure any upstream handlers run
       setTimeout(() => onFiltersChange({ searchTerm: place.formattedAddress }), 50);
     }
   };
@@ -257,22 +258,21 @@ export const Property24SearchBar = ({
               onClick={() => setFiltersSheetOpen(true)}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
-              <span className="truncate">All Filters</span>
+              All Filters
             </Button>
             <Button
-              className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg whitespace-nowrap"
+              className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg"
               onClick={onSearch}
             >
               <Search className="h-4 w-4 mr-2" />
-              <span className="hidden xs:inline">Search Property</span>
-              <span className="xs:hidden">Search</span>
+              Search
             </Button>
           </div>
 
           <Sheet open={filtersSheetOpen} onOpenChange={setFiltersSheetOpen}>
             <SheetContent className="w-full h-full p-6 bg-white">
               <SheetHeader>
-                <SheetTitle>Filters</SheetTitle>
+                <SheetTitle title="Filters" />
               </SheetHeader>
 
               <div className="space-y-6 mt-6 overflow-auto">
@@ -370,15 +370,15 @@ export const Property24SearchBar = ({
           </Sheet>
         </>
       ) : (
-        <div className="px-6 pb-6 flex gap-3 items-center flex-wrap">
+        <div className="px-6 pb-6 flex gap-3 items-center flex-row">
           <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={propertyTypeOpen}>
+              <Button variant="outline" className="property24-filter-button" aria-expanded={propertyTypeOpen}>
                 {getPropertyTypeLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                <ChevronDown className="h-4 w-6 ml-2" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4 bg-background border-border shadow-lg z-50">
+            <PopoverContent className="w-64 p-4">
               <div className="space-y-2">
                 {propertyTypeOptions.map(option => (
                   <Button
@@ -403,12 +403,12 @@ export const Property24SearchBar = ({
 
           <Popover open={priceOpen} onOpenChange={setPriceOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={priceOpen}>
+              <Button variant="outline" className="property24-filter-button" aria-expanded={priceOpen}>
                 {getPriceLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-4 bg-background border-border shadow-lg z-50">
+            <PopoverContent className="w-80 p-4">
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -417,7 +417,7 @@ export const Property24SearchBar = ({
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-border">
+                      <SelectContent>
                         {priceOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
@@ -430,7 +430,7 @@ export const Property24SearchBar = ({
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background border-border">
+                      <SelectContent>
                         {priceOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
@@ -439,8 +439,8 @@ export const Property24SearchBar = ({
                   </div>
                 </div>
                 <Button
-                  onClick={() => setPriceOpen(false)}
                   className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+                  onClick={() => setPriceOpen(false)}
                 >
                   Apply Price Filter
                 </Button>
@@ -450,12 +450,12 @@ export const Property24SearchBar = ({
 
           <Popover open={bedroomsOpen} onOpenChange={setBedroomsOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bedroomsOpen}>
+              <Button variant="outline" className="property24-filter-button" aria-expanded={bedroomsOpen}>
                 {getBedroomsLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
+            <PopoverContent className="w-64 p-4">
               <div className="space-y-2">
                 {bedroomOptions.map(option => (
                   <Button
@@ -480,12 +480,12 @@ export const Property24SearchBar = ({
 
           <Popover open={bathroomsOpen} onOpenChange={setBathroomsOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bathroomsOpen}>
+              <Button variant="outline" className="property24-filter-button" aria-expanded={bathroomsOpen}>
                 {getBathroomsLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                <ChevronDown className="h-4 w-4 ml-2" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
+            <PopoverContent className="w-64 p-4">
               <div className="space-y-2">
                 {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
                   <Button
@@ -511,7 +511,7 @@ export const Property24SearchBar = ({
           {onMoreFiltersOpen && (
             <Button
               variant="outline"
-              className="property24-filter-button flex-shrink-0"
+              className="property24-filter-button"
               onClick={onMoreFiltersOpen}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
@@ -520,12 +520,11 @@ export const Property24SearchBar = ({
           )}
 
           <Button
-            className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto flex-shrink-0"
+            className="h-12 px-4 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto"
             onClick={onSearch}
           >
-            <Search className="h-4 w-4 mr-2" />
-            <span className="hidden sm:inline whitespace-nowrap">Search Property</span>
-            <span className="sm:hidden">Search</span>
+            <Search className="h-4 w-3 mr-2" />
+            Search Properties
           </Button>
         </div>
       )}

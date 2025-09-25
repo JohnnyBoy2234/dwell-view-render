@@ -17,7 +17,6 @@ import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@/types/maintenance';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
-import { AccountingOverview } from '@/components/accounting/AccountingOverview';
 
 interface PropertyWithTenant {
   id: string;
@@ -646,7 +645,7 @@ export default function EnhancedLandlordDashboard() {
         return renderPaymentsTab();
       case '/enhancedlandlorddashboard/reports':
         console.log('[Dashboard] Rendering reports tab');
-        return <AccountingOverview />;
+        return renderReportsTab();
       case '/enhancedlandlorddashboard/maintenance':
         console.log('[Dashboard] Rendering maintenance tab');
         return renderMaintenanceTab();

@@ -11,16 +11,15 @@ import { MobileSidebar } from "@/components/MobileSidebar";
 
 const Navbar = () => {
   const location = useLocation();
-  const { user, signOut, isLandlord, isAdmin, loading } = useAuth();
+  const { user, signOut, isLandlord, isAdmin } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { hasProperties } = useUserProperties();
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/#how-it-works", label: "How It Works", icon: Search },
-    { path: "/safe-renting", label: "Safe Renting", icon: Shield },
-    { path: "/properties", label: "Find Rental", icon: Search },
-    { path: "/about", label: "Contact", icon: Send }
+    { path: "/properties", label: "Properties", icon: Search },
+    { path: "/blog", label: "Blog", icon: User },
+    { path: "/about", label: "About", icon: User }
   ];
 
   return (
@@ -46,42 +45,48 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Desktop Action Buttons - Simplified */}
-            <div className="hidden md:flex items-center space-x-3">
-              {loading ? (
-                <div className="h-9 w-[200px]" />
-              ) : user ? (
+            {/* Desktop Action Buttons */}
+            <div className="hidden md:flex items-center space-x-4">
+              {user ? (
                 <>
                   <Button 
                     asChild 
-                    className="bg-success-green hover:bg-success-green-dark text-white font-medium"
+                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                  >
+                    <Link to="/messages" className="flex items-center gap-1">
+                      <MessageCircle className="h-4 w-4" />
+                      Messages
+                      {messageUnread > 0 && (
+                        <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center ml-1">
+                          {messageUnread > 99 ? '99+' : messageUnread}
+                        </Badge>
+                      )}
+                    </Link>
+                  </Button>
+                  <Button 
+                    asChild 
+                    className="bg-success-green hover:bg-success-green-dark text-white"
                   >
                     <Link to="/list-property">List Property</Link>
                   </Button>
+                  {isLandlord && hasProperties ? (
+                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Landlord Dashboard</Link></Button>
+                  ) : !isLandlord ? (
+                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedtenantdashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
+                  ) : null}
                   <NotificationBell />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="border-border">
+                      <Button variant="ghost" size="sm">
                         <User className="h-4 w-4 mr-2" />
                         {user.email?.split('@')[0]}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-background border-border shadow-lg z-50" align="end">
+                    <DropdownMenuContent className="bg-background border-border z-50" align="end">
                       <DropdownMenuItem asChild>
                         <Link to={isLandlord ? "/enhancedlandlorddashboard" : "/enhancedtenantdashboard"} className="cursor-pointer">
                           <LayoutDashboard className="h-4 w-4 mr-2" />
                           Dashboard
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/messages" className="cursor-pointer">
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Messages
-                          {messageUnread > 0 && (
-                            <Badge variant="destructive" className="h-4 w-4 p-0 text-xs flex items-center justify-center ml-2">
-                              {messageUnread > 99 ? '99+' : messageUnread}
-                            </Badge>
-                          )}
                         </Link>
                       </DropdownMenuItem>
                       {isAdmin && (
@@ -111,7 +116,7 @@ const Navbar = () => {
                   >
                     <Link to="/list-property">List Property</Link>
                   </Button>
-                  <Button asChild variant="outline"><Link to="/auth">Sign In</Link></Button>
+                  <Button asChild><Link to="/auth">Sign In</Link></Button>
                 </>
               )}
             </div>
