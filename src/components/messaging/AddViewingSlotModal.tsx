@@ -62,6 +62,16 @@ export function AddViewingSlotModal({
       return;
     }
 
+    // Validate required identifiers
+    if (!conversationId || !propertyId || !tenantId) {
+      toast({
+        variant: "destructive",
+        title: "Missing context",
+        description: "Conversation, property, or tenant information is missing.",
+      });
+      return;
+    }
+
     setLoading(true);
     
     try {
@@ -86,6 +96,13 @@ export function AddViewingSlotModal({
         return;
       }
 
+      // Ensure authenticated call to Edge Function
+      const { data: sessionResult } = await supabase.auth.getSession();
+      const accessToken = sessionResult.session?.access_token;
+      if (!accessToken) {
+        throw new Error('You need to be signed in to create a viewing.');
+      }
+
       const { data, error } = await supabase.functions.invoke('create-viewing-proposal', {
         body: {
           conversationId,
@@ -96,11 +113,18 @@ export function AddViewingSlotModal({
           notes: notes.trim() || undefined
         },
         headers: {
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(error.message || 'Failed to create viewing request');
+      }
+
+      // Edge Function may return { error: string } in data on failure with 200; handle that too
+      if (data && (data as any).error) {
+        throw new Error((data as any).error);
+      }
 
       toast({
         title: "Viewing request sent",
@@ -121,7 +145,7 @@ export function AddViewingSlotModal({
       toast({
         variant: "destructive",
         title: "Error creating viewing request",
-        description: error.message || "Please try again later.",
+        description: (error?.message as string) || "Please try again later.",
       });
     } finally {
       setLoading(false);
