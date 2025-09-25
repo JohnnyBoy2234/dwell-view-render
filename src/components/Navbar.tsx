@@ -28,12 +28,22 @@ const Navbar = () => {
       <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo */}
+            {/* Logo - Special styling for Blog page */}
             <Link to="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
+              <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
+                location.pathname === '/blog' 
+                  ? 'bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 shadow-lg scale-110' 
+                  : 'bg-gradient-to-br from-ocean-blue to-success-green'
+              }`}>
                 <Home className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-foreground">SwiftRent</span>
+              <span className={`text-xl font-bold transition-all duration-300 ${
+                location.pathname === '/blog'
+                  ? 'text-transparent bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500 bg-clip-text'
+                  : 'text-foreground'
+              }`}>
+                SwiftRent
+              </span>
             </Link>
 
             {/* Desktop Navigation */}
