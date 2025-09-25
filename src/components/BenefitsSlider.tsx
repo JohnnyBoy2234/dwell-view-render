@@ -3,7 +3,7 @@ import { Navigation, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import "swiper/css/effect-fade";
 
 interface Benefit {
   icon: string;
@@ -59,14 +59,14 @@ const benefits: Benefit[] = [
 
 export function BenefitsSlider() {
   return (
-    <section className="py-16 bg-gradient-to-br from-slate-50 via-white to-blue-50">
+    <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          title="Why Choose SwiftRent?"
-          subtitle="The smarter, simpler way to rent — for landlords and tenants alike."
-          showTagline={true}
-          taglineVariant="eyebrow"
-        />
+        <h2 className="text-3xl font-bold text-center mb-4">
+          Why Choose SwiftRent?
+        </h2>
+        <p className="text-center text-lg text-gray-600 mb-12">
+          The smarter, simpler way to rent — for landlords and tenants alike.
+        </p>
         <Swiper
           modules={[Navigation, Pagination, EffectFade]}
           slidesPerView={3}
@@ -77,22 +77,18 @@ export function BenefitsSlider() {
           loop
           className="benefits-swiper pb-12"
         >
-          {benefits.map((benefit, index) => (
-            <SwiperSlide key={`${benefit.title}-${index}`}>
-              <div className={`bg-white rounded-xl shadow-md p-8 flex flex-col md:flex-row items-center md:items-start gap-6 ${
-                benefit.highlight ? 'ring-2 ring-ocean-blue shadow-lg' : ''
-              }`}>
+          {benefits.map((benefit) => (
+            <SwiperSlide key={benefit.title}>
+              <div className="bg-white rounded-xl shadow-md p-8 flex flex-col md:flex-row items-center md:items-start gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-ocean-blue to-success-green flex items-center justify-center text-5xl md:text-6xl">
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-green-600 flex items-center justify-center text-5xl md:text-6xl">
                     <span role="img" aria-label={benefit.title}>
                       {benefit.icon}
                     </span>
                   </div>
                 </div>
                 <div className="text-center md:text-left">
-                  <h3 className={`text-2xl font-bold mb-2 ${
-                    benefit.highlight ? 'text-ocean-blue font-extrabold' : 'text-ocean-blue'
-                  }`}>
+                  <h3 className={`text-2xl font-bold mb-2 ${benefit.highlight ? 'text-primary font-extrabold' : 'text-blue-600'}`}>
                     {benefit.title}
                   </h3>
                   <p className="text-gray-600">{benefit.text}</p>

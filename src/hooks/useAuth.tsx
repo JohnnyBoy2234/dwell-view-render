@@ -5,7 +5,9 @@ import { supabase } from '@/integrations/supabase/client';
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  loading: boolean;
+  loading: boolean; // true until auth AND roles are resolved
+  authLoading: boolean;
+  rolesLoading: boolean;
   signUp: (email: string, password: string, role?: 'tenant' | 'landlord') => Promise<{ error: any; isNewUser?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signInWithGoogle: (role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
@@ -23,7 +25,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [rolesLoading, setRolesLoading] = useState(true);
   const [isLandlord, setIsLandlord] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [returnToPath, setReturnToPath] = useState<string | null>(null);
@@ -34,16 +37,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        setLoading(false);
+        setAuthLoading(false);
 
         // Check user role
         if (session?.user) {
-          setTimeout(() => {
-            checkUserRole(session.user.id);
-          }, 0);
+          setRolesLoading(true);
+          checkUserRole(session.user.id);
         } else {
           setIsLandlord(false);
           setIsAdmin(false);
+          setRolesLoading(false);
         }
       }
     );
@@ -52,12 +55,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      setLoading(false);
+      setAuthLoading(false);
 
       if (session?.user) {
-        setTimeout(() => {
-          checkUserRole(session.user.id);
-        }, 0);
+        setRolesLoading(true);
+        checkUserRole(session.user.id);
+      } else {
+        setRolesLoading(false);
       }
     });
 
@@ -66,6 +70,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkUserRole = async (userId: string) => {
     try {
+      // Optional fast hydration from localStorage to reduce UI flash
+      const cached = localStorage.getItem(`sr_roles_${userId}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (typeof parsed.isLandlord === 'boolean') setIsLandlord(parsed.isLandlord);
+          if (typeof parsed.isAdmin === 'boolean') setIsAdmin(parsed.isAdmin);
+        } catch {}
+      }
+
       const { data: roles } = await supabase
         .from('user_roles')
         .select('role')
@@ -74,9 +88,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userRoles = roles?.map(r => r.role) || [];
       setIsLandlord(userRoles.includes('landlord'));
       setIsAdmin(userRoles.includes('admin'));
+
+      // Cache roles for instant hydration on next load
+      localStorage.setItem(`sr_roles_${userId}` , JSON.stringify({ isLandlord: userRoles.includes('landlord'), isAdmin: userRoles.includes('admin') }));
     } catch (error) {
       setIsLandlord(false);
       setIsAdmin(false);
+    } finally {
+      setRolesLoading(false);
     }
   };
 
@@ -180,10 +199,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null);
       setIsLandlord(false);
       setIsAdmin(false);
+      setAuthLoading(false);
+      setRolesLoading(false);
       
       // Clear all auth data from localStorage
       localStorage.removeItem('sb-rsfrvjaqxhoqavvscvwf-auth-token');
       localStorage.removeItem('supabase.auth.token');
+      // Clear cached roles
+      // Note: we can't know previous user id here reliably, so clear all sr_roles_* keys
+      Object.keys(localStorage)
+        .filter(k => k.startsWith('sr_roles_'))
+        .forEach(k => localStorage.removeItem(k));
       
       // Then sign out from server
       const { error } = await supabase.auth.signOut({ scope: 'local' });
@@ -203,7 +229,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     session,
-    loading,
+    loading: authLoading || rolesLoading,
+    authLoading,
+    rolesLoading,
     signUp,
     signIn,
     signInWithGoogle,

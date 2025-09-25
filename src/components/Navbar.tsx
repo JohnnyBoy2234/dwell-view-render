@@ -11,15 +11,16 @@ import { MobileSidebar } from "@/components/MobileSidebar";
 
 const Navbar = () => {
   const location = useLocation();
-  const { user, signOut, isLandlord, isAdmin } = useAuth();
+  const { user, signOut, isLandlord, isAdmin, loading } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { hasProperties } = useUserProperties();
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/properties", label: "Properties", icon: Search },
-    { path: "/blog", label: "Blog", icon: User },
-    { path: "/about", label: "About", icon: User }
+    { path: "/#how-it-works", label: "How It Works", icon: Search },
+    { path: "/safe-renting", label: "Safe Renting", icon: Shield },
+    { path: "/properties", label: "Find Rental", icon: Search },
+    { path: "/about", label: "Contact", icon: Send }
   ];
 
   return (
@@ -28,14 +29,12 @@ const Navbar = () => {
       <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo - Add "Blog" text for Blog page */}
+            {/* Logo */}
             <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center">
                 <Home className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-foreground">
-                SwiftRent{location.pathname === '/blog' && ' Blog'}
-              </span>
+              <span className="text-xl font-bold text-foreground">SwiftRent</span>
             </Link>
 
             {/* Desktop Navigation */}
@@ -49,7 +48,10 @@ const Navbar = () => {
 
             {/* Desktop Action Buttons */}
             <div className="hidden md:flex items-center space-x-4">
-              {user ? (
+              {loading ? (
+                // Reserve space to avoid layout shift while auth resolves
+                <div className="h-9 w-[280px]" />
+              ) : user ? (
                 <>
                   <Button 
                     asChild 
@@ -118,7 +120,8 @@ const Navbar = () => {
                   >
                     <Link to="/list-property">List Property</Link>
                   </Button>
-                  <Button asChild><Link to="/auth">Sign In</Link></Button>
+                  <Button asChild><Link to="/auth">Tenant Login</Link></Button>
+                  <Button variant="outline" asChild><Link to="/auth">Landlord Login</Link></Button>
                 </>
               )}
             </div>
