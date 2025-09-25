@@ -32,6 +32,7 @@ import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
+import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -68,6 +69,21 @@ export default function EnhancedTenantDashboard() {
       setCurrentTab(path);
     }
   }, [user, isLandlord, navigate, location.pathname]);
+
+  // Fire local reminder checks when dashboard mounts and when upcoming viewings load
+  useEffect(() => {
+    if (!user) return;
+    // Tenant reminders use upcomingViewings from hook
+    ensureTwoHourViewingRemindersForTenant(user.id, upcomingViewings || []);
+    // Landlord reminders pull from viewings table
+    ensureTwoHourViewingRemindersForLandlord(user.id);
+    // Re-run every 5 minutes while on dashboard
+    const interval = setInterval(() => {
+      ensureTwoHourViewingRemindersForTenant(user.id, upcomingViewings || []);
+      ensureTwoHourViewingRemindersForLandlord(user.id);
+    }, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user, upcomingViewings]);
 
   const handleMakePayment = () => {
     if (rentDue) {
