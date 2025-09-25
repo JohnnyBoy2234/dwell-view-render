@@ -1788,7 +1788,7 @@ export default function EnhancedLandlordDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        request.priority === 'emergency' ? 'bg-red-500' :
+                        request.priority === 'urgent' ? 'bg-red-500' :
                         request.priority === 'high' ? 'bg-orange-500' :
                         request.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                       }`}>
@@ -1807,7 +1807,7 @@ export default function EnhancedLandlordDashboard() {
                         <span className="text-muted-foreground">Priority:</span>
                         <Badge 
                           variant={
-                            request.priority === 'emergency' ? 'destructive' :
+                            request.priority === 'urgent' ? 'destructive' :
                             request.priority === 'high' ? 'default' :
                             request.priority === 'medium' ? 'secondary' : 'outline'
                           }

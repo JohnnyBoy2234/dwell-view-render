@@ -1,6 +1,6 @@
-export type Priority = 'low' | 'medium' | 'high' | 'emergency';
+export type Priority = 'low' | 'medium' | 'high' | 'urgent';
 export type MaintenanceStatus = 'submitted' | 'in_progress' | 'completed' | 'cancelled';
-export type Category = 'plumbing' | 'electrical' | 'appliances' | 'pest' | 'general' | 'other';
+export type Category = 'plumbing' | 'electrical' | 'appliance' | 'pest_control' | 'other';
 export type Role = 'TENANT' | 'LANDLORD' | 'CONTRACTOR';
 
 export interface MaintenanceRequest {

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useMaintenanceTickets } from '@/hooks/useMaintenanceTickets';
 import { toast } from 'sonner';
 import { Upload, Camera } from 'lucide-react';
+import type { Priority, Category } from '@/types/maintenance';
 
 interface CreateMaintenanceTicketProps {
   propertyId: string;
@@ -38,13 +39,13 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
       setLoading(true);
       
       // Map UI values to DB-allowed enums
-      const mapCategory = (c: string) => {
+      const mapCategory = (c: string): Category => {
         if (c === 'appliances') return 'appliance';
         if (c === 'pest') return 'pest_control';
         if (c === 'general') return 'other';
-        return c;
+        return c as Category;
       };
-      const mapPriority = (p: string) => (p === 'emergency' ? 'urgent' : p);
+      const mapPriority = (p: string): Priority => (p === 'emergency' ? 'urgent' : p as Priority);
 
       await createTicket({
         property_id: propertyId,

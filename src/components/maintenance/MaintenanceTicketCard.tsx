@@ -63,7 +63,7 @@ export function MaintenanceTicketCard({ ticket, showActions = true }: Maintenanc
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'emergency':
+      case 'urgent':
       case 'high':
         return 'destructive';
       case 'medium':

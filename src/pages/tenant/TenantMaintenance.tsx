@@ -310,7 +310,7 @@ export default function TenantMaintenance() {
               <div>
                 <p className="text-sm text-muted-foreground">High Priority</p>
                 <p className="text-xl font-bold">
-                  {maintenanceRequests?.filter(r => r.priority === 'high' || r.priority === 'emergency').length || 0}
+                  {maintenanceRequests?.filter(r => r.priority === 'high' || r.priority === 'urgent').length || 0}
                 </p>
               </div>
             </div>

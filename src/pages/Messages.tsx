@@ -27,9 +27,26 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
 export default function Messages() {
-  // Minimal version to fix initialization error
-  const { user, isLandlord } = useAuth();
+  // Initialize auth context with error handling
+  const auth = useAuth();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Early return with loading state if auth isn't ready
+  if (!auth || auth.user === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="p-8 text-center bg-card rounded-lg border shadow-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-lg font-semibold mb-2">Loading messages...</h2>
+          <p className="text-muted-foreground">Please wait</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { user, isLandlord } = auth;
   const { unreadCount: messageUnread } = useUnreadMessages();
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
@@ -40,8 +57,6 @@ export default function Messages() {
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
 
   const {
     conversations,

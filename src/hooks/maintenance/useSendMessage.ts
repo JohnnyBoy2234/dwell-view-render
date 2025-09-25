@@ -97,14 +97,14 @@ export function useSendMessage(ticketId: string) {
             m.id === context?.tempId
               ? {
                   id: created.id,
-                  ticketId: created.maintenance_request_id,
-                  senderUserId: created.sender_user_id,
-                  senderRole: (created.sender_role === 'tenant' ? 'TENANT' : 'LANDLORD') as Role,
-                  recipientUserId: created.recipient_user_id,
+                  ticketId: created.ticketId,
+                  senderUserId: created.senderUserId,
+                  senderRole: created.senderRole,
+                  recipientUserId: created.recipientUserId,
                   body: created.body,
                   attachments: created.attachments,
-                  createdAt: created.created_at,
-                  readAt: created.read_at,
+                  createdAt: created.createdAt,
+                  readAt: created.readAt,
                 }
               : m
           );

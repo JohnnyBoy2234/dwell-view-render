@@ -59,7 +59,7 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
       if (ticket.status === 'completed' || ticket.status === 'cancelled') return false;
       
       const createdAt = new Date(ticket.created_at);
-      const slaHours = ticket.priority === 'high' || ticket.priority === 'emergency' ? 8 :
+      const slaHours = ticket.priority === 'high' || ticket.priority === 'urgent' ? 8 :
                      ticket.priority === 'medium' ? 48 : 120;
       const slaDeadline = new Date(createdAt.getTime() + (slaHours * 60 * 60 * 1000));
       
@@ -124,7 +124,7 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
               className="text-sm border rounded px-2 py-1"
             >
               <option value="">All Priorities</option>
-              <option value="emergency">Emergency</option>
+              <option value="urgent">Urgent</option>
               <option value="high">High</option>
               <option value="medium">Medium</option>
               <option value="low">Low</option>
