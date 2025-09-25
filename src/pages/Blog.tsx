@@ -52,9 +52,7 @@ export default function Blog() {
     <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 py-16">
         <SectionHeader
-          title="SwiftRent Blog"
-          subtitle="Insights, tips, and perspectives on the rental market"
-          showTagline={true}
+          title="Insights, tips, and perspectives on the rental market"
         />
         
         <div className="space-y-8">
@@ -66,7 +64,7 @@ export default function Blog() {
                     Why Paying Commission on Rentals Is Wrong
                   </CardTitle>
                   <p className="text-muted-foreground text-sm mt-2">
-                    Published on {new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    Published on 12 September 2025
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleShare} className="shrink-0">
@@ -84,10 +82,6 @@ export default function Blog() {
               <p className="mb-6">
                 The truth is, paying commission is outdated, unfair, and unnecessary in today's digital world. Here's why.
               </p>
-              
-              <div className="border-l-4 border-primary pl-4 my-8">
-                <div className="w-16 h-0.5 bg-muted-foreground mb-4"></div>
-              </div>
 
               <div className="space-y-8">
                 <section>
@@ -100,10 +94,6 @@ export default function Blog() {
                   </p>
                 </section>
 
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
-
                 <section>
                   <h3 className="text-xl font-semibold mb-4">2. Landlords Lose Hard-Earned Income</h3>
                   <p>
@@ -114,9 +104,6 @@ export default function Blog() {
                   </p>
                 </section>
 
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
 
                 <section>
                   <h3 className="text-xl font-semibold mb-4">3. Tenants End Up Paying More Too</h3>
@@ -128,10 +115,6 @@ export default function Blog() {
                   </p>
                 </section>
 
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
-
                 <section>
                   <h3 className="text-xl font-semibold mb-4">4. Technology Has Replaced the Middleman</h3>
                   <p>
@@ -141,10 +124,6 @@ export default function Blog() {
                     From ID verification and free credit checks to digital lease signing and automated maintenance requests, everything agents used to do can now be handled online at a fraction of the cost.
                   </p>
                 </section>
-
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
 
                 <section>
                   <h3 className="text-xl font-semibold mb-4">5. Transparency Builds Trust</h3>
@@ -156,10 +135,6 @@ export default function Blog() {
                   </p>
                 </section>
 
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
-
                 <section>
                   <h3 className="text-xl font-semibold mb-4">6. Gratitude, Not Exploitation</h3>
                   <p>
@@ -167,9 +142,6 @@ export default function Blog() {
                   </p>
                 </section>
 
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
 
                 <section className="bg-muted/50 p-6 rounded-lg">
                   <h3 className="text-xl font-semibold mb-4">The Bottom Line</h3>
