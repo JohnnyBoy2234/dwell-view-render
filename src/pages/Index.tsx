@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { BenefitsSlider } from "@/components/BenefitsSlider";
 import { useAuth } from "@/hooks/useAuth";
 
 // Lightweight utilities for homepage motion without new deps
@@ -479,6 +480,77 @@ const Index = () => {
 
       {/* How It Works Section */}
       <HowItWorks />
+
+      {/* Why Choose SwiftRent - Benefits Slider */}
+      <BenefitsSlider />
+
+      {/* Your Safety, Our Priority Section */}
+      <section className="py-20 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+              Your Safety, Our Priority
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+              Advanced security measures and verification processes to ensure a safe rental experience for everyone.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: Shield,
+                title: "ID Verification & Background Checks",
+                description: "Comprehensive identity verification and background screening for all users to ensure legitimate, trustworthy connections.",
+                gradient: "from-blue-500/20 to-indigo-500/20",
+                border: "border-blue-500/30",
+                iconBg: "bg-gradient-to-br from-blue-500 to-indigo-600",
+              },
+              {
+                icon: CheckCircle,
+                title: "Secure Payment Processing",
+                description: "Bank-level encryption and PCI-compliant payment systems protect all financial transactions and sensitive data.",
+                gradient: "from-green-500/20 to-emerald-500/20",
+                border: "border-green-500/30",
+                iconBg: "bg-gradient-to-br from-green-500 to-emerald-600",
+              },
+              {
+                icon: Zap,
+                title: "Legal Document Management",
+                description: "Secure digital storage and management of all rental agreements and legal documents with audit trails.",
+                gradient: "from-purple-500/20 to-violet-500/20",
+                border: "border-purple-500/30",
+                iconBg: "bg-gradient-to-br from-purple-500 to-violet-600",
+              },
+              {
+                icon: Star,
+                title: "24/7 Support & Monitoring",
+                description: "Round-the-clock support team and automated monitoring systems to quickly address any security concerns.",
+                gradient: "from-orange-500/20 to-red-500/20",
+                border: "border-orange-500/30",
+                iconBg: "bg-gradient-to-br from-orange-500 to-red-600",
+              },
+            ].map((feature, index) => (
+              <div
+                key={feature.title}
+                className={`backdrop-blur-xl bg-white/10 ${feature.border} rounded-2xl p-8 hover:bg-white/20 transition-all duration-500 hover:scale-105 hover:shadow-2xl reveal-up group`}
+                style={{ animationDelay: `${index * 100}ms` }}
+                {...tilt}
+              >
+                <div className={`w-16 h-16 ${feature.iconBg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                  <feature.icon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-4 group-hover:text-primary transition-colors duration-300">
+                  {feature.title}
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Featured Properties with Glass Cards */}
       <section className="py-16 relative">
