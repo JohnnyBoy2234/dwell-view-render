@@ -403,7 +403,7 @@ export default function Messages() {
               
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0 overflow-hidden">
-                  <ScrollArea className="h-full" ref={scrollAreaRef}>
+                  <ScrollArea className="h-full">
                   <div className="p-1 space-y-1">
                     {messages.length === 0 ? (
                       <div className="flex items-center justify-center h-32 text-muted-foreground">
@@ -689,7 +689,7 @@ export default function Messages() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-      <ScrollArea className="h-full" ref={scrollAreaRef}>
+      <ScrollArea className="h-full">
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-32 text-muted-foreground">
                     <div className="text-center">
