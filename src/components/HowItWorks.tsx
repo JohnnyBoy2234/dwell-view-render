@@ -137,11 +137,12 @@ const HowItWorks: React.FC = () => {
     <div className="bg-[hsl(var(--sr-bg))]">
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                  <SectionHeader
-          title="How SwiftRent Works"
-          subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
-          showTagline={false}
-        />
+          <SectionHeader
+            title="How SwiftRent Works"
+            subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
+            showTagline={true}
+            taglineVariant="eyebrow"
+          />
         </div>
 
         <div className="pb-12 md:hidden">
@@ -154,19 +155,19 @@ const HowItWorks: React.FC = () => {
             </Label>
             <Switch
               id="user-type-toggle"
-              checked={!isTenant}
-              onCheckedChange={() =>
-                setUserType(isTenant ? "landlord" : "tenant")
+              checked={userType === "landlord"}
+              onCheckedChange={(checked) =>
+                setUserType(checked ? "landlord" : "tenant")
               }
               className={`transition-colors ${
-                !isTenant
+                userType === "landlord"
                   ? "bg-[hsl(var(--sr-green))]"
                   : "bg-[hsl(var(--sr-blue))]"
               }`}
             />
             <Label
               htmlFor="user-type-toggle"
-              className={`font-medium transition-colors ${!isTenant ? "text-[hsl(var(--sr-green))]" : "text-[hsl(var(--sr-muted))]"}`}
+              className={`font-medium transition-colors ${userType === "landlord" ? "text-[hsl(var(--sr-green))]" : "text-[hsl(var(--sr-muted))]"}`}
             >
               For Landlords
             </Label>

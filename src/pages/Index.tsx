@@ -11,6 +11,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import HowItWorks from "@/components/HowItWorks";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { ThemeTagline } from "@/components/ui/ThemeTagline";
 import { BenefitsSlider } from "@/components/BenefitsSlider";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -199,17 +200,21 @@ const Index = () => {
               transition: 'transform 120ms ease-out',
             }}
           >
-            {/* Enhanced Title */}
             <div className="mb-4 reveal-up">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
-                <span className="block">Renting the way</span>
-                <span className="block text-success-green">it should be</span>
+                <span className="block">Find Your Perfect</span>
+                <span className="block text-success-green">Rental Home</span>
               </h1>
             </div>
             
-            <p className="text-lg md:text-xl mb-8 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
-              Find your perfect rental home in South Africa connecting landlords and tenants directly with state-of-the-art technology. No agents. Zero commission. Full control.
+            <p className="text-lg md:text-xl mb-4 text-white/90 reveal-up" style={{ animationDelay: '100ms' }}>
+              Connect directly with landlords and tenants. No agents, no commission, 
+              just honest rental connections across South Africa.
             </p>
+
+            <div className="mb-8 reveal-up" style={{ animationDelay: '150ms' }}>
+              <ThemeTagline variant="hero" />
+            </div>
 
             {/* Glass Search Bar */}
             <div className="reveal-up" style={{ animationDelay: '200ms' }}>
@@ -365,17 +370,12 @@ const Index = () => {
       {/* Why SwiftRent - Enhanced Feature Grid with Glass Cards */}
       <section className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-3xl font-semibold text-foreground mb-2">
-              Why SwiftRent
-            </h2>
-            <p className="text-lg font-medium text-muted-foreground mb-4">
-              From Listing to Lease, Made Easy
-            </p>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring giving you confidence every time.
-            </p>
-          </div>
+          <SectionHeader
+            title="Why SwiftRent?"
+            subtitle="No agents. No commission. You keep the full rental income. From listing to maintenance, manage your entire property with ease in one secure platform. Tenants apply online with ID verification, credit checks, references, and risk scoring giving you confidence every time."
+            showTagline={true}
+            taglineVariant="eyebrow"
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {[

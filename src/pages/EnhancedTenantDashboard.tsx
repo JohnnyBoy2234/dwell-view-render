@@ -183,19 +183,47 @@ export default function EnhancedTenantDashboard() {
     ];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-        {/* iPhone-style status bar simulation */}
-        <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50">
-          <div className="px-4 py-2 flex justify-between items-center">
-            <div className="text-sm font-semibold text-gray-900">Dashboard</div>
-            <div className="flex items-center space-x-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <div className="text-xs text-gray-600">Online</div>
+        <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+          {/* iPhone-style status bar simulation */}
+          <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50">
+            <div className="px-4 py-2 flex justify-between items-center">
+              <div className="text-sm font-semibold text-gray-900">Dashboard</div>
+              <div className="flex items-center space-x-1">
+                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="text-xs text-gray-600">Online</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="p-4 pb-24 md:pb-4 space-y-4">
+          <div className="p-4 pb-24 md:pb-4 space-y-4">
+            {/* Welcome card with enhanced glass styling */}
+            <GlassCard className="p-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-ocean-blue rounded-ios-button flex items-center justify-center">
+                  <Home className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-lg font-semibold text-gray-900">Welcome back!</h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Here's what's happening with your rentals</p>
+                </div>
+              </div>
+            </GlassCard>
+
+            {/* Quick stats using StatCard */}
+            <div className="grid grid-cols-2 gap-3">
+              <StatCard
+                icon={<Activity className="h-5 w-5" />}
+                label="Active Properties"
+                value={tenantProperty ? "1" : "0"}
+                subText="Rental units"
+              />
+              <StatCard
+                icon={<Bell className="h-5 w-5" />}
+                label="Notifications"
+                value={unreadCount || 0}
+                subText="Unread messages"
+              />
+            </div>
 
           {/* Feature Blocks - iPhone app grid style */}
           <div className="space-y-3">
