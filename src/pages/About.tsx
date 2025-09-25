@@ -4,6 +4,26 @@ import { Heart, Users, Shield, Globe, Award, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const About = () => {
+  const teamMembers = [
+    {
+      name: "Sarah Johnson",
+      role: "Founder & CEO",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      description: "10+ years in property management and tech innovation."
+    },
+    {
+      name: "Michael Chen",
+      role: "CTO",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      description: "Former tech lead at major property platforms."
+    },
+    {
+      name: "Amara Okafor",
+      role: "Head of Operations",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80",
+      description: "Expert in South African rental market dynamics."
+    }
+  ];
 
   const stats = [
     { number: "50,000+", label: "Properties Listed" },
@@ -114,6 +134,26 @@ const About = () => {
           </div>
         </section>
 
+        {/* Team */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-center mb-12">Meet Our Team</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {teamMembers.map((member, index) => (
+              <Card key={index}>
+                <CardContent className="p-8 text-center">
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-24 h-24 rounded-full mx-auto mb-4 object-cover"
+                  />
+                  <h3 className="text-xl font-semibold mb-2">{member.name}</h3>
+                  <p className="text-primary font-medium mb-3">{member.role}</p>
+                  <p className="text-muted-foreground text-sm">{member.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
 
         {/* South African Focus */}
         <section className="mb-16">

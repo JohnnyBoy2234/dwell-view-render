@@ -77,22 +77,13 @@ function KycManagementContent() {
       const profilesWithUserInfo: AdminKycListItem[] = (kycData || []).map((profile: any) => {
         const userProfile = profilesMap.get(profile.user_id);
         
-        // Normalize status for UI: if docs exist but status didn't update, treat as submitted
-        const id_front_path = profile.id_front_path || profile.id_doc_path;
-        const id_back_path = profile.id_back_path;
-        const hasDocs = !!(id_front_path || profile.selfie_path);
-        const normalizedStatus = (profile.status === 'not_started' && hasDocs)
-          ? 'submitted'
-          : profile.status;
-
         return {
           ...profile,
           user_email: `user-${profile.user_id.slice(0, 8)}@example.com`, // Placeholder
           user_display_name: userProfile?.display_name || 'Unknown User',
           // Handle both old and new field names
-          id_front_path,
-          id_back_path,
-          status: normalizedStatus
+          id_front_path: profile.id_front_path || profile.id_doc_path,
+          id_back_path: profile.id_back_path
         };
       });
 

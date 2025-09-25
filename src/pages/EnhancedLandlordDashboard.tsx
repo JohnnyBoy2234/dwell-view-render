@@ -9,8 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play } from "lucide-react";
-import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, DollarSign, BarChart3, Calendar, Trash2, Save, User, Wrench, Play } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import { useToast } from '@/hooks/use-toast';
@@ -916,7 +915,7 @@ export default function EnhancedLandlordDashboard() {
   const renderPaymentsTab = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <MoneyBagCoinsIcon className="h-6 w-6 text-ocean-blue" />
+        <DollarSign className="h-6 w-6 text-ocean-blue" />
         <h2 className="text-xl font-bold">Payment Management</h2>
         <Badge variant="secondary" className="ml-2">
           {tenants.length} active leases
@@ -926,7 +925,7 @@ export default function EnhancedLandlordDashboard() {
       {tenants.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <MoneyBagCoinsIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Active Leases</h3>
             <p className="text-muted-foreground mb-4">
               You don't have any active leases yet. Once tenants sign leases, you'll be able to track rent payments here.
@@ -945,7 +944,7 @@ export default function EnhancedLandlordDashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <MoneyBagCoinsIcon className="h-5 w-5 text-success-green" />
+                    <DollarSign className="h-5 w-5 text-success-green" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Monthly Rent</p>
@@ -1084,7 +1083,7 @@ export default function EnhancedLandlordDashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <MoneyBagCoinsIcon className="h-5 w-5 text-success-green" />
+                    <DollarSign className="h-5 w-5 text-success-green" />
                   </div>
                   <div>
                     <p className="text-sm text-black text-muted-foreground">Annual Revenue</p>
@@ -1922,6 +1921,23 @@ export default function EnhancedLandlordDashboard() {
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
+        {/* iPhone-style Status Bar */}
+        <div className="px-4 pt-2 pb-1">
+          <div className="flex items-center justify-between text-xs font-medium text-ios-gray-dark">
+            <span>9:41</span>
+            <div className="flex items-center gap-1">
+              <div className="flex gap-0.5">
+                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
+                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
+                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
+              </div>
+              <span>📶</span>
+              <span>📶</span>
+              <span>🔋</span>
+            </div>
+          </div>
+        </div>
+
         <div className="px-4 space-y-6">
           {/* Header */}
           <div className="pt-4">
@@ -1931,6 +1947,27 @@ export default function EnhancedLandlordDashboard() {
             <p className="text-ios-gray text-sm">
               {user?.email?.split('@')[0] || 'Landlord'}
             </p>
+          </div>
+
+          {/* Quick Stats Widget */}
+          <div className="bg-gradient-to-r from-ios-blue to-ios-blue-light rounded-ios-card p-6 shadow-ios-md">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-semibold text-lg">Portfolio Overview</h2>
+              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                <BarChart3 className="w-4 h-4 text-white" />
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-white/10 rounded-ios p-3">
+                <p className="text-white/80 text-xs mb-1">Monthly Revenue</p>
+                <p className="text-white font-bold text-lg">R{totalRevenue.toLocaleString()}</p>
+              </div>
+              <div className="bg-white/10 rounded-ios p-3">
+                <p className="text-white/80 text-xs mb-1">Occupancy Rate</p>
+                <p className="text-white font-bold text-lg">{occupancyRate}%</p>
+              </div>
+            </div>
           </div>
 
           {/* App-style Feature Grid */}
@@ -1996,7 +2033,7 @@ export default function EnhancedLandlordDashboard() {
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <MoneyBagCoinsIcon className="w-5 h-5 text-white" />
+                  <DollarSign className="w-5 h-5 text-white" />
                 </div>
                 <p className="text-xs font-medium text-ios-gray-dark">Payments</p>
                 <p className="text-xs text-ios-gray">Track</p>

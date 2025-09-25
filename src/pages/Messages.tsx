@@ -550,15 +550,6 @@ export default function Messages() {
     <>
     {/* Desktop Messages Page Header */}
     <div className="flex items-center gap-4 mb-6">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate('/')}
-        className="hidden md:inline-flex"
-      >
-        <Home className="h-4 w-4 mr-2" />
-        Home
-      </Button>
       <div className="flex items-center gap-2">
         <MessageCircle className="h-6 w-6 text-primary" />
         <h1 className="text-2xl font-bold">Messages</h1>

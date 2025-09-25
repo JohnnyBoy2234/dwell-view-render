@@ -10,9 +10,9 @@ import {
   Building2,
   Mail,
   Shield,
+  DollarSign,
   ArrowRight,
 } from "lucide-react";
-import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import TenantCard from "./TenantCard";
 import React from "react";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -48,11 +48,11 @@ const landlordData = {
       badges: ["Easy Applications", "Screening", "Fast Processing"],
     },
     {
-      icon: <MoneyBagCoinsIcon className="h-4 w-4 text-white" />,
-      title: "Manage Properties",
+      icon: <DollarSign className="h-4 w-4 text-white" />,
+      title: "Manage & Collect",
       description:
-      "Control all your rentals in one place simple, fast, and effortless.",
-      badges: ["Maintenance Tracking", "Financial Reports"],
+        "Collect rent online with secure payments and track everything in one place.",
+      badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"],
     },
   ],
   cta: {
@@ -73,7 +73,7 @@ const LandlordCard: React.FC = () => {
   const colors = landlordColors;
   return (
     <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-success-green/20 bg-gradient-to-br from-white via-white to-success-green/5">
-      <CardHeader className="pb-6 bg-gradient-to-r from-success-green/5 to-success-green/0">
+      <CardHeader className="pb-6 bg-gradient-to-r from-success-green/10 to-success-green/5">
         <div className="mb-2 flex items-center gap-3">
           <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-success-green to-success-green-glow sm:h-12 sm:w-12">
             {data.header.icon}
@@ -87,7 +87,7 @@ const LandlordCard: React.FC = () => {
             </Badge>
           </div>
         </div>
-        <p className="text-sm text-foreground sm:text-base">
+        <p className="text-sm text-muted-foreground sm:text-base">
           {data.header.description}
         </p>
       </CardHeader>
@@ -134,14 +134,14 @@ const HowItWorks: React.FC = () => {
   const isTenant = userType === "tenant";
 
   return (
-    <div>
+    <div className="bg-[hsl(var(--sr-bg))]">
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <SectionHeader
-            title="How SwiftRent Works"
-            subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
-            showTagline={false}
-          />
+                  <SectionHeader
+          title="How SwiftRent Works"
+          subtitle="Connecting landlords and tenants directly with no agents, zero commission, and full control"
+          showTagline={false}
+        />
         </div>
 
         <div className="pb-12 md:hidden">
@@ -158,7 +158,11 @@ const HowItWorks: React.FC = () => {
               onCheckedChange={() =>
                 setUserType(isTenant ? "landlord" : "tenant")
               }
-              className={`transition-colors data-[state=checked]:!bg-[hsl(var(--sr-green))] data-[state=unchecked]:!bg-[hsl(var(--sr-blue))]`}
+              className={`transition-colors ${
+                !isTenant
+                  ? "bg-[hsl(var(--sr-green))]"
+                  : "bg-[hsl(var(--sr-blue))]"
+              }`}
             />
             <Label
               htmlFor="user-type-toggle"

@@ -476,66 +476,49 @@ export default function PropertyDetail() {
                 {!isOwner && (
                   <div className="space-y-3">
                     <Button 
-                      onClick={() => {
-                        if (!user) {
-                          navigate('/auth?redirect=' + window.location.pathname);
-                          return;
-                        }
-                        // Gate by verification
-                        // Assuming profiles table has id_verification_status; fallback allow if missing
-                        (async () => {
-                          const { data: profile } = await supabase
-                            .from('profiles')
-                            .select('id_verification_status')
-                            .eq('user_id', user.id)
-                            .single();
-                          const verified = !profile || profile.id_verification_status === 'verified';
-                          if (!verified) {
-                            toast({
-                              title: 'Verification required',
-                              description: 'Please verify your ID before requesting a viewing.',
-                              variant: 'destructive'
-                            });
-                            navigate('/safe-renting');
-                            return;
-                          }
-                          // Create or get conversation, then go to messages with prefill
-                          let conversationId: string | undefined;
-                          {
-                            const { data: existing } = await supabase
-                              .from('conversations')
-                              .select('id')
-                              .eq('property_id', property.id)
-                              .eq('tenant_id', user.id)
-                              .eq('landlord_id', property.landlord_id)
-                              .single();
-                            conversationId = existing?.id;
-                          }
-                          if (!conversationId) {
-                            const { data: created, error } = await supabase
-                              .from('conversations')
-                              .insert({
-                                property_id: property.id,
-                                tenant_id: user.id,
-                                landlord_id: property.landlord_id,
-                              })
-                              .select('id')
-                              .single();
-                            if (error) {
-                              toast({ title: 'Error', description: 'Failed to start conversation', variant: 'destructive' });
-                              return;
-                            }
-                            conversationId = created.id;
-                          }
-                          const prefill = encodeURIComponent(`Hello, I would like to request a viewing for ${property.title}.`);
-                          navigate(`/messages?c=${conversationId}&message=${prefill}`);
-                        })();
-                      }} 
+                      onClick={() => setShowBooking(true)} 
                       className="w-full bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue"
                     >
                       <Calendar className="h-4 w-4 mr-2" />
                       Request Viewing
                     </Button>
+                    
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Message Owner
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Send Message</DialogTitle>
+                          <DialogDescription>
+                            Send a message to the property owner
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="message">Message</Label>
+                            <Textarea
+                              id="message"
+                              placeholder="Hi, I'm interested in this property..."
+                              value={messageFormData.message}
+                              onChange={(e) => setMessageFormData({ ...messageFormData, message: e.target.value })}
+                              rows={4}
+                            />
+                          </div>
+                          <Button 
+                            onClick={handleSendMessage} 
+                            disabled={sendingMessage || !messageFormData.message.trim()}
+                            className="w-full"
+                          >
+                            <Send className="h-4 w-4 mr-2" />
+                            {sendingMessage ? "Sending..." : "Send Message"}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   </div>
                 )}
               </CardContent>
@@ -565,43 +548,48 @@ export default function PropertyDetail() {
           {!isOwner && (
             <>
               <Button 
-                onClick={() => {
-                  if (!user) { navigate('/auth?redirect=' + window.location.pathname); return; }
-                  (async () => {
-                    const { data: profile } = await supabase
-                      .from('profiles')
-                      .select('id_verification_status')
-                      .eq('user_id', user.id)
-                      .single();
-                    const verified = !profile || profile.id_verification_status === 'verified';
-                    if (!verified) { toast({ title: 'Verification required', description: 'Please verify your ID before requesting a viewing.', variant: 'destructive' }); navigate('/safe-renting'); return; }
-                    let conversationId: string | undefined;
-                    const { data: existing } = await supabase
-                      .from('conversations')
-                      .select('id')
-                      .eq('property_id', property.id)
-                      .eq('tenant_id', user.id)
-                      .eq('landlord_id', property.landlord_id)
-                      .single();
-                    conversationId = existing?.id;
-                    if (!conversationId) {
-                      const { data: created, error } = await supabase
-                        .from('conversations')
-                        .insert({ property_id: property.id, tenant_id: user.id, landlord_id: property.landlord_id })
-                        .select('id')
-                        .single();
-                      if (error) { toast({ title: 'Error', description: 'Failed to start conversation', variant: 'destructive' }); return; }
-                      conversationId = created.id;
-                    }
-                    const prefill = encodeURIComponent(`Hello, I would like to request a viewing for ${property.title}.`);
-                    navigate(`/messages?c=${conversationId}&message=${prefill}`);
-                  })();
-                }} 
+                onClick={() => setShowBooking(true)} 
                 className="flex-1 bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue"
               >
                 <Calendar className="h-4 w-4 mr-2" />
-                Request Viewing
+                View
               </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="flex-1">
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Send Message</DialogTitle>
+                    <DialogDescription>
+                      Send a message to the property owner
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="mobile-message">Message</Label>
+                      <Textarea
+                        id="mobile-message"
+                        placeholder="Hi, I'm interested in this property..."
+                        value={messageFormData.message}
+                        onChange={(e) => setMessageFormData({ ...messageFormData, message: e.target.value })}
+                        rows={4}
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleSendMessage} 
+                      disabled={sendingMessage || !messageFormData.message.trim()}
+                      className="w-full"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      {sendingMessage ? "Sending..." : "Send Message"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </>
           )}
         </div>

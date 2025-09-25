@@ -59,21 +59,11 @@ export function useCreateMaintenanceRequest() {
         .single();
       
       if (propError) throw propError;
-      // Normalize values to satisfy DB CHECK constraints
-      const mapCategory = (c: string) => {
-        if (c === 'general') return 'other';
-        if (c === 'appliances') return 'appliance';
-        if (c === 'pest') return 'pest_control';
-        return c;
-      };
-      const mapPriority = (p: string) => (p === 'emergency' ? 'urgent' : p);
       
       const { data, error } = await supabase
         .from('maintenance_requests')
         .insert({
           ...request,
-          category: mapCategory((request as any).category),
-          priority: mapPriority((request as any).priority),
           tenant_id: user.id,
           landlord_id: property.landlord_id,
         })

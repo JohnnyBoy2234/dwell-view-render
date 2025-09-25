@@ -22,7 +22,7 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
     title: '',
     description: '',
     priority: 'medium' as const,
-    category: 'other' as const,
+    category: 'general' as const,
     images: [] as string[]
   });
 
@@ -37,21 +37,12 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
     try {
       setLoading(true);
       
-      // Map UI values to DB-allowed enums
-      const mapCategory = (c: string) => {
-        if (c === 'appliances') return 'appliance';
-        if (c === 'pest') return 'pest_control';
-        if (c === 'general') return 'other';
-        return c;
-      };
-      const mapPriority = (p: string) => (p === 'emergency' ? 'urgent' : p);
-
       await createTicket({
         property_id: propertyId,
         title: formData.title,
         description: formData.description,
-        priority: mapPriority(formData.priority),
-        category: mapCategory(formData.category),
+        priority: formData.priority,
+        category: formData.category,
         images: formData.images
       });
 
@@ -62,7 +53,7 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
         title: '',
         description: '',
         priority: 'medium',
-        category: 'other',
+        category: 'general',
         images: []
       });
       
@@ -148,11 +139,9 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
                 <SelectContent>
                   <SelectItem value="plumbing">🚰 Plumbing</SelectItem>
                   <SelectItem value="electrical">⚡ Electrical</SelectItem>
-                  <SelectItem value="heating">🔥 Heating</SelectItem>
-                  <SelectItem value="appliance">🏠 Appliance</SelectItem>
-                  <SelectItem value="structural">🏗️ Structural</SelectItem>
-                  <SelectItem value="pest_control">🐛 Pest Control</SelectItem>
-                  <SelectItem value="cleaning">🧹 Cleaning</SelectItem>
+                  <SelectItem value="appliances">🏠 Appliances</SelectItem>
+                  <SelectItem value="pest">🐛 Pest Control</SelectItem>
+                  <SelectItem value="general">🔧 General</SelectItem>
                   <SelectItem value="other">❓ Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -173,8 +162,8 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
                 <SelectContent>
                   <SelectItem value="low">🟢 Low - Can wait</SelectItem>
                   <SelectItem value="medium">🟡 Medium - Normal</SelectItem>
-                  <SelectItem value="high">🟠 High - Soon</SelectItem>
-                  <SelectItem value="urgent">🔴 Urgent - Immediate</SelectItem>
+                  <SelectItem value="high">🔴 High - Urgent</SelectItem>
+                  <SelectItem value="emergency">🚨 Emergency</SelectItem>
                 </SelectContent>
               </Select>
             </div>

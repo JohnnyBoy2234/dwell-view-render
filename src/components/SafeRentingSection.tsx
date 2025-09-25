@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Shield, Lock, FileCheck, MessageSquareText } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -35,29 +34,27 @@ export function SafeRentingSection() {
             <Shield className="h-10 w-10 text-white" />
           </div>
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
           Your Safety, Our Priority
         </h2>
-        <p className="text-lg text-white/80 max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
           We've built comprehensive safety measures into every part of the rental process
         </p>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
         {safetyFeatures.map((feature, index) => (
-          <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-8">
-              <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                <feature.icon className="h-8 w-8 text-white" />
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                {feature.title}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {feature.description}
-              </p>
-            </CardContent>
-          </Card>
+          <div key={index} className="text-center">
+            <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue/10 to-success-green/10 rounded-xl flex items-center justify-center mx-auto mb-4 border border-ocean-blue/20">
+              <feature.icon className="h-8 w-8 text-ocean-blue" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              {feature.title}
+            </h3>
+            <p className="text-muted-foreground text-sm">
+              {feature.description}
+            </p>
+          </div>
         ))}
       </div>
 

@@ -32,7 +32,6 @@ import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
-import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -69,21 +68,6 @@ export default function EnhancedTenantDashboard() {
       setCurrentTab(path);
     }
   }, [user, isLandlord, navigate, location.pathname]);
-
-  // Fire local reminder checks when dashboard mounts and when upcoming viewings load
-  useEffect(() => {
-    if (!user) return;
-    // Tenant reminders use upcomingViewings from hook
-    ensureTwoHourViewingRemindersForTenant(user.id, upcomingViewings || []);
-    // Landlord reminders pull from viewings table
-    ensureTwoHourViewingRemindersForLandlord(user.id);
-    // Re-run every 5 minutes while on dashboard
-    const interval = setInterval(() => {
-      ensureTwoHourViewingRemindersForTenant(user.id, upcomingViewings || []);
-      ensureTwoHourViewingRemindersForLandlord(user.id);
-    }, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [user, upcomingViewings]);
 
   const handleMakePayment = () => {
     if (rentDue) {
@@ -188,15 +172,6 @@ export default function EnhancedTenantDashboard() {
         path: '/tenant/applications'
       },
       {
-        title: 'Support',
-        icon: Home,
-        color: 'hsl(var(--ios-gray))',
-        bgColor: 'bg-gradient-to-br from-ocean-blue to-success-green',
-        iconBg: 'bg-gradient-to-br from-ocean-blue to-success-green',
-        subtitle: 'SwiftRent support',
-        path: '/support'
-      },
-      {
         title: 'Settings',
         icon: User,
         color: 'hsl(var(--ios-pink))',
@@ -222,34 +197,52 @@ export default function EnhancedTenantDashboard() {
 
         <div className="p-4 pb-24 md:pb-4 space-y-4">
 
-          {/* Feature Blocks - Management tools style grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {/* Feature Blocks - iPhone app grid style */}
+          <div className="space-y-3">
             {featureBlocks.map((block) => {
               const IconComponent = block.icon;
               return (
-                <div key={block.title}>
-                  <Card
-                    className="cursor-pointer rounded-2xl bg-white shadow-md border border-gray-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-                    onClick={() => navigate(block.path)}
-                  >
-                    <CardContent className="p-4 h-[120px] md:h-[132px]">
-                      <div className="flex flex-col items-center text-center h-full justify-center">
-                        <div className="relative">
-                          <div className={`w-10 h-10 ${block.iconBg} rounded-full shadow-md flex items-center justify-center`}>
-                            <IconComponent className="w-5 h-5 text-white" />
-                          </div>
-                          {block.count !== undefined && block.count > 0 && (
-                            <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full text-[10px] font-medium bg-red-500 text-white shadow-sm">
-                              {block.count}
-                            </span>
-                          )}
+                <button
+                  key={block.title}
+                  onClick={() => navigate(block.path)}
+                  className="w-full bg-white/90 backdrop-blur-md rounded-ios-card p-4 shadow-ios-md border border-white/40 
+                           hover:shadow-ios-lg hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 
+                           group text-left"
+                >
+                  <div className="flex items-center space-x-4">
+                    {/* iOS-style app icon */}
+                    <div className={`w-12 h-12 ${block.iconBg} rounded-ios-button shadow-ios-sm 
+                                   flex items-center justify-center group-hover:scale-105 transition-transform duration-200`}>
+                      <IconComponent className="w-6 h-6 text-white" />
+                    </div>
+                    
+                    {/* Content */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="text-base font-semibold text-gray-900">{block.title}</h3>
+                          <p className="text-sm text-gray-500 mt-0.5">{block.subtitle}</p>
                         </div>
-                        <h3 className="mt-2 text-[13px] font-semibold text-gray-900 leading-tight">{block.title}</h3>
-                        <p className="text-[11px] text-gray-500 leading-tight">{block.subtitle}</p>
+                        
+                        {/* iOS-style chevron */}
+                        <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                      
+                      {/* Count badge if applicable */}
+                      {block.count !== undefined && block.count > 0 && (
+                        <div className="mt-2">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            {block.count}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </button>
               );
             })}
           </div>
@@ -276,7 +269,10 @@ export default function EnhancedTenantDashboard() {
             </div>
           )}
 
-          {/* Support is now part of the grid */}
+          {/* SwiftRent Support Section */}
+          <div className="mt-6">
+            <SwiftRentSupport />
+          </div>
         </div>
       </div>
     );

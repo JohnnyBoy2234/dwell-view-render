@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { MapPin, Home } from 'lucide-react';
-import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
+import { MapPin, Home, DollarSign } from 'lucide-react';
 import type { LeaseContractData } from '@/types/lease';
 
 interface ContractBasicInfoProps {
@@ -123,7 +122,7 @@ export function ContractBasicInfo({ data, onUpdate }: ContractBasicInfoProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <MoneyBagCoinsIcon className="h-5 w-5" />
+            <DollarSign className="h-5 w-5" />
             <span>Rent Information</span>
           </CardTitle>
         </CardHeader>

@@ -12,6 +12,7 @@ import {
   MessageCircle, 
   FileText, 
   Calendar, 
+  DollarSign, 
   Wrench, 
   Home,
   CheckCircle,
@@ -19,7 +20,6 @@ import {
   Info,
   Clock
 } from 'lucide-react';
-import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -119,7 +119,7 @@ export default function Notifications() {
       case 'maintenance':
         return <Wrench className={iconClass} />;
       case 'payment':
-        return <MoneyBagCoinsIcon className={iconClass} />;
+        return <DollarSign className={iconClass} />;
       case 'viewing':
         return <Calendar className={iconClass} />;
       case 'application':

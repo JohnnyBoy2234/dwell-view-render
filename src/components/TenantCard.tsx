@@ -61,10 +61,10 @@ const TenantCard: React.FC = () => {
   const colors = tenantColors;
   
   return (
-    <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-ocean-blue/10 bg-white">
-      <CardHeader className="pb-6 bg-gradient-to-r from-ocean-blue/5 to-success-green/5">
+    <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-ocean-blue/20 bg-gradient-to-br from-white via-white to-ocean-blue/5">
+      <CardHeader className="pb-6 bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/5">
         <div className="mb-2 flex items-center gap-3">
-          <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-blue to-success-green sm:h-12 sm:w-12">
+          <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-ocean-blue to-ocean-blue-light sm:h-12 sm:w-12">
             {data.header.icon}
           </div>
           <div>
@@ -84,7 +84,7 @@ const TenantCard: React.FC = () => {
         {data.steps.map((step, index) => (
           <div className="flex gap-3" key={index}>
             <div
-              className={`shadow-soft flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]} shadow-glow`}
+              className={`shadow-soft flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${colors[index]}`}
             >
               {step.icon}
             </div>

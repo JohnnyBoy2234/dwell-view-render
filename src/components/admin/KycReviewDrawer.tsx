@@ -167,7 +167,7 @@ export function KycReviewDrawer({ kycProfile, onReview, children }: KycReviewDra
     }
   }, [open]);
 
-  const isSubmitted = kycProfile.status === 'submitted' || (!!(kycProfile.id_front_path || kycProfile.selfie_path) && kycProfile.status === 'not_started');
+  const isSubmitted = kycProfile.status === 'submitted';
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>

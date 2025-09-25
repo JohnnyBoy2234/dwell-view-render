@@ -5,8 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } from 'lucide-react';
-import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
+import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -47,7 +46,7 @@ const steps = [
   { id: 1, title: 'Property Type', icon: Home, description: 'What are you listing?' },
   { id: 2, title: 'Location', icon: MapPin, description: 'Where is your property?' },
   { id: 3, title: 'Details', icon: Settings, description: 'Property specifications' },
-  { id: 4, title: 'Pricing', icon: MoneyBagCoinsIcon as any, description: 'Set your price' },
+  { id: 4, title: 'Pricing', icon: DollarSign, description: 'Set your price' },
   { id: 5, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
   { id: 6, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];

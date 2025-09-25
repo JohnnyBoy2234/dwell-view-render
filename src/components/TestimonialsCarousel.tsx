@@ -47,7 +47,15 @@ export function TestimonialsCarousel() {
   return (
     <section className="py-16 md:py-24 bg-gradient-to-br from-ocean-blue/5 to-success-green/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header removed per request */}
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Trusted by Renters & Landlords
+          </h2>
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-ocean-blue to-success-green text-white px-6 py-2 rounded-full text-lg font-semibold">
+            <Star className="h-5 w-5 fill-current" />
+            Trusted by 1000+ renters and landlords across South Africa
+          </div>
+        </div>
 
         <div className="relative max-w-4xl mx-auto">
           <div className="overflow-hidden">

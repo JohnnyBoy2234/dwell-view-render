@@ -4,8 +4,7 @@ import { Controller } from 'react-hook-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Calendar } from 'lucide-react';
-import MoneyBagCoinsIcon from '@/components/icons/MoneyBagCoinsIcon';
+import { Calendar, DollarSign } from 'lucide-react';
 import { ListingFormData } from '@/pages/ListProperty';
 
 interface PricingStepProps {
