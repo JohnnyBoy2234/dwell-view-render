@@ -335,7 +335,9 @@ export default function Messages() {
                               </div>
                               
                               <p className="text-xs text-muted-foreground mt-1">
-                                {formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })}
+                                {conversation.last_message_at
+                                  ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
+                                  : 'No messages yet'}
                               </p>
                             </div>
                           </div>
@@ -478,7 +480,7 @@ export default function Messages() {
                                       : 'bg-muted text-foreground rounded-bl-md'
                                   }`}
                                 >
-                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{message.content}</p>
+                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap" style={{ wordBreak: 'break-word' }}>{message.content}</p>
                                 </div>
                                 
                                 <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
@@ -631,7 +633,9 @@ export default function Messages() {
                             </div>
                             
                             <p className="text-xs text-muted-foreground mt-1">
-                              {formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })}
+                              {conversation.last_message_at
+                                ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
+                                : 'No messages yet'}
                             </p>
                           </div>
                         </div>
@@ -685,7 +689,7 @@ export default function Messages() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-              <ScrollArea className="h-full">
+      <ScrollArea className="h-full" ref={scrollAreaRef}>
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-32 text-muted-foreground">
                     <div className="text-center">
