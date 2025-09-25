@@ -1921,23 +1921,6 @@ export default function EnhancedLandlordDashboard() {
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
-        {/* iPhone-style Status Bar */}
-        <div className="px-4 pt-2 pb-1">
-          <div className="flex items-center justify-between text-xs font-medium text-ios-gray-dark">
-            <span>9:41</span>
-            <div className="flex items-center gap-1">
-              <div className="flex gap-0.5">
-                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
-                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
-                <div className="w-1 h-1 bg-ios-gray-dark rounded-full"></div>
-              </div>
-              <span>📶</span>
-              <span>📶</span>
-              <span>🔋</span>
-            </div>
-          </div>
-        </div>
-
         <div className="px-4 space-y-6">
           {/* Header */}
           <div className="pt-4">
@@ -1948,28 +1931,7 @@ export default function EnhancedLandlordDashboard() {
               {user?.email?.split('@')[0] || 'Landlord'}
             </p>
           </div>
-
-          {/* Quick Stats Widget */}
-          <div className="bg-gradient-to-r from-ios-blue to-ios-blue-light rounded-ios-card p-6 shadow-ios-md">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-white font-semibold text-lg">Portfolio Overview</h2>
-              <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
-                <BarChart3 className="w-4 h-4 text-white" />
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/10 rounded-ios p-3">
-                <p className="text-white/80 text-xs mb-1">Monthly Revenue</p>
-                <p className="text-white font-bold text-lg">R{totalRevenue.toLocaleString()}</p>
-              </div>
-              <div className="bg-white/10 rounded-ios p-3">
-                <p className="text-white/80 text-xs mb-1">Occupancy Rate</p>
-                <p className="text-white font-bold text-lg">{occupancyRate}%</p>
-              </div>
-            </div>
-          </div>
-
+          
           {/* App-style Feature Grid */}
           <div>
             <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>

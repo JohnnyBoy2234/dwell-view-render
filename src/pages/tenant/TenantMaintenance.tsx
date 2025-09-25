@@ -46,7 +46,7 @@ export default function TenantMaintenance() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
-  const [category, setCategory] = useState<Category>('general');
+  const [category, setCategory] = useState<Category>('other');
   const [photos, setPhotos] = useState<FileList | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,7 +121,7 @@ export default function TenantMaintenance() {
       setTitle('');
       setDescription('');
       setPriority('medium');
-      setCategory('general');
+      setCategory('other');
       setPhotos(null);
       setIsCreateDialogOpen(false);
       
@@ -212,7 +212,7 @@ export default function TenantMaintenance() {
                     <SelectItem value="low">Low</SelectItem>
                     <SelectItem value="medium">Medium</SelectItem>
                     <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="emergency">Emergency</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -226,8 +226,8 @@ export default function TenantMaintenance() {
                   <SelectContent>
                     <SelectItem value="plumbing">Plumbing</SelectItem>
                     <SelectItem value="electrical">Electrical</SelectItem>
-                    <SelectItem value="appliances">Appliances</SelectItem>
-                    <SelectItem value="pest">Pest Control</SelectItem>
+                    <SelectItem value="appliance">Appliance</SelectItem>
+                    <SelectItem value="pest_control">Pest Control</SelectItem>
                     <SelectItem value="general">General</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectContent>

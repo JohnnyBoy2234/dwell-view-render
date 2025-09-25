@@ -316,7 +316,6 @@ All colors MUST be HSL.
   
   /* Card backgrounds with better contrast */
   .bg-card, [class*="bg-white"], [class*="bg-background"] {
-    background: rgba(255, 255, 255, 0.85) !important;
     backdrop-filter: blur(10px);
   }
   
@@ -345,6 +344,18 @@ All colors MUST be HSL.
   animation: fadeIn 0.5s ease-in-out forwards;
 }
 
+
+/* Subtle floating animation for mobile cards */
+@keyframes floatSlow {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
 /* Scrollbar hiding for mobile tabs */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -353,6 +364,13 @@ All colors MUST be HSL.
 
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* When the mobile bottom bar is present, add safe padding at the bottom */
+@media (max-width: 768px) {
+  body.has-mobile-bottom-bar {
+    padding-bottom: 72px; /* height of bottom bar plus a bit of spacing */
+  }
 }
 
 /* Enhanced dropdown and popover styling for visibility */

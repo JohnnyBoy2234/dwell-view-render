@@ -157,7 +157,6 @@ export const Property24SearchBar = ({
   const handlePlaceSelect = (place: any) => {
     if (place?.formattedAddress) {
       onFiltersChange({ searchTerm: place.formattedAddress });
-      // minor debounce to ensure any upstream handlers run
       setTimeout(() => onFiltersChange({ searchTerm: place.formattedAddress }), 50);
     }
   };
@@ -254,25 +253,26 @@ export const Property24SearchBar = ({
           <div className="px-6 pb-6 flex gap-3 items-center">
             <Button
               variant="outline"
-              className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white"
+             className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white"
               onClick={() => setFiltersSheetOpen(true)}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
-              All Filters
+              <span className="truncate">All Filters</span>
             </Button>
             <Button
-              className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg"
+              className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg whitespace-nowrap"
               onClick={onSearch}
             >
               <Search className="h-4 w-4 mr-2" />
-              Search
+              <span className="hidden xs:inline">Search Property</span>
+              <span className="xs:hidden">Search</span>
             </Button>
           </div>
 
           <Sheet open={filtersSheetOpen} onOpenChange={setFiltersSheetOpen}>
             <SheetContent className="w-full h-full p-6 bg-white">
               <SheetHeader>
-                <SheetTitle title="Filters" />
+              <SheetTitle>Filters</SheetTitle>
               </SheetHeader>
 
               <div className="space-y-6 mt-6 overflow-auto">
@@ -370,15 +370,15 @@ export const Property24SearchBar = ({
           </Sheet>
         </>
       ) : (
-        <div className="px-6 pb-6 flex gap-3 items-center flex-row">
+        <div className="px-6 pb-6 flex gap-3 items-center flex-wrap">
           <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button" aria-expanded={propertyTypeOpen}>
+            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={propertyTypeOpen}>
                 {getPropertyTypeLabel()}
-                <ChevronDown className="h-4 w-6 ml-2" />
+                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4">
+            <PopoverContent className="w-64 p-4 bg-background border-border shadow-lg z-50">
               <div className="space-y-2">
                 {propertyTypeOptions.map(option => (
                   <Button
@@ -403,12 +403,12 @@ export const Property24SearchBar = ({
 
           <Popover open={priceOpen} onOpenChange={setPriceOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button" aria-expanded={priceOpen}>
+            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={priceOpen}>
                 {getPriceLabel()}
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-80 p-4">
+            <PopoverContent className="w-80 p-4 bg-background border-border shadow-lg z-50">
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -417,7 +417,7 @@ export const Property24SearchBar = ({
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border-border">
                         {priceOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
@@ -430,7 +430,7 @@ export const Property24SearchBar = ({
                       <SelectTrigger>
                         <SelectValue placeholder="Any" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-background border-border">
                         {priceOptions.map(option => (
                           <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
                         ))}
@@ -439,8 +439,9 @@ export const Property24SearchBar = ({
                   </div>
                 </div>
                 <Button
+                onClick={() => setPriceOpen(false)}
                   className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white"
-                  onClick={() => setPriceOpen(false)}
+                  
                 >
                   Apply Price Filter
                 </Button>
@@ -450,12 +451,12 @@ export const Property24SearchBar = ({
 
           <Popover open={bedroomsOpen} onOpenChange={setBedroomsOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button" aria-expanded={bedroomsOpen}>
+            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bedroomsOpen}>
                 {getBedroomsLabel()}
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4">
+            <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
               <div className="space-y-2">
                 {bedroomOptions.map(option => (
                   <Button
@@ -480,12 +481,12 @@ export const Property24SearchBar = ({
 
           <Popover open={bathroomsOpen} onOpenChange={setBathroomsOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="property24-filter-button" aria-expanded={bathroomsOpen}>
+            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bathroomsOpen}>
                 {getBathroomsLabel()}
-                <ChevronDown className="h-4 w-4 ml-2" />
+                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-64 p-4">
+            <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
               <div className="space-y-2">
                 {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
                   <Button
@@ -511,7 +512,7 @@ export const Property24SearchBar = ({
           {onMoreFiltersOpen && (
             <Button
               variant="outline"
-              className="property24-filter-button"
+              className="property24-filter-button flex-shrink-0"
               onClick={onMoreFiltersOpen}
             >
               <SlidersHorizontal className="h-4 w-4 mr-2" />
@@ -520,11 +521,12 @@ export const Property24SearchBar = ({
           )}
 
           <Button
-            className="h-12 px-4 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto"
+          className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto flex-shrink-0"
             onClick={onSearch}
           >
-            <Search className="h-4 w-3 mr-2" />
-            Search Properties
+            <Search className="h-4 w-4 mr-2" />
+            <span className="hidden sm:inline whitespace-nowrap">Search Property</span>
+            <span className="sm:hidden">Search</span>
           </Button>
         </div>
       )}

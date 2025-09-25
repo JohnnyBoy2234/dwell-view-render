@@ -8,7 +8,6 @@ import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { useAuth } from "@/hooks/useAuth";
 import HowItWorks from "@/components/HowItWorks";
-import { SafeRentingSection } from "@/components/SafeRentingSection";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { Footer } from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
@@ -27,10 +26,35 @@ import {
   UserCheck,
   MessageSquare,
   Search,
-  MapPin
+  MapPin,
+  Smartphone,
+  Zap,
+  LayoutDashboard,
+  Calculator,
+  ShoppingBag,
+  Layers
 } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
+// Custom money bag icon (filled) for higher legibility at small sizes
+const MoneyBagIcon = ({ className }: { className?: string }) => (
+  <svg
+    className={className}
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="currentColor"
+  >
+    {/* Bag knot/top */}
+    <path d="M8.3 6.1c-.7-.7-1.5-1.9-1.9-2.6.8-.6 1.8-.9 2.8-1 1-.2 1.9.3 2.8.7.3.1.6.3 1 .3s.7-.2 1-.3c.9-.4 1.8-.9 2.8-.7 1 .1 2 .4 2.8 1-.4.7-1.2 1.9-1.9 2.6-.5.5-1.1.9-1.8 1.1-1.6.4-3.2.5-4.8.5s-3.2-.1-4.8-.5c-.7-.2-1.3-.6-1.8-1.1Z"/>
+    {/* Tie band */}
+    <rect x="6.8" y="8" width="10.4" height="1.9" rx="0.9" />
+    {/* Bag body */}
+    <path d="M5.2 11.2c-1.5 1.8-1.8 4.7-.6 6.8 1.5 2.6 4.7 4 7.4 4s5.9-1.4 7.4-4c1.2-2.1.9-5-.6-6.8-1.5-1.8-4-2.7-6.8-2.7s-5.3.9-6.8 2.7Z"/>
+    {/* Coin stack */}
+    <ellipse cx="18.3" cy="14.3" rx="2.2" ry="1.1" />
+    <path d="M16.1 14.3v3.2c0 1.1 1 2 2.2 2s2.2-.9 2.2-2v-3.2c-.5.5-1.4.9-2.2.9s-1.7-.3-2.2-.9Z"/>
+  </svg>
+);
 // AnimatedCounter component for stats
 const AnimatedCounter = ({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) => {
   const [count, setCount] = useState(from);
@@ -97,28 +121,52 @@ const Index = () => {
   // Features data
   const features = [
     {
-      icon: DollarSign,
-      title: "No Commission",
-      description: "Save thousands by cutting out agent fees. Connect directly with landlords and tenants.",
+      icon: MoneyBagIcon,
+      title: "Commission-Free Renting",
+      description: "Renting the way it should be! Stop paying agents thousands. With SwiftRent, you keep 100% of your rental income always.",
       gradient: "from-success-green to-success-green-glow"
     },
     {
-      icon: UserCheck,
-      title: "Verified & Secure",
-      description: "ID & email verification for all users. Safe messaging and verified listings only.",
+      icon: Smartphone,
+      title: "State-of-the-Art Platform",
+      description: "Cutting-edge tech built for landlords and tenants: smart dashboards, digital leases, e-signatures",
       gradient: "from-ocean-blue to-ocean-blue-glow"
-    },
+      },
+      {
+        icon: Zap,
+        title: "Speed & Simplicity",
+        description: "List, screen, and sign in minutes. No delays, no middlemen just fast, simple renting.",
+        gradient: "from-purple-500 to-purple-600"
+      },
+      {
+        icon: LayoutDashboard,
+        title: "All-in-One Dashboard",
+        description: "Manage listings, leases, rent, maintenance and even accounting from one clean dashboard.",
+        gradient: "from-orange-500 to-orange-600"
+      },
+      {
+        icon: Calculator,
+        title: "Built-In Accounting & Tax Invoices",
+        description: "SwiftRent generates professional tax invoices, saving you time and giving you peace of mind.",
+        gradient: "from-teal-500 to-teal-600"
+      },
     {
       icon: Shield,
-      title: "Safe Renting",
-      description: "Built-in trust with transparent processes and protected digital agreements.",
-      gradient: "from-earth-warm to-earth-warm"
+      title: "Safety & Trust",
+      description: "Verified users. Credit-checked tenants. Legally binding contracts. Your rental, secured.",
+      gradient: "from-red-500 to-red-600"
     },
     {
-      icon: Wrench,
-      title: "Maintenance Manager",
-      description: "Track and resolve property issues online with our integrated maintenance system.",
-      gradient: "from-muted-foreground to-muted"
+      icon: MessageSquare,
+      title: "Seamless On-Board Communication",
+      description: "Landlords and tenants can chat, share documents, and track updates directly inside SwiftRent no lost WhatsApps, no messy email chains. Everything in one secure place.",
+      gradient: "from-indigo-500 to-indigo-600"
+    },
+    {
+      icon: Layers,
+      title: "Unlimited Property Management",
+      description: "SwiftRent lets you manage one property or a hundred with ease scalable, simple, and hassle-free.",
+      gradient: "from-amber-400 to-amber-600"
     }
   ];
 
@@ -161,15 +209,11 @@ const Index = () => {
     },
   ];
 
-  const stats = [
-    { label: "Active Listings", value: 2500, icon: Home },
-    { label: "Happy Tenants", value: 1200, icon: Users },
-    { label: "Verified Landlords", value: 850, icon: Award },
-    { label: "5-Star Reviews", value: 4.8, icon: Star, isRating: true }
-  ];
+ // Stats removed per request
+ const stats: never[] = [];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-gray-200/60 to-gray-100/40">
       {/* Hero Section */}
       <section 
         className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
@@ -184,7 +228,7 @@ const Index = () => {
           <div className="absolute -bottom-10 -right-10 w-96 h-96 bg-success-green/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-16 sm:pt-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-2 sm:pt-8">
           {/* Hero Content */}
           <div className="mb-8 sm:mb-12">
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
@@ -198,91 +242,30 @@ const Index = () => {
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
             
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8 sm:mb-16">
-              <Button 
-                asChild 
-                size="lg" 
-                className="bg-white text-ocean-blue hover:bg-white/90 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-              >
-                <Link to="/list-property">List Your Property</Link>
-              </Button>
-              <Button 
-                asChild 
-                size="lg" 
-                variant="outline" 
-                className="border-white text-white hover:bg-white/10 rounded-xl px-8 py-4 text-lg font-bold backdrop-blur-sm"
-              >
-                <Link to="/properties">Find Rental</Link>
-              </Button>
-            </div>
+            {/* CTA Buttons removed per request */}
           </div>
 
-          {/* Search Module */}
+          {/* Search Module wrapper removed; keep only the search bar */}
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 md:p-8 border border-white/20 shadow-2xl">
-              <div className="flex items-center gap-3 mb-6">
-                <Search className="h-6 w-6 text-white" />
-                <h2 className="text-xl font-semibold text-white">Find Your Perfect Rental</h2>
-              </div>
-              <div className="space-y-4">
                 <Property24SearchBar
                   onSearch={handleSearch}
                   onFiltersChange={onFiltersChange}
                   onMoreFiltersOpen={() => setShowMoreFilters(true)}
                   filters={filters}
                 />
-                <div className="flex flex-wrap gap-2 justify-center">
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Cape Town
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Johannesburg
-                  </Badge>
-                  <Badge variant="secondary" className="bg-white/20 text-white border-white/30">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    Durban
-                  </Badge>
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* Quick Stats */}
-          {user && (
-            <div className="mt-12 flex flex-col sm:flex-row justify-center items-center gap-6">
-              <div className="text-center">
-                <div className="text-2xl font-bold">2,500+</div>
-                <div className="text-white/80">Active Listings</div>
-              </div>
-              <div className="hidden sm:block w-px h-12 bg-white/30"></div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">1,200+</div>
-                <div className="text-white/80">Happy Tenants</div>
-              </div>
-              {isAdmin && (
-                <>
-                  <div className="hidden sm:block w-px h-12 bg-white/30"></div>
-                  <Button 
-                    asChild
-                    variant="outline" 
-                    className="border-white/30 text-white hover:bg-white/10 backdrop-blur-sm"
-                  >
-                    <Link to="/admin/dashboard">Admin Panel</Link>
-                  </Button>
-                </>
-              )}
-            </div>
-          )}
+          {/* Quick Stats removed per request */}
         </div>
+        
+        {/* Seamless fade into page background */}
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-gray-200/50"></div>
       </section>
 
       {/* Feature Highlights */}
-      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+      <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose SwiftRent?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -290,12 +273,41 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+         {/* Mobile: cards fading in one by one */}
+        <div className="md:hidden space-y-6">
+            {features.map((feature, index) => (
+              <div 
+              key={index} 
+              className="animate-fade-in"
+              style={{ 
+                animationDelay: `${index * 300}ms`,
+                animationFillMode: 'forwards'
+              }}
+            >
+               <Card className="text-center bg-white/10 border border-white/20 shadow-lg transition-all duration-300 hover:shadow-xl animate-float-slow">
+              <CardContent className="p-6">
+                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
+                <feature.icon className="h-8 w-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground mb-3">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {feature.description}
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            ))}
+        </div>
+
+        {/* Desktop/Tablet: responsive grid for 7 cards */}
+        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <Card key={index} className="text-center border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardContent className="p-8">
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
-                  <feature.icon className="h-8 w-8 text-white" />
+                <feature.icon className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">
                   {feature.title}
@@ -309,20 +321,19 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Safe Renting Section */}
-      <SafeRentingSection />
+      {/* Safe Renting Section removed by request */}
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-br from-muted/20 to-accent/5">
+      <section id="how-it-works" className="pt-6 md:pt-8 pb-4 md:pb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <HowItWorks />
         </div>
       </section>
 
       {/* Featured Properties */}
-      <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+      <section className="pt-4 md:pt-6 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Featured Properties
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -353,41 +364,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Success Stats */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-ocean-blue/5 to-success-green/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              Trusted Across South Africa
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              Join thousands of satisfied landlords and tenants
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="w-20 h-20 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <stat.icon className="h-10 w-10 text-white" />
-                </div>
-                <div className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-                  {stat.isRating ? (
-                    <span>{stat.value}</span>
-                  ) : (
-                    <AnimatedCounter to={stat.value} />
-                  )}
-                  {stat.isRating && <Star className="inline h-6 w-6 text-earth-warm fill-current ml-1" />}
-                </div>
-                <div className="text-muted-foreground font-medium">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Testimonials */}
       <TestimonialsCarousel />
 
@@ -405,7 +381,7 @@ const Index = () => {
             <Button 
               asChild
               size="lg" 
-              className="bg-white text-ocean-blue hover:bg-white/90 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               <Link to="/auth">Join as Landlord</Link>
             </Button>
@@ -413,7 +389,7 @@ const Index = () => {
               asChild
               size="lg" 
               variant="outline"
-              className="border-white text-white hover:bg-white/10 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm"
+              className="bg-white/20 text-ocean-blue-dark border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Link to="/auth">Join as Tenant</Link>
             </Button>

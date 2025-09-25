@@ -64,8 +64,9 @@ export function useSendMessage(ticketId: string) {
     onMutate: async ({ body }) => {
       await qc.cancelQueries({ queryKey: ['maintenance-messages', ticketId] });
       const previous = qc.getQueryData<any>(['maintenance-messages', ticketId]);
+      const tempId = `temp-${Date.now()}`;
       const optimistic: MaintenanceMessage = {
-        id: `temp-${Date.now()}`,
+        id: tempId,
         ticketId,
         senderUserId: user?.id || 'temp',
         senderRole: (isLandlord ? 'LANDLORD' : 'TENANT') as Role,
@@ -80,14 +81,41 @@ export function useSendMessage(ticketId: string) {
         ],
         pageParams: [undefined, ...(data?.pageParams || [])],
       }));
-      return { previous };
+      return { previous, tempId };
     },
     retry: 0,
     onError: (_err, _vars, context) => {
       qc.setQueryData(['maintenance-messages', ticketId], context?.previous);
     },
+    onSuccess: (created, _vars, context) => {
+      // Replace optimistic temp message with actual one
+      qc.setQueryData(['maintenance-messages', ticketId], (data: any) => {
+        if (!data) return data;
+        const pages = (data.pages || []).map((page: any, idx: number) => {
+          if (idx !== 0) return page;
+          const messages = (page.messages || []).map((m: MaintenanceMessage) =>
+            m.id === context?.tempId
+              ? {
+                  id: created.id,
+                  ticketId: created.maintenance_request_id,
+                  senderUserId: created.sender_user_id,
+                  senderRole: (created.sender_role === 'tenant' ? 'TENANT' : 'LANDLORD') as Role,
+                  recipientUserId: created.recipient_user_id,
+                  body: created.body,
+                  attachments: created.attachments,
+                  createdAt: created.created_at,
+                  readAt: created.read_at,
+                }
+              : m
+          );
+          return { ...page, messages };
+        });
+        return { ...data, pages };
+      });
+    },
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['maintenance-messages', ticketId] });
+      qc.invalidateQueries({ queryKey: ['maintenance-unread-counts'] });
     },
   });
 }

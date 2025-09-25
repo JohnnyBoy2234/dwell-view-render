@@ -49,10 +49,10 @@ const landlordData = {
     },
     {
       icon: <DollarSign className="h-4 w-4 text-white" />,
-      title: "Manage & Collect",
+      title: "Manage Properties",
       description:
-        "Collect rent online with secure payments and track everything in one place.",
-      badges: ["Online Payments", "Maintenance Tracking", "Financial Reports"],
+      "Control all your rentals in one place simple, fast, and effortless.",
+      badges: ["Maintenance Tracking", "Financial Reports"],
     },
   ],
   cta: {
@@ -73,7 +73,7 @@ const LandlordCard: React.FC = () => {
   const colors = landlordColors;
   return (
     <Card className="shadow-strong overflow-hidden transition-all duration-500 animate-fade-in border-success-green/20 bg-gradient-to-br from-white via-white to-success-green/5">
-      <CardHeader className="pb-6 bg-gradient-to-r from-success-green/10 to-success-green/5">
+       <CardHeader className="pb-6 bg-gradient-to-r from-success-green/5 to-success-green/0">
         <div className="mb-2 flex items-center gap-3">
           <div className="shadow-soft flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-success-green to-success-green-glow sm:h-12 sm:w-12">
             {data.header.icon}
@@ -87,7 +87,7 @@ const LandlordCard: React.FC = () => {
             </Badge>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground sm:text-base">
+        <p className="text-sm text-foreground sm:text-base">
           {data.header.description}
         </p>
       </CardHeader>
@@ -100,7 +100,7 @@ const LandlordCard: React.FC = () => {
               {step.icon}
             </div>
             <div className="flex-1">
-              <h3 className="mb-2 text-base font-semibold sm:text-lg">
+            <h3 className="mb-2 text-base font-semibold sm:text-lg">
                 {step.title}
               </h3>
               <p className="mb-3 text-sm leading-relaxed text-muted-foreground sm:text-base">
@@ -134,7 +134,7 @@ const HowItWorks: React.FC = () => {
   const isTenant = userType === "tenant";
 
   return (
-    <div className="bg-[hsl(var(--sr-bg))]">
+    <div>
       <section className="py-16 sm:py-20 lg:py-24">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                   <SectionHeader
@@ -158,11 +158,7 @@ const HowItWorks: React.FC = () => {
               onCheckedChange={() =>
                 setUserType(isTenant ? "landlord" : "tenant")
               }
-              className={`transition-colors ${
-                !isTenant
-                  ? "bg-[hsl(var(--sr-green))]"
-                  : "bg-[hsl(var(--sr-blue))]"
-              }`}
+              className={`transition-colors data-[state=checked]:!bg-[hsl(var(--sr-green))] data-[state=unchecked]:!bg-[hsl(var(--sr-blue))]`}
             />
             <Label
               htmlFor="user-type-toggle"

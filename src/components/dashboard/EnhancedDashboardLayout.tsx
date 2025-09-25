@@ -69,7 +69,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
             
             <div className="flex items-center gap-2 sm:gap-4 ml-auto">
               {/* Notifications */}
-              <NotificationBell />
+              <NotificationBell className="hidden sm:block" />
               
               {/* Custom Actions */}
               {actions}

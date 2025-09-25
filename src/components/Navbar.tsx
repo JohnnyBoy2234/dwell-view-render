@@ -46,51 +46,42 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Desktop Action Buttons */}
-            <div className="hidden md:flex items-center space-x-4">
+            {/* Desktop Action Buttons - Simplified */}
+            <div className="hidden md:flex items-center space-x-3">
               {loading ? (
-                // Reserve space to avoid layout shift while auth resolves
-                <div className="h-9 w-[280px]" />
+                <div className="h-9 w-[200px]" />
               ) : user ? (
                 <>
                   <Button 
                     asChild 
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Link to="/messages" className="flex items-center gap-1">
-                      <MessageCircle className="h-4 w-4" />
-                      Messages
-                      {messageUnread > 0 && (
-                        <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center ml-1">
-                          {messageUnread > 99 ? '99+' : messageUnread}
-                        </Badge>
-                      )}
-                    </Link>
-                  </Button>
-                  <Button 
-                    asChild 
-                    className="bg-success-green hover:bg-success-green-dark text-white"
+                  className="bg-success-green hover:bg-success-green-dark text-white font-medium"
                   >
                     <Link to="/list-property">List Property</Link>
                   </Button>
-                  {isLandlord && hasProperties ? (
-                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedlandlorddashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />Landlord Dashboard</Link></Button>
-                  ) : !isLandlord ? (
-                    <Button variant="ghost" size="sm" asChild><Link to="/enhancedtenantdashboard" className="flex items-center relative"><LayoutDashboard className="h-4 w-4 mr-2" />My Dashboard</Link></Button>
-                  ) : null}
                   <NotificationBell />
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
+                    <Button variant="outline" size="sm" className="border-border">
                         <User className="h-4 w-4 mr-2" />
                         {user.email?.split('@')[0]}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="bg-background border-border z-50" align="end">
+                    <DropdownMenuContent className="bg-background border-border shadow-lg z-50" align="end">
                       <DropdownMenuItem asChild>
                         <Link to={isLandlord ? "/enhancedlandlorddashboard" : "/enhancedtenantdashboard"} className="cursor-pointer">
                           <LayoutDashboard className="h-4 w-4 mr-2" />
                           Dashboard
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/messages" className="cursor-pointer">
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Messages
+                          {messageUnread > 0 && (
+                            <Badge variant="destructive" className="h-4 w-4 p-0 text-xs flex items-center justify-center ml-2">
+                              {messageUnread > 99 ? '99+' : messageUnread}
+                            </Badge>
+                          )}
                         </Link>
                       </DropdownMenuItem>
                       {isAdmin && (
@@ -120,8 +111,7 @@ const Navbar = () => {
                   >
                     <Link to="/list-property">List Property</Link>
                   </Button>
-                  <Button asChild><Link to="/auth">Tenant Login</Link></Button>
-                  <Button variant="outline" asChild><Link to="/auth">Landlord Login</Link></Button>
+                  <Button asChild variant="outline"><Link to="/auth">Sign In</Link></Button>
                 </>
               )}
             </div>
