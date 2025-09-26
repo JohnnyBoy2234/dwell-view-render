@@ -148,21 +148,11 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
     console.log('🔔 Marking all notifications as read for user:', user.id);
     try {
-      // First update local state immediately for better UX
-      if (isMountedRef.current) {
-        setNotifications(prev => {
-          const updated = prev.map(n => ({ ...n, is_read: true }));
-          console.log('🔔 Local state updated immediately:', updated.length, 'notifications marked as read');
-          return updated;
-        });
-        setUnreadCount(0);
-        console.log('🔔 Unread count set to 0 immediately');
-      }
-
-      // Then update database - get unread notifications first
+      // Get unread notifications BEFORE updating local state
       const unreadNotifications = notifications.filter(n => !n.is_read);
-      console.log('🔔 Updating', unreadNotifications.length, 'unread notifications in database');
+      console.log('🔔 Found', unreadNotifications.length, 'unread notifications to update in database');
       
+      // Update database first
       if (unreadNotifications.length > 0) {
         // Update each notification individually to avoid trigger issues
         const updatePromises = unreadNotifications.map(notification => 
@@ -181,7 +171,18 @@ export const useNotifications = (filters?: NotificationFilters) => {
           throw new Error(`Failed to update ${errors.length} notifications`);
         }
         
-        console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications');
+        console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications in database');
+      }
+
+      // Then update local state
+      if (isMountedRef.current) {
+        setNotifications(prev => {
+          const updated = prev.map(n => ({ ...n, is_read: true }));
+          console.log('🔔 Local state updated:', updated.length, 'notifications marked as read');
+          return updated;
+        });
+        setUnreadCount(0);
+        console.log('🔔 Unread count set to 0');
       }
       
       // Refresh from database to ensure consistency
