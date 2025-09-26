@@ -59,10 +59,19 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   // Auto-scroll to bottom when new messages arrive or when typing
   const scrollToBottom = (force = false) => {
     if (force || isScrolledToBottom) {
-      messagesEndRef.current?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'end'
-      });
+      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        // Use scrollTop method for more reliable bottom positioning
+        setTimeout(() => {
+          (scrollContainer as any).scrollTop = (scrollContainer as any).scrollHeight;
+        }, 50);
+      } else {
+        // Fallback to scrollIntoView with better positioning
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
     }
   };
 
