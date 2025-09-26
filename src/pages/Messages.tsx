@@ -42,7 +42,7 @@ export default function Messages() {
   const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
-  const enableViewingUI = false; // Temporarily disable viewing UI to stabilize messages route
+  const enableViewingUI = true;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 

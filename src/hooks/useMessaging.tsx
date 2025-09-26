@@ -48,6 +48,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const isMountedRef = useRef(true);
+  const messageChannelRef = useRef<any | null>(null);
 
   // Component mount tracking
   useEffect(() => {
@@ -312,13 +313,13 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
       console.log('✅ Message sent successfully:', data);
 
-      // Refresh messages and conversations immediately after sending
-      if (!isMountedRef.current) return;
-      if (activeConversation === conversationId) {
-        console.log('🔄 Refreshing messages for active conversation');
-        fetchMessages(conversationId);
+      // Optimistically append for instant UI; realtime will reconcile
+      if (isMountedRef.current && activeConversation === conversationId) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === (data as any).id)) return prev;
+          return [...prev, data as any];
+        });
       }
-      console.log('🔄 Refreshing conversations');
       fetchConversations();
     } catch (error: any) {
       console.error('❌ Final error in sendMessage:', error);
@@ -435,22 +436,15 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
-  // Re-enable real-time subscriptions for messaging
+  // Global realtime: keep conversation list fresh (messages handled by scoped channel)
   useRealtime({
     onMessageChange: () => {
-      console.log('🔄 Refreshing messages due to real-time update');
       if (!isMountedRef.current) return;
-      if (activeConversation) {
-        fetchMessages(activeConversation);
-      }
       fetchConversations();
     },
     onViewingProposalChange: () => {
-      console.log('🔄 Refreshing viewing proposals due to real-time update');
       if (!isMountedRef.current) return;
-      if (onViewingProposalChange) {
-        onViewingProposalChange();
-      }
+      if (onViewingProposalChange) onViewingProposalChange();
       fetchConversations();
     }
   });
@@ -467,6 +461,48 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     if (activeConversation) {
       fetchMessages(activeConversation);
     }
+  }, [activeConversation]);
+
+  // Per-conversation realtime channel for instant message updates
+  useEffect(() => {
+    if (messageChannelRef.current) {
+      supabase.removeChannel(messageChannelRef.current);
+      messageChannelRef.current = null;
+    }
+    if (!activeConversation) return;
+
+    const channel = supabase
+      .channel(`messages-${activeConversation}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConversation}` },
+        (payload) => {
+          if (!isMountedRef.current) return;
+          try {
+            if (payload.eventType === 'INSERT') {
+              const newMsg = payload.new as any as Message;
+              setMessages(prev => (prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]));
+            } else if (payload.eventType === 'UPDATE') {
+              const updated = payload.new as any as Message;
+              setMessages(prev => prev.map(m => (m.id === updated.id ? { ...m, ...updated } : m)));
+            } else if (payload.eventType === 'DELETE') {
+              const oldRow: any = payload.old;
+              setMessages(prev => prev.filter(m => m.id !== oldRow.id));
+            }
+          } catch (e) {
+            console.error('Realtime message handler error:', e);
+          }
+        }
+      )
+      .subscribe();
+
+    messageChannelRef.current = channel;
+    return () => {
+      if (messageChannelRef.current) {
+        supabase.removeChannel(messageChannelRef.current);
+        messageChannelRef.current = null;
+      }
+    };
   }, [activeConversation]);
 
   return {
