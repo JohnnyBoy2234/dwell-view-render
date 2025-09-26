@@ -5,8 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { 
   MessageCircle, 
@@ -33,7 +33,7 @@ export default function Messages() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const { user, isLandlord } = auth || ({} as any);
+  const { user, isLandlord, authLoading } = auth || ({} as any);
   const { unreadCount: messageUnread } = useUnreadMessages();
   const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
@@ -266,6 +266,19 @@ export default function Messages() {
     );
   }
 
+  // Loading guard to avoid rendering unstable subtrees
+  if (auth && authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="p-8 text-center bg-card rounded-lg border shadow-lg">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <h2 className="text-lg font-semibold mb-2">Loading messages...</h2>
+          <p className="text-muted-foreground">Please wait</p>
+        </div>
+      </div>
+    );
+  }
+
   // Mobile layout
   if (isMobile) {
     return (
@@ -287,8 +300,8 @@ export default function Messages() {
             </div>
             
             {/* Conversations List - Mobile */}
-            <div className="flex-1 flex flex-col h-[calc(100vh-8rem)]">              
-              <ScrollArea className="flex-1 min-h-0">
+            <div className="flex-1 flex flex-col h-[calc(100vh-8rem)]">
+              <div className="flex-1 min-h-0 overflow-auto">
                 {loading ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
                     <div>
@@ -360,7 +373,7 @@ export default function Messages() {
                     })}
                   </div>
                 )}
-              </ScrollArea>
+              </div>
             </div>
           </div>
         )}
@@ -417,7 +430,7 @@ export default function Messages() {
               
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0 overflow-hidden">
-                  <ScrollArea className="h-full">
+                  <div className="h-full overflow-auto">
                   <div className="p-1 space-y-1">
                     {messages.length === 0 ? (
                       <div className="flex items-center justify-center h-32 text-muted-foreground">
@@ -525,7 +538,7 @@ export default function Messages() {
                     )}
                     <div ref={messagesEndRef} />
                   </div>
-                  </ScrollArea>
+                  </div>
                 </div>
 
                 {/* Message Input - Mobile */}
@@ -590,7 +603,7 @@ export default function Messages() {
         <div className="h-full rounded-lg border bg-card">
           
           <div className="p-0">
-            <ScrollArea className="h-[calc(100vh-8rem)]">
+            <div className="h-[calc(100vh-8rem)] overflow-auto">
               {loading ? (
                 <div className="p-6 text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
@@ -658,7 +671,7 @@ export default function Messages() {
                   })}
                 </div>
               )}
-            </ScrollArea>
+            </div>
           </div>
         </div>
       </div>
@@ -703,7 +716,7 @@ export default function Messages() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-      <ScrollArea className="h-full">
+      <div className="h-full overflow-auto">
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-32 text-muted-foreground">
                     <div className="text-center">
@@ -812,7 +825,7 @@ export default function Messages() {
                     <div ref={messagesEndRef} />
                   </div>
                 )}
-              </ScrollArea>
+              </div>
             </div>
 
             {/* Message Input */}
