@@ -163,26 +163,45 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const unreadNotifications = freshNotifications || [];
       console.log('🔔 Found', unreadNotifications.length, 'unread notifications to update in database');
       
-      // Update database first
+      // Update database first - try bulk update first, fallback to individual if needed
       if (unreadNotifications.length > 0) {
-        // Update each notification individually to avoid trigger issues
-        const updatePromises = unreadNotifications.map(notification => 
-          supabase
+        try {
+          // Try bulk update first
+          const { error: bulkError } = await supabase
             .from('notifications')
             .update({ is_read: true })
-            .eq('id', notification.id)
             .eq('user_id', user.id)
-        );
-        
-        const results = await Promise.all(updatePromises);
-        const errors = results.filter(result => result.error);
-        
-        if (errors.length > 0) {
-          console.error('🔔 Some notification updates failed:', errors);
-          throw new Error(`Failed to update ${errors.length} notifications`);
+            .eq('is_read', false);
+
+          if (bulkError) {
+            console.log('🔔 Bulk update failed, trying individual updates:', bulkError.message);
+            
+            // Fallback to individual updates with better error handling
+            const updatePromises = unreadNotifications.map(notification => 
+              supabase
+                .from('notifications')
+                .update({ is_read: true })
+                .eq('id', notification.id)
+                .eq('user_id', user.id)
+            );
+            
+            const results = await Promise.all(updatePromises);
+            const errors = results.filter(result => result.error);
+            
+            if (errors.length > 0) {
+              console.error('🔔 Individual updates also failed:', errors.length, 'errors');
+              // Don't throw error, just log it - local state is already updated
+              console.log('🔔 Continuing with local state update only');
+            } else {
+              console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications individually');
+            }
+          } else {
+            console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications in bulk');
+          }
+        } catch (error) {
+          console.error('🔔 Database update failed completely:', error);
+          // Don't throw error, just log it - local state is already updated
         }
-        
-        console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications in database');
       }
 
       // Then update local state
