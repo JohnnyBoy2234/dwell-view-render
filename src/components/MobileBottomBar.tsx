@@ -20,17 +20,17 @@ export function MobileBottomBar() {
   const isInConversation = location.pathname === '/messages' && searchParams.get('c');
   const isSigningPage = /\/leases\/.+\/sign/.test(location.pathname) || /\/contracts\/.+\/sign/.test(location.pathname) || location.pathname.includes('/sign') || location.pathname.startsWith('/swiftrent-lease/');
   
-  if (isInConversation || isSigningPage) {
-    return null;
-  }
-
   // Ensure pages have enough bottom padding when the bar is visible
   useEffect(() => {
+    if (isInConversation || isSigningPage) {
+      document.body.classList.remove('has-mobile-bottom-bar');
+      return;
+    }
     document.body.classList.add('has-mobile-bottom-bar');
     return () => {
       document.body.classList.remove('has-mobile-bottom-bar');
     };
-  }, []);
+  }, [isInConversation, isSigningPage]);
   
   const leftNavItems = [
     { path: '/', icon: Home, label: 'Home' },
@@ -82,6 +82,10 @@ export function MobileBottomBar() {
       </Link>
     );
   };
+
+  if (isInConversation || isSigningPage) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-[#4169e1] backdrop-blur-md border-t border-white/20 z-40 md:hidden">
