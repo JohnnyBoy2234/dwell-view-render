@@ -1,97 +1,59 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Fingerprint, User, Smartphone } from 'lucide-react';
-import { MobileServices } from '@/services/mobileServices';
 import { useMobile } from '@/hooks/useMobile';
-import { toast } from 'sonner';
+import { useBiometricAuth } from '@/hooks/useBiometricAuth';
+import { MobileAuthIcon } from './MobileAuthIcon';
+import { MOBILE_AUTH_LABELS, PLATFORM_AUTH_TEXT, MOBILE_ARIA_LABELS } from '@/constants/mobileConstants';
 
 interface MobileAuthProps {
   onSuccess: () => void;
   onFallback: () => void;
 }
 
+/**
+ * Mobile biometric authentication component
+ * Handles platform-specific biometric authentication with proper fallbacks
+ */
 export function MobileAuth({ onSuccess, onFallback }: MobileAuthProps) {
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const { isNative, isIOS, isAndroid } = useMobile();
-
-  const handleBiometricAuth = async () => {
-    if (!isNative) {
-      onFallback();
-      return;
-    }
-
-    setIsAuthenticating(true);
-    
-    try {
-      // Check if biometric authentication is available
-      const isAvailable = await MobileServices.isBiometricAvailable();
-      
-      if (!isAvailable) {
-        toast.error('Biometric authentication not available');
-        onFallback();
-        return;
-      }
-
-      // Attempt biometric authentication
-      const result = await MobileServices.authenticateWithBiometric();
-      
-      if (result.success) {
-        await MobileServices.vibrateLight();
-        toast.success('Authentication successful');
-        onSuccess();
-      } else {
-        toast.error('Authentication failed');
-        onFallback();
-      }
-    } catch (error) {
-      console.error('Biometric auth error:', error);
-      toast.error('Authentication error');
-      onFallback();
-    } finally {
-      setIsAuthenticating(false);
-    }
-  };
+  const { isAuthenticating, authenticate } = useBiometricAuth({ onSuccess, onFallback });
 
   if (!isNative) {
     return null;
   }
 
-  const getAuthIcon = () => {
-    if (isIOS) return <User className="h-8 w-8" />;
-    if (isAndroid) return <Fingerprint className="h-8 w-8" />;
-    return <Smartphone className="h-8 w-8" />;
-  };
-
   const getAuthText = () => {
-    if (isIOS) return 'Use Face ID or Touch ID';
-    if (isAndroid) return 'Use Fingerprint';
-    return 'Use Biometric Authentication';
+    if (isIOS) return PLATFORM_AUTH_TEXT.IOS;
+    if (isAndroid) return PLATFORM_AUTH_TEXT.ANDROID;
+    return PLATFORM_AUTH_TEXT.DEFAULT;
   };
 
   return (
     <Card className="w-full max-w-sm mx-auto">
       <CardHeader className="text-center">
         <CardTitle className="flex items-center justify-center gap-2">
-          {getAuthIcon()}
-          Quick Access
+          <MobileAuthIcon />
+          {MOBILE_AUTH_LABELS.TITLE}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <Button
-          onClick={handleBiometricAuth}
+          onClick={authenticate}
           disabled={isAuthenticating}
           className="w-full"
           size="lg"
+          aria-label={MOBILE_ARIA_LABELS.AUTH_BUTTON}
         >
-          {isAuthenticating ? 'Authenticating...' : getAuthText()}
+          {isAuthenticating ? MOBILE_AUTH_LABELS.AUTHENTICATING : getAuthText()}
         </Button>
         <Button
           variant="outline"
           onClick={onFallback}
           className="w-full"
+          aria-label={MOBILE_ARIA_LABELS.FALLBACK_BUTTON}
         >
-          Use Password Instead
+          {MOBILE_AUTH_LABELS.FALLBACK_BUTTON}
         </Button>
       </CardContent>
     </Card>
