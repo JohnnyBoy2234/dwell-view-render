@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Check, CheckCheck, Clock } from 'lucide-react';
 import { formatDistanceToNow, format } from 'date-fns';
 
@@ -60,9 +61,7 @@ export function MessageBubble({ message, currentUserId, isLandlord = false, show
           </div>
         )}
         
-        <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-          {message.content}
-        </div>
+        <MessageContent content={message.content} isOwn={isOwn} />
         
         <div className={cn(
           'flex items-center justify-end gap-1 mt-1 text-xs',
@@ -77,6 +76,54 @@ export function MessageBubble({ message, currentUserId, isLandlord = false, show
           {getMessageStatus()}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Inline component to render message content with link handling and CTA for application invites
+function MessageContent({ content, isOwn }: { content: string; isOwn: boolean }) {
+  // Basic URL detection
+  const urlRegex = /https?:\/\/[^\s]+/g;
+  const urls = content.match(urlRegex) || [];
+  const inviteUrl = urls.find((u) => u.includes('/apply/invite/'));
+
+  // Convert URLs in text to clickable anchors
+  const parts = content.split(urlRegex);
+  const interleaved: (string | JSX.Element)[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    interleaved.push(parts[i]);
+    if (i < parts.length - 1 && urls[i]) {
+      const href = urls[i];
+      interleaved.push(
+        <a
+          key={`${href}-${i}`}
+          href={href}
+          className={cn('underline break-all', isOwn ? 'text-white' : 'text-primary')}
+        >
+          {href}
+        </a>
+      );
+    }
+  }
+
+  return (
+    <div>
+      <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+        {interleaved}
+      </div>
+      {inviteUrl && (
+        <div className="mt-2">
+          <Button
+            size="sm"
+            className={cn(isOwn ? 'bg-white text-ios-blue hover:bg-white/90' : undefined)}
+            onClick={() => {
+              window.location.href = inviteUrl;
+            }}
+          >
+            Start Application
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
