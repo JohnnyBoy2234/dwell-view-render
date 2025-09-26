@@ -119,4 +119,5 @@ export const RentalApplicationForm = ({
         </form>
       </CardContent>
     </Card>
+  );
 };
