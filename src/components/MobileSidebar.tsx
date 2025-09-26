@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, FileText, Info } from 'lucide-react';
+import { Menu, X, FileText, Info, Shield, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -12,8 +12,10 @@ export function MobileSidebar() {
   if (!isMobile) return null;
 
   const menuItems = [
-    { path: '/blog', label: 'Blog', icon: FileText },
-    { path: '/about', label: 'About Us', icon: Info }
+    { path: '/safe-renting', label: 'Safe Renting', icon: Shield },
+    { path: '/about', label: 'About', icon: Info },
+    { path: '/contact', label: 'Contact', icon: Mail },
+    { path: '/blog', label: 'Blog', icon: FileText }
   ];
 
   return (
