@@ -55,6 +55,14 @@ const About = () => {
           </div>
         </section>
 
+        {/* Vision for the Future */}
+        <section className="mb-16 text-center">
+          <h2 className="text-3xl font-bold mb-6">A Vision for the Future</h2>
+          <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-8">
+            SwiftRent is not only about saving money today — it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
+          </p>
+        </section>
+
         {/* Values */}
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Our Values</h2>
@@ -149,14 +157,6 @@ const About = () => {
               </div>
             </div>
           </div>
-        </section>
-
-        {/* Vision for the Future */}
-        <section className="mb-16 text-center">
-          <h2 className="text-3xl font-bold mb-6">A Vision for the Future</h2>
-          <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-8">
-            SwiftRent is not only about saving money today — it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
-          </p>
         </section>
 
         {/* CTA */}
