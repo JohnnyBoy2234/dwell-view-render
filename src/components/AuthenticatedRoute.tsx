@@ -25,17 +25,18 @@ export function AuthenticatedRoute({
       return;
     }
 
-    if (!authLoading && !kycLoading && user && requireVerification) {
-      // Check if user needs verification
-      if (!kycProfile || kycProfile.status !== 'approved') {
-        navigate(fallbackPath);
-        return;
+    if (!authLoading && !kycLoading && user) {
+      if (requireVerification) {
+        if (!kycProfile || kycProfile.status !== 'approved') {
+          navigate(fallbackPath);
+          return;
+        }
       }
     }
   }, [authLoading, kycLoading, user, kycProfile, requireVerification, navigate, fallbackPath]);
 
   // Still loading
-  if (authLoading || kycLoading) {
+  if (authLoading || (requireVerification && kycLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center space-y-4">

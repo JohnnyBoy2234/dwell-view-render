@@ -129,7 +129,7 @@ const App = () => {
               <Route path="/dashboard/accounting/reports/expense-summary" element={<AuthenticatedRoute><ExpenseSummaryPage /></AuthenticatedRoute>} />
               <Route path="/dashboard/invoices/tax" element={<AuthenticatedRoute><TaxInvoicePage /></AuthenticatedRoute>} />
               
-              <Route path="/messages" element={<AuthenticatedRoute><Messages /></AuthenticatedRoute>} />
+              <Route path="/messages" element={<AuthenticatedRoute requireVerification={false}><Messages /></AuthenticatedRoute>} />
               <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
               <Route path="/applications" element={<AuthenticatedRoute><Applications /></AuthenticatedRoute>} />
               <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
