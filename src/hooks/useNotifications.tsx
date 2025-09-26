@@ -159,25 +159,30 @@ export const useNotifications = (filters?: NotificationFilters) => {
         console.log('🔔 Unread count set to 0 immediately');
       }
 
-      // Then update database
-      const { error } = await supabase
-        .from('notifications')
-        .update({ 
-          is_read: true
-        })
-        .eq('user_id', user.id)
-        .eq('is_read', false);
-
-      if (error) {
-        // If table doesn't exist, local state is already updated
-        if (error.code === '42P01' || error.message.includes('relation "notifications" does not exist')) {
-          console.log('🔔 Notifications table does not exist, local state already updated');
-          return;
+      // Then update database - get unread notifications first
+      const unreadNotifications = notifications.filter(n => !n.is_read);
+      console.log('🔔 Updating', unreadNotifications.length, 'unread notifications in database');
+      
+      if (unreadNotifications.length > 0) {
+        // Update each notification individually to avoid trigger issues
+        const updatePromises = unreadNotifications.map(notification => 
+          supabase
+            .from('notifications')
+            .update({ is_read: true })
+            .eq('id', notification.id)
+            .eq('user_id', user.id)
+        );
+        
+        const results = await Promise.all(updatePromises);
+        const errors = results.filter(result => result.error);
+        
+        if (errors.length > 0) {
+          console.error('🔔 Some notification updates failed:', errors);
+          throw new Error(`Failed to update ${errors.length} notifications`);
         }
-        throw error;
+        
+        console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications');
       }
-
-      console.log('🔔 Database update successful');
       
       // Refresh from database to ensure consistency
       setTimeout(() => {
