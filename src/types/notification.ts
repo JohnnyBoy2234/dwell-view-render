@@ -1,4 +1,4 @@
-export type NotificationType = 'lease' | 'maintenance' | 'application' | 'payment' | 'viewing' | 'system';
+export type NotificationType = 'lease' | 'maintenance' | 'application' | 'payment' | 'viewing' | 'system' | 'kyc' | 'inventory' | 'offer';
 export type NotificationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface Notification {

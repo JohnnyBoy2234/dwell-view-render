@@ -1128,6 +1128,33 @@ export type Database = {
           },
         ]
       }
+      notification_read_status: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          notification_key: string
+          read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          notification_key: string
+          read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          notification_key?: string
+          read_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string

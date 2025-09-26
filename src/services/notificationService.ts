@@ -310,4 +310,88 @@ export class NotificationService {
       { amount, propertyAddress, dueDate }
     );
   }
+
+  /**
+   * Notify about KYC status updates
+   */
+  static async notifyKycApproved(userId: string) {
+    return this.createSystemNotification(
+      userId,
+      'ID Verification Approved',
+      'Your identity verification has been approved. You can now request property viewings.',
+      'normal',
+      '/enhancedtenantdashboard'
+    );
+  }
+
+  static async notifyKycRejected(userId: string, reason?: string) {
+    return this.createSystemNotification(
+      userId,
+      'ID Verification Requires Attention',
+      `Your identity verification needs to be resubmitted. ${reason || 'Please check the requirements and try again.'}`,
+      'high',
+      '/verify-id'
+    );
+  }
+
+  /**
+   * Notify about inventory updates
+   */
+  static async notifyInventoryCompleted(landlordId: string, tenantName: string, propertyAddress: string, inventoryId: string) {
+    return this.createSystemNotification(
+      landlordId,
+      'Property Inventory Completed',
+      `${tenantName} has completed the inventory for ${propertyAddress}.`,
+      'normal',
+      `/enhancedlandlorddashboard/inventory/${inventoryId}`,
+      { inventoryId, tenantName, propertyAddress }
+    );
+  }
+
+  static async notifyInventoryApproved(tenantId: string, propertyAddress: string, inventoryId: string) {
+    return this.createSystemNotification(
+      tenantId,
+      'Inventory Approved',
+      `Your property inventory for ${propertyAddress} has been approved by the landlord.`,
+      'normal',
+      `/enhancedtenantdashboard/inventory/${inventoryId}`,
+      { inventoryId, propertyAddress }
+    );
+  }
+
+  /**
+   * Notify about offers
+   */
+  static async notifyOfferReceived(tenantId: string, landlordName: string, propertyAddress: string, offerId: string) {
+    return this.createApplicationNotification(
+      tenantId,
+      'New Rental Offer Received',
+      `${landlordName} has sent you an offer for ${propertyAddress}.`,
+      'high',
+      `/enhancedtenantdashboard/offers/${offerId}`,
+      { offerId, landlordName, propertyAddress }
+    );
+  }
+
+  static async notifyOfferAccepted(landlordId: string, tenantName: string, propertyAddress: string, offerId: string) {
+    return this.createApplicationNotification(
+      landlordId,
+      'Offer Accepted',
+      `${tenantName} has accepted your offer for ${propertyAddress}.`,
+      'high',
+      `/enhancedlandlorddashboard/offers/${offerId}`,
+      { offerId, tenantName, propertyAddress }
+    );
+  }
+
+  static async notifyOfferDeclined(landlordId: string, tenantName: string, propertyAddress: string, offerId: string) {
+    return this.createApplicationNotification(
+      landlordId,
+      'Offer Declined',
+      `${tenantName} has declined your offer for ${propertyAddress}.`,
+      'normal',
+      `/enhancedlandlorddashboard/offers/${offerId}`,
+      { offerId, tenantName, propertyAddress }
+    );
+  }
 }

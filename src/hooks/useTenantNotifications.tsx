@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useRealtime } from '@/hooks/useRealtime';
 
 export interface TenantNotification {
   id: string;
@@ -37,13 +38,27 @@ export const useTenantNotifications = () => {
   const [notifications, setNotifications] = useState<TenantNotification[]>([]);
   const [pendingLeases, setPendingLeases] = useState<PendingLease[]>([]);
   const [loading, setLoading] = useState(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
     if (user) {
       fetchNotifications();
       fetchPendingLeases();
     }
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [user]);
+
+  // Add real-time subscriptions
+  useRealtime({
+    onTenancyChange: () => {
+      if (isMountedRef.current && user) {
+        fetchNotifications();
+        fetchPendingLeases();
+      }
+    }
+  });
 
   const fetchNotifications = async () => {
     if (!user) return;
@@ -70,6 +85,17 @@ export const useTenantNotifications = () => {
 
       if (error) throw error;
 
+      // Check read status for each notification
+      const { data: readStatuses } = await supabase
+        .from('notification_read_status')
+        .select('notification_key, is_read')
+        .eq('user_id', user.id)
+        .in('notification_key', (tenancies || []).map((t: any) => `tenant_lease_${t.id}`));
+
+      const readStatusMap = new Map(
+        (readStatuses || []).map(status => [status.notification_key, status.is_read])
+      );
+
       const notificationsData: TenantNotification[] = (tenancies || []).map((tenancy: any) => ({
         id: tenancy.id,
         type: 'lease_ready' as const,
@@ -79,7 +105,7 @@ export const useTenantNotifications = () => {
         landlordName: tenancy.landlord_profile?.display_name || 'Landlord',
         tenancyId: tenancy.id,
         createdAt: tenancy.created_at,
-        isRead: false
+        isRead: readStatusMap.get(`tenant_lease_${tenancy.id}`) || false
       }));
 
       setNotifications(notificationsData);
@@ -135,14 +161,30 @@ export const useTenantNotifications = () => {
     }
   };
 
-  const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === notificationId 
-          ? { ...notification, isRead: true }
-          : notification
-      )
-    );
+  const markAsRead = async (notificationId: string) => {
+    try {
+      // Update in database
+      const notificationKey = `tenant_lease_${notificationId}`;
+      await supabase
+        .from('notification_read_status')
+        .upsert({
+          user_id: user?.id,
+          notification_key: notificationKey,
+          is_read: true,
+          read_at: new Date().toISOString()
+        });
+
+      // Update local state
+      setNotifications(prev => 
+        prev.map(notification => 
+          notification.id === notificationId 
+            ? { ...notification, isRead: true }
+            : notification
+        )
+      );
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
   };
 
   return {

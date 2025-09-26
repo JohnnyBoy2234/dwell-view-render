@@ -6,12 +6,16 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useTenantNotifications } from '@/hooks/useTenantNotifications';
+import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';
 
 export function MobileBottomBar() {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, isLandlord } = useAuth();
   const { unreadCount: messageUnread } = useUnreadMessages();
   const { unreadCount: notificationUnread } = useNotifications();
+  const { unreadCount: tenantUnread } = useTenantNotifications();
+  const { unreadCount: landlordUnread } = useLandlordNotifications();
   
   
   const [searchParams] = useSearchParams();
@@ -37,9 +41,12 @@ export function MobileBottomBar() {
     { path: '/properties', icon: Search, label: 'Find' }
   ];
 
+  // Calculate total notification count
+  const totalNotifications = notificationUnread + (isLandlord ? landlordUnread : tenantUnread);
+  
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: 0, authRequired: true }, // Temporarily set to 0 to hide the 9+
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: true },
     { path: '/auth', icon: User, label: 'Desk' }
   ];
 

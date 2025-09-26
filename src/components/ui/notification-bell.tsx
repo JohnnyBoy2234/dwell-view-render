@@ -51,15 +51,30 @@ export function NotificationBell() {
       markTenantAsRead(notification.id);
     }
 
-    // Navigate to relevant page
+    // Navigate to relevant page based on notification type
     if (notification.link_url) {
       navigate(notification.link_url);
-    } else if (notification.tenancyId) {
+    } else if (notification.action_url) {
+      navigate(notification.action_url);
+    } else if (notification.tenancyId || notification.id) {
+      // Handle lease-related notifications
+      const leaseId = notification.tenancyId || notification.id;
       if (isLandlord) {
-        navigate(`/enhancedlandlorddashboard?tab=leases&tenancy=${notification.tenancyId}`);
+        if (notification.type === 'lease_signed_by_tenant' || notification.type === 'lease_ready') {
+          navigate(`/enhancedlandlorddashboard?tab=leases&lease=${leaseId}`);
+        } else {
+          navigate('/enhancedlandlorddashboard');
+        }
       } else {
-                  navigate(`/enhancedtenantdashboard#leases-section`);
+        if (notification.type === 'lease_ready' || notification.type === 'lease_update') {
+          navigate(`/enhancedtenantdashboard?tab=leases&lease=${leaseId}`);
+        } else {
+          navigate('/enhancedtenantdashboard');
+        }
       }
+    } else {
+      // Default navigation based on user type
+      navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
     }
     
     setOpen(false);
@@ -97,10 +112,18 @@ export function NotificationBell() {
             const notifDate = 'createdAt' in notification ? notification.createdAt : notification.created_at;
             const time = new Date(notifDate).toLocaleDateString();
             
+            // Get notification type for styling
+            const notificationType = notification.type || 'general';
+            const isHighPriority = (notification as any).priority === 'high' || (notification as any).priority === 'urgent';
+            
             return (
               <DropdownMenuItem
                 key={notification.id}
-                className={`px-4 py-3 cursor-pointer hover:bg-muted/50 ${isUnread ? 'bg-primary/5 border-l-2 border-l-primary' : ''}`}
+                className={`px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors ${
+                  isUnread 
+                    ? `bg-primary/5 border-l-2 ${isHighPriority ? 'border-l-destructive' : 'border-l-primary'}` 
+                    : ''
+                }`}
                 onClick={() => handleNotificationClick(notification)}
               >
                 <div className="flex flex-col gap-1 w-full">
@@ -108,16 +131,28 @@ export function NotificationBell() {
                     <span className={`text-sm ${isUnread ? 'font-semibold' : 'font-medium'}`}>
                       {title}
                     </span>
-                    {isUnread && (
-                      <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-1"></div>
-                    )}
+                    <div className="flex items-center gap-1">
+                      {isHighPriority && (
+                        <div className="w-1.5 h-1.5 bg-destructive rounded-full"></div>
+                      )}
+                      {isUnread && (
+                        <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0"></div>
+                      )}
+                    </div>
                   </div>
                   <span className="text-xs text-muted-foreground line-clamp-2">
                     {message}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {time}
-                  </span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                      {time}
+                    </span>
+                    {notificationType !== 'general' && (
+                      <span className="text-xs px-1.5 py-0.5 bg-muted/50 rounded text-muted-foreground capitalize">
+                        {notificationType}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </DropdownMenuItem>
             );
