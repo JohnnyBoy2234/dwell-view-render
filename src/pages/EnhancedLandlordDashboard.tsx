@@ -823,7 +823,7 @@ export default function EnhancedLandlordDashboard() {
                                 {invited ? (
                                   <Badge variant="secondary">Invited</Badge>
                                 ) : (
-                                  <Button size="sm" onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}>Invite</Button>
+                                  <Button size="sm" onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}>Send Application</Button>
                                 )}
                                 <Button variant="outline" size="sm" onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}>Chat</Button>
                               </div>
