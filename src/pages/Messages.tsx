@@ -42,6 +42,7 @@ export default function Messages() {
   const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
+  const enableViewingUI = false; // Temporarily disable viewing UI to stabilize messages route
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -442,7 +443,7 @@ export default function Messages() {
                     ) : (
                       <>
                         {/* Viewing components */}
-                        {!isLandlord && selectedConversation && (
+                        {enableViewingUI && !isLandlord && selectedConversation && (
                           <div className="w-full max-w-[95%] mx-auto">
                             <ViewingSlotNotification
                               propertyId={selectedConversation.property_id}
@@ -452,7 +453,7 @@ export default function Messages() {
                           </div>
                         )}
 
-                        {isLandlord && selectedConversation && (
+                        {enableViewingUI && isLandlord && selectedConversation && (
                           <div className="w-full max-w-[95%] mx-auto">
                             <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
                               <div className="flex items-center justify-between">
@@ -472,7 +473,7 @@ export default function Messages() {
                           </div>
                         )}
 
-                        {viewingProposals.map((proposal) => (
+                        {enableViewingUI && viewingProposals.map((proposal) => (
                           <div key={proposal.id} className="w-full max-w-[95%] mx-auto">
                             <ViewingProposalCard
                               proposal={proposal}
@@ -727,7 +728,7 @@ export default function Messages() {
                 ) : (
                   <div className="space-y-1 py-1 px-1">
                      {/* Viewing Slot Notification for Tenants */}
-                    {!isLandlord && selectedConversation && (
+                    {enableViewingUI && !isLandlord && selectedConversation && (
                       <div className="w-full max-w-[85%] mx-auto">
                         <ViewingSlotNotification
                           propertyId={selectedConversation.property_id}
@@ -738,7 +739,7 @@ export default function Messages() {
                     )}
 
                     {/* Create Viewing Slot Button for Landlords */}
-                    {isLandlord && selectedConversation && (
+                    {enableViewingUI && isLandlord && selectedConversation && (
                       <div className="w-full max-w-[85%] mx-auto">
                         <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
                           <div className="flex items-center justify-between">
@@ -759,7 +760,7 @@ export default function Messages() {
                     )}
 
                     {/* Viewing Requests */}
-                    {viewingProposals.map((proposal) => (
+                    {enableViewingUI && viewingProposals.map((proposal) => (
                       <div key={proposal.id} className="w-full max-w-[85%] mx-auto">
                         <ViewingProposalCard
                           proposal={proposal}
