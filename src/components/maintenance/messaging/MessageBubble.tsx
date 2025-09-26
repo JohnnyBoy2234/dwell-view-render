@@ -47,7 +47,7 @@ export function MessageBubble({
           </div>
         )}
         
-        <MessageContent content={message.content} isOwn={isOwn} />
+        <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} />
         
         <div className={cn(
           MESSAGE_STYLES.TIMESTAMP_BASE,

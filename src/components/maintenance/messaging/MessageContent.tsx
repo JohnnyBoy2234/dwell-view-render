@@ -6,12 +6,13 @@ import { MESSAGE_STYLES, BUTTON_LABELS, ARIA_LABELS } from '@/constants/messageC
 interface MessageContentProps {
   content: string;
   isOwn: boolean;
+  isLandlord?: boolean;
 }
 
 /**
  * Component to render message content with link parsing and application invite handling
  */
-export function MessageContent({ content, isOwn }: MessageContentProps) {
+export function MessageContent({ content, isOwn, isLandlord }: MessageContentProps) {
   const { textParts, urls, inviteUrl } = useMessageParsing({ content });
 
   const handleInviteClick = () => {
@@ -64,7 +65,7 @@ export function MessageContent({ content, isOwn }: MessageContentProps) {
         {renderContentWithLinks()}
       </div>
       
-      {inviteUrl && (
+      {inviteUrl && !isLandlord && (
         <div className="mt-2">
           <Button
             size="sm"
