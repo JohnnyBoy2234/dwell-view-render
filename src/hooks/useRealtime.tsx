@@ -37,7 +37,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('🔔 Notification change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onNotificationChange?.();
+            try {
+              callbacks.onNotificationChange?.();
+            } catch (error) {
+              console.error('Error in notification callback:', error);
+            }
           }
         )
         .subscribe();
@@ -58,7 +62,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('💬 Message change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onMessageChange?.();
+            try {
+              callbacks.onMessageChange?.();
+            } catch (error) {
+              console.error('Error in message callback:', error);
+            }
           }
         )
         .subscribe();
@@ -79,7 +87,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('📅 Viewing proposal change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onViewingProposalChange?.();
+            try {
+              callbacks.onViewingProposalChange?.();
+            } catch (error) {
+              console.error('Error in viewing proposal callback:', error);
+            }
           }
         )
         .subscribe();
@@ -100,7 +112,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('📋 Application change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onApplicationChange?.();
+            try {
+              callbacks.onApplicationChange?.();
+            } catch (error) {
+              console.error('Error in application callback:', error);
+            }
           }
         )
         .subscribe();
@@ -121,7 +137,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('🔧 Maintenance change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onMaintenanceChange?.();
+            try {
+              callbacks.onMaintenanceChange?.();
+            } catch (error) {
+              console.error('Error in maintenance callback:', error);
+            }
           }
         )
         .subscribe();
@@ -143,7 +163,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('📄 Lease change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onLeaseChange?.();
+            try {
+              callbacks.onLeaseChange?.();
+            } catch (error) {
+              console.error('Error in lease callback:', error);
+            }
           }
         )
         .subscribe();
@@ -164,7 +188,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('🏠 Property change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onPropertyChange?.();
+            try {
+              callbacks.onPropertyChange?.();
+            } catch (error) {
+              console.error('Error in property callback:', error);
+            }
           }
         )
         .subscribe();
@@ -186,7 +214,11 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           (payload) => {
             console.log('🏘️ Tenancy change received:', payload);
             if (!isMountedRef.current) return;
-            callbacks.onTenancyChange?.();
+            try {
+              callbacks.onTenancyChange?.();
+            } catch (error) {
+              console.error('Error in tenancy callback:', error);
+            }
           }
         )
         .subscribe();

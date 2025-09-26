@@ -35,6 +35,7 @@ import TenantMessages from "./pages/TenantMessages";
 import Notifications from "./pages/Notifications";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
+import Applications from "./pages/Applications";
 import DocuSignCallback from "./pages/DocuSignCallback";
 import DocuSignRedirect from "./pages/DocuSignRedirect";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
@@ -128,6 +129,7 @@ const App = () => {
               
               <Route path="/messages" element={<AuthenticatedRoute><Messages /></AuthenticatedRoute>} />
               <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
+              <Route path="/applications" element={<AuthenticatedRoute><Applications /></AuthenticatedRoute>} />
               <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
               <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
               <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />

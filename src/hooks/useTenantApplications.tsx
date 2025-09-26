@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -28,11 +28,16 @@ export const useTenantApplications = () => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<TenantApplication[]>([]);
   const [loading, setLoading] = useState(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
     if (user) {
       fetchApplications();
     }
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [user]);
 
   const fetchApplications = async () => {
@@ -42,6 +47,7 @@ export const useTenantApplications = () => {
     }
     
     console.log('Fetching applications for tenant:', user.id);
+    if (!isMountedRef.current) return;
     setLoading(true);
     try {
       const { data: applicationsData, error } = await supabase
@@ -90,16 +96,24 @@ export const useTenantApplications = () => {
         }));
 
         console.log('Final enriched applications:', enrichedApplications);
-        setApplications(enrichedApplications);
+        if (isMountedRef.current) {
+          setApplications(enrichedApplications);
+        }
       } else {
         console.log('No applications found');
-        setApplications([]);
+        if (isMountedRef.current) {
+          setApplications([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
-      setApplications([]);
+      if (isMountedRef.current) {
+        setApplications([]);
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

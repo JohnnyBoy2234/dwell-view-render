@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { useRealtime } from './useRealtime';
@@ -11,6 +11,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(true);
+  const isMountedRef = useRef(true);
 
   // Fetch notifications from database
   const fetchNotifications = useCallback(async () => {
@@ -43,14 +44,20 @@ export const useNotifications = (filters?: NotificationFilters) => {
         notification.id
       );
       
-      setNotifications(validNotifications as Notification[]);
-      setUnreadCount(validNotifications.filter(n => !n.is_read).length || 0);
-      setError(null);
+      if (isMountedRef.current) {
+        setNotifications(validNotifications as Notification[]);
+        setUnreadCount(validNotifications.filter(n => !n.is_read).length || 0);
+        setError(null);
+      }
     } catch (err) {
       console.error('Error fetching notifications:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch notifications');
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   }, [user]);
 
@@ -70,17 +77,21 @@ export const useNotifications = (filters?: NotificationFilters) => {
       if (error) throw error;
 
       // Update local state
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
-            ? { ...n, is_read: true }
-            : n
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      if (isMountedRef.current) {
+        setNotifications(prev => 
+          prev.map(n => 
+            n.id === notificationId 
+              ? { ...n, is_read: true }
+              : n
+          )
+        );
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (err) {
       console.error('Error marking notification as read:', err);
-      setError(err instanceof Error ? err.message : 'Failed to mark notification as read');
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to mark notification as read');
+      }
     }
   }, [user]);
 
@@ -100,17 +111,21 @@ export const useNotifications = (filters?: NotificationFilters) => {
       if (error) throw error;
 
       // Update local state
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId 
-            ? { ...n, is_read: false }
-            : n
-        )
-      );
-      setUnreadCount(prev => prev + 1);
+      if (isMountedRef.current) {
+        setNotifications(prev => 
+          prev.map(n => 
+            n.id === notificationId 
+              ? { ...n, is_read: false }
+              : n
+          )
+        );
+        setUnreadCount(prev => prev + 1);
+      }
     } catch (err) {
       console.error('Error marking notification as unread:', err);
-      setError(err instanceof Error ? err.message : 'Failed to mark notification as unread');
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to mark notification as unread');
+      }
     }
   }, [user]);
 
@@ -147,14 +162,18 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
       // Update local state
       console.log('Database update successful, updating local state');
-      setNotifications(prev => 
-        prev.map(n => ({ ...n, is_read: true }))
-      );
-      setUnreadCount(0);
-      console.log('Local state updated, unreadCount set to 0');
+      if (isMountedRef.current) {
+        setNotifications(prev => 
+          prev.map(n => ({ ...n, is_read: true }))
+        );
+        setUnreadCount(0);
+        console.log('Local state updated, unreadCount set to 0');
+      }
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
-      setError(err instanceof Error ? err.message : 'Failed to mark all notifications as read');
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to mark all notifications as read');
+      }
     }
   }, [user]);
 
@@ -173,13 +192,17 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
       // Update local state
       const notification = notifications.find(n => n.id === notificationId);
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      if (notification && !notification.is_read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
+      if (isMountedRef.current) {
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+        if (notification && !notification.is_read) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
       }
     } catch (err) {
       console.error('Error deleting notification:', err);
-      setError(err instanceof Error ? err.message : 'Failed to delete notification');
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to delete notification');
+      }
     }
   }, [user, notifications]);
 
@@ -195,7 +218,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       if (error) throw error;
 
       // Update local state if it's for the current user
-      if (notification.user_id === user?.id) {
+      if (notification.user_id === user?.id && isMountedRef.current) {
         setNotifications(prev => [notification as Notification, ...prev]);
         if (!notification.is_read) {
           setUnreadCount(prev => prev + 1);
@@ -205,31 +228,43 @@ export const useNotifications = (filters?: NotificationFilters) => {
       return notification;
     } catch (err) {
       console.error('Error creating notification:', err);
-      setError(err instanceof Error ? err.message : 'Failed to create notification');
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : 'Failed to create notification');
+      }
       throw err;
     }
   }, [user]);
 
-  // Set up real-time subscription using centralized real-time system
+  // Set up real-time subscription with error handling
   useRealtime({
     onNotificationChange: () => {
       console.log('🔄 Refreshing notifications due to real-time update');
-      fetchNotifications();
+      if (isMountedRef.current) {
+        fetchNotifications();
+      }
     }
   });
 
   // Fallback polling when WebSocket connection fails
   useEffect(() => {
-    if (!isConnected && user) {
+    if (!isConnected && user && isMountedRef.current) {
       console.log('WebSocket disconnected, starting fallback polling');
-      const interval = setInterval(fetchNotifications, 30000);
+      const interval = setInterval(() => {
+        if (isMountedRef.current) {
+          fetchNotifications();
+        }
+      }, 30000);
       return () => clearInterval(interval);
     }
   }, [isConnected, user, fetchNotifications]);
 
-  // Initial fetch
+  // Initial fetch with mount tracking
   useEffect(() => {
+    isMountedRef.current = true;
     fetchNotifications();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [fetchNotifications]);
 
   return {

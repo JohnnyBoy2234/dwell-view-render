@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtime } from './useRealtime';
@@ -7,13 +7,17 @@ export function useUnreadMessages() {
   const { user, isLandlord } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  const isMountedRef = useRef(true);
 
   const fetchUnreadCount = async () => {
     if (!user) {
-      setUnreadCount(0);
+      if (isMountedRef.current) {
+        setUnreadCount(0);
+      }
       return;
     }
 
+    if (!isMountedRef.current) return;
     setLoading(true);
     try {
       // Get conversations where the user is either landlord or tenant
@@ -25,7 +29,9 @@ export function useUnreadMessages() {
       if (conversationError) throw conversationError;
 
       if (!conversations || conversations.length === 0) {
-        setUnreadCount(0);
+        if (isMountedRef.current) {
+          setUnreadCount(0);
+        }
         return;
       }
 
@@ -50,24 +56,36 @@ export function useUnreadMessages() {
 
       if (messageError) throw messageError;
 
-      setUnreadCount(count || 0);
+      if (isMountedRef.current) {
+        setUnreadCount(count || 0);
+      }
     } catch (error) {
       console.error('Error fetching unread count:', error);
-      setUnreadCount(0);
+      if (isMountedRef.current) {
+        setUnreadCount(0);
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
+    isMountedRef.current = true;
     fetchUnreadCount();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, [user, isLandlord]);
 
   // Re-enable real-time subscription for unread messages
   useRealtime({
     onMessageChange: () => {
       console.log('🔄 Refreshing unread messages due to real-time update');
-      fetchUnreadCount();
+      if (isMountedRef.current) {
+        fetchUnreadCount();
+      }
     }
   });
 
