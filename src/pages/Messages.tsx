@@ -634,15 +634,23 @@ export default function Messages() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-              <WhatsAppStyleThread 
-                conversationId={activeConversation}
-                onMessageSent={() => {
-                  // Refresh conversations to update last message
-                  fetchConversations?.();
-                }}
-                onScrollToProposal={setScrollToProposalFn}
-                onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
-              />
+              {loading && messages.length === 0 ? (
+                <div className="animate-pulse space-y-3 p-4">
+                  {[1,2,3,4].map((i) => (
+                    <div key={i} className="h-10 bg-muted rounded-md"></div>
+                  ))}
+                </div>
+              ) : (
+                <WhatsAppStyleThread 
+                  conversationId={activeConversation}
+                  onMessageSent={() => {
+                    // Refresh conversations to update last message
+                    fetchConversations?.();
+                  }}
+                  onScrollToProposal={setScrollToProposalFn}
+                  onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
+                />
+              )}
             </div>
           </div>
         ) : (

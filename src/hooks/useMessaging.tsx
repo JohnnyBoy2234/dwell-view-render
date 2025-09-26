@@ -44,10 +44,11 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
   const isMountedRef = useRef(true);
+  const hasHydratedFromCacheRef = useRef(false);
   const messageChannelRef = useRef<any | null>(null);
 
   // Component mount tracking
@@ -136,12 +137,14 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   const fetchConversations = async () => {
     if (!user) {
       console.log('❌ Cannot fetch conversations: no user');
+      setLoading(false);
       return;
     }
 
     console.log('📋 Fetching conversations for user:', user.id);
 
     try {
+      setLoading(true);
       // First fetch conversations with property data
       const { data: conversationsData, error: conversationsError } = await supabase
         .from('conversations')
@@ -165,6 +168,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       if (!conversationsData || conversationsData.length === 0) {
         if (!isMountedRef.current) return;
         setConversations([]);
+        setLoading(false);
         return;
       }
 
@@ -212,12 +216,14 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
       if (!isMountedRef.current) return;
       setConversations(conversationsWithUnread as any);
+      setLoading(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error loading conversations",
         description: error.message
       });
+      setLoading(false);
     }
   };
 
@@ -225,6 +231,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   const fetchMessages = async (conversationId: string) => {
     console.log('📥 Fetching messages for conversation:', conversationId);
     try {
+      setLoading(true);
       // First fetch messages
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
@@ -243,6 +250,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         console.log('📥 No messages found for conversation');
         if (!isMountedRef.current) return;
         setMessages([]);
+        setLoading(false);
         return;
       }
 
@@ -276,12 +284,14 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
       // Mark messages as read
       await markMessagesAsRead(conversationId);
+      setLoading(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error loading messages",
         description: error.message
       });
+      setLoading(false);
     }
   };
 
@@ -451,9 +461,34 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
   // Load conversations on mount
   useEffect(() => {
-    if (user) {
-      fetchConversations();
+    if (!user) return;
+
+    // 1) Hydrate from local cache instantly (warm load)
+    try {
+      const cacheKey = `sr_conversations_${user.id}`;
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          setConversations(parsed as any);
+          hasHydratedFromCacheRef.current = true;
+        } else if (Array.isArray(parsed?.items)) {
+          setConversations(parsed.items as any);
+          hasHydratedFromCacheRef.current = true;
+        }
+      }
+      // Restore last active conversation if present (and no URL param set elsewhere)
+      const lastKey = `sr_active_conv_${user.id}`;
+      const last = localStorage.getItem(lastKey);
+      if (last && !activeConversation) {
+        setActiveConversation(last);
+      }
+    } catch (e) {
+      // Ignore cache errors
     }
+
+    // 2) Always refresh from server
+    fetchConversations();
   }, [user]);
 
   // Load messages when active conversation changes
@@ -462,6 +497,24 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       fetchMessages(activeConversation);
     }
   }, [activeConversation]);
+
+  // Persist conversations to cache after refresh
+  useEffect(() => {
+    if (!user) return;
+    try {
+      const cacheKey = `sr_conversations_${user.id}`;
+      localStorage.setItem(cacheKey, JSON.stringify(conversations));
+    } catch {}
+  }, [user, conversations]);
+
+  // Persist last active conversation
+  useEffect(() => {
+    if (!user || !activeConversation) return;
+    try {
+      const lastKey = `sr_active_conv_${user.id}`;
+      localStorage.setItem(lastKey, activeConversation);
+    } catch {}
+  }, [user, activeConversation]);
 
   // Per-conversation realtime channel for instant message updates
   useEffect(() => {

@@ -41,6 +41,19 @@ export function useMessageCache() {
       return cache[conversationId];
     }
 
+    // Try hydrate from localStorage for instant warm load
+    try {
+      const localKey = `sr_msgs_${conversationId}`;
+      const raw = localStorage.getItem(localKey);
+      if (raw) {
+        const parsed = JSON.parse(raw) as CachedMessage[];
+        if (Array.isArray(parsed)) {
+          setCache(prev => ({ ...prev, [conversationId]: parsed }));
+          // Do not return here; still fetch fresh from server below
+        }
+      }
+    } catch {}
+
     // If already loading, return empty array (loading state)
     if (loadingConversations.has(conversationId)) {
       return [];
@@ -91,10 +104,16 @@ export function useMessageCache() {
       }));
 
       if (isMountedRef.current) {
+        const trimmed = messages.slice(-50);
         setCache(prev => ({
           ...prev,
-          [conversationId]: messages
+          [conversationId]: trimmed
         }));
+        // Persist to localStorage for warm loads
+        try {
+          const localKey = `sr_msgs_${conversationId}`;
+          localStorage.setItem(localKey, JSON.stringify(trimmed));
+        } catch {}
         setLoadingConversations(prev => {
           const newSet = new Set(prev);
           newSet.delete(conversationId);
@@ -130,35 +149,47 @@ export function useMessageCache() {
       ...message
     };
 
-    setCache(prev => ({
-      ...prev,
-      [conversationId]: [...(prev[conversationId] || []), optimisticMessage]
-    }));
+    setCache(prev => {
+      const next = {
+        ...prev,
+        [conversationId]: [...(prev[conversationId] || []), optimisticMessage].slice(-50)
+      };
+      try {
+        localStorage.setItem(`sr_msgs_${conversationId}`, JSON.stringify(next[conversationId]));
+      } catch {}
+      return next;
+    });
 
     return optimisticMessage.id;
   }, []);
 
   // Update message when server confirms it
   const confirmMessage = useCallback((conversationId: string, tempId: string, realMessage: CachedMessage) => {
-    setCache(prev => ({
-      ...prev,
-      [conversationId]: (prev[conversationId] || []).map(msg =>
-        msg.id === tempId 
-          ? { ...realMessage, optimistic: false }
-          : msg
-      )
-    }));
+    setCache(prev => {
+      const updated = (prev[conversationId] || []).map(msg =>
+        msg.id === tempId ? { ...realMessage, optimistic: false } : msg
+      ).slice(-50);
+      const next = { ...prev, [conversationId]: updated };
+      try {
+        localStorage.setItem(`sr_msgs_${conversationId}`, JSON.stringify(updated));
+      } catch {}
+      return next;
+    });
   }, []);
 
   // Add real-time message
   const addRealtimeMessage = useCallback((message: CachedMessage) => {
-    setCache(prev => ({
-      ...prev,
-      [message.conversation_id]: [
+    setCache(prev => {
+      const sorted = [
         ...(prev[message.conversation_id] || []).filter(m => m.id !== message.id),
         message
-      ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-    }));
+      ].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()).slice(-50);
+      const next = { ...prev, [message.conversation_id]: sorted };
+      try {
+        localStorage.setItem(`sr_msgs_${message.conversation_id}`, JSON.stringify(sorted));
+      } catch {}
+      return next;
+    });
   }, []);
 
   // Update message read status
