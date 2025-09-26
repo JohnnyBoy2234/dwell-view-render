@@ -69,9 +69,12 @@ export default function Messages() {
     fetchMessages: refetchMessages
   } = useMessaging();
 
+  // Add mount tracking
+  const isMountedRef = useRef(true);
+
   // Define fetchViewingProposals as useCallback to avoid dependency issues
   const fetchViewingProposals = useCallback(async () => {
-    if (!user || !activeConversation) return;
+    if (!user || !activeConversation || !isMountedRef.current) return;
     
     try {
       const { data, error } = await supabase
@@ -87,6 +90,7 @@ export default function Messages() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      if (!isMountedRef.current) return;
       setViewingProposals(data || []);
     } catch (error) {
       console.error('Error fetching viewing requests:', error);
@@ -94,6 +98,14 @@ export default function Messages() {
   }, [activeConversation, user]);
 
   const selectedConversation = conversations.find(c => c.id === activeConversation);
+
+  // Component mount tracking
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Fetch viewing requests for active conversation
   useEffect(() => {

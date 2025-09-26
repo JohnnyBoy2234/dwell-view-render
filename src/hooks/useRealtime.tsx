@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -15,6 +15,7 @@ interface RealtimeCallbacks {
 
 export function useRealtime(callbacks: RealtimeCallbacks = {}) {
   const { user, isLandlord } = useAuth();
+  const isMountedRef = useRef(true);
 
   const setupRealtimeSubscriptions = useCallback(() => {
     if (!user) return () => {};
@@ -35,6 +36,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('🔔 Notification change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onNotificationChange?.();
           }
         )
@@ -55,6 +57,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('💬 Message change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onMessageChange?.();
           }
         )
@@ -75,6 +78,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('📅 Viewing proposal change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onViewingProposalChange?.();
           }
         )
@@ -95,6 +99,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('📋 Application change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onApplicationChange?.();
           }
         )
@@ -115,6 +120,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('🔧 Maintenance change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onMaintenanceChange?.();
           }
         )
@@ -136,6 +142,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('📄 Lease change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onLeaseChange?.();
           }
         )
@@ -156,6 +163,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('🏠 Property change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onPropertyChange?.();
           }
         )
@@ -177,6 +185,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
           },
           (payload) => {
             console.log('🏘️ Tenancy change received:', payload);
+            if (!isMountedRef.current) return;
             callbacks.onTenancyChange?.();
           }
         )
@@ -194,8 +203,12 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
   }, [user, callbacks]);
 
   useEffect(() => {
+    isMountedRef.current = true;
     const cleanup = setupRealtimeSubscriptions();
-    return cleanup;
+    return () => {
+      isMountedRef.current = false;
+      cleanup();
+    };
   }, [setupRealtimeSubscriptions]);
 
   return {

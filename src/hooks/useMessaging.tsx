@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -47,12 +47,22 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   const [loading, setLoading] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const isMountedRef = useRef(true);
+
+  // Component mount tracking
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Update user presence
   useEffect(() => {
     if (!user) return;
 
     const updatePresence = async () => {
+      if (!isMountedRef.current) return;
       await supabase
         .from('user_presence')
         .upsert({
@@ -101,6 +111,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             const presence = payload.new as any;
+            if (!isMountedRef.current) return;
             setOnlineUsers(prev => {
               const newSet = new Set(prev);
               if (presence.is_online) {
@@ -151,6 +162,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       console.log('📋 Fetched conversations:', conversationsData?.length || 0, 'conversations');
 
       if (!conversationsData || conversationsData.length === 0) {
+        if (!isMountedRef.current) return;
         setConversations([]);
         return;
       }
@@ -197,6 +209,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         })
       );
 
+      if (!isMountedRef.current) return;
       setConversations(conversationsWithUnread as any);
     } catch (error: any) {
       toast({
@@ -227,6 +240,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
       if (!messagesData || messagesData.length === 0) {
         console.log('📥 No messages found for conversation');
+        if (!isMountedRef.current) return;
         setMessages([]);
         return;
       }
@@ -256,6 +270,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         profiles: profileMap.get(message.sender_id) || null
       }));
 
+      if (!isMountedRef.current) return;
       setMessages(messagesWithProfiles as any);
 
       // Mark messages as read
@@ -298,6 +313,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       console.log('✅ Message sent successfully:', data);
 
       // Refresh messages and conversations immediately after sending
+      if (!isMountedRef.current) return;
       if (activeConversation === conversationId) {
         console.log('🔄 Refreshing messages for active conversation');
         fetchMessages(conversationId);
@@ -379,6 +395,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       }
 
       console.log('✅ Successfully created conversation:', data.id);
+      if (!isMountedRef.current) return data;
       fetchConversations();
       return data;
     } catch (error: any) {
@@ -405,6 +422,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       if (error) throw error;
 
       // Update local state
+      if (!isMountedRef.current) return;
       setConversations(prev =>
         prev.map(conv =>
           conv.id === conversationId
@@ -421,6 +439,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   useRealtime({
     onMessageChange: () => {
       console.log('🔄 Refreshing messages due to real-time update');
+      if (!isMountedRef.current) return;
       if (activeConversation) {
         fetchMessages(activeConversation);
       }
@@ -428,6 +447,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     },
     onViewingProposalChange: () => {
       console.log('🔄 Refreshing viewing proposals due to real-time update');
+      if (!isMountedRef.current) return;
       if (onViewingProposalChange) {
         onViewingProposalChange();
       }
