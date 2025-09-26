@@ -1,7 +1,7 @@
 import { useState, ChangeEvent, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Paperclip, X } from 'lucide-react';
+import { Send, Paperclip, X, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MessageComposerProps {
@@ -13,6 +13,8 @@ interface MessageComposerProps {
   onChange?: (value: string) => void;
   onFocus?: () => void;
   autoFocus?: boolean;
+  onCreateViewing?: () => void;
+  showViewingButton?: boolean;
 }
 
 export function MessageComposer({ 
@@ -23,7 +25,9 @@ export function MessageComposer({
   value: controlledValue,
   onChange: controlledOnChange,
   onFocus,
-  autoFocus = false
+  autoFocus = false,
+  onCreateViewing,
+  showViewingButton = false
 }: MessageComposerProps) {
   const [internalValue, setInternalValue] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -93,10 +97,22 @@ export function MessageComposer({
         isFocused ? "border-primary/50 shadow-sm" : "border-border",
         disabled && "opacity-60"
       )}>
+        {showViewingButton && (
+          <button
+            onClick={onCreateViewing}
+            className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-muted/50"
+            disabled={disabled}
+            title="Create viewing slot"
+          >
+            <Calendar className="h-5 w-5" />
+          </button>
+        )}
+
         <button
           onClick={() => fileInputRef.current?.click()}
           className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-muted/50"
           disabled={disabled}
+          title="Attach file"
         >
           <Paperclip className="h-5 w-5" />
         </button>

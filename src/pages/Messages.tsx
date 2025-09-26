@@ -445,6 +445,7 @@ export default function Messages() {
                   fetchConversations?.();
                 }}
                 onScrollToProposal={setScrollToProposalFn}
+                onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
               />
             </div>
             </div>
@@ -640,6 +641,7 @@ export default function Messages() {
                   fetchConversations?.();
                 }}
                 onScrollToProposal={setScrollToProposalFn}
+                onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
               />
             </div>
           </div>

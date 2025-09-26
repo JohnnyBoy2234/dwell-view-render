@@ -24,9 +24,10 @@ interface WhatsAppStyleThreadProps {
   conversationId: string;
   onMessageSent?: () => void;
   onScrollToProposal?: (fn: (proposalId: string) => void) => void;
+  onCreateViewing?: () => void;
 }
 
-export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal }: WhatsAppStyleThreadProps) {
+export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -353,6 +354,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           onChange={setNewMessage}
           onFocus={handleComposerFocus}
           autoFocus={false}
+          onCreateViewing={onCreateViewing}
+          showViewingButton={!!onCreateViewing}
         />
       </div>
     </div>
