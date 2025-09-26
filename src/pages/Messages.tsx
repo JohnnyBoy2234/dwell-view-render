@@ -46,6 +46,10 @@ export default function Messages() {
   const enableViewingUI = true;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const inputFormRef = useRef<HTMLFormElement>(null);
+  const inputFieldRef = useRef<HTMLInputElement>(null);
+  const [inputHeight, setInputHeight] = useState<number>(64);
+  const [isTyping, setIsTyping] = useState<boolean>(false);
 
   const {
     conversations,
@@ -114,6 +118,18 @@ export default function Messages() {
       scrollToBottom();
     }
   }, [messages, selectedConversation]);
+
+  // Measure input height and update bottom padding for mobile keyboard safety
+  useEffect(() => {
+    const measure = () => {
+      if (inputFormRef.current) {
+        setInputHeight(inputFormRef.current.offsetHeight || 64);
+      }
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, []);
 
   // Pre-fill message only for truly first-time contact (no conversation history)
   useEffect(() => {
@@ -385,7 +401,7 @@ export default function Messages() {
         {!showConversations && selectedConversation && (
           <div className="fixed inset-0 bg-background flex flex-col z-30">
               {/* Mobile Chat Header */}
-              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0">
+              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0 sticky top-0 z-10">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -566,7 +582,7 @@ export default function Messages() {
         {selectedConversation ? (
           <div className="h-full flex flex-col rounded-lg border bg-card">
             {/* Desktop Chat Header */}
-            <div className="flex items-center gap-3 p-4 border-b bg-card">
+            <div className="flex items-center gap-3 p-4 border-b bg-card sticky top-0 z-10">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="relative">
                   <Avatar className="h-10 w-10">

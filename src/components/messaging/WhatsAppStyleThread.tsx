@@ -192,7 +192,10 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
         ref={scrollAreaRef}
         onScroll={handleScroll}
       >
-        <div className="py-4 space-y-1">
+        <div
+          className="py-4 space-y-1"
+          style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
+        >
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-muted-foreground">
               <p>No messages yet. Start the conversation!</p>
@@ -232,7 +235,10 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
       )}
 
       {/* Message Input */}
-      <div className="p-4 bg-background/95 backdrop-blur border-t">
+      <div
+        className="p-4 bg-background/95 backdrop-blur border-t sticky bottom-0"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      >
         <MessageComposer
           onSend={handleSendMessage}
           placeholder="Type a message..."
