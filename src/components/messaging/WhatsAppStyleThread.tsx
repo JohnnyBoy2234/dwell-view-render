@@ -73,6 +73,14 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     }
   }, [messages.length]);
 
+  // Auto-scroll to bottom when conversation changes (initial load)
+  useEffect(() => {
+    if (conversationId && messages.length > 0) {
+      // Force scroll to bottom when opening a new conversation
+      setTimeout(() => scrollToBottom(true), 150);
+    }
+  }, [conversationId]);
+
   // Load viewing proposals referenced by messages
   useEffect(() => {
     const missingIds = Array.from(
@@ -189,6 +197,54 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     };
   }, [conversationId, addRealtimeMessage]);
 
+  // Real-time viewing proposals subscription
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel(`viewing-proposals-${conversationId}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'viewing_proposals',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        async (payload) => {
+          console.log('🔔 Viewing proposal change:', payload);
+          
+          // Refresh the proposal data when status changes
+          if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
+            const proposalId = payload.new?.id;
+            if (proposalId) {
+              try {
+                const { data, error } = await supabase
+                  .from('viewing_proposals')
+                  .select(`*, properties ( title, location )`)
+                  .eq('id', proposalId)
+                  .single();
+                
+                if (!error && data) {
+                  setProposalsById(prev => ({
+                    ...prev,
+                    [proposalId]: data
+                  }));
+                }
+              } catch (error) {
+                console.error('Error refetching proposal:', error);
+              }
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId]);
+
   // Handle sending messages
   const handleSendMessage = async (content: string, files?: File[]) => {
     if (!content.trim() || !user) return;
@@ -300,9 +356,30 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                       {proposal ? (
                         <ViewingProposalCard
                           proposal={proposal}
-                          onUpdate={() => {
+                          onUpdate={async () => {
                             // Reload proposal for fresh status
-                            setProposalsById(prev => ({ ...prev, [proposal.id]: undefined }));
+                            try {
+                              const { data, error } = await supabase
+                                .from('viewing_proposals')
+                                .select(`*, properties ( title, location )`)
+                                .eq('id', proposal.id)
+                                .single();
+                              
+                              if (!error && data) {
+                                setProposalsById(prev => ({
+                                  ...prev,
+                                  [proposal.id]: data
+                                }));
+                              }
+                            } catch (error) {
+                              console.error('Error reloading proposal:', error);
+                              // Fallback: remove from cache to force reload
+                              setProposalsById(prev => {
+                                const next = { ...prev };
+                                delete next[proposal.id];
+                                return next;
+                              });
+                            }
                           }}
                         />
                       ) : (
