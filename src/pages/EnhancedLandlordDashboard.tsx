@@ -129,8 +129,10 @@ export default function EnhancedLandlordDashboard() {
   const [nextInvoiceNumber, setNextInvoiceNumber] = useState(1);
 
   // Global application leads (across all properties) for quick invites
-  const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string }>>([]);
+  const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string; last_message_at?: string }>>([]);
   const [appInvitesMap, setAppInvitesMap] = useState<Record<string, any>>({}); // key: `${tenant_id}:${property_id}`
+  const [leadQuery, setLeadQuery] = useState('');
+  const [hideInvited, setHideInvited] = useState(false);
 
   useEffect(() => {
     // Visible in production console to verify current deployed build
@@ -351,7 +353,8 @@ export default function EnhancedLandlordDashboard() {
         tenant_id: c.tenant_id,
         property_id: c.property_id,
         title: c.properties?.title || 'Property',
-        tenant_name: profileMap.get(c.tenant_id) || 'Tenant'
+        tenant_name: profileMap.get(c.tenant_id) || 'Tenant',
+        last_message_at: c.last_message_at
       }));
       setAppLeads(leads);
 
@@ -759,31 +762,80 @@ export default function EnhancedLandlordDashboard() {
           <CardTitle>Leads</CardTitle>
           <div className="text-sm text-muted-foreground">Tenants you’ve chatted with recently</div>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-4">
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+            <input
+              value={leadQuery}
+              onChange={(e) => setLeadQuery(e.target.value)}
+              placeholder="Search tenant or property..."
+              className="w-full sm:w-80 border rounded-md p-2"
+            />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={hideInvited} onChange={(e) => setHideInvited(e.target.checked)} />
+              Hide invited
+            </label>
+          </div>
+
           {appLeads.length === 0 ? (
             <div className="text-sm text-muted-foreground">No recent leads.</div>
           ) : (
-            <div className="grid gap-3">
-              {appLeads.map((lead) => {
-                const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
-                return (
-                  <div key={lead.conversation_id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{lead.tenant_name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{lead.title}</div>
+            (() => {
+              // Filter + sort leads
+              const filtered = appLeads
+                .filter(l => {
+                  const invited = appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status === 'invited';
+                  if (hideInvited && invited) return false;
+                  if (!leadQuery.trim()) return true;
+                  const q = leadQuery.toLowerCase();
+                  return l.tenant_name.toLowerCase().includes(q) || l.title.toLowerCase().includes(q);
+                })
+                .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
+
+              // Group by property title
+              const groups = filtered.reduce((acc: Record<string, typeof filtered>, lead) => {
+                const key = lead.title || 'Property';
+                acc[key] = acc[key] || [];
+                acc[key].push(lead);
+                return acc;
+              }, {});
+
+              const propertyTitles = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+              return (
+                <div className="space-y-4">
+                  {propertyTitles.map((ptitle) => (
+                    <div key={ptitle} className="border rounded-lg">
+                      <div className="px-4 py-2 bg-muted/50 flex items-center justify-between">
+                        <div className="font-medium truncate">{ptitle}</div>
+                        <Badge variant="outline">{groups[ptitle].length}</Badge>
+                      </div>
+                      <div className="divide-y">
+                        {groups[ptitle].map((lead) => {
+                          const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
+                          return (
+                            <div key={lead.conversation_id} className="flex items-center justify-between p-3 gap-3">
+                              <div className="min-w-0">
+                                <div className="font-medium truncate">{lead.tenant_name}</div>
+                                <div className="text-xs text-muted-foreground">Last chat {lead.last_message_at ? new Date(lead.last_message_at).toLocaleString() : 'N/A'}</div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {invited ? (
+                                  <Badge variant="secondary">Invited</Badge>
+                                ) : (
+                                  <Button size="sm" onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}>Invite</Button>
+                                )}
+                                <Button variant="outline" size="sm" onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}>Chat</Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {invited ? (
-                        <Badge variant="secondary">Invited</Badge>
-                      ) : (
-                        <Button size="sm" onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}>Invite to Apply</Button>
-                      )}
-                      <Button variant="outline" size="sm" onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}>View Chat</Button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                  ))}
+                </div>
+              );
+            })()
           )}
         </CardContent>
       </Card>
