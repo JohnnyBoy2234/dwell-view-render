@@ -1,73 +1,52 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Shield, Lock, FileCheck, MessageSquareText } from "lucide-react";
+import { Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import { SafetyFeatureCard } from './landing/SafetyFeatureCard';
+import { 
+  SAFETY_FEATURES, 
+  SAFE_RENTING_CONTENT, 
+  SAFE_RENTING_STYLES 
+} from '@/constants/safeRentingConstants';
 
+/**
+ * Safe renting section component highlighting security features
+ * Displays safety features with call-to-action
+ */
 export function SafeRentingSection() {
-  const safetyFeatures = [
-    {
-      icon: Shield,
-      title: "ID & Email Verification",
-      description: "Every user is verified before they can list or view properties"
-    },
-    {
-      icon: Lock,
-      title: "Fraud Protection & Moderated Listings", 
-      description: "All listings are reviewed and users are monitored for suspicious activity"
-    },
-    {
-      icon: FileCheck,
-      title: "Encrypted Digital Leases",
-      description: "Secure e-signature contracts with full legal protection"
-    },
-    {
-      icon: MessageSquareText,
-      title: "Secure Messaging",
-      description: "Chat only with verified users through our secure platform"
-    }
-  ];
-
   return (
-    <section className="py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-      <div className="text-center mb-12">
+    <section className={SAFE_RENTING_STYLES.SECTION}>
+      <div className={SAFE_RENTING_STYLES.HEADER}>
         <div className="flex justify-center mb-6">
-          <div className="w-20 h-20 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center shadow-lg">
-            <Shield className="h-10 w-10 text-white" />
+          <div className={SAFE_RENTING_STYLES.ICON_CONTAINER}>
+            <Shield className={SAFE_RENTING_STYLES.MAIN_ICON} />
           </div>
         </div>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-          Your Safety, Our Priority
+        <h2 className={SAFE_RENTING_STYLES.TITLE}>
+          {SAFE_RENTING_CONTENT.TITLE}
         </h2>
-        <p className="text-lg text-white/80 max-w-2xl mx-auto">
-          We've built comprehensive safety measures into every part of the rental process
+        <p className={SAFE_RENTING_STYLES.SUBTITLE}>
+          {SAFE_RENTING_CONTENT.SUBTITLE}
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-        {safetyFeatures.map((feature, index) => (
-          <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300">
-          <CardContent className="p-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-              <feature.icon className="h-8 w-8 text-white" />
-            </div>
-            <h3 className="text-xl font-semibold text-foreground mb-2">
-              {feature.title}
-            </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {feature.description}
-            </p>
-            </CardContent>
-            </Card>
+      <div className={SAFE_RENTING_STYLES.GRID}>
+        {SAFETY_FEATURES.map((feature, index) => (
+          <SafetyFeatureCard 
+            key={`${feature.title}-${index}`} 
+            feature={feature} 
+          />
         ))}
       </div>
 
-      <div className="text-center">
+      <div className={SAFE_RENTING_STYLES.CTA_CONTAINER}>
         <Button 
           asChild 
           size="lg" 
-          className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue-dark hover:to-success-green-dark text-white rounded-xl px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+          className={SAFE_RENTING_STYLES.CTA_BUTTON}
         >
-          <Link to="/safe-renting">Learn More About Safe Renting</Link>
+          <Link to={SAFE_RENTING_CONTENT.CTA_LINK}>
+            {SAFE_RENTING_CONTENT.CTA_TEXT}
+          </Link>
         </Button>
       </div>
     </section>
