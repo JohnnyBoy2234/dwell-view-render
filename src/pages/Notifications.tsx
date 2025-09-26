@@ -52,7 +52,7 @@ export default function Notifications() {
     }
 
     fetchAllNotifications();
-  }, [user, navigate, messageUnread]);
+  }, [user, navigate, messageUnread, notifications]);
 
   const fetchAllNotifications = async () => {
     try {
@@ -63,6 +63,7 @@ export default function Notifications() {
 
       // Add general notifications from database
       if (notifications && notifications.length > 0) {
+        console.log('🔔 Processing notifications in Notifications page:', notifications.length);
         notifications.forEach(notification => {
           combinedNotifications.push({
             id: notification.id,
@@ -75,6 +76,8 @@ export default function Notifications() {
             priority: (['urgent', 'normal'].includes(notification.priority) ? 'high' : notification.priority) as 'low' | 'medium' | 'high' || 'medium'
           });
         });
+      } else {
+        console.log('🔔 No notifications found in Notifications page');
       }
 
       // Add message notifications if there are unread messages
