@@ -39,6 +39,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithTenant | null>(null);
   const [leads, setLeads] = useState<any[]>([]);
   const [invitesByTenant, setInvitesByTenant] = useState<Record<string, any>>({});
+  const [requests, setRequests] = useState<ApplicationWithTenant[]>([]);
 
   const fetchLeads = async () => {
     if (!user || !propertyId) return;
@@ -70,6 +71,30 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
     const map: Record<string, any> = {};
     (invites || []).forEach(i => { map[i.tenant_id] = i; });
     setInvitesByTenant(map);
+    // Fetch application requests for this property
+    const { data: reqs } = await supabase
+      .from('applications')
+      .select('*')
+      .eq('property_id', propertyId)
+      .eq('landlord_id', user.id)
+      .eq('status', 'requested')
+      .order('created_at', { ascending: false });
+    const withProfiles = await Promise.all(
+      (reqs || []).map(async (app) => {
+        const { data: tenantProfile } = await supabase
+          .from('profiles')
+          .select('display_name, user_id')
+          .eq('user_id', app.tenant_id)
+          .maybeSingle();
+        const { data: property } = await supabase
+          .from('properties')
+          .select('id, title, location, images')
+          .eq('id', app.property_id)
+          .maybeSingle();
+        return { ...app, tenant_profile: tenantProfile || undefined, properties: property || undefined } as ApplicationWithTenant;
+      })
+    );
+    setRequests(withProfiles);
   };
 
   const handleInvite = async (tenantId: string, conversationId?: string) => {
@@ -104,6 +129,60 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
       await fetchLeads();
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to send invite', description: e.message });
+    }
+  };
+
+  const approveRequest = async (application: ApplicationWithTenant) => {
+    if (!user) return;
+    try {
+      // Create invite token and message
+      const token = crypto.randomUUID();
+      await supabase.from('application_invites').insert({
+        token,
+        property_id: application.property_id,
+        landlord_id: user.id,
+        tenant_id: application.tenant_id,
+        status: 'invited'
+      });
+      const link = `${window.location.origin}/apply/invite/${token}`;
+      // Optional: message via conversations if exists
+      const { data: conv } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('property_id', application.property_id)
+        .eq('landlord_id', user.id)
+        .eq('tenant_id', application.tenant_id)
+        .maybeSingle();
+      if (conv?.id) {
+        await supabase.from('messages').insert({
+          conversation_id: conv.id,
+          sender_id: user.id,
+          content: `You've been invited to apply for this property. Click here to start: ${link}`,
+          message_type: 'text'
+        });
+      }
+      // Update application to pending
+      await supabase
+        .from('applications')
+        .update({ status: 'pending' })
+        .eq('id', application.id);
+      toast({ title: 'Request approved', description: 'Invitation sent to tenant.' });
+      fetchLeads();
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Approval failed', description: e.message });
+    }
+  };
+
+  const declineRequest = async (applicationId: string) => {
+    try {
+      await supabase
+        .from('applications')
+        .update({ status: 'declined' })
+        .eq('id', applicationId);
+      toast({ title: 'Request declined' });
+      fetchLeads();
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Decline failed', description: e.message });
     }
   };
 
@@ -300,6 +379,33 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
 
   return (
     <div className="space-y-6">
+      {/* Requests */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Application Requests</CardTitle>
+          <CardDescription>Approve requests to send an application to the tenant</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {requests.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No requests yet.</div>
+          ) : (
+            <div className="grid gap-3">
+              {requests.map((req) => (
+                <div key={req.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium truncate">{req.tenant_profile?.display_name || 'Tenant'}</div>
+                    <div className="text-xs text-muted-foreground truncate">{req.properties?.title}</div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => approveRequest(req)}>Approve</Button>
+                    <Button size="sm" variant="outline" onClick={() => declineRequest(req.id)}>Decline</Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       {/* Leads / Inquiries */}
       <Card>
         <CardHeader>

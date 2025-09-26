@@ -5,12 +5,22 @@ import { useApplicationInvites } from "@/hooks/useApplicationInvites";
 import { useTenantApplications } from "@/hooks/useTenantApplications";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { CheckCircle, FileText, Clock } from 'lucide-react';
+import { CheckCircle, FileText, Clock, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useApplications } from '@/hooks/useApplications';
 
 export const TenantApplicationsSection = () => {
   const { invites, loading: invitesLoading } = useApplicationInvites();
   const { applications, loading: applicationsLoading } = useTenantApplications();
+  const { requestApplication } = useApplications();
   const navigate = useNavigate();
+  const [openRequest, setOpenRequest] = useState(false);
+  const [leadOptions, setLeadOptions] = useState<Array<{ conversation_id: string; property_id: string; landlord_id: string; title: string }>>([]);
+  const [selectedLead, setSelectedLead] = useState<string>('');
+  const [submitting, setSubmitting] = useState(false);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -31,9 +41,76 @@ export const TenantApplicationsSection = () => {
 
   const loading = invitesLoading || applicationsLoading;
 
+  useEffect(() => {
+    const loadLeads = async () => {
+      // Get recent conversations the tenant has (landlord/property pairs)
+      const { data: convs } = await supabase
+        .from('conversations')
+        .select('id, property_id, landlord_id, properties ( title )')
+        .order('last_message_at', { ascending: false })
+        .limit(20);
+      const mapped = (convs || []).map(c => ({
+        conversation_id: c.id,
+        property_id: c.property_id,
+        landlord_id: c.landlord_id,
+        title: c.properties?.title || 'Property'
+      }));
+      setLeadOptions(mapped);
+    };
+    loadLeads();
+  }, []);
+
+  const handleRequest = async () => {
+    if (!selectedLead) return;
+    const lead = leadOptions.find(l => l.conversation_id === selectedLead);
+    if (!lead) return;
+    setSubmitting(true);
+    try {
+      await requestApplication(lead.property_id, lead.landlord_id);
+      setOpenRequest(false);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <div className="mb-8">
       <h2 className="text-xl font-semibold mb-4">My Applications</h2>
+      <div className="flex justify-end mb-3">
+        <Dialog open={openRequest} onOpenChange={setOpenRequest}>
+          <DialogTrigger asChild>
+            <Button size="sm" variant="outline">
+              <Plus className="h-4 w-4 mr-2" /> Request Application
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Request an Application</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <label className="text-sm font-medium">Choose a recent chat/property</label>
+              <select
+                className="w-full border rounded-md p-2"
+                value={selectedLead}
+                onChange={(e) => setSelectedLead(e.target.value)}
+              >
+                <option value="">Select a property</option>
+                {leadOptions.map((l) => (
+                  <option key={l.conversation_id} value={l.conversation_id}>
+                    {l.title}
+                  </option>
+                ))}
+              </select>
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setOpenRequest(false)}>Cancel</Button>
+                <Button onClick={handleRequest} disabled={!selectedLead || submitting}>
+                  {submitting ? 'Requesting...' : 'Request'}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       
       <Tabs defaultValue="invites" className="w-full">
         <TabsList className="grid w-full grid-cols-2">

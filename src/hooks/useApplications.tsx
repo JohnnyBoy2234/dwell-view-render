@@ -91,6 +91,40 @@ export const useApplications = () => {
     }
   };
 
+  // Tenant requests an application from landlord for a property
+  const requestApplication = async (propertyId: string, landlordId: string) => {
+    if (!user) return null;
+    setLoading(true);
+    try {
+      // Upsert-like behavior: remove any non-accepted existing attempts to avoid duplicates
+      await supabase
+        .from('applications')
+        .delete()
+        .eq('tenant_id', user.id)
+        .eq('property_id', propertyId)
+        .neq('status', 'accepted');
+
+      const { data, error } = await supabase
+        .from('applications')
+        .insert({
+          tenant_id: user.id,
+          landlord_id: landlordId,
+          property_id: propertyId,
+          status: 'requested'
+        })
+        .select()
+        .single();
+      if (error) throw error;
+      await fetchApplications();
+      return data;
+    } catch (e) {
+      console.error('Error requesting application:', e);
+      throw e;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const hasAppliedToProperty = (propertyId: string) => {
     return applications.some(app => app.property_id === propertyId);
   };
@@ -99,6 +133,7 @@ export const useApplications = () => {
     applications,
     loading,
     submitApplication,
+    requestApplication,
     hasAppliedToProperty,
     refreshData: () => {
       fetchApplications();
