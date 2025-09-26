@@ -146,8 +146,20 @@ export const useNotifications = (filters?: NotificationFilters) => {
       return;
     }
 
-    console.log('Marking all notifications as read for user:', user.id);
+    console.log('🔔 Marking all notifications as read for user:', user.id);
     try {
+      // First update local state immediately for better UX
+      if (isMountedRef.current) {
+        setNotifications(prev => {
+          const updated = prev.map(n => ({ ...n, is_read: true }));
+          console.log('🔔 Local state updated immediately:', updated.length, 'notifications marked as read');
+          return updated;
+        });
+        setUnreadCount(0);
+        console.log('🔔 Unread count set to 0 immediately');
+      }
+
+      // Then update database
       const { error } = await supabase
         .from('notifications')
         .update({ 
@@ -157,37 +169,32 @@ export const useNotifications = (filters?: NotificationFilters) => {
         .eq('is_read', false);
 
       if (error) {
-        // If table doesn't exist, just update local state
+        // If table doesn't exist, local state is already updated
         if (error.code === '42P01' || error.message.includes('relation "notifications" does not exist')) {
-          console.log('Notifications table does not exist, updating local state only');
-          setNotifications(prev => 
-            prev.map(n => ({ ...n, is_read: true }))
-          );
-          setUnreadCount(0);
-          console.log('Local state updated (fallback), unreadCount set to 0');
+          console.log('🔔 Notifications table does not exist, local state already updated');
           return;
         }
         throw error;
       }
 
-      // Update local state
-      console.log('Database update successful, updating local state');
-      if (isMountedRef.current) {
-        setNotifications(prev => {
-          const updated = prev.map(n => ({ ...n, is_read: true }));
-          console.log('🔔 Updated notifications:', updated.map(n => ({ id: n.id, is_read: n.is_read })));
-          return updated;
-        });
-        setUnreadCount(0);
-        console.log('🔔 Local state updated, unreadCount set to 0');
-      }
+      console.log('🔔 Database update successful');
+      
+      // Refresh from database to ensure consistency
+      setTimeout(() => {
+        if (isMountedRef.current) {
+          fetchNotifications();
+        }
+      }, 100);
+      
     } catch (err) {
       console.error('Error marking all notifications as read:', err);
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : 'Failed to mark all notifications as read');
+        // Revert local state on error
+        fetchNotifications();
       }
     }
-  }, [user]);
+  }, [user, fetchNotifications]);
 
   // Delete notification
   const deleteNotification = useCallback(async (notificationId: string) => {

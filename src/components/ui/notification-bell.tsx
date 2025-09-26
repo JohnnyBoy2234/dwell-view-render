@@ -174,17 +174,22 @@ export function NotificationBell() {
               className="px-4 py-2 text-center text-primary cursor-pointer"
               onClick={async () => {
                 console.log('🔔 Marking all notifications as read');
-                await markGeneralAsRead();
-                if (isLandlord) {
-                  // Mark landlord notifications as read
-                  for (const notification of landlordNotifications) {
-                    await markLandlordAsRead(notification.id);
+                try {
+                  await markGeneralAsRead();
+                  if (isLandlord) {
+                    // Mark landlord notifications as read
+                    for (const notification of landlordNotifications) {
+                      await markLandlordAsRead(notification.id);
+                    }
+                  } else {
+                    // Mark tenant notifications as read
+                    for (const notification of tenantNotifications) {
+                      await markTenantAsRead(notification.id);
+                    }
                   }
-                } else {
-                  // Mark tenant notifications as read
-                  for (const notification of tenantNotifications) {
-                    await markTenantAsRead(notification.id);
-                  }
+                  console.log('🔔 All notifications marked as read');
+                } catch (error) {
+                  console.error('Error marking all as read:', error);
                 }
                 setOpen(false);
               }}

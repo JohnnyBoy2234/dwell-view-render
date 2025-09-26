@@ -200,11 +200,14 @@ export default function Notifications() {
 
   const handleMarkAllAsRead = async () => {
     try {
+      console.log('🔔 Notifications page: Marking all as read');
       await markAllAsRead();
       // Update local state immediately
-      setAllNotifications(prev => 
-        prev.map(n => ({ ...n, isRead: true }))
-      );
+      setAllNotifications(prev => {
+        const updated = prev.map(n => ({ ...n, isRead: true }));
+        console.log('🔔 Notifications page: Local state updated,', updated.length, 'notifications marked as read');
+        return updated;
+      });
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
     }
