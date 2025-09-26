@@ -23,6 +23,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
+import { BookViewingDialog } from '@/components/viewing/BookViewingDialog';
 import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -42,6 +43,7 @@ export default function Messages() {
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
   const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [viewingProposals, setViewingProposals] = useState<any[]>([]);
   const enableViewingUI = true;
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -399,9 +401,9 @@ export default function Messages() {
 
         {/* Chat Window - Mobile Full Screen (hides bottom menu) */}
         {!showConversations && selectedConversation && (
-          <div className="fixed inset-0 bg-background flex flex-col z-30">
-              {/* Mobile Chat Header */}
-              <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm flex-shrink-0 sticky top-0 z-10">
+          <div className="fixed inset-0 bg-background flex flex-col z-30 pt-28">
+              {/* Mobile Chat Header - fixed to viewport */}
+              <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-40">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -446,6 +448,33 @@ export default function Messages() {
                   </div>
                 </div>
               </div>
+              {/* Quick Viewing Bar - fixed below header */}
+              <div className="fixed top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b z-40">
+                <div className="px-4 py-2 flex items-center gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground truncate">
+                      {selectedConversation.properties?.title || 'Property'}
+                    </p>
+                  </div>
+                  {isLandlord ? (
+                    <Button
+                      size="sm"
+                      className="bg-primary hover:bg-primary/90"
+                      onClick={() => setShowViewingModal(true)}
+                    >
+                      Create viewing
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowBookingDialog(true)}
+                    >
+                      Book viewing
+                    </Button>
+                  )}
+                </div>
+              </div>
               
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0 overflow-hidden">
@@ -469,6 +498,16 @@ export default function Messages() {
             tenantId={selectedConversation.tenant_id}
             propertyTitle={selectedConversation.properties?.title}
             onSuccess={handleViewingModalSuccess}
+          />
+        )}
+
+        {/* Tenant booking dialog */}
+        {selectedConversation && !isLandlord && (
+          <BookViewingDialog
+            propertyId={selectedConversation.property_id}
+            landlordId={selectedConversation.landlord_id}
+            open={showBookingDialog}
+            onOpenChange={setShowBookingDialog}
           />
         )}
       </>
