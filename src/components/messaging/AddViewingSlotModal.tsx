@@ -9,7 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarIcon, Clock } from 'lucide-react';
 import { format } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -81,7 +81,7 @@ export function AddViewingSlotModal({
       localDateTime.setHours(hours, minutes, 0, 0);
       
       // Convert to UTC for storage
-      const utcDateTime = zonedTimeToUtc(localDateTime, 'Africa/Johannesburg');
+      const utcDateTime = fromZonedTime(localDateTime, 'Africa/Johannesburg');
       
       // Validate the time is in the future
       const now = new Date();

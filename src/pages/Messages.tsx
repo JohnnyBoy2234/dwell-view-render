@@ -25,6 +25,8 @@ import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard'
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { BookViewingDialog } from '@/components/viewing/BookViewingDialog';
 import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
+import { ViewingReminderHeader } from '@/components/messaging/ViewingReminderHeader';
+import { useConfirmedViewing } from '@/hooks/useConfirmedViewing';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
@@ -44,7 +46,6 @@ export default function Messages() {
   const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const [viewingProposals, setViewingProposals] = useState<any[]>([]);
   const enableViewingUI = true;
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -52,6 +53,7 @@ export default function Messages() {
   const inputFieldRef = useRef<HTMLInputElement>(null);
   const [inputHeight, setInputHeight] = useState<number>(64);
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [scrollToProposalFn, setScrollToProposalFn] = useState<((id: string) => void) | null>(null);
 
   const {
     conversations,
@@ -64,34 +66,11 @@ export default function Messages() {
     fetchMessages: refetchMessages,
     fetchConversations
   } = useMessaging();
+  
+  const { confirmedViewing } = useConfirmedViewing(activeConversation);
 
   // Add mount tracking
   const isMountedRef = useRef(true);
-
-  // Define fetchViewingProposals as useCallback to avoid dependency issues
-  const fetchViewingProposals = useCallback(async () => {
-    if (!user || !activeConversation || !isMountedRef.current) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('viewing_proposals')
-        .select(`
-          *,
-          properties (
-            title,
-            location
-          )
-        `)
-        .eq('conversation_id', activeConversation)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      if (!isMountedRef.current) return;
-      setViewingProposals(data || []);
-    } catch (error) {
-      console.error('Error fetching viewing requests:', error);
-    }
-  }, [activeConversation, user]);
 
   const selectedConversation = activeConversation ? conversations.find(c => c.id === activeConversation) : undefined;
 
@@ -102,32 +81,6 @@ export default function Messages() {
       isMountedRef.current = false;
     };
   }, []);
-
-  // Fetch viewing requests for active conversation
-  useEffect(() => {
-    if (activeConversation && user) {
-      fetchViewingProposals();
-    }
-  }, [activeConversation, user, fetchViewingProposals]);
-
-  // Subscribe to viewing proposal changes for instant updates
-  useEffect(() => {
-    if (!activeConversation) return;
-    const channel = supabase
-      .channel(`viewing-proposals-${activeConversation}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'viewing_proposals', filter: `conversation_id=eq.${activeConversation}` },
-        () => {
-          fetchViewingProposals();
-          if (activeConversation) refetchMessages(activeConversation);
-        }
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [activeConversation, fetchViewingProposals, refetchMessages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -221,7 +174,7 @@ export default function Messages() {
   };
 
   const handleViewingModalSuccess = () => {
-    fetchViewingProposals();
+    // Refresh messages to show new viewing proposal
     if (activeConversation) {
       refetchMessages(activeConversation);
     }
@@ -420,7 +373,7 @@ export default function Messages() {
 
         {/* Chat Window - Mobile Full Screen (hides bottom menu) */}
         {!showConversations && selectedConversation && (
-          <div className="fixed inset-0 bg-background flex flex-col z-30 pt-28">
+          <div className="fixed inset-0 bg-background flex flex-col z-30 pt-20">
               {/* Mobile Chat Header - fixed to viewport */}
               <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-40">
                 <Button
@@ -467,119 +420,33 @@ export default function Messages() {
                   </div>
                 </div>
               </div>
-              {/* Sticky Viewing Area - shows active proposal if present, else quick actions */}
-              <div className="fixed top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b z-40">
-                {viewingProposals && viewingProposals.length > 0 ? (
-                  <div className="px-4 py-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-xs text-muted-foreground truncate">
-                          {selectedConversation.properties?.title || 'Property'}
-                        </p>
-                        <p className="text-sm font-medium truncate">
-                          Viewing {new Date(viewingProposals[0].start_at).toLocaleString('en-ZA', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })} SAST
-                          {viewingProposals[0].status === 'confirmed' ? ' • Confirmed' : viewingProposals[0].status === 'proposed' ? ' • Awaiting confirmation' : ''}
-                        </p>
-                      </div>
-                      {(!isLandlord && viewingProposals[0].status === 'proposed') ? (
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <Button
-                            size="sm"
-                            className="bg-green-600 hover:bg-green-700 text-white"
-                            onClick={async () => {
-                              try {
-                                const { data: sessionResult } = await supabase.auth.getSession();
-                                const token = sessionResult.session?.access_token;
-                                await supabase.functions.invoke('confirm-viewing-proposal', {
-                                  body: { proposalId: viewingProposals[0].id },
-                                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                                });
-                                fetchViewingProposals();
-                                if (activeConversation) refetchMessages(activeConversation);
-                              } catch (e) {
-                                console.error('Confirm viewing failed', e);
-                              }
-                            }}
-                          >
-                            Confirm
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              try {
-                                const { data: sessionResult } = await supabase.auth.getSession();
-                                const token = sessionResult.session?.access_token;
-                                await supabase.functions.invoke('decline-viewing-proposal', {
-                                  body: { proposalId: viewingProposals[0].id },
-                                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                                });
-                                fetchViewingProposals();
-                                if (activeConversation) refetchMessages(activeConversation);
-                              } catch (e) {
-                                console.error('Decline viewing failed', e);
-                              }
-                            }}
-                          >
-                            Decline
-                          </Button>
-                        </div>
-                      ) : null}
-                      <div className="flex items-center gap-2 flex-shrink-0">
-                        {isLandlord && viewingProposals[0].status === 'proposed' && (
-                          <span className="text-xs text-muted-foreground">Waiting for tenant</span>
-                        )}
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            const ev = new CustomEvent('scroll-to-proposal', { detail: { id: viewingProposals[0].id } });
-                            window.dispatchEvent(ev);
-                          }}
-                        >
-                          View in chat
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="px-4 py-2 flex items-center gap-2">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground truncate">
-                        {selectedConversation.properties?.title || 'Property'}
-                      </p>
-                    </div>
-                    {isLandlord ? (
-                      <Button
-                        size="sm"
-                        className="bg-primary hover:bg-primary/90"
-                        onClick={() => setShowViewingModal(true)}
-                      >
-                        Create viewing
-                      </Button>
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setShowBookingDialog(true)}
-                      >
-                        Book viewing
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-              
-              {/* Messages - Mobile */}
-              <div className="flex-1 min-h-0 overflow-hidden">
-                <WhatsAppStyleThread 
-                  conversationId={activeConversation}
-                  onMessageSent={() => {
-                    // Refresh conversations to update last message
-                    fetchConversations?.();
-                  }}
-                />
-              </div>
+            {/* Viewing Reminder Header - Only show for confirmed viewings */}
+            {confirmedViewing && (
+              <ViewingReminderHeader 
+                viewing={confirmedViewing}
+                onViewDetails={() => {
+                  if (scrollToProposalFn) {
+                    scrollToProposalFn(confirmedViewing.id);
+                  } else {
+                    // Fallback to custom event
+                    const ev = new CustomEvent('scroll-to-proposal', { detail: { id: confirmedViewing.id } });
+                    window.dispatchEvent(ev);
+                  }
+                }}
+              />
+            )}
+            
+            {/* Messages - Mobile */}
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <WhatsAppStyleThread 
+                conversationId={activeConversation}
+                onMessageSent={() => {
+                  // Refresh conversations to update last message
+                  fetchConversations?.();
+                }}
+                onScrollToProposal={setScrollToProposalFn}
+              />
+            </div>
             </div>
           )}
 
@@ -748,6 +615,22 @@ export default function Messages() {
               </div>
             </div>
 
+            {/* Viewing Reminder Header - Desktop */}
+            {confirmedViewing && (
+              <ViewingReminderHeader 
+                viewing={confirmedViewing}
+                onViewDetails={() => {
+                  if (scrollToProposalFn) {
+                    scrollToProposalFn(confirmedViewing.id);
+                  } else {
+                    // Fallback to custom event
+                    const ev = new CustomEvent('scroll-to-proposal', { detail: { id: confirmedViewing.id } });
+                    window.dispatchEvent(ev);
+                  }
+                }}
+              />
+            )}
+
             {/* Messages */}
             <div className="flex-1 min-h-0">
               <WhatsAppStyleThread 
@@ -756,6 +639,7 @@ export default function Messages() {
                   // Refresh conversations to update last message
                   fetchConversations?.();
                 }}
+                onScrollToProposal={setScrollToProposalFn}
               />
             </div>
           </div>

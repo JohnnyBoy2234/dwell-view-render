@@ -23,9 +23,10 @@ interface Message {
 interface WhatsAppStyleThreadProps {
   conversationId: string;
   onMessageSent?: () => void;
+  onScrollToProposal?: (fn: (proposalId: string) => void) => void;
 }
 
-export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppStyleThreadProps) {
+export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -99,24 +100,44 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
     load();
   }, [messages, proposalsById]);
 
+  // Scroll to specific proposal (called from reminder header)
+  const scrollToProposal = (proposalId: string) => {
+    const anchor = document.getElementById(`proposal-${proposalId}`);
+    if (anchor && scrollAreaRef.current) {
+      anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Offset for fixed header
+      setTimeout(() => {
+        try {
+          const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+          if (scrollContainer) {
+            (scrollContainer as any).scrollTop = (scrollContainer as any).scrollTop - 80;
+          }
+        } catch {}
+      }, 200);
+    }
+  };
+
   // Support external scroll-to events from header sticky bar
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent<{ id: string }>;
-      const anchor = document.getElementById(`proposal-${ce.detail.id}`);
-      if (anchor && scrollAreaRef.current) {
-        anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        // Offset for fixed header
-        setTimeout(() => {
-          try {
-            (scrollAreaRef.current as any).scrollTop = (scrollAreaRef.current as any).scrollTop - 80;
-          } catch {}
-        }, 200);
-      }
+      scrollToProposal(ce.detail.id);
     };
     window.addEventListener('scroll-to-proposal', handler as EventListener);
     return () => window.removeEventListener('scroll-to-proposal', handler as EventListener);
   }, []);
+
+  // Expose scroll function to parent
+  const handleScrollToProposal = (fn: (id: string) => void) => {
+    // Store the function reference for later use
+    if (onScrollToProposal) {
+      onScrollToProposal(fn);
+    }
+  };
+
+  useEffect(() => {
+    handleScrollToProposal(scrollToProposal);
+  }, [onScrollToProposal]);
 
   // Handle scroll position tracking
   const handleScroll = (event: any) => {
