@@ -44,6 +44,14 @@ export function MobileBottomBar() {
   // Calculate total notification count
   const totalNotifications = notificationUnread + (isLandlord ? landlordUnread : tenantUnread);
   
+  console.log('🔔 MobileBottomBar counts:', {
+    notificationUnread,
+    tenantUnread,
+    landlordUnread,
+    isLandlord,
+    totalNotifications
+  });
+  
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
     { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: true },

@@ -430,7 +430,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
       {/* Message Input */}
       <div
-        className="p-4 bg-background/95 backdrop-blur border-t sticky bottom-0"
+        className="p-4 bg-background/95 backdrop-blur border-t sticky bottom-0 z-10 flex-shrink-0"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <MessageComposer

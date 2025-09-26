@@ -18,11 +18,14 @@ export const useNotifications = (filters?: NotificationFilters) => {
     if (!user) return;
 
     try {
+      console.log('🔔 Fetching notifications for user:', user.id);
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
+        
+      console.log('🔔 Raw notification data:', { data, error });
 
       if (error) {
         // If table doesn't exist, just return empty data instead of crashing
@@ -44,9 +47,16 @@ export const useNotifications = (filters?: NotificationFilters) => {
         notification.id
       );
       
+      const unreadCount = validNotifications.filter(n => !n.is_read).length;
+      console.log('🔔 Notifications fetched:', {
+        total: validNotifications.length,
+        unread: unreadCount,
+        notifications: validNotifications.map(n => ({ id: n.id, is_read: n.is_read, message: n.message }))
+      });
+      
       if (isMountedRef.current) {
         setNotifications(validNotifications as Notification[]);
-        setUnreadCount(validNotifications.filter(n => !n.is_read).length || 0);
+        setUnreadCount(unreadCount);
         setError(null);
       }
     } catch (err) {
@@ -163,11 +173,13 @@ export const useNotifications = (filters?: NotificationFilters) => {
       // Update local state
       console.log('Database update successful, updating local state');
       if (isMountedRef.current) {
-        setNotifications(prev => 
-          prev.map(n => ({ ...n, is_read: true }))
-        );
+        setNotifications(prev => {
+          const updated = prev.map(n => ({ ...n, is_read: true }));
+          console.log('🔔 Updated notifications:', updated.map(n => ({ id: n.id, is_read: n.is_read })));
+          return updated;
+        });
         setUnreadCount(0);
-        console.log('Local state updated, unreadCount set to 0');
+        console.log('🔔 Local state updated, unreadCount set to 0');
       }
     } catch (err) {
       console.error('Error marking all notifications as read:', err);

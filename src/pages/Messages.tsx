@@ -375,7 +375,7 @@ export default function Messages() {
         {!showConversations && selectedConversation && (
           <div className="fixed inset-0 bg-background flex flex-col z-30 pt-20">
               {/* Mobile Chat Header - fixed to viewport */}
-              <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-40">
+              <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-50 flex-shrink-0">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -506,10 +506,11 @@ export default function Messages() {
           
           <div className="p-0">
             <div className="h-[calc(100vh-8rem)] overflow-auto">
-              {loading ? (
-                <div className="p-6 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                  <p className="text-muted-foreground">Loading conversations...</p>
+              {loading && conversations.length === 0 ? (
+                <div className="animate-pulse space-y-3 p-4">
+                  {[1,2,3].map((i) => (
+                    <div key={i} className="h-16 bg-muted rounded-md"></div>
+                  ))}
                 </div>
               ) : conversations.length === 0 ? (
                 <div className="p-6 text-center">
@@ -583,7 +584,7 @@ export default function Messages() {
         {selectedConversation ? (
           <div className="h-full flex flex-col rounded-lg border bg-card">
             {/* Desktop Chat Header */}
-            <div className="flex items-center gap-3 p-4 border-b bg-card sticky top-0 z-10">
+            <div className="flex items-center gap-3 p-4 border-b bg-card sticky top-0 z-20 flex-shrink-0">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <div className="relative">
                   <Avatar className="h-10 w-10">

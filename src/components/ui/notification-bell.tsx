@@ -31,6 +31,14 @@ export function NotificationBell() {
   // Calculate total unread count
   const totalUnread = generalUnread + (isLandlord ? landlordUnread : tenantUnread);
   
+  console.log('🔔 NotificationBell counts:', {
+    generalUnread,
+    tenantUnread,
+    landlordUnread,
+    isLandlord,
+    totalUnread
+  });
+  
   // Combine notifications based on user type
   const allNotifications = [
     ...generalNotifications,
@@ -157,6 +165,33 @@ export function NotificationBell() {
               </DropdownMenuItem>
             );
           })
+        )}
+        
+        {allNotifications.length > 0 && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem 
+              className="px-4 py-2 text-center text-primary cursor-pointer"
+              onClick={async () => {
+                console.log('🔔 Marking all notifications as read');
+                await markGeneralAsRead();
+                if (isLandlord) {
+                  // Mark landlord notifications as read
+                  for (const notification of landlordNotifications) {
+                    await markLandlordAsRead(notification.id);
+                  }
+                } else {
+                  // Mark tenant notifications as read
+                  for (const notification of tenantNotifications) {
+                    await markTenantAsRead(notification.id);
+                  }
+                }
+                setOpen(false);
+              }}
+            >
+              Mark all as read
+            </DropdownMenuItem>
+          </>
         )}
         
         {allNotifications.length > 10 && (
