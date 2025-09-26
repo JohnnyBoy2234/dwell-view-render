@@ -1,9 +1,13 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-import { MapPin, Bed, Bath, Car } from "lucide-react";
-
-import { useNavigate } from "react-router-dom";
+import { MapPin } from "lucide-react";
+import { PropertyFeatures } from '@/components/property/PropertyFeatures';
+import { usePropertyNavigation } from '@/hooks/usePropertyNavigation';
+import { 
+  PROPERTY_CARD_STYLES, 
+  PROPERTY_CARD_LABELS, 
+  PROPERTY_CARD_CURRENCY 
+} from '@/constants/propertyCardConstants';
 
 interface PropertyCardProps {
   id: string;
@@ -18,6 +22,10 @@ interface PropertyCardProps {
   featured?: boolean;
 }
 
+/**
+ * Property card component for displaying property listings
+ * Shows property image, price, location, and key features
+ */
 const PropertyCard = ({
   id,
   title,
@@ -30,65 +38,67 @@ const PropertyCard = ({
   type,
   featured = false,
 }: PropertyCardProps) => {
-  const navigate = useNavigate();
+  const { navigateToProperty, handleKeyDown } = usePropertyNavigation(id);
 
+  const formattedPrice = `${PROPERTY_CARD_CURRENCY.SYMBOL}${price.toLocaleString()}${PROPERTY_CARD_CURRENCY.SEPARATOR}`;
+  const altText = `${type} in ${location}`;
+  const locationText = `${type} in ${location}`;
 
   return (
     <Card 
-      className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 cursor-pointer backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg h-full flex flex-col"
+      className={PROPERTY_CARD_STYLES.CARD}
       role="button"
       tabIndex={0}
-      onClick={() => navigate(`/property/${id}`)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          navigate(`/property/${id}`);
-        }
-      }}
+      onClick={navigateToProperty}
+      onKeyDown={handleKeyDown}
+      aria-label={`View details for ${locationText}, ${formattedPrice}`}
     >
-      <div className="relative overflow-hidden rounded-t-lg">
+      <div className={PROPERTY_CARD_STYLES.IMAGE_CONTAINER}>
         <img
           src={image}
-          alt={`${type} in ${location}`}
-          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          alt={altText}
+          className={PROPERTY_CARD_STYLES.IMAGE}
+          loading="lazy"
         />
         {featured && (
-          <Badge className="absolute top-3 left-3 bg-accent text-accent-foreground">
-            Featured
+          <Badge className={PROPERTY_CARD_STYLES.FEATURED_BADGE}>
+            {PROPERTY_CARD_LABELS.FEATURED}
           </Badge>
         )}
       </div>
 
-      <CardContent className="p-4 flex-1 flex flex-col">
-        <div className="space-y-2 flex-1 flex flex-col">
-          <div className="flex items-center justify-between">
-            <Badge variant="secondary" className="line-clamp-1">{type}</Badge>
+      <CardContent className={PROPERTY_CARD_STYLES.CONTENT}>
+        <div className={PROPERTY_CARD_STYLES.CONTENT_INNER}>
+          <div className={PROPERTY_CARD_STYLES.HEADER}>
+            <Badge 
+              variant="secondary" 
+              className={PROPERTY_CARD_STYLES.TYPE_BADGE}
+            >
+              {type}
+            </Badge>
           </div>
           
-          <h3 className="font-semibold text-lg line-clamp-1">R{price.toLocaleString()}/month</h3>
+          <h3 className={PROPERTY_CARD_STYLES.PRICE}>
+            {formattedPrice}
+          </h3>
           
-          <div className="flex items-center text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-            <span className="text-sm line-clamp-1">{type} in {location}</span>
+          <div className={PROPERTY_CARD_STYLES.LOCATION_CONTAINER}>
+            <MapPin 
+              className={PROPERTY_CARD_STYLES.LOCATION_ICON}
+              aria-hidden="true"
+            />
+            <span className={PROPERTY_CARD_STYLES.LOCATION_TEXT}>
+              {locationText}
+            </span>
           </div>
 
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-auto">
-            <div className="flex items-center">
-              <Bed className="h-4 w-4 mr-1 flex-shrink-0" />
-              <span>{beds} beds</span>
-            </div>
-            <div className="flex items-center">
-              <Bath className="h-4 w-4 mr-1 flex-shrink-0" />
-              <span>{baths} baths</span>
-            </div>
-            <div className="flex items-center">
-              <Car className="h-4 w-4 mr-1 flex-shrink-0" />
-              <span>{parking} parking</span>
-            </div>
-          </div>
+          <PropertyFeatures 
+            beds={beds} 
+            baths={baths} 
+            parking={parking} 
+          />
         </div>
       </CardContent>
-
     </Card>
   );
 };
