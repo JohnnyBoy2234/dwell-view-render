@@ -23,6 +23,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
+import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 
@@ -54,7 +55,8 @@ export default function Messages() {
     loading,
     onlineUsers,
     sendMessage,
-    fetchMessages: refetchMessages
+    fetchMessages: refetchMessages,
+    fetchConversations
   } = useMessaging();
 
   // Add mount tracking
@@ -431,133 +433,15 @@ export default function Messages() {
               
               {/* Messages - Mobile */}
               <div className="flex-1 min-h-0 overflow-hidden">
-                  <div className="h-full overflow-auto">
-                  <div className="p-1 space-y-1">
-                    {messages.length === 0 ? (
-                      <div className="flex items-center justify-center h-32 text-muted-foreground">
-                        <div className="text-center">
-                          <MessageCircle className="h-8 w-8 mx-auto mb-2" />
-                          <p>No messages yet. Start the conversation!</p>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Viewing components */}
-                        {enableViewingUI && !isLandlord && selectedConversation && (
-                          <div className="w-full max-w-[95%] mx-auto">
-                            <ViewingSlotNotification
-                              propertyId={selectedConversation.property_id}
-                              landlordId={selectedConversation.landlord_id}
-                              propertyTitle={selectedConversation.properties?.title || 'Property'}
-                            />
-                          </div>
-                        )}
-
-                        {enableViewingUI && isLandlord && selectedConversation && (
-                          <div className="w-full max-w-[95%] mx-auto">
-                            <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
-                              <div className="flex items-center justify-between">
-                                <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-medium break-words">Schedule a viewing</p>
-                                  <p className="text-xs text-muted-foreground break-words">Create a viewing request for this tenant</p>
-                                </div>
-                                <Button
-                                  onClick={() => setShowViewingModal(true)}
-                                  size="sm"
-                                  className="bg-primary hover:bg-primary/90 flex-shrink-0 ml-2"
-                                >
-                                  Create
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {enableViewingUI && viewingProposals.map((proposal) => (
-                          <div key={proposal.id} className="w-full max-w-[95%] mx-auto">
-                            <ViewingProposalCard
-                              proposal={proposal}
-                              onUpdate={() => {
-                                fetchViewingProposals();
-                                if (activeConversation) {
-                                  refetchMessages(activeConversation);
-                                }
-                              }}
-                            />
-                          </div>
-                        ))}
-                        
-                        {messages.map((message) => {
-                          const isSender = message.sender_id === user.id;
-                          const isRead = isMessageRead(message);
-                          
-                          if (message.message_type === 'viewing_proposal') {
-                            return null;
-                          }
-                          
-                          return (
-                            <div
-                              key={message.id}
-                              className={`flex mb-4 px-1 ${isSender ? 'justify-end' : 'justify-start'}`}
-                            >
-                              <div className={`max-w-[95%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
-                                <div
-                                  className={`rounded-2xl px-4 py-3 ${
-                                    isSender
-                                      ? 'bg-primary text-primary-foreground rounded-br-md'
-                                      : 'bg-muted text-foreground rounded-bl-md'
-                                  }`}
-                                >
-                                  <p className="text-sm leading-relaxed break-words whitespace-pre-wrap" style={{ wordBreak: 'break-word' }}>{message.content}</p>
-                                </div>
-                                
-                                <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
-                                  isSender ? 'justify-end' : 'justify-start'
-                                }`}>
-                                  <Clock className="h-3 w-3 flex-shrink-0" />
-                                  <span className="truncate">
-                                    {new Date(message.created_at).toLocaleTimeString([], {
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    })}
-                                  </span>
-                                  {isSender && (
-                                    <div className="ml-1 flex-shrink-0">
-                                      {isRead ? (
-                                        <CheckCheck className="h-3 w-3 text-blue-500" />
-                                      ) : (
-                                        <Check className="h-3 w-3" />
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </>
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
-                  </div>
-                </div>
-
-                {/* Message Input - Mobile */}
-                <form onSubmit={handleSendMessage} className="p-4 border-t bg-background flex-shrink-0">
-                <div className="flex gap-2">
-                  <Input
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type your message..."
-                    className="flex-1 rounded-full"
-                    disabled={loading}
-                  />
-                  <Button type="submit" disabled={!newMessage.trim() || loading} className="rounded-full h-10 w-10 p-0 flex-shrink-0">
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-                </form>
+                <WhatsAppStyleThread 
+                  conversationId={activeConversation}
+                  onMessageSent={() => {
+                    // Refresh conversations to update last message
+                    fetchConversations?.();
+                  }}
+                />
               </div>
+            </div>
           )}
 
         {selectedConversation && (
@@ -717,132 +601,13 @@ export default function Messages() {
 
             {/* Messages */}
             <div className="flex-1 min-h-0">
-      <div className="h-full overflow-auto">
-                {messages.length === 0 ? (
-                  <div className="flex items-center justify-center h-32 text-muted-foreground">
-                    <div className="text-center">
-                      <MessageCircle className="h-8 w-8 mx-auto mb-2" />
-                      <p>No messages yet. Start the conversation!</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-1 py-1 px-1">
-                     {/* Viewing Slot Notification for Tenants */}
-                    {enableViewingUI && !isLandlord && selectedConversation && (
-                      <div className="w-full max-w-[85%] mx-auto">
-                        <ViewingSlotNotification
-                          propertyId={selectedConversation.property_id}
-                          landlordId={selectedConversation.landlord_id}
-                          propertyTitle={selectedConversation.properties?.title || 'Property'}
-                        />
-                      </div>
-                    )}
-
-                    {/* Create Viewing Slot Button for Landlords */}
-                    {enableViewingUI && isLandlord && selectedConversation && (
-                      <div className="w-full max-w-[85%] mx-auto">
-                        <div className="bg-muted/30 rounded-lg p-3 border-l-4 border-l-primary">
-                          <div className="flex items-center justify-between">
-                            <div className="min-w-0 flex-1">
-                              <p className="text-sm font-medium break-words">Schedule a viewing</p>
-                              <p className="text-xs text-muted-foreground break-words">Create a viewing request for this tenant</p>
-                            </div>
-                            <Button
-                              onClick={() => setShowViewingModal(true)}
-                              size="sm"
-                              className="bg-primary hover:bg-primary/90 flex-shrink-0 ml-2"
-                            >
-                              Create / Add Viewing Slot
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Viewing Requests */}
-                    {enableViewingUI && viewingProposals.map((proposal) => (
-                      <div key={proposal.id} className="w-full max-w-[85%] mx-auto">
-                        <ViewingProposalCard
-                          proposal={proposal}
-                          onUpdate={() => {
-                            fetchViewingProposals();
-                            if (activeConversation) {
-                              refetchMessages(activeConversation);
-                            }
-                          }}
-                        />
-                      </div>
-                    ))}
-                    
-                     {messages.map((message) => {
-                      const isSender = message.sender_id === user.id;
-                      const isRead = isMessageRead(message);
-                      
-                      // Skip rendering messages that are viewing_proposal type as they're handled above
-                      if (message.message_type === 'viewing_proposal') {
-                        return null;
-                      }
-                      
-                      return (
-                        <div
-                          key={message.id}
-                          className={`flex mb-4 px-1 ${isSender ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div className={`max-w-[85%] min-w-0 ${isSender ? 'order-2' : 'order-1'}`}>
-                            <div
-                              className={`rounded-2xl px-4 py-3 ${
-                                isSender
-                                  ? 'bg-primary text-primary-foreground rounded-br-md'
-                                  : 'bg-muted text-foreground rounded-bl-md'
-                              }`}
-                            >
-                              <p className="text-sm leading-relaxed break-words whitespace-pre-wrap overflow-wrap-anywhere">{message.content}</p>
-                            </div>
-                            
-                            <div className={`flex items-center gap-1 mt-1 text-xs text-muted-foreground ${
-                              isSender ? 'justify-end' : 'justify-start'
-                            }`}>
-                              <Clock className="h-3 w-3 flex-shrink-0" />
-                              <span className="truncate">
-                                {new Date(message.created_at).toLocaleTimeString([], {
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                              {isSender && (
-                                <div className="ml-1 flex-shrink-0">
-                                  {isRead ? (
-                                    <CheckCheck className="h-3 w-3 text-blue-500" />
-                                  ) : (
-                                    <Check className="h-3 w-3" />
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    <div ref={messagesEndRef} />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Message Input */}
-            <div className="flex-shrink-0 p-4 border-t">
-              <form onSubmit={handleSendMessage} className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type your message..."
-                  className="flex-1 rounded-full"
-                  disabled={loading}
-                />
-                <Button type="submit" disabled={!newMessage.trim() || loading} className="rounded-full h-10 w-10 p-0">
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
+              <WhatsAppStyleThread 
+                conversationId={activeConversation}
+                onMessageSent={() => {
+                  // Refresh conversations to update last message
+                  fetchConversations?.();
+                }}
+              />
             </div>
           </div>
         ) : (

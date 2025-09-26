@@ -1,0 +1,247 @@
+import { useEffect, useRef, useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MessageBubble } from '@/components/maintenance/messaging/MessageBubble';
+import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
+import { useMessageCache } from '@/hooks/useMessageCache';
+import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface Message {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  content: string;
+  created_at: string;
+  read_by_landlord: boolean;
+  read_by_tenant: boolean;
+  profiles?: { display_name: string } | null;
+  optimistic?: boolean;
+}
+
+interface WhatsAppStyleThreadProps {
+  conversationId: string;
+  onMessageSent?: () => void;
+}
+
+export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppStyleThreadProps) {
+  const { user, isLandlord } = useAuth();
+  const { toast } = useToast();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
+  const [newMessage, setNewMessage] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
+
+  const {
+    getMessages,
+    addOptimisticMessage,
+    confirmMessage,
+    addRealtimeMessage,
+    getCachedMessages,
+    isLoading
+  } = useMessageCache();
+
+  const messages = getCachedMessages(conversationId);
+  const loading = isLoading(conversationId);
+
+  // Load messages when conversation changes
+  useEffect(() => {
+    if (conversationId) {
+      getMessages(conversationId);
+    }
+  }, [conversationId, getMessages]);
+
+  // Auto-scroll to bottom when new messages arrive or when typing
+  const scrollToBottom = (force = false) => {
+    if (force || isScrolledToBottom) {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'end'
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Small delay to ensure DOM is updated
+      setTimeout(() => scrollToBottom(), 50);
+    }
+  }, [messages.length]);
+
+  // Handle scroll position tracking
+  const handleScroll = (event: any) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+    setIsScrolledToBottom(isAtBottom);
+  };
+
+  // Real-time message subscription
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel(`messages-${conversationId}`)
+      .on(
+        'postgres_changes',
+        { 
+          event: 'INSERT', 
+          schema: 'public', 
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        (payload) => {
+          const newMsg = payload.new as Message;
+          addRealtimeMessage(newMsg);
+          
+          // Auto-scroll for new messages
+          setTimeout(() => scrollToBottom(true), 100);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { 
+          event: 'UPDATE', 
+          schema: 'public', 
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`
+        },
+        (payload) => {
+          const updatedMsg = payload.new as Message;
+          addRealtimeMessage(updatedMsg);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, addRealtimeMessage]);
+
+  // Handle sending messages
+  const handleSendMessage = async (content: string, files?: File[]) => {
+    if (!content.trim() || !user) return;
+
+    // Add optimistic message for instant UI
+    const tempId = addOptimisticMessage(conversationId, {
+      sender_id: user.id,
+      content: content.trim(),
+      profiles: null
+    });
+
+    // Clear input immediately
+    setNewMessage('');
+    
+    // Auto-scroll to show the new message
+    setTimeout(() => scrollToBottom(true), 50);
+
+    try {
+      // Send to server
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: content.trim(),
+          message_type: 'text'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Replace optimistic message with real one
+      confirmMessage(conversationId, tempId, data as Message);
+      
+      // Update conversation's last message timestamp
+      await supabase
+        .from('conversations')
+        .update({ last_message_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
+      onMessageSent?.();
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast({
+        variant: "destructive",
+        title: "Failed to send message",
+        description: "Please try again"
+      });
+    }
+  };
+
+  // Handle input focus for mobile keyboard
+  const handleComposerFocus = () => {
+    // Scroll to bottom when keyboard opens on mobile
+    setTimeout(() => scrollToBottom(true), 300);
+  };
+
+  if (loading && messages.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full bg-gradient-to-b from-background to-muted/20">
+      {/* Messages Area */}
+      <ScrollArea 
+        className="flex-1 px-4" 
+        ref={scrollAreaRef}
+        onScroll={handleScroll}
+      >
+        <div className="py-4 space-y-1">
+          {messages.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-muted-foreground">
+              <p>No messages yet. Start the conversation!</p>
+            </div>
+          ) : (
+            <>
+              {messages.map((message, index) => {
+                const showTime = index === 0 || 
+                  new Date(message.created_at).getTime() - new Date(messages[index - 1]?.created_at || 0).getTime() > 300000; // 5 minutes
+                
+                return (
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    currentUserId={user?.id || ''}
+                    isLandlord={isLandlord}
+                    showTime={showTime}
+                  />
+                );
+              })}
+              <div ref={messagesEndRef} />
+            </>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Show scroll to bottom button when not at bottom */}
+      {!isScrolledToBottom && messages.length > 0 && (
+        <div className="absolute bottom-20 right-4 z-10">
+          <button
+            onClick={() => scrollToBottom(true)}
+            className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:bg-primary/90 transition-all"
+          >
+            ↓
+          </button>
+        </div>
+      )}
+
+      {/* Message Input */}
+      <div className="p-4 bg-background/95 backdrop-blur border-t">
+        <MessageComposer
+          onSend={handleSendMessage}
+          placeholder="Type a message..."
+          value={newMessage}
+          onChange={setNewMessage}
+          onFocus={handleComposerFocus}
+          autoFocus={false}
+        />
+      </div>
+    </div>
+  );
+}

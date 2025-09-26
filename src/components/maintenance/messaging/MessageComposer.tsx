@@ -1,59 +1,157 @@
-import { useState, ChangeEvent } from 'react';
+import { useState, ChangeEvent, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import { Send, Paperclip, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface MessageComposerProps {
   maxLength?: number;
-  onSend: (body: string, files: File[]) => void;
+  onSend: (body: string, files?: File[]) => void;
   disabled?: boolean;
+  placeholder?: string;
+  value?: string;
+  onChange?: (value: string) => void;
+  onFocus?: () => void;
+  autoFocus?: boolean;
 }
 
-export function MessageComposer({ maxLength = 5000, onSend, disabled }: MessageComposerProps) {
-  const [body, setBody] = useState('');
+export function MessageComposer({ 
+  maxLength = 5000, 
+  onSend, 
+  disabled,
+  placeholder = "Type a message...",
+  value: controlledValue,
+  onChange: controlledOnChange,
+  onFocus,
+  autoFocus = false
+}: MessageComposerProps) {
+  const [internalValue, setInternalValue] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+  const [isFocused, setIsFocused] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const value = controlledValue !== undefined ? controlledValue : internalValue;
+  const setValue = controlledOnChange || setInternalValue;
+
+  useEffect(() => {
+    if (autoFocus && textareaRef.current) {
+      textareaRef.current.focus();
+    }
+  }, [autoFocus]);
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
-    setFiles(selected.slice(0, 5));
+    setFiles(prev => [...prev, ...selected].slice(0, 5));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleSend = () => {
-    if (!body.trim()) return;
-    onSend(body, files);
-    setBody('');
+    if (!value.trim() && files.length === 0) return;
+    onSend(value.trim(), files);
+    setValue('');
     setFiles([]);
+    textareaRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey && !disabled) {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
     <div className="space-y-2">
-      <Textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder="Write a reply..."
-        maxLength={maxLength}
-        rows={3}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            handleSend();
-          }
-        }}
-      />
-      <div className="flex items-center justify-between">
-        <div className="text-xs text-muted-foreground">
-          {body.length}/{maxLength}
+      {/* File Attachments */}
+      {files.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {files.map((file, index) => (
+            <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
+              <Paperclip className="h-4 w-4" />
+              <span className="truncate max-w-[120px]">{file.name}</span>
+              <button
+                onClick={() => removeFile(index)}
+                className="text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
         </div>
-        <Input
+      )}
+
+      {/* Message Input */}
+      <div className={cn(
+        "flex items-end gap-2 p-2 bg-background rounded-2xl border transition-all duration-200",
+        isFocused ? "border-primary/50 shadow-sm" : "border-border",
+        disabled && "opacity-60"
+      )}>
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-muted/50"
+          disabled={disabled}
+        >
+          <Paperclip className="h-5 w-5" />
+        </button>
+
+        <Textarea
+          ref={textareaRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder={placeholder}
+          maxLength={maxLength}
+          rows={1}
+          className={cn(
+            "flex-1 min-h-[44px] max-h-[120px] resize-none border-0 bg-transparent",
+            "focus-visible:ring-0 focus-visible:ring-offset-0 px-0 py-2",
+            "placeholder:text-muted-foreground/60"
+          )}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            setIsFocused(true);
+            onFocus?.();
+          }}
+          onBlur={() => setIsFocused(false)}
+          disabled={disabled}
+        />
+
+        <Button
+          onClick={handleSend}
+          disabled={disabled || (!value.trim() && files.length === 0)}
+          size="sm"
+          className={cn(
+            "rounded-full h-10 w-10 p-0 transition-all duration-200",
+            (value.trim() || files.length > 0) 
+              ? "bg-ios-blue hover:bg-ios-blue-dark scale-100" 
+              : "bg-muted text-muted-foreground hover:bg-muted scale-95"
+          )}
+        >
+          <Send className="h-4 w-4" />
+        </Button>
+
+        <input
+          ref={fileInputRef}
           type="file"
           multiple
           onChange={handleFileChange}
           accept="image/png,image/jpeg,image/jpg,image/webp,application/pdf"
+          className="hidden"
         />
-        <Button onClick={handleSend} disabled={disabled || body.length === 0}>
-          Send
-        </Button>
       </div>
+
+      {/* Character Count */}
+      {value.length > maxLength * 0.8 && (
+        <div className="text-xs text-muted-foreground text-right">
+          {value.length}/{maxLength}
+        </div>
+      )}
     </div>
   );
 }
