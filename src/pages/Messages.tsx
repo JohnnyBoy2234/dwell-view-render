@@ -525,9 +525,21 @@ export default function Messages() {
                           </Button>
                         </div>
                       ) : null}
-                      {isLandlord && viewingProposals[0].status === 'proposed' ? (
-                        <span className="text-xs text-muted-foreground flex-shrink-0">Waiting for tenant</span>
-                      ) : null}
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        {isLandlord && viewingProposals[0].status === 'proposed' && (
+                          <span className="text-xs text-muted-foreground">Waiting for tenant</span>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => {
+                            const ev = new CustomEvent('scroll-to-proposal', { detail: { id: viewingProposals[0].id } });
+                            window.dispatchEvent(ev);
+                          }}
+                        >
+                          View in chat
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 ) : (

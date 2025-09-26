@@ -6,6 +6,7 @@ import { useMessageCache } from '@/hooks/useMessageCache';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 
 interface Message {
   id: string;
@@ -32,6 +33,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [proposalsById, setProposalsById] = useState<Record<string, any>>({});
 
   const {
     getMessages,
@@ -68,6 +70,53 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
       setTimeout(() => scrollToBottom(), 50);
     }
   }, [messages.length]);
+
+  // Load viewing proposals referenced by messages
+  useEffect(() => {
+    const missingIds = Array.from(
+      new Set(
+        messages
+          .filter(m => m.viewing_proposal_id)
+          .map(m => m.viewing_proposal_id as string)
+      )
+    ).filter(id => !proposalsById[id]);
+
+    if (missingIds.length === 0) return;
+
+    const load = async () => {
+      const { data, error } = await supabase
+        .from('viewing_proposals')
+        .select(`*, properties ( title, location )`)
+        .in('id', missingIds as any);
+      if (!error && data) {
+        setProposalsById(prev => {
+          const next = { ...prev };
+          data.forEach(p => { next[p.id] = p; });
+          return next;
+        });
+      }
+    };
+    load();
+  }, [messages, proposalsById]);
+
+  // Support external scroll-to events from header sticky bar
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const ce = e as CustomEvent<{ id: string }>;
+      const anchor = document.getElementById(`proposal-${ce.detail.id}`);
+      if (anchor && scrollAreaRef.current) {
+        anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Offset for fixed header
+        setTimeout(() => {
+          try {
+            (scrollAreaRef.current as any).scrollTop = (scrollAreaRef.current as any).scrollTop - 80;
+          } catch {}
+        }, 200);
+      }
+    };
+    window.addEventListener('scroll-to-proposal', handler as EventListener);
+    return () => window.removeEventListener('scroll-to-proposal', handler as EventListener);
+  }, []);
 
   // Handle scroll position tracking
   const handleScroll = (event: any) => {
@@ -221,10 +270,32 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
                 const showTime = index === 0 || 
                   new Date(message.created_at).getTime() - new Date(messages[index - 1]?.created_at || 0).getTime() > 300000; // 5 minutes
                 
+                // Render viewing proposal as inline card
+                if (message.message_type === 'viewing_proposal' && message.viewing_proposal_id) {
+                  const proposal = proposalsById[message.viewing_proposal_id];
+                  return (
+                    <div key={message.id} id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto">
+                      {proposal ? (
+                        <ViewingProposalCard
+                          proposal={proposal}
+                          onUpdate={() => {
+                            // Reload proposal for fresh status
+                            setProposalsById(prev => ({ ...prev, [proposal.id]: undefined }));
+                          }}
+                        />
+                      ) : (
+                        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
+                          Loading viewing details...
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
                 return (
                   <MessageBubble
                     key={message.id}
-                    message={message}
+                    message={message as any}
                     currentUserId={user?.id || ''}
                     isLandlord={isLandlord}
                     showTime={showTime}
