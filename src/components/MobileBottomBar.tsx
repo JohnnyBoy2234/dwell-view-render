@@ -81,7 +81,7 @@ export function MobileBottomBar() {
                 variant="destructive" 
                 className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
               >
-                {item.badgeCount > 9 ? '9+' : item.badgeCount}
+                {item.badgeCount}
               </Badge>
             )}
         </div>
