@@ -1,0 +1,39 @@
+import { Check, CheckCheck, Clock } from 'lucide-react';
+import type { MessageStatusType } from '@/hooks/useMessageStatus';
+
+interface MessageStatusIconProps {
+  statusType: MessageStatusType;
+  ariaLabel: string;
+}
+
+/**
+ * Component to render message status icons with proper accessibility
+ */
+export function MessageStatusIcon({ statusType, ariaLabel }: MessageStatusIconProps) {
+  if (statusType === 'none') {
+    return null;
+  }
+
+  const getIcon = () => {
+    switch (statusType) {
+      case 'sending':
+        return <Clock className="h-3 w-3 opacity-60" />;
+      case 'read':
+        return <CheckCheck className="h-3 w-3 opacity-60 text-ios-blue" />;
+      case 'delivered':
+        return <Check className="h-3 w-3 opacity-60" />;
+      default:
+        return null;
+    }
+  };
+
+  const icon = getIcon();
+  
+  if (!icon) return null;
+
+  return (
+    <span aria-label={ariaLabel}>
+      {icon}
+    </span>
+  );
+}
