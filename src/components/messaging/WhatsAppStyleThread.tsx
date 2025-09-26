@@ -136,6 +136,20 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
     setTimeout(() => scrollToBottom(true), 50);
 
     try {
+      let attachmentUrl: string | null = null;
+
+      // Upload attachments if any (single file for now; can be extended to multi)
+      if (files && files.length > 0) {
+        const file = files[0];
+        const ext = file.name.split('.').pop();
+        const path = `messages/${conversationId}/${user.id}/${Date.now()}.${ext}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('chat-attachments')
+          .upload(path, file, { upsert: false });
+        if (uploadError) throw uploadError;
+        attachmentUrl = uploadData?.path || null;
+      }
+
       // Send to server
       const { data, error } = await supabase
         .from('messages')
@@ -143,7 +157,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent }: WhatsAppS
           conversation_id: conversationId,
           sender_id: user.id,
           content: content.trim(),
-          message_type: 'text'
+          message_type: attachmentUrl ? 'attachment' : 'text',
+          attachment_url: attachmentUrl
         })
         .select()
         .single();

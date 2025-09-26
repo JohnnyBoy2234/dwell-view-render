@@ -110,6 +110,25 @@ export default function Messages() {
     }
   }, [activeConversation, user, fetchViewingProposals]);
 
+  // Subscribe to viewing proposal changes for instant updates
+  useEffect(() => {
+    if (!activeConversation) return;
+    const channel = supabase
+      .channel(`viewing-proposals-${activeConversation}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'viewing_proposals', filter: `conversation_id=eq.${activeConversation}` },
+        () => {
+          fetchViewingProposals();
+          if (activeConversation) refetchMessages(activeConversation);
+        }
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeConversation, fetchViewingProposals, refetchMessages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -448,32 +467,95 @@ export default function Messages() {
                   </div>
                 </div>
               </div>
-              {/* Quick Viewing Bar - fixed below header */}
+              {/* Sticky Viewing Area - shows active proposal if present, else quick actions */}
               <div className="fixed top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b z-40">
-                <div className="px-4 py-2 flex items-center gap-2">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground truncate">
-                      {selectedConversation.properties?.title || 'Property'}
-                    </p>
+                {viewingProposals && viewingProposals.length > 0 ? (
+                  <div className="px-4 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-xs text-muted-foreground truncate">
+                          {selectedConversation.properties?.title || 'Property'}
+                        </p>
+                        <p className="text-sm font-medium truncate">
+                          Viewing {new Date(viewingProposals[0].start_at).toLocaleString('en-ZA', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' })} SAST
+                          {viewingProposals[0].status === 'confirmed' ? ' • Confirmed' : viewingProposals[0].status === 'proposed' ? ' • Awaiting confirmation' : ''}
+                        </p>
+                      </div>
+                      {(!isLandlord && viewingProposals[0].status === 'proposed') ? (
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={async () => {
+                              try {
+                                const { data: sessionResult } = await supabase.auth.getSession();
+                                const token = sessionResult.session?.access_token;
+                                await supabase.functions.invoke('confirm-viewing-proposal', {
+                                  body: { proposalId: viewingProposals[0].id },
+                                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                                });
+                                fetchViewingProposals();
+                                if (activeConversation) refetchMessages(activeConversation);
+                              } catch (e) {
+                                console.error('Confirm viewing failed', e);
+                              }
+                            }}
+                          >
+                            Confirm
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              try {
+                                const { data: sessionResult } = await supabase.auth.getSession();
+                                const token = sessionResult.session?.access_token;
+                                await supabase.functions.invoke('decline-viewing-proposal', {
+                                  body: { proposalId: viewingProposals[0].id },
+                                  headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                                });
+                                fetchViewingProposals();
+                                if (activeConversation) refetchMessages(activeConversation);
+                              } catch (e) {
+                                console.error('Decline viewing failed', e);
+                              }
+                            }}
+                          >
+                            Decline
+                          </Button>
+                        </div>
+                      ) : null}
+                      {isLandlord && viewingProposals[0].status === 'proposed' ? (
+                        <span className="text-xs text-muted-foreground flex-shrink-0">Waiting for tenant</span>
+                      ) : null}
+                    </div>
                   </div>
-                  {isLandlord ? (
-                    <Button
-                      size="sm"
-                      className="bg-primary hover:bg-primary/90"
-                      onClick={() => setShowViewingModal(true)}
-                    >
-                      Create viewing
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setShowBookingDialog(true)}
-                    >
-                      Book viewing
-                    </Button>
-                  )}
-                </div>
+                ) : (
+                  <div className="px-4 py-2 flex items-center gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-muted-foreground truncate">
+                        {selectedConversation.properties?.title || 'Property'}
+                      </p>
+                    </div>
+                    {isLandlord ? (
+                      <Button
+                        size="sm"
+                        className="bg-primary hover:bg-primary/90"
+                        onClick={() => setShowViewingModal(true)}
+                      >
+                        Create viewing
+                      </Button>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowBookingDialog(true)}
+                      >
+                        Book viewing
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
               
               {/* Messages - Mobile */}
