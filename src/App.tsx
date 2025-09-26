@@ -15,6 +15,7 @@ import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import About from "./pages/About";
+import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
@@ -91,6 +92,7 @@ const App = () => {
               <Route path="/" element={<><Navbar /><Index /></>} />
               <Route path="/properties" element={<><Navbar /><Properties /></>} />
               <Route path="/about" element={<><Navbar /><About /></>} />
+              <Route path="/contact" element={<><Navbar /><Contact /></>} />
               <Route path="/blog" element={<><Navbar /><Blog /></>} />
               <Route path="/safe-renting" element={<><Navbar /><SafeRenting /></>} />
 

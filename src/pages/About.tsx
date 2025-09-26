@@ -18,10 +18,9 @@ const About = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold text-foreground mb-4">About SwiftRent</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            We're revolutionizing the South African rental market by connecting landlords and tenants directly, 
-            eliminating unnecessary fees and creating genuine connections.
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">We're Transforming Renting in South Africa</h1>
+          <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
+            SwiftRent is more than a rental platform — it's a movement. We're revolutionizing the South African rental market by connecting landlords and tenants directly, eliminating unnecessary fees, and creating genuine, trustworthy connections.
           </p>
         </div>
 
@@ -31,13 +30,10 @@ const About = () => {
             <div>
               <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
               <p className="text-lg text-muted-foreground mb-6">
-                At SwiftRent, we believe finding the perfect rental home shouldn't be complicated or expensive. 
-                Our mission is to create a transparent, direct connection between property owners and renters 
-                across South Africa.
+                At SwiftRent, we believe finding the perfect rental home shouldn't be complicated, risky, or expensive. Our mission is simple: to make renting fair, transparent, and human again.
               </p>
               <p className="text-lg text-muted-foreground mb-6">
-                By eliminating the middleman, we're not just saving money – we're building trust, fostering 
-                genuine relationships, and making the rental process more human again.
+                By eliminating middlemen and outdated processes, we're not just helping landlords save money — we're building trust, fostering real relationships, and creating a rental ecosystem where both landlords and tenants thrive.
               </p>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -45,7 +41,7 @@ const About = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold">Built with Care</h3>
-                  <p className="text-muted-foreground">Every feature designed with user experience in mind</p>
+                  <p className="text-muted-foreground">Every feature designed to make renting effortless for modern South Africans</p>
                 </div>
               </div>
             </div>
@@ -70,7 +66,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Trust & Transparency</h3>
                 <p className="text-muted-foreground">
-                  We verify all properties and maintain open communication channels between all parties.
+                  Verified landlords, credit-checked tenants, and clear communication at every step.
                 </p>
               </CardContent>
             </Card>
@@ -82,7 +78,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Community First</h3>
                 <p className="text-muted-foreground">
-                  Building a supportive community where both landlords and tenants thrive together.
+                  Renting should uplift people. SwiftRent builds stronger communities where everyone benefits.
                 </p>
               </CardContent>
             </Card>
@@ -94,7 +90,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Innovation</h3>
                 <p className="text-muted-foreground">
-                  Continuously improving our platform with cutting-edge technology and user feedback.
+                  We're constantly improving, guided by user feedback and powered by cutting-edge technology.
                 </p>
               </CardContent>
             </Card>
@@ -103,7 +99,10 @@ const About = () => {
 
         {/* Stats */}
         <section className="mb-16 bg-gradient-to-r from-primary to-accent text-white rounded-lg p-12">
-          <h2 className="text-3xl font-bold text-center mb-12">Our Impact</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">Our Impact</h2>
+          <p className="text-center text-white/90 mb-12 text-lg">
+            Every listing is a step toward transforming how South Africans rent, one home at a time.
+          </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             {stats.map((stat, index) => (
               <div key={index}>
@@ -124,9 +123,7 @@ const About = () => {
                   <h2 className="text-3xl font-bold">Proudly South African</h2>
                 </div>
                 <p className="text-lg text-muted-foreground mb-6">
-                  As a South African company, we understand the unique challenges and opportunities 
-                  in our local rental market. From Cape Town to Johannesburg, Durban to Pretoria, 
-                  we're here to serve our community.
+                  We're not just another tech startup — we're rooted here. From Cape Town to Johannesburg, Durban to Pretoria, we know the unique challenges of the South African rental market, and we're committed to being part of the solution.
                 </p>
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-center">
@@ -154,11 +151,19 @@ const About = () => {
           </div>
         </section>
 
+        {/* Vision for the Future */}
+        <section className="mb-16 text-center">
+          <h2 className="text-3xl font-bold mb-6">A Vision for the Future</h2>
+          <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-8">
+            SwiftRent is not only about saving money today — it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
+          </p>
+        </section>
+
         {/* CTA */}
         <section className="text-center">
           <h2 className="text-3xl font-bold mb-4">Join the SwiftRent Community</h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Whether you're looking for a home or renting out your property, we're here to help.
+            Whether you're searching for your dream home or renting out your property, SwiftRent is here to make the process safe, simple, and rewarding.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">

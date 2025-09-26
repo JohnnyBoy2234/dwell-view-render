@@ -20,7 +20,8 @@ const Navbar = () => {
     { path: "/#how-it-works", label: "How It Works", icon: Search },
     { path: "/safe-renting", label: "Safe Renting", icon: Shield },
     { path: "/properties", label: "Find Rental", icon: Search },
-    { path: "/about", label: "Contact", icon: Send }
+    { path: "/about", label: "About", icon: Send },
+    { path: "/contact", label: "Contact", icon: Send }
   ];
 
   return (
