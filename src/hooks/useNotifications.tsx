@@ -148,8 +148,19 @@ export const useNotifications = (filters?: NotificationFilters) => {
 
     console.log('🔔 Marking all notifications as read for user:', user.id);
     try {
-      // Get unread notifications BEFORE updating local state
-      const unreadNotifications = notifications.filter(n => !n.is_read);
+      // First, get fresh data from database to ensure we have the latest unread notifications
+      const { data: freshNotifications, error: fetchError } = await supabase
+        .from('notifications')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_read', false);
+
+      if (fetchError) {
+        console.error('🔔 Error fetching unread notifications:', fetchError);
+        throw fetchError;
+      }
+
+      const unreadNotifications = freshNotifications || [];
       console.log('🔔 Found', unreadNotifications.length, 'unread notifications to update in database');
       
       // Update database first
