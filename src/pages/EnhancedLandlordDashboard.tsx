@@ -128,6 +128,10 @@ export default function EnhancedLandlordDashboard() {
   const [invoiceHistory, setInvoiceHistory] = useState<Invoice[]>([]);
   const [nextInvoiceNumber, setNextInvoiceNumber] = useState(1);
 
+  // Global application leads (across all properties) for quick invites
+  const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string }>>([]);
+  const [appInvitesMap, setAppInvitesMap] = useState<Record<string, any>>({}); // key: `${tenant_id}:${property_id}`
+
   useEffect(() => {
     // Visible in production console to verify current deployed build
     // eslint-disable-next-line no-console
@@ -156,6 +160,7 @@ export default function EnhancedLandlordDashboard() {
     fetchLandlordSettings();
     fetchAdditionalCosts();
     fetchInvoiceScheduleSettings();
+    fetchGlobalApplicationLeads();
   }, [authLoading, user, isLandlord, navigate, location.pathname]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
@@ -319,6 +324,76 @@ export default function EnhancedLandlordDashboard() {
       setMaintenanceRequests([]);
     } finally {
       setLoadingMaintenance(false);
+    }
+  };
+
+  // Aggregate conversations across all properties to suggest tenants to invite
+  const fetchGlobalApplicationLeads = async () => {
+    if (!user) return;
+    try {
+      const { data: convs } = await supabase
+        .from('conversations')
+        .select('id, tenant_id, property_id, landlord_id, last_message_at, properties ( title )')
+        .eq('landlord_id', user.id)
+        .order('last_message_at', { ascending: false })
+        .limit(50);
+
+      const tenantIds = Array.from(new Set((convs || []).map(c => c.tenant_id)));
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, display_name')
+        .in('user_id', tenantIds);
+      const profileMap = new Map<string, any>();
+      (profiles || []).forEach(p => profileMap.set(p.user_id, p.display_name));
+
+      const leads = (convs || []).map(c => ({
+        conversation_id: c.id,
+        tenant_id: c.tenant_id,
+        property_id: c.property_id,
+        title: c.properties?.title || 'Property',
+        tenant_name: profileMap.get(c.tenant_id) || 'Tenant'
+      }));
+      setAppLeads(leads);
+
+      const { data: invites } = await supabase
+        .from('application_invites')
+        .select('*')
+        .eq('landlord_id', user.id);
+      const map: Record<string, any> = {};
+      (invites || []).forEach(i => { map[`${i.tenant_id}:${i.property_id}`] = i; });
+      setAppInvitesMap(map);
+    } catch (e) {
+      console.warn('Failed to fetch global application leads', e);
+    }
+  };
+
+  const handleInviteFromLead = async (tenantId: string, propertyId: string, conversationId?: string) => {
+    if (!user) return;
+    try {
+      const token = crypto.randomUUID();
+      await supabase
+        .from('application_invites')
+        .insert({
+          token,
+          property_id: propertyId,
+          landlord_id: user.id,
+          tenant_id: tenantId,
+          conversation_id: conversationId,
+          status: 'invited'
+        });
+      const link = `${window.location.origin}/apply/invite/${token}`;
+      if (conversationId) {
+        await supabase.from('messages').insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: `You've been invited to apply for this property. Click here to start: ${link}`,
+          message_type: 'text'
+        });
+      }
+      await fetchGlobalApplicationLeads();
+      toast({ title: 'Invite sent', description: 'We notified the tenant with an application link.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Failed to send invite', description: e.message });
     }
   };
 
@@ -677,6 +752,41 @@ export default function EnhancedLandlordDashboard() {
           {applications.length} Total
         </Badge>
       </div>
+
+      {/* Leads from recent chats across all properties */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Leads</CardTitle>
+          <div className="text-sm text-muted-foreground">Tenants you’ve chatted with recently</div>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {appLeads.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No recent leads.</div>
+          ) : (
+            <div className="grid gap-3">
+              {appLeads.map((lead) => {
+                const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
+                return (
+                  <div key={lead.conversation_id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{lead.tenant_name}</div>
+                      <div className="text-xs text-muted-foreground truncate">{lead.title}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {invited ? (
+                        <Badge variant="secondary">Invited</Badge>
+                      ) : (
+                        <Button size="sm" onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}>Invite to Apply</Button>
+                      )}
+                      <Button variant="outline" size="sm" onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}>View Chat</Button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
       
       {applicationsLoading ? (
         <div className="space-y-4">
