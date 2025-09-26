@@ -59,6 +59,7 @@ import ExpenseSummaryPage from "@/pages/accounting/ExpenseSummaryPage";
 import TaxInvoicePage from "@/pages/accounting/TaxInvoicePage";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import SafeRenting from "./pages/SafeRenting";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,7 @@ const App = () => {
         <AuthProvider>
           <AuthBootstrap>
             <BrowserRouter>
+              <ErrorBoundary>
               <MobileNetworkStatus />
               <Routes>
               {/* Admin Routes - No Navbar */}
@@ -144,6 +146,7 @@ const App = () => {
               <Route path="*" element={<NotFound />} />
             </Routes>
             <MobileBottomBar />
+              </ErrorBoundary>
           </BrowserRouter>
         </AuthBootstrap>
       </AuthProvider>

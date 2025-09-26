@@ -16,6 +16,11 @@ interface RealtimeCallbacks {
 export function useRealtime(callbacks: RealtimeCallbacks = {}) {
   const { user, isLandlord } = useAuth();
   const isMountedRef = useRef(true);
+  // Keep latest callbacks stable to avoid re-subscribing every render
+  const callbacksRef = useRef<RealtimeCallbacks>(callbacks);
+  useEffect(() => {
+    callbacksRef.current = callbacks;
+  }, [callbacks]);
 
   const setupRealtimeSubscriptions = useCallback(() => {
     if (!user) return () => {};
@@ -23,7 +28,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     const channels: any[] = [];
 
     // Notifications real-time subscription
-    if (callbacks.onNotificationChange) {
+    if (callbacksRef.current.onNotificationChange) {
       const notificationChannel = supabase
         .channel('notifications-realtime')
         .on(
@@ -38,7 +43,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('🔔 Notification change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onNotificationChange?.();
+              callbacksRef.current.onNotificationChange?.();
             } catch (error) {
               console.error('Error in notification callback:', error);
             }
@@ -49,7 +54,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Messages real-time subscription
-    if (callbacks.onMessageChange) {
+    if (callbacksRef.current.onMessageChange) {
       const messageChannel = supabase
         .channel('messages-realtime')
         .on(
@@ -63,7 +68,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('💬 Message change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onMessageChange?.();
+              callbacksRef.current.onMessageChange?.();
             } catch (error) {
               console.error('Error in message callback:', error);
             }
@@ -74,7 +79,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Viewing proposals real-time subscription
-    if (callbacks.onViewingProposalChange) {
+    if (callbacksRef.current.onViewingProposalChange) {
       const viewingChannel = supabase
         .channel('viewing-proposals-realtime')
         .on(
@@ -88,7 +93,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('📅 Viewing proposal change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onViewingProposalChange?.();
+              callbacksRef.current.onViewingProposalChange?.();
             } catch (error) {
               console.error('Error in viewing proposal callback:', error);
             }
@@ -99,7 +104,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Applications real-time subscription
-    if (callbacks.onApplicationChange) {
+    if (callbacksRef.current.onApplicationChange) {
       const applicationChannel = supabase
         .channel('applications-realtime')
         .on(
@@ -113,7 +118,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('📋 Application change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onApplicationChange?.();
+              callbacksRef.current.onApplicationChange?.();
             } catch (error) {
               console.error('Error in application callback:', error);
             }
@@ -124,7 +129,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Maintenance requests real-time subscription
-    if (callbacks.onMaintenanceChange) {
+    if (callbacksRef.current.onMaintenanceChange) {
       const maintenanceChannel = supabase
         .channel('maintenance-realtime')
         .on(
@@ -138,7 +143,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('🔧 Maintenance change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onMaintenanceChange?.();
+              callbacksRef.current.onMaintenanceChange?.();
             } catch (error) {
               console.error('Error in maintenance callback:', error);
             }
@@ -149,7 +154,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Leases real-time subscription
-    if (callbacks.onLeaseChange) {
+    if (callbacksRef.current.onLeaseChange) {
       const leaseChannel = supabase
         .channel('leases-realtime')
         .on(
@@ -164,7 +169,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('📄 Lease change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onLeaseChange?.();
+              callbacksRef.current.onLeaseChange?.();
             } catch (error) {
               console.error('Error in lease callback:', error);
             }
@@ -175,7 +180,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Properties real-time subscription
-    if (callbacks.onPropertyChange) {
+    if (callbacksRef.current.onPropertyChange) {
       const propertyChannel = supabase
         .channel('properties-realtime')
         .on(
@@ -189,7 +194,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('🏠 Property change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onPropertyChange?.();
+              callbacksRef.current.onPropertyChange?.();
             } catch (error) {
               console.error('Error in property callback:', error);
             }
@@ -200,7 +205,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     }
 
     // Tenancies real-time subscription
-    if (callbacks.onTenancyChange) {
+    if (callbacksRef.current.onTenancyChange) {
       const tenancyChannel = supabase
         .channel('tenancies-realtime')
         .on(
@@ -215,7 +220,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
             console.log('🏘️ Tenancy change received:', payload);
             if (!isMountedRef.current) return;
             try {
-              callbacks.onTenancyChange?.();
+              callbacksRef.current.onTenancyChange?.();
             } catch (error) {
               console.error('Error in tenancy callback:', error);
             }
@@ -232,7 +237,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
         supabase.removeChannel(channel);
       });
     };
-  }, [user, callbacks]);
+  }, [user]);
 
   useEffect(() => {
     isMountedRef.current = true;
