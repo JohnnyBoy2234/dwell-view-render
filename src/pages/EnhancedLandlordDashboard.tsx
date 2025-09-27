@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -2158,7 +2158,8 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">Track</p>
               </button>
 
-              <button
+              {/* SwiftBooks */}
+              <button 
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2200,6 +2201,18 @@ export default function EnhancedLandlordDashboard() {
                 </div>
                 <p className="text-xs font-medium text-ios-gray-dark">Calendar</p>
                 <p className="text-xs text-ios-gray">Schedule</p>
+              </button>
+
+              {/* Support */}
+              <button
+                onClick={() => navigate('/support')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Home className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Support</p>
+                <p className="text-xs text-ios-gray">Help & Resources</p>
               </button>
             </div>
           </div>

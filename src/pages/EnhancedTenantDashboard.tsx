@@ -189,9 +189,9 @@ export default function EnhancedTenantDashboard() {
       {
         title: 'Support',
         icon: Home,
-        color: 'hsl(var(--ios-gray))',
-        bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100/50',
-        iconBg: 'bg-gray-700',
+        color: 'hsl(var(--ios-blue))',
+        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/60',
+        iconBg: 'bg-ocean-blue',
         subtitle: 'SwiftRent support',
         path: '/support'
       },
