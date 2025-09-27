@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
+import { cn } from '@/lib/utils';
+import { Clock, Check, CheckCheck } from 'lucide-react';
 
 interface Message {
   id: string;
