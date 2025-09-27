@@ -78,7 +78,7 @@ export function MessagesTab() {
         <div className="relative rounded-3xl border border-white/60 bg-white/80 backdrop-blur-md shadow-soft">
           <div className="p-4 space-y-3">
             {conversations.length === 0 ? (
-              <MessagesEmptyState />
+              <MessagesEmptyState isLandlord={isLandlord} />
             ) : (
               <>
                 {conversations

@@ -23,6 +23,7 @@ interface Message {
   optimistic?: boolean;
   message_type?: string | null;
   attachment_url?: string | null;
+  viewing_proposal_id?: string | null;
 }
 
 interface WhatsAppStyleThreadProps {
@@ -381,9 +382,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         {message.message_type === 'viewing_proposal' && message.viewing_proposal_id ? (
           <div id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming">
             <ViewingProposalCard
-              message={message}
               proposal={proposalsById[message.viewing_proposal_id]}
-              onCreateViewing={onCreateViewing}
+              onUpdate={onCreateViewing}
             />
           </div>
         ) : (

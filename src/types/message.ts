@@ -15,6 +15,9 @@ export interface Message {
   read_by_tenant?: boolean;
   optimistic?: boolean;
   profiles?: MessageProfile | null;
+  message_type?: string | null;
+  attachment_url?: string | null;
+  viewing_proposal_id?: string | null;
 }
 
 export interface MessageBubbleProps {
