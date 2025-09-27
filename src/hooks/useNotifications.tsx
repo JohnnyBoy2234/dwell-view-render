@@ -45,7 +45,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       );
       
       const unreadCount = validNotifications.filter(n => !n.is_read).length;
-      console.log('🔔 Notifications fetched:', {
+      {
         total: validNotifications.length,
         unread: unreadCount,
         notifications: validNotifications.map(n => ({ id: n.id, is_read: n.is_read, message: n.message }))
