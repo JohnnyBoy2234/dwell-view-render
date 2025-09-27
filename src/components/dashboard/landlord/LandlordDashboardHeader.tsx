@@ -56,13 +56,13 @@ export function LandlordDashboardHeader() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                <DropdownMenuItem onClick={() => navigate('/enhancedlandlorddashboard')}>
                   Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/messages')}>
+                <DropdownMenuItem onClick={() => navigate('/enhancedlandlorddashboard/messages')}>
                   Messages
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/dashboard/add-property')}>
+                <DropdownMenuItem onClick={() => navigate('/enhancedlandlorddashboard/add-property')}>
                   Add Property
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={signOut} className="text-destructive">

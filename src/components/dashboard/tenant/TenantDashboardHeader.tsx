@@ -63,7 +63,7 @@ export function TenantDashboardHeader() {
                 <DropdownMenuItem onClick={() => navigate('/enhancedtenantdashboard')}>
                   Dashboard
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/messages')}>
+                <DropdownMenuItem onClick={() => navigate('/tenant-dashboard/messages')}>
                   Messages
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/properties')}>

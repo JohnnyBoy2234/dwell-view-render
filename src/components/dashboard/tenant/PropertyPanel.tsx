@@ -127,7 +127,7 @@ export function PropertyPanel({ tenantProperty, onMakePayment }: PropertyPanelPr
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => navigate('/messages')}
+              onClick={() => navigate('/tenant-dashboard/messages')}
               className="border-success-green text-success-green hover:bg-success-green/10"
             >
               Contact Landlord

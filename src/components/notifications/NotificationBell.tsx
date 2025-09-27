@@ -8,6 +8,7 @@ import { useNotifications } from '@/hooks/useNotifications';
 import { Notification } from '@/types/notification';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 interface NotificationBellProps {
   className?: string;
@@ -17,6 +18,7 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { isLandlord } = useAuth();
   const { notifications, unreadCount, markAsRead, markAsUnread, markAllAsRead, deleteNotification } = useNotifications();
 
   // Debug isOpen state changes
@@ -78,10 +80,11 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
           }
       }
     }
-    if (targetUrl) {
-      navigate(targetUrl);
-      setIsOpen(false);
+    if (!targetUrl) {
+      targetUrl = isLandlord ? '/enhancedlandlorddashboard/messages' : '/tenant-dashboard/messages';
     }
+    navigate(targetUrl);
+    setIsOpen(false);
   };
 
   const handleMarkAsRead = async (e: React.MouseEvent, notificationId: string) => {

@@ -102,12 +102,8 @@ export default function Auth() {
         return;
       }
       
-      // Default redirect based on role
-      if (user.role === 'landlord') {
-        navigate('/enhancedlandlorddashboard');
-      } else {
-        navigate('/enhancedtenantdashboard');
-      }
+      // Default redirect to home page
+      navigate('/');
     }
   }, [user, loading, navigate]);
 
