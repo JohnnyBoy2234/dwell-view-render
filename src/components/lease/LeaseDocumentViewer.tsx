@@ -8,6 +8,7 @@ import { useLeaseContracts } from '@/hooks/useLeaseContracts';
 import { useESignature } from '@/hooks/useESignature';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { downloadFileFromUrl } from '@/lib/download';
 import type { LeaseContract } from '@/types/lease';
 
 interface LeaseDocumentViewerProps {
@@ -42,9 +43,9 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     if (contract.pdf_url) {
-      window.open(contract.pdf_url, '_blank');
+      await downloadFileFromUrl(contract.pdf_url, `lease-${contract.id}.pdf`);
     } else {
       handleGeneratePDF();
     }

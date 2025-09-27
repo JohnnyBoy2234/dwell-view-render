@@ -7,6 +7,7 @@ import { ArrowLeft, FileText, Home, MapPin, Calendar, Download } from 'lucide-re
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { downloadFileFromUrl } from '@/lib/download';
 
 interface ApplicationDetail {
   id: string;
@@ -278,14 +279,8 @@ export default function ApplicationDetail() {
         fileUrl = data.signedUrl;
       }
       
-      // Create a temporary anchor element to trigger download
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = document.name;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Use the shared download utility
+      await downloadFileFromUrl(fileUrl, document.name);
       
       toast({
         title: "Download started",
