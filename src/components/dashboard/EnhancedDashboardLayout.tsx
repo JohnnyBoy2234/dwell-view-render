@@ -6,6 +6,7 @@ import { LogOut, Menu, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Component, ReactNode } from 'react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { BUILD_TAG } from '@/version';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
