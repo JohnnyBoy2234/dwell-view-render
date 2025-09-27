@@ -18,14 +18,11 @@ export const useNotifications = (filters?: NotificationFilters) => {
     if (!user) return;
 
     try {
-      console.log('🔔 Fetching notifications for user:', user.id);
       const { data, error } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
-        
-      console.log('🔔 Raw notification data:', { data, error });
 
       if (error) {
         // If table doesn't exist, just return empty data instead of crashing
