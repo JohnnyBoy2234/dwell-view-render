@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -185,8 +185,8 @@ export default function TenantMaintenance() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-8">
+      {/* Header with prominent action button */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Maintenance Requests</h1>
@@ -195,155 +195,154 @@ export default function TenantMaintenance() {
           </p>
         </div>
         
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="bg-ocean-blue hover:bg-ocean-blue-dark">
-              <Plus className="h-4 w-4 mr-2" />
-              New Request
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Submit Maintenance Request</DialogTitle>
-              <DialogDescription>
-                Describe the issue you're experiencing and we'll get it resolved as soon as possible.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Issue Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Leaky faucet in kitchen"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Please provide detailed information about the issue..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={4}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="priority">Priority</Label>
-                <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select priority" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="urgent">Urgent</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
-                <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="plumbing">Plumbing</SelectItem>
-                    <SelectItem value="electrical">Electrical</SelectItem>
-                    <SelectItem value="appliance">Appliance</SelectItem>
-                    <SelectItem value="pest_control">Pest Control</SelectItem>
-                    <SelectItem value="general">General</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="photos">Photos (Optional)</Label>
-                <Input
-                  id="photos"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  capture="environment"
-                  onChange={(e) => setPhotos(e.target.files)}
-                />
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Camera className="h-4 w-4" />
-                  <span>Upload photos to help us understand the issue better</span>
-                </div>
-              </div>
-
-              <Button 
-                type="submit" 
-                className="w-full bg-ocean-blue hover:bg-ocean-blue-dark"
-                disabled={createMaintenance.isPending}
-              >
-                {createMaintenance.isPending ? 'Submitting...' : 'Submit Request'}
-              </Button>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <Button 
+          onClick={() => setIsCreateDialogOpen(true)}
+          size="lg"
+          className="bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-lg hover:shadow-xl transition-all duration-200"
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          New Request
+        </Button>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Clock className="h-5 w-5 text-earth-warm" />
-              <div>
-                <p className="text-sm text-muted-foreground">Submitted</p>
-                <p className="text-xl font-bold">
-                  {maintenanceRequests?.filter(r => r.status === 'submitted').length || 0}
-                </p>
+      {/* Create Request Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Submit Maintenance Request</DialogTitle>
+            <DialogDescription>
+              Describe the issue you're experiencing and we'll get it resolved as soon as possible.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Issue Title *</Label>
+              <Input
+                id="title"
+                placeholder="e.g., Leaky faucet in kitchen"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description *</Label>
+              <Textarea
+                id="description"
+                placeholder="Please provide detailed information about the issue..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={4}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="priority">Priority</Label>
+              <Select value={priority} onValueChange={(value: Priority) => setPriority(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="urgent">Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={category} onValueChange={(value: Category) => setCategory(value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="plumbing">Plumbing</SelectItem>
+                  <SelectItem value="electrical">Electrical</SelectItem>
+                  <SelectItem value="appliance">Appliance</SelectItem>
+                  <SelectItem value="pest_control">Pest Control</SelectItem>
+                  <SelectItem value="general">General</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="photos">Photos (Optional)</Label>
+              <Input
+                id="photos"
+                type="file"
+                multiple
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => setPhotos(e.target.files)}
+              />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Camera className="h-4 w-4" />
+                <span>Upload photos to help us understand the issue better</span>
               </div>
+            </div>
+
+            <Button 
+              type="submit" 
+              className="w-full bg-ocean-blue hover:bg-ocean-blue-dark"
+              disabled={createMaintenance.isPending}
+            >
+              {createMaintenance.isPending ? 'Submitting...' : 'Submit Request'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Color-coded Quick Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/60">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center text-center">
+              <Clock className="h-8 w-8 text-orange-600 mb-2" />
+              <div className="text-3xl font-bold text-orange-700 mb-1">
+                {maintenanceRequests?.filter(r => r.status === 'submitted').length || 0}
+              </div>
+              <p className="text-sm font-medium text-orange-600">Submitted</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/60">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Wrench className="h-5 w-5 text-ocean-blue" />
-              <div>
-                <p className="text-sm text-muted-foreground">In Progress</p>
-                <p className="text-xl font-bold">
-                  {maintenanceRequests?.filter(r => r.status === 'in_progress').length || 0}
-                </p>
+            <div className="flex flex-col items-center text-center">
+              <Wrench className="h-8 w-8 text-blue-600 mb-2" />
+              <div className="text-3xl font-bold text-blue-700 mb-1">
+                {maintenanceRequests?.filter(r => r.status === 'in_progress').length || 0}
               </div>
+              <p className="text-sm font-medium text-blue-600">In Progress</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100/60">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-success-green" />
-              <div>
-                <p className="text-sm text-muted-foreground">Completed</p>
-                <p className="text-xl font-bold">
-                  {maintenanceRequests?.filter(r => r.status === 'completed').length || 0}
-                </p>
+            <div className="flex flex-col items-center text-center">
+              <CheckCircle className="h-8 w-8 text-green-600 mb-2" />
+              <div className="text-3xl font-bold text-green-700 mb-1">
+                {maintenanceRequests?.filter(r => r.status === 'completed').length || 0}
               </div>
+              <p className="text-sm font-medium text-green-600">Completed</p>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-red-100/60">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-destructive" />
-              <div>
-                <p className="text-sm text-muted-foreground">High Priority</p>
-                <p className="text-xl font-bold">
-                  {maintenanceRequests?.filter(r => r.priority === 'high' || r.priority === 'urgent').length || 0}
-                </p>
+            <div className="flex flex-col items-center text-center">
+              <AlertTriangle className="h-8 w-8 text-red-600 mb-2" />
+              <div className="text-3xl font-bold text-red-700 mb-1">
+                {maintenanceRequests?.filter(r => r.priority === 'high' || r.priority === 'urgent').length || 0}
               </div>
+              <p className="text-sm font-medium text-red-600">High Priority</p>
             </div>
           </CardContent>
         </Card>
@@ -358,8 +357,8 @@ export default function TenantMaintenance() {
       )}
 
       {/* Maintenance Requests List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Your Requests</h2>
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold text-foreground">Your Requests</h2>
         {isLoading ? (
           <Card>
             <CardContent className="p-8 text-center">
@@ -367,39 +366,51 @@ export default function TenantMaintenance() {
             </CardContent>
           </Card>
         ) : !maintenanceRequests || maintenanceRequests.length === 0 ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No maintenance requests yet</h3>
-              <p className="text-muted-foreground mb-4">
-                When you submit maintenance requests, they'll appear here.
+          <Card className="border-dashed border-2 border-muted">
+            <CardContent className="p-12 text-center">
+              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                <Wrench className="h-10 w-10 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3 text-foreground">No maintenance requests yet!</h3>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                When you need something fixed or maintained, create your first request and we'll take care of it quickly.
               </p>
               <Button 
                 onClick={() => setIsCreateDialogOpen(true)}
-                className="bg-ocean-blue hover:bg-ocean-blue-dark"
+                size="lg"
+                className="bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-lg"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Submit Your First Request
+                <Plus className="h-5 w-5 mr-2" />
+                Start Your First Request
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {maintenanceRequests.map((request) => (
-              <Card key={request.id} className="hover:shadow-medium transition-all duration-200 cursor-pointer" onClick={()=>navigate(`/maintenance/${request.id}`)}>
-                <CardHeader>
+              <Card key={request.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-ocean-blue" onClick={()=>navigate(`/maintenance/${request.id}`)}>
+                <CardHeader className="pb-3">
                   <div className="flex items-start justify-between">
-                    <div>
-                      <CardTitle className="text-lg">{request.title}</CardTitle>
-                      <CardDescription>
-                        Submitted on {new Date(request.created_at).toLocaleDateString()}
+                    <div className="flex-1">
+                      <CardTitle className="text-xl mb-2">{request.title}</CardTitle>
+                      <CardDescription className="text-base">
+                        Submitted on {new Date(request.created_at).toLocaleDateString('en-US', { 
+                          weekday: 'long', 
+                          year: 'numeric', 
+                          month: 'long', 
+                          day: 'numeric' 
+                        })}
                       </CardDescription>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={priorityColors[request.priority]}>
+                    <div className="flex items-center gap-3">
+                      <Badge 
+                        className={`${priorityColors[request.priority]} font-semibold px-3 py-1`}
+                      >
                         {request.priority.toUpperCase()}
                       </Badge>
-                      <Badge className={statusColors[request.status]}>
+                      <Badge 
+                        className={`${statusColors[request.status]} font-semibold px-3 py-1`}
+                      >
                         {request.status.replace('_', ' ').toUpperCase()}
                       </Badge>
                     </div>
@@ -407,14 +418,14 @@ export default function TenantMaintenance() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">{request.description}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{request.description}</p>
                     
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between pt-2 border-t border-muted">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Wrench className="h-4 w-4" />
                         <span>Request #{request.id.slice(0, 8)}</span>
                       </div>
-                      <span className="text-sm text-muted-foreground capitalize">
+                      <span className="text-sm font-medium text-foreground capitalize bg-muted px-2 py-1 rounded">
                         {request.category}
                       </span>
                     </div>
