@@ -149,7 +149,7 @@ export function ContractReview({ data, contract, onGeneratePDF }: ContractReview
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <RandMoneyBagIcon className="h-5 w-5" />
+            <RandMoneyBagIcon className="h-7 w-7" />
             <span>Financial Summary</span>
           </CardTitle>
         </CardHeader>

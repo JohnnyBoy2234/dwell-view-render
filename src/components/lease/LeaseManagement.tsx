@@ -212,7 +212,7 @@ export function LeaseManagement() {
                       </div>
                       
                       <div className="flex items-center space-x-2">
-                        <RandMoneyBagIcon className="h-4 w-4 text-muted-foreground" />
+                        <RandMoneyBagIcon className="h-6 w-6 text-muted-foreground" />
                         <span>
                           {formatCurrency(
                             contract.contract_data?.rentAmount, 

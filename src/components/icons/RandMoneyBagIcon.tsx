@@ -2,7 +2,7 @@ import * as React from "react";
 import { LucideProps } from "lucide-react";
 
 export const RandMoneyBagIcon = React.forwardRef<SVGSVGElement, LucideProps>(
-  ({ className, size = 24, strokeWidth = 2, ...props }, ref) => (
+  ({ className, size = 28, strokeWidth = 2, ...props }, ref) => (
     <svg
       ref={ref}
       width={size}

@@ -366,7 +366,7 @@ export default function MaintenanceTicketDetails() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <RandMoneyBagIcon className="h-5 w-5" />
+                  <RandMoneyBagIcon className="h-7 w-7" />
                   Cost Information
                 </CardTitle>
               </CardHeader>

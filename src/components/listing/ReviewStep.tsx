@@ -140,7 +140,7 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <RandMoneyBagIcon className="h-5 w-5" />
+              <RandMoneyBagIcon className="h-7 w-7" />
               Pricing & Availability
             </CardTitle>
           </CardHeader>

@@ -192,7 +192,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   const getStepIcon = (step: ContractBuilderStep, index: number) => {
     if (index === 0) return <FileText className="h-5 w-5" />;
     if (index === 1) return <Users className="h-5 w-5" />;
-    if (index === 2) return <RandMoneyBagIcon className="h-5 w-5" />;
+    if (index === 2) return <RandMoneyBagIcon className="h-7 w-7" />;
     if (index === 3) return <Settings className="h-5 w-5" />;
     return <Shield className="h-5 w-5" />;
   };

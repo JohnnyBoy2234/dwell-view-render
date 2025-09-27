@@ -107,7 +107,7 @@ export default function TenantPayments() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <RandMoneyBagIcon className="h-5 w-5 text-ocean-blue" />
+                  <RandMoneyBagIcon className="h-7 w-7 text-ocean-blue" />
                   Rent Due
                 </CardTitle>
                 <CardDescription>
@@ -152,7 +152,7 @@ export default function TenantPayments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <RandMoneyBagIcon className="h-5 w-5 text-success-green" />
+              <RandMoneyBagIcon className="h-7 w-7 text-success-green" />
               <div>
                 <p className="text-sm text-muted-foreground">Total Paid (2024)</p>
                 <p className="text-xl font-bold">R{(15000).toLocaleString()}</p>
