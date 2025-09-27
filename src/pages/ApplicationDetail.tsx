@@ -258,20 +258,33 @@ export default function ApplicationDetail() {
           // For tenants accessing their own documents, create signed URL
           let bucket: string | null = extractBucketFromPath(document.file_path);
           let pathWithinBucket = document.file_path;
-          if (bucket === 'public') {
-            const segments = document.file_path.split('/').slice(1);
-            bucket = segments.shift() || 'income-documents';
+
+          if (bucket?.startsWith('public')) {
+            const segments = document.file_path.split('/');
+            segments.shift();
+            bucket = segments.shift() || bucket.replace('public-', '');
             pathWithinBucket = segments.join('/');
           } else if (bucket && document.file_path.startsWith(`${bucket}/`)) {
             pathWithinBucket = document.file_path.slice(bucket.length + 1);
           }
+
           if (!bucket) {
             if (document.type === 'id_document' || document.type === 'id') {
               bucket = 'id-documents';
-            } else if (document.type === 'income' || document.type === 'proof_of_income' || document.type === 'experian_credit_report' || document.type === 'bank_statement' || document.type === 'payslip') {
+            } else if ([
+              'income',
+              'proof_of_income',
+              'experian_credit_report',
+              'bank_statement',
+              'payslip'
+            ].includes(document.type)) {
               bucket = 'income-documents';
             } else {
               bucket = 'income-documents';
+            }
+
+            if (document.file_path?.includes('/')) {
+              pathWithinBucket = document.file_path.split('/').slice(1).join('/');
             }
           }
           console.log('Tenant accessing own document from bucket:', bucket, 'path within bucket:', pathWithinBucket);
