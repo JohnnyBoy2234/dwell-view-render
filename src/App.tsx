@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
@@ -64,23 +64,22 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
-const App = () => {
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+  }, [pathname]);
+  return null;
+}
+
+function AppRoutes() {
   useEffect(() => {
     // Initialize mobile services when app starts
     MobileServices.initialize();
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <AuthBootstrap>
-            <BrowserRouter>
-              <ErrorBoundary>
-              <MobileNetworkStatus />
-              <Routes>
+    <Routes>
               {/* Admin Routes - No Navbar */}
               <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
               <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
@@ -147,13 +146,29 @@ const App = () => {
               <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <MobileBottomBar />
+  );
+}
+
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <AuthProvider>
+          <AuthBootstrap>
+            <BrowserRouter>
+              <ScrollToTop />
+              <ErrorBoundary>
+              <MobileNetworkStatus />
+              <AppRoutes />
+              <MobileBottomBar />
               </ErrorBoundary>
-          </BrowserRouter>
-        </AuthBootstrap>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
+            </BrowserRouter>
+          </AuthBootstrap>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
