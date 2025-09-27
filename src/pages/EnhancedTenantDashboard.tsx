@@ -188,7 +188,7 @@ export default function EnhancedTenantDashboard() {
       },
       {
         title: 'Support',
-        icon: HelpCircle,
+        icon: Home,
         color: 'hsl(var(--ios-gray))',
         bgColor: 'bg-gradient-to-br from-gray-50 to-gray-100/50',
         iconBg: 'bg-gray-700',
