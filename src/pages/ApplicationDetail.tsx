@@ -203,7 +203,7 @@ export default function ApplicationDetail() {
         title: "Error loading application",
         description: error.message
       });
-      navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard');
+      navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
     } finally {
       setLoading(false);
     }
@@ -360,7 +360,7 @@ export default function ApplicationDetail() {
           <FileText className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
           <h2 className="text-2xl font-bold mb-2">Application not found</h2>
           <p className="text-muted-foreground mb-4">The application you're looking for doesn't exist.</p>
-          <Button onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')}>
+          <Button onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard')}>
             Back to Dashboard
           </Button>
         </Card>
@@ -373,7 +373,7 @@ export default function ApplicationDetail() {
       <div className="container mx-auto p-6 max-w-4xl">
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')}>
+          <Button variant="outline" onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Clock, User, Phone, Mail, CheckCircle, XCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Calendar, MapPin, Clock, User, Phone, Mail, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,21 +16,27 @@ interface PropertyViewing {
   status: 'booked' | 'completed' | 'cancelled';
   notes?: string;
   property?: {
+    id: string;
     title: string;
     location: string;
     price: number;
     bedrooms: number;
     bathrooms: number;
     images?: string[];
+    landlord_id?: string;
   };
   landlord?: {
     display_name: string;
     phone?: string;
+    user_id?: string;
   };
+  landlord_id?: string;
+  conversation_id?: string;
 }
 
 export default function TenantPropertyViewings() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [viewings, setViewings] = useState<PropertyViewing[]>([]);
@@ -48,7 +55,7 @@ export default function TenantPropertyViewings() {
       // Fetch tenant's booked viewing slots
       const { data: viewingSlots, error } = await supabase
         .from('viewing_slots')
-        .select('id, property_id, start_time, end_time, status')
+        .select('id, property_id, landlord_id, start_time, end_time, status, conversation_id')
         .eq('booked_by_tenant_id', user.id)
         .order('start_time', { ascending: false });
 
@@ -82,7 +89,7 @@ export default function TenantPropertyViewings() {
       // Map the data to match the component's interface
       const mappedViewings: PropertyViewing[] = viewingSlots.map(slot => {
         const property = properties?.find(p => p.id === slot.property_id);
-        const landlord = landlordProfiles?.find(profile => profile.user_id === property?.landlord_id);
+        const landlordProfile = landlordProfiles?.find(profile => profile.user_id === (slot.landlord_id || property?.landlord_id));
         
         return {
           id: slot.id,
@@ -91,17 +98,21 @@ export default function TenantPropertyViewings() {
           end_time: slot.end_time,
           status: (slot.status === 'booked' ? 'booked' : 
                    slot.status === 'completed' ? 'completed' : 'cancelled') as 'booked' | 'completed' | 'cancelled',
+          conversation_id: slot.conversation_id || undefined,
           property: property ? {
+            id: property.id,
             title: property.title,
             location: property.location,
             price: property.price,
             bedrooms: property.bedrooms,
             bathrooms: property.bathrooms,
-            images: property.images || []
+            images: property.images,
+            landlord_id: property.landlord_id
           } : undefined,
-          landlord: landlord ? {
-            display_name: landlord.display_name || 'Landlord',
-            phone: landlord.phone
+          landlord: landlordProfile ? {
+            display_name: landlordProfile.display_name,
+            phone: landlordProfile.phone,
+            user_id: landlordProfile.user_id
           } : undefined
         };
       });
@@ -265,16 +276,22 @@ export default function TenantPropertyViewings() {
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      {viewing.landlord?.phone && (
+                      {viewing.conversation_id || viewing.landlord?.user_id ? (
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => window.open(`tel:${viewing.landlord?.phone}`)}
+                          onClick={() => {
+                            if (viewing.conversation_id) {
+                              navigate(`/messages?c=${viewing.conversation_id}`);
+                            } else if (viewing.property?.id && viewing.property.landlord_id) {
+                              navigate(`/messages?propertyId=${viewing.property.id}&landlordId=${viewing.property.landlord_id}`);
+                            }
+                          }}
                         >
-                          <Phone className="h-4 w-4 mr-2" />
-                          Call
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Message
                         </Button>
-                      )}
+                      ) : null}
                       <Button
                         variant="outline"
                         size="sm"
