@@ -247,18 +247,15 @@ export const useNotifications = (filters?: NotificationFilters) => {
     }
   });
 
-  // Fallback polling when WebSocket connection fails
   useEffect(() => {
-    if (!isConnected && user && isMountedRef.current) {
-      console.log('WebSocket disconnected, starting fallback polling');
-      const interval = setInterval(() => {
-        if (isMountedRef.current) {
-          fetchNotifications();
-        }
-      }, 30000);
-      return () => clearInterval(interval);
-    }
-  }, [isConnected, user, fetchNotifications]);
+    if (!user) return;
+    const interval = setInterval(() => {
+      if (isMountedRef.current) {
+        fetchNotifications();
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [user, fetchNotifications]);
 
   // Initial fetch with mount tracking
   useEffect(() => {

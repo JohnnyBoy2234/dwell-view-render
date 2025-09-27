@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtime } from './useRealtime';
@@ -9,7 +9,7 @@ export function useUnreadMessages() {
   const [loading, setLoading] = useState(false);
   const isMountedRef = useRef(true);
 
-  const fetchUnreadCount = async () => {
+  const fetchUnreadCount = useCallback(async (showLoading = false) => {
     if (!user) {
       if (isMountedRef.current) {
         setUnreadCount(0);
@@ -18,7 +18,9 @@ export function useUnreadMessages() {
     }
 
     if (!isMountedRef.current) return;
-    setLoading(true);
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       // Get conversations where the user is either landlord or tenant
       const { data: conversations, error: conversationError } = await supabase
@@ -65,19 +67,29 @@ export function useUnreadMessages() {
         setUnreadCount(0);
       }
     } finally {
-      if (isMountedRef.current) {
+      if (isMountedRef.current && showLoading) {
         setLoading(false);
       }
     }
-  };
+  }, [user, isLandlord]);
 
   useEffect(() => {
     isMountedRef.current = true;
-    fetchUnreadCount();
+    fetchUnreadCount(true);
     return () => {
       isMountedRef.current = false;
     };
-  }, [user, isLandlord]);
+  }, [fetchUnreadCount]);
+
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      if (isMountedRef.current) {
+        fetchUnreadCount();
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [user, fetchUnreadCount]);
 
   // Re-enable real-time subscription for unread messages
   useRealtime({
@@ -89,5 +101,5 @@ export function useUnreadMessages() {
     }
   });
 
-  return { unreadCount, loading, refetch: fetchUnreadCount };
+  return { unreadCount, loading, refetch: () => fetchUnreadCount(true) };
 }

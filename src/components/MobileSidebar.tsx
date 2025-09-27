@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, FileText, Info, Shield, Mail } from 'lucide-react';
+import { Menu, X, FileText, Info, Shield, Mail, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerTrigger, DrawerClose } from '@/components/ui/drawer';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/hooks/useAuth';
 
 export function MobileSidebar() {
   const [open, setOpen] = useState(false);
   const isMobile = useIsMobile();
+  const { user, signOut, loading } = useAuth();
 
   if (!isMobile) return null;
 
@@ -17,6 +19,14 @@ export function MobileSidebar() {
     { path: '/contact', label: 'Contact', icon: Mail },
     { path: '/blog', label: 'Blog', icon: FileText }
   ];
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } finally {
+      setOpen(false);
+    }
+  };
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
@@ -49,6 +59,19 @@ export function MobileSidebar() {
               </Link>
             ))}
           </nav>
+
+          {!loading && user && (
+            <div className="mt-6 pt-6 border-t">
+              <Button
+                variant="destructive"
+                className="w-full flex items-center justify-center gap-2"
+                onClick={handleSignOut}
+              >
+                <LogOut className="h-4 w-4" />
+                Log Out
+              </Button>
+            </div>
+          )}
         </div>
       </DrawerContent>
     </Drawer>

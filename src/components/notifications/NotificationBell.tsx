@@ -40,9 +40,44 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
     if (!notification.is_read) {
       await markAsRead(notification.id);
     }
-    
-    // Navigate to link URL or action URL if provided
-    const targetUrl = notification.link_url || notification.action_url;
+    let targetUrl = notification.link_url || notification.action_url;
+    if (!targetUrl && notification.metadata) {
+      const { leaseId, requestId, applicationId, viewingId, offerId, inventoryId, propertyId, conversationId } = notification.metadata;
+      switch (notification.type) {
+        case 'lease':
+          targetUrl = leaseId ? `/enhancedlandlorddashboard/leases/${leaseId}` : undefined;
+          break;
+        case 'maintenance':
+          targetUrl = requestId ? `/enhancedlandlorddashboard/maintenance/${requestId}` : undefined;
+          break;
+        case 'application':
+          targetUrl = applicationId ? `/enhancedlandlorddashboard/applications/${applicationId}` : undefined;
+          break;
+        case 'payment':
+          targetUrl = '/enhancedlandlorddashboard/payments';
+          break;
+        case 'viewing':
+          targetUrl = viewingId ? `/enhancedlandlorddashboard/viewings/${viewingId}` : undefined;
+          break;
+        case 'inventory':
+          targetUrl = inventoryId ? `/enhancedlandlorddashboard/inventory/${inventoryId}` : undefined;
+          break;
+        case 'offer':
+          targetUrl = offerId ? `/enhancedlandlorddashboard/offers/${offerId}` : undefined;
+          break;
+        case 'system':
+          if (notification.metadata?.redirect_url) {
+            targetUrl = notification.metadata.redirect_url;
+          }
+          break;
+        default:
+          if (conversationId) {
+            targetUrl = `/messages?c=${conversationId}`;
+          } else if (propertyId) {
+            targetUrl = `/properties/${propertyId}`;
+          }
+      }
+    }
     if (targetUrl) {
       navigate(targetUrl);
       setIsOpen(false);
