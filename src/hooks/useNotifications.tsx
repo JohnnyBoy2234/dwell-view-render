@@ -79,8 +79,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const { error } = await supabase
         .from('notifications')
         .update({ 
-          is_read: true,
-          read_at: new Date().toISOString()
+          is_read: true
         })
         .eq('id', notificationId)
         .eq('user_id', user.id);
@@ -92,7 +91,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
         setNotifications(prev => 
           prev.map(n => 
             n.id === notificationId 
-              ? { ...n, is_read: true, read_at: new Date().toISOString() }
+              ? { ...n, is_read: true }
               : n
           )
         );
@@ -162,35 +161,17 @@ export const useNotifications = (filters?: NotificationFilters) => {
     
     // Try to update database in the background (non-blocking)
     try {
-      // First get all unread notification IDs for this user
-      const { data: unreadNotifications, error: fetchError } = await supabase
+      // Simple update approach - mark all unread notifications as read for this user
+      const { error: updateError } = await supabase
         .from('notifications')
-        .select('id')
+        .update({ is_read: true })
         .eq('user_id', user.id)
         .eq('is_read', false);
       
-      if (fetchError) {
-        console.log('🔔 Failed to fetch unread notifications:', fetchError);
-        return;
-      }
-      
-      if (unreadNotifications && unreadNotifications.length > 0) {
-        const notificationIds = unreadNotifications.map(n => n.id);
-        const { error: updateError } = await supabase
-          .from('notifications')
-          .update({ 
-            is_read: true,
-            read_at: new Date().toISOString()
-          })
-          .in('id', notificationIds);
-        
-        if (updateError) {
-          console.log('🔔 Database update failed (non-blocking):', updateError);
-        } else {
-          console.log('🔔 Database updated successfully');
-        }
+      if (updateError) {
+        console.log('🔔 Database update failed (non-blocking):', updateError);
       } else {
-        console.log('🔔 No unread notifications to update');
+        console.log('🔔 Database updated successfully - all unread notifications marked as read');
       }
     } catch (error) {
       console.log('🔔 Database update failed (non-blocking):', error);
