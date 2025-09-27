@@ -58,6 +58,11 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                     {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
                   </Badge>
                 </div>
+                <div className="hidden sm:block">
+                  <Badge variant="outline" className="text-[10px] ml-1">
+                    {BUILD_TAG}
+                  </Badge>
+                </div>
               </div>
             </div>
             
