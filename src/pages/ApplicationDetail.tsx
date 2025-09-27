@@ -237,8 +237,14 @@ export default function ApplicationDetail() {
         fileUrl = document.file_path;
       }
       
-      // If it's a Supabase storage URL, we might need to get a signed URL
-      if (fileUrl.includes('supabase.co/storage')) {
+      // If it's already a signed URL, use it directly
+      if (fileUrl.includes('/storage/v1/object/sign/')) {
+        // This is already a signed URL, use it as-is
+        console.log('Using existing signed URL:', fileUrl);
+      } else if (fileUrl.includes('supabase.co/storage/v1/object/public/')) {
+        // This is a public URL, use it directly
+        console.log('Using public URL:', fileUrl);
+      } else if (fileUrl.includes('supabase.co/storage')) {
         // Extract bucket and file path from the URL
         const urlParts = fileUrl.split('/storage/v1/object/');
         if (urlParts.length === 2) {
@@ -253,6 +259,23 @@ export default function ApplicationDetail() {
           if (error) throw error;
           fileUrl = data.signedUrl;
         }
+      } else {
+        // Assume it's a file path and try to create a signed URL
+        // Determine bucket based on document type or file path
+        let bucket = 'income-documents'; // default
+        if (fileUrl.includes('id_') || fileUrl.includes('id-')) {
+          bucket = 'id-documents';
+        }
+        
+        const { data, error } = await supabase.storage
+          .from(bucket)
+          .createSignedUrl(fileUrl, 60);
+        
+        if (error) {
+          console.error('Storage error:', error);
+          throw error;
+        }
+        fileUrl = data.signedUrl;
       }
       
       // Create a temporary anchor element to trigger download
