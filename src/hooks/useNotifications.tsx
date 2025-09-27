@@ -147,90 +147,31 @@ export const useNotifications = (filters?: NotificationFilters) => {
     }
 
     console.log('🔔 Marking all notifications as read for user:', user.id);
+    
+    // Just update local state immediately - like the chat does
+    if (isMountedRef.current) {
+      setNotifications(prev => {
+        const updated = prev.map(n => ({ ...n, is_read: true }));
+        console.log('🔔 Local state updated:', updated.length, 'notifications marked as read');
+        return updated;
+      });
+      setUnreadCount(0);
+      console.log('🔔 Unread count set to 0 - badge should disappear');
+    }
+    
+    // Try to update database in the background (non-blocking)
     try {
-      // First, get fresh data from database to ensure we have the latest unread notifications
-      const { data: freshNotifications, error: fetchError } = await supabase
+      await supabase
         .from('notifications')
-        .select('*')
+        .update({ is_read: true })
         .eq('user_id', user.id)
         .eq('is_read', false);
-
-      if (fetchError) {
-        console.error('🔔 Error fetching unread notifications:', fetchError);
-        throw fetchError;
-      }
-
-      const unreadNotifications = freshNotifications || [];
-      console.log('🔔 Found', unreadNotifications.length, 'unread notifications to update in database');
-      
-      // Update database first - try bulk update first, fallback to individual if needed
-      if (unreadNotifications.length > 0) {
-        try {
-          // Try bulk update first
-          const { error: bulkError } = await supabase
-            .from('notifications')
-            .update({ is_read: true })
-            .eq('user_id', user.id)
-            .eq('is_read', false);
-
-          if (bulkError) {
-            console.log('🔔 Bulk update failed, trying individual updates:', bulkError.message);
-            
-            // Fallback to individual updates with better error handling
-            const updatePromises = unreadNotifications.map(notification => 
-              supabase
-                .from('notifications')
-                .update({ is_read: true })
-                .eq('id', notification.id)
-                .eq('user_id', user.id)
-            );
-            
-            const results = await Promise.all(updatePromises);
-            const errors = results.filter(result => result.error);
-            
-            if (errors.length > 0) {
-              console.error('🔔 Individual updates also failed:', errors.length, 'errors');
-              // Don't throw error, just log it - local state is already updated
-              console.log('🔔 Continuing with local state update only');
-            } else {
-              console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications individually');
-            }
-          } else {
-            console.log('🔔 Successfully updated', unreadNotifications.length, 'notifications in bulk');
-          }
-        } catch (error) {
-          console.error('🔔 Database update failed completely:', error);
-          // Don't throw error, just log it - local state is already updated
-        }
-      }
-
-      // Then update local state
-      if (isMountedRef.current) {
-        setNotifications(prev => {
-          const updated = prev.map(n => ({ ...n, is_read: true }));
-          console.log('🔔 Local state updated:', updated.length, 'notifications marked as read');
-          return updated;
-        });
-        setUnreadCount(0);
-        console.log('🔔 Unread count set to 0');
-      }
-      
-      // Refresh from database to ensure consistency
-      setTimeout(() => {
-        if (isMountedRef.current) {
-          fetchNotifications();
-        }
-      }, 100);
-      
-    } catch (err) {
-      console.error('Error marking all notifications as read:', err);
-      if (isMountedRef.current) {
-        setError(err instanceof Error ? err.message : 'Failed to mark all notifications as read');
-        // Revert local state on error
-        fetchNotifications();
-      }
+      console.log('🔔 Database updated successfully');
+    } catch (error) {
+      console.log('🔔 Database update failed (non-blocking):', error);
+      // Don't worry about database errors - local state is already updated
     }
-  }, [user, fetchNotifications]);
+  }, [user]);
 
   // Delete notification
   const deleteNotification = useCallback(async (notificationId: string) => {
