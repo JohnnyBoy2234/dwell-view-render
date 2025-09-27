@@ -63,7 +63,7 @@ const validatePassword = (password: string): { isValid: boolean; errors: string[
 };
 
 export default function Auth() {
-  const { user, signUp, signIn, signInWithGoogle, resetPassword, loading } = useAuth();
+  const { user, signUp, signIn, signInWithGoogle, resetPassword, loading, isLandlord } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -251,12 +251,8 @@ export default function Auth() {
       sessionStorage.removeItem('returnTo');
       navigate(returnTo);
     } else {
-      // Default redirect based on role
-      if (user?.role === 'landlord') {
-        navigate('/enhancedlandlorddashboard');
-      } else {
-        navigate('/enhancedtenantdashboard');
-      }
+      // Default redirect to home page for all users
+      navigate('/');
     }
     setSignInLoading(false);
   };
