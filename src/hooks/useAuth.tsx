@@ -29,7 +29,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [rolesLoading, setRolesLoading] = useState(true);
   const [isLandlord, setIsLandlord] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [returnToPath, setReturnToPath] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -189,7 +188,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const redirectAfterAuth = (path: string) => {
-    setReturnToPath(path);
+    sessionStorage.setItem('returnTo', path);
   };
 
   const signOut = async () => {
