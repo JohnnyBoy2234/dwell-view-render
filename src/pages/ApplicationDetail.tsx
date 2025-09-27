@@ -230,39 +230,54 @@ export default function ApplicationDetail() {
     try {
       let fileUrl: string;
       
+      console.log('Downloading document:', document);
+      
       if (document.source === 'screening_profile') {
         // Document from screening profile - use the URL directly
         fileUrl = document.url || document.name;
+        console.log('Using screening profile URL:', fileUrl);
       } else if (document.source === 'documents_table') {
         // Documents from documents table need proper authorization
         if (isLandlord) {
           // Use the edge function for landlords to access tenant documents
+          console.log('Landlord accessing tenant document via edge function');
           const { data, error } = await supabase.functions.invoke('landlord-get-document-url', {
             body: { document_id: document.id }
           });
           
           if (error || !data?.url) {
+            console.error('Edge function error:', error);
             throw new Error(error?.message || 'Failed to get download URL');
           }
           
           fileUrl = data.url;
+          console.log('Edge function returned URL:', fileUrl);
         } else {
           // For tenants accessing their own documents, create signed URL
-          const bucket = document.type === 'id' ? 'id-documents' : 'income-documents';
+          const bucket = document.document_type === 'id' ? 'id-documents' : 'income-documents';
+          console.log('Tenant accessing own document from bucket:', bucket, 'file_path:', document.file_path);
+          
           const { data, error } = await supabase.storage
             .from(bucket)
             .createSignedUrl(document.file_path, 60); // 60 seconds expiry
           
           if (error) {
-            console.error('Storage error:', error);
-            throw new Error('Failed to create signed URL for document');
+            console.error('Storage error creating signed URL:', error);
+            throw new Error(`Failed to create signed URL for document: ${error.message}`);
+          }
+          
+          if (!data?.signedUrl) {
+            console.error('No signed URL returned from storage');
+            throw new Error('No signed URL returned from storage');
           }
           
           fileUrl = data.signedUrl;
+          console.log('Created signed URL:', fileUrl);
         }
       } else {
         // Fallback for other document types
         fileUrl = document.url || document.file_path || document.name;
+        console.log('Using fallback URL:', fileUrl);
       }
       
       // Use the shared download utility
