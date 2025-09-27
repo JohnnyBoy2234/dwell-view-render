@@ -21,7 +21,7 @@ import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
-import Messages from "./pages/Messages";
+import Messages from "./pages/OptimizedMessages";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";

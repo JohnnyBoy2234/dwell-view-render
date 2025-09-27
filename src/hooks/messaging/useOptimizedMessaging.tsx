@@ -41,32 +41,12 @@ interface ConversationWithDetails {
   last_message?: string;
 }
 
-// Single optimized query to fetch all conversation data
+// Single optimized query to fetch all conversation data - will use RPC when types are updated
 const fetchConversationsWithDetails = async (userId: string, isLandlord: boolean) => {
   if (!userId) throw new Error('No user ID provided');
 
-  // Single query with joins and aggregations
-  const { data, error } = await supabase.rpc('get_conversations_with_details', {
-    user_id: userId,
-    is_landlord_param: isLandlord
-  });
-
-  if (error) throw error;
-  return data || [];
-};
-
-// Create the RPC function if it doesn't exist
-const ensureConversationsRPCExists = async () => {
-  const { error } = await supabase.rpc('get_conversations_with_details', {
-    user_id: '00000000-0000-0000-0000-000000000000',
-    is_landlord_param: true
-  }).then(
-    () => ({ error: null }),
-    (err) => ({ error: err })
-  );
-
-  // If function doesn't exist, we'll fall back to the old method
-  return !error || !error.message?.includes('function');
+  // For now, use the optimized fallback method until RPC types are generated
+  return fetchConversationsFallback(userId, isLandlord);
 };
 
 // Fallback: optimized version of the old query method
@@ -184,7 +164,7 @@ export function useOptimizedMessaging() {
     refetch: refetchConversations
   } = useQuery({
     queryKey: ['conversations', user?.id, isLandlord],
-    queryFn: () => fetchConversationsFallback(user!.id, isLandlord),
+    queryFn: () => fetchConversationsWithDetails(user!.id, isLandlord),
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     refetchInterval: 60000, // Refetch every minute
