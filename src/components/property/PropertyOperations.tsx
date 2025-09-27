@@ -11,8 +11,9 @@ import {
   CheckCircle,
   Clock,
   ArrowRight,
-  DollarSign
+  Calendar
 } from 'lucide-react';
+import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types/dashboard';
 
@@ -85,7 +86,7 @@ export function PropertyOperations({ property, maintenanceRequests }: PropertyOp
     {
       label: 'Monthly Revenue',
       value: `R${property.price.toLocaleString()}`,
-      icon: DollarSign,
+      icon: RandMoneyBagIcon,
       color: 'ios-green'
     },
     {

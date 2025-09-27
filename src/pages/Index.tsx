@@ -16,7 +16,7 @@ import {
   CheckCircle, 
   Lock, 
   Wrench, 
-  DollarSign, 
+  Calendar, 
   Users,
   Home,
   TrendingUp,

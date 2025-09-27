@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { CreditCard, Download, Calendar, DollarSign, Clock, CheckCircle } from 'lucide-react';
+import { CreditCard, Download, Calendar, Clock, CheckCircle } from 'lucide-react';
+import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -106,7 +107,7 @@ export default function TenantPayments() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <DollarSign className="h-5 w-5 text-ocean-blue" />
+                  <RandMoneyBagIcon className="h-5 w-5 text-ocean-blue" />
                   Rent Due
                 </CardTitle>
                 <CardDescription>
@@ -151,7 +152,7 @@ export default function TenantPayments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-success-green" />
+              <RandMoneyBagIcon className="h-5 w-5 text-success-green" />
               <div>
                 <p className="text-sm text-muted-foreground">Total Paid (2024)</p>
                 <p className="text-xl font-bold">R{(15000).toLocaleString()}</p>

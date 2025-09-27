@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAccounting } from '@/hooks/useAccounting';
 import { useUserProperties } from '@/hooks/useUserProperties';
-import { Plus, FileText, Receipt, TrendingUp, TrendingDown, DollarSign, AlertCircle } from 'lucide-react';
+import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
 import { format, startOfMonth, subMonths } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
@@ -148,7 +149,7 @@ export function AccountingOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Income</CardTitle>
-            <DollarSign className="h-4 w-4 text-ocean-blue" />
+            <RandMoneyBagIcon className="h-4 w-4 text-ocean-blue" />
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${kpis.netIncome >= 0 ? 'text-success-green' : 'text-destructive'}`}>

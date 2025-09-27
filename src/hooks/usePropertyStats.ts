@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { DollarSign, Home, Users, Wrench } from 'lucide-react';
+import { Home, Users, Wrench } from 'lucide-react';
+import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
 import { Property } from '@/types/dashboard';
 import { 
   PROPERTY_LABELS, 
@@ -16,7 +17,7 @@ interface MaintenanceRequest {
 export interface PropertyStat {
   label: string;
   value: string;
-  icon: typeof DollarSign;
+  icon: typeof RandMoneyBagIcon;
   color: string;
   trend: string;
 }
@@ -38,7 +39,7 @@ export function usePropertyStats({ property, maintenanceRequests }: PropertyStat
       {
         label: PROPERTY_LABELS.MONTHLY_RENT,
         value: `R${property.price.toLocaleString()}`,
-        icon: DollarSign,
+        icon: RandMoneyBagIcon,
         color: PROPERTY_COLORS.IOS_GREEN,
         trend: '+5.2%'
       },

@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Home, Bed, Bath, Car, Ruler, DollarSign, Calendar, Camera } from 'lucide-react';
+import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera } from 'lucide-react';
+import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
 import { ListingFormData } from '@/pages/ListProperty';
 
 interface ReviewStepProps {
@@ -139,7 +140,7 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5" />
+              <RandMoneyBagIcon className="h-5 w-5" />
               Pricing & Availability
             </CardTitle>
           </CardHeader>

@@ -3,12 +3,12 @@ import {
   Building2,
   Mail,
   Shield,
-  DollarSign,
-  Search,
   Calendar,
+  Search,
   FileText,
   Home,
 } from "lucide-react";
+import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
 import type { LucideIcon } from "lucide-react";
 
 export interface ProcessStep {
@@ -107,7 +107,7 @@ export const LANDLORD_DATA: UserTypeData = {
       badges: ["Easy Applications", "Screening", "Fast Processing"],
     },
     {
-      icon: DollarSign,
+      icon: RandMoneyBagIcon,
       title: "Manage Properties",
       description:
         "Control all your rentals in one place simple, fast, and effortless.",
