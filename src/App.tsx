@@ -106,6 +106,7 @@ function AppRoutes() {
               {/* Enhanced Dashboard Routes */}
               <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
               <Route path="/enhancedtenantdashboard/leases" element={<EnhancedTenantDashboard />} />
+              <Route path="/tenant-dashboard/*" element={<TenantDashboardRoutes />} />
               <Route path="/tenant/*" element={<TenantDashboardRoutes />} />
               <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}

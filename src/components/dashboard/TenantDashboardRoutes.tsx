@@ -22,6 +22,10 @@ import ProfilePage from '@/components/profile/ProfilePage';
 export default function TenantDashboardRoutes() {
   return (
     <Routes>
+      {/* Default dashboard route */}
+      <Route index element={<EnhancedTenantDashboard />} />
+      <Route path="/" element={<EnhancedTenantDashboard />} />
+      
       <Route path="/contracts" element={
         <EnhancedDashboardLayout title="Contract Documents">
           <TenantLeaseDocuments />
