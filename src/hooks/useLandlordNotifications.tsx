@@ -183,7 +183,23 @@ export const useLandlordNotifications = () => {
         )
       );
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error marking landlord notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      console.log('🔔 Marking all landlord notifications as read:', notifications.length);
+      // Mark all unread notifications as read
+      const unreadNotifications = notifications.filter(n => !n.isRead);
+      
+      for (const notification of unreadNotifications) {
+        await markAsRead(notification.id);
+      }
+      
+      console.log('🔔 All landlord notifications marked as read');
+    } catch (error) {
+      console.error('Error marking all landlord notifications as read:', error);
     }
   };
 
@@ -194,6 +210,7 @@ export const useLandlordNotifications = () => {
     fetchNotifications,
     fetchPendingSignatures,
     markAsRead,
+    markAllAsRead,
     unreadCount: notifications.filter(n => !n.isRead).length
   };
 };

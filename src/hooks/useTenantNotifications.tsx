@@ -183,7 +183,23 @@ export const useTenantNotifications = () => {
         )
       );
     } catch (error) {
-      console.error('Error marking notification as read:', error);
+      console.error('Error marking tenant notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      console.log('🔔 Marking all tenant notifications as read:', notifications.length);
+      // Mark all unread notifications as read
+      const unreadNotifications = notifications.filter(n => !n.isRead);
+      
+      for (const notification of unreadNotifications) {
+        await markAsRead(notification.id);
+      }
+      
+      console.log('🔔 All tenant notifications marked as read');
+    } catch (error) {
+      console.error('Error marking all tenant notifications as read:', error);
     }
   };
 
@@ -194,6 +210,7 @@ export const useTenantNotifications = () => {
     fetchNotifications,
     fetchPendingLeases,
     markAsRead,
+    markAllAsRead,
     unreadCount: notifications.filter(n => !n.isRead).length
   };
 };

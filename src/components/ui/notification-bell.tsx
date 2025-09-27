@@ -23,8 +23,9 @@ export function NotificationBell() {
   
   // Use the appropriate notification hook based on user type
   const { notifications: generalNotifications, unreadCount: generalUnread, markAsRead: markGeneralAsRead, markAllAsRead: markAllGeneralAsRead } = useNotifications();
-  const { notifications: tenantNotifications, unreadCount: tenantUnread, markAsRead: markTenantAsRead } = useTenantNotifications();
-  const { notifications: landlordNotifications, unreadCount: landlordUnread, markAsRead: markLandlordAsRead } = useLandlordNotifications();
+  // Add markAllAsRead functions for tenant/landlord notifications  
+  const { notifications: tenantNotifications, unreadCount: tenantUnread, markAsRead: markTenantAsRead, markAllAsRead: markAllTenantAsRead } = useTenantNotifications();
+  const { notifications: landlordNotifications, unreadCount: landlordUnread, markAsRead: markLandlordAsRead, markAllAsRead: markAllLandlordAsRead } = useLandlordNotifications();
 
   if (!user) return null;
 
@@ -173,20 +174,18 @@ export function NotificationBell() {
             <DropdownMenuItem 
               className="px-4 py-2 text-center text-primary cursor-pointer"
               onClick={async () => {
-                console.log('🔔 Marking all notifications as read');
+                console.log('🔔 Marking ALL notifications as read - General:', generalUnread, 'Tenant:', tenantUnread, 'Landlord:', landlordUnread);
                 try {
+                  // Mark general notifications as read
                   await markAllGeneralAsRead();
+                  
+                  // Mark tenant/landlord specific notifications as read
                   if (isLandlord) {
-                    // Mark landlord notifications as read
-                    for (const notification of landlordNotifications) {
-                      await markLandlordAsRead(notification.id);
-                    }
+                    await markAllLandlordAsRead();
                   } else {
-                    // Mark tenant notifications as read
-                    for (const notification of tenantNotifications) {
-                      await markTenantAsRead(notification.id);
-                    }
+                    await markAllTenantAsRead();
                   }
+                  
                   console.log('🔔 All notifications marked as read');
                 } catch (error) {
                   console.error('Error marking all as read:', error);
