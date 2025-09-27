@@ -68,7 +68,7 @@ export function MessagesTab() {
         </Button>
       </div>
 
-      {conversations.length === 0 ? (
+      {!loading && conversations.length === 0 ? (
         <MessagesEmptyState isLandlord={isLandlord} />
       ) : (
         <div className="space-y-3">

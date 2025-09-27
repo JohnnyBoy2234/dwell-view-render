@@ -246,7 +246,7 @@ export default function Notifications() {
         </div>
 
         {/* Notifications List */}
-        {allNotifications.length === 0 ? (
+        {!loading && allNotifications.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Bell className="h-16 w-16 text-muted-foreground mb-4" />
