@@ -161,12 +161,33 @@ export const useNotifications = (filters?: NotificationFilters) => {
     
     // Try to update database in the background (non-blocking)
     try {
-      await supabase
+      // First get all unread notification IDs for this user
+      const { data: unreadNotifications, error: fetchError } = await supabase
         .from('notifications')
-        .update({ is_read: true })
+        .select('id')
         .eq('user_id', user.id)
         .eq('is_read', false);
-      console.log('🔔 Database updated successfully');
+      
+      if (fetchError) {
+        console.log('🔔 Failed to fetch unread notifications:', fetchError);
+        return;
+      }
+      
+      if (unreadNotifications && unreadNotifications.length > 0) {
+        const notificationIds = unreadNotifications.map(n => n.id);
+        const { error: updateError } = await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .in('id', notificationIds);
+        
+        if (updateError) {
+          console.log('🔔 Database update failed (non-blocking):', updateError);
+        } else {
+          console.log('🔔 Database updated successfully');
+        }
+      } else {
+        console.log('🔔 No unread notifications to update');
+      }
     } catch (error) {
       console.log('🔔 Database update failed (non-blocking):', error);
       // Don't worry about database errors - local state is already updated
