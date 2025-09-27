@@ -233,9 +233,10 @@ export default function ApplicationDetail() {
       if (document.source === 'screening_profile') {
         // Document from screening profile - use the URL directly
         fileUrl = document.url || document.name;
-      } else if (document.source === 'documents_table' && isLandlord) {
-        // Use the edge function for landlords to access tenant documents
-        try {
+      } else if (document.source === 'documents_table') {
+        // Documents from documents table need proper authorization
+        if (isLandlord) {
+          // Use the edge function for landlords to access tenant documents
           const { data, error } = await supabase.functions.invoke('landlord-get-document-url', {
             body: { document_id: document.id }
           });
@@ -245,13 +246,23 @@ export default function ApplicationDetail() {
           }
           
           fileUrl = data.url;
-        } catch (edgeError) {
-          console.error('Edge function error:', edgeError);
-          throw edgeError;
+        } else {
+          // For tenants accessing their own documents, create signed URL
+          const bucket = document.type === 'id' ? 'id-documents' : 'income-documents';
+          const { data, error } = await supabase.storage
+            .from(bucket)
+            .createSignedUrl(document.file_path, 60); // 60 seconds expiry
+          
+          if (error) {
+            console.error('Storage error:', error);
+            throw new Error('Failed to create signed URL for document');
+          }
+          
+          fileUrl = data.signedUrl;
         }
       } else {
-        // For tenants or other cases, construct URL from file_path
-        fileUrl = document.file_path || document.url || document.name;
+        // Fallback for other document types
+        fileUrl = document.url || document.file_path || document.name;
       }
       
       // Use the shared download utility
