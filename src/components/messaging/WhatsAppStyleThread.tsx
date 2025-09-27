@@ -7,9 +7,11 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
+import { useOptimizedUpload } from '@/hooks/useOptimizedUpload';
+import { startTimer, endTimer, logUploadPerformance } from '@/utils/performanceMonitor';
 import { cn } from '@/lib/utils';
 import { Clock, Check, CheckCheck } from 'lucide-react';
-import React from 'react'; // Added missing import
+import React from 'react';
 
 interface Message {
   id: string;
@@ -51,6 +53,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     getCachedMessages,
     isLoading
   } = useMessageCache();
+
+  const { uploadFile } = useOptimizedUpload();
 
   const messages = getCachedMessages(conversationId);
   const loading = isLoading(conversationId);
@@ -260,11 +264,16 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     };
   }, [conversationId]);
 
-  // Handle sending messages
+  // Handle sending messages with optimized uploads
   const handleSendMessage = async (content: string, files?: File[]) => {
     if (!user) return;
     const trimmed = content.trim();
     if (!trimmed && (!files || files.length === 0)) return;
+
+    const performanceId = startTimer('send_message', { 
+      hasAttachment: !!(files?.length), 
+      fileCount: files?.length || 0 
+    });
 
     const tempId = addOptimisticMessage(conversationId, {
       sender_id: user.id,
@@ -277,20 +286,35 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
     try {
       let attachmentUrl: string | null = null;
+      let uploadResult: any = null;
 
       if (files && files.length > 0) {
         const file = files[0];
+        const uploadTimerId = startTimer('file_upload', { 
+          fileName: file.name, 
+          fileSize: file.size 
+        });
+
         const ext = file.name.split('.').pop();
         const path = `messages/${conversationId}/${user.id}/${Date.now()}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('chat-attachments')
-          .upload(path, file, { upsert: false });
-        if (uploadError) throw uploadError;
-        const storedPath = uploadData?.path || path;
-        const { data: publicUrlData } = supabase.storage
-          .from('chat-attachments')
-          .getPublicUrl(storedPath);
-        attachmentUrl = publicUrlData?.publicUrl || storedPath;
+
+        try {
+          uploadResult = await uploadFile(file, 'chat-attachments', path);
+          attachmentUrl = uploadResult.url;
+          
+          const uploadDuration = endTimer(uploadTimerId) || 0;
+          if (uploadResult.compressedSize) {
+            logUploadPerformance(
+              file.name, 
+              uploadResult.originalSize, 
+              uploadResult.compressedSize, 
+              uploadDuration
+            );
+          }
+        } catch (uploadError) {
+          console.error('Upload failed:', uploadError);
+          throw new Error('File upload failed');
+        }
       }
 
       const { data, error } = await supabase
@@ -314,13 +338,17 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
 
+      const totalDuration = endTimer(performanceId);
+      console.log(`✅ Message sent successfully in ${totalDuration?.toFixed(2)}ms`);
+
       onMessageSent?.();
     } catch (error: any) {
       console.error('Error sending message:', error);
+      endTimer(performanceId);
       toast({
         variant: 'destructive',
         title: 'Failed to send message',
-        description: 'Please try again',
+        description: error.message || 'Please try again',
       });
     }
   };
