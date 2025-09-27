@@ -435,11 +435,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         )}
 
         {showTimeGap && index !== messages.length - 1 && (
-          <div className="flex justify-center my-2">
-            <span className="px-2 py-1 text-[11px] text-ios-gray bg-white/80 rounded-full shadow-soft">
-              {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-            </span>
-          </div>
+          <div className="py-1" aria-hidden="true"></div>
         )}
       </React.Fragment>
     );
