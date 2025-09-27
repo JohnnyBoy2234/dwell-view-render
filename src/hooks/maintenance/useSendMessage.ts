@@ -23,9 +23,29 @@ async function sendMessage(
     ? maintenanceRequest.landlord_id 
     : maintenanceRequest.tenant_id;
 
-  // For now, we'll just store file names in attachments array
-  // In a full implementation, you'd upload files to storage first
-  const attachments = files.map(f => f.name);
+  // Upload files to maintenance-images storage bucket and get URLs
+  const attachmentUrls: string[] = [];
+  
+  for (const file of files) {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${senderUserId}/${ticketId}/${Date.now()}.${fileExt}`;
+    
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('maintenance-images')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      console.error('Error uploading maintenance file:', uploadError);
+      continue; // Skip failed uploads
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('maintenance-images')
+      .getPublicUrl(uploadData.path);
+
+    attachmentUrls.push(publicUrl);
+  }
 
   const { data, error } = await supabase
     .from('maintenance_messages')
@@ -35,7 +55,7 @@ async function sendMessage(
       sender_role: senderRole,
       recipient_user_id: recipientUserId,
       body,
-      attachments,
+      attachments: attachmentUrls, // Store URLs instead of file names
     })
     .select()
     .single();

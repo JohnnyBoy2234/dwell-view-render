@@ -341,6 +341,83 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
+  // Send a message with attachment
+  const sendMessageWithAttachment = async (conversationId: string, content: string, files: File[] = []) => {
+    if (!user || (!content.trim() && files.length === 0)) {
+      console.log('❌ Cannot send message: missing user or content/files');
+      return;
+    }
+
+    console.log('📤 Sending message with attachments:', { conversationId, content: content.trim(), files: files.length, senderId: user.id });
+
+    try {
+      let attachmentUrl = null;
+      let messageType = 'text';
+
+      // Upload file if provided
+      if (files.length > 0) {
+        const file = files[0]; // For now, handle single file
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        console.log('📎 Uploading file:', fileName);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('chat-attachments')
+          .upload(fileName, file);
+
+        if (uploadError) {
+          console.error('❌ Error uploading file:', uploadError);
+          throw uploadError;
+        }
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('chat-attachments')
+          .getPublicUrl(uploadData.path);
+
+        attachmentUrl = publicUrl;
+        messageType = 'attachment';
+        console.log('✅ File uploaded successfully:', attachmentUrl);
+      }
+
+      const { data, error } = await supabase
+        .from('messages')
+        .insert({
+          conversation_id: conversationId,
+          sender_id: user.id,
+          content: content.trim() || '',
+          message_type: messageType,
+          attachment_url: attachmentUrl
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Error sending message:', error);
+        throw error;
+      }
+
+      console.log('✅ Message with attachment sent successfully:', data);
+
+      // Optimistically append for instant UI; realtime will reconcile
+      if (isMountedRef.current && activeConversation === conversationId) {
+        setMessages(prev => {
+          if (prev.some(m => m.id === (data as any).id)) return prev;
+          return [...prev, data as any];
+        });
+      }
+      fetchConversations();
+    } catch (error: any) {
+      console.error('❌ Final error in sendMessageWithAttachment:', error);
+      toast({
+        variant: "destructive",
+        title: "Error sending message",
+        description: error.message
+      });
+    }
+  };
+
   // Create a new conversation
   const createConversation = async (propertyId: string, landlordId: string, tenantId: string, inquiryId?: string) => {
     if (!user) return null;
@@ -566,6 +643,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     loading,
     onlineUsers,
     sendMessage,
+    sendMessageWithAttachment,
     createConversation,
     fetchConversations,
     fetchMessages,
