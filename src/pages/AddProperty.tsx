@@ -150,7 +150,7 @@ export default function AddProperty() {
         description: "Your property is now listed on SwiftRent."
       });
 
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -174,7 +174,7 @@ export default function AddProperty() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="flex flex-col items-left gap-4 mb-8">
-          <Button variant="outline" onClick={() => navigate('/dashboard')}>
+          <Button variant="outline" onClick={() => navigate('/enhancedlandlorddashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
@@ -399,7 +399,7 @@ export default function AddProperty() {
 
           {/* Submit */}
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => navigate('/dashboard')}>
+            <Button type="button" variant="outline" onClick={() => navigate('/enhancedlandlorddashboard')}>
               Cancel
             </Button>
             <Button type="submit" disabled={uploading}>

@@ -5,7 +5,8 @@ import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { MobileSidebar } from "@/components/MobileSidebar";
 import { NavItems } from '@/components/navigation/NavItems';
 import { NavActions } from '@/components/navigation/NavActions';
-import { NAVBAR_CONTENT, NAVBAR_STYLES } from '@/constants/navbarConstants';
+import { NAVBAR_CONTENT, NAVBAR_STYLES, NAVBAR_ROUTES } from '@/constants/navbarConstants';
+import { Button } from "@/components/ui/button";
 
 /**
  * Main navigation component
@@ -41,6 +42,18 @@ const Navbar = () => {
             isAdmin={isAdmin}
             onSignOut={signOut}
           />
+
+          {/* Mobile Sign In */}
+          {!loading && !user && (
+            <Button
+              asChild
+              size="sm"
+              className="md:hidden mr-2"
+              variant="outline"
+            >
+              <Link to={NAVBAR_ROUTES.AUTH}>{NAVBAR_CONTENT.SIGN_IN_LABEL}</Link>
+            </Button>
+          )}
 
           {/* Mobile Hamburger Menu */}
           <MobileSidebar />

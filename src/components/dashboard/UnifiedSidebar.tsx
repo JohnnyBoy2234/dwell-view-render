@@ -39,15 +39,15 @@ const tenantNavigationItems = [
 ];
 
 const landlordNavigationItems = [
-  { title: 'Dashboard', url: '/dashboard', icon: Home, description: 'Overview & Analytics' },
-  { title: 'Properties', url: '/dashboard/properties', icon: Building, description: 'Manage Your Properties' },
-  { title: 'Tenants', url: '/dashboard/tenants', icon: Users, description: 'Tenant Management' },
-  { title: 'Messages', url: '/dashboard/messages', icon: MessageSquare, description: 'Communications' },
-  { title: 'Payment Tracking', url: '/dashboard/payments', icon: RandIcon, description: 'Rent & Payment Management' },
-  { title: 'Lease Management', url: '/dashboard/leases', icon: FileText, description: 'Lease Agreements' },
-  { title: 'Maintenance', url: '/dashboard/maintenance', icon: Wrench, description: 'Maintenance Requests' },
-  { title: 'Analytics', url: '/dashboard/analytics', icon: BarChart3, description: 'SwiftBooks & Insights' },
-  { title: 'Support', url: '/dashboard/support', icon: HelpCircle, description: 'Help & Resources' },
+  { title: 'Dashboard', url: '/enhancedlandlorddashboard', icon: Home, description: 'Overview & Analytics' },
+  { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building, description: 'Manage Your Properties' },
+  { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users, description: 'Tenant Management' },
+  { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare, description: 'Communications' },
+  { title: 'Payment Tracking', url: '/enhancedlandlorddashboard/payments', icon: RandIcon, description: 'Rent & Payment Management' },
+  { title: 'Lease Management', url: '/enhancedlandlorddashboard/leases', icon: FileText, description: 'Lease Agreements' },
+  { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench, description: 'Maintenance Requests' },
+  { title: 'Analytics', url: '/enhancedlandlorddashboard/reports', icon: BarChart3, description: 'SwiftBooks & Insights' },
+  { title: 'Support', url: '/enhancedlandlorddashboard/support', icon: HelpCircle, description: 'Help & Resources' },
 ];
 
 interface UnifiedSidebarProps {
@@ -65,7 +65,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
   const currentPath = location.pathname;
   
   const isActive = (path: string) => {
-    if (path === '/tenant-dashboard' || path === '/dashboard') {
+    if (path === '/tenant-dashboard' || path === '/enhancedlandlorddashboard') {
       return currentPath === path;
     }
     return currentPath.startsWith(path);
@@ -166,7 +166,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
                 }
               </p>
               <button
-                onClick={() => navigate(userRole === 'tenant' ? '/tenant-dashboard/support' : '/list-property')}
+                onClick={() => navigate(userRole === 'tenant' ? '/tenant-dashboard/support' : '/enhancedlandlorddashboard/properties')}
                 className="w-full px-3 py-2 bg-gradient-to-r from-ocean-blue to-ocean-blue-light text-white text-sm font-medium rounded-md hover:from-ocean-blue-dark hover:to-ocean-blue transition-all duration-200 shadow-soft"
               >
                 {userRole === 'tenant' ? 'Get Support' : 'Add Property'}
