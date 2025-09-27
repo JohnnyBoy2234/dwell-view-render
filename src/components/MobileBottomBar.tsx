@@ -52,10 +52,16 @@ export function MobileBottomBar() {
     totalNotifications
   });
   
+  // Determine desk route based on authentication and role
+  const getDeskRoute = () => {
+    if (!user) return '/auth';
+    return isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+  };
+
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
     { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: true },
-    { path: '/auth', icon: User, label: 'Desk' }
+    { path: getDeskRoute(), icon: User, label: 'Desk' }
   ];
 
   const renderNavItem = (item: any) => {
