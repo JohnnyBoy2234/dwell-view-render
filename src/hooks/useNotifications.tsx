@@ -142,18 +142,14 @@ export const useNotifications = (filters?: NotificationFilters) => {
       console.log('No user, cannot mark all as read');
       return;
     }
-
-    console.log('🔔 Marking all notifications as read for user:', user.id);
     
     // Just update local state immediately - like the chat does
     if (isMountedRef.current) {
       setNotifications(prev => {
         const updated = prev.map(n => ({ ...n, is_read: true }));
-        console.log('🔔 Local state updated:', updated.length, 'notifications marked as read');
         return updated;
       });
       setUnreadCount(0);
-      console.log('🔔 Unread count set to 0 - badge should disappear');
     }
     
     // Try to update database in the background (non-blocking)
@@ -166,12 +162,9 @@ export const useNotifications = (filters?: NotificationFilters) => {
         .eq('is_read', false);
       
       if (updateError) {
-        console.log('🔔 Database update failed (non-blocking):', updateError);
       } else {
-        console.log('🔔 Database updated successfully - all unread notifications marked as read');
       }
     } catch (error) {
-      console.log('🔔 Database update failed (non-blocking):', error);
       // Don't worry about database errors - local state is already updated
     }
   }, [user]);
@@ -237,7 +230,6 @@ export const useNotifications = (filters?: NotificationFilters) => {
   // Set up real-time subscription with error handling
   useRealtime({
     onNotificationChange: () => {
-      console.log('🔄 Refreshing notifications due to real-time update');
       if (isMountedRef.current) {
         fetchNotifications();
       }
