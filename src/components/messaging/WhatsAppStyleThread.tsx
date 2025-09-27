@@ -21,8 +21,8 @@ interface Message {
   read_by_tenant: boolean;
   profiles?: { display_name: string } | null;
   optimistic?: boolean;
-  message_type?: string; // Added for new rendering logic
-  viewing_proposal_id?: string; // Added for new rendering logic
+  message_type?: string | null;
+  attachment_url?: string | null;
 }
 
 interface WhatsAppStyleThreadProps {
@@ -261,25 +261,22 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   // Handle sending messages
   const handleSendMessage = async (content: string, files?: File[]) => {
-    if (!content.trim() || !user) return;
+    if (!user) return;
+    const trimmed = content.trim();
+    if (!trimmed && (!files || files.length === 0)) return;
 
-    // Add optimistic message for instant UI
     const tempId = addOptimisticMessage(conversationId, {
       sender_id: user.id,
-      content: content.trim(),
-      profiles: null
+      content: trimmed,
+      profiles: null,
     });
 
-    // Clear input immediately
     setNewMessage('');
-    
-    // Auto-scroll to show the new message
     setTimeout(() => scrollToBottom(true), 50);
 
     try {
       let attachmentUrl: string | null = null;
 
-      // Upload attachments if any (single file for now; can be extended to multi)
       if (files && files.length > 0) {
         const file = files[0];
         const ext = file.name.split('.').pop();
@@ -288,28 +285,29 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           .from('chat-attachments')
           .upload(path, file, { upsert: false });
         if (uploadError) throw uploadError;
-        attachmentUrl = uploadData?.path || null;
+        const storedPath = uploadData?.path || path;
+        const { data: publicUrlData } = supabase.storage
+          .from('chat-attachments')
+          .getPublicUrl(storedPath);
+        attachmentUrl = publicUrlData?.publicUrl || storedPath;
       }
 
-      // Send to server
       const { data, error } = await supabase
         .from('messages')
         .insert({
           conversation_id: conversationId,
           sender_id: user.id,
-          content: content.trim(),
+          content: trimmed,
           message_type: attachmentUrl ? 'attachment' : 'text',
-          attachment_url: attachmentUrl
+          attachment_url: attachmentUrl,
         })
         .select()
         .single();
 
       if (error) throw error;
 
-      // Replace optimistic message with real one
       confirmMessage(conversationId, tempId, data as Message);
-      
-      // Update conversation's last message timestamp
+
       await supabase
         .from('conversations')
         .update({ last_message_at: new Date().toISOString() })
@@ -319,9 +317,9 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast({
-        variant: "destructive",
-        title: "Failed to send message",
-        description: "Please try again"
+        variant: 'destructive',
+        title: 'Failed to send message',
+        description: 'Please try again',
       });
     }
   };

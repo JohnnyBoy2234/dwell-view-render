@@ -27,10 +27,12 @@ export function MessageBubble({
     isRead,
   });
 
+  const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
+
   return (
     <div 
       className={cn(
-        'flex items-end gap-2 mb-1 animate-fade-in',
+        'flex items-end gap-2 mb-2 animate-message-incoming',
         isOwn ? 'justify-end' : 'justify-start'
       )}
       role="listitem"
@@ -46,8 +48,24 @@ export function MessageBubble({
             {message.profiles.display_name}
           </div>
         )}
+
+        {hasAttachment && (
+          <div className="mb-2">
+            <a
+              href={message.attachment_url!}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium"
+            >
+              <span className="truncate max-w-[200px]">Attachment</span>
+              <span className="text-[10px] text-white/60">Open</span>
+            </a>
+          </div>
+        )}
         
-        <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} />
+        {message.content && (
+          <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} />
+        )}
         
         <div className={cn(
           MESSAGE_STYLES.TIMESTAMP_BASE,
