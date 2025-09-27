@@ -79,7 +79,8 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const { error } = await supabase
         .from('notifications')
         .update({ 
-          is_read: true
+          is_read: true,
+          read_at: new Date().toISOString()
         })
         .eq('id', notificationId)
         .eq('user_id', user.id);
@@ -91,7 +92,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
         setNotifications(prev => 
           prev.map(n => 
             n.id === notificationId 
-              ? { ...n, is_read: true }
+              ? { ...n, is_read: true, read_at: new Date().toISOString() }
               : n
           )
         );
@@ -177,7 +178,10 @@ export const useNotifications = (filters?: NotificationFilters) => {
         const notificationIds = unreadNotifications.map(n => n.id);
         const { error: updateError } = await supabase
           .from('notifications')
-          .update({ is_read: true })
+          .update({ 
+            is_read: true,
+            read_at: new Date().toISOString()
+          })
           .in('id', notificationIds);
         
         if (updateError) {

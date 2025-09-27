@@ -22,7 +22,7 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   
   // Use the appropriate notification hook based on user type
-  const { notifications: generalNotifications, unreadCount: generalUnread, markAsRead: markGeneralAsRead } = useNotifications();
+  const { notifications: generalNotifications, unreadCount: generalUnread, markAsRead: markGeneralAsRead, markAllAsRead: markAllGeneralAsRead } = useNotifications();
   const { notifications: tenantNotifications, unreadCount: tenantUnread, markAsRead: markTenantAsRead } = useTenantNotifications();
   const { notifications: landlordNotifications, unreadCount: landlordUnread, markAsRead: markLandlordAsRead } = useLandlordNotifications();
 
@@ -175,7 +175,7 @@ export function NotificationBell() {
               onClick={async () => {
                 console.log('🔔 Marking all notifications as read');
                 try {
-                  await markGeneralAsRead();
+                  await markAllGeneralAsRead();
                   if (isLandlord) {
                     // Mark landlord notifications as read
                     for (const notification of landlordNotifications) {
