@@ -1,8 +1,11 @@
 import { useState, ChangeEvent, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Paperclip, X, Calendar } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Send, Paperclip, X, Calendar, Image as ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useOptimizedUpload, UploadProgress } from '@/hooks/useOptimizedUpload';
+import { isImageFile, formatFileSize } from '@/utils/imageCompression';
 
 interface MessageComposerProps {
   maxLength?: number;
@@ -32,11 +35,13 @@ export function MessageComposer({
   const [internalValue, setInternalValue] = useState('');
   const [files, setFiles] = useState<File[]>([]);
   const [isFocused, setIsFocused] = useState(false);
+  const [uploadProgresses, setUploadProgresses] = useState<Map<string, UploadProgress>>(new Map());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const value = controlledValue !== undefined ? controlledValue : internalValue;
   const setValue = controlledOnChange || setInternalValue;
+  const { uploadFile } = useOptimizedUpload();
 
   useEffect(() => {
     if (autoFocus && textareaRef.current) {
@@ -46,6 +51,16 @@ export function MessageComposer({
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || []);
+    
+    // Generate progress tracking for each file
+    selected.forEach(file => {
+      const fileId = `${file.name}-${Date.now()}`;
+      setUploadProgresses(prev => new Map(prev.set(fileId, {
+        progress: 0,
+        stage: 'compressing' as const
+      })));
+    });
+    
     setFiles(prev => [...prev, ...selected].slice(0, 5));
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -75,22 +90,53 @@ export function MessageComposer({
     <div className="space-y-3">
       {/* File Attachments */}
       {files.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {files.map((file, index) => (
-            <div 
-              key={index} 
-              className="flex items-center gap-2 bg-white/90 border border-ocean-blue/15 rounded-xl px-3 py-2 text-sm shadow-soft animate-attachment-pop"
-            >
-              <Paperclip className="h-4 w-4 text-ocean-blue" />
-              <span className="truncate max-w-[140px] text-ios-gray-dark font-medium">{file.name}</span>
-              <button
-                onClick={() => removeFile(index)}
-                className="text-muted-foreground hover:text-destructive transition-colors"
+        <div className="space-y-2">
+          {files.map((file, index) => {
+            const fileId = `${file.name}-${Date.now()}`;
+            const progress = uploadProgresses.get(fileId);
+            const isImage = isImageFile(file);
+            
+            return (
+              <div 
+                key={index} 
+                className="flex items-center gap-3 bg-white/90 border border-ocean-blue/15 rounded-xl px-3 py-3 text-sm shadow-soft animate-attachment-pop"
               >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
+                {isImage ? (
+                  <ImageIcon className="h-4 w-4 text-ocean-blue flex-shrink-0" />
+                ) : (
+                  <Paperclip className="h-4 w-4 text-ocean-blue flex-shrink-0" />
+                )}
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="truncate max-w-[140px] text-ios-gray-dark font-medium">
+                      {file.name}
+                    </span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {formatFileSize(file.size)}
+                    </span>
+                  </div>
+                  
+                  {progress && progress.stage !== 'complete' && (
+                    <div className="space-y-1">
+                      <Progress value={progress.progress} className="h-1" />
+                      <div className="text-xs text-muted-foreground capitalize">
+                        {progress.stage}... {progress.progress}%
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  onClick={() => removeFile(index)}
+                  className="text-muted-foreground hover:text-destructive transition-colors flex-shrink-0"
+                  disabled={progress?.stage === 'uploading'}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 

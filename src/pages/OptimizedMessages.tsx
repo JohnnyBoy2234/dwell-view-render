@@ -2,19 +2,13 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useOptimizedMessaging } from '@/hooks/messaging/useOptimizedMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
 import { 
   MessageCircle, 
-  Send, 
   ArrowLeft, 
   Home,
-  Clock,
-  Check,
-  CheckCheck,
   Bell,
   Loader2
 } from 'lucide-react';
@@ -30,34 +24,18 @@ export default function OptimizedMessages() {
   const [searchParams] = useSearchParams();
 
   const { user, isLandlord, authLoading } = auth || ({} as any);
-  const [newMessage, setNewMessage] = useState('');
   const [showConversations, setShowConversations] = useState(true);
-  const [hasPrefilledMessage, setHasPrefilledMessage] = useState(false);
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputFormRef = useRef<HTMLFormElement>(null);
 
   const {
     conversations,
     activeConversation,
     setActiveConversation,
-    messages,
     loading,
     onlineUsers,
-    sendMessage,
-    sendMessageWithAttachment,
     isLoadingConversations,
-    isLoadingMessages,
-    isSending,
     error
   } = useOptimizedMessaging();
-
-  // Auto-scroll to bottom when messages change
-  useEffect(() => {
-    if (messages.length > 0) {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, [messages]);
 
   // Handle initial URL parameter
   useEffect(() => {
@@ -74,15 +52,11 @@ export default function OptimizedMessages() {
     } else {
       setHasProcessedUrlParam(true);
     }
-  }, [conversations, searchParams, hasProcessedUrlParam]);
+  }, [conversations, searchParams, hasProcessedUrlParam, setActiveConversation]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !activeConversation || isSending) return;
-
-    await sendMessage(activeConversation, newMessage);
-    setNewMessage('');
-    setHasPrefilledMessage(false);
+  const handleMessageSent = () => {
+    // Optionally refresh conversations list
+    console.log('Message sent, conversations will auto-update via realtime');
   };
 
   const getOtherUser = (conversation: any) => {
@@ -111,10 +85,6 @@ export default function OptimizedMessages() {
     }
     
     return fullTitle.length > 20 ? fullTitle.substring(0, 20) + '...' : fullTitle;
-  };
-
-  const isMessageRead = (message: any) => {
-    return isLandlord ? message.read_by_landlord : message.read_by_tenant;
   };
 
   const handleConversationClick = (conversationId: string) => {
@@ -311,65 +281,12 @@ export default function OptimizedMessages() {
               </div>
             </div>
 
-            {/* Messages Area */}
-            <ScrollArea className="flex-1 px-4 pt-4">
-              {isLoadingMessages ? (
-                <div className="space-y-4">
-                  {[...Array(8)].map((_, i) => (
-                    <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
-                      <Skeleton className="h-10 w-3/4 max-w-sm rounded-2xl" />
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-4 pb-4">
-                  {messages.map((message) => (
-                    <div key={message.id} className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                        message.sender_id === user?.id
-                          ? 'bg-primary text-primary-foreground ml-auto'
-                          : 'bg-muted'
-                      }`}>
-                        <p className="text-sm break-words">{message.content}</p>
-                        <div className={`flex items-center gap-1 text-xs mt-1 ${
-                          message.sender_id === user?.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                        }`}>
-                          <Clock className="h-3 w-3" />
-                          <span>{formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}</span>
-                          {message.sender_id === user?.id && (
-                            isMessageRead(message) ? (
-                              <CheckCheck className="h-3 w-3 text-green-400" />
-                            ) : (
-                              <Check className="h-3 w-3" />
-                            )
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-            </ScrollArea>
-
-            {/* Input Area */}
-            <div className="border-t p-4 bg-background/95 backdrop-blur">
-              <form ref={inputFormRef} onSubmit={handleSendMessage} className="flex gap-2">
-                <Input
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  className="flex-1"
-                  disabled={isSending}
-                />
-                <Button type="submit" disabled={!newMessage.trim() || isSending} size="sm">
-                  {isSending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Send className="h-4 w-4" />
-                  )}
-                </Button>
-              </form>
+            {/* Messages Thread */}
+            <div className="flex-1 flex flex-col">
+              <WhatsAppStyleThread 
+                conversationId={selectedConversation.id}
+                onMessageSent={handleMessageSent}
+              />
             </div>
           </div>
         )}
@@ -377,7 +294,7 @@ export default function OptimizedMessages() {
     );
   }
 
-  // Desktop layout (simplified for now)
+  // Desktop layout
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
@@ -423,27 +340,35 @@ export default function OptimizedMessages() {
                     >
                       <div className="flex items-start gap-3">
                         <div className="relative">
-                          <Avatar className="h-10 w-10">
+                          <Avatar className="h-8 w-8">
                             <AvatarFallback>
                               {otherUser.name.charAt(0).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
                           {isOnline && (
-                            <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
+                            <div className="absolute -bottom-1 -right-1 h-2 w-2 bg-green-500 rounded-full border border-background"></div>
                           )}
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between mb-1">
                             <p className="font-medium text-sm truncate">{otherUser.name}</p>
                             {conversation.unread_count && conversation.unread_count > 0 && (
-                              <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
+                              <Badge variant="destructive" className="h-4 w-4 p-0 text-xs flex items-center justify-center">
                                 {conversation.unread_count}
                               </Badge>
                             )}
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {getShortPropertyInfo(conversation)}
+                          
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+                            <Home className="h-3 w-3" />
+                            <span className="truncate">{getShortPropertyInfo(conversation)}</span>
+                          </div>
+                          
+                          <p className="text-xs text-muted-foreground">
+                            {conversation.last_message_at
+                              ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
+                              : 'Loading...'}
                           </p>
                         </div>
                       </div>
@@ -454,89 +379,39 @@ export default function OptimizedMessages() {
             )}
           </div>
 
-          {/* Messages Area */}
-          <div className="lg:col-span-2 bg-card rounded-lg border flex flex-col">
+          {/* Messages */}
+          <div className="bg-card rounded-lg border p-0 lg:col-span-2">
             {selectedConversation ? (
-              <>
-                {/* Chat Header */}
-                <div className="p-4 border-b">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>
-                        {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h3 className="font-semibold">{getOtherUser(selectedConversation).name}</h3>
-                      <p className="text-sm text-muted-foreground">{getShortPropertyInfo(selectedConversation)}</p>
+              <div className="flex flex-col h-full">
+                <div className="flex items-center gap-3 p-4 border-b">
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback>
+                      {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="font-semibold">{getOtherUser(selectedConversation).name}</h3>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Badge variant="outline">{getOtherUser(selectedConversation).role}</Badge>
+                      {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
+                        <span className="text-green-600">Online</span>
+                      ) : (
+                        <span>Offline</span>
+                      )}
                     </div>
                   </div>
                 </div>
-
-                {/* Messages */}
-                <ScrollArea className="flex-1 p-4">
-                  {isLoadingMessages ? (
-                    <div className="space-y-4">
-                      {[...Array(6)].map((_, i) => (
-                        <div key={i} className={`flex ${i % 2 === 0 ? 'justify-start' : 'justify-end'}`}>
-                          <Skeleton className="h-12 w-2/3 max-w-sm rounded-2xl" />
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {messages.map((message) => (
-                        <div key={message.id} className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
-                          <div className={`max-w-[70%] rounded-2xl px-4 py-3 ${
-                            message.sender_id === user?.id
-                              ? 'bg-primary text-primary-foreground'
-                              : 'bg-muted'
-                          }`}>
-                            <p className="break-words">{message.content}</p>
-                            <div className={`flex items-center gap-2 text-xs mt-2 ${
-                              message.sender_id === user?.id ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                            }`}>
-                              <Clock className="h-3 w-3" />
-                              <span>{formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}</span>
-                              {message.sender_id === user?.id && (
-                                isMessageRead(message) ? (
-                                  <CheckCheck className="h-3 w-3 text-green-400" />
-                                ) : (
-                                  <Check className="h-3 w-3" />
-                                )
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                      <div ref={messagesEndRef} />
-                    </div>
-                  )}
-                </ScrollArea>
-
-                {/* Input */}
-                <div className="border-t p-4">
-                  <form onSubmit={handleSendMessage} className="flex gap-2">
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type a message..."
-                      className="flex-1"
-                      disabled={isSending}
-                    />
-                    <Button type="submit" disabled={!newMessage.trim() || isSending}>
-                      {isSending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Send className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </form>
+                
+                <div className="flex-1 flex flex-col">
+                  <WhatsAppStyleThread 
+                    conversationId={selectedConversation.id}
+                    onMessageSent={handleMessageSent}
+                  />
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center">
+              <div className="flex items-center justify-center h-full text-center p-8">
+                <div>
                   <MessageCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
                   <p className="text-muted-foreground">Select a conversation to start messaging</p>
                 </div>
