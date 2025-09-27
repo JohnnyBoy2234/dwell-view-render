@@ -478,7 +478,7 @@ export default function Messages() {
 
   // Desktop layout
   return (
-    <>
+    <div className="px-4 md:px-8 lg:px-12">
     {/* Desktop Messages Page Header */}
     <div className="flex items-center gap-4 mb-6">
       <div className="flex items-center gap-2">
@@ -678,6 +678,6 @@ export default function Messages() {
         onSuccess={handleViewingModalSuccess}
       />
     )}
-    </>
+    </div>
   );
 }
