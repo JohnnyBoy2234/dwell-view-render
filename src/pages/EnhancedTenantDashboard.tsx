@@ -193,7 +193,7 @@ export default function EnhancedTenantDashboard() {
         bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/60',
         iconBg: 'bg-ocean-blue',
         subtitle: 'SwiftRent support',
-        path: '/support'
+        path: '/tenant/support'
       },
       {
         title: 'Settings',

@@ -19,7 +19,7 @@ export function MessageStatusIcon({ statusType, ariaLabel }: MessageStatusIconPr
       case 'sending':
         return <Clock className="h-3 w-3 opacity-60" />;
       case 'read':
-        return <CheckCheck className="h-3 w-3 text-slate-400" />;
+        return <CheckCheck className="h-3 w-3 text-slate-300" />;
       case 'delivered':
         return <Check className="h-3 w-3 text-slate-400" />;
       default:

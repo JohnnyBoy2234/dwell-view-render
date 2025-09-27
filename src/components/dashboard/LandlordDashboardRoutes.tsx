@@ -4,6 +4,7 @@ import Messages from '@/pages/Messages';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
+import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
 
 import ProfilePage from '@/components/profile/ProfilePage';
 
@@ -119,6 +120,11 @@ export default function LandlordDashboardRoutes() {
       <Route path="profile" element={
         <EnhancedDashboardLayout title="Profile Settings">
           <ProfilePage />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="support" element={
+        <EnhancedDashboardLayout title="Support & Help">
+          <SwiftRentSupport />
         </EnhancedDashboardLayout>
       } />
     </Routes>

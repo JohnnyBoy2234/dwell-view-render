@@ -2206,7 +2206,7 @@ export default function EnhancedLandlordDashboard() {
 
               {/* Support */}
               <button
-                onClick={() => navigate('/support')}
+                onClick={() => navigate('/enhancedlandlorddashboard/support')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
