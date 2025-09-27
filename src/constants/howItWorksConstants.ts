@@ -111,7 +111,7 @@ export const LANDLORD_DATA: UserTypeData = {
       title: "Manage Properties",
       description:
         "Control all your rentals in one place simple, fast, and effortless.",
-      badges: ["Maintenance Tracking", "Financial Reports"],
+      badges: ["Maintenance Tracking", "Financial SwiftBooks"],
     },
   ],
   cta: {

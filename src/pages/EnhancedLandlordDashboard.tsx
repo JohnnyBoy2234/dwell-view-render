@@ -1217,7 +1217,7 @@ export default function EnhancedLandlordDashboard() {
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
         <BarChart3 className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Reports & Analytics</h2>
+        <h2 className="text-xl font-bold">SwiftBooks & Analytics</h2>
         <Badge variant="secondary" className="ml-2">
           Financial Overview
         </Badge>
@@ -1229,7 +1229,7 @@ export default function EnhancedLandlordDashboard() {
             <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Financial Data</h3>
             <p className="text-muted-foreground mb-4">
-              Financial reports will be available once you have active tenants and rental income.
+              Financial SwiftBooks will be available once you have active tenants and rental income.
             </p>
             <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
               <Building className="h-4 w-4 mr-2" />
@@ -2171,7 +2171,7 @@ export default function EnhancedLandlordDashboard() {
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
                   <BarChart3 className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Reports</p>
+                <p className="text-xs font-medium text-ios-gray-dark">SwiftBooks</p>
                 <p className="text-xs text-ios-gray">Analytics</p>
               </button>
 

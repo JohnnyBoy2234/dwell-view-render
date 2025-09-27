@@ -35,7 +35,7 @@ export const BENEFITS_DATA: Benefit[] = [
   {
     icon: "🛠️",
     title: "Smart Tools Included",
-    text: "Enjoy built-in tenant screening, maintenance tracking, and reports.",
+    text: "Enjoy built-in tenant screening, maintenance tracking, and SwiftBooks.",
   },
   {
     icon: "📱",

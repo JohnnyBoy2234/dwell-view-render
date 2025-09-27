@@ -44,7 +44,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
   { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: RandIcon },
   { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
-  { title: 'Reports', url: '/enhancedlandlorddashboard/reports', icon: BarChart3 },
+  { title: 'SwiftBooks', url: '/enhancedlandlorddashboard/reports', icon: BarChart3 },
 ];
 
 interface EnhancedSidebarProps {

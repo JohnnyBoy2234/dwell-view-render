@@ -64,10 +64,10 @@ function LandlordReports() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Reports & Analytics</CardTitle>
+        <CardTitle>SwiftBooks & Analytics</CardTitle>
       </CardHeader>
       <CardContent>
-        <p>Reports and analytics coming soon.</p>
+        <p>SwiftBooks and analytics coming soon.</p>
       </CardContent>
     </Card>
   );
@@ -102,7 +102,7 @@ export default function LandlordDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="reports" element={
-        <EnhancedDashboardLayout title="Reports & Analytics">
+        <EnhancedDashboardLayout title="SwiftBooks & Analytics">
           <LandlordReports />
         </EnhancedDashboardLayout>
       } />

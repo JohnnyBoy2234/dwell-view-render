@@ -46,7 +46,7 @@ const landlordNavigationItems = [
   { title: 'Payment Tracking', url: '/dashboard/payments', icon: RandIcon, description: 'Rent & Payment Management' },
   { title: 'Lease Management', url: '/dashboard/leases', icon: FileText, description: 'Lease Agreements' },
   { title: 'Maintenance', url: '/dashboard/maintenance', icon: Wrench, description: 'Maintenance Requests' },
-  { title: 'Analytics', url: '/dashboard/analytics', icon: BarChart3, description: 'Reports & Insights' },
+  { title: 'Analytics', url: '/dashboard/analytics', icon: BarChart3, description: 'SwiftBooks & Insights' },
   { title: 'Support', url: '/dashboard/support', icon: HelpCircle, description: 'Help & Resources' },
 ];
 
