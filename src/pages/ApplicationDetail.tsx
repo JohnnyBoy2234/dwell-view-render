@@ -269,6 +269,7 @@ export default function ApplicationDetail() {
           }
 
           if (!bucket) {
+            // No bucket found in path, determine from document type
             if (document.type === 'id_document' || document.type === 'id') {
               bucket = 'id-documents';
             } else if ([
@@ -282,10 +283,9 @@ export default function ApplicationDetail() {
             } else {
               bucket = 'income-documents';
             }
-
-            if (document.file_path?.includes('/')) {
-              pathWithinBucket = document.file_path.split('/').slice(1).join('/');
-            }
+            
+            // When bucket isn't in path, use the full file_path as pathWithinBucket
+            pathWithinBucket = document.file_path;
           }
           console.log('Tenant accessing own document from bucket:', bucket, 'path within bucket:', pathWithinBucket);
           const { data, error } = await supabase.storage
