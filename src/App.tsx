@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
@@ -21,7 +21,7 @@ import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
-import Messages from "./pages/OptimizedMessages";
+import Messages from "./pages/Messages";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -158,12 +158,14 @@ const App = () => {
         <Sonner />
         <AuthProvider>
           <AuthBootstrap>
-            <ScrollToTop />
-            <ErrorBoundary>
-            <MobileNetworkStatus />
-            <AppRoutes />
-            <MobileBottomBar />
-            </ErrorBoundary>
+            <BrowserRouter>
+              <ScrollToTop />
+              <ErrorBoundary>
+              <MobileNetworkStatus />
+              <AppRoutes />
+              <MobileBottomBar />
+              </ErrorBoundary>
+            </BrowserRouter>
           </AuthBootstrap>
         </AuthProvider>
       </TooltipProvider>

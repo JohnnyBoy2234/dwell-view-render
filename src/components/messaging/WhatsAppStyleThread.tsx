@@ -7,11 +7,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
-import { useOptimizedUpload } from '@/hooks/useOptimizedUpload';
-import { startTimer, endTimer, logUploadPerformance } from '@/utils/performanceMonitor';
 import { cn } from '@/lib/utils';
 import { Clock, Check, CheckCheck } from 'lucide-react';
-import React from 'react';
+import React from 'react'; // Added missing import
 
 interface Message {
   id: string;
@@ -54,8 +52,6 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     isLoading
   } = useMessageCache();
 
-  const { uploadFile } = useOptimizedUpload();
-
   const messages = getCachedMessages(conversationId);
   const loading = isLoading(conversationId);
 
@@ -68,26 +64,20 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   // Auto-scroll to bottom when new messages arrive or when typing
   const scrollToBottom = (force = false) => {
-    console.log('⬇️ Attempting scroll to bottom, force:', force, 'isScrolledToBottom:', isScrolledToBottom);
     if (force || isScrolledToBottom) {
       const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-      console.log('📦 ScrollArea viewport found:', !!scrollContainer);
       if (scrollContainer) {
-        // Use requestAnimationFrame for smoother scrolling
-        requestAnimationFrame(() => {
-          const beforeScroll = scrollContainer.scrollTop;
-          scrollContainer.scrollTop = scrollContainer.scrollHeight;
-          console.log('📊 Scroll update - before:', beforeScroll, 'after:', scrollContainer.scrollTop, 'height:', scrollContainer.scrollHeight);
-        });
-      }
-      // Fallback to messagesEndRef
-      setTimeout(() => {
-        console.log('🎯 Using messagesEndRef fallback');
+        // Use scrollTop method for more reliable bottom positioning
+        setTimeout(() => {
+          (scrollContainer as any).scrollTop = (scrollContainer as any).scrollHeight;
+        }, 50);
+      } else {
+        // Fallback to scrollIntoView with better positioning
         messagesEndRef.current?.scrollIntoView({ 
           behavior: 'smooth',
-          block: 'end'
+          block: 'nearest'
         });
-      }, 50);
+      }
     }
   };
 
@@ -170,36 +160,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   };
 
   useEffect(() => {
-    console.log('🔧 Setting up ScrollArea viewport listener');
-    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-    console.log('🎯 ScrollArea viewport element:', scrollContainer);
-    
-    if (!scrollContainer) return;
-
-    const handleViewportScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20;
-      console.log('📊 Viewport scroll:', { scrollTop, scrollHeight, clientHeight, isAtBottom });
-      setIsScrolledToBottom(isAtBottom);
-    };
-
-    scrollContainer.addEventListener('scroll', handleViewportScroll);
-    console.log('✅ Viewport scroll listener added');
-    
-    return () => {
-      scrollContainer.removeEventListener('scroll', handleViewportScroll);
-      console.log('🗑️ Viewport scroll listener removed');
-    };
-  }, [scrollAreaRef.current, conversationId]);
+    handleScrollToProposal(scrollToProposal);
+  }, [onScrollToProposal]);
 
   // Handle scroll position tracking
   const handleScroll = (event: any) => {
-    console.log('🔄 Scroll event triggered:', event.target);
-    const scrollContainer = event.target;
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
-    console.log('📊 Scroll metrics:', { scrollTop, scrollHeight, clientHeight });
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20; // 20px threshold
-    console.log('⬇️ Is at bottom:', isAtBottom);
+    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
     setIsScrolledToBottom(isAtBottom);
   };
 
@@ -293,16 +260,11 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     };
   }, [conversationId]);
 
-  // Handle sending messages with optimized uploads
+  // Handle sending messages
   const handleSendMessage = async (content: string, files?: File[]) => {
     if (!user) return;
     const trimmed = content.trim();
     if (!trimmed && (!files || files.length === 0)) return;
-
-    const performanceId = startTimer('send_message', { 
-      hasAttachment: !!(files?.length), 
-      fileCount: files?.length || 0 
-    });
 
     const tempId = addOptimisticMessage(conversationId, {
       sender_id: user.id,
@@ -315,35 +277,20 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
     try {
       let attachmentUrl: string | null = null;
-      let uploadResult: any = null;
 
       if (files && files.length > 0) {
         const file = files[0];
-        const uploadTimerId = startTimer('file_upload', { 
-          fileName: file.name, 
-          fileSize: file.size 
-        });
-
         const ext = file.name.split('.').pop();
         const path = `messages/${conversationId}/${user.id}/${Date.now()}.${ext}`;
-
-        try {
-          uploadResult = await uploadFile(file, 'chat-attachments', path);
-          attachmentUrl = uploadResult.url;
-          
-          const uploadDuration = endTimer(uploadTimerId) || 0;
-          if (uploadResult.compressedSize) {
-            logUploadPerformance(
-              file.name, 
-              uploadResult.originalSize, 
-              uploadResult.compressedSize, 
-              uploadDuration
-            );
-          }
-        } catch (uploadError) {
-          console.error('Upload failed:', uploadError);
-          throw new Error('File upload failed');
-        }
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('chat-attachments')
+          .upload(path, file, { upsert: false });
+        if (uploadError) throw uploadError;
+        const storedPath = uploadData?.path || path;
+        const { data: publicUrlData } = supabase.storage
+          .from('chat-attachments')
+          .getPublicUrl(storedPath);
+        attachmentUrl = publicUrlData?.publicUrl || storedPath;
       }
 
       const { data, error } = await supabase
@@ -367,17 +314,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         .update({ last_message_at: new Date().toISOString() })
         .eq('id', conversationId);
 
-      const totalDuration = endTimer(performanceId);
-      console.log(`✅ Message sent successfully in ${totalDuration?.toFixed(2)}ms`);
-
       onMessageSent?.();
     } catch (error: any) {
       console.error('Error sending message:', error);
-      endTimer(performanceId);
       toast({
         variant: 'destructive',
         title: 'Failed to send message',
-        description: error.message || 'Please try again',
+        description: 'Please try again',
       });
     }
   };
@@ -551,13 +494,14 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-background to-muted/20">
-      {/* Messages Area - Fixed height for proper scrolling */}
+      {/* Messages Area */}
       <ScrollArea 
-        className="flex-1 px-4 h-full" 
+        className="flex-1 px-4" 
         ref={scrollAreaRef}
+        onScroll={handleScroll}
       >
         <div
-          className="py-4 space-y-1 min-h-full"
+          className="py-4 space-y-1"
           style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
         >
           {loading ? (

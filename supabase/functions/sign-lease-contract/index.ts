@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -155,16 +156,91 @@ serve(async (req) => {
 
 async function sendCompletionNotifications(supabase: any, contract: any, contractId: string) {
   try {
-    console.log('Would send completion notifications for contract:', contractId);
-    
-    // TODO: Re-enable email notifications after fixing Resend import
-    /*
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) return;
 
     const resend = new Resend(resendApiKey);
-    ... email sending code ...
-    */
+
+    // Get both parties' profiles
+    const { data: landlordProfile } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('user_id', contract.landlord_id)
+      .single();
+
+    const { data: tenantProfile } = await supabase
+      .from('profiles')  
+      .select('display_name')
+      .eq('user_id', contract.tenant_id)
+      .single();
+
+    const landlordName = landlordProfile?.display_name || 'Landlord';
+    const tenantName = tenantProfile?.display_name || 'Tenant';
+    const propertyAddress = contract.contract_data?.propertyAddress || 'the property';
+
+    // Email template for completion
+    const completionEmailHtml = (recipient: string, otherParty: string) => `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #16a34a; border-bottom: 2px solid #16a34a; padding-bottom: 10px;">
+          🎉 Lease Agreement Fully Executed
+        </h2>
+        
+        <p>Congratulations!</p>
+        
+        <p>The lease agreement for <strong>${propertyAddress}</strong> has been successfully signed by both parties.</p>
+        
+        <div style="background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #16a34a;">
+          <h3 style="margin-top: 0; color: #16a34a;">Contract Status: Fully Executed</h3>
+          <ul style="margin: 10px 0;">
+            <li><strong>Property:</strong> ${propertyAddress}</li>
+            <li><strong>Landlord:</strong> ${landlordName}</li>
+            <li><strong>Tenant:</strong> ${tenantName}</li>
+            <li><strong>Completed:</strong> ${new Date().toLocaleDateString()}</li>
+          </ul>
+        </div>
+        
+        <p><strong>What happens next:</strong></p>
+        <ul>
+          <li>Both parties will receive a final copy of the signed agreement</li>
+          <li>The lease terms are now legally binding</li>
+          <li>You can access the agreement anytime from your dashboard</li>
+        </ul>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${Deno.env.get('APP_BASE_URL')}/leases" 
+             style="background: #16a34a; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+            View Agreement
+          </a>
+        </div>
+        
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; margin-top: 40px; color: #64748b; font-size: 14px;">
+          <p>This is a legally binding agreement. Please keep this confirmation for your records.</p>
+        </div>
+      </div>
+    `;
+
+    // Send to both parties
+    const landlordEmail = contract.contract_data?.landlordEmail;
+    const tenantEmail = contract.contract_data?.tenantEmail;
+
+    if (landlordEmail) {
+      await resend.emails.send({
+        from: `SwiftRent <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@swiftrent.co"}>`,
+        to: [landlordEmail],
+        subject: `✅ Lease Agreement Completed - ${propertyAddress}`,
+        html: completionEmailHtml(landlordName, tenantName),
+      });
+    }
+
+    if (tenantEmail) {
+      await resend.emails.send({
+        from: `SwiftRent <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@swiftrent.co"}>`,
+        to: [tenantEmail],
+        subject: `✅ Lease Agreement Completed - ${propertyAddress}`,
+        html: completionEmailHtml(tenantName, landlordName),
+      });
+    }
+
   } catch (error) {
     console.error("Error sending completion notifications:", error);
     // Don't fail the signing process if notification fails

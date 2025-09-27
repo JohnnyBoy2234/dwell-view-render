@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { Resend } from "npm:resend@4.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import bcrypt from "npm:bcryptjs@2.4.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -62,8 +64,7 @@ serve(async (req) => {
     }
 
     const code = generateCode();
-    // Temporarily disable bcrypt hashing due to import issues
-    const code_hash = code; // TODO: Re-enable bcrypt.hash(code, 10) after fixing imports
+    const code_hash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     const { error: insertError } = await adminClient.from("verification_codes").insert({
@@ -80,21 +81,36 @@ serve(async (req) => {
       });
     }
 
-    // Temporarily disable email sending
-    console.log('Would send login code:', code, 'to:', email);
-    
-    // TODO: Re-enable email sending after fixing Resend import
-    /*
     const resend = new Resend(resendApiKey);
-    const emailResponse = await resend.emails.send({
+    const to = email;
+    const FROM_EMAIL = Deno.env.get("RESEND_FROM_EMAIL") ?? "onboarding@resend.dev";
+    const FROM_NAME = Deno.env.get("RESEND_FROM_NAME") ?? "SwiftRent";
+    const from = `${FROM_NAME} <${FROM_EMAIL}>`;
+
+
+    const emailHtml = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Verify your sign-in</h2>
+        <p>Your SwiftRent verification code is:</p>
+        <p style="font-size: 28px; font-weight: bold; letter-spacing: 4px;">${code}</p>
+        <p>This code expires in 10 minutes. If you didn't request this, you can safely ignore this email.</p>
+      </div>
+    `;
+
+    const { error: emailError } = await resend.emails.send({
       from,
       to: [to],
       subject: "Your SwiftRent verification code",
       html: emailHtml,
     });
-    */
 
-    console.log('Login code process completed for:', email);
+    if (emailError) {
+      console.error("Email error:", emailError);
+      return new Response(JSON.stringify({ error: "Failed to send email" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
 
     return new Response(JSON.stringify({ sent: true, expiresAt }), {
       status: 200,
