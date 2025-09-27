@@ -256,25 +256,21 @@ export default function ApplicationDetail() {
           console.log('Edge function returned URL:', fileUrl);
         } else {
           // For tenants accessing their own documents, create signed URL
-          let bucket: string;
-          
-          // More explicit bucket mapping based on document type
-          if (document.type === 'id_document' || document.type === 'id') {
-            bucket = 'id-documents';
-          } else if (document.type === 'income' || document.type === 'proof_of_income' || 
-                     document.type === 'bank_statement' || document.type === 'payslip') {
-            bucket = 'income-documents';
-          } else {
-            // Default fallback - but this shouldn't happen
-            console.warn('Unknown document type, defaulting to income-documents:', document.type);
-            bucket = 'income-documents';
+          let bucket: string | null = extractBucketFromPath(document.file_path);
+          if (!bucket) {
+            if (document.type === 'id_document' || document.type === 'id') {
+              bucket = 'id-documents';
+            } else if (document.type === 'income' || document.type === 'proof_of_income' || document.type === 'experian_credit_report' || document.type === 'bank_statement' || document.type === 'payslip') {
+              bucket = 'income-documents';
+            } else {
+              bucket = 'income-documents';
+            }
           }
-          
           console.log('Tenant accessing own document from bucket:', bucket, 'file_path:', document.file_path);
-          
+          const pathWithinBucket = bucket && document.file_path.startsWith(`${bucket}/`) ? document.file_path.slice(bucket.length + 1) : document.file_path;
           const { data, error } = await supabase.storage
             .from(bucket)
-            .createSignedUrl(document.file_path, 60); // 60 seconds expiry
+            .createSignedUrl(pathWithinBucket, 60);
           
           if (error) {
             console.error('Storage error creating signed URL:', error);
@@ -321,6 +317,12 @@ export default function ApplicationDetail() {
         description: error instanceof Error ? error.message : "Could not download the document. Please try again.",
       });
     }
+  };
+
+  const extractBucketFromPath = (path: string | null | undefined): string | null => {
+    if (!path) return null;
+    const parts = path.split('/');
+    return parts.length > 0 ? parts[0] : null;
   };
 
   if (loading) {
