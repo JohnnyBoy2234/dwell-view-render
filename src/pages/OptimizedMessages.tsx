@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
+import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { 
   MessageCircle, 
   ArrowLeft, 
@@ -26,6 +27,7 @@ export default function OptimizedMessages() {
   const { user, isLandlord, authLoading } = auth || ({} as any);
   const [showConversations, setShowConversations] = useState(true);
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
+  const [showViewingModal, setShowViewingModal] = useState(false);
 
   const {
     conversations,
@@ -57,6 +59,16 @@ export default function OptimizedMessages() {
   const handleMessageSent = () => {
     // Optionally refresh conversations list
     console.log('Message sent, conversations will auto-update via realtime');
+  };
+
+  const handleCreateViewing = () => {
+    setShowViewingModal(true);
+  };
+
+  const handleViewingModalSuccess = () => {
+    // Refresh messages to show new viewing proposal
+    setShowViewingModal(false);
+    console.log('Viewing created successfully');
   };
 
   const getOtherUser = (conversation: any) => {
@@ -286,17 +298,31 @@ export default function OptimizedMessages() {
               <WhatsAppStyleThread 
                 conversationId={selectedConversation.id}
                 onMessageSent={handleMessageSent}
+                onCreateViewing={isLandlord ? handleCreateViewing : undefined}
               />
             </div>
           </div>
+        )}
+
+        {/* Add Viewing Modal for Mobile */}
+        {selectedConversation && (
+          <AddViewingSlotModal
+            open={showViewingModal}
+            onOpenChange={setShowViewingModal}
+            conversationId={selectedConversation.id}
+            propertyId={selectedConversation.property_id}
+            tenantId={isLandlord ? getOtherUser(selectedConversation).id : user?.id || ''}
+            propertyTitle={selectedConversation.properties?.title || 'Property'}
+            onSuccess={handleViewingModalSuccess}
+          />
         )}
       </>
     );
   }
 
-  // Desktop layout
   return (
-    <div className="min-h-screen bg-background p-6">
+    <>
+      <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <MessageCircle className="h-8 w-8 text-primary" />
@@ -406,6 +432,7 @@ export default function OptimizedMessages() {
                   <WhatsAppStyleThread 
                     conversationId={selectedConversation.id}
                     onMessageSent={handleMessageSent}
+                    onCreateViewing={isLandlord ? handleCreateViewing : undefined}
                   />
                 </div>
               </div>
@@ -418,8 +445,22 @@ export default function OptimizedMessages() {
               </div>
             )}
           </div>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Add Viewing Modal */}
+      {selectedConversation && (
+        <AddViewingSlotModal
+          open={showViewingModal}
+          onOpenChange={setShowViewingModal}
+          conversationId={selectedConversation.id}
+          propertyId={selectedConversation.property_id}
+          tenantId={isLandlord ? getOtherUser(selectedConversation).id : user?.id || ''}
+          propertyTitle={selectedConversation.properties?.title || 'Property'}
+          onSuccess={handleViewingModalSuccess}
+        />
+      )}
+    </>
   );
 }

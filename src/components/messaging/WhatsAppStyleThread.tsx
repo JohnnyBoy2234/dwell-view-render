@@ -71,17 +71,18 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     if (force || isScrolledToBottom) {
       const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
-        // Use scrollTop method for more reliable bottom positioning
-        setTimeout(() => {
+        // Force immediate scroll to bottom with requestAnimationFrame for smooth scrolling
+        requestAnimationFrame(() => {
           (scrollContainer as any).scrollTop = (scrollContainer as any).scrollHeight;
-        }, 50);
-      } else {
-        // Fallback to scrollIntoView with better positioning
-        messagesEndRef.current?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'nearest'
         });
       }
+      // Always also try messagesEndRef as backup
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'end'
+        });
+      }, 100);
     }
   };
 
@@ -169,8 +170,9 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   // Handle scroll position tracking
   const handleScroll = (event: any) => {
-    const { scrollTop, scrollHeight, clientHeight } = event.target;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
+    const scrollContainer = event.target;
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20; // 20px threshold
     setIsScrolledToBottom(isAtBottom);
   };
 
@@ -531,6 +533,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         <div
           className="py-4 space-y-1"
           style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
+          onScroll={handleScroll}
         >
           {loading ? (
             <div className="flex justify-center py-10">
