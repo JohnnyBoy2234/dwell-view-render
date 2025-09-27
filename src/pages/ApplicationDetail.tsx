@@ -231,7 +231,7 @@ export default function ApplicationDetail() {
       let fileUrl: string;
       
       console.log('Downloading document:', document);
-      console.log('Document type:', document.document_type);
+      console.log('Document type:', document.type);
       console.log('Document file path:', document.file_path);
       
       if (document.source === 'screening_profile') {
@@ -259,14 +259,14 @@ export default function ApplicationDetail() {
           let bucket: string;
           
           // More explicit bucket mapping based on document type
-          if (document.document_type === 'id_document' || document.document_type === 'id') {
+          if (document.type === 'id_document' || document.type === 'id') {
             bucket = 'id-documents';
-          } else if (document.document_type === 'income' || document.document_type === 'proof_of_income' || 
-                     document.document_type === 'bank_statement' || document.document_type === 'payslip') {
+          } else if (document.type === 'income' || document.type === 'proof_of_income' || 
+                     document.type === 'bank_statement' || document.type === 'payslip') {
             bucket = 'income-documents';
           } else {
             // Default fallback - but this shouldn't happen
-            console.warn('Unknown document type, defaulting to income-documents:', document.document_type);
+            console.warn('Unknown document type, defaulting to income-documents:', document.type);
             bucket = 'income-documents';
           }
           
