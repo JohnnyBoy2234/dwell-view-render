@@ -43,19 +43,19 @@ const Navbar = () => {
             onSignOut={signOut}
           />
 
-          {/* Mobile Sign In */}
-          {!loading && !user && (
-            <Button
-              asChild
-              size="sm"
-              className="md:hidden mr-2 bg-ocean-blue text-white hover:bg-ocean-blue-dark"
-            >
-              <Link to={NAVBAR_ROUTES.AUTH}>{NAVBAR_CONTENT.SIGN_IN_LABEL}</Link>
-            </Button>
-          )}
-
-          {/* Mobile Hamburger Menu */}
-          <MobileSidebar />
+          {/* Mobile Actions */}
+          <div className="flex items-center md:hidden gap-2">
+            <MobileSidebar />
+            {!loading && !user && (
+              <Button
+                asChild
+                size="sm"
+                className="bg-ocean-blue text-white hover:bg-ocean-blue-dark"
+              >
+                <Link to={NAVBAR_ROUTES.AUTH}>{NAVBAR_CONTENT.SIGN_IN_LABEL}</Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </nav>
