@@ -31,7 +31,7 @@ export const NAVBAR_ROUTES = {
   AUTH: "/auth",
   MESSAGES: "/messages",
   LANDLORD_DASHBOARD: "/enhancedlandlorddashboard",
-  TENANT_DASHBOARD: "/enhancedtenantdashboard",
+  TENANT_DASHBOARD: "/tenant-dashboard",
   ADMIN_DASHBOARD: "/admin/dashboard",
 } as const;
 

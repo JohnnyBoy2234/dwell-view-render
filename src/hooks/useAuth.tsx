@@ -188,7 +188,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
   const redirectAfterAuth = (path: string) => {
-    sessionStorage.setItem('returnTo', path);
+    if (path) {
+      sessionStorage.setItem('returnTo', path);
+    } else {
+      sessionStorage.removeItem('returnTo');
+    }
   };
 
   const signOut = async () => {
