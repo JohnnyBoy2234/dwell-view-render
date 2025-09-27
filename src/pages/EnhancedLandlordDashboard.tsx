@@ -760,7 +760,7 @@ export default function EnhancedLandlordDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Leads</CardTitle>
-          <div className="text-sm text-muted-foreground">Tenants you’ve chatted with recently</div>
+          <div className="text-sm text-muted-foreground">Tenants you've chatted with recently</div>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Controls */}
@@ -2097,9 +2097,8 @@ export default function EnhancedLandlordDashboard() {
           {/* App-style Feature Grid */}
           <div>
             <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>
-            <div className="grid grid-cols-3 gap-3">
-              {/* Properties */}
-              <button 
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/properties')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2110,8 +2109,7 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">{properties.length}</p>
               </button>
 
-              {/* Tenants */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2122,8 +2120,7 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">{tenants.length}</p>
               </button>
 
-              {/* Applications */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2134,10 +2131,9 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">{applications.length}</p>
               </button>
 
-              {/* Maintenance */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100 relative"
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                   <Wrench className="w-5 h-5 text-white" />
@@ -2151,8 +2147,7 @@ export default function EnhancedLandlordDashboard() {
                 )}
               </button>
 
-              {/* Payments */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2163,8 +2158,7 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">Track</p>
               </button>
 
-              {/* Reports */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2175,8 +2169,7 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">Analytics</p>
               </button>
 
-              {/* Leases */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2187,8 +2180,7 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">Manage</p>
               </button>
 
-              {/* Add Property */}
-              <button 
+              <button
                 onClick={() => navigate('/add-property')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2199,8 +2191,7 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">New</p>
               </button>
 
-              {/* Quick Stats */}
-              <button 
+              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
