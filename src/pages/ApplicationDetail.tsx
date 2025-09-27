@@ -257,6 +257,14 @@ export default function ApplicationDetail() {
         } else {
           // For tenants accessing their own documents, create signed URL
           let bucket: string | null = extractBucketFromPath(document.file_path);
+          let pathWithinBucket = document.file_path;
+          if (bucket === 'public') {
+            const segments = document.file_path.split('/').slice(1);
+            bucket = segments.shift() || 'income-documents';
+            pathWithinBucket = segments.join('/');
+          } else if (bucket && document.file_path.startsWith(`${bucket}/`)) {
+            pathWithinBucket = document.file_path.slice(bucket.length + 1);
+          }
           if (!bucket) {
             if (document.type === 'id_document' || document.type === 'id') {
               bucket = 'id-documents';
@@ -266,8 +274,7 @@ export default function ApplicationDetail() {
               bucket = 'income-documents';
             }
           }
-          console.log('Tenant accessing own document from bucket:', bucket, 'file_path:', document.file_path);
-          const pathWithinBucket = bucket && document.file_path.startsWith(`${bucket}/`) ? document.file_path.slice(bucket.length + 1) : document.file_path;
+          console.log('Tenant accessing own document from bucket:', bucket, 'path within bucket:', pathWithinBucket);
           const { data, error } = await supabase.storage
             .from(bucket)
             .createSignedUrl(pathWithinBucket, 60);
@@ -286,9 +293,9 @@ export default function ApplicationDetail() {
           console.log('Created signed URL:', fileUrl);
           
           // Validate the signed URL format
-          if (!fileUrl.includes('token=') || !fileUrl.includes('Signature=')) {
-            console.error('Invalid signed URL format:', fileUrl);
-            throw new Error('Invalid signed URL format received');
+          if (!fileUrl.includes('token=') && !fileUrl.includes('download=') && !fileUrl.includes('Expires=')) {
+            console.error('Unexpected signed URL format:', fileUrl);
+            throw new Error('Unexpected signed URL format received');
           }
         }
       } else {
