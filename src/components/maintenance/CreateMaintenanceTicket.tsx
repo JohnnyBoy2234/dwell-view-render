@@ -7,8 +7,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMaintenanceTickets } from '@/hooks/useMaintenanceTickets';
 import { toast } from 'sonner';
-import { Upload, Camera } from 'lucide-react';
+import { Upload, Camera, X } from 'lucide-react';
 import type { Priority, Category } from '@/types/maintenance';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CreateMaintenanceTicketProps {
   propertyId: string;
@@ -17,6 +19,7 @@ interface CreateMaintenanceTicketProps {
 
 export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateMaintenanceTicketProps) {
   const { createTicket } = useMaintenanceTickets(propertyId);
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -24,11 +27,49 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
     description: '',
     priority: 'medium' as const,
     category: 'other' as const,
-    images: [] as string[]
+    images: [] as File[]
   });
+
+  const uploadImages = async (files: File[]): Promise<string[]> => {
+    if (!user || !files.length) return [];
+
+    const imageUrls: string[] = [];
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}_${i}.${fileExt}`;
+      
+      try {
+        const { error: uploadError } = await supabase.storage
+          .from('maintenance-images')
+          .upload(fileName, file);
+          
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          toast.error(`Failed to upload image: ${file.name}`);
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('maintenance-images')
+            .getPublicUrl(fileName);
+          imageUrls.push(publicUrl);
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        toast.error(`Failed to upload image: ${file.name}`);
+      }
+    }
+    
+    return imageUrls;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!user) {
+      toast.error('You must be logged in to create a maintenance request');
+      return;
+    }
     
     if (!formData.title || !formData.description) {
       toast.error('Please fill in all required fields');
@@ -37,6 +78,9 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
 
     try {
       setLoading(true);
+      
+      // Upload images first
+      const imageUrls = await uploadImages(formData.images);
       
       // Map UI values to DB-allowed enums
       const mapCategory = (c: string): Category => {
@@ -53,7 +97,7 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
         description: formData.description,
         priority: mapPriority(formData.priority),
         category: mapCategory(formData.category),
-        images: formData.images
+        images: imageUrls
       });
 
       toast.success('Maintenance request submitted successfully!');
@@ -81,12 +125,17 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
     const files = e.target.files;
     if (!files) return;
 
-    // In a real app, you would upload these to Supabase Storage
-    // For now, we'll just store file names
-    const newImages = Array.from(files).map(file => file.name);
+    const newImages = Array.from(files);
     setFormData(prev => ({
       ...prev,
       images: [...prev.images, ...newImages]
+    }));
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
     }));
   };
 
@@ -211,15 +260,26 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
               
               {formData.images.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm font-medium mb-2">Selected Files:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {formData.images.map((image, index) => (
-                      <span 
-                        key={index}
-                        className="px-2 py-1 bg-primary/10 text-primary text-xs rounded"
-                      >
-                        {image}
-                      </span>
+                  <p className="text-sm font-medium mb-2">Selected Images:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {formData.images.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-24 object-cover rounded-md border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                        <div className="absolute bottom-1 left-1 bg-black/50 text-white text-xs px-1 rounded">
+                          {file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>

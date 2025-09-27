@@ -116,18 +116,18 @@ export default function TenantMaintenance() {
           const fileExt = file.name.split('.').pop();
           const fileName = `${user.id}/${Date.now()}_${i}.${fileExt}`;
           
-          const { error: uploadError } = await supabase.storage
-            .from('property-images')
-            .upload(fileName, file);
-            
-          if (uploadError) {
-            console.error('Error uploading image:', uploadError);
-          } else {
-            const { data: { publicUrl } } = supabase.storage
-              .from('property-images')
-              .getPublicUrl(fileName);
-            imageUrls.push(publicUrl);
-          }
+        const { error: uploadError } = await supabase.storage
+          .from('maintenance-images')
+          .upload(fileName, file);
+          
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('maintenance-images')
+            .getPublicUrl(fileName);
+          imageUrls.push(publicUrl);
+        }
         }
       }
 

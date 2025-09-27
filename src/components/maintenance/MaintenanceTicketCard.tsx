@@ -16,6 +16,7 @@ import {
   MessageSquare,
   Images
 } from 'lucide-react';
+import { MaintenanceImageGallery } from './MaintenanceImageGallery';
 import type { MaintenanceRequest } from '@/types/maintenance';
 
 interface MaintenanceTicketCardProps {
@@ -248,17 +249,7 @@ export function MaintenanceTicketCard({ ticket, showActions = true }: Maintenanc
               <Images className="h-4 w-4" />
               <span>{ticket.images.length} image(s) attached</span>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {ticket.images.map((imageUrl, index) => (
-                <img
-                  key={index}
-                  src={imageUrl}
-                  alt={`Maintenance image ${index + 1}`}
-                  className="w-full h-24 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => window.open(imageUrl, '_blank')}
-                />
-              ))}
-            </div>
+            <MaintenanceImageGallery images={ticket.images} ticketTitle={ticket.title} />
           </div>
         )}
 
