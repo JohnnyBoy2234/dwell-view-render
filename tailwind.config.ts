@@ -170,6 +170,16 @@ export default {
 				'typing-bounce': {
 					'0%, 80%, 100%': { transform: 'scale(0)' },
 					'40%': { transform: 'scale(1)' }
+				},
+				'conversation-entry': {
+					'0%': { transform: 'translateY(12px)', opacity: '0' },
+					'60%': { transform: 'translateY(-4px)', opacity: '1' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
+				},
+				'badge-pop': {
+					'0%': { transform: 'scale(0.6)', opacity: '0' },
+					'70%': { transform: 'scale(1.15)', opacity: '1' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
 				}
 			},
 			animation: {
@@ -179,7 +189,9 @@ export default {
 				'message-incoming': 'message-incoming 0.24s cubic-bezier(.22,.61,.36,1) both',
 				'message-outgoing': 'message-outgoing 0.24s cubic-bezier(.22,.61,.36,1) both',
 				'message-status-pulse': 'message-status-pulse 1.6s ease-in-out infinite',
-				'typing-bounce': 'typing-bounce 1.2s ease-in-out infinite'
+				'typing-bounce': 'typing-bounce 1.2s ease-in-out infinite',
+				'conversation-entry': 'conversation-entry 0.28s cubic-bezier(.22,.61,.36,1) both',
+				'badge-pop': 'badge-pop 0.4s ease-out'
 			}
 		}
 	},
