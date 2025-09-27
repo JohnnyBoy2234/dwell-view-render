@@ -198,6 +198,37 @@ export default function MaintenanceTicketDetails() {
                   </p>
                 </div>
               )}
+
+              {/* Images */}
+              {ticket.images && ticket.images.length > 0 && (
+                <div>
+                  <Label className="text-sm font-medium">Attached Images</Label>
+                  <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {ticket.images.map((imageUrl, index) => (
+                      <div
+                        key={index}
+                        className="relative group cursor-pointer"
+                        onClick={() => window.open(imageUrl, '_blank')}
+                      >
+                        <img
+                          src={imageUrl}
+                          alt={`Maintenance issue ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg border transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            e.currentTarget.src = '/placeholder.svg';
+                            e.currentTarget.alt = 'Image failed to load';
+                          }}
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-colors flex items-center justify-center">
+                          <span className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                            Click to view full size
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 

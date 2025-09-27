@@ -108,13 +108,36 @@ export default function TenantMaintenance() {
         }
       }
 
+      // Upload images if any
+      const imageUrls: string[] = [];
+      if (photos && photos.length > 0) {
+        for (let i = 0; i < photos.length; i++) {
+          const file = photos[i];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}_${i}.${fileExt}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('property-images')
+            .upload(fileName, file);
+            
+          if (uploadError) {
+            console.error('Error uploading image:', uploadError);
+          } else {
+            const { data: { publicUrl } } = supabase.storage
+              .from('property-images')
+              .getPublicUrl(fileName);
+            imageUrls.push(publicUrl);
+          }
+        }
+      }
+
       await createMaintenance.mutateAsync({
         property_id: propertyId,
         title: title.trim(),
         description: description.trim(),
         priority,
         category,
-        images: [], // TODO: Handle photo uploads
+        images: imageUrls,
       });
 
       // Reset form
@@ -123,6 +146,13 @@ export default function TenantMaintenance() {
       setPriority('medium');
       setCategory('other');
       setPhotos(null);
+      
+      // Reset file input
+      const fileInput = document.getElementById('photos') as HTMLInputElement;
+      if (fileInput) {
+        fileInput.value = '';
+      }
+      
       setIsCreateDialogOpen(false);
       
       toast({

@@ -243,9 +243,22 @@ export function MaintenanceTicketCard({ ticket, showActions = true }: Maintenanc
         )}
 
         {ticket.images && ticket.images.length > 0 && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Images className="h-4 w-4" />
-            <span>{ticket.images.length} image(s) attached</span>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <Images className="h-4 w-4" />
+              <span>{ticket.images.length} image(s) attached</span>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {ticket.images.map((imageUrl, index) => (
+                <img
+                  key={index}
+                  src={imageUrl}
+                  alt={`Maintenance image ${index + 1}`}
+                  className="w-full h-24 object-cover rounded-md border cursor-pointer hover:opacity-80 transition-opacity"
+                  onClick={() => window.open(imageUrl, '_blank')}
+                />
+              ))}
+            </div>
           </div>
         )}
 
