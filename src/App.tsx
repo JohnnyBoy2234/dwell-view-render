@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
@@ -158,14 +158,12 @@ const App = () => {
         <Sonner />
         <AuthProvider>
           <AuthBootstrap>
-            <BrowserRouter>
-              <ScrollToTop />
-              <ErrorBoundary>
-              <MobileNetworkStatus />
-              <AppRoutes />
-              <MobileBottomBar />
-              </ErrorBoundary>
-            </BrowserRouter>
+            <ScrollToTop />
+            <ErrorBoundary>
+            <MobileNetworkStatus />
+            <AppRoutes />
+            <MobileBottomBar />
+            </ErrorBoundary>
           </AuthBootstrap>
         </AuthProvider>
       </TooltipProvider>
