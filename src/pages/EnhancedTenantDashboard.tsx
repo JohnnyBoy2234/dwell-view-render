@@ -222,7 +222,7 @@ export default function EnhancedTenantDashboard() {
                     className="cursor-pointer rounded-2xl bg-white shadow-md border border-gray-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
                   onClick={() => navigate(block.path)}
                   >
-                   <CardContent className="p-4 h-[120px] md:h-[132px]">
+                   <CardContent className="p-4 h-[150px] md:h-[172px]">
                    <div className="flex flex-col items-center text-center h-full justify-center">
                         <div className="relative">
                         <div className={`w-10 h-10 ${block.iconBg} rounded-full shadow-md flex items-center justify-center`}>

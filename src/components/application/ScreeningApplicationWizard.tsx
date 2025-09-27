@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,8 @@ export interface ScreeningApplicationWizardProps {
   inviteId?: string;
   onSubmissionComplete?: () => void;
 }
+
+const getAutosaveKey = (userId: string, propertyId: string) => `sr_application_autosave_${userId}_${propertyId}`;
 
 interface FormData {
   // Personal
@@ -73,6 +75,45 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const [uploadedDocuments, setUploadedDocuments] = useState<DocumentItem[]>([]);
   const [incomeDocuments, setIncomeDocuments] = useState<DocumentItem[]>([]);
   const [creditDocuments, setCreditDocuments] = useState<DocumentItem[]>([]);
+  const [hasLoadedAutosave, setHasLoadedAutosave] = useState(false);
+
+  const clearAutosave = useCallback(() => {
+    if (!user) return;
+    try {
+      localStorage.removeItem(getAutosaveKey(user.id, propertyId));
+    } catch (error) {
+      console.warn("Failed to clear application autosave", error);
+    }
+  }, [user?.id, propertyId]);
+
+  const applySavedProgress = useCallback(() => {
+    if (!user || hasLoadedAutosave) return;
+    const key = getAutosaveKey(user.id, propertyId);
+    const raw = localStorage.getItem(key);
+    if (!raw) {
+      setHasLoadedAutosave(true);
+      return;
+    }
+
+    try {
+      const saved = JSON.parse(raw);
+      if (saved?.formData && typeof saved.formData === "object") {
+        setFormData((prev) => ({
+          ...prev,
+          ...saved.formData,
+        }));
+      }
+
+      if (typeof saved?.currentStep === "number") {
+        const clamped = Math.min(Math.max(saved.currentStep, 0), steps.length - 1);
+        setCurrentStep(clamped);
+      }
+    } catch (error) {
+      console.warn("Failed to load saved application progress", error);
+    } finally {
+      setHasLoadedAutosave(true);
+    }
+  }, [user?.id, propertyId, hasLoadedAutosave]);
 
   const [formData, setFormData] = useState<FormData>({
     first_name: "",
@@ -94,11 +135,42 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   });
 
   useEffect(() => {
+    let isMounted = true;
     if (user) {
-      void loadExistingData();
+      (async () => {
+        await loadExistingData();
+        if (isMounted) {
+          applySavedProgress();
+        }
+      })();
     }
+    return () => {
+      isMounted = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, propertyId]);
+  }, [user?.id, propertyId, applySavedProgress]);
+
+  useEffect(() => {
+    if (!user || loading || !hasLoadedAutosave) return;
+
+    const handler = setTimeout(() => {
+      const key = getAutosaveKey(user.id, propertyId);
+      try {
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            formData,
+            currentStep,
+            updatedAt: Date.now(),
+          })
+        );
+      } catch (error) {
+        console.warn("Failed to autosave application", error);
+      }
+    }, 600);
+
+    return () => clearTimeout(handler);
+  }, [formData, currentStep, user?.id, propertyId, loading, hasLoadedAutosave]);
 
   // Quick apply using saved screening details
   const quickApply = async () => {
@@ -129,6 +201,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         description: "Your application has been sent using your saved details.",
       });
 
+      clearAutosave();
       if (onSubmissionComplete) onSubmissionComplete();
       else navigate("/enhancedtenantdashboard");
       return true;
@@ -592,6 +665,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         description: "We will run a credit check and update your status shortly.",
       });
 
+      clearAutosave();
       if (onSubmissionComplete) onSubmissionComplete();
       else navigate("/enhancedtenantdashboard");
     } catch (error: any) {

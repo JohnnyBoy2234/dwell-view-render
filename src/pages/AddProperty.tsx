@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -55,6 +55,8 @@ const amenitiesList = [
   'Pet Friendly'
 ];
 
+const getAutosaveKey = (userId: string) => `sr_add_property_autosave_${userId}`;
+
 export default function AddProperty() {
   const { user, isLandlord } = useAuth();
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
@@ -69,6 +71,55 @@ export default function AddProperty() {
       pets_allowed: false
     }
   });
+
+  useEffect(() => {
+    if (!user) return;
+    const key = getAutosaveKey(user.id);
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (saved?.formData && typeof saved.formData === 'object') {
+        Object.entries(saved.formData as Partial<PropertyFormData>).forEach(([field, value]) => {
+          setValue(field as keyof PropertyFormData, value as any);
+        });
+      }
+      if (Array.isArray(saved?.selectedAmenities)) {
+        setSelectedAmenities(saved.selectedAmenities);
+      }
+    } catch (error) {
+      console.warn('Failed to load property autosave', error);
+    }
+  }, [user?.id, setValue]);
+
+  useEffect(() => {
+    if (!user) return;
+    const subscription = watch((value) => {
+      const key = getAutosaveKey(user.id);
+      try {
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            formData: value,
+            selectedAmenities,
+            updatedAt: Date.now(),
+          })
+        );
+      } catch (error) {
+        console.warn('Failed to autosave property form', error);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, user?.id, selectedAmenities]);
+
+  const clearAutosave = () => {
+    if (!user) return;
+    try {
+      localStorage.removeItem(getAutosaveKey(user.id));
+    } catch (error) {
+      console.warn('Failed to clear property autosave', error);
+    }
+  };
 
   if (!user) {
     navigate('/auth');
@@ -150,6 +201,7 @@ export default function AddProperty() {
         description: "Your property is now listed on SwiftRent."
       });
 
+      clearAutosave();
       navigate('/enhancedlandlorddashboard');
     } catch (error: any) {
       toast({

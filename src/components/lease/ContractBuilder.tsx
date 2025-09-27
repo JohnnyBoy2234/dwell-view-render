@@ -83,6 +83,14 @@ const builderSteps: ContractBuilderStep[] = [
   }
 ];
 
+const getAutosaveKey = (userId?: string, contractId?: string, propertyId?: string) => {
+  const base = 'sr_lease_autosave';
+  if (contractId) return `${base}_contract_${contractId}`;
+  if (userId && propertyId) return `${base}_${userId}_${propertyId}`;
+  if (userId) return `${base}_${userId}`;
+  return base;
+};
+
 export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }: ContractBuilderProps) {
   const { contracts, createContract, updateContract, generatePDF } = useLeaseContracts();
   const [currentStep, setCurrentStep] = useState(0);
@@ -122,16 +130,70 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   });
   const [steps, setSteps] = useState(builderSteps);
   const [saving, setSaving] = useState(false);
+  const [hasLoadedAutosave, setHasLoadedAutosave] = useState(false);
 
   useEffect(() => {
-    if (contractId) {
-      const existingContract = contracts.find(c => c.id === contractId);
-      if (existingContract) {
-        setContract(existingContract);
-        setContractData(existingContract.contract_data);
+    const loadData = async () => {
+      if (contractId) {
+        const existingContract = contracts.find(c => c.id === contractId);
+        if (existingContract) {
+          setContract(existingContract);
+          setContractData(existingContract.contract_data);
+        }
       }
+
+      const key = getAutosaveKey(contract?.landlord_id || contracts[0]?.landlord_id, contractId, propertyId);
+      if (!hasLoadedAutosave && key) {
+        try {
+          const raw = localStorage.getItem(key);
+          if (raw) {
+            const saved = JSON.parse(raw);
+            if (saved?.contractData) {
+              setContractData((prev) => ({ ...prev, ...saved.contractData }));
+            }
+            if (typeof saved?.currentStep === 'number') {
+              const clamped = Math.min(Math.max(saved.currentStep, 0), builderSteps.length - 1);
+              setCurrentStep(clamped);
+            }
+          }
+        } catch (error) {
+          console.warn('Failed to load lease autosave', error);
+        }
+        setHasLoadedAutosave(true);
+      }
+    };
+    loadData();
+  }, [contractId, contracts, propertyId, contract, hasLoadedAutosave]);
+
+  useEffect(() => {
+    if (!hasLoadedAutosave) return;
+    const key = getAutosaveKey(contract?.landlord_id, contract?.id || contractId, propertyId);
+    if (!key) return;
+
+    const handler = setTimeout(() => {
+      try {
+        localStorage.setItem(key, JSON.stringify({
+          contractData,
+          currentStep,
+          updatedAt: Date.now(),
+        }));
+      } catch (error) {
+        console.warn('Failed to autosave lease contract', error);
+      }
+    }, 600);
+
+    return () => clearTimeout(handler);
+  }, [contractData, currentStep, contract?.id, contract?.landlord_id, contractId, propertyId, hasLoadedAutosave]);
+
+  const clearAutosave = () => {
+    const key = getAutosaveKey(contract?.landlord_id, contract?.id || contractId, propertyId);
+    if (!key) return;
+    try {
+      localStorage.removeItem(key);
+    } catch (error) {
+      console.warn('Failed to clear lease autosave', error);
     }
-  }, [contractId, contracts]);
+  };
 
   const validateStep = (stepIndex: number): boolean => {
     const step = steps[stepIndex];
@@ -186,6 +248,14 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleComplete = async () => {
+    await saveContract(false);
+    clearAutosave();
+    if (onComplete && contract?.id) {
+      onComplete(contract.id);
     }
   };
 
@@ -324,10 +394,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
             </Button>
           ) : (
             <Button
-              onClick={() => {
-                saveContract(false);
-                onComplete?.(contract?.id || '');
-              }}
+              onClick={handleComplete}
               disabled={!steps.every(step => step.isCompleted) || saving}
             >
               Complete Contract
