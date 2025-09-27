@@ -25,7 +25,7 @@ const RIcon = ({ className }: { className?: string }) => (
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { BUILD_TAG } from '@/version';
+
 import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
 import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
@@ -53,7 +53,6 @@ export default function EnhancedTenantDashboard() {
   useEffect(() => {
     // Visible in production console to verify current deployed build
     // eslint-disable-next-line no-console
-    console.log('[EnhancedTenantDashboard] Build:', BUILD_TAG);
     if (!user) {
       navigate('/auth');
       return;
