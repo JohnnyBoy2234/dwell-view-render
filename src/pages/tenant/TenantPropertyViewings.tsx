@@ -55,7 +55,7 @@ export default function TenantPropertyViewings() {
       // Fetch tenant's booked viewing slots
       const { data: viewingSlots, error } = await supabase
         .from('viewing_slots')
-        .select('id, property_id, landlord_id, start_time, end_time, status, conversation_id')
+        .select('id, property_id, landlord_id, start_time, end_time, status')
         .eq('booked_by_tenant_id', user.id)
         .order('start_time', { ascending: false });
 
@@ -98,7 +98,7 @@ export default function TenantPropertyViewings() {
           end_time: slot.end_time,
           status: (slot.status === 'booked' ? 'booked' : 
                    slot.status === 'completed' ? 'completed' : 'cancelled') as 'booked' | 'completed' | 'cancelled',
-          conversation_id: slot.conversation_id || undefined,
+          conversation_id: undefined,
           property: property ? {
             id: property.id,
             title: property.title,
