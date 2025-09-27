@@ -6,7 +6,6 @@ import { LogOut, Menu, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Component, ReactNode } from 'react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { BUILD_TAG } from '@/version';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
@@ -59,11 +58,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                     {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
                   </Badge>
                 </div>
-                <div className="hidden sm:block">
-                  <Badge variant="outline" className="text-[10px] ml-1">
-                    {BUILD_TAG}
-                  </Badge>
-                </div>
+                
               </div>
             </div>
             
