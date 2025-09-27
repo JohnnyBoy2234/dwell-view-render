@@ -423,7 +423,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                   <span
                     className={cn(
                       'inline-flex items-center transition-colors duration-200',
-                      statusType === 'read' ? 'text-success-green-light animate-message-status-pulse' : 'text-white/70'
+                      statusType === 'read' ? 'text-success-green-light' : 'text-white/70'
                     )}
                   >
                     {statusType === 'read' ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
