@@ -151,12 +151,35 @@ export default {
 				'soft-float': {
 					'0%, 100%': { transform: 'translateY(0)' },
 					'50%': { transform: 'translateY(-2px)' }
+				},
+				'message-incoming': {
+					'0%': { transform: 'translateY(6px) scale(0.98)', opacity: '0' },
+					'60%': { transform: 'translateY(-2px) scale(1.01)', opacity: '1' },
+					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+				},
+				'message-outgoing': {
+					'0%': { transform: 'translateY(6px) translateX(12px) scale(0.96)', opacity: '0' },
+					'70%': { transform: 'translateY(-2px) translateX(0) scale(1.02)', opacity: '1' },
+					'100%': { transform: 'translateY(0) translateX(0) scale(1)', opacity: '1' }
+				},
+				'message-status-pulse': {
+					'0%': { transform: 'scale(0.9)', opacity: '0.4' },
+					'50%': { transform: 'scale(1)', opacity: '1' },
+					'100%': { transform: 'scale(0.95)', opacity: '0.7' }
+				},
+				'typing-bounce': {
+					'0%, 80%, 100%': { transform: 'scale(0)' },
+					'40%': { transform: 'scale(1)' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'soft-float': 'soft-float 6s ease-in-out infinite'
+				'soft-float': 'soft-float 6s ease-in-out infinite',
+				'message-incoming': 'message-incoming 0.24s cubic-bezier(.22,.61,.36,1) both',
+				'message-outgoing': 'message-outgoing 0.24s cubic-bezier(.22,.61,.36,1) both',
+				'message-status-pulse': 'message-status-pulse 1.6s ease-in-out infinite',
+				'typing-bounce': 'typing-bounce 1.2s ease-in-out infinite'
 			}
 		}
 	},

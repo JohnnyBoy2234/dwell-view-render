@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { cn } from '@/lib/utils';
 import { Clock, Check, CheckCheck } from 'lucide-react';
+import React from 'react'; // Added missing import
 
 interface Message {
   id: string;
@@ -20,6 +21,8 @@ interface Message {
   read_by_tenant: boolean;
   profiles?: { display_name: string } | null;
   optimistic?: boolean;
+  message_type?: string; // Added for new rendering logic
+  viewing_proposal_id?: string; // Added for new rendering logic
 }
 
 interface WhatsAppStyleThreadProps {
@@ -329,13 +332,118 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     setTimeout(() => scrollToBottom(true), 300);
   };
 
-  if (loading && messages.length === 0) {
+  const handleMessageChange = (value: string) => {
+    setNewMessage(value);
+    if (value.length > 0) {
+      setIsTyping(true);
+    } else {
+      setIsTyping(false);
+    }
+  };
+
+  const handleTypingStart = () => {
+    setIsTyping(true);
+  };
+
+  const handleTypingStop = () => {
+    setIsTyping(false);
+  };
+
+  const renderMessage = (message: Message, index: number) => {
+    const isOwn = message.sender_id === user?.id;
+    const isRead = isOwn ? (isLandlord ? message.read_by_tenant : message.read_by_landlord) : (isLandlord ? message.read_by_landlord : message.read_by_tenant);
+    const statusType = isOwn
+      ? isLandlord
+        ? (message.read_by_tenant ? 'read' : 'delivered')
+        : (message.read_by_landlord ? 'read' : 'delivered')
+      : 'none';
+
+    const showNewDayDivider = index === 0 ||
+      new Date(message.created_at).toDateString() !== new Date(messages[index - 1]?.created_at || 0).toDateString();
+
+    const showTimeGap = index === 0 ||
+      new Date(message.created_at).getTime() - new Date(messages[index - 1]?.created_at || 0).getTime() > 300000; // 5 minutes
+
+    const messageKey = message.id;
+
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <React.Fragment key={messageKey}>
+        {showNewDayDivider && (
+          <div className="flex justify-center my-3">
+            <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/80 text-ios-gray-dark shadow-soft">
+              {new Date(message.created_at).toLocaleDateString(undefined, {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric'
+              })}
+            </span>
+          </div>
+        )}
+
+        {message.message_type === 'viewing_proposal' && message.viewing_proposal_id ? (
+          <div id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming">
+            <ViewingProposalCard
+              message={message}
+              proposal={proposalsById[message.viewing_proposal_id]}
+              onCreateViewing={onCreateViewing}
+            />
+          </div>
+        ) : (
+          <div
+            className={cn(
+              'flex items-end gap-2 mb-1',
+              isOwn ? 'justify-end' : 'justify-start'
+            )}
+          >
+            <div
+              className={cn(
+                'relative max-w-[95%] sm:max-w-[70%] rounded-3xl px-4 py-3 shadow-soft transition-transform',
+                'backdrop-blur-sm border border-white/20',
+                isOwn
+                  ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white animate-message-outgoing'
+                  : 'bg-white/90 text-ios-gray-dark animate-message-incoming'
+              )}
+            >
+              {(!isOwn && message.profiles?.display_name) && (
+                <div className="text-xs font-semibold text-ios-blue mb-1 tracking-tight">
+                  {message.profiles.display_name}
+                </div>
+              )}
+
+              <div className="text-sm leading-relaxed whitespace-pre-line break-words">
+                {message.content}
+              </div>
+
+              <div className={cn(
+                'mt-2 flex items-center gap-1 text-[11px]',
+                isOwn ? 'flex-row-reverse text-white/70' : 'text-ios-gray'
+              )}>
+                <span>{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                {isOwn && (
+                  <span
+                    className={cn(
+                      'inline-flex items-center transition-colors duration-200',
+                      statusType === 'read' ? 'text-success-green animate-message-status-pulse' : 'text-white/70'
+                    )}
+                  >
+                    {statusType === 'read' ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showTimeGap && index !== messages.length - 1 && (
+          <div className="flex justify-center my-2">
+            <span className="px-2 py-1 text-[11px] text-ios-gray bg-white/80 rounded-full shadow-soft">
+              {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          </div>
+        )}
+      </React.Fragment>
     );
-  }
+  };
 
   return (
     <div className="flex flex-col h-full bg-gradient-to-b from-background to-muted/20">
@@ -349,75 +457,14 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           className="py-4 space-y-1"
           style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
         >
-          {messages.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-muted-foreground">
-              <div className="flex items-center">
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
-                <p>Loading messages...</p>
-              </div>
+          {loading ? (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <>
-              {messages.map((message, index) => {
-                const showTime = index === 0 || 
-                  new Date(message.created_at).getTime() - new Date(messages[index - 1]?.created_at || 0).getTime() > 300000; // 5 minutes
-                
-                // Render viewing proposal as inline card
-                if (message.message_type === 'viewing_proposal' && message.viewing_proposal_id) {
-                  const proposal = proposalsById[message.viewing_proposal_id];
-                  return (
-                    <div key={message.id} id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto">
-                      {proposal ? (
-                        <ViewingProposalCard
-                          proposal={proposal}
-                          onUpdate={async () => {
-                            // Reload proposal for fresh status
-                            try {
-                              const { data, error } = await supabase
-                                .from('viewing_proposals')
-                                .select(`*, properties ( title, location )`)
-                                .eq('id', proposal.id)
-                                .single();
-                              
-                              if (!error && data) {
-                                setProposalsById(prev => ({
-                                  ...prev,
-                                  [proposal.id]: data
-                                }));
-                              }
-                            } catch (error) {
-                              console.error('Error reloading proposal:', error);
-                              // Fallback: remove from cache to force reload
-                              setProposalsById(prev => {
-                                const next = { ...prev };
-                                delete next[proposal.id];
-                                return next;
-                              });
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div className="rounded-lg border bg-card p-4 text-sm text-muted-foreground">
-                          Loading viewing details...
-                        </div>
-                      )}
-                    </div>
-                  );
-                }
-
-                return (
-                  <MessageBubble
-                    key={message.id}
-                    message={message as any}
-                    currentUserId={user?.id || ''}
-                    isLandlord={isLandlord}
-                    showTime={showTime}
-                  />
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </>
+            messages.map(renderMessage)
           )}
+          <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
 
@@ -442,7 +489,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           onSend={handleSendMessage}
           placeholder="Type a message..."
           value={newMessage}
-          onChange={setNewMessage}
+          onChange={handleMessageChange}
           onFocus={handleComposerFocus}
           autoFocus={false}
           onCreateViewing={onCreateViewing}
