@@ -8,7 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Wrench, Building } from 'lucide-react';
+import { Wrench, Building, Images } from 'lucide-react';
+import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
 
 interface MaintenanceRequest {
   id: string;
@@ -18,6 +19,7 @@ interface MaintenanceRequest {
   priority: 'low' | 'medium' | 'high';
   created_at: string;
   property_title: string;
+  images?: string[];
 }
 
 interface SupabaseMaintenanceRequest {
@@ -28,6 +30,7 @@ interface SupabaseMaintenanceRequest {
   priority: 'low' | 'medium' | 'high';
   created_at: string;
   property_id: string;
+  images?: string[];
 }
 
 export default function LandlordMaintenance() {
@@ -48,7 +51,7 @@ export default function LandlordMaintenance() {
       setLoading(true);
       const { data, error } = await supabase
         .from('maintenance_requests')
-        .select('id, title, description, status, priority, created_at, property_id')
+        .select('id, title, description, status, priority, created_at, property_id, images')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -74,6 +77,7 @@ export default function LandlordMaintenance() {
         priority: req.priority,
         created_at: req.created_at,
         property_title: propertiesMap[req.property_id] || 'Unknown Property',
+        images: req.images || [],
       }));
       setRequests(transformed);
     } catch (error) {
@@ -152,7 +156,7 @@ export default function LandlordMaintenance() {
                         <Building className="h-3 w-3" />
                         <span>{req.property_title}</span>
                       </div>
-                      <div className="text-xs text-muted-foreground mt-1">
+                       <div className="text-xs text-muted-foreground mt-1">
                         {new Date(req.created_at).toLocaleDateString()}
                       </div>
                     </div>
@@ -164,6 +168,16 @@ export default function LandlordMaintenance() {
                       Respond
                     </Button>
                   </div>
+                  
+                  {req.images && req.images.length > 0 && (
+                    <div className="space-y-3 mt-4">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Images className="h-4 w-4" />
+                        <span>{req.images.length} image(s) attached</span>
+                      </div>
+                      <MaintenanceImageGallery images={req.images} ticketTitle={req.title} />
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>
                       <SelectTrigger className="w-[160px]">

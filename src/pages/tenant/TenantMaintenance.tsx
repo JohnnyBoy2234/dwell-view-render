@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@/hooks/maintenance/useMaintenanceRequests';
 import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import { useTenantResponses } from '@/hooks/maintenance/useTenantResponses';
-import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera } from 'lucide-react';
+import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera, Images } from 'lucide-react';
+import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -405,14 +406,28 @@ export default function TenantMaintenance() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Wrench className="h-4 w-4" />
-                      <span>Request #{request.id.slice(0, 8)}</span>
+                  <div className="space-y-4">
+                    <p className="text-sm text-muted-foreground">{request.description}</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Wrench className="h-4 w-4" />
+                        <span>Request #{request.id.slice(0, 8)}</span>
+                      </div>
+                      <span className="text-sm text-muted-foreground capitalize">
+                        {request.category}
+                      </span>
                     </div>
-                    <span className="text-sm text-muted-foreground capitalize">
-                      {request.category}
-                    </span>
+                    
+                    {request.images && request.images.length > 0 && (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <Images className="h-4 w-4" />
+                          <span>{request.images.length} image(s) attached</span>
+                        </div>
+                        <MaintenanceImageGallery images={request.images} ticketTitle={request.title} />
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
