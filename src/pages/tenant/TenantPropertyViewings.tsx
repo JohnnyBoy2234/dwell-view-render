@@ -45,51 +45,70 @@ export default function TenantPropertyViewings() {
     
     setLoading(true);
     try {
-      // For now, using mock data since the database schema needs adjustment
-      // In a real implementation, this would fetch from viewing_slots table
-      const mockViewings = [
-        {
-          id: '1',
-          property_id: 'prop1',
-          start_time: new Date(Date.now() + 86400000).toISOString(), // Tomorrow
-          end_time: new Date(Date.now() + 90000000).toISOString(),
-          status: 'booked' as const,
-          property: {
-            title: 'Modern 2-Bedroom Apartment',
-            location: 'Cape Town City Centre',
-            price: 18000,
-            bedrooms: 2,
-            bathrooms: 2,
-            images: []
-          },
-          landlord: {
-            display_name: 'John Smith',
-            phone: '+27123456789'
-          }
-        },
-        {
-          id: '2',
-          property_id: 'prop2',
-          start_time: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-          end_time: new Date(Date.now() - 82800000).toISOString(),
-          status: 'completed' as const,
-          property: {
-            title: 'Cozy Studio in Green Point',
-            location: 'Green Point, Cape Town',
-            price: 12000,
-            bedrooms: 1,
-            bathrooms: 1,
-            images: []
-          },
-          landlord: {
-            display_name: 'Sarah Johnson',
-            phone: '+27987654321'
-          }
-        }
-      ];
+      // Fetch tenant's booked viewing slots
+      const { data: viewingSlots, error } = await supabase
+        .from('viewing_slots')
+        .select('id, property_id, start_time, end_time, status')
+        .eq('booked_by_tenant_id', user.id)
+        .order('start_time', { ascending: false });
 
-      setViewings(mockViewings);
+      if (error) throw error;
+
+      if (!viewingSlots || viewingSlots.length === 0) {
+        setViewings([]);
+        return;
+      }
+
+      // Fetch property details for each slot
+      const propertyIds = [...new Set(viewingSlots.map(slot => slot.property_id))];
+      
+      const { data: properties, error: propertiesError } = await supabase
+        .from('properties')
+        .select('id, title, location, price, bedrooms, bathrooms, images, landlord_id')
+        .in('id', propertyIds);
+
+      if (propertiesError) throw propertiesError;
+
+      // Fetch landlord details
+      const landlordIds = [...new Set(properties?.map(property => property.landlord_id).filter(Boolean) || [])];
+      
+      const { data: landlordProfiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, display_name, phone')
+        .in('user_id', landlordIds);
+
+      if (profilesError) throw profilesError;
+
+      // Map the data to match the component's interface
+      const mappedViewings: PropertyViewing[] = viewingSlots.map(slot => {
+        const property = properties?.find(p => p.id === slot.property_id);
+        const landlord = landlordProfiles?.find(profile => profile.user_id === property?.landlord_id);
+        
+        return {
+          id: slot.id,
+          property_id: slot.property_id,
+          start_time: slot.start_time,
+          end_time: slot.end_time,
+          status: (slot.status === 'booked' ? 'booked' : 
+                   slot.status === 'completed' ? 'completed' : 'cancelled') as 'booked' | 'completed' | 'cancelled',
+          property: property ? {
+            title: property.title,
+            location: property.location,
+            price: property.price,
+            bedrooms: property.bedrooms,
+            bathrooms: property.bathrooms,
+            images: property.images || []
+          } : undefined,
+          landlord: landlord ? {
+            display_name: landlord.display_name || 'Landlord',
+            phone: landlord.phone
+          } : undefined
+        };
+      });
+
+      setViewings(mappedViewings);
     } catch (error: any) {
+      console.error('Error fetching viewings:', error);
       toast({
         variant: 'destructive',
         title: 'Error loading viewings',
