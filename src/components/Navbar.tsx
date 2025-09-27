@@ -48,8 +48,7 @@ const Navbar = () => {
             <Button
               asChild
               size="sm"
-              className="md:hidden mr-2"
-              variant="outline"
+              className="md:hidden mr-2 bg-ocean-blue text-white hover:bg-ocean-blue-dark"
             >
               <Link to={NAVBAR_ROUTES.AUTH}>{NAVBAR_CONTENT.SIGN_IN_LABEL}</Link>
             </Button>
