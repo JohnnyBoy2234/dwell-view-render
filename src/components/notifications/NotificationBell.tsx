@@ -164,8 +164,10 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
             <CardContent className="p-0 max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-6 text-center text-muted-foreground">
-                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">No notifications yet</p>
+                  <div className="flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                    <p className="text-sm">Loading notifications...</p>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-1">

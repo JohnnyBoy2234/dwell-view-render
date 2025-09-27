@@ -208,8 +208,10 @@ export function SwiftRentSupport() {
             <div className="text-center py-4 text-gray-500">Loading messages...</div>
           ) : messages.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
-              <MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>No messages yet. Send us your first concern or query!</p>
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                <p>Loading messages...</p>
+              </div>
             </div>
           ) : (
             <div className="space-y-3 max-h-64 overflow-y-auto">

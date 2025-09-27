@@ -349,7 +349,10 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         >
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-muted-foreground">
-              <p>No messages yet. Start the conversation!</p>
+              <div className="flex items-center">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+                <p>Loading messages...</p>
+              </div>
             </div>
           ) : (
             <>

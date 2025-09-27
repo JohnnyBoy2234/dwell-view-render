@@ -15,7 +15,10 @@ export function MessagesEmptyState({ isLandlord }: MessagesEmptyStateProps) {
     <Card className="text-center p-8">
       <CardContent>
         <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No messages yet</h3>
+        <div className="flex items-center justify-center mb-2">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+          <h3 className="text-lg font-semibold">Loading messages...</h3>
+        </div>
         <p className="text-muted-foreground">
           {isLandlord ? EMPTY_STATE_MESSAGES.LANDLORD : EMPTY_STATE_MESSAGES.TENANT}
         </p>

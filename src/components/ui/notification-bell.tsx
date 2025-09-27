@@ -111,7 +111,10 @@ export function NotificationBell() {
         
         {allNotifications.length === 0 ? (
           <DropdownMenuItem className="px-4 py-6 text-center text-muted-foreground">
-            No notifications yet
+            <div className="flex items-center justify-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary mr-2"></div>
+              Loading notifications...
+            </div>
           </DropdownMenuItem>
         ) : (
           allNotifications.slice(0, 10).map((notification, index) => {

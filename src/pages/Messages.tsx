@@ -305,8 +305,8 @@ export default function Messages() {
                 ) : conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
                     <div>
-                      <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                      <p className="text-muted-foreground">No conversations yet</p>
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+                      <p className="text-muted-foreground">Loading conversations...</p>
                     </div>
                   </div>
                 ) : (
@@ -357,7 +357,7 @@ export default function Messages() {
                               <p className="text-xs text-muted-foreground mt-1">
                                 {conversation.last_message_at
                                   ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
-                                  : 'No messages yet'}
+                                  : 'Loading...'}
                               </p>
                             </div>
                           </div>
@@ -514,8 +514,8 @@ export default function Messages() {
                 </div>
               ) : conversations.length === 0 ? (
                 <div className="p-6 text-center">
-                  <MessageCircle className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                  <p className="text-muted-foreground">No conversations yet</p>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
+                  <p className="text-muted-foreground">Loading conversations...</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -565,7 +565,7 @@ export default function Messages() {
                             <p className="text-xs text-muted-foreground mt-1">
                               {conversation.last_message_at
                                 ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
-                                : 'No messages yet'}
+                                : 'Loading...'}
                             </p>
                           </div>
                         </div>
