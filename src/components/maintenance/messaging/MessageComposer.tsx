@@ -72,14 +72,17 @@ export function MessageComposer({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {/* File Attachments */}
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {files.map((file, index) => (
-            <div key={index} className="flex items-center gap-2 bg-muted rounded-lg px-3 py-2 text-sm">
-              <Paperclip className="h-4 w-4" />
-              <span className="truncate max-w-[120px]">{file.name}</span>
+            <div 
+              key={index} 
+              className="flex items-center gap-2 bg-white/90 border border-ocean-blue/15 rounded-xl px-3 py-2 text-sm shadow-soft animate-attachment-pop"
+            >
+              <Paperclip className="h-4 w-4 text-ocean-blue" />
+              <span className="truncate max-w-[140px] text-ios-gray-dark font-medium">{file.name}</span>
               <button
                 onClick={() => removeFile(index)}
                 className="text-muted-foreground hover:text-destructive transition-colors"
@@ -93,14 +96,15 @@ export function MessageComposer({
 
       {/* Message Input */}
       <div className={cn(
-        "flex items-end gap-2 p-2 bg-background rounded-2xl border transition-all duration-200",
-        isFocused ? "border-primary/50 shadow-sm" : "border-border",
+        "flex items-end gap-2 p-2.5 bg-white/80 rounded-2xl border transition-all duration-300", 
+        "backdrop-blur-md shadow-soft",
+        isFocused ? "border-ocean-blue/40 ring-2 ring-ocean-blue/20" : "border-white/70",
         disabled && "opacity-60"
       )}>
         {showViewingButton && (
           <button
             onClick={onCreateViewing}
-            className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-muted/50"
+            className="text-muted-foreground hover:text-ocean-blue transition-colors p-2 rounded-full hover:bg-ocean-blue/10"
             disabled={disabled}
             title="Create viewing slot"
           >
@@ -110,7 +114,7 @@ export function MessageComposer({
 
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="text-muted-foreground hover:text-primary transition-colors p-2 rounded-full hover:bg-muted/50"
+          className="text-muted-foreground hover:text-ocean-blue transition-colors p-2 rounded-full hover:bg-ocean-blue/10"
           disabled={disabled}
           title="Attach file"
         >
@@ -126,7 +130,7 @@ export function MessageComposer({
           rows={1}
           className={cn(
             "flex-1 min-h-[44px] max-h-[120px] resize-none border-0 bg-transparent",
-            "focus-visible:ring-0 focus-visible:ring-offset-0 px-0 py-2",
+            "focus-visible:ring-0 focus-visible:ring-offset-0 px-0 py-2 text-[15px]",
             "placeholder:text-muted-foreground/60"
           )}
           onKeyDown={handleKeyDown}
@@ -141,11 +145,11 @@ export function MessageComposer({
         <Button
           onClick={handleSend}
           disabled={disabled || (!value.trim() && files.length === 0)}
-          size="sm"
+          size="icon"
           className={cn(
-            "rounded-full h-10 w-10 p-0 transition-all duration-200",
+            "rounded-full h-11 w-11 p-0 transition-all duration-200", 
             (value.trim() || files.length > 0) 
-              ? "bg-ios-blue hover:bg-ios-blue-dark scale-100" 
+              ? "bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white shadow-pop hover:shadow-lg" 
               : "bg-muted text-muted-foreground hover:bg-muted scale-95"
           )}
         >
@@ -162,7 +166,6 @@ export function MessageComposer({
         />
       </div>
 
-      {/* Character Count */}
       {value.length > maxLength * 0.8 && (
         <div className="text-xs text-muted-foreground text-right">
           {value.length}/{maxLength}

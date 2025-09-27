@@ -171,6 +171,21 @@ export default {
 					'0%, 80%, 100%': { transform: 'scale(0)' },
 					'40%': { transform: 'scale(1)' }
 				},
+        'composer-focus': {
+          '0%': { transform: 'translateY(10px) scale(0.98)', opacity: '0' },
+          '60%': { transform: 'translateY(-2px) scale(1.01)', opacity: '1' },
+          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+        },
+        'send-press': {
+          '0%': { transform: 'scale(0.92) rotate(-6deg)' },
+          '60%': { transform: 'scale(1.08) rotate(2deg)' },
+          '100%': { transform: 'scale(1) rotate(0)' }
+        },
+        'attachment-pop': {
+          '0%': { transform: 'translateY(8px) scale(0.96)', opacity: '0' },
+          '60%': { transform: 'translateY(-2px) scale(1.02)', opacity: '1' },
+          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+        },
 				'conversation-entry': {
 					'0%': { transform: 'translateY(12px)', opacity: '0' },
 					'60%': { transform: 'translateY(-4px)', opacity: '1' },
@@ -190,6 +205,9 @@ export default {
 				'message-outgoing': 'message-outgoing 0.24s cubic-bezier(.22,.61,.36,1) both',
 				'message-status-pulse': 'message-status-pulse 1.6s ease-in-out infinite',
 				'typing-bounce': 'typing-bounce 1.2s ease-in-out infinite',
+				'composer-focus': 'composer-focus 0.18s cubic-bezier(.22,.61,.36,1) both',
+				'send-press': 'send-press 0.22s cubic-bezier(.22,.61,.36,1) both',
+				'attachment-pop': 'attachment-pop 0.3s cubic-bezier(.22,.61,.36,1) both',
 				'conversation-entry': 'conversation-entry 0.28s cubic-bezier(.22,.61,.36,1) both',
 				'badge-pop': 'badge-pop 0.4s ease-out'
 			}
