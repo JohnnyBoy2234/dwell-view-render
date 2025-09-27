@@ -68,10 +68,7 @@ export function MessagesTab() {
         </Button>
       </div>
 
-      {!loading && conversations.length === 0 ? (
-        <MessagesEmptyState isLandlord={isLandlord} />
-      ) : (
-        <div className="space-y-3">
+      <div className="space-y-3">
           {conversations.slice(0, UI_CONSTANTS.MAX_CONVERSATIONS_SHOWN).map((conversation) => (
             <ConversationItem
               key={`${conversation.other_user_id}${UI_CONSTANTS.CONVERSATION_KEY_SEPARATOR}${conversation.property_id || UI_CONSTANTS.GENERAL_CONVERSATION_KEY}`}
@@ -90,7 +87,6 @@ export function MessagesTab() {
             </Button>
           )}
         </div>
-      )}
     </div>
   );
 }

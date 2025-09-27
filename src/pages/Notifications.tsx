@@ -246,18 +246,7 @@ export default function Notifications() {
         </div>
 
         {/* Notifications List */}
-        {!loading && allNotifications.length === 0 ? (
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <Bell className="h-16 w-16 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No notifications</h3>
-              <p className="text-muted-foreground text-center">
-                You're all caught up! We'll notify you when there's something new.
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <ScrollArea className="h-[calc(100vh-12rem)]">
+        <ScrollArea className="h-[calc(100vh-12rem)]">
             <div className="space-y-2">
               {allNotifications.map((notification, index) => (
                 <Card 
@@ -299,7 +288,6 @@ export default function Notifications() {
               ))}
             </div>
           </ScrollArea>
-        )}
       </div>
     </div>
   );
