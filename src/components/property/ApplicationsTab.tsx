@@ -20,6 +20,7 @@ import {
 import { useLandlordApplications, ApplicationWithTenant } from '@/hooks/useLandlordApplications';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { downloadFileFromUrl } from '@/lib/download';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -224,7 +225,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
         body: { document_id: documentId }
       });
       if (error || !data?.url) throw error || new Error('No download URL');
-      window.open(data.url, '_blank');
+      await downloadFileFromUrl(data.url, `document-${documentId}`);
     } catch (e: any) {
       toast({ title: 'Download failed', description: e.message || 'Unable to get download link', variant: 'destructive' });
     }

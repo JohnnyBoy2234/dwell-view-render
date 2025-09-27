@@ -7,6 +7,7 @@ import { ArrowLeft, FileText, Home, MapPin, Calendar, Download } from 'lucide-re
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { downloadFileFromUrl } from '@/lib/download';
 
 interface ApplicationDetail {
   id: string;
@@ -229,63 +230,58 @@ export default function ApplicationDetail() {
     try {
       let fileUrl: string;
       
+      console.log('Downloading document:', document);
+      
       if (document.source === 'screening_profile') {
         // Document from screening profile - use the URL directly
         fileUrl = document.url || document.name;
-      } else {
-        // Document from documents table - construct URL from file_path
-        fileUrl = document.file_path;
-      }
-      
-      // If it's already a signed URL, use it directly
-      if (fileUrl.includes('/storage/v1/object/sign/')) {
-        // This is already a signed URL, use it as-is
-        console.log('Using existing signed URL:', fileUrl);
-      } else if (fileUrl.includes('supabase.co/storage/v1/object/public/')) {
-        // This is a public URL, use it directly
-        console.log('Using public URL:', fileUrl);
-      } else if (fileUrl.includes('supabase.co/storage')) {
-        // Extract bucket and file path from the URL
-        const urlParts = fileUrl.split('/storage/v1/object/');
-        if (urlParts.length === 2) {
-          const [bucket, ...pathParts] = urlParts[1].split('/');
-          const filePath = pathParts.join('/');
+        console.log('Using screening profile URL:', fileUrl);
+      } else if (document.source === 'documents_table') {
+        // Documents from documents table need proper authorization
+        if (isLandlord) {
+          // Use the edge function for landlords to access tenant documents
+          console.log('Landlord accessing tenant document via edge function');
+          const { data, error } = await supabase.functions.invoke('landlord-get-document-url', {
+            body: { document_id: document.id }
+          });
           
-          // Get a signed URL for download
+          if (error || !data?.url) {
+            console.error('Edge function error:', error);
+            throw new Error(error?.message || 'Failed to get download URL');
+          }
+          
+          fileUrl = data.url;
+          console.log('Edge function returned URL:', fileUrl);
+        } else {
+          // For tenants accessing their own documents, create signed URL
+          const bucket = document.document_type === 'id' ? 'id-documents' : 'income-documents';
+          console.log('Tenant accessing own document from bucket:', bucket, 'file_path:', document.file_path);
+          
           const { data, error } = await supabase.storage
             .from(bucket)
-            .createSignedUrl(filePath, 60); // 60 seconds expiry
+            .createSignedUrl(document.file_path, 60); // 60 seconds expiry
           
-          if (error) throw error;
+          if (error) {
+            console.error('Storage error creating signed URL:', error);
+            throw new Error(`Failed to create signed URL for document: ${error.message}`);
+          }
+          
+          if (!data?.signedUrl) {
+            console.error('No signed URL returned from storage');
+            throw new Error('No signed URL returned from storage');
+          }
+          
           fileUrl = data.signedUrl;
+          console.log('Created signed URL:', fileUrl);
         }
       } else {
-        // Assume it's a file path and try to create a signed URL
-        // Determine bucket based on document type or file path
-        let bucket = 'income-documents'; // default
-        if (fileUrl.includes('id_') || fileUrl.includes('id-')) {
-          bucket = 'id-documents';
-        }
-        
-        const { data, error } = await supabase.storage
-          .from(bucket)
-          .createSignedUrl(fileUrl, 60);
-        
-        if (error) {
-          console.error('Storage error:', error);
-          throw error;
-        }
-        fileUrl = data.signedUrl;
+        // Fallback for other document types
+        fileUrl = document.url || document.file_path || document.name;
+        console.log('Using fallback URL:', fileUrl);
       }
       
-      // Create a temporary anchor element to trigger download
-      const link = document.createElement('a');
-      link.href = fileUrl;
-      link.download = document.name;
-      link.target = '_blank';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Use the shared download utility
+      await downloadFileFromUrl(fileUrl, document.name);
       
       toast({
         title: "Download started",
