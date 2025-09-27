@@ -231,6 +231,8 @@ export default function ApplicationDetail() {
       let fileUrl: string;
       
       console.log('Downloading document:', document);
+      console.log('Document type:', document.document_type);
+      console.log('Document file path:', document.file_path);
       
       if (document.source === 'screening_profile') {
         // Document from screening profile - use the URL directly
@@ -254,7 +256,20 @@ export default function ApplicationDetail() {
           console.log('Edge function returned URL:', fileUrl);
         } else {
           // For tenants accessing their own documents, create signed URL
-          const bucket = document.document_type === 'id' ? 'id-documents' : 'income-documents';
+          let bucket: string;
+          
+          // More explicit bucket mapping based on document type
+          if (document.document_type === 'id_document' || document.document_type === 'id') {
+            bucket = 'id-documents';
+          } else if (document.document_type === 'income' || document.document_type === 'proof_of_income' || 
+                     document.document_type === 'bank_statement' || document.document_type === 'payslip') {
+            bucket = 'income-documents';
+          } else {
+            // Default fallback - but this shouldn't happen
+            console.warn('Unknown document type, defaulting to income-documents:', document.document_type);
+            bucket = 'income-documents';
+          }
+          
           console.log('Tenant accessing own document from bucket:', bucket, 'file_path:', document.file_path);
           
           const { data, error } = await supabase.storage
@@ -273,11 +288,22 @@ export default function ApplicationDetail() {
           
           fileUrl = data.signedUrl;
           console.log('Created signed URL:', fileUrl);
+          
+          // Validate the signed URL format
+          if (!fileUrl.includes('token=') || !fileUrl.includes('Signature=')) {
+            console.error('Invalid signed URL format:', fileUrl);
+            throw new Error('Invalid signed URL format received');
+          }
         }
       } else {
         // Fallback for other document types
         fileUrl = document.url || document.file_path || document.name;
         console.log('Using fallback URL:', fileUrl);
+      }
+      
+      // Additional validation before download
+      if (!fileUrl || fileUrl.trim() === '') {
+        throw new Error('No valid file URL available for download');
       }
       
       // Use the shared download utility
@@ -291,8 +317,8 @@ export default function ApplicationDetail() {
       console.error('Error downloading document:', error);
       toast({
         variant: "destructive",
-        title: "Download failed",
-        description: "Could not download the document. Please try again.",
+        title: "Download failed", 
+        description: error instanceof Error ? error.message : "Could not download the document. Please try again.",
       });
     }
   };
