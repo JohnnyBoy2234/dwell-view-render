@@ -408,9 +408,62 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                 </div>
               )}
 
-              <div className="text-sm leading-relaxed whitespace-pre-line break-words">
-                {message.content}
-              </div>
+              {/* Attachment handling */}
+              {message.message_type === 'attachment' && message.attachment_url && (
+                <div className="mb-2">
+                  {(() => {
+                    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
+                    const isImage = imageExtensions.some(ext => message.attachment_url!.toLowerCase().includes(ext));
+                    
+                    return isImage ? (
+                      <div className="relative">
+                        <img
+                          src={message.attachment_url}
+                          alt="Shared image"
+                          className="max-w-[250px] max-h-[200px] rounded-xl object-cover cursor-pointer hover:opacity-95 transition-opacity"
+                          onClick={() => window.open(message.attachment_url!, '_blank')}
+                          onError={(e) => {
+                            // Fallback to link if image fails to load
+                            e.currentTarget.style.display = 'none';
+                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                          }}
+                        />
+                        <a
+                          href={message.attachment_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(
+                            "hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium",
+                            isOwn ? "bg-white/15 border border-white/20 text-white hover:bg-white/25" : "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200"
+                          )}
+                        >
+                          <span className="truncate max-w-[200px]">Image</span>
+                          <span className="text-[10px] opacity-60">Open</span>
+                        </a>
+                      </div>
+                    ) : (
+                      <a
+                        href={message.attachment_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(
+                          "inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors",
+                          isOwn ? "bg-white/15 border border-white/20 text-white hover:bg-white/25" : "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200"
+                        )}
+                      >
+                        <span className="truncate max-w-[200px]">Attachment</span>
+                        <span className="text-[10px] opacity-60">Open</span>
+                      </a>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {message.content && (
+                <div className="text-sm leading-relaxed whitespace-pre-line break-words">
+                  {message.content}
+                </div>
+              )}
 
               <div className={cn(
                 'mt-2 flex items-center gap-1 text-[11px]',
