@@ -19,7 +19,12 @@ import {
   Info,
   Clock
 } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -122,7 +127,7 @@ export default function Notifications() {
       case 'maintenance':
         return <Wrench className={iconClass} />;
       case 'payment':
-        return <RandMoneyBagIcon className={iconClass} />;
+        return <RIcon className={iconClass} />;
       case 'viewing':
         return <Calendar className={iconClass} />;
       case 'application':

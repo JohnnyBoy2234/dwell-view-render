@@ -10,7 +10,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Wrench, Calendar, User, Building } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { useState } from 'react';
 import type { MaintenanceRequest, MaintenanceStatus } from '@/types/maintenance';
 import { MaintenanceThread } from '@/components/maintenance/messaging/MaintenanceThread';
@@ -366,7 +371,7 @@ export default function MaintenanceTicketDetails() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <RandMoneyBagIcon className="h-7 w-7" />
+                  <RIcon className="h-7 w-7" />
                   Cost Information
                 </CardTitle>
               </CardHeader>

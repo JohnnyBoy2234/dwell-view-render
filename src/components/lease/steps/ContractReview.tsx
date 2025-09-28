@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { FileText, Download, Send, Eye, CheckCircle, AlertCircle, Calendar, Users, Home } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import type { LeaseContract, LeaseContractData } from '@/types/lease';
 
 interface ContractReviewProps {
@@ -149,7 +154,7 @@ export function ContractReview({ data, contract, onGeneratePDF }: ContractReview
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <RandMoneyBagIcon className="h-7 w-7" />
+            <RIcon className="h-7 w-7" />
             <span>Financial Summary</span>
           </CardTitle>
         </CardHeader>

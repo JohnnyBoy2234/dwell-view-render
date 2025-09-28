@@ -1,6 +1,7 @@
+import React from 'react';
 import { useMemo } from 'react';
-import { Home, Users, Wrench } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+import { Home, Users, Wrench, type LucideIcon } from 'lucide-react';
+import { RIcon } from '../components/icons/RIcon';
 import { Property } from '@/types/dashboard';
 import { 
   PROPERTY_LABELS, 
@@ -17,7 +18,7 @@ interface MaintenanceRequest {
 export interface PropertyStat {
   label: string;
   value: string;
-  icon: typeof RandMoneyBagIcon;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   color: string;
   trend: string;
 }
@@ -39,7 +40,7 @@ export function usePropertyStats({ property, maintenanceRequests }: PropertyStat
       {
         label: PROPERTY_LABELS.MONTHLY_RENT,
         value: `R${property.price.toLocaleString()}`,
-        icon: RandMoneyBagIcon,
+        icon: RIcon,
         color: PROPERTY_COLORS.IOS_GREEN,
         trend: '+5.2%'
       },

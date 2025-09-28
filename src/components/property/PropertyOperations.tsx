@@ -13,7 +13,12 @@ import {
   ArrowRight,
   Calendar
 } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types/dashboard';
 
@@ -86,7 +91,7 @@ export function PropertyOperations({ property, maintenanceRequests }: PropertyOp
     {
       label: 'Monthly Revenue',
       value: `R${property.price.toLocaleString()}`,
-      icon: RandMoneyBagIcon,
+      icon: RIcon,
       color: 'ios-green'
     },
     {

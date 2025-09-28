@@ -5,7 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Home } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import type { LeaseContractData } from '@/types/lease';
 
 interface ContractBasicInfoProps {
@@ -123,7 +128,7 @@ export function ContractBasicInfo({ data, onUpdate }: ContractBasicInfoProps) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <RandMoneyBagIcon className="h-7 w-7" />
+            <RIcon className="h-7 w-7" />
             <span>Rent Information</span>
           </CardTitle>
         </CardHeader>

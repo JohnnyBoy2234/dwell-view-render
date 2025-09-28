@@ -5,7 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAccounting } from '@/hooks/useAccounting';
 import { useUserProperties } from '@/hooks/useUserProperties';
 import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { format, startOfMonth, subMonths } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
@@ -149,7 +154,7 @@ export function AccountingOverview() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Income</CardTitle>
-            <RandMoneyBagIcon className="h-6 w-6 text-ocean-blue" />
+            <RIcon className="h-6 w-6 text-ocean-blue" />
           </CardHeader>
           <CardContent>
             <div className={`text-2xl font-bold ${kpis.netIncome >= 0 ? 'text-success-green' : 'text-destructive'}`}>

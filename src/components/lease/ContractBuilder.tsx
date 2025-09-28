@@ -4,7 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, Circle, AlertCircle, FileText, Users, Calendar, Shield, Settings } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { useLeaseContracts } from '@/hooks/useLeaseContracts';
 import { ContractBasicInfo } from './steps/ContractBasicInfo';
 import { ContractParties } from './steps/ContractParties';
@@ -262,7 +267,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   const getStepIcon = (step: ContractBuilderStep, index: number) => {
     if (index === 0) return <FileText className="h-5 w-5" />;
     if (index === 1) return <Users className="h-5 w-5" />;
-    if (index === 2) return <RandMoneyBagIcon className="h-7 w-7" />;
+    if (index === 2) return <RIcon className="h-7 w-7" />;
     if (index === 3) return <Settings className="h-5 w-5" />;
     return <Shield className="h-5 w-5" />;
   };
