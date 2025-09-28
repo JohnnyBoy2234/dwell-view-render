@@ -1,4 +1,4 @@
-import { RIcon } from "@/pages/EnhancedTenantDashboard";
+import { RIcon } from "@/components/icons/RIcon";
 
 export const RandMoneyBagIcon = ({ className }: { className?: string }) => (
   <RIcon className={className} />
