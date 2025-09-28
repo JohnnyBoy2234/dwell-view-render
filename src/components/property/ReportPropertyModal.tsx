@@ -145,28 +145,20 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
 
       if (error) throw error;
 
-      // Get all admin users to notify
-      const { data: adminUsers } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin');
-
-      // Create notifications for all admins
-      if (adminUsers && adminUsers.length > 0) {
-        const notifications = adminUsers.map(admin => ({
-          user_id: admin.user_id,
-          type: 'system',
-          message: `Property report: ${selectedIssue?.label || 'New report'}`,
-          metadata: {
-            property_id: propertyId,
-            issue_type: issueType,
-            reporter_email: user?.email || reporterEmail.trim(),
-          },
-        }));
-
+      // Create notification for admin
+      if (user) {
         await supabase
           .from('notifications')
-          .insert(notifications);
+          .insert([{
+            user_id: user.id,
+            type: 'property_report',
+            message: `Property report submitted: ${selectedIssue?.label || 'New report'}`,
+            metadata: {
+              property_id: propertyId,
+              issue_type: issueType,
+              reporter_email: user.email || reporterEmail.trim(),
+            },
+          }]);
       }
 
       toast({
