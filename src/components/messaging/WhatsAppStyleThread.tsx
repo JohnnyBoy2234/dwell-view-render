@@ -2,14 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from '@/components/maintenance/messaging/MessageBubble';
 import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
-import { useMessageCache } from '@/hooks/useMessageCache';
+import { useMessaging } from '@/hooks/useMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { cn } from '@/lib/utils';
 import { Clock, Check, CheckCheck } from 'lucide-react';
-import React from 'react'; // Added missing import
+import React from 'react';
 
 interface Message {
   id: string;
@@ -44,23 +44,20 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   const [proposalsById, setProposalsById] = useState<Record<string, any>>({});
 
   const {
-    getMessages,
-    addOptimisticMessage,
-    confirmMessage,
-    addRealtimeMessage,
-    getCachedMessages,
-    isLoading
-  } = useMessageCache();
-
-  const messages = getCachedMessages(conversationId);
-  const loading = isLoading(conversationId);
+    messages,
+    loading,
+    fetchMessages,
+    sendMessageWithAttachment,
+    setActiveConversation
+  } = useMessaging();
 
   // Load messages when conversation changes
   useEffect(() => {
     if (conversationId) {
-      getMessages(conversationId);
+      setActiveConversation(conversationId);
+      fetchMessages(conversationId);
     }
-  }, [conversationId, getMessages]);
+  }, [conversationId, setActiveConversation, fetchMessages]);
 
   // Auto-scroll to bottom when new messages arrive or when typing
   const scrollToBottom = (force = false) => {
@@ -165,52 +162,20 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   // Handle scroll position tracking
   const handleScroll = (event: any) => {
-    const { scrollTop, scrollHeight, clientHeight } = event.target;
+    // For Radix UI ScrollArea, the event.target might be the viewport
+    const target = event.target;
+    const { scrollTop, scrollHeight, clientHeight } = target;
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
     setIsScrolledToBottom(isAtBottom);
   };
 
-  // Real-time message subscription
+  // Real-time updates are handled by useMessaging hook
+  // Auto-scroll when new messages arrive
   useEffect(() => {
-    if (!conversationId) return;
-
-    const channel = supabase
-      .channel(`messages-${conversationId}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: 'INSERT', 
-          schema: 'public', 
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`
-        },
-        (payload) => {
-          const newMsg = payload.new as Message;
-          addRealtimeMessage(newMsg);
-          
-          // Auto-scroll for new messages
-          setTimeout(() => scrollToBottom(true), 100);
-        }
-      )
-      .on(
-        'postgres_changes',
-        { 
-          event: 'UPDATE', 
-          schema: 'public', 
-          table: 'messages',
-          filter: `conversation_id=eq.${conversationId}`
-        },
-        (payload) => {
-          const updatedMsg = payload.new as Message;
-          addRealtimeMessage(updatedMsg);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [conversationId, addRealtimeMessage]);
+    if (messages.length > 0) {
+      setTimeout(() => scrollToBottom(true), 100);
+    }
+  }, [messages.length]);
 
   // Real-time viewing proposals subscription
   useEffect(() => {
@@ -266,54 +231,11 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     const trimmed = content.trim();
     if (!trimmed && (!files || files.length === 0)) return;
 
-    const tempId = addOptimisticMessage(conversationId, {
-      sender_id: user.id,
-      content: trimmed,
-      profiles: null,
-    });
-
     setNewMessage('');
     setTimeout(() => scrollToBottom(true), 50);
 
     try {
-      let attachmentUrl: string | null = null;
-
-      if (files && files.length > 0) {
-        const file = files[0];
-        const ext = file.name.split('.').pop();
-        const path = `messages/${conversationId}/${user.id}/${Date.now()}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('chat-attachments')
-          .upload(path, file, { upsert: false });
-        if (uploadError) throw uploadError;
-        const storedPath = uploadData?.path || path;
-        const { data: publicUrlData } = supabase.storage
-          .from('chat-attachments')
-          .getPublicUrl(storedPath);
-        attachmentUrl = publicUrlData?.publicUrl || storedPath;
-      }
-
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: trimmed,
-          message_type: attachmentUrl ? 'attachment' : 'text',
-          attachment_url: attachmentUrl,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      confirmMessage(conversationId, tempId, data as Message);
-
-      await supabase
-        .from('conversations')
-        .update({ last_message_at: new Date().toISOString() })
-        .eq('id', conversationId);
-
+      await sendMessageWithAttachment(conversationId, trimmed, files || []);
       onMessageSent?.();
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -467,7 +389,15 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
       <ScrollArea 
         className="flex-1 px-4" 
         ref={scrollAreaRef}
-        onScroll={handleScroll}
+        onScrollCapture={(e) => {
+          // Use onScrollCapture for better compatibility with Radix ScrollArea
+          const viewport = e.currentTarget.querySelector('[data-radix-scroll-area-viewport]');
+          if (viewport) {
+            const { scrollTop, scrollHeight, clientHeight } = viewport as HTMLElement;
+            const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
+            setIsScrolledToBottom(isAtBottom);
+          }
+        }}
       >
         <div
           className="py-4 space-y-1"

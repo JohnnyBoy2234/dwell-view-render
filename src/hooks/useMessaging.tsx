@@ -14,6 +14,7 @@ interface Message {
   read_by_landlord: boolean;
   read_by_tenant: boolean;
   created_at: string;
+  viewing_proposal_id?: string | null;
   profiles?: {
     display_name: string;
   } | null;

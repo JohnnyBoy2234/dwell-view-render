@@ -42,25 +42,36 @@ export function useMessageCache() {
     }
 
     // Try hydrate from localStorage for instant warm load
+    let cachedMessages: CachedMessage[] = [];
     try {
       const localKey = `sr_msgs_${conversationId}`;
       const raw = localStorage.getItem(localKey);
       if (raw) {
         const parsed = JSON.parse(raw) as CachedMessage[];
         if (Array.isArray(parsed)) {
+          cachedMessages = parsed;
           setCache(prev => ({ ...prev, [conversationId]: parsed }));
-          // Do not return here; still fetch fresh from server below
         }
       }
     } catch {}
 
-    // If already loading, return empty array (loading state)
+    // If already loading, return cached messages (don't block with empty array)
     if (loadingConversations.has(conversationId)) {
-      return [];
+      return cachedMessages;
     }
 
     // Start loading from server
     setLoadingConversations(prev => new Set(prev).add(conversationId));
+
+    // Add timeout to prevent stuck loading states
+    const timeoutId = setTimeout(() => {
+      setLoadingConversations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(conversationId);
+        return newSet;
+      });
+      console.warn('Message loading timeout for conversation:', conversationId);
+    }, 10000); // 10 second timeout
 
     try {
       const { data: messagesData, error } = await supabase
@@ -114,16 +125,20 @@ export function useMessageCache() {
           const localKey = `sr_msgs_${conversationId}`;
           localStorage.setItem(localKey, JSON.stringify(trimmed));
         } catch {}
-        setLoadingConversations(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(conversationId);
-          return newSet;
-        });
       }
+
+      // Always clear loading state and return messages
+      clearTimeout(timeoutId);
+      setLoadingConversations(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(conversationId);
+        return newSet;
+      });
 
       return messages;
     } catch (error) {
       console.error('Error loading messages:', error);
+      clearTimeout(timeoutId);
       if (isMountedRef.current) {
         setLoadingConversations(prev => {
           const newSet = new Set(prev);
@@ -131,7 +146,7 @@ export function useMessageCache() {
           return newSet;
         });
       }
-      return [];
+      return cachedMessages; // Return cached messages instead of empty array on error
     }
   }, [cache, loadingConversations]);
 
