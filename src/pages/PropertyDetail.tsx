@@ -666,21 +666,29 @@ export default function PropertyDetail() {
             )}
 
             {/* Property Info */}
-            <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-earth-warm/10 border-earth-warm/30 shadow-elegant">
-              <CardHeader>
-                <CardTitle>Property Information</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Property Type</span>
-                  <span className="font-medium">{property.property_type}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Listed</span>
-                  <span className="font-medium">{new Date(property.created_at).toLocaleDateString()}</span>
-                </div>
-              </CardContent>
-            </Card>
+              <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-earth-warm/10 border-earth-warm/30 shadow-elegant">
+                <CardHeader>
+                  <CardTitle>Property Information</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Property Type</span>
+                    <span className="font-medium">{property.property_type}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Listed</span>
+                    <span className="font-medium">{new Date(property.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <div className="pt-2 border-t border-white/20">
+                    <button
+                      onClick={() => setReportModalOpen(true)}
+                      className="text-xs font-semibold text-ios-red hover:text-ios-red/80 transition-colors"
+                    >
+                      Report Property
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
           </div>
         </div>
 
