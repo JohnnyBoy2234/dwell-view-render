@@ -15,91 +15,40 @@ interface ReportPropertyModalProps {
 }
 
 const ISSUE_TYPES = [
-  { id: 'inappropriate_content', label: 'Inappropriate content or imagery' },
-  { id: 'misleading_info', label: 'Misleading or inaccurate information' },
-  { id: 'duplicate_listing', label: 'Duplicate listing on SwiftRent' },
-  { id: 'pricing_issue', label: 'Suspicious pricing or deposit requirements' },
-  { id: 'scam_listing', label: 'Suspected scam or fake listing' },
-  { id: 'other', label: 'Other concerns' },
+  { id: 'inappropriate_content', label: 'Inappropriate Content' },
+  { id: 'misleading_info', label: 'Misleading Information' },
+  { id: 'duplicate_listing', label: 'Duplicate Listing' },
+  { id: 'pricing_issue', label: 'Pricing Issue' },
+  { id: 'fake_listing', label: 'Fake Listing' },
+  { id: 'other', label: 'Other' },
 ];
 
 export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   const [open, setOpen] = useState(false);
   const [issueType, setIssueType] = useState('');
   const [description, setDescription] = useState('');
-  const [reporterName, setReporterName] = useState('');
-  const [reporterEmail, setReporterEmail] = useState('');
-  const [supportingLinks, setSupportingLinks] = useState('');
-  const [attachments, setAttachments] = useState<File[]>([]);
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const selectedIssue = ISSUE_TYPES.find((issue) => issueType === issue.id);
-  const issueGuidance: Record<string, string> = {
-    inappropriate_content: 'Use this if the listing contains inappropriate language, photos, or violates SwiftRent community guidelines.',
-    misleading_info: 'Select this if the property details, amenities, or photos don’t match reality.',
-    duplicate_listing: 'Use this when you’ve spotted the same property posted more than once.',
-    pricing_issue: 'Choose this if the pricing, deposits, or payment requests appear suspicious.',
-    scam_listing: 'Select this when you suspect fraudulent behaviour or a fake listing.',
-    other: 'Please provide as much detail as possible so we can investigate.',
-  };
-
-  const resetForm = () => {
-    setIssueType('');
-    setDescription('');
-    setReporterName('');
-    setReporterEmail('');
-    setSupportingLinks('');
-    setAttachments([]);
-  };
-
-  const handleFilesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    if (files.length === 0) return;
-
-    const maxSize = 10 * 1024 * 1024; // 10MB
-    const valid = files.filter((file) => file.size <= maxSize);
-    if (valid.length !== files.length) {
-      toast({
-        title: 'Attachment too large',
-        description: 'Each file must be 10MB or smaller.',
-        variant: 'destructive',
-      });
-    }
-    setAttachments(valid.slice(0, 3));
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!issueType) {
+    if (!issueType || !description.trim()) {
       toast({
-        title: 'Select a reason',
-        description: 'Please choose the closest reason for reporting this property.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!description.trim()) {
-      toast({
-        title: 'Add details',
-        description: 'Please include a short explanation so our team can follow up.',
+        title: "Missing Information",
+        description: "Please select an issue type and provide a description.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!user && !reporterEmail.trim()) {
+    if (!user && !email.trim()) {
       toast({
-        title: 'Email required',
-        description: 'Add your email so SwiftRent admins can contact you if needed.',
+        title: "Email Required",
+        description: "Please provide your email address to submit a report.",
         variant: "destructive",
       });
       return;
@@ -108,35 +57,11 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
     setIsSubmitting(true);
 
     try {
-      let uploadedUrls: string[] = [];
-      if (attachments.length > 0) {
-        uploadedUrls = await Promise.all(
-          attachments.map(async (file) => {
-            const ext = file.name.split('.').pop();
-            const fileName = `${crypto.randomUUID()}.${ext}`;
-            const { data, error } = await supabase.storage
-              .from('property-report-attachments')
-              .upload(fileName, file);
-            if (error) throw error;
-            const { data: publicUrl } = supabase.storage
-              .from('property-report-attachments')
-              .getPublicUrl(data.path);
-            return publicUrl.publicUrl;
-          })
-        );
-      }
-
       const reportData = {
         property_id: propertyId,
         issue_type: issueType,
         description: description.trim(),
-        supporting_links: supportingLinks ? supportingLinks.trim() : null,
-        attachments: uploadedUrls,
-        reporter_name: reporterName ? reporterName.trim() : null,
-        ...(user
-          ? { reporter_id: user.id, reporter_email: user.email }
-          : { reporter_email: reporterEmail.trim() }
-        ),
+        ...(user ? { reporter_id: user.id } : { reporter_email: email.trim() }),
       };
 
       const { error } = await supabase
@@ -145,29 +70,15 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
 
       if (error) throw error;
 
-      // Create notification for admin
-      if (user) {
-        await supabase
-          .from('notifications')
-          .insert([{
-            user_id: user.id,
-            type: 'property_report',
-            message: `Property report submitted: ${selectedIssue?.label || 'New report'}`,
-            metadata: {
-              property_id: propertyId,
-              issue_type: issueType,
-              reporter_email: user.email || reporterEmail.trim(),
-            },
-          }]);
-      }
-
       toast({
         title: "Report Submitted",
         description: "Thank you for your report. Our team will review it shortly.",
       });
 
       // Reset form and close modal
-      resetForm();
+      setIssueType('');
+      setDescription('');
+      setEmail('');
       setOpen(false);
     } catch (error) {
       console.error('Error submitting report:', error);
@@ -226,70 +137,20 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="resize-none"
-              rows={4}
+              rows={3}
             />
-            <p className="text-xs text-muted-foreground">Do not include passwords or payment details.</p>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="supportingLinks">Links (optional)</Label>
-            <Input
-              id="supportingLinks"
-              placeholder="Include any links or references"
-              value={supportingLinks}
-              onChange={(e) => setSupportingLinks(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="attachments">Attachments (optional)</Label>
-            <Input
-              id="attachments"
-              type="file"
-              accept="image/*,application/pdf"
-              multiple
-              onChange={handleFilesChange}
-            />
-            {attachments.length > 0 && (
-              <ul className="text-xs text-muted-foreground space-y-1">
-                {attachments.map((file, idx) => (
-                  <li key={idx} className="flex items-center justify-between gap-2">
-                    <span className="truncate">{file.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeAttachment(idx)}
-                      className="text-destructive hover:text-destructive/80"
-                    >
-                      Remove
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
 
           {!user && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="reporterName">Your Name</Label>
-                <Input
-                  id="reporterName"
-                  placeholder="Optional"
-                  value={reporterName}
-                  onChange={(e) => setReporterName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reporterEmail">Email</Label>
-                <Input
-                  id="reporterEmail"
-                  type="email"
-                  required
-                  placeholder="your.email@example.com"
-                  value={reporterEmail}
-                  onChange={(e) => setReporterEmail(e.target.value)}
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Your Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="your.email@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
             </div>
           )}
 

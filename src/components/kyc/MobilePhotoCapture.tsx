@@ -159,36 +159,8 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
     if (!capturedFile) return;
 
     try {
-      console.log('Starting mobile file upload for:', type);
-      
-      // Get session ID and token from URL params
-      const urlParams = new URLSearchParams(window.location.search);
-      const sessionId = urlParams.get('session');
-      const token = urlParams.get('t');
-      
-      if (!sessionId || !token) {
-        throw new Error('Missing session or token parameters');
-      }
-
-      // Upload using edge function approach
-      const formData = new FormData();
-      formData.append('file', capturedFile);
-      
-      const response = await fetch(
-        `https://rsfrvjaqxhoqavvscvwf.supabase.co/functions/v1/kyc-upload-capture?sid=${sessionId}&t=${token}`,
-        {
-          method: 'POST',
-          body: formData
-        }
-      );
-      
-      const result = await response.json();
-      
-      if (!response.ok || !result.success) {
-        throw new Error(result.error || 'Upload failed');
-      }
-      
-      console.log('Upload successful:', result);
+      console.log('Starting file upload for:', type);
+      await uploadFile(capturedFile, type);
       toast({
         title: "Photo uploaded successfully",
         description: `Your ${type.replace('_', ' ')} has been uploaded.`,
@@ -198,12 +170,10 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       console.error('Upload error:', error);
       
       let errorMessage = "Please try again.";
-      if (error.message?.includes('session') || error.message?.includes('token')) {
-        errorMessage = "Session expired. Please scan the QR code again.";
-      } else if (error.message?.includes('authentication')) {
-        errorMessage = "Authentication error. Please try again.";
-      } else if (error.message?.includes('file')) {
-        errorMessage = "File upload failed. Please check your connection.";
+      if (error.message?.includes('authentication') || error.message?.includes('session')) {
+        errorMessage = "Your session has expired. Please sign in again.";
+      } else if (error.message?.includes('authorization')) {
+        errorMessage = "Authentication error. Please sign out and sign in again.";
       }
       
       toast({
