@@ -77,15 +77,24 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     typingUsers,
     sendMessage,
     sendTypingIndicator,
-    setActiveConversation
+    setActiveConversation,
+    markMessagesAsRead
   } = useWhatsAppMessaging();
 
   // Load messages when conversation changes - useMessaging handles this automatically
   useEffect(() => {
     if (conversationId) {
       setActiveConversation(conversationId);
+      
+      // Mark messages as read when opening the conversation
+      setTimeout(() => {
+        if (markMessagesAsRead) {
+          console.log('📖 WhatsApp Thread: Marking messages as read for conversation:', conversationId);
+          markMessagesAsRead(conversationId);
+        }
+      }, 1000);
     }
-  }, [conversationId, setActiveConversation]);
+  }, [conversationId, setActiveConversation, markMessagesAsRead]);
 
   // Auto-scroll to bottom when new messages arrive or when typing
   const scrollToBottom = (force = false) => {

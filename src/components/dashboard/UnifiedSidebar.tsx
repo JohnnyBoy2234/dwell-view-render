@@ -1,3 +1,4 @@
+import React from 'react';
 import { 
   Home, 
   MessageSquare, 
@@ -11,7 +12,7 @@ import {
   Settings,
   Calendar
 } from 'lucide-react';
-import { RandIcon } from '@/components/icons/RandIcon';
+import { RIcon } from '@/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -43,7 +44,7 @@ const landlordNavigationItems = [
   { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building, description: 'Manage Your Properties' },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users, description: 'Tenant Management' },
   { title: 'Messages', url: '/enhancedlandlorddashboard/messages', icon: MessageSquare, description: 'Communications' },
-  { title: 'Payment Tracking', url: '/enhancedlandlorddashboard/payments', icon: RandIcon, description: 'Rent & Payment Management' },
+  { title: 'Payment Tracking', url: '/enhancedlandlorddashboard/payments', icon: RIcon, description: 'Rent & Payment Management' },
   { title: 'Lease Management', url: '/enhancedlandlorddashboard/leases', icon: FileText, description: 'Lease Agreements' },
   { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench, description: 'Maintenance Requests' },
   { title: 'Analytics', url: '/enhancedlandlorddashboard/reports', icon: BarChart3, description: 'SwiftBooks & Insights' },

@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { CreditCard, Download, Calendar, Clock, CheckCircle } from 'lucide-react';
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -107,7 +112,7 @@ export default function TenantPayments() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="flex items-center gap-2">
-                  <RandMoneyBagIcon className="h-7 w-7 text-ocean-blue" />
+                  <RIcon className="h-7 w-7 text-ocean-blue" />
                   Rent Due
                 </CardTitle>
                 <CardDescription>
@@ -152,7 +157,7 @@ export default function TenantPayments() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <RandMoneyBagIcon className="h-7 w-7 text-success-green" />
+              <RIcon className="h-7 w-7 text-success-green" />
               <div>
                 <p className="text-sm text-muted-foreground">Total Paid (2024)</p>
                 <p className="text-xl font-bold">R{(15000).toLocaleString()}</p>

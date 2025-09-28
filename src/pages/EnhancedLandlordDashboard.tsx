@@ -10,7 +10,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play } from "lucide-react";
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import { useToast } from '@/hooks/use-toast';
@@ -1078,7 +1083,7 @@ export default function EnhancedLandlordDashboard() {
   const renderPaymentsTab = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
-        <RandMoneyBagIcon className="h-8 w-8 text-ocean-blue" />
+        <RIcon className="h-8 w-8 text-ocean-blue" />
         <h2 className="text-xl font-bold">Payment Management</h2>
         <Badge variant="secondary" className="ml-2">
           {tenants.length} active leases
@@ -1088,7 +1093,7 @@ export default function EnhancedLandlordDashboard() {
       {tenants.length === 0 ? (
         <Card>
           <CardContent className="p-8 text-center">
-            <RandMoneyBagIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+            <RIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Active Leases</h3>
             <p className="text-muted-foreground mb-4">
               You don't have any active leases yet. Once tenants sign leases, you'll be able to track rent payments here.
@@ -1107,7 +1112,7 @@ export default function EnhancedLandlordDashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <RandMoneyBagIcon className="h-7 w-7 text-success-green" />
+                    <RIcon className="h-7 w-7 text-success-green" />
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Total Monthly Rent</p>
@@ -1246,7 +1251,7 @@ export default function EnhancedLandlordDashboard() {
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <RandMoneyBagIcon className="h-7 w-7 text-success-green" />
+                    <RIcon className="h-7 w-7 text-success-green" />
                   </div>
                   <div>
                     <p className="text-sm text-black text-muted-foreground">Annual Revenue</p>
@@ -2153,7 +2158,7 @@ export default function EnhancedLandlordDashboard() {
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <RandMoneyBagIcon className="w-7 h-7 text-white" />
+                  <RIcon className="w-7 h-7 text-white" />
                 </div>
                 <p className="text-xs font-medium text-ios-gray-dark">Payments</p>
                 <p className="text-xs text-ios-gray">Track</p>

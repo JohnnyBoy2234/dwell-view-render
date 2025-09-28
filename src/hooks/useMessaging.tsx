@@ -519,26 +519,57 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
-  // Mark messages as read
+  // Mark messages as read with detailed logging
   const markMessagesAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
 
+    console.log('📖 [READ MARKING] Starting mark as read for conversation:', conversationId, 'role:', isLandlord ? 'landlord' : 'tenant');
+
     try {
-      const { error } = await supabase.rpc('mark_messages_as_read', {
+      const { error, data } = await supabase.rpc('mark_messages_as_read', {
         conversation_uuid: conversationId,
         user_role: isLandlord ? 'landlord' : 'tenant'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [READ MARKING] RPC function error:', error);
+        throw error;
+      }
+
+      console.log('✅ [READ MARKING] RPC function completed successfully:', data);
+
+      // Verify that messages were actually updated by checking the database
+      const { data: verifyMessages, error: verifyError } = await supabase
+        .from('messages')
+        .select('id, sender_id, read_by_landlord, read_by_tenant')
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', user.id)
+        .limit(5);
+
+      if (verifyError) {
+        console.error('❌ [READ MARKING] Verification query error:', verifyError);
+      } else {
+        console.log('🔍 [READ MARKING] Verification - updated messages:', verifyMessages);
+        const readField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
+        const unreadCount = verifyMessages?.filter(m => !m[readField]).length || 0;
+        console.log('🔍 [READ MARKING] Remaining unread messages:', unreadCount);
+      }
 
       if (!isMountedRef.current) return;
+      
+      // Update local conversation state
       setConversations(prev =>
         prev.map(conv =>
           conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
         )
       );
+
+      // Force refresh unread counts across the app by triggering a custom event
+      window.dispatchEvent(new CustomEvent('messages-marked-read', { 
+        detail: { conversationId } 
+      }));
     } catch (error: any) {
-      console.error('Error marking messages as read:', error);
+      console.error('❌ [READ MARKING] Error marking messages as read:', error);
     }
   }, [user, isLandlord]);
 
@@ -628,6 +659,14 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     console.log('🔄 Loading messages for conversation:', activeConversation);
     fetchMessages(activeConversation);
 
+    // Auto-mark messages as read when conversation becomes active and visible
+    const markAsReadInterval = setInterval(() => {
+      if (document.visibilityState === 'visible' && !document.hidden) {
+        console.log('🔄 Auto-marking messages as read for active conversation:', activeConversation);
+        markMessagesAsRead(activeConversation);
+      }
+    }, 3000); // Check every 3 seconds
+
     // Single real-time subscription for messages
     const channel = supabase
       .channel(`messages-${activeConversation}`)
@@ -670,6 +709,12 @@ export function useMessaging(onViewingProposalChange?: () => void) {
                 console.log('📝 Adding new real-time message');
                 return [...prev, newMessage];
               });
+
+              // Auto-mark new messages as read if user is viewing the conversation
+              if (newMessage.sender_id !== user?.id && document.visibilityState === 'visible') {
+                console.log('📖 Auto-marking new message as read since user is viewing conversation');
+                setTimeout(() => markMessagesAsRead(activeConversation), 1000);
+              }
             } else if (payload.eventType === 'UPDATE') {
               const updatedMessage = payload.new as Message;
               setMessages(prev => 
@@ -688,9 +733,10 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
     return () => {
       console.log('🧹 Cleaning up messages channel for:', activeConversation);
+      clearInterval(markAsReadInterval);
       supabase.removeChannel(channel);
     };
-  }, [activeConversation]);
+  }, [activeConversation, markMessagesAsRead, user]);
 
   // Persist conversations to cache after refresh
   useEffect(() => {

@@ -69,7 +69,8 @@ export default function Messages() {
     sendMessage,
     sendTypingIndicator,
     fetchMessages: refetchMessages,
-    fetchConversations
+    fetchConversations,
+    markMessagesAsRead: markConversationMessagesAsRead
   } = useWhatsAppMessaging();
   
   const { confirmedViewing } = useConfirmedViewing(activeConversation);
@@ -132,6 +133,34 @@ export default function Messages() {
   useEffect(() => {
     setSentAutoMessage(false);
   }, [activeConversation]);
+
+  // Add visibility-based read marking for active conversations
+  useEffect(() => {
+    if (!activeConversation || !markConversationMessagesAsRead) return;
+
+    // Mark messages as read when page becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && !document.hidden) {
+        console.log('📖 Messages Page: Page became visible, marking messages as read');
+        markConversationMessagesAsRead(activeConversation);
+      }
+    };
+
+    // Mark messages as read periodically while viewing
+    const markAsReadInterval = setInterval(() => {
+      if (document.visibilityState === 'visible' && !document.hidden) {
+        console.log('📖 Messages Page: Periodic read marking for active conversation:', activeConversation);
+        markConversationMessagesAsRead(activeConversation);
+      }
+    }, 5000); // Every 5 seconds
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(markAsReadInterval);
+    };
+  }, [activeConversation, markConversationMessagesAsRead]);
 
   // Handle initial URL parameter only once
   useEffect(() => {
@@ -253,6 +282,14 @@ export default function Messages() {
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('c', conversationId);
     navigate({ search: newSearchParams.toString() }, { replace: true });
+
+    // Mark messages as read when opening conversation
+    setTimeout(() => {
+      if (markConversationMessagesAsRead) {
+        console.log('📖 Messages Page: Marking messages as read for conversation:', conversationId);
+        markConversationMessagesAsRead(conversationId);
+      }
+    }, 1500);
   };
 
   if (auth && auth.user === null) {

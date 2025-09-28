@@ -109,5 +109,20 @@ export function useUnreadMessages() {
     }
   });
 
+  // Listen for custom events when messages are marked as read
+  useEffect(() => {
+    const handleMessagesMarkedRead = () => {
+      console.log('🔄 Messages marked as read event received, refreshing unread count');
+      if (isMountedRef.current) {
+        fetchUnreadCount();
+      }
+    };
+
+    window.addEventListener('messages-marked-read', handleMessagesMarkedRead);
+    return () => {
+      window.removeEventListener('messages-marked-read', handleMessagesMarkedRead);
+    };
+  }, [fetchUnreadCount]);
+
   return { unreadCount, loading, refetch: () => fetchUnreadCount(true) };
 }

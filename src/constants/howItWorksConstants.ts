@@ -8,11 +8,12 @@ import {
   FileText,
   Home,
 } from "lucide-react";
-import { RandMoneyBagIcon } from '@/components/icons/RandMoneyBagIcon';
+import { RIcon } from '../components/icons/RIcon';
 import type { LucideIcon } from "lucide-react";
+import React from 'react';
 
 export interface ProcessStep {
-  icon: LucideIcon;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   title: string;
   description: string;
   badges: string[];
@@ -107,7 +108,7 @@ export const LANDLORD_DATA: UserTypeData = {
       badges: ["Easy Applications", "Screening", "Fast Processing"],
     },
     {
-      icon: RandMoneyBagIcon,
+      icon: RIcon,
       title: "Manage Properties",
       description:
         "Control all your rentals in one place simple, fast, and effortless.",
