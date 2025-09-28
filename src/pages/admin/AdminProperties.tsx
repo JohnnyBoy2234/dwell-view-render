@@ -3,7 +3,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, MapPin, Calendar, User, AlertCircle } from 'lucide-react';
+import { Trash2, MapPin, Calendar, User, AlertCircle, Building } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
