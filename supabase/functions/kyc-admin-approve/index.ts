@@ -93,26 +93,34 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Create audit log for approval
-    await supabaseAdmin.rpc('create_kyc_audit_log', {
-      _user_id: user_id,
-      _action: 'approved',
-      _actor: user.id,
-      _metadata: {
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id
-      }
-    });
+    // Create audit log for approval (non-blocking)
+    try {
+      await supabaseAdmin.rpc('create_kyc_audit_log', {
+        _user_id: user_id,
+        _action: 'approved',
+        _actor: user.id,
+        _metadata: {
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id
+        }
+      });
+    } catch (auditErr) {
+      console.error('create_kyc_audit_log failed:', auditErr);
+    }
 
-    // Log telemetry event
-    await supabaseAdmin.rpc('log_event', {
-      _user_id: user_id,
-      _name: 'kyc_approved',
-      _properties: {
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString()
-      }
-    });
+    // Log telemetry event (non-blocking)
+    try {
+      await supabaseAdmin.rpc('log_event', {
+        _user_id: user_id,
+        _name: 'kyc_approved',
+        _properties: {
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString()
+        }
+      });
+    } catch (eventErr) {
+      console.error('log_event failed:', eventErr);
+    }
 
     // TODO: Send email notification to user about approval
     console.log(`KYC approved for user ${user_id} by ${user.id}`);

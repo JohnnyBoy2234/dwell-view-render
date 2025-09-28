@@ -94,28 +94,36 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Create audit log for decline
-    await supabaseAdmin.rpc('create_kyc_audit_log', {
-      _user_id: user_id,
-      _action: 'declined',
-      _actor: user.id,
-      _metadata: {
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id,
-        decline_reason: reason.trim()
-      }
-    });
+    // Create audit log for decline (non-blocking)
+    try {
+      await supabaseAdmin.rpc('create_kyc_audit_log', {
+        _user_id: user_id,
+        _action: 'declined',
+        _actor: user.id,
+        _metadata: {
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id,
+          decline_reason: reason.trim()
+        }
+      });
+    } catch (auditErr) {
+      console.error('create_kyc_audit_log failed:', auditErr);
+    }
 
-    // Log telemetry event
-    await supabaseAdmin.rpc('log_event', {
-      _user_id: user_id,
-      _name: 'kyc_declined',
-      _properties: {
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString(),
-        decline_reason: reason.trim()
-      }
-    });
+    // Log telemetry event (non-blocking)
+    try {
+      await supabaseAdmin.rpc('log_event', {
+        _user_id: user_id,
+        _name: 'kyc_declined',
+        _properties: {
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString(),
+          decline_reason: reason.trim()
+        }
+      });
+    } catch (eventErr) {
+      console.error('log_event failed:', eventErr);
+    }
 
     // Optional: email/SMS could be sent here via provider if configured
     console.log(`KYC declined for user ${user_id} by ${user.id} with reason: ${reason}`);
