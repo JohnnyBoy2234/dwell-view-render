@@ -93,7 +93,7 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
           </TabsContent>
         </Tabs>
         
-        <div className="mt-4 pt-4 border-t border-ocean-blue/10">
+        <div className="mt-2">
           <ReportPropertyModal propertyId={property.id} />
         </div>
       </CardContent>

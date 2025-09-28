@@ -95,14 +95,11 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          variant="outline" 
-          size="sm"
-          className="flex items-center gap-2"
+        <button 
+          className="text-sm text-ocean-blue-light hover:text-ocean-blue transition-colors cursor-pointer underline-offset-4 hover:underline"
         >
-          <Flag className="h-3 w-3" />
-          Report
-        </Button>
+          report property
+        </button>
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-md">

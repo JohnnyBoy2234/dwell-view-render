@@ -99,7 +99,7 @@ const PropertyCard = ({
             parking={parking} 
           />
           
-          <div className="mt-4 pt-2 border-t">
+          <div className="mt-2">
             <ReportPropertyModal propertyId={id} />
           </div>
         </div>
