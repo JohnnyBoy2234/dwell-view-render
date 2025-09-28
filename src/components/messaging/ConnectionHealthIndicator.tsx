@@ -79,8 +79,8 @@ export function ConnectionHealthIndicator({
   const config = getStatusConfig();
   const Icon = config.icon;
 
-  // Only show if there are connection issues or user wants to see details
-  if (status.status === 'connected' && !showDetails) {
+  // Only show if there are actual connection problems
+  if (status.status === 'connected' || status.status === 'connecting') {
     return null;
   }
 
@@ -98,7 +98,7 @@ export function ConnectionHealthIndicator({
       <Icon 
         className={cn(
           'h-4 w-4',
-          status.status === 'connecting' || status.status === 'reconnecting' ? 'animate-spin' : ''
+          status.status === 'reconnecting' ? 'animate-spin' : ''
         )} 
       />
       <span>{config.text}</span>

@@ -67,9 +67,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkUserRole = async (userId: string, retryCount = 0) => {
+  const checkUserRole = async (userId: string) => {
     try {
-      // Optional fast hydration from localStorage to reduce UI flash
+      // Fast hydration from localStorage
       const cached = localStorage.getItem(`sr_roles_${userId}`);
       if (cached) {
         try {
@@ -79,53 +79,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch {}
       }
 
-      // Ensure we have a valid session before making the request
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        console.warn('No valid session found when checking user roles');
-        setIsLandlord(false);
-        setIsAdmin(false);
-        setRolesLoading(false);
-        return;
-      }
-
+      // Simple role fetch without retries to avoid loops
       const { data: roles, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
       
       if (error) {
-        console.error('Error fetching user roles:', error);
-        
-        // Handle 406 error specifically - likely authentication issue
-        if (error.message?.includes('406') || error.code === '406') {
-          console.warn('406 error fetching roles, likely authentication issue. Retrying...');
-          
-          // Retry with exponential backoff (max 3 attempts)
-          if (retryCount < 3) {
-            const delay = Math.pow(2, retryCount) * 1000; // 1s, 2s, 4s
-            setTimeout(() => {
-              checkUserRole(userId, retryCount + 1);
-            }, delay);
-            return;
-          }
-        }
-        
-        throw error;
+        console.warn('Could not fetch user roles:', error.message);
+        // Set defaults and continue - don't retry
+        setIsLandlord(false);
+        setIsAdmin(false);
+        setRolesLoading(false);
+        return;
       }
       
       const userRoles = roles?.map(r => r.role) || [];
       setIsLandlord(userRoles.includes('landlord'));
       setIsAdmin(userRoles.includes('admin'));
 
-      // Cache roles for instant hydration on next load
+      // Cache roles
       localStorage.setItem(`sr_roles_${userId}` , JSON.stringify({ 
         isLandlord: userRoles.includes('landlord'), 
-        isAdmin: userRoles.includes('admin'),
-        timestamp: Date.now() // Add timestamp for cache invalidation
+        isAdmin: userRoles.includes('admin')
       }));
     } catch (error) {
-      console.error('Failed to check user role after retries:', error);
+      console.warn('Role check failed, using defaults:', error);
       setIsLandlord(false);
       setIsAdmin(false);
     } finally {

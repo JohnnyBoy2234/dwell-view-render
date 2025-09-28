@@ -263,18 +263,10 @@ export function useWebSocketConnection() {
   };
 
   const startHeartbeat = () => {
+    // Remove heartbeat to prevent unnecessary connection issues
     if (heartbeatIntervalRef.current) {
       clearInterval(heartbeatIntervalRef.current);
     }
-    
-    heartbeatIntervalRef.current = setInterval(() => {
-      if (channelRef.current && user) {
-        channelRef.current.track({
-          user_id: user.id,
-          online_at: new Date().toISOString()
-        });
-      }
-    }, 30000); // Heartbeat every 30 seconds
   };
 
   // Send typing indicator
