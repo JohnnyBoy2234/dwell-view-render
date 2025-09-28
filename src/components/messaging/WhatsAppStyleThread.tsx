@@ -2,11 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageBubble } from '@/components/maintenance/messaging/MessageBubble';
 import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
-import { useMessaging } from '@/hooks/useMessaging';
+import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
+import { MessageStatusIndicator } from '@/components/messaging/MessageStatusIndicator';
+import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { cn } from '@/lib/utils';
 import { Clock, Check, CheckCheck } from 'lucide-react';
 import React from 'react';
@@ -17,13 +19,15 @@ interface Message {
   sender_id: string;
   content: string;
   created_at: string;
-  read_by_landlord: boolean;
-  read_by_tenant: boolean;
+  read_by_landlord?: boolean;
+  read_by_tenant?: boolean;
   profiles?: { display_name: string } | null;
   optimistic?: boolean;
   message_type?: string | null;
   attachment_url?: string | null;
   viewing_proposal_id?: string | null;
+  tempId?: string;
+  status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 }
 
 interface WhatsAppStyleThreadProps {
@@ -46,9 +50,12 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   const {
     messages,
     loading,
-    sendMessageWithAttachment,
+    connectionStatus,
+    typingUsers,
+    sendMessage,
+    sendTypingIndicator,
     setActiveConversation
-  } = useMessaging();
+  } = useWhatsAppMessaging();
 
   // Load messages when conversation changes - useMessaging handles this automatically
   useEffect(() => {
@@ -277,11 +284,14 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     const trimmed = content.trim();
     if (!trimmed && (!files || files.length === 0)) return;
 
+    // Stop typing indicator
+    sendTypingIndicator(conversationId, false);
+    
     setNewMessage('');
     setTimeout(() => scrollToBottom(true), 50);
 
     try {
-      await sendMessageWithAttachment(conversationId, trimmed, files || []);
+      await sendMessage(conversationId, trimmed, files || []);
       onMessageSent?.();
     } catch (error: any) {
       console.error('Error sending message:', error);
@@ -301,29 +311,38 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   const handleMessageChange = (value: string) => {
     setNewMessage(value);
-    if (value.length > 0) {
+    
+    // Send typing indicators
+    if (value.length > 0 && !isTyping) {
       setIsTyping(true);
-    } else {
+      sendTypingIndicator(conversationId, true);
+    } else if (value.length === 0 && isTyping) {
       setIsTyping(false);
+      sendTypingIndicator(conversationId, false);
     }
   };
 
   const handleTypingStart = () => {
-    setIsTyping(true);
+    if (!isTyping) {
+      setIsTyping(true);
+      sendTypingIndicator(conversationId, true);
+    }
   };
 
   const handleTypingStop = () => {
-    setIsTyping(false);
+    if (isTyping) {
+      setIsTyping(false);
+      sendTypingIndicator(conversationId, false);
+    }
   };
 
   const renderMessage = (message: Message, index: number) => {
     const isOwn = message.sender_id === user?.id;
-    const isRead = isOwn ? (isLandlord ? message.read_by_tenant : message.read_by_landlord) : (isLandlord ? message.read_by_landlord : message.read_by_tenant);
-    const statusType = isOwn
-      ? isLandlord
-        ? (message.read_by_tenant ? 'read' : 'delivered')
-        : (message.read_by_landlord ? 'read' : 'delivered')
-      : 'none';
+    const messageStatus = message.status || (isOwn 
+      ? (isLandlord 
+          ? (message.read_by_tenant ? 'read' : 'delivered')
+          : (message.read_by_landlord ? 'read' : 'delivered'))
+      : 'delivered');
 
     const showNewDayDivider = index === 0 ||
       new Date(message.created_at).toDateString() !== new Date(messages[index - 1]?.created_at || 0).toDateString();
@@ -383,14 +402,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           )}>
             <span>{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             {isOwn && (
-              <span
+              <MessageStatusIndicator 
+                status={messageStatus}
                 className={cn(
-                  'inline-flex items-center transition-colors duration-200',
-                  statusType === 'read' ? 'text-success-green-light' : 'text-white/70'
+                  'transition-colors duration-200',
+                  messageStatus === 'read' ? 'text-blue-400' : 'text-white/70'
                 )}
-              >
-                {statusType === 'read' ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
-              </span>
+              />
             )}
           </div>
         </div>
@@ -464,7 +482,21 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
-            messages.map(renderMessage)
+            <>
+              {messages.map(renderMessage)}
+              
+              {/* Show typing indicator */}
+              {Array.from(typingUsers.entries())
+                .filter(([userId, convId]) => convId === conversationId && userId !== user?.id)
+                .length > 0 && (
+                <TypingIndicator 
+                  userNames={Array.from(typingUsers.entries())
+                    .filter(([userId, convId]) => convId === conversationId && userId !== user?.id)
+                    .map(([userId]) => 'User')} // You could map to actual names if you have them
+                  className="mb-2"
+                />
+              )}
+            </>
           )}
           <div ref={messagesEndRef} />
         </div>

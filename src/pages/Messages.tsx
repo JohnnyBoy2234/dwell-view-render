@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useMessaging } from '@/hooks/useMessaging';
+import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,8 @@ import {
   CheckCheck,
   Bell
 } from 'lucide-react';
+import { ConnectionStatus } from '@/components/messaging/ConnectionStatus';
+import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
@@ -61,11 +63,14 @@ export default function Messages() {
     setActiveConversation,
     messages,
     loading,
+    connectionStatus,
     onlineUsers,
+    typingUsers,
     sendMessage,
+    sendTypingIndicator,
     fetchMessages: refetchMessages,
     fetchConversations
-  } = useMessaging();
+  } = useWhatsAppMessaging();
   
   const { confirmedViewing } = useConfirmedViewing(activeConversation);
 
@@ -162,6 +167,9 @@ export default function Messages() {
     e.preventDefault();
     if (!newMessage.trim() || !activeConversation) return;
 
+    // Send typing stop indicator
+    sendTypingIndicator(activeConversation, false);
+    
     await sendMessage(activeConversation, newMessage);
     
     // Mark auto message as sent if this was the pre-filled message
@@ -285,7 +293,8 @@ export default function Messages() {
                 <MessageCircle className="h-6 w-6 text-primary" />
                 <h1 className="text-lg font-semibold">Messages</h1>
               </div>
-              <div className="ml-auto">
+              <div className="ml-auto flex items-center gap-2">
+                <ConnectionStatus status={connectionStatus} />
                 <Badge variant="secondary" className="text-xs">
                   {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
                 </Badge>
