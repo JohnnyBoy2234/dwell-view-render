@@ -338,14 +338,16 @@ export function useWhatsAppMessaging() {
     }
   }, [user, toast]);
 
-  // Mark messages as read
+  // Mark messages as read with detailed logging
   const markMessagesAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
+
+    console.log('📖 [WHATSAPP READ] Starting mark as read for conversation:', conversationId, 'user role:', isLandlord ? 'landlord' : 'tenant');
 
     try {
       const roleField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
       
-      console.log('📖 Marking messages as read for conversation:', conversationId, 'as', roleField);
+      console.log('📖 [WHATSAPP READ] Updating field:', roleField, 'for conversation:', conversationId);
       
       const { data, error } = await supabase
         .from('messages')
@@ -356,11 +358,38 @@ export function useWhatsAppMessaging() {
         .select('id');
 
       if (error) {
-        console.error('❌ Error marking messages as read:', error);
-        return;
+        console.error('❌ [WHATSAPP READ] Direct update error:', error);
+        
+        // Try using the RPC function as fallback
+        console.log('📖 [WHATSAPP READ] Trying RPC function as fallback...');
+        const { error: rpcError } = await supabase.rpc('mark_messages_as_read', {
+          conversation_uuid: conversationId,
+          user_role: isLandlord ? 'landlord' : 'tenant'
+        });
+        
+        if (rpcError) {
+          console.error('❌ [WHATSAPP READ] RPC fallback also failed:', rpcError);
+          return;
+        }
+        console.log('✅ [WHATSAPP READ] RPC fallback succeeded');
+      } else {
+        console.log('✅ [WHATSAPP READ] Direct update succeeded, marked', data?.length || 0, 'messages as read');
       }
 
-      console.log('✅ Marked', data?.length || 0, 'messages as read');
+      // Verify the update worked
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('messages')
+        .select('id, sender_id, read_by_landlord, read_by_tenant')
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', user.id)
+        .eq(roleField, false)
+        .limit(3);
+
+      if (verifyError) {
+        console.error('❌ [WHATSAPP READ] Verification failed:', verifyError);
+      } else {
+        console.log('🔍 [WHATSAPP READ] Remaining unread messages:', verifyData?.length || 0, verifyData);
+      }
 
       // Update local message status immediately
       setMessages(prev => prev.map(msg => 
@@ -386,7 +415,7 @@ export function useWhatsAppMessaging() {
       }
 
     } catch (error) {
-      console.error('❌ Error marking messages as read:', error);
+      console.error('❌ [WHATSAPP READ] Unexpected error:', error);
     }
   }, [user, isLandlord]);
 

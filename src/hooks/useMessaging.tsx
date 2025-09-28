@@ -519,21 +519,41 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
-  // Mark messages as read with proper logging and notifications refresh
+  // Mark messages as read with detailed logging
   const markMessagesAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
 
-    console.log('📖 Marking messages as read for conversation:', conversationId, 'role:', isLandlord ? 'landlord' : 'tenant');
+    console.log('📖 [READ MARKING] Starting mark as read for conversation:', conversationId, 'role:', isLandlord ? 'landlord' : 'tenant');
 
     try {
-      const { error } = await supabase.rpc('mark_messages_as_read', {
+      const { error, data } = await supabase.rpc('mark_messages_as_read', {
         conversation_uuid: conversationId,
         user_role: isLandlord ? 'landlord' : 'tenant'
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ [READ MARKING] RPC function error:', error);
+        throw error;
+      }
 
-      console.log('✅ Successfully marked messages as read for conversation:', conversationId);
+      console.log('✅ [READ MARKING] RPC function completed successfully:', data);
+
+      // Verify that messages were actually updated by checking the database
+      const { data: verifyMessages, error: verifyError } = await supabase
+        .from('messages')
+        .select('id, sender_id, read_by_landlord, read_by_tenant')
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', user.id)
+        .limit(5);
+
+      if (verifyError) {
+        console.error('❌ [READ MARKING] Verification query error:', verifyError);
+      } else {
+        console.log('🔍 [READ MARKING] Verification - updated messages:', verifyMessages);
+        const readField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
+        const unreadCount = verifyMessages?.filter(m => !m[readField]).length || 0;
+        console.log('🔍 [READ MARKING] Remaining unread messages:', unreadCount);
+      }
 
       if (!isMountedRef.current) return;
       
@@ -549,7 +569,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         detail: { conversationId } 
       }));
     } catch (error: any) {
-      console.error('❌ Error marking messages as read:', error);
+      console.error('❌ [READ MARKING] Error marking messages as read:', error);
     }
   }, [user, isLandlord]);
 
