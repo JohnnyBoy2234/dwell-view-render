@@ -285,8 +285,6 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
       if (!isMountedRef.current) return;
       setMessages(messagesWithProfiles as any);
-
-      // Mark messages as read
       await markMessagesAsRead(conversationId);
       setLoading(false);
     } catch (error: any) {

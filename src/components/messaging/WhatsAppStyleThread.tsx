@@ -37,6 +37,26 @@ interface WhatsAppStyleThreadProps {
   onCreateViewing?: () => void;
 }
 
+interface MessageStatusIndicatorProps {
+  status: 'sending' | 'sent' | 'delivered' | 'read';
+}
+
+function MessageStatusIndicator({ status }: MessageStatusIndicatorProps) {
+  const base = 'h-3 w-3';
+  switch (status) {
+    case 'sending':
+      return <Clock className={`${base} text-white/60`} aria-label="Sending" />;
+    case 'sent':
+      return <Check className={`${base} text-white/80`} aria-label="Sent" />;
+    case 'delivered':
+      return <CheckCheck className={`${base} text-white`} aria-label="Delivered" />;
+    case 'read':
+      return <CheckCheck className={`${base} text-success-green`} aria-label="Read" />;
+    default:
+      return null;
+  }
+}
+
 export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
