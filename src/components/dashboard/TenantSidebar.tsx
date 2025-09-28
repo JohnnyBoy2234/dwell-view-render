@@ -1,5 +1,6 @@
+import React from 'react';
 import { Home, MessageSquare, FileText } from 'lucide-react';
-import { RandIcon } from '@/components/icons/RandIcon';
+import { RIcon } from '@/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Sidebar,
@@ -18,7 +19,7 @@ const tenantItems = [
   { title: 'Dashboard', url: '/tenant-dashboard', icon: Home },
   { title: 'Messages', url: '/tenant/messages', icon: MessageSquare },
   { title: 'My Leases', url: '#leases-section', icon: FileText, scrollTo: 'leases-section' },
-  { title: 'Payments', url: '/tenant/payments', icon: RandIcon },
+  { title: 'Payments', url: '/tenant/payments', icon: RIcon },
 ];
 
 export function TenantSidebar() {

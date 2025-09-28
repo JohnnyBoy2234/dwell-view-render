@@ -1,5 +1,6 @@
+import React from 'react';
 import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, type LucideIcon } from 'lucide-react';
-import { RandIcon } from '@/components/icons/RandIcon';
+import { RIcon } from '@/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -21,7 +22,7 @@ import { Badge } from '@/components/ui/badge';
 interface SidebarItem {
   title: string;
   url: string;
-  icon: LucideIcon;
+  icon: LucideIcon | React.ComponentType<{ className?: string }>;
   badge?: number;
 }
 
@@ -42,7 +43,7 @@ const landlordItems: SidebarItem[] = [
   { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
   { title: 'Lease System', url: '/enhancedlandlorddashboard/leases', icon: FileText },
   { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
-  { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: RandIcon },
+  { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: RIcon },
   { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
   { title: 'SwiftBooks', url: '/enhancedlandlorddashboard/reports', icon: BarChart3 },
 ];
