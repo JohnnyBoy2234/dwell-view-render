@@ -46,6 +46,8 @@ export function useWebSocketConnection() {
   const channelRef = useRef<any>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout>();
   const heartbeatIntervalRef = useRef<NodeJS.Timeout>();
+  const reconnectAttemptsRef = useRef(0); // Fix stale closure issue
+  const isConnectingRef = useRef(false); // Prevent duplicate connections
   const callbacksRef = useRef<{
     onMessage?: (message: RealtimeMessage) => void;
     onMessageAck?: (ack: MessageAck) => void;
@@ -55,8 +57,9 @@ export function useWebSocketConnection() {
   }>({});
 
   const connect = useCallback(() => {
-    if (!user || channelRef.current) return;
+    if (!user || channelRef.current || isConnectingRef.current) return;
 
+    isConnectingRef.current = true;
     console.log('🔌 Connecting to WebSocket...');
     setConnectionStatus(prev => ({ ...prev, status: 'connecting' }));
 
@@ -155,6 +158,7 @@ export function useWebSocketConnection() {
         })
         .subscribe(async (status) => {
           console.log('📡 Subscription status:', status);
+          isConnectingRef.current = false;
           
           if (status === 'SUBSCRIBED') {
             // Track user presence
@@ -163,6 +167,8 @@ export function useWebSocketConnection() {
               online_at: new Date().toISOString()
             });
             
+            // Reset reconnect attempts on successful connection
+            reconnectAttemptsRef.current = 0;
             setConnectionStatus({
               status: 'connected',
               lastConnected: new Date(),
@@ -191,6 +197,9 @@ export function useWebSocketConnection() {
   const disconnect = useCallback(() => {
     console.log('🔌 Disconnecting from WebSocket...');
     
+    isConnectingRef.current = false;
+    reconnectAttemptsRef.current = 0;
+    
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
     }
@@ -210,10 +219,13 @@ export function useWebSocketConnection() {
   }, []);
 
   const handleConnectionError = () => {
+    isConnectingRef.current = false;
+    reconnectAttemptsRef.current += 1;
+    
     setConnectionStatus(prev => ({
       ...prev,
       status: 'disconnected',
-      reconnectAttempts: prev.reconnectAttempts + 1
+      reconnectAttempts: reconnectAttemptsRef.current
     }));
     
     if (channelRef.current) {
@@ -229,10 +241,21 @@ export function useWebSocketConnection() {
       clearTimeout(reconnectTimeoutRef.current);
     }
     
-    const delay = Math.min(1000 * Math.pow(2, connectionStatus.reconnectAttempts), 30000);
-    console.log(`🔄 Scheduling reconnect in ${delay}ms...`);
+    // Cap at 5 attempts, then stop trying for a while
+    if (reconnectAttemptsRef.current >= 5) {
+      console.log('🔄 Max reconnection attempts reached, pausing...');
+      setConnectionStatus(prev => ({ ...prev, status: 'disconnected' }));
+      return;
+    }
     
-    setConnectionStatus(prev => ({ ...prev, status: 'reconnecting' }));
+    const delay = Math.min(1000 * Math.pow(2, reconnectAttemptsRef.current), 30000);
+    console.log(`🔄 Scheduling reconnect in ${delay}ms (attempt ${reconnectAttemptsRef.current + 1})...`);
+    
+    setConnectionStatus(prev => ({ 
+      ...prev, 
+      status: 'reconnecting',
+      reconnectAttempts: reconnectAttemptsRef.current 
+    }));
     
     reconnectTimeoutRef.current = setTimeout(() => {
       connect();
@@ -274,7 +297,16 @@ export function useWebSocketConnection() {
     if (!user) return;
 
     try {
-      const updateField = user.id === 'landlord' ? 'read_by_landlord' : 'read_by_tenant';
+      // Get user role to determine which field to update
+      const { data: userRoleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .single();
+        
+      const isLandlordUser = userRoleData?.role === 'landlord';
+      const updateField = isLandlordUser ? 'read_by_landlord' : 'read_by_tenant';
+      
       await supabase
         .from('messages')
         .update({ [updateField]: status === 'read' })

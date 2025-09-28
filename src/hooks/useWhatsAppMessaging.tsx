@@ -363,8 +363,11 @@ export function useWhatsAppMessaging() {
     // Check if this is for the active conversation
     if (message.conversation_id === activeConversation) {
       setMessages(prev => {
-        // Prevent duplicates
-        if (prev.some(m => m.id === message.id)) return prev;
+        // Prevent duplicates - check both id and tempId
+        if (prev.some(m => m.id === message.id || m.tempId === message.id)) {
+          console.log('🔄 Duplicate message prevented:', message.id);
+          return prev;
+        }
         
         const optimisticMessage: OptimisticMessage = {
           ...message,
@@ -372,8 +375,20 @@ export function useWhatsAppMessaging() {
           status: 'delivered'
         };
         
+        console.log('✅ Adding real-time message to active conversation:', optimisticMessage);
         return [...prev, optimisticMessage];
       });
+
+      // Update cache
+      const cached = messagesCache.current.get(activeConversation) || [];
+      if (!cached.some(m => m.id === message.id || m.tempId === message.id)) {
+        const optimisticMessage: OptimisticMessage = {
+          ...message,
+          tempId: message.id,
+          status: 'delivered'
+        };
+        messagesCache.current.set(activeConversation, [...cached, optimisticMessage]);
+      }
 
       // Send read acknowledgment
       sendMessageAck(message.id, 'read');

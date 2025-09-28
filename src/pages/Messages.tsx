@@ -18,7 +18,7 @@ import {
   CheckCheck,
   Bell
 } from 'lucide-react';
-import { ConnectionStatus } from '@/components/messaging/ConnectionStatus';
+import { ConnectionHealthIndicator } from '@/components/messaging/ConnectionHealthIndicator';
 import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
@@ -294,7 +294,11 @@ export default function Messages() {
                 <h1 className="text-lg font-semibold">Messages</h1>
               </div>
               <div className="ml-auto flex items-center gap-2">
-                <ConnectionStatus status={connectionStatus} />
+                <ConnectionHealthIndicator 
+                  status={connectionStatus} 
+                  onlineUsers={onlineUsers}
+                  className="text-xs"
+                />
                 <Badge variant="secondary" className="text-xs">
                   {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
                 </Badge>
