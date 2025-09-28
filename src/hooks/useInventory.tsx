@@ -23,6 +23,7 @@ export interface InventoryItem {
   condition: "excellent" | "good" | "fair" | "poor" | "damaged";
   description?: string;
   photos: string[];
+  voice_note_url?: string;
   created_at: string;
   updated_at: string;
 }
@@ -79,14 +80,20 @@ export function useInventory() {
     setError(null);
     try {
       // RLS restricts to allowed rows; additionally filter by current user
-      const { data, error: selectError } = await db
+      const { data: records, error: selectError } = await db
         .from('inventory_records')
-        .select('*')
+        .select(`
+          *,
+          inventory_items (*)
+        `)
         .eq('tenant_id', user.id)
         .order('created_at', { ascending: false });
       if (selectError) throw selectError;
-      setInventoryRecords((data || []) as InventoryRecordWithDetails[]);
+      
+      console.log('Fetched inventory records with items:', records);
+      setInventoryRecords((records || []) as InventoryRecordWithDetails[]);
     } catch (e: any) {
+      console.error('Error fetching inventory records:', e);
       setError(e.message || String(e));
     } finally {
       setLoading(false);

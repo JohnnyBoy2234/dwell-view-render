@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   MapPin, 
   Calendar, 
@@ -17,9 +18,128 @@ import {
   X,
   CheckCircle,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Play,
+  Pause
 } from 'lucide-react';
 import { InventoryRecordWithDetails } from '@/types/inventory';
+
+interface PhotoViewerProps {
+  photoPath: string;
+}
+
+function PhotoViewer({ photoPath }: PhotoViewerProps) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleViewPhoto = async () => {
+    if (imageUrl) return; // Already loaded
+    
+    setLoading(true);
+    try {
+      const { data } = await supabase.storage
+        .from('kyc-uploads')
+        .createSignedUrl(photoPath, 60); // 1 minute expiry
+      
+      if (data?.signedUrl) {
+        setImageUrl(data.signedUrl);
+      }
+    } catch (error) {
+      console.error('Error loading photo:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div 
+      className="aspect-square bg-muted rounded-lg overflow-hidden cursor-pointer border hover:border-primary transition-colors"
+      onClick={handleViewPhoto}
+    >
+      {loading ? (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+        </div>
+      ) : imageUrl ? (
+        <img 
+          src={imageUrl} 
+          alt="Inventory item" 
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+          <Camera className="h-6 w-6" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface VoiceNotePlayerProps {
+  voiceNoteUrl: string;
+}
+
+function VoiceNotePlayer({ voiceNoteUrl }: VoiceNotePlayerProps) {
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  const handleLoadAudio = async () => {
+    if (audioUrl) {
+      // Toggle play/pause
+      if (audio) {
+        if (playing) {
+          audio.pause();
+          setPlaying(false);
+        } else {
+          audio.play();
+          setPlaying(true);
+        }
+      }
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const { data } = await supabase.storage
+        .from('kyc-uploads')
+        .createSignedUrl(voiceNoteUrl, 60);
+      
+      if (data?.signedUrl) {
+        setAudioUrl(data.signedUrl);
+        const newAudio = new Audio(data.signedUrl);
+        newAudio.onended = () => setPlaying(false);
+        setAudio(newAudio);
+        newAudio.play();
+        setPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error loading voice note:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={handleLoadAudio}
+      disabled={loading}
+      className="flex items-center gap-2"
+    >
+      {loading ? (
+        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+      ) : playing ? (
+        <Pause className="h-4 w-4" />
+      ) : (
+        <Play className="h-4 w-4" />
+      )}
+      {loading ? 'Loading...' : playing ? 'Pause' : 'Play Voice Note'}
+    </Button>
+  );
+}
 
 interface InventoryDetailModalProps {
   record: InventoryRecordWithDetails | null;
@@ -174,10 +294,36 @@ export function InventoryDetailModal({
                         </div>
                         
                         {item.description && (
-                          <p className="text-sm text-muted-foreground mb-2">{item.description}</p>
+                          <p className="text-sm text-muted-foreground mb-3">{item.description}</p>
                         )}
                         
-                        <div className="flex items-center gap-4 text-sm">
+                        {/* Photos Section */}
+                        {item.photos && item.photos.length > 0 && (
+                          <div className="mb-3">
+                            <h5 className="text-sm font-medium mb-2 flex items-center gap-1">
+                              <Camera className="h-4 w-4" />
+                              Photos ({item.photos.length})
+                            </h5>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                              {item.photos.map((photoPath, idx) => (
+                                <PhotoViewer key={idx} photoPath={photoPath} />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Voice Note Section */}
+                        {item.voice_note_url && (
+                          <div className="mb-3">
+                            <h5 className="text-sm font-medium mb-2 flex items-center gap-1">
+                              <Mic className="h-4 w-4" />
+                              Voice Note
+                            </h5>
+                            <VoiceNotePlayer voiceNoteUrl={item.voice_note_url} />
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2 border-t">
                           {item.photos.length > 0 && (
                             <div className="flex items-center gap-1">
                               <Camera className="h-4 w-4" />

@@ -136,6 +136,8 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     // This avoids landlord-only policies on property-images.
     const bucket = 'kyc-uploads';
     const finalPath = `inventory/${user!.id}/${path}`;
+    console.log('Uploading to bucket:', bucket, 'path:', finalPath, 'contentType:', contentType);
+    
     const { data, error } = await supabase.storage
       .from(bucket)
       .upload(finalPath, file as any, {
@@ -143,7 +145,11 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         upsert: false,
         contentType,
       });
-    if (error) throw error;
+    if (error) {
+      console.error('Storage upload error:', error);
+      throw error;
+    }
+    console.log('Storage upload successful:', data.path);
     // Return storage path for secure access later
     return data.path;
   };
@@ -226,7 +232,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
           const filename = `${crypto.randomUUID()}.${ext}`;
           const path = `${propertyId}/${recordId}/${noteId}/${filename}`;
+          console.log('Uploading photo:', path, 'Size:', file.size);
           const storagePath = await uploadToInventoryBucket(path, file, file.type);
+          console.log('Photo uploaded to:', storagePath);
           uploadedPhotoPaths.push(storagePath);
         }
 
@@ -234,7 +242,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         if (note.audioBlob && note.audioBlob.size > 0) {
           const filename = `${crypto.randomUUID()}.webm`;
           const path = `${propertyId}/${recordId}/${noteId}/${filename}`;
+          console.log('Uploading voice note:', path, 'Size:', note.audioBlob.size);
           audioPath = await uploadToInventoryBucket(path, note.audioBlob, 'audio/webm');
+          console.log('Voice note uploaded to:', audioPath);
         }
 
         itemsPayload.push({
@@ -249,13 +259,20 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       }
 
       if (itemsPayload.length > 0) {
+        console.log('Inserting inventory items:', itemsPayload);
         const { error: itemsErr } = await supabase.from('inventory_items' as any).insert(itemsPayload);
-        if (itemsErr) throw itemsErr;
+        if (itemsErr) {
+          console.error('Failed to insert inventory items:', itemsErr);
+          throw itemsErr;
+        }
+        console.log('Successfully inserted inventory items');
       }
 
       // Update counts on the record (count all notes, not just newly saved ones)
       const photosCount = notes.reduce((acc, n) => acc + n.photos.length, 0);
-      const voiceCount = notes.reduce((acc, n) => acc + (n.audioBlob && n.audioBlob.size > 0 ? 1 : 0), 0);
+      const voiceCount = notes.filter(n => n.audioBlob && n.audioBlob.size > 0).length;
+      console.log('Updating inventory record counts:', { photosCount, voiceCount, notesLength: notes.length });
+      
       const { error: updErr } = await supabase
         .from('inventory_records' as any)
         .update({
