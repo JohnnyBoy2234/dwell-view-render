@@ -196,12 +196,15 @@ export function useKyc() {
         }
       });
 
-      // Trigger notification to admins
-      await fetch('/api/kyc/notify-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id })
-      });
+      // Trigger notification to admins (non-blocking)
+      try {
+        await supabase.functions.invoke('kyc-notify-admin', {
+          body: { user_id: user.id }
+        });
+      } catch (notificationError) {
+        console.warn('Failed to notify admins:', notificationError);
+        // Don't throw - the KYC submission should still succeed
+      }
 
       toast({
         title: "Submitted for review",
