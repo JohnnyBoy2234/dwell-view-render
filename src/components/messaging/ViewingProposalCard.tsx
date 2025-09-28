@@ -37,6 +37,16 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
+  // Early return if proposal is not available
+  if (!proposal) {
+    return (
+      <div className="bg-muted/50 rounded-lg p-4 text-center">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+        <p className="text-sm text-muted-foreground">Loading viewing proposal...</p>
+      </div>
+    );
+  }
+
   const hasStartTime = !!proposal.start_at;
   const localStartTime = hasStartTime
     ? toZonedTime(new Date(proposal.start_at!), 'Africa/Johannesburg')

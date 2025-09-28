@@ -104,16 +104,28 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     if (missingIds.length === 0) return;
 
     const load = async () => {
-      const { data, error } = await supabase
-        .from('viewing_proposals')
-        .select(`*, properties ( title, location )`)
-        .in('id', missingIds as any);
-      if (!error && data) {
-        setProposalsById(prev => {
-          const next = { ...prev };
-          data.forEach(p => { next[p.id] = p; });
-          return next;
-        });
+      try {
+        console.log('📋 Loading viewing proposals:', missingIds);
+        const { data, error } = await supabase
+          .from('viewing_proposals')
+          .select(`*, properties ( title, location )`)
+          .in('id', missingIds as any);
+        
+        if (error) {
+          console.error('Error loading viewing proposals:', error);
+          return;
+        }
+        
+        if (data) {
+          console.log('📋 Loaded viewing proposals:', data.length);
+          setProposalsById(prev => {
+            const next = { ...prev };
+            data.forEach(p => { next[p.id] = p; });
+            return next;
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load viewing proposals:', error);
       }
     };
     load();
@@ -365,10 +377,17 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
         {message.message_type === 'viewing_proposal' && message.viewing_proposal_id ? (
           <div id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming">
-            <ViewingProposalCard
-              proposal={proposalsById[message.viewing_proposal_id]}
-              onUpdate={onCreateViewing}
-            />
+            {proposalsById[message.viewing_proposal_id] ? (
+              <ViewingProposalCard
+                proposal={proposalsById[message.viewing_proposal_id]}
+                onUpdate={onCreateViewing}
+              />
+            ) : (
+              <div className="bg-muted/50 rounded-lg p-4 text-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
+                <p className="text-sm text-muted-foreground">Loading viewing proposal...</p>
+              </div>
+            )}
           </div>
         ) : (
           bubbleElement
