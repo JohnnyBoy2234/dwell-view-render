@@ -175,7 +175,8 @@ serve(async (req) => {
       _user_id: user_id,
       _message: `Your identity verification has been approved! ✅`,
       _link_url: '/verify-id',
-      _type: 'kyc_approved'
+      _type: 'kyc_approved',
+      _metadata: {}
     });
 
     // TODO: Send email notification to user about approval
