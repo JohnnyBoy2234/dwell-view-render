@@ -33,8 +33,19 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
+  const handleOpenChange = (newOpen: boolean) => {
+    console.log('Dialog open change:', newOpen);
+    setOpen(newOpen);
+  };
+
+  const handleIssueTypeChange = (value: string) => {
+    console.log('Issue type changed:', value);
+    setIssueType(value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with:', { issueType, description, email });
     
     if (!issueType || !description.trim()) {
       toast({
@@ -93,13 +104,14 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
           onClick={(e) => {
             e.stopPropagation();
+            console.log('Report button clicked');
             setOpen(true);
           }}
           className="flex items-center gap-2"
@@ -109,26 +121,34 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-md">
+      <DialogContent 
+        className="sm:max-w-md"
+        onInteractOutside={(e) => {
+          // Prevent closing when clicking inside the modal
+          const target = e.target as Element;
+          if (target.closest('[data-radix-collection-item]')) {
+            e.preventDefault();
+          }
+        }}
+      >
         <DialogHeader>
           <DialogTitle>Report Property</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <Label htmlFor="issue-type">What's the issue?</Label>
-            <RadioGroup value={issueType} onValueChange={setIssueType}>
+            <Label>What's the issue?</Label>
+            <RadioGroup 
+              value={issueType} 
+              onValueChange={handleIssueTypeChange}
+              className="space-y-2"
+            >
               {ISSUE_TYPES.map((type) => (
-                <div 
-                  key={type.id} 
-                  className="flex items-center space-x-2"
-                  onClick={(e) => e.stopPropagation()}
-                >
+                <div key={type.id} className="flex items-center space-x-2">
                   <RadioGroupItem value={type.id} id={type.id} />
                   <Label 
                     htmlFor={type.id} 
                     className="text-sm font-normal cursor-pointer"
-                    onClick={(e) => e.stopPropagation()}
                   >
                     {type.label}
                   </Label>
