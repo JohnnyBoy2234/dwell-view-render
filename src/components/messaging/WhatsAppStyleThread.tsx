@@ -7,7 +7,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
-import { MessageStatusIndicator } from '@/components/messaging/MessageStatusIndicator';
 import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { cn } from '@/lib/utils';
 import { Clock, Check, CheckCheck } from 'lucide-react';
@@ -38,20 +37,24 @@ interface WhatsAppStyleThreadProps {
 }
 
 interface MessageStatusIndicatorProps {
-  status: 'sending' | 'sent' | 'delivered' | 'read';
+  status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+  className?: string;
 }
 
-function MessageStatusIndicator({ status }: MessageStatusIndicatorProps) {
+function MessageStatusIndicator({ status, className }: MessageStatusIndicatorProps) {
   const base = 'h-3 w-3';
+  const iconClass = cn(base, className);
   switch (status) {
     case 'sending':
-      return <Clock className={`${base} text-white/60`} aria-label="Sending" />;
+      return <Clock className={`${iconClass} text-white/60`} aria-label="Sending" />;
     case 'sent':
-      return <Check className={`${base} text-white/80`} aria-label="Sent" />;
+      return <Check className={`${iconClass} text-white/80`} aria-label="Sent" />;
     case 'delivered':
-      return <CheckCheck className={`${base} text-white`} aria-label="Delivered" />;
+      return <CheckCheck className={`${iconClass} text-white`} aria-label="Delivered" />;
     case 'read':
-      return <CheckCheck className={`${base} text-success-green`} aria-label="Read" />;
+      return <CheckCheck className={`${iconClass} text-success-green`} aria-label="Read" />;
+    case 'failed':
+      return <Clock className={`${iconClass} text-red-400`} aria-label="Failed" />;
     default:
       return null;
   }

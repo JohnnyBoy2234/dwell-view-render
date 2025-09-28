@@ -370,158 +370,153 @@ export const Property24SearchBar = ({
           </Sheet>
         </>
       ) : (
-        <div className="px-6 pb-6 flex gap-3 items-center flex-wrap">
-          <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
-            <PopoverTrigger asChild>
-            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={propertyTypeOpen}>
-                {getPropertyTypeLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-64 p-4 bg-background border-border shadow-lg z-50">
-              <div className="space-y-2">
-                {propertyTypeOptions.map(option => (
-                  <Button
-                    key={option.value}
-                    variant={filters.propertyType === option.value ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      filters.propertyType === option.value 
-                        ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
-                        : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
-                    }`}
-                    onClick={() => {
-                      onFiltersChange({ propertyType: option.value });
-                      setPropertyTypeOpen(false);
-                    }}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
+        <div className="px-6 pb-6 flex gap-3 items-center justify-center flex-wrap">
+          <div className="flex gap-3 items-center flex-wrap">
+            <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
+              <PopoverTrigger asChild>
+              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={propertyTypeOpen}>
+                  {getPropertyTypeLabel()}
+                  <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4 bg-background border-border shadow-lg z-50">
+                <div className="space-y-2">
+                  {propertyTypeOptions.map(option => (
+                    <Button
+                      key={option.value}
+                      variant={filters.propertyType === option.value ? "default" : "ghost"}
+                      className={`w-full justify-start ${
+                        filters.propertyType === option.value 
+                          ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
+                          : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
+                      }`}
+                      onClick={() => {
+                        onFiltersChange({ propertyType: option.value });
+                        setPropertyTypeOpen(false);
+                      }}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
 
-          <Popover open={priceOpen} onOpenChange={setPriceOpen}>
-            <PopoverTrigger asChild>
-            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={priceOpen}>
-                {getPriceLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4 bg-background border-border shadow-lg z-50">
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-foreground">Min Price</label>
-                    <Select value={filters.minPrice || ""} onValueChange={(value) => onFiltersChange({ minPrice: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border-border">
-                        {priceOptions.map(option => (
-                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium mb-2 block text-foreground">Max Price</label>
-                    <Select value={filters.maxPrice || ""} onValueChange={(value) => onFiltersChange({ maxPrice: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Any" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-background border-border">
-                        {priceOptions.map(option => (
-                          <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+            <Popover open={priceOpen} onOpenChange={setPriceOpen}>
+              <PopoverTrigger asChild>
+              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={priceOpen}>
+                  {getPriceLabel()}
+                  <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4 bg-background border-border shadow-lg z-50">
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium mb-2 block text-foreground">Min Price</label>
+                      <Select value={filters.minPrice || ""} onValueChange={(value) => onFiltersChange({ minPrice: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Any" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border-border">
+                          {priceOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium mb-2 block text-foreground">Max Price</label>
+                      <Select value={filters.maxPrice || ""} onValueChange={(value) => onFiltersChange({ maxPrice: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Any" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border-border">
+                          {priceOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </div>
-                <Button
-                onClick={() => setPriceOpen(false)}
-                  className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white"
-                  
-                >
-                  Apply Price Filter
+              </PopoverContent>
+            </Popover>
+
+            <Popover open={bedroomsOpen} onOpenChange={setBedroomsOpen}>
+              <PopoverTrigger asChild>
+              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bedroomsOpen}>
+                  {getBedroomsLabel()}
+                  <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
                 </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
+                <div className="space-y-2">
+                  {bedroomOptions.map(option => (
+                    <Button
+                      key={option.value}
+                      variant={filters.bedrooms === option.value ? "default" : "ghost"}
+                      className={`w-full justify-start ${
+                        filters.bedrooms === option.value 
+                          ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
+                          : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
+                      }`}
+                      onClick={() => {
+                        onFiltersChange({ bedrooms: option.value });
+                        setBedroomsOpen(false);
+                      }}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
 
-          <Popover open={bedroomsOpen} onOpenChange={setBedroomsOpen}>
-            <PopoverTrigger asChild>
-            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bedroomsOpen}>
-                {getBedroomsLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+            <Popover open={bathroomsOpen} onOpenChange={setBathroomsOpen}>
+              <PopoverTrigger asChild>
+              <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bathroomsOpen}>
+                  {getBathroomsLabel()}
+                  <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
+                <div className="space-y-2">
+                  {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
+                    <Button
+                      key={option.value}
+                      variant={filters.bathrooms === option.value ? "default" : "ghost"}
+                      className={`w-full justify-start ${
+                        filters.bathrooms === option.value 
+                          ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
+                          : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
+                      }`}
+                      onClick={() => {
+                        onFiltersChange({ bathrooms: option.value });
+                        setBathroomsOpen(false);
+                      }}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+
+            {onMoreFiltersOpen && (
+              <Button
+                variant="outline"
+                className="property24-filter-button flex-shrink-0"
+                onClick={onMoreFiltersOpen}
+              >
+                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                More Filters
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
-              <div className="space-y-2">
-                {bedroomOptions.map(option => (
-                  <Button
-                    key={option.value}
-                    variant={filters.bedrooms === option.value ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      filters.bedrooms === option.value 
-                        ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
-                        : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
-                    }`}
-                    onClick={() => {
-                      onFiltersChange({ bedrooms: option.value });
-                      setBedroomsOpen(false);
-                    }}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          <Popover open={bathroomsOpen} onOpenChange={setBathroomsOpen}>
-            <PopoverTrigger asChild>
-            <Button variant="outline" className="property24-filter-button flex-shrink-0" aria-expanded={bathroomsOpen}>
-                {getBathroomsLabel()}
-                <ChevronDown className="h-4 w-4 ml-2 flex-shrink-0" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
-              <div className="space-y-2">
-                {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
-                  <Button
-                    key={option.value}
-                    variant={filters.bathrooms === option.value ? "default" : "ghost"}
-                    className={`w-full justify-start ${
-                      filters.bathrooms === option.value 
-                        ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
-                        : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
-                    }`}
-                    onClick={() => {
-                      onFiltersChange({ bathrooms: option.value });
-                      setBathroomsOpen(false);
-                    }}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {onMoreFiltersOpen && (
-            <Button
-              variant="outline"
-              className="property24-filter-button flex-shrink-0"
-              onClick={onMoreFiltersOpen}
-            >
-              <SlidersHorizontal className="h-4 w-4 mr-2" />
-              More Filters
-            </Button>
-          )}
+            )}
+          </div>
 
           <Button
-          className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg ml-auto flex-shrink-0"
+            className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg flex-shrink-0"
             onClick={onSearch}
           >
             <Search className="h-4 w-4 mr-2" />
