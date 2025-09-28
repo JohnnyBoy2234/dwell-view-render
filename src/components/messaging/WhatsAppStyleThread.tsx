@@ -46,18 +46,16 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   const {
     messages,
     loading,
-    fetchMessages,
     sendMessageWithAttachment,
     setActiveConversation
   } = useMessaging();
 
-  // Load messages when conversation changes
+  // Load messages when conversation changes - useMessaging handles this automatically
   useEffect(() => {
     if (conversationId) {
       setActiveConversation(conversationId);
-      fetchMessages(conversationId);
     }
-  }, [conversationId, setActiveConversation, fetchMessages]);
+  }, [conversationId, setActiveConversation]);
 
   // Auto-scroll to bottom when new messages arrive or when typing
   const scrollToBottom = (force = false) => {

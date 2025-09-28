@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -232,7 +232,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   };
 
   // Fetch messages for a conversation
-  const fetchMessages = async (conversationId: string) => {
+  const fetchMessages = useCallback(async (conversationId: string) => {
     console.log('📥 Fetching messages for conversation:', conversationId);
     try {
       setLoading(true);
@@ -297,7 +297,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       });
       setLoading(false);
     }
-  };
+  }, [toast, isLandlord]);
 
   // Send a message
   const sendMessage = async (conversationId: string, content: string) => {
@@ -604,7 +604,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [activeConversation, fetchMessages]);
+  }, [activeConversation]);
 
   // Persist conversations to cache after refresh
   useEffect(() => {
