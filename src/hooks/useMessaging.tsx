@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -134,7 +134,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   }, []);
 
   // Fetch conversations
-  const fetchConversations = useCallback(async () => {
+  const fetchConversations = async () => {
     if (!user) {
       console.log('❌ Cannot fetch conversations: no user');
       setLoading(false);
@@ -166,9 +166,11 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       console.log('📋 Fetched conversations:', conversationsData?.length || 0, 'conversations');
 
       if (!conversationsData || conversationsData.length === 0) {
-        if (isMountedRef.current) {
-          setConversations([]);
+        if (!isMountedRef.current) {
+          setLoading(false);
+          return;
         }
+        setConversations([]);
         setLoading(false);
         return;
       }
@@ -226,12 +228,11 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       });
       setLoading(false);
     }
-  }, [user, isLandlord, toast]);
+  };
 
   // Fetch messages for a conversation
-  const fetchMessages = useCallback(async (conversationId: string) => {
+  const fetchMessages = async (conversationId: string) => {
     console.log('📥 Fetching messages for conversation:', conversationId);
-    if (!user) return;
     try {
       setLoading(true);
       // First fetch messages
@@ -295,7 +296,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       });
       setLoading(false);
     }
-  }, [user, toast, markMessagesAsRead]);
+  };
 
   // Send a message
   const sendMessage = async (conversationId: string, content: string) => {
@@ -568,7 +569,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
     // 2) Always refresh from server
     fetchConversations();
-  }, [user, fetchConversations]);
+  }, [user]);
 
   // Load messages when active conversation changes
   useEffect(() => {
@@ -593,8 +594,6 @@ export function useMessaging(onViewingProposalChange?: () => void) {
             setMessages(prev => (prev.some(m => m.id === message.id) ? prev : [...prev, message]));
           } else if (payload.eventType === 'UPDATE') {
             const message = payload.new as Message;
-            // The original code had a confirmMessage function here, but it's not defined.
-            // Assuming it's meant to update the message in the state.
             setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, ...message } : m)));
           }
         }
