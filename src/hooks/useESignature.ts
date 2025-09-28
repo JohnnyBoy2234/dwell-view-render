@@ -49,8 +49,15 @@ export function useESignature() {
       setSigning(true);
 
       // Get user's IP and user agent
-      const ipResponse = await fetch('https://api.ipify.org?format=json');
-      const ipData = await ipResponse.json();
+      let ipAddress = 'unknown';
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        ipAddress = ipData.ip;
+      } catch (error) {
+        console.warn('Failed to get IP address:', error);
+      }
+      
       const userAgent = navigator.userAgent;
 
       // Create signature hash
@@ -81,7 +88,7 @@ export function useESignature() {
         signature_image_url: signatureDataUrl,
         signature_hash: hashHex,
         signed_at: new Date().toISOString(),
-        ip_address: ipData.ip,
+        ip_address: ipAddress,
         user_agent: userAgent,
         geolocation,
         consent_acknowledged: consentAcknowledged

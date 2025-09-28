@@ -63,13 +63,8 @@ serve(async (req) => {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const documentHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-    // Generate signature hash
-    const signatureHash = await crypto.subtle.digest(
-      'SHA-256',
-      encoder.encode(signatureData.signature_image_url + Date.now())
-    );
-    const sigHashArray = Array.from(new Uint8Array(signatureHash));
-    const sigHashHex = sigHashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    // Use the signature hash provided by the client (already calculated there)
+    const sigHashHex = signatureData.signature_hash;
 
     const now = new Date().toISOString();
     const signerRole = isLandlord ? 'landlord' : 'tenant';
@@ -104,6 +99,7 @@ serve(async (req) => {
         signer_id: user.id,
         signer_role: signerRole,
         signature_hash: sigHashHex,
+        signature_image_url: signatureData.signature_image_url,
         ip_address: signatureData.ip_address,
         user_agent: signatureData.user_agent,
         document_hash: documentHash,
