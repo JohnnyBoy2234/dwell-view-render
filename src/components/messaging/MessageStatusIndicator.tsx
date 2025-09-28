@@ -30,7 +30,7 @@ export function MessageStatusIndicator({ status, className }: MessageStatusIndic
       case 'read':
         return {
           icon: CheckCheck,
-          className: 'text-blue-500',
+          className: 'text-green-400',
           ariaLabel: 'Message read'
         };
       case 'failed':

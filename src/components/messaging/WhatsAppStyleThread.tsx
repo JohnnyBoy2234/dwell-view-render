@@ -402,13 +402,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           )}>
             <span>{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             {isOwn && (
-              <MessageStatusIndicator 
-                status={messageStatus}
-                className={cn(
-                  'transition-colors duration-200',
-                  messageStatus === 'read' ? 'text-blue-400' : 'text-white/70'
-                )}
-              />
+                <MessageStatusIndicator 
+                  status={messageStatus}
+                  className={cn(
+                    'transition-colors duration-200',
+                    messageStatus === 'read' ? 'text-green-400' : 'text-white/70'
+                  )}
+                />
             )}
           </div>
         </div>

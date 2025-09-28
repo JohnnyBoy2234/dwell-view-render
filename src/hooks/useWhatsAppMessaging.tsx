@@ -188,23 +188,33 @@ export function useWhatsAppMessaging() {
         profileMap.set(profile.user_id, profile);
       });
 
-      // Transform to optimistic messages
-      const optimisticMessages: OptimisticMessage[] = messagesData.map(msg => ({
-        ...msg,
-        tempId: msg.id,
-        status: 'delivered' as const,
-        profiles: profileMap.get(msg.sender_id) || null
-      }));
+      // Transform to optimistic messages with correct read status
+      const optimisticMessages: OptimisticMessage[] = messagesData.map(msg => {
+        const isRead = isLandlord ? msg.read_by_landlord : msg.read_by_tenant;
+        return {
+          ...msg,
+          tempId: msg.id,
+          status: isRead ? 'read' : 'delivered',
+          profiles: profileMap.get(msg.sender_id) || null
+        };
+      });
 
       messagesCache.current.set(conversationId, optimisticMessages);
       setMessages(optimisticMessages);
 
-      // Mark messages as read
+      // Mark messages as read immediately after loading
       await markMessagesAsRead(conversationId);
+      
+      // Update messages status to read for messages from other users
+      const updatedMessages = optimisticMessages.map(msg => 
+        msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
+      );
+      setMessages(updatedMessages);
+      messagesCache.current.set(conversationId, updatedMessages);
 
       // Cache in localStorage
       try {
-        localStorage.setItem(`messaging_messages_${conversationId}`, JSON.stringify(optimisticMessages));
+        localStorage.setItem(`messaging_messages_${conversationId}`, JSON.stringify(updatedMessages));
       } catch {}
 
     } catch (error: any) {
@@ -215,7 +225,7 @@ export function useWhatsAppMessaging() {
         description: error.message
       });
     }
-  }, [user, toast]);
+  }, [user, toast, isLandlord]);
 
   // Send message with optimistic update
   const sendMessage = useCallback(async (conversationId: string, content: string, files?: File[]) => {
@@ -335,14 +345,29 @@ export function useWhatsAppMessaging() {
     try {
       const roleField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
       
-      await supabase
+      console.log('📖 Marking messages as read for conversation:', conversationId, 'as', roleField);
+      
+      const { data, error } = await supabase
         .from('messages')
         .update({ [roleField]: true })
         .eq('conversation_id', conversationId)
         .eq(roleField, false)
-        .neq('sender_id', user.id);
+        .neq('sender_id', user.id)
+        .select('id');
 
-      // Update local unread counts
+      if (error) {
+        console.error('❌ Error marking messages as read:', error);
+        return;
+      }
+
+      console.log('✅ Marked', data?.length || 0, 'messages as read');
+
+      // Update local message status immediately
+      setMessages(prev => prev.map(msg => 
+        msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
+      ));
+
+      // Update local conversation unread counts
       setConversations(prev =>
         prev.map(conv =>
           conv.id === conversationId
@@ -350,6 +375,15 @@ export function useWhatsAppMessaging() {
             : conv
         )
       );
+
+      // Update cache with read status
+      const cached = messagesCache.current.get(conversationId);
+      if (cached) {
+        const updatedCache = cached.map(msg => 
+          msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
+        );
+        messagesCache.current.set(conversationId, updatedCache);
+      }
 
     } catch (error) {
       console.error('❌ Error marking messages as read:', error);

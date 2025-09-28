@@ -22,6 +22,8 @@ export function useUnreadMessages() {
       setLoading(true);
     }
     try {
+      console.log('🔔 Fetching unread count for user:', user.id, 'isLandlord:', isLandlord);
+      
       // Get conversations where the user is either landlord or tenant
       const { data: conversations, error: conversationError } = await supabase
         .from('conversations')
@@ -31,12 +33,14 @@ export function useUnreadMessages() {
       if (conversationError) throw conversationError;
 
       if (!conversations || conversations.length === 0) {
+        console.log('🔔 No conversations found');
         if (isMountedRef.current) {
           setUnreadCount(0);
         }
         return;
       }
 
+      console.log('🔔 Found', conversations.length, 'conversations');
       const conversationIds = conversations.map(c => c.id);
 
       // Count unread messages based on user role, excluding messages sent by current user
@@ -58,6 +62,7 @@ export function useUnreadMessages() {
 
       if (messageError) throw messageError;
 
+      console.log('🔔 Unread count:', count || 0);
       if (isMountedRef.current) {
         setUnreadCount(count || 0);
       }
@@ -96,7 +101,10 @@ export function useUnreadMessages() {
     onMessageChange: () => {
       console.log('🔄 Refreshing unread messages due to real-time update');
       if (isMountedRef.current) {
-        fetchUnreadCount();
+        // Add a small delay to allow database to be updated
+        setTimeout(() => {
+          fetchUnreadCount();
+        }, 500);
       }
     }
   });
