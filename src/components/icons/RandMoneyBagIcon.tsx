@@ -1,34 +1,46 @@
 import * as React from "react";
 import { LucideProps } from "lucide-react";
 
+// Chunky money bag with prominent R symbol
 export const RandMoneyBagIcon = React.forwardRef<SVGSVGElement, LucideProps>(
-  ({ className, size = 28, strokeWidth = 2, ...props }, ref) => (
+  ({ className, size = 24, ...props }, ref) => (
     <svg
       ref={ref}
+      className={className}
       width={size}
       height={size}
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      aria-hidden="true"
       {...props}
     >
-      {/* Money bag shape */}
-      <path d="M8 6.5C8 4.567 9.567 3 11.5 3h1C14.433 3 16 4.567 16 6.5V7h1.5c.828 0 1.5.672 1.5 1.5v1.5"/>
-      <path d="M7 10.5c0-.828.672-1.5 1.5-1.5h7c.828 0 1.5.672 1.5 1.5v6c0 2.21-1.79 4-4 4h-2c-2.21 0-4-1.79-4-4v-6z"/>
+      {/* Money bag drawstring knot */}
+      <path d="M10 3c0-1.1.9-2 2-2s2 .9 2 2v1h-4V3z" fill="currentColor" opacity="0.8"/>
       
-      {/* Bag tie/drawstring */}
-      <path d="M10 7h4"/>
-      <path d="M11 6v2"/>
-      <path d="M13 6v2"/>
+      {/* Drawstring band */}
+      <rect x="7" y="4" width="10" height="1.5" rx="0.75" fill="currentColor" opacity="0.9"/>
       
-      {/* Letter R in the center */}
-      <path d="M10 12h2.5c.828 0 1.5.672 1.5 1.5s-.672 1.5-1.5 1.5H10"/>
-      <path d="M10 12v6"/>
-      <path d="M12.5 15l1.5 3"/>
+      {/* Main chunky bag body - wide and full */}
+      <path d="M6 6.5c-1.5 1-2.5 2.8-2.5 4.8 0 3.5 2.5 6.5 6 7.5.8.2 1.6.2 2.5.2s1.7 0 2.5-.2c3.5-1 6-4 6-7.5 0-2-1-3.8-2.5-4.8-1-0.7-2.2-1.2-3.5-1.4-1.3-0.2-2.7-0.2-4 0-1.3 0.2-2.5 0.7-3.5 1.4z" 
+            fill="currentColor"/>
+      
+      {/* Bag highlight for depth */}
+      <ellipse cx="12" cy="8" rx="6" ry="1.5" fill="currentColor" opacity="0.3"/>
+      
+      {/* Large prominent R symbol in center */}
+      <g transform="translate(12, 13)">
+        {/* R letter - bold and prominent */}
+        <path d="M-2.5 -3h2c1.1 0 2 .9 2 2s-.9 2-2 2h-1l1.8 2.5h-1.3l-1.5-2.5h-1v2.5h-1V-3z
+                 M-1.5 -2v2h1c.6 0 1-.4 1-1s-.4-1-1-1h-1z" 
+              fill="hsl(var(--background))" 
+              stroke="none"/>
+      </g>
+      
+      {/* Scattered coins around the bag */}
+      <circle cx="4" cy="10" r="1" fill="currentColor" opacity="0.6"/>
+      <circle cx="20" cy="12" r="0.8" fill="currentColor" opacity="0.5"/>
+      <circle cx="3" cy="16" r="0.7" fill="currentColor" opacity="0.4"/>
     </svg>
   )
 );
