@@ -16,7 +16,6 @@ interface ApplicationInvite {
   conversation_id?: string | null;
   status: string;
   created_at: string;
-  expires_at: string;
   used_at?: string | null;
 }
 
@@ -57,16 +56,11 @@ export default function ApplyInvite() {
         }
 
         // Validate invite
-        const isExpired = new Date(data.expires_at) < new Date();
         const isUsed = !!data.used_at || data.status === 'used';
         const isOwner = data.tenant_id === user.id;
 
         if (!isOwner) {
           setError('This invitation is not for your account.');
-          return;
-        }
-        if (isExpired) {
-          setError('This invitation link has expired.');
           return;
         }
         if (isUsed) {

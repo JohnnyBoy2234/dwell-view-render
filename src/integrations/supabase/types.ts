@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           conversation_id: string | null
           created_at: string
-          expires_at: string
           id: string
           landlord_id: string
           property_id: string
@@ -30,7 +29,6 @@ export type Database = {
         Insert: {
           conversation_id?: string | null
           created_at?: string
-          expires_at?: string
           id?: string
           landlord_id: string
           property_id: string
@@ -42,7 +40,6 @@ export type Database = {
         Update: {
           conversation_id?: string | null
           created_at?: string
-          expires_at?: string
           id?: string
           landlord_id?: string
           property_id?: string

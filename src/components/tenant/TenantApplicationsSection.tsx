@@ -167,7 +167,7 @@ export const TenantApplicationsSection = () => {
                         </CardHeader>
                         <CardContent>
                           <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Valid until {new Date(inv.expires_at).toLocaleDateString()}</p>
+                            <p className="text-sm text-muted-foreground">Invitation available</p>
                             <Button onClick={() => navigate(`/apply/invite/${inv.token}`)}>Start Application</Button>
                           </div>
                         </CardContent>

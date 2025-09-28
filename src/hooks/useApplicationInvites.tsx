@@ -10,7 +10,6 @@ export interface ApplicationInvite {
   tenant_id: string;
   status: string;
   created_at: string;
-  expires_at: string;
   used_at?: string | null;
 }
 
