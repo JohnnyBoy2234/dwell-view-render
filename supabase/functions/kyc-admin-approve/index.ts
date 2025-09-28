@@ -161,32 +161,34 @@ serve(async (req) => {
       }
     }
 
-    // Get user profile for notification
-    const { data: profile, error: profileError } = await supabaseAdmin
+    // Get user profile for notification context (optional)
+    const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('display_name')
       .eq('user_id', user_id)
       .single();
 
-    const userName = profile?.display_name || 'User';
+    const approvedAt = new Date().toISOString();
 
-    // Create notification for user
-    await supabaseAdmin
-      .from('notifications')
-      .insert({
-        user_id: user_id,
-        message: `Your identity verification has been approved! ✅`,
-        link_url: '/verify-id',
-        type: 'kyc_approved',
-        metadata: {
-          approved_by: user.id,
-          approved_at: new Date().toISOString()
-        }
-      });
+    // Create notification for user via helper (handles RLS)
+    const { error: notifyError } = await supabaseAdmin.rpc('create_notification', {
+      _user_id: user_id,
+      _message: 'Your identity verification has been approved! ✅',
+      _link_url: '/verify-id',
+      _type: 'kyc_approved',
+      _metadata: {
+        approved_by: user.id,
+        approved_at: approvedAt,
+        reviewer_name: profile?.display_name || null
+      }
+    });
 
-    // TODO: Send email notification to user about approval
-    // TODO: Send SMS/WhatsApp notification if configured
-    console.log(`Would send approval notification to ${userName} (${user_id})`);
+    if (notifyError) {
+      console.error('Failed to create approval notification:', notifyError);
+    }
+
+    // TODO: Send email/SMS if needed
+    console.log(`KYC approved for ${profile?.display_name || 'user'} (${user_id}) by ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
