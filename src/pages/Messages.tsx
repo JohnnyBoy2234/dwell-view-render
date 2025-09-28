@@ -704,6 +704,8 @@ export default function Messages() {
                   onScrollToProposal={setScrollToProposalFn}
                   onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
                   isLandlordInConversation={isLandlordInConversation}
+                  tenantId={selectedConversation?.tenant_id}
+                  propertyId={selectedConversation?.property_id}
                 />
               )}
             </div>

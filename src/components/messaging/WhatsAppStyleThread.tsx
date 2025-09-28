@@ -35,6 +35,8 @@ interface WhatsAppStyleThreadProps {
   onScrollToProposal?: (fn: (proposalId: string) => void) => void;
   onCreateViewing?: () => void;
   isLandlordInConversation?: boolean;
+  tenantId?: string;
+  propertyId?: string;
 }
 
 interface MessageStatusIndicatorProps {
@@ -61,7 +63,7 @@ function MessageStatusIndicator({ status, className }: MessageStatusIndicatorPro
   }
 }
 
-export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing, isLandlordInConversation }: WhatsAppStyleThreadProps) {
+export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing, isLandlordInConversation, tenantId, propertyId }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -426,6 +428,28 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           {message.content && (
             <div className="text-sm leading-relaxed whitespace-pre-line break-words">
               {message.content}
+            </div>
+          )}
+
+          {/* Application Invite CTA inside message bubble for tenants */}
+          {!isOwn && !isLandlordInConversation && typeof message.content === 'string' && message.content.includes('/apply/invite/') && (
+            <div className="mt-2">
+              <button
+                className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
+                onClick={() => {
+                  try {
+                    const match = message.content.match(/\/apply\/invite\/([a-zA-Z0-9-]+)/);
+                    if (match && match[1]) {
+                      window.location.href = `/apply/invite/${match[1]}`;
+                    }
+                  } catch (e) {
+                    console.error('Failed to navigate to invite from message:', e);
+                  }
+                }}
+                aria-label="Start rental application"
+              >
+                Start Application
+              </button>
             </div>
           )}
 

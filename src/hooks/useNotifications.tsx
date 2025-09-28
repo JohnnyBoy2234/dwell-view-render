@@ -68,7 +68,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      let { error } = await supabase
         .from('notifications')
         .update({ 
           is_read: true,
@@ -77,6 +77,16 @@ export const useNotifications = (filters?: NotificationFilters) => {
         })
         .eq('id', notificationId)
         .eq('user_id', user.id);
+
+      // Fallback if read_at/updated_at columns don't exist
+      if (error && (error.code === 'PGRST204' || (error.message || '').includes("read_at"))) {
+        const fallback = await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('id', notificationId)
+          .eq('user_id', user.id);
+        error = fallback.error as any;
+      }
 
       if (error) throw error;
 
@@ -143,7 +153,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
     try {
       // Update database first
       const now = new Date().toISOString();
-      const { error: updateError } = await supabase
+      let { error: updateError } = await supabase
         .from('notifications')
         .update({ 
           is_read: true, 
@@ -152,7 +162,17 @@ export const useNotifications = (filters?: NotificationFilters) => {
         })
         .eq('user_id', user.id)
         .eq('is_read', false);
-      
+
+      // Fallback if read_at/updated_at columns don't exist
+      if (updateError && (updateError.code === 'PGRST204' || (updateError.message || '').includes('read_at'))) {
+        const fb = await supabase
+          .from('notifications')
+          .update({ is_read: true })
+          .eq('user_id', user.id)
+          .eq('is_read', false);
+        updateError = fb.error as any;
+      }
+
       if (updateError) throw updateError;
 
       // Update local state after successful database update

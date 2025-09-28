@@ -37,6 +37,13 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const navigateToInvite = (token: string) => {
+    try {
+      window.location.href = `/apply/invite/${token}`;
+    } catch (e) {
+      console.error('Failed to navigate to invite:', e);
+    }
+  };
 
   // Early return if proposal is not available
   if (!proposal) {
@@ -154,6 +161,52 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
   // Use conversation-specific landlord flag if provided to avoid misclassification when a user has both roles
   const effectiveIsLandlord = typeof isLandlordInConversation === 'boolean' ? isLandlordInConversation : isLandlord;
   const canTakeAction = user && !effectiveIsLandlord && user.id === proposal.tenant_id && proposal.status === 'proposed';
+  const canStartApplication = user && !effectiveIsLandlord && user.id === proposal.tenant_id && proposal.status === 'confirmed';
+
+  const handleStartApplication = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      // Find existing invite
+      const { data: existing, error: findError } = await supabase
+        .from('application_invites')
+        .select('token')
+        .eq('tenant_id', user.id)
+        .eq('property_id', proposal.property_id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (findError) throw findError;
+      if (existing?.token) {
+        navigateToInvite(existing.token);
+        return;
+      }
+
+      // Create a new invite if none exists
+      const token = crypto.randomUUID();
+      const { error: createError } = await supabase
+        .from('application_invites')
+        .insert({
+          token,
+          property_id: proposal.property_id,
+          landlord_id: proposal.landlord_id,
+          tenant_id: user.id,
+          status: 'invited'
+        });
+      if (createError) throw createError;
+      navigateToInvite(token);
+    } catch (error: any) {
+      console.error('Error starting application:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Could not start application',
+        description: error?.message || 'Please try again later.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Card className="w-full max-w-full bg-gradient-to-br from-background to-muted/20 border-2">
@@ -249,6 +302,13 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
               <CheckCircle className="h-4 w-4" />
               <span className="font-medium">Viewing confirmed! You'll receive reminders.</span>
             </div>
+            {canStartApplication && (
+              <div className="pt-2">
+                <Button size="sm" onClick={handleStartApplication} disabled={loading}>
+                  {loading ? 'Opening…' : 'Start Application'}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>
