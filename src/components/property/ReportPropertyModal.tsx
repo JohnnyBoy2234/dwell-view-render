@@ -145,18 +145,21 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
 
       if (error) throw error;
 
-      await supabase
-        .from('admin_notifications')
-        .insert([{
-          type: 'property_report',
-          title: `Property report: ${selectedIssue?.label || 'New report'}`,
-          message: description.trim().slice(0, 200),
-          metadata: {
-            property_id: propertyId,
-            issue_type: issueType,
-            reporter_email: user?.email || reporterEmail.trim(),
-          },
-        }]);
+      // Create notification for admin
+      if (user) {
+        await supabase
+          .from('notifications')
+          .insert([{
+            user_id: user.id,
+            type: 'property_report',
+            message: `Property report submitted: ${selectedIssue?.label || 'New report'}`,
+            metadata: {
+              property_id: propertyId,
+              issue_type: issueType,
+              reporter_email: user.email || reporterEmail.trim(),
+            },
+          }]);
+      }
 
       toast({
         title: "Report Submitted",

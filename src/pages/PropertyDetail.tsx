@@ -83,6 +83,7 @@ export default function PropertyDetail() {
   const [messageOpen, setMessageOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [reportModalOpen, setReportModalOpen] = useState(false);
   
   const { activeBooking } = useViewingBooking(property?.id || '', property?.landlord_id || '');
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<MessageFormData>();
