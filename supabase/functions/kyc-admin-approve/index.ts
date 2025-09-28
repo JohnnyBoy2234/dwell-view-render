@@ -20,7 +20,10 @@ serve(async (req) => {
     // Get auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('Authorization required');
+      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Initialize Supabase clients
@@ -40,27 +43,41 @@ serve(async (req) => {
     );
 
     // Verify admin access
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication failed');
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Authentication failed' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
+    const user = userData.user;
 
     const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin', { 
       user_id: user.id 
     });
 
     if (adminCheckError || !isAdmin) {
-      throw new Error('Admin access required');
+      return new Response(JSON.stringify({ error: 'Admin access required' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     if (req.method !== 'POST') {
-      throw new Error('Method not allowed');
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     const { user_id }: ApproveRequest = await req.json();
 
     if (!user_id) {
-      throw new Error('User ID is required');
+      return new Response(JSON.stringify({ error: 'User ID is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Get current KYC profile
@@ -71,11 +88,17 @@ serve(async (req) => {
       .single();
 
     if (kycError || !kycProfile) {
-      throw new Error('KYC profile not found');
+      return new Response(JSON.stringify({ error: 'KYC profile not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     if (kycProfile.status !== 'submitted') {
-      throw new Error('KYC profile is not in submitted status');
+      return new Response(JSON.stringify({ error: 'KYC profile is not in submitted status' }), {
+        status: 409,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Update KYC profile to approved
@@ -90,7 +113,11 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (updateError) {
-      throw updateError;
+      console.error('Update error:', updateError);
+      return new Response(JSON.stringify({ error: 'Failed to update KYC profile' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Create audit log for approval (non-blocking)
@@ -142,18 +169,9 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Error in kyc-admin-approve function:', error);
-    
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error' 
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: error?.message || 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
   }
 });
