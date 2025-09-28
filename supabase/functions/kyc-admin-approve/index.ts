@@ -171,18 +171,16 @@ serve(async (req) => {
     const userName = profile?.display_name || 'User';
 
     // Create notification for user
-    await supabaseAdmin
-      .from('notifications')
-      .insert({
-        user_id: user_id,
-        message: `Your identity verification has been approved! ✅`,
-        link_url: '/verify-id',
-        type: 'kyc_approved',
-        metadata: {
-          approved_by: user.id,
-          approved_at: new Date().toISOString()
-        }
-      });
+    await supabaseAdmin.rpc('create_notification', {
+      _user_id: user_id,
+      _message: `Your identity verification has been approved! ✅`,
+      _link_url: '/verify-id',
+      _type: 'kyc_approved',
+      _metadata: {
+        approved_by: user.id,
+        approved_at: new Date().toISOString()
+      }
+    });
 
     // TODO: Send email notification to user about approval
     // TODO: Send SMS/WhatsApp notification if configured
