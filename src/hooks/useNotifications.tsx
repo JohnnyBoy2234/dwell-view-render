@@ -71,7 +71,9 @@ export const useNotifications = (filters?: NotificationFilters) => {
       const { error } = await supabase
         .from('notifications')
         .update({ 
-          is_read: true
+          is_read: true,
+          read_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
         .eq('id', notificationId)
         .eq('user_id', user.id);
@@ -83,7 +85,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
         setNotifications(prev => 
           prev.map(n => 
             n.id === notificationId 
-              ? { ...n, is_read: true }
+              ? { ...n, is_read: true, read_at: new Date().toISOString() }
               : n
           )
         );
@@ -138,29 +140,34 @@ export const useNotifications = (filters?: NotificationFilters) => {
       return;
     }
     
-    // Just update local state immediately - like the chat does
-    if (isMountedRef.current) {
-      setNotifications(prev => {
-        const updated = prev.map(n => ({ ...n, is_read: true }));
-        return updated;
-      });
-      setUnreadCount(0);
-    }
-    
-    // Try to update database in the background (non-blocking)
     try {
-      // Simple update approach - mark all unread notifications as read for this user
+      // Update database first
+      const now = new Date().toISOString();
       const { error: updateError } = await supabase
         .from('notifications')
-        .update({ is_read: true })
+        .update({ 
+          is_read: true, 
+          read_at: now,
+          updated_at: now
+        })
         .eq('user_id', user.id)
         .eq('is_read', false);
       
-      if (updateError) {
-      } else {
+      if (updateError) throw updateError;
+
+      // Update local state after successful database update
+      if (isMountedRef.current) {
+        setNotifications(prev => {
+          const updated = prev.map(n => ({ ...n, is_read: true, read_at: now }));
+          return updated;
+        });
+        setUnreadCount(0);
       }
     } catch (error) {
-      // Don't worry about database errors - local state is already updated
+      console.error('Error marking all notifications as read:', error);
+      if (isMountedRef.current) {
+        setError(error instanceof Error ? error.message : 'Failed to mark all as read');
+      }
     }
   }, [user]);
 
