@@ -1,114 +1,38 @@
-import { useState } from 'react';
 import { Upload, FileText, Download, Trash2, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-
-interface ProofDocument {
-  id: string;
-  fileName: string;
-  fileSize: string;
-  uploadDate: string;
-  description: string;
-  type: 'bank_statement' | 'transfer_receipt' | 'other';
-  status: 'uploaded' | 'processing' | 'verified';
-}
+import { useProofOfPayment } from '@/hooks/useProofOfPayment';
 
 export default function TenantProofOfPayment() {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
-  const [documents, setDocuments] = useState<ProofDocument[]>([
-    {
-      id: '1',
-      fileName: 'Bank_Statement_Jan_2024.pdf',
-      fileSize: '2.4 MB',
-      uploadDate: '2024-01-15',
-      description: 'January 2024 Bank Statement',
-      type: 'bank_statement',
-      status: 'verified'
-    },
-    {
-      id: '2', 
-      fileName: 'Rent_Transfer_Receipt_Dec.pdf',
-      fileSize: '0.8 MB',
-      uploadDate: '2024-01-02',
-      description: 'December Rent Payment Receipt',
-      type: 'transfer_receipt',
-      status: 'uploaded'
-    }
-  ]);
+  const {
+    documents,
+    loading,
+    uploading,
+    uploadDocument,
+    deleteDocument,
+    downloadDocument
+  } = useProofOfPayment();
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
     const file = files[0];
+    await uploadDocument(file);
     
-    // Validate file type
-    if (!file.type.includes('pdf') && !file.type.includes('image')) {
-      toast({
-        variant: 'destructive',
-        title: 'Invalid file type',
-        description: 'Please upload PDF or image files only.'
-      });
-      return;
-    }
-
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      toast({
-        variant: 'destructive',
-        title: 'File too large',
-        description: 'Please upload files smaller than 10MB.'
-      });
-      return;
-    }
-
-    setUploading(true);
-    
-    try {
-      // Simulate upload process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const newDocument: ProofDocument = {
-        id: Date.now().toString(),
-        fileName: file.name,
-        fileSize: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-        uploadDate: new Date().toISOString().split('T')[0],
-        description: file.name.replace(/\.[^/.]+$/, ''),
-        type: file.name.toLowerCase().includes('statement') ? 'bank_statement' : 
-              file.name.toLowerCase().includes('receipt') ? 'transfer_receipt' : 'other',
-        status: 'uploaded'
-      };
-      
-      setDocuments(prev => [newDocument, ...prev]);
-      
-      toast({
-        title: 'Upload successful',
-        description: 'Your proof of payment has been uploaded successfully.'
-      });
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Upload failed',
-        description: 'Please try again or contact support if the problem persists.'
-      });
-    } finally {
-      setUploading(false);
-    }
+    // Clear the input
+    event.target.value = '';
   };
 
-  const handleDeleteDocument = (id: string) => {
-    setDocuments(prev => prev.filter(doc => doc.id !== id));
-    toast({
-      title: 'Document deleted',
-      description: 'The document has been removed from your records.'
-    });
+  const handleDeleteDocument = (id: string, filePath: string) => {
+    deleteDocument(id, filePath);
+  };
+
+  const handleDownloadDocument = (id: string, filePath: string, fileName: string) => {
+    downloadDocument(id, filePath, fileName);
   };
 
   const getStatusIcon = (status: string) => {
@@ -132,6 +56,20 @@ export default function TenantProofOfPayment() {
         return <Badge variant="outline">Uploaded</Badge>;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Proof of Payment</h1>
+          <p className="text-muted-foreground">Loading your documents...</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 border-2 border-ocean-blue border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -221,10 +159,7 @@ export default function TenantProofOfPayment() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // In real app, this would download the file
-                          toast({ title: 'Download started', description: `Downloading ${document.fileName}` });
-                        }}
+                        onClick={() => handleDownloadDocument(document.id, document.filePath, document.fileName)}
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download
@@ -232,7 +167,7 @@ export default function TenantProofOfPayment() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDeleteDocument(document.id)}
+                        onClick={() => handleDeleteDocument(document.id, document.filePath)}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
