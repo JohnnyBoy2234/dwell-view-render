@@ -86,7 +86,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error creating signature session:", error);
     return new Response(JSON.stringify({ 
-      error: error.message || "Failed to create signature session" 
+      error: (error as Error).message || "Failed to create signature session" 
     }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -146,7 +146,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error signing contract:", error);
     return new Response(JSON.stringify({ 
-      error: error.message || "Failed to sign contract" 
+      error: (error as Error).message || "Failed to sign contract" 
     }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },

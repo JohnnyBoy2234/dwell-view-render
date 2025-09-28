@@ -43,8 +43,8 @@ serve(async (req) => {
       tokenPayload = await verify(token, key);
       console.log('Token verified successfully:', { sid: tokenPayload.sid, purpose: tokenPayload.purpose });
     } catch (err) {
-      console.error('Token verification failed:', err.message);
-      return new Response(JSON.stringify({ error: 'Invalid or expired token', details: err.message }), { 
+      console.error('Token verification failed:', (err as Error).message);
+      return new Response(JSON.stringify({ error: 'Invalid or expired token', details: (err as Error).message }), {
         status: 401, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       });
@@ -173,7 +173,7 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in kyc-upload-capture:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

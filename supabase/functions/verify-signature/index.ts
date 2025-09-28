@@ -87,7 +87,7 @@ serve(async (req) => {
     console.error("Error verifying signature:", error);
     return new Response(JSON.stringify({ 
       isValid: false,
-      error: error.message || "Failed to verify signature" 
+      error: (error as Error).message || "Failed to verify signature" 
     }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },

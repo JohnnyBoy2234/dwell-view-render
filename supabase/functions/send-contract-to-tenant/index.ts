@@ -38,17 +38,18 @@ serve(async (req) => {
       .eq('user_id', contract.landlord_id)
       .single();
 
-    // Find or create tenant user by email
+    // Find existing tenant user by email using listUsers
     let tenantUserId = null;
-    const { data: existingUser, error: userError } = await supabase.auth.admin.getUserByEmail(tenantEmail);
+    const { data: { users }, error: listUsersError } = await supabase.auth.admin.listUsers();
     
-    if (userError && userError.message !== 'User not found') {
-      throw userError;
+    if (!listUsersError && users) {
+      const existingUser = users.find(u => u.email === tenantEmail);
+      if (existingUser) {
+        tenantUserId = existingUser.id;
+      }
     }
 
-    if (existingUser?.user) {
-      tenantUserId = existingUser.user.id;
-    } else {
+    if (!tenantUserId) {
       // Create a new user account for the tenant
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: tenantEmail,
@@ -155,7 +156,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Error sending contract:", error);
     return new Response(JSON.stringify({ 
-      error: error.message || "Failed to send contract to tenant" 
+      error: (error as Error).message || "Failed to send contract to tenant" 
     }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },

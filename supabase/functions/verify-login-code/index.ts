@@ -26,16 +26,23 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Find user by email
-    const { data: userRes, error: getUserErr } = await adminClient.auth.admin.getUserByEmail(email);
-    if (getUserErr || !userRes?.user) {
+    // Find user by email using listUsers
+    const { data: { users }, error: listUsersError } = await adminClient.auth.admin.listUsers();
+    
+    if (listUsersError) {
+      throw listUsersError;
+    }
+
+    const userRes = users?.find(u => u.email === email);
+    
+    if (!userRes) {
       return new Response(JSON.stringify({ error: "No account found for this email" }), {
         status: 404,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    const user = userRes.user;
+    const user = userRes;
 
     const nowIso = new Date().toISOString();
     const { data: latest, error: selectError } = await adminClient

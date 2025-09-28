@@ -33,16 +33,23 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Find user by email (must exist for login)
-    const { data: userRes, error: getUserErr } = await adminClient.auth.admin.getUserByEmail(email);
-    if (getUserErr || !userRes?.user) {
+    // Find user by email using listUsers
+    const { data: { users }, error: listUsersError } = await adminClient.auth.admin.listUsers();
+    
+    if (listUsersError) {
+      throw listUsersError;
+    }
+
+    const userRes = users?.find(u => u.email === email);
+    
+    if (!userRes) {
       return new Response(JSON.stringify({ error: "No account found for this email" }), {
         status: 404,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
 
-    const user = userRes.user;
+    const user = userRes;
 
     // Rate limit: 30 seconds between sends per user
     const { data: latest } = await adminClient
@@ -64,7 +71,7 @@ serve(async (req) => {
     }
 
     const code = generateCode();
-    const code_hash = await bcrypt.hash(code, 10);
+    const code_hash = await bcrypt.hash(code, "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy");
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     const { error: insertError } = await adminClient.from("verification_codes").insert({

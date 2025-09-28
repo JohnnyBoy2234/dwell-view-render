@@ -579,7 +579,10 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                 value={note.text || ''}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setNotes((prev) => prev.map((n) => n.id === note.id ? { ...n, text: value } : n));
+                  setNotes((prev) => prev.map((n) => 
+                    n.id === note.id ? { ...n, text: value, saved: false } : n
+                  ));
+                  setHasUnsavedChanges(true);
                 }}
               />
               <Input

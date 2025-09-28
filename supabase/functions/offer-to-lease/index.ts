@@ -213,7 +213,7 @@ serve(async (req) => {
     console.error("Error in offer-to-lease:", e);
     return new Response(JSON.stringify({ 
       ok: false, 
-      error: String(e?.message ?? e) 
+      error: String((e as any)?.message ?? e) 
     }), { 
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

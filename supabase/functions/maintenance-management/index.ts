@@ -91,7 +91,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Maintenance management error:', error);
     return new Response(JSON.stringify({ 
-      error: error.message || 'Internal server error' 
+      error: (error as Error).message || 'Internal server error' 
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

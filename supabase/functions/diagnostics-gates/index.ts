@@ -70,13 +70,20 @@ serve(async (req) => {
     }
 
     // Check user gate status using our secure function
-    const { data: gateStatus, error: gateError } = await supabaseAdmin
+    const { data: gateStatusData, error: gateError } = await supabaseAdmin
       .rpc('check_user_gate_status', { _user_id: userId })
       .single();
 
     if (gateError) {
       throw new Error(`Failed to check gate status: ${gateError.message}`);
     }
+
+    const gateStatus = gateStatusData as {
+      user_id: string;
+      email_verified: boolean;
+      kyc_status: string;
+      can_request_viewing: boolean;
+    };
 
     // Get additional context from KYC profile
     const { data: kycProfile, error: kycError } = await supabaseAdmin
