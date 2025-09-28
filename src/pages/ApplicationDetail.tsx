@@ -235,9 +235,32 @@ export default function ApplicationDetail() {
       console.log('Document file path:', document.file_path);
       
       if (document.source === 'screening_profile') {
-        // Document from screening profile - use the URL directly
-        fileUrl = document.url || document.name;
-        console.log('Using screening profile URL:', fileUrl);
+        // Document from screening profile - prefer signed URL (fallback to provided URL)
+        const originalUrl: string | undefined = document.url || document.name;
+        fileUrl = originalUrl || '';
+
+        // If it's a Supabase Storage public URL, build a signed URL instead to avoid 400s on private buckets
+        if (originalUrl && originalUrl.includes('/storage/v1/object/public/')) {
+          try {
+            const match = originalUrl.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+            const bucketFromUrl = match?.[1];
+            const pathFromUrl = match?.[2];
+            if (bucketFromUrl && pathFromUrl) {
+              console.log('Creating signed URL for screening_profile doc from bucket/path:', bucketFromUrl, pathFromUrl);
+              const { data, error } = await supabase.storage
+                .from(bucketFromUrl)
+                .createSignedUrl(pathFromUrl, 60);
+              if (!error && data?.signedUrl) {
+                fileUrl = data.signedUrl;
+              } else if (error) {
+                console.warn('Failed to create signed URL for screening_profile doc, using original URL:', error);
+              }
+            }
+          } catch (e) {
+            console.warn('Signed URL fallback failed for screening_profile doc, using original URL:', e);
+          }
+        }
+        console.log('Resolved screening profile file URL:', fileUrl);
       } else if (document.source === 'documents_table') {
         // Documents from documents table need proper authorization
         if (isLandlord) {
