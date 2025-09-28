@@ -17,15 +17,11 @@ serve(async (req) => {
   }
 
   try {
-    console.log('KYC approval function started');
-    
     // Get auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('Authorization required');
     }
-    
-    console.log('Auth header found');
 
     // Initialize Supabase clients
     const supabase = createClient(
@@ -62,14 +58,12 @@ serve(async (req) => {
     }
 
     const { user_id }: ApproveRequest = await req.json();
-    console.log('Request parsed, user_id:', user_id);
 
     if (!user_id) {
       throw new Error('User ID is required');
     }
 
     // Get current KYC profile
-    console.log('Fetching KYC profile for user:', user_id);
     const { data: kycProfile, error: kycError } = await supabaseAdmin
       .from('kyc_profiles')
       .select('*')
@@ -77,18 +71,14 @@ serve(async (req) => {
       .single();
 
     if (kycError || !kycProfile) {
-      console.error('KYC profile fetch error:', kycError);
       throw new Error('KYC profile not found');
     }
-    
-    console.log('KYC profile found, status:', kycProfile.status);
 
     if (kycProfile.status !== 'submitted') {
       throw new Error('KYC profile is not in submitted status');
     }
 
     // Update KYC profile to approved
-    console.log('Updating KYC profile to approved');
     const { error: updateError } = await supabaseAdmin
       .from('kyc_profiles')
       .update({
@@ -100,19 +90,36 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (updateError) {
-      console.error('Update error:', updateError);
-      throw new Error(`Failed to update KYC profile: ${updateError.message}`);
+      throw updateError;
     }
 
-    console.log('KYC profile updated successfully');
+    // Create audit log for approval
+    await supabaseAdmin.rpc('create_kyc_audit_log', {
+      _user_id: user_id,
+      _action: 'approved',
+      _actor: user.id,
+      _metadata: {
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: user.id
+      }
+    });
+
+    // Log telemetry event
+    await supabaseAdmin.rpc('log_event', {
+      _user_id: user_id,
+      _name: 'kyc_approved',
+      _properties: {
+        reviewed_by: user.id,
+        reviewed_at: new Date().toISOString()
+      }
+    });
 
     // Create notification for user
-    console.log('Creating notification');
-    const { error: notifyError } = await supabaseAdmin
+    await supabaseAdmin
       .from('notifications')
       .insert({
         user_id: user_id,
-        message: 'Your identity verification has been approved! ✅',
+        message: `Your identity verification has been approved! ✅`,
         link_url: '/verify-id',
         type: 'kyc_approved',
         metadata: {
@@ -121,13 +128,7 @@ serve(async (req) => {
         }
       });
 
-    if (notifyError) {
-      console.error('Notification error:', notifyError);
-      // Don't throw - approval succeeded even if notification failed
-    } else {
-      console.log('Notification created successfully');
-    }
-
+    // TODO: Send email notification to user about approval
     console.log(`KYC approved for user ${user_id} by ${user.id}`);
 
     return new Response(
@@ -147,17 +148,10 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Error in kyc-admin-approve function:', error);
-    console.error('Error stack:', error.stack);
-    console.error('Error details:', {
-      message: error.message,
-      name: error.name,
-      cause: error.cause
-    });
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: error.message || 'Internal server error' 
       }),
       {
         status: 500,
