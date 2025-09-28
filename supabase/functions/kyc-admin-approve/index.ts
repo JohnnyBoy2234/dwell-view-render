@@ -17,11 +17,14 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 Starting KYC approval process');
+
     // Get auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('Authorization required');
     }
+    console.log('✅ Auth header found');
 
     // Initialize Supabase clients
     const supabase = createClient(
@@ -38,32 +41,39 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
+    console.log('✅ Supabase clients initialized');
 
     // Verify admin access
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
+      console.error('❌ Authentication failed:', authError);
       throw new Error('Authentication failed');
     }
+    console.log('✅ User authenticated:', user.id);
 
     const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin', { 
       user_id: user.id 
     });
 
     if (adminCheckError || !isAdmin) {
+      console.error('❌ Admin check failed:', adminCheckError);
       throw new Error('Admin access required');
     }
+    console.log('✅ Admin access verified');
 
     if (req.method !== 'POST') {
       throw new Error('Method not allowed');
     }
 
     const { user_id }: ApproveRequest = await req.json();
+    console.log('✅ Request body parsed, user_id:', user_id);
 
     if (!user_id) {
       throw new Error('User ID is required');
     }
 
     // Get current KYC profile
+    console.log('🔍 Fetching KYC profile for user:', user_id);
     const { data: kycProfile, error: kycError } = await supabaseAdmin
       .from('kyc_profiles')
       .select('*')
@@ -71,14 +81,17 @@ serve(async (req) => {
       .single();
 
     if (kycError || !kycProfile) {
+      console.error('❌ KYC profile not found:', kycError);
       throw new Error('KYC profile not found');
     }
+    console.log('✅ KYC profile found, status:', kycProfile.status);
 
     if (kycProfile.status !== 'submitted') {
       throw new Error('KYC profile is not in submitted status');
     }
 
     // Update KYC profile to approved
+    console.log('📝 Updating KYC profile to approved');
     const { error: updateError } = await supabaseAdmin
       .from('kyc_profiles')
       .update({
@@ -90,10 +103,13 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (updateError) {
+      console.error('❌ Failed to update KYC profile:', updateError);
       throw updateError;
     }
+    console.log('✅ KYC profile updated to approved');
 
     // Create audit log for approval
+    console.log('📋 Creating audit log');
     await supabaseAdmin.rpc('create_kyc_audit_log', {
       _user_id: user_id,
       _action: 'approved',
@@ -103,8 +119,10 @@ serve(async (req) => {
         reviewed_by: user.id
       }
     });
+    console.log('✅ Audit log created');
 
     // Log telemetry event
+    console.log('📊 Logging telemetry event');
     await supabaseAdmin.rpc('log_event', {
       _user_id: user_id,
       _name: 'kyc_approved',
@@ -113,64 +131,25 @@ serve(async (req) => {
         reviewed_at: new Date().toISOString()
       }
     });
-
-    // Delete original documents from storage for privacy
-    const filesToDelete = [];
-    if (kycProfile.id_front_path) filesToDelete.push(kycProfile.id_front_path);
-    if (kycProfile.id_back_path) filesToDelete.push(kycProfile.id_back_path);
-    if (kycProfile.selfie_path) filesToDelete.push(kycProfile.selfie_path);
-    // Handle legacy field names
-    if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);
-
-    if (filesToDelete.length > 0) {
-      try {
-        const { error: deleteError } = await supabaseAdmin.storage
-          .from('kyc-uploads')
-          .remove(filesToDelete);
-
-        if (deleteError) {
-          console.error('Error deleting files:', deleteError);
-          // Don't throw - continue with approval but log the issue
-        }
-
-        // Clear file paths from profile
-        await supabaseAdmin
-          .from('kyc_profiles')
-          .update({
-            id_front_path: null,
-            id_back_path: null,
-            id_doc_path: null, // legacy field
-            selfie_path: null
-          })
-          .eq('user_id', user_id);
-
-        // Create audit log for deletion
-        await supabaseAdmin.rpc('create_kyc_audit_log', {
-          _user_id: user_id,
-          _action: 'deleted_originals',
-          _actor: user.id,
-          _metadata: {
-            deleted_files: filesToDelete,
-            deleted_at: new Date().toISOString()
-          }
-        });
-
-      } catch (deleteErr) {
-        console.error('File deletion error:', deleteErr);
-        // Continue - don't fail the approval
-      }
-    }
+    console.log('✅ Telemetry event logged');
 
     // Get user profile for notification
+    console.log('👤 Fetching user profile');
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('display_name')
       .eq('user_id', user_id)
       .single();
 
+    if (profileError) {
+      console.error('⚠️ Profile fetch error (continuing):', profileError);
+    }
+
     const userName = profile?.display_name || 'User';
+    console.log('✅ User profile fetched, name:', userName);
 
     // Create notification for user
+    console.log('🔔 Creating notification');
     await supabaseAdmin
       .from('notifications')
       .insert({
@@ -183,10 +162,9 @@ serve(async (req) => {
           approved_at: new Date().toISOString()
         }
       });
+    console.log('✅ Notification created');
 
-    // TODO: Send email notification to user about approval
-    // TODO: Send SMS/WhatsApp notification if configured
-    console.log(`Would send approval notification to ${userName} (${user_id})`);
+    console.log('🎉 KYC approval process completed successfully');
 
     return new Response(
       JSON.stringify({ 
@@ -204,7 +182,8 @@ serve(async (req) => {
     );
 
   } catch (error: any) {
-    console.error('Error in kyc-admin-approve function:', error);
+    console.error('💥 Error in kyc-admin-approve function:', error);
+    console.error('💥 Error stack:', error.stack);
     
     return new Response(
       JSON.stringify({ 
