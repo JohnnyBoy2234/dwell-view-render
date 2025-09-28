@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -13,7 +13,8 @@ export function useKyc() {
   const [uploading, setUploading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchKycProfile = async () => {
+  // Wrap functions in useCallback to prevent infinite re-renders
+  const fetchKycProfile = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -34,9 +35,9 @@ export function useKyc() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, toast]);
 
-  const fetchAuditLogs = async () => {
+  const fetchAuditLogs = useCallback(async () => {
     if (!user) return;
 
     try {
@@ -50,8 +51,13 @@ export function useKyc() {
       setAuditLogs(data || []);
     } catch (error: any) {
       console.error('Error fetching audit logs:', error);
+      toast({
+        variant: "destructive", 
+        title: "Error loading audit logs",
+        description: error.message,
+      });
     }
-  };
+  }, [user, toast]);
 
   const uploadFile = async (file: File, kind: 'id_doc' | 'id_front' | 'selfie') => {
     if (!user) throw new Error('User not authenticated');
@@ -68,6 +74,7 @@ export function useKyc() {
       if (!session) {
         throw new Error('No authentication session found. Please sign in again.');
       }
+
       // Validate file
       const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowedTypes.includes(file.type)) {
@@ -79,8 +86,9 @@ export function useKyc() {
       }
 
       // Create file path
-      const timestamp = new Date().toISOString();
-      const fileName = `${kind}_${timestamp}.${file.name.split('.').pop()}`;
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${kind}_${timestamp}.${fileExt}`;
       const filePath = `kyc/${user.id}/${fileName}`;
 
       // Upload to storage
@@ -98,9 +106,14 @@ export function useKyc() {
         throw error;
       }
 
-      // Update or create KYC profile
-      const pathField = kind === 'selfie' ? 'selfie_path' : 
-                       kind === 'id_front' ? 'id_front_path' : 'id_doc_path';
+      // Fix: Proper field mapping
+      const pathFieldMap = {
+        'id_doc': 'id_doc_path',
+        'id_front': 'id_front_path', 
+        'selfie': 'selfie_path'
+      } as const;
+      
+      const pathField = pathFieldMap[kind];
       
       const updateData = {
         user_id: user.id,
@@ -110,7 +123,9 @@ export function useKyc() {
 
       const { error: profileError } = await supabase
         .from('kyc_profiles')
-        .upsert(updateData);
+        .upsert(updateData, {
+          onConflict: 'user_id'
+        });
 
       if (profileError) throw profileError;
 
@@ -196,14 +211,16 @@ export function useKyc() {
         }
       });
 
-      // Trigger notification to admins (non-blocking)
+      // Trigger notification to admins with error handling
       try {
-        await supabase.functions.invoke('kyc-notify-admin', {
-          body: { user_id: user.id }
+        await fetch('/api/kyc/notify-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id })
         });
-      } catch (notificationError) {
-        console.warn('Failed to notify admins:', notificationError);
-        // Don't throw - the KYC submission should still succeed
+      } catch (fetchError) {
+        console.warn('Failed to notify admin:', fetchError);
+        // Don't throw - this shouldn't block the main submission
       }
 
       toast({
@@ -235,9 +252,13 @@ export function useKyc() {
       if (kycProfile?.selfie_path) filesToRemove.push(kycProfile.selfie_path);
       
       if (filesToRemove.length > 0) {
-        await supabase.storage
+        const { error: storageError } = await supabase.storage
           .from('kyc-uploads')
           .remove(filesToRemove);
+
+        if (storageError) {
+          console.warn('Failed to remove some files:', storageError);
+        }
       }
 
       // Reset profile
@@ -284,7 +305,7 @@ export function useKyc() {
       fetchKycProfile();
       fetchAuditLogs();
     }
-  }, [user]);
+  }, [user, fetchKycProfile, fetchAuditLogs]); // Added dependencies
 
   return {
     kycProfile,
