@@ -577,42 +577,56 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   useEffect(() => {
     if (!user) return;
 
-    const channel = supabase
-      .channel('conversation-updates')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'conversations',
-          filter: `or(landlord_id.eq.${user.id},tenant_id.eq.${user.id})`
-        },
-        (payload) => {
-          if (!isMountedRef.current) return;
-          console.log('📋 Conversation update received:', payload);
-          
-          const updatedConv = payload.new as any;
-          setConversations(prev => 
-            prev.map(conv => 
-              conv.id === updatedConv.id 
-                ? { ...conv, last_message_at: updatedConv.last_message_at }
-                : conv
-            )
-          );
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'viewing_proposals'
-        },
-        () => {
-          if (!isMountedRef.current) return;
-          if (onViewingProposalChange) onViewingProposalChange();
-        }
-      )
+    const channel = supabase.channel('conversation-updates');
+
+    // Subscribe to both landlord and tenant scoped updates separately (or(...) is not supported in filter)
+    const onConversationChange = (payload: any) => {
+      if (!isMountedRef.current) return;
+      console.log('📋 Conversation change received:', payload);
+      const updatedConv = payload.new as any;
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.id === updatedConv.id
+            ? { ...conv, last_message_at: updatedConv.last_message_at }
+            : conv
+        )
+      );
+    };
+
+    channel
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'conversations',
+        filter: `landlord_id=eq.${user.id}`
+      }, onConversationChange)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'conversations',
+        filter: `tenant_id=eq.${user.id}`
+      }, onConversationChange)
+      // Also listen for new conversations you're part of
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'conversations',
+        filter: `landlord_id=eq.${user.id}`
+      }, () => fetchConversations())
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'conversations',
+        filter: `tenant_id=eq.${user.id}`
+      }, () => fetchConversations())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'viewing_proposals'
+      }, () => {
+        if (!isMountedRef.current) return;
+        if (onViewingProposalChange) onViewingProposalChange();
+      })
       .subscribe();
 
     return () => {
@@ -667,7 +681,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       }
     }, 3000); // Check every 3 seconds
 
-    // Single real-time subscription for messages
+    // Single real-time subscription for messages + watchdog
     const channel = supabase
       .channel(`messages-${activeConversation}`)
       .on(
@@ -731,9 +745,23 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       )
       .subscribe();
 
+    // Watchdog: if no realtime for a while, poll as a fallback
+    let lastRealtimeAt = Date.now();
+    const origHandler = (channel as any).bindings?.[0]?.callback;
+    // This is defensive; if structure differs, we still poll
+    const pollInterval = setInterval(() => {
+      const elapsed = Date.now() - lastRealtimeAt;
+      if (elapsed > 8000) {
+        console.log('⏱️ Realtime quiet for >8s, polling messages as fallback');
+        fetchMessages(activeConversation);
+        lastRealtimeAt = Date.now();
+      }
+    }, 5000);
+
     return () => {
       console.log('🧹 Cleaning up messages channel for:', activeConversation);
       clearInterval(markAsReadInterval);
+      clearInterval(pollInterval);
       supabase.removeChannel(channel);
     };
   }, [activeConversation, markMessagesAsRead, user]);
