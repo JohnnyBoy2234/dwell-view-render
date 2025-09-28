@@ -673,7 +673,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'INSERT',
           schema: 'public',
           table: 'messages',
           filter: `conversation_id=eq.${activeConversation}`
