@@ -42,7 +42,6 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
 
   const startCamera = useCallback(async () => {
     try {
-      console.log('Starting camera for type:', type);
       setIsCapturing(true);
       
       // Check if we have mediaDevices support
@@ -58,9 +57,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
         }
       };
 
-      console.log('Requesting camera with constraints:', constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('Camera stream obtained');
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -68,31 +65,12 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
         videoRef.current.setAttribute('muted', 'true');
         videoRef.current.setAttribute('autoplay', 'true');
         
-        // Wait for video to be ready with timeout
-        const videoReady = new Promise((resolve, reject) => {
-          const timeoutId = setTimeout(() => {
-            reject(new Error('Video load timeout'));
-          }, 10000); // 10 second timeout
-          
-          videoRef.current!.onloadedmetadata = () => {
-            clearTimeout(timeoutId);
-            console.log('Video metadata loaded', {
-              videoWidth: videoRef.current!.videoWidth,
-              videoHeight: videoRef.current!.videoHeight
-            });
-            resolve(undefined);
-          };
+        // Wait for video to be ready
+        await new Promise((resolve) => {
+          videoRef.current!.onloadedmetadata = () => resolve(undefined);
         });
         
-        await videoReady;
         await videoRef.current.play();
-        console.log('Camera started successfully');
-        
-        // Show success feedback
-        toast({
-          title: "Camera ready",
-          description: "Position your document and tap the capture button.",
-        });
       }
     } catch (error) {
       console.error('Camera error:', error);
@@ -105,8 +83,6 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
         description += "No camera found on this device.";
       } else if (errorMessage.includes('NotSupportedError')) {
         description += "Camera not supported on this device.";
-      } else if (errorMessage.includes('timeout')) {
-        description += "Camera is taking too long to start. Please try again.";
       } else {
         description += "Please use the gallery upload option.";
       }
@@ -123,42 +99,13 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
   // REMOVED AUTO-DETECTION CODE - Manual capture only
 
   const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) {
-      console.error('Video or canvas ref not available');
-      toast({
-        variant: "destructive",
-        title: "Camera Error",
-        description: "Unable to capture photo. Please try again.",
-      });
-      return;
-    }
+    if (!videoRef.current || !canvasRef.current) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
     const context = canvas.getContext('2d');
 
-    if (!context) {
-      console.error('Unable to get canvas context');
-      toast({
-        variant: "destructive",
-        title: "Camera Error",
-        description: "Unable to process camera feed.",
-      });
-      return;
-    }
-
-    // Ensure video is ready
-    if (video.videoWidth === 0 || video.videoHeight === 0) {
-      console.error('Video not ready for capture');
-      toast({
-        variant: "destructive",
-        title: "Camera Error", 
-        description: "Camera is not ready. Please wait and try again.",
-      });
-      return;
-    }
-
-    console.log('Capturing photo', { videoWidth: video.videoWidth, videoHeight: video.videoHeight });
+    if (!context) return;
 
     // Set canvas dimensions to match video
     canvas.width = video.videoWidth;
@@ -169,8 +116,7 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
 
     // Convert to blob and create file
     canvas.toBlob((blob) => {
-      if (blob && blob.size > 0) {
-        console.log('Photo captured successfully', { blobSize: blob.size });
+      if (blob) {
         const file = new File([blob], `${type}_${Date.now()}.jpg`, { type: 'image/jpeg' });
         const imageUrl = URL.createObjectURL(blob);
         
@@ -179,20 +125,8 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
         
         // Stop camera
         stopCamera();
-        
-        toast({
-          title: "Photo captured",
-          description: "Review your photo and tap 'Use Photo' to upload.",
-        });
-      } else {
-        console.error('Failed to capture photo - empty blob');
-        toast({
-          variant: "destructive",
-          title: "Capture Failed",
-          description: "Unable to capture photo. Please try again.",
-        });
       }
-    }, 'image/jpeg', 0.9);
+    }, 'image/jpeg', 0.8);
   };
 
   const stopCamera = () => {
@@ -222,26 +156,11 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
   };
 
   const handleSubmit = async () => {
-    if (!capturedFile) {
-      console.error('No captured file to upload');
-      toast({
-        variant: "destructive",
-        title: "No Photo",
-        description: "Please capture a photo first.",
-      });
-      return;
-    }
-
-    console.log('Starting file upload', { 
-      type, 
-      fileName: capturedFile.name, 
-      fileSize: capturedFile.size,
-      fileType: capturedFile.type
-    });
+    if (!capturedFile) return;
 
     try {
+      console.log('Starting file upload for:', type);
       await uploadFile(capturedFile, type);
-      console.log('Upload successful');
       toast({
         title: "Photo uploaded successfully",
         description: `Your ${type.replace('_', ' ')} has been uploaded.`,
@@ -251,16 +170,10 @@ export function MobilePhotoCapture({ type, onCapture, onClose }: MobilePhotoCapt
       console.error('Upload error:', error);
       
       let errorMessage = "Please try again.";
-      if (error.message?.includes('Invalid file type')) {
-        errorMessage = "Invalid image format. Please try capturing again.";
-      } else if (error.message?.includes('authentication') || error.message?.includes('session')) {
+      if (error.message?.includes('authentication') || error.message?.includes('session')) {
         errorMessage = "Your session has expired. Please sign in again.";
-      } else if (error.message?.includes('authorization') || error.message?.includes('permission')) {
-        errorMessage = "Permission denied. Please check your account status.";
-      } else if (error.message?.includes('storage')) {
-        errorMessage = "Storage error. Please try again.";
-      } else if (error.message?.includes('network') || error.message?.includes('fetch')) {
-        errorMessage = "Network error. Check your connection and try again.";
+      } else if (error.message?.includes('authorization')) {
+        errorMessage = "Authentication error. Please sign out and sign in again.";
       }
       
       toast({
