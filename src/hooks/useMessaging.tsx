@@ -570,10 +570,40 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
   // Load messages when active conversation changes
   useEffect(() => {
-    if (activeConversation) {
-      fetchMessages(activeConversation);
-    }
-  }, [activeConversation]);
+    if (!activeConversation) return;
+
+    fetchMessages(activeConversation);
+
+    const channel = supabase
+      .channel(`messages-${activeConversation}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${activeConversation}`
+        },
+        async (payload) => {
+          if (!isMountedRef.current) return;
+          if (payload.eventType === 'INSERT') {
+            const message = payload.new as Message;
+            setMessages(prev => (prev.some(m => m.id === message.id) ? prev : [...prev, message]));
+            if (activeConversation === message.conversation_id) {
+              setTimeout(() => scrollToBottom(true), 50);
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            const message = payload.new as Message;
+            setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, ...message } : m)));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [activeConversation, fetchMessages]);
 
   // Persist conversations to cache after refresh
   useEffect(() => {

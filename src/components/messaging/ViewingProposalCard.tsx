@@ -15,8 +15,8 @@ interface ViewingProposal {
   property_id: string;
   landlord_id: string;
   tenant_id: string;
-  start_at: string;
-  duration_minutes: number;
+  start_at?: string | null;
+  duration_minutes?: number | null;
   status: 'proposed' | 'confirmed' | 'declined' | 'cancelled' | 'expired';
   notes?: string;
   created_by: string;
@@ -37,9 +37,14 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
-  // Convert UTC time to Africa/Johannesburg timezone
-  const localStartTime = toZonedTime(new Date(proposal.start_at), 'Africa/Johannesburg');
-  const endTime = new Date(localStartTime.getTime() + proposal.duration_minutes * 60 * 1000);
+  const hasStartTime = !!proposal.start_at;
+  const localStartTime = hasStartTime
+    ? toZonedTime(new Date(proposal.start_at!), 'Africa/Johannesburg')
+    : null;
+  const durationMinutes = proposal.duration_minutes ?? 20;
+  const endTime = localStartTime
+    ? new Date(localStartTime.getTime() + durationMinutes * 60 * 1000)
+    : null;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -164,24 +169,30 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
         )}
 
         {/* Date and Time */}
-        <div className="bg-white/50 rounded-lg p-3 space-y-2">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-primary" />
-            <span className="font-medium">
-              {format(localStartTime, 'EEEE, MMMM d, yyyy')}
-            </span>
+        {hasStartTime ? (
+          <div className="bg-white/50 rounded-lg p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-primary" />
+              <span className="font-medium">
+                {format(localStartTime!, 'EEEE, MMMM d, yyyy')}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              <span className="font-medium">
+                {format(localStartTime!, 'h:mm a')} - {endTime ? format(endTime, 'h:mm a') : 'N/A'}
+              </span>
+              <span className="text-xs text-muted-foreground">SAST</span>
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Duration: {durationMinutes} minutes
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-primary" />
-            <span className="font-medium">
-              {format(localStartTime, 'h:mm a')} - {format(endTime, 'h:mm a')}
-            </span>
-            <span className="text-xs text-muted-foreground">SAST</span>
+        ) : (
+          <div className="bg-red-50 text-red-700 border border-red-100 rounded-lg p-3 text-sm">
+            <strong>Viewing time unavailable.</strong> Please contact the landlord to reschedule.
           </div>
-          <div className="text-xs text-muted-foreground">
-            Duration: {proposal.duration_minutes} minutes
-          </div>
-        </div>
+        )}
 
         {/* Notes */}
         {proposal.notes && (
@@ -191,7 +202,7 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
         )}
 
         {/* Actions for Tenant */}
-        {canTakeAction && (
+        {canTakeAction && hasStartTime && (
           <div className="flex gap-2 pt-2">
             <Button
               onClick={handleConfirm}
@@ -210,6 +221,11 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
             >
               {loading ? 'Declining...' : 'Decline'}
             </Button>
+          </div>
+        )}
+        {!hasStartTime && (
+          <div className="pt-2 text-xs text-muted-foreground text-right">
+            Awaiting schedule details from landlord.
           </div>
         )}
 

@@ -112,21 +112,22 @@ serve(async (req: Request) => {
       throw new Error('Failed to create viewing proposal');
     }
 
-    // Create system message with viewing proposal
+    const messageContent = `Let’s schedule a viewing for ${startAt.toLocaleDateString('en-ZA', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Africa/Johannesburg'
+    })} SAST${notes ? ` — Notes: ${notes}` : ''}. Tap to review & confirm.`;
+
     const { error: messageError } = await supabase
       .from('messages')
       .insert({
         conversation_id: conversationId,
         sender_id: user.id,
-        content: `Viewing proposal created for ${startAt.toLocaleDateString('en-ZA', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit',
-          timeZone: 'Africa/Johannesburg'
-        })} SAST${notes ? ` - ${notes}` : ''}`,
+        content: messageContent,
         message_type: 'viewing_proposal',
         viewing_proposal_id: proposal.id
       });

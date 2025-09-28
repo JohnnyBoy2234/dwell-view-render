@@ -365,6 +365,70 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
     const messageKey = message.id;
 
+    const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
+
+    const bubbleElement = (
+      <div
+        className={cn(
+          'flex items-end gap-2 mb-1',
+          isOwn ? 'justify-end' : 'justify-start'
+        )}
+      >
+        <div
+          className={cn(
+            'relative max-w-[95%] sm:max-w-[70%] rounded-3xl px-4 py-3 shadow-soft transition-transform',
+            'backdrop-blur-sm border border-white/20',
+            isOwn
+              ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white animate-message-outgoing'
+              : 'bg-white/90 text-ios-gray-dark animate-message-incoming'
+          )}
+        >
+          {(!isOwn && message.profiles?.display_name) && (
+            <div className="text-xs font-semibold text-ios-blue mb-1 tracking-tight">
+              {message.profiles.display_name}
+            </div>
+          )}
+
+          {hasAttachment && (
+            <div className="mb-2">
+              <a
+                href={message.attachment_url!}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium"
+              >
+                <span className="truncate max-w-[200px]">Attachment</span>
+                <span className="text-[10px] text-white/60">Open</span>
+              </a>
+            </div>
+          )}
+
+          {message.content && (
+            <div className="text-sm leading-relaxed whitespace-pre-line break-words">
+              {message.content}
+            </div>
+          )}
+
+          <div className={cn(
+            'mt-2 flex items-center gap-1 text-[11px]',
+            isOwn ? 'flex-row-reverse text-white/70' : 'text-ios-gray'
+          )}>
+            <span>{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            {isOwn && (
+              <span
+                className={cn(
+                  'inline-flex items-center transition-colors duration-200',
+                  statusType === 'read' ? 'text-success-green-light' : 'text-white/70'
+                )}
+              >
+                {statusType === 'read' ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+
     return (
       <React.Fragment key={messageKey}>
         {showNewDayDivider && (
@@ -387,102 +451,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
             />
           </div>
         ) : (
-          <div
-            className={cn(
-              'flex items-end gap-2 mb-1',
-              isOwn ? 'justify-end' : 'justify-start'
-            )}
-          >
-            <div
-              className={cn(
-                'relative max-w-[95%] sm:max-w-[70%] rounded-3xl px-4 py-3 shadow-soft transition-transform',
-                'backdrop-blur-sm border border-white/20',
-                isOwn
-                  ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white animate-message-outgoing'
-                  : 'bg-white/90 text-ios-gray-dark animate-message-incoming'
-              )}
-            >
-              {(!isOwn && message.profiles?.display_name) && (
-                <div className="text-xs font-semibold text-ios-blue mb-1 tracking-tight">
-                  {message.profiles.display_name}
-                </div>
-              )}
-
-              {/* Attachment handling */}
-              {message.message_type === 'attachment' && message.attachment_url && (
-                <div className="mb-2">
-                  {(() => {
-                    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
-                    const isImage = imageExtensions.some(ext => message.attachment_url!.toLowerCase().includes(ext));
-                    
-                    return isImage ? (
-                      <div className="relative">
-                        <img
-                          src={message.attachment_url}
-                          alt="Shared image"
-                          className="max-w-[250px] max-h-[200px] rounded-xl object-cover cursor-pointer hover:opacity-95 transition-opacity"
-                          onClick={() => window.open(message.attachment_url!, '_blank')}
-                          onError={(e) => {
-                            // Fallback to link if image fails to load
-                            e.currentTarget.style.display = 'none';
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                          }}
-                        />
-                        <a
-                          href={message.attachment_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(
-                            "hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium",
-                            isOwn ? "bg-white/15 border border-white/20 text-white hover:bg-white/25" : "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200"
-                          )}
-                        >
-                          <span className="truncate max-w-[200px]">Image</span>
-                          <span className="text-[10px] opacity-60">Open</span>
-                        </a>
-                      </div>
-                    ) : (
-                      <a
-                        href={message.attachment_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={cn(
-                          "inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-colors",
-                          isOwn ? "bg-white/15 border border-white/20 text-white hover:bg-white/25" : "bg-gray-100 border border-gray-200 text-gray-700 hover:bg-gray-200"
-                        )}
-                      >
-                        <span className="truncate max-w-[200px]">Attachment</span>
-                        <span className="text-[10px] opacity-60">Open</span>
-                      </a>
-                    );
-                  })()}
-                </div>
-              )}
-
-              {message.content && (
-                <div className="text-sm leading-relaxed whitespace-pre-line break-words">
-                  {message.content}
-                </div>
-              )}
-
-              <div className={cn(
-                'mt-2 flex items-center gap-1 text-[11px]',
-                isOwn ? 'flex-row-reverse text-white/70' : 'text-ios-gray'
-              )}>
-                <span>{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                {isOwn && (
-                  <span
-                    className={cn(
-                      'inline-flex items-center transition-colors duration-200',
-                      statusType === 'read' ? 'text-success-green-light' : 'text-white/70'
-                    )}
-                  >
-                    {statusType === 'read' ? <CheckCheck className="h-3 w-3" /> : <Check className="h-3 w-3" />}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
+          bubbleElement
         )}
 
         {showTimeGap && index !== messages.length - 1 && (
