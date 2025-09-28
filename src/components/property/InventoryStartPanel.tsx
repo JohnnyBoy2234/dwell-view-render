@@ -26,6 +26,8 @@ interface Note {
   photos: Photo[];
   audioBlob?: Blob;
   text?: string;
+  saved?: boolean;
+  savingInProgress?: boolean;
 }
 
 function useAnalytics() {
@@ -47,6 +49,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [pendingQuickNoteId, setPendingQuickNoteId] = useState<string | null>(null);
   const quickPhotoInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const webpSupportedRef = useRef<boolean | null>(null);
 
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -110,10 +113,12 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           createdAt: Date.now(),
           photos: [],
           audioBlob: blob,
+          saved: false,
         };
         setNotes((prev) => [...prev, newNote]);
+        setHasUnsavedChanges(true);
         track('inventory_voice_note_saved');
-        toast({ title: 'Voice note saved' });
+        toast({ title: 'Voice note recorded' });
       };
       recorder.start();
       setMediaRecorder(recorder);
@@ -152,8 +157,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       toast({ title: 'Missing property', variant: 'destructive' });
       return;
     }
-    if (notes.length === 0) {
-      toast({ title: 'Nothing to save', description: 'Add a voice note or photos first.' });
+    const unsavedNotes = notes.filter(note => !note.saved);
+    if (unsavedNotes.length === 0) {
+      toast({ title: 'Nothing to save', description: 'All notes are already saved.' });
       return;
     }
 
@@ -196,7 +202,12 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         recordId = (existingRecords[0] as any).id;
       }
 
-      // Upload all media and build items
+      // Mark unsaved notes as saving in progress
+      setNotes(prev => prev.map(note => 
+        !note.saved ? { ...note, savingInProgress: true } : note
+      ));
+
+      // Upload all media and build items (only for unsaved notes)
       const itemsPayload: Array<{
         inventory_record_id: string;
         room_name: string;
@@ -207,7 +218,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         voice_note_url?: string;
       }> = [];
 
-      for (const [index, note] of notes.entries()) {
+      for (const [index, note] of unsavedNotes.entries()) {
         const noteId = note.id;
         const uploadedPhotoPaths: string[] = [];
         for (const photo of note.photos) {
@@ -242,7 +253,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         if (itemsErr) throw itemsErr;
       }
 
-      // Update counts on the record
+      // Update counts on the record (count all notes, not just newly saved ones)
       const photosCount = notes.reduce((acc, n) => acc + n.photos.length, 0);
       const voiceCount = notes.reduce((acc, n) => acc + (n.audioBlob && n.audioBlob.size > 0 ? 1 : 0), 0);
       const { error: updErr } = await supabase
@@ -256,10 +267,22 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         .eq('id', recordId);
       if (updErr) throw updErr;
 
-      toast({ title: 'Inventory saved', description: new Date().toLocaleString() });
-      setNotes([]);
+      // Mark the unsaved notes as saved
+      setNotes(prev => prev.map(note => 
+        !note.saved ? { ...note, saved: true, savingInProgress: false } : note
+      ));
+      setHasUnsavedChanges(false);
+
+      toast({ 
+        title: 'Inventory saved', 
+        description: `${unsavedNotes.length} note(s) saved at ${new Date().toLocaleString()}` 
+      });
     } catch (e: any) {
       console.error('Save inventory failed:', e);
+      // Reset saving state for failed notes
+      setNotes(prev => prev.map(note => 
+        note.savingInProgress ? { ...note, savingInProgress: false } : note
+      ));
       toast({ title: 'Failed to save inventory', description: e.message || String(e), variant: 'destructive' });
     } finally {
       setSaving(false);
@@ -360,17 +383,19 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     if (newPhotos.length) {
       setNotes((prev) =>
         prev.map((n) =>
-          n.id === noteId ? { ...n, photos: [...n.photos, ...newPhotos] } : n
+          n.id === noteId ? { ...n, photos: [...n.photos, ...newPhotos], saved: false } : n
         )
       );
+      setHasUnsavedChanges(true);
       toast({ title: 'Photo attached' });
     }
   };
 
   const createEmptyNote = (): string => {
     const id = crypto.randomUUID();
-    const newNote: Note = { id, audioUrl: '', createdAt: Date.now(), photos: [] };
+    const newNote: Note = { id, audioUrl: '', createdAt: Date.now(), photos: [], saved: false };
     setNotes((prev) => [newNote, ...prev]);
+    setHasUnsavedChanges(true);
     return id;
   };
 
@@ -382,6 +407,8 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
 
   const deleteNote = (noteId: string) => {
     setNotes((prev) => prev.filter((n) => n.id !== noteId));
+    const remainingUnsaved = notes.filter(n => n.id !== noteId && !n.saved);
+    setHasUnsavedChanges(remainingUnsaved.length > 0);
     toast({ title: 'Note deleted' });
   };
 
@@ -389,11 +416,18 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     setNotes((prev) =>
       prev.map((n) =>
         n.id === noteId
-          ? { ...n, photos: n.photos.filter((p) => p.id !== photoId) }
+          ? { ...n, photos: n.photos.filter((p) => p.id !== photoId), saved: false }
           : n
       )
     );
+    setHasUnsavedChanges(true);
     toast({ title: 'Photo removed' });
+  };
+
+  const clearAllNotes = () => {
+    setNotes([]);
+    setHasUnsavedChanges(false);
+    toast({ title: 'All notes cleared' });
   };
 
   if (!propertyId) {
@@ -470,23 +504,46 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
 
       <div>
         <h3 className="text-lg font-semibold mb-2">Voice Notes</h3>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
         <Button
           onClick={recording ? stopRecording : startRecording}
           aria-label={recording ? 'Stop recording' : 'Start recording'}
         >
           {recording ? 'Stop Recording' : 'Start Recording'}
         </Button>
-        <Button onClick={handleSave} disabled={saving || notes.length === 0}>
-          {saving ? 'Saving…' : 'Save'}
+        <Button 
+          onClick={handleSave} 
+          disabled={saving || !hasUnsavedChanges}
+          className={hasUnsavedChanges ? 'bg-primary' : ''}
+        >
+          {saving ? 'Saving…' : hasUnsavedChanges ? `Save (${notes.filter(n => !n.saved).length})` : 'All Saved'}
         </Button>
+        {notes.length > 0 && (
+          <Button 
+            variant="outline" 
+            onClick={clearAllNotes}
+            className="text-destructive hover:text-destructive"
+          >
+            Clear All
+          </Button>
+        )}
         </div>
         {error && <p className="text-destructive mt-2">{error}</p>}
         <div className="mt-4 space-y-4">
           {notes.map((note) => (
-            <Card key={note.id} className="p-4 space-y-2">
+            <Card key={note.id} className={`p-4 space-y-2 ${
+              note.saved ? 'bg-success-green/5 border-success-green/20' : 
+              note.savingInProgress ? 'bg-primary/5 border-primary/20' : 
+              'bg-background'
+            }`}>
               <div className="flex items-center justify-between">
-                <audio controls src={note.audioUrl} className="flex-1" />
+                <div className="flex items-center gap-2 flex-1">
+                  {note.audioUrl && <audio controls src={note.audioUrl} className="flex-1" />}
+                  {!note.audioUrl && <span className="text-muted-foreground italic">Photo-only note</span>}
+                  {note.saved && <span className="text-xs text-success-green font-medium">✓ Saved</span>}
+                  {note.savingInProgress && <span className="text-xs text-primary font-medium">💾 Saving...</span>}
+                  {!note.saved && !note.savingInProgress && <span className="text-xs text-orange-500 font-medium">• Unsaved</span>}
+                </div>
                 <Button
                   variant="ghost"
                   size="icon"
