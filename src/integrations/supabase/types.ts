@@ -1411,6 +1411,48 @@ export type Database = {
         }
         Relationships: []
       }
+      property_reports: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          issue_type: string
+          property_id: string
+          reporter_email: string | null
+          reporter_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          issue_type: string
+          property_id: string
+          reporter_email?: string | null
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          issue_type?: string
+          property_id?: string
+          reporter_email?: string | null
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       rent_payments: {
         Row: {
           amount: number

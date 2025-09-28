@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { MapPin } from "lucide-react";
 import { PropertyFeatures } from '@/components/property/PropertyFeatures';
 import { usePropertyNavigation } from '@/hooks/usePropertyNavigation';
+import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 import { 
   PROPERTY_CARD_STYLES, 
   PROPERTY_CARD_LABELS, 
@@ -97,6 +98,10 @@ const PropertyCard = ({
             baths={baths} 
             parking={parking} 
           />
+          
+          <div className="mt-4 pt-2 border-t">
+            <ReportPropertyModal propertyId={id} />
+          </div>
         </div>
       </CardContent>
     </Card>

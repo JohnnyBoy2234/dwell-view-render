@@ -28,6 +28,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminProperties from "./pages/admin/AdminProperties";
+import PropertyReports from "./pages/admin/PropertyReports";
 import DocumentReview from "./pages/admin/DocumentReview";
 import ApplyInvite from "./pages/ApplyInvite";
 import ApplicationDetail from "./pages/ApplicationDetail";
@@ -89,6 +90,7 @@ function AppRoutes() {
               <Route path="/admin/properties" element={<RouteGuard><AdminProperties /></RouteGuard>} />
               <Route path="/admin/documents" element={<RouteGuard><DocumentReview /></RouteGuard>} />
               <Route path="/admin/kyc" element={<KycManagement />} />
+              <Route path="/admin/reports" element={<RouteGuard><PropertyReports /></RouteGuard>} />
 
               {/* Routes with Navbar */}
               <Route path="/" element={<><Navbar /><Index /></>} />

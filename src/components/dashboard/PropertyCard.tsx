@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { PropertyCardProps } from '@/types/dashboard';
 import { FindTenantsTab } from './FindTenantsTab';
 import { ManageTenantsTab } from './ManageTenantsTab';
+import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 import { Home } from 'lucide-react';
 
 export function PropertyCard({ property, inquiriesCount, applicationsCount, activeTenancy }: PropertyCardProps) {
@@ -91,6 +92,10 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
             />
           </TabsContent>
         </Tabs>
+        
+        <div className="mt-4 pt-4 border-t border-ocean-blue/10">
+          <ReportPropertyModal propertyId={property.id} />
+        </div>
       </CardContent>
     </Card>
   );
