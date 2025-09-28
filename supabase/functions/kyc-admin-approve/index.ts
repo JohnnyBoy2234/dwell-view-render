@@ -88,6 +88,7 @@ serve(async (req) => {
     }
 
     // Update KYC profile to approved
+    console.log('Updating KYC profile to approved');
     const { error: updateError } = await supabaseAdmin
       .from('kyc_profiles')
       .update({
@@ -99,102 +100,14 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (updateError) {
-      throw updateError;
+      console.error('Update error:', updateError);
+      throw new Error(`Failed to update KYC profile: ${updateError.message}`);
     }
 
-    // Create audit log for approval (with error handling)
-    try {
-      await supabaseAdmin.rpc('create_kyc_audit_log', {
-        _user_id: user_id,
-        _action: 'approved',
-        _actor: user.id,
-        _metadata: {
-          reviewed_at: new Date().toISOString(),
-          reviewed_by: user.id
-        }
-      });
-    } catch (auditError) {
-      console.error('Audit log error:', auditError);
-      // Continue - don't fail approval if audit fails
-    }
-
-    // Log telemetry event (with error handling)
-    try {
-      await supabaseAdmin.rpc('log_event', {
-        _user_id: user_id,
-        _name: 'kyc_approved',
-        _properties: {
-          reviewed_by: user.id,
-          reviewed_at: new Date().toISOString()
-        }
-      });
-    } catch (eventError) {
-      console.error('Event log error:', eventError);
-      // Continue - don't fail approval if event logging fails
-    }
-
-    // Delete original documents from storage for privacy
-    const filesToDelete: string[] = [];
-    if (kycProfile.id_front_path) filesToDelete.push(kycProfile.id_front_path);
-    if (kycProfile.id_back_path) filesToDelete.push(kycProfile.id_back_path);
-    if (kycProfile.selfie_path) filesToDelete.push(kycProfile.selfie_path);
-    // Handle legacy field names
-    if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);
-
-    if (filesToDelete.length > 0) {
-      try {
-        const { error: deleteError } = await supabaseAdmin.storage
-          .from('kyc-uploads')
-          .remove(filesToDelete);
-
-        if (deleteError) {
-          console.error('Error deleting files:', deleteError);
-          // Don't throw - continue with approval but log the issue
-        }
-
-        // Clear file paths from profile
-        await supabaseAdmin
-          .from('kyc_profiles')
-          .update({
-            id_front_path: null,
-            id_back_path: null,
-            id_doc_path: null, // legacy field
-            selfie_path: null
-          })
-          .eq('user_id', user_id);
-
-        // Create audit log for deletion (with error handling)
-        try {
-          await supabaseAdmin.rpc('create_kyc_audit_log', {
-            _user_id: user_id,
-            _action: 'deleted_originals',
-            _actor: user.id,
-            _metadata: {
-              deleted_files: filesToDelete,
-              deleted_at: new Date().toISOString()
-            }
-          });
-        } catch (deleteAuditError) {
-          console.error('Delete audit log error:', deleteAuditError);
-          // Continue - don't fail if audit logging fails
-        }
-
-      } catch (deleteErr) {
-        console.error('File deletion error:', deleteErr);
-        // Continue - don't fail the approval
-      }
-    }
-
-    // Get user profile for notification context (optional)
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('display_name')
-      .eq('user_id', user_id)
-      .single();
-
-    const approvedAt = new Date().toISOString();
+    console.log('KYC profile updated successfully');
 
     // Create notification for user
+    console.log('Creating notification');
     const { error: notifyError } = await supabaseAdmin
       .from('notifications')
       .insert({
@@ -204,18 +117,18 @@ serve(async (req) => {
         type: 'kyc_approved',
         metadata: {
           approved_by: user.id,
-          approved_at: approvedAt,
-          reviewer_name: profile?.display_name || null
+          approved_at: new Date().toISOString()
         }
       });
 
     if (notifyError) {
-      console.error('Failed to create approval notification:', notifyError);
+      console.error('Notification error:', notifyError);
       // Don't throw - approval succeeded even if notification failed
+    } else {
+      console.log('Notification created successfully');
     }
 
-    // TODO: Send email/SMS if needed
-    console.log(`KYC approved for ${profile?.display_name || 'user'} (${user_id}) by ${user.id}`);
+    console.log(`KYC approved for user ${user_id} by ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
