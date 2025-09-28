@@ -119,9 +119,17 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
             <Label htmlFor="issue-type">What's the issue?</Label>
             <RadioGroup value={issueType} onValueChange={setIssueType}>
               {ISSUE_TYPES.map((type) => (
-                <div key={type.id} className="flex items-center space-x-2">
+                <div 
+                  key={type.id} 
+                  className="flex items-center space-x-2"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <RadioGroupItem value={type.id} id={type.id} />
-                  <Label htmlFor={type.id} className="text-sm font-normal">
+                  <Label 
+                    htmlFor={type.id} 
+                    className="text-sm font-normal cursor-pointer"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {type.label}
                   </Label>
                 </div>
