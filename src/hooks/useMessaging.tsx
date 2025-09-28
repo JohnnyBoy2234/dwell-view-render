@@ -520,7 +520,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   };
 
   // Mark messages as read
-  const markMessagesAsRead = async (conversationId: string) => {
+  const markMessagesAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
 
     try {
@@ -531,19 +531,16 @@ export function useMessaging(onViewingProposalChange?: () => void) {
 
       if (error) throw error;
 
-      // Update local state
       if (!isMountedRef.current) return;
       setConversations(prev =>
         prev.map(conv =>
-          conv.id === conversationId
-            ? { ...conv, unread_count: 0 }
-            : conv
+          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
         )
       );
     } catch (error: any) {
       console.error('Error marking messages as read:', error);
     }
-  };
+  }, [user, isLandlord]);
 
   // Real-time subscription for conversation updates (last_message_at)
   useEffect(() => {
