@@ -33,19 +33,8 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const handleOpenChange = (newOpen: boolean) => {
-    console.log('Dialog open change:', newOpen);
-    setOpen(newOpen);
-  };
-
-  const handleIssueTypeChange = (value: string) => {
-    console.log('Issue type changed:', value);
-    setIssueType(value);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with:', { issueType, description, email });
     
     if (!issueType || !description.trim()) {
       toast({
@@ -104,16 +93,11 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button 
           variant="outline" 
           size="sm"
-          onClick={(e) => {
-            e.stopPropagation();
-            console.log('Report button clicked');
-            setOpen(true);
-          }}
           className="flex items-center gap-2"
         >
           <Flag className="h-3 w-3" />
@@ -121,16 +105,7 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
         </Button>
       </DialogTrigger>
       
-      <DialogContent 
-        className="sm:max-w-md"
-        onInteractOutside={(e) => {
-          // Prevent closing when clicking inside the modal
-          const target = e.target as Element;
-          if (target.closest('[data-radix-collection-item]')) {
-            e.preventDefault();
-          }
-        }}
-      >
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Report Property</DialogTitle>
         </DialogHeader>
@@ -140,7 +115,7 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
             <Label>What's the issue?</Label>
             <RadioGroup 
               value={issueType} 
-              onValueChange={handleIssueTypeChange}
+              onValueChange={setIssueType}
               className="space-y-2"
             >
               {ISSUE_TYPES.map((type) => (
