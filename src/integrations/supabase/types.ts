@@ -2161,6 +2161,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_conversations_with_details: {
+        Args: { is_landlord_param: boolean; user_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          landlord_id: string
+          landlord_profile: Json
+          last_message: string
+          last_message_at: string
+          properties: Json
+          property_id: string
+          status: string
+          tenant_id: string
+          tenant_profile: Json
+          unread_count: number
+        }[]
+      }
       has_active_booking: {
         Args: { property_uuid: string; tenant_uuid: string }
         Returns: {

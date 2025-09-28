@@ -592,9 +592,6 @@ export function useMessaging(onViewingProposalChange?: () => void) {
           if (payload.eventType === 'INSERT') {
             const message = payload.new as Message;
             setMessages(prev => (prev.some(m => m.id === message.id) ? prev : [...prev, message]));
-            if (activeConversation === message.conversation_id) {
-              setTimeout(() => scrollToBottom(true), 50);
-            }
           } else if (payload.eventType === 'UPDATE') {
             const message = payload.new as Message;
             setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, ...message } : m)));
