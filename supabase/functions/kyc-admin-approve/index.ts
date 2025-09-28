@@ -17,11 +17,15 @@ serve(async (req) => {
   }
 
   try {
+    console.log('KYC approval function started');
+    
     // Get auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       throw new Error('Authorization required');
     }
+    
+    console.log('Auth header found');
 
     // Initialize Supabase clients
     const supabase = createClient(
@@ -58,12 +62,14 @@ serve(async (req) => {
     }
 
     const { user_id }: ApproveRequest = await req.json();
+    console.log('Request parsed, user_id:', user_id);
 
     if (!user_id) {
       throw new Error('User ID is required');
     }
 
     // Get current KYC profile
+    console.log('Fetching KYC profile for user:', user_id);
     const { data: kycProfile, error: kycError } = await supabaseAdmin
       .from('kyc_profiles')
       .select('*')
@@ -71,8 +77,11 @@ serve(async (req) => {
       .single();
 
     if (kycError || !kycProfile) {
+      console.error('KYC profile fetch error:', kycError);
       throw new Error('KYC profile not found');
     }
+    
+    console.log('KYC profile found, status:', kycProfile.status);
 
     if (kycProfile.status !== 'submitted') {
       throw new Error('KYC profile is not in submitted status');
@@ -93,26 +102,36 @@ serve(async (req) => {
       throw updateError;
     }
 
-    // Create audit log for approval
-    await supabaseAdmin.rpc('create_kyc_audit_log', {
-      _user_id: user_id,
-      _action: 'approved',
-      _actor: user.id,
-      _metadata: {
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id
-      }
-    });
+    // Create audit log for approval (with error handling)
+    try {
+      await supabaseAdmin.rpc('create_kyc_audit_log', {
+        _user_id: user_id,
+        _action: 'approved',
+        _actor: user.id,
+        _metadata: {
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id
+        }
+      });
+    } catch (auditError) {
+      console.error('Audit log error:', auditError);
+      // Continue - don't fail approval if audit fails
+    }
 
-    // Log telemetry event
-    await supabaseAdmin.rpc('log_event', {
-      _user_id: user_id,
-      _name: 'kyc_approved',
-      _properties: {
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString()
-      }
-    });
+    // Log telemetry event (with error handling)
+    try {
+      await supabaseAdmin.rpc('log_event', {
+        _user_id: user_id,
+        _name: 'kyc_approved',
+        _properties: {
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString()
+        }
+      });
+    } catch (eventError) {
+      console.error('Event log error:', eventError);
+      // Continue - don't fail approval if event logging fails
+    }
 
     // Delete original documents from storage for privacy
     const filesToDelete: string[] = [];
@@ -144,16 +163,21 @@ serve(async (req) => {
           })
           .eq('user_id', user_id);
 
-        // Create audit log for deletion
-        await supabaseAdmin.rpc('create_kyc_audit_log', {
-          _user_id: user_id,
-          _action: 'deleted_originals',
-          _actor: user.id,
-          _metadata: {
-            deleted_files: filesToDelete,
-            deleted_at: new Date().toISOString()
-          }
-        });
+        // Create audit log for deletion (with error handling)
+        try {
+          await supabaseAdmin.rpc('create_kyc_audit_log', {
+            _user_id: user_id,
+            _action: 'deleted_originals',
+            _actor: user.id,
+            _metadata: {
+              deleted_files: filesToDelete,
+              deleted_at: new Date().toISOString()
+            }
+          });
+        } catch (deleteAuditError) {
+          console.error('Delete audit log error:', deleteAuditError);
+          // Continue - don't fail if audit logging fails
+        }
 
       } catch (deleteErr) {
         console.error('File deletion error:', deleteErr);
@@ -210,10 +234,17 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Error in kyc-admin-approve function:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      cause: error.cause
+    });
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Internal server error' 
+        error: error.message || 'Internal server error',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       }),
       {
         status: 500,
