@@ -90,55 +90,30 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (updateError) {
-      throw updateError;
+      console.error('Update error:', updateError);
+      throw new Error(`Failed to update KYC profile: ${updateError.message}`);
     }
 
-    // Create audit log for approval
-    await supabaseAdmin.rpc('create_kyc_audit_log', {
-      _user_id: user_id,
-      _action: 'approved',
-      _actor: user.id,
-      _metadata: {
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id
-      }
-    });
-
-    // Log telemetry event
-    await supabaseAdmin.rpc('log_event', {
-      _user_id: user_id,
-      _name: 'kyc_approved',
-      _properties: {
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString()
-      }
-    });
-
-    // Get user profile for notification
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('display_name')
-      .eq('user_id', user_id)
-      .single();
-
-    const userName = profile?.display_name || 'User';
-
-    // Create notification for user
-    await supabaseAdmin
+    // Create notification for user (minimal version)
+    const { error: notificationError } = await supabaseAdmin
       .from('notifications')
       .insert({
         user_id: user_id,
-        message: `Your identity verification has been approved! ✅`,
+        message: 'Your identity verification has been approved! ✅',
         link_url: '/verify-id',
         type: 'kyc_approved',
         metadata: {
           approved_by: user.id,
-          approved_at: new Date().toISOString(),
-          reviewer_name: userName
+          approved_at: new Date().toISOString()
         }
       });
 
-    console.log(`KYC approved for ${userName} (${user_id}) by ${user.id}`);
+    if (notificationError) {
+      console.error('Notification error:', notificationError);
+      // Don't throw - approval succeeded even if notification failed
+    }
+
+    console.log(`KYC approved for user ${user_id} by ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
