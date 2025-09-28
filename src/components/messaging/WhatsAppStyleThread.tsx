@@ -62,10 +62,10 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     if (force || isScrolledToBottom) {
       const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
       if (scrollContainer) {
-        // Use scrollTop method for more reliable bottom positioning
-        setTimeout(() => {
+        // Use requestAnimationFrame for better DOM timing
+        requestAnimationFrame(() => {
           (scrollContainer as any).scrollTop = (scrollContainer as any).scrollHeight;
-        }, 50);
+        });
       } else {
         // Fallback to scrollIntoView with better positioning
         messagesEndRef.current?.scrollIntoView({ 
@@ -76,20 +76,32 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     }
   };
 
+  // Handle all scroll-to-bottom scenarios in one effect
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     if (messages.length > 0) {
       // Small delay to ensure DOM is updated
-      setTimeout(() => scrollToBottom(), 50);
+      timeoutId = setTimeout(() => {
+        // Force scroll for new conversation or if we're at bottom
+        const isNewConversation = messages.length === 1;
+        scrollToBottom(isNewConversation);
+      }, 100);
     }
-  }, [messages.length]);
 
-  // Auto-scroll to bottom when conversation changes (initial load)
+    return () => {
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [messages.length, conversationId]);
+
+  // Force scroll to latest message when opening conversation
   useEffect(() => {
-    if (conversationId && messages.length > 0) {
-      // Force scroll to bottom when opening a new conversation
-      setTimeout(() => scrollToBottom(true), 150);
+    if (conversationId && !loading) {
+      // Always scroll to bottom when switching conversations
+      const timeoutId = setTimeout(() => scrollToBottom(true), 200);
+      return () => clearTimeout(timeoutId);
     }
-  }, [conversationId]);
+  }, [conversationId, loading]);
 
   // Load viewing proposals referenced by messages
   useEffect(() => {
@@ -170,22 +182,46 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     handleScrollToProposal(scrollToProposal);
   }, [onScrollToProposal]);
 
-  // Handle scroll position tracking
-  const handleScroll = (event: any) => {
-    // For Radix UI ScrollArea, the event.target might be the viewport
-    const target = event.target;
-    const { scrollTop, scrollHeight, clientHeight } = target;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10; // 10px threshold
-    setIsScrolledToBottom(isAtBottom);
+  // Improved scroll position tracking with debouncing
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+  
+  const handleScrollPositionUpdate = (viewport: Element) => {
+    const { scrollTop, scrollHeight, clientHeight } = viewport as HTMLElement;
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20; // 20px threshold for better UX
+    
+    if (isAtBottom !== isScrolledToBottom) {
+      setIsScrolledToBottom(isAtBottom);
+    }
   };
 
-  // Real-time updates are handled by useMessaging hook
-  // Auto-scroll when new messages arrive
+  // Real-time scroll behavior for new messages
+  const previousMessageCount = useRef(messages.length);
+  const lastMessageId = useRef<string | null>(null);
+  
   useEffect(() => {
-    if (messages.length > 0) {
-      setTimeout(() => scrollToBottom(true), 100);
+    const currentMessageCount = messages.length;
+    const latestMessage = messages[messages.length - 1];
+    
+    // Check if we have a new message (not just initial load)
+    if (currentMessageCount > previousMessageCount.current && latestMessage && latestMessage.id !== lastMessageId.current) {
+      console.log('📝 New message detected, auto-scrolling');
+      
+      // Always scroll for own messages, smart scroll for others
+      const isOwnMessage = latestMessage.sender_id === user?.id;
+      
+      if (isOwnMessage) {
+        // Always scroll for own messages
+        setTimeout(() => scrollToBottom(true), 50);
+      } else if (isScrolledToBottom) {
+        // Only scroll for others' messages if user is at bottom
+        setTimeout(() => scrollToBottom(), 50);
+      }
+      
+      lastMessageId.current = latestMessage.id;
     }
-  }, [messages.length]);
+    
+    previousMessageCount.current = currentMessageCount;
+  }, [messages, user?.id, isScrolledToBottom]);
 
   // Real-time viewing proposals subscription
   useEffect(() => {
@@ -407,12 +443,15 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         className="flex-1 px-4" 
         ref={scrollAreaRef}
         onScrollCapture={(e) => {
-          // Use onScrollCapture for better compatibility with Radix ScrollArea
           const viewport = e.currentTarget.querySelector('[data-radix-scroll-area-viewport]');
           if (viewport) {
-            const { scrollTop, scrollHeight, clientHeight } = viewport as HTMLElement;
-            const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
-            setIsScrolledToBottom(isAtBottom);
+            // Debounce scroll position updates for better performance
+            if (scrollTimeoutRef.current) {
+              clearTimeout(scrollTimeoutRef.current);
+            }
+            scrollTimeoutRef.current = setTimeout(() => {
+              handleScrollPositionUpdate(viewport);
+            }, 50);
           }
         }}
       >

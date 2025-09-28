@@ -576,8 +576,10 @@ export function useMessaging(onViewingProposalChange?: () => void) {
   useEffect(() => {
     if (!activeConversation) return;
 
+    console.log('🔄 Loading messages for conversation:', activeConversation);
     fetchMessages(activeConversation);
 
+    // Single real-time subscription for messages
     const channel = supabase
       .channel(`messages-${activeConversation}`)
       .on(
@@ -590,18 +592,53 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         },
         async (payload) => {
           if (!isMountedRef.current) return;
-          if (payload.eventType === 'INSERT') {
-            const message = payload.new as Message;
-            setMessages(prev => (prev.some(m => m.id === message.id) ? prev : [...prev, message]));
-          } else if (payload.eventType === 'UPDATE') {
-            const message = payload.new as Message;
-            setMessages(prev => prev.map(m => (m.id === message.id ? { ...m, ...message } : m)));
+          
+          console.log('💬 Real-time message update:', payload.eventType, payload);
+          
+          try {
+            if (payload.eventType === 'INSERT') {
+              const newMessage = payload.new as Message;
+              
+              // Fetch sender profile if not already loaded
+              if (newMessage.sender_id && !newMessage.profiles) {
+                const { data: profile } = await supabase
+                  .from('profiles')
+                  .select('user_id, display_name')
+                  .eq('user_id', newMessage.sender_id)
+                  .single();
+                
+                if (profile) {
+                  newMessage.profiles = { display_name: profile.display_name };
+                }
+              }
+              
+              setMessages(prev => {
+                // Deduplication: check if message already exists
+                if (prev.some(m => m.id === newMessage.id)) {
+                  console.log('📝 Message already exists, skipping duplicate');
+                  return prev;
+                }
+                console.log('📝 Adding new real-time message');
+                return [...prev, newMessage];
+              });
+            } else if (payload.eventType === 'UPDATE') {
+              const updatedMessage = payload.new as Message;
+              setMessages(prev => 
+                prev.map(m => m.id === updatedMessage.id ? { ...m, ...updatedMessage } : m)
+              );
+            } else if (payload.eventType === 'DELETE') {
+              const deletedMessage = payload.old as Message;
+              setMessages(prev => prev.filter(m => m.id !== deletedMessage.id));
+            }
+          } catch (error) {
+            console.error('Error processing real-time message update:', error);
           }
         }
       )
       .subscribe();
 
     return () => {
+      console.log('🧹 Cleaning up messages channel for:', activeConversation);
       supabase.removeChannel(channel);
     };
   }, [activeConversation]);
@@ -624,47 +661,15 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     } catch {}
   }, [user, activeConversation]);
 
-  // Per-conversation realtime channel for instant message updates
+  // Cleanup message channel ref on unmount
   useEffect(() => {
-    if (messageChannelRef.current) {
-      supabase.removeChannel(messageChannelRef.current);
-      messageChannelRef.current = null;
-    }
-    if (!activeConversation) return;
-
-    const channel = supabase
-      .channel(`messages-${activeConversation}`)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConversation}` },
-        (payload) => {
-          if (!isMountedRef.current) return;
-          try {
-            if (payload.eventType === 'INSERT') {
-              const newMsg = payload.new as any as Message;
-              setMessages(prev => (prev.some(m => m.id === newMsg.id) ? prev : [...prev, newMsg]));
-            } else if (payload.eventType === 'UPDATE') {
-              const updated = payload.new as any as Message;
-              setMessages(prev => prev.map(m => (m.id === updated.id ? { ...m, ...updated } : m)));
-            } else if (payload.eventType === 'DELETE') {
-              const oldRow: any = payload.old;
-              setMessages(prev => prev.filter(m => m.id !== oldRow.id));
-            }
-          } catch (e) {
-            console.error('Realtime message handler error:', e);
-          }
-        }
-      )
-      .subscribe();
-
-    messageChannelRef.current = channel;
     return () => {
       if (messageChannelRef.current) {
         supabase.removeChannel(messageChannelRef.current);
         messageChannelRef.current = null;
       }
     };
-  }, [activeConversation]);
+  }, []);
 
   return {
     conversations,
