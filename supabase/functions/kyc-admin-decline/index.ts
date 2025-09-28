@@ -117,33 +117,8 @@ serve(async (req) => {
       }
     });
 
-    // Get user profile for notification
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('display_name')
-      .eq('user_id', user_id)
-      .single();
-
-    const userName = profile?.display_name || 'User';
-
-    // Create notification for user
-    await supabaseAdmin
-      .from('notifications')
-      .insert({
-        user_id: user_id,
-        message: `Your identity verification was declined. Please review the feedback and resubmit.`,
-        link_url: '/verify-id',
-        type: 'kyc_declined',
-        metadata: {
-          declined_by: user.id,
-          declined_at: new Date().toISOString(),
-          decline_reason: reason.trim()
-        }
-      });
-
-    // TODO: Send email notification to user about decline with reason
-    // TODO: Send SMS/WhatsApp notification if configured
-    console.log(`Would send decline notification to ${userName} (${user_id}) with reason: ${reason}`);
+    // Optional: email/SMS could be sent here via provider if configured
+    console.log(`KYC declined for user ${user_id} by ${user.id} with reason: ${reason}`);
 
     return new Response(
       JSON.stringify({ 

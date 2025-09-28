@@ -114,20 +114,6 @@ serve(async (req) => {
       }
     });
 
-    // Create notification for user
-    await supabaseAdmin
-      .from('notifications')
-      .insert({
-        user_id: user_id,
-        message: `Your identity verification has been approved! ✅`,
-        link_url: '/verify-id',
-        type: 'kyc_approved',
-        metadata: {
-          approved_by: user.id,
-          approved_at: new Date().toISOString()
-        }
-      });
-
     // TODO: Send email notification to user about approval
     console.log(`KYC approved for user ${user_id} by ${user.id}`);
 
