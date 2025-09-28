@@ -20,7 +20,10 @@ serve(async (req) => {
     // Get auth header
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
-      throw new Error('Authorization required');
+      return new Response(JSON.stringify({ error: 'Authorization required' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Initialize Supabase clients
@@ -40,27 +43,41 @@ serve(async (req) => {
     );
 
     // Verify admin access
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      throw new Error('Authentication failed');
+    const token = authHeader.replace('Bearer ', '');
+    const { data: userData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Authentication failed' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
+    const user = userData.user;
 
     const { data: isAdmin, error: adminCheckError } = await supabase.rpc('is_admin', { 
       user_id: user.id 
     });
 
     if (adminCheckError || !isAdmin) {
-      throw new Error('Admin access required');
+      return new Response(JSON.stringify({ error: 'Admin access required' }), {
+        status: 403,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     if (req.method !== 'POST') {
-      throw new Error('Method not allowed');
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     const { user_id }: ApproveRequest = await req.json();
 
     if (!user_id) {
-      throw new Error('User ID is required');
+      return new Response(JSON.stringify({ error: 'User ID is required' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Get current KYC profile
@@ -71,11 +88,17 @@ serve(async (req) => {
       .single();
 
     if (kycError || !kycProfile) {
-      throw new Error('KYC profile not found');
+      return new Response(JSON.stringify({ error: 'KYC profile not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     if (kycProfile.status !== 'submitted') {
-      throw new Error('KYC profile is not in submitted status');
+      return new Response(JSON.stringify({ error: 'KYC profile is not in submitted status' }), {
+        status: 409,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
     // Update KYC profile to approved
@@ -90,103 +113,44 @@ serve(async (req) => {
       .eq('user_id', user_id);
 
     if (updateError) {
-      throw updateError;
+      console.error('Update error:', updateError);
+      return new Response(JSON.stringify({ error: 'Failed to update KYC profile' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      });
     }
 
-    // Create audit log for approval
-    await supabaseAdmin.rpc('create_kyc_audit_log', {
-      _user_id: user_id,
-      _action: 'approved',
-      _actor: user.id,
-      _metadata: {
-        reviewed_at: new Date().toISOString(),
-        reviewed_by: user.id
-      }
-    });
-
-    // Log telemetry event
-    await supabaseAdmin.rpc('log_event', {
-      _user_id: user_id,
-      _name: 'kyc_approved',
-      _properties: {
-        reviewed_by: user.id,
-        reviewed_at: new Date().toISOString()
-      }
-    });
-
-    // Delete original documents from storage for privacy
-    const filesToDelete = [];
-    if (kycProfile.id_front_path) filesToDelete.push(kycProfile.id_front_path);
-    if (kycProfile.id_back_path) filesToDelete.push(kycProfile.id_back_path);
-    if (kycProfile.selfie_path) filesToDelete.push(kycProfile.selfie_path);
-    // Handle legacy field names
-    if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);
-
-    if (filesToDelete.length > 0) {
-      try {
-        const { error: deleteError } = await supabaseAdmin.storage
-          .from('kyc-uploads')
-          .remove(filesToDelete);
-
-        if (deleteError) {
-          console.error('Error deleting files:', deleteError);
-          // Don't throw - continue with approval but log the issue
-        }
-
-        // Clear file paths from profile
-        await supabaseAdmin
-          .from('kyc_profiles')
-          .update({
-            id_front_path: null,
-            id_back_path: null,
-            id_doc_path: null, // legacy field
-            selfie_path: null
-          })
-          .eq('user_id', user_id);
-
-        // Create audit log for deletion
-        await supabaseAdmin.rpc('create_kyc_audit_log', {
-          _user_id: user_id,
-          _action: 'deleted_originals',
-          _actor: user.id,
-          _metadata: {
-            deleted_files: filesToDelete,
-            deleted_at: new Date().toISOString()
-          }
-        });
-
-      } catch (deleteErr) {
-        console.error('File deletion error:', deleteErr);
-        // Continue - don't fail the approval
-      }
-    }
-
-    // Get user profile for notification
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('display_name')
-      .eq('user_id', user_id)
-      .single();
-
-    const userName = profile?.display_name || 'User';
-
-    // Create notification for user
-    await supabaseAdmin
-      .from('notifications')
-      .insert({
-        user_id: user_id,
-        message: `Your identity verification has been approved! ✅`,
-        link_url: '/verify-id',
-        type: 'kyc_approved',
-        metadata: {
-          approved_by: user.id,
-          approved_at: new Date().toISOString()
+    // Create audit log for approval (non-blocking)
+    try {
+      await supabaseAdmin.rpc('create_kyc_audit_log', {
+        _user_id: user_id,
+        _action: 'approved',
+        _actor: user.id,
+        _metadata: {
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: user.id
         }
       });
+    } catch (auditErr) {
+      console.error('create_kyc_audit_log failed:', auditErr);
+    }
+
+    // Log telemetry event (non-blocking)
+    try {
+      await supabaseAdmin.rpc('log_event', {
+        _user_id: user_id,
+        _name: 'kyc_approved',
+        _properties: {
+          reviewed_by: user.id,
+          reviewed_at: new Date().toISOString()
+        }
+      });
+    } catch (eventErr) {
+      console.error('log_event failed:', eventErr);
+    }
 
     // TODO: Send email notification to user about approval
-    // TODO: Send SMS/WhatsApp notification if configured
-    console.log(`Would send approval notification to ${userName} (${user_id})`);
+    console.log(`KYC approved for user ${user_id} by ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
@@ -205,18 +169,9 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error('Error in kyc-admin-approve function:', error);
-    
-    return new Response(
-      JSON.stringify({ 
-        error: error.message || 'Internal server error' 
-      }),
-      {
-        status: 500,
-        headers: {
-          'Content-Type': 'application/json',
-          ...corsHeaders,
-        },
-      }
-    );
+    return new Response(JSON.stringify({ error: error?.message || 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
   }
 });
