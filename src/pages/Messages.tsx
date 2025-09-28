@@ -79,6 +79,9 @@ export default function Messages() {
   const isMountedRef = useRef(true);
 
   const selectedConversation = activeConversation ? conversations.find(c => c.id === activeConversation) : undefined;
+  const isLandlordInConversation = user && selectedConversation
+    ? user.id === selectedConversation.landlord_id
+    : isLandlord;
 
   // Component mount tracking
   useEffect(() => {
@@ -699,7 +702,8 @@ export default function Messages() {
                     fetchConversations?.();
                   }}
                   onScrollToProposal={setScrollToProposalFn}
-                  onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
+                  onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
+                  isLandlordInConversation={isLandlordInConversation}
                 />
               )}
             </div>

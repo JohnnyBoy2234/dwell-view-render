@@ -30,9 +30,10 @@ interface ViewingProposal {
 interface ViewingProposalCardProps {
   proposal: ViewingProposal;
   onUpdate?: () => void;
+  isLandlordInConversation?: boolean;
 }
 
-export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardProps) {
+export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversation }: ViewingProposalCardProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -150,7 +151,9 @@ export function ViewingProposalCard({ proposal, onUpdate }: ViewingProposalCardP
     }
   };
 
-  const canTakeAction = user && !isLandlord && user.id === proposal.tenant_id && proposal.status === 'proposed';
+  // Use conversation-specific landlord flag if provided to avoid misclassification when a user has both roles
+  const effectiveIsLandlord = typeof isLandlordInConversation === 'boolean' ? isLandlordInConversation : isLandlord;
+  const canTakeAction = user && !effectiveIsLandlord && user.id === proposal.tenant_id && proposal.status === 'proposed';
 
   return (
     <Card className="w-full max-w-full bg-gradient-to-br from-background to-muted/20 border-2">

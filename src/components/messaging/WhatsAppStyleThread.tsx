@@ -34,6 +34,7 @@ interface WhatsAppStyleThreadProps {
   onMessageSent?: () => void;
   onScrollToProposal?: (fn: (proposalId: string) => void) => void;
   onCreateViewing?: () => void;
+  isLandlordInConversation?: boolean;
 }
 
 interface MessageStatusIndicatorProps {
@@ -60,7 +61,7 @@ function MessageStatusIndicator({ status, className }: MessageStatusIndicatorPro
   }
 }
 
-export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing }: WhatsAppStyleThreadProps) {
+export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing, isLandlordInConversation }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -463,11 +464,12 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
         {message.message_type === 'viewing_proposal' && message.viewing_proposal_id ? (
           <div id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming">
-            {proposalsById[message.viewing_proposal_id] ? (
-              <ViewingProposalCard
-                proposal={proposalsById[message.viewing_proposal_id]}
-                onUpdate={onCreateViewing}
-              />
+        {proposalsById[message.viewing_proposal_id] ? (
+          <ViewingProposalCard
+            proposal={proposalsById[message.viewing_proposal_id]}
+            onUpdate={onCreateViewing}
+            isLandlordInConversation={!!isLandlordInConversation}
+          />
             ) : (
               <div className="bg-muted/50 rounded-lg p-4 text-center">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
