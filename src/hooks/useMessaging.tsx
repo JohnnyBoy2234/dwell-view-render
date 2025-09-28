@@ -166,7 +166,10 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       console.log('📋 Fetched conversations:', conversationsData?.length || 0, 'conversations');
 
       if (!conversationsData || conversationsData.length === 0) {
-        if (!isMountedRef.current) return;
+        if (!isMountedRef.current) {
+          setLoading(false);
+          return;
+        }
         setConversations([]);
         setLoading(false);
         return;
