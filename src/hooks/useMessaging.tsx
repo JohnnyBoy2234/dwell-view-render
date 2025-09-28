@@ -334,7 +334,17 @@ export function useMessaging(onViewingProposalChange?: () => void) {
           return [...prev, data as any];
         });
       }
-      fetchConversations();
+      
+      // Update conversation's last_message_at optimistically
+      if (isMountedRef.current) {
+        setConversations(prev => 
+          prev.map(conv => 
+            conv.id === conversationId 
+              ? { ...conv, last_message_at: new Date().toISOString() }
+              : conv
+          )
+        );
+      }
     } catch (error: any) {
       console.error('❌ Final error in sendMessage:', error);
       toast({
@@ -411,7 +421,17 @@ export function useMessaging(onViewingProposalChange?: () => void) {
           return [...prev, data as any];
         });
       }
-      fetchConversations();
+      
+      // Update conversation's last_message_at optimistically
+      if (isMountedRef.current) {
+        setConversations(prev => 
+          prev.map(conv => 
+            conv.id === conversationId 
+              ? { ...conv, last_message_at: new Date().toISOString() }
+              : conv
+          )
+        );
+      }
     } catch (error: any) {
       console.error('❌ Final error in sendMessageWithAttachment:', error);
       toast({
@@ -527,18 +547,52 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     }
   };
 
-  // Global realtime: keep conversation list fresh (messages handled by scoped channel)
-  useRealtime({
-    onMessageChange: () => {
-      if (!isMountedRef.current) return;
-      fetchConversations();
-    },
-    onViewingProposalChange: () => {
-      if (!isMountedRef.current) return;
-      if (onViewingProposalChange) onViewingProposalChange();
-      fetchConversations();
-    }
-  });
+  // Real-time subscription for conversation updates (last_message_at)
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('conversation-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `or(landlord_id.eq.${user.id},tenant_id.eq.${user.id})`
+        },
+        (payload) => {
+          if (!isMountedRef.current) return;
+          console.log('📋 Conversation update received:', payload);
+          
+          const updatedConv = payload.new as any;
+          setConversations(prev => 
+            prev.map(conv => 
+              conv.id === updatedConv.id 
+                ? { ...conv, last_message_at: updatedConv.last_message_at }
+                : conv
+            )
+          );
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'viewing_proposals'
+        },
+        () => {
+          if (!isMountedRef.current) return;
+          if (onViewingProposalChange) onViewingProposalChange();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, onViewingProposalChange]);
 
   // Load conversations on mount
   useEffect(() => {
