@@ -170,18 +170,20 @@ serve(async (req) => {
 
     const approvedAt = new Date().toISOString();
 
-    // Create notification for user via helper (handles RLS)
-    const { error: notifyError } = await supabaseAdmin.rpc('create_notification', {
-      _user_id: user_id,
-      _message: 'Your identity verification has been approved! ✅',
-      _link_url: '/verify-id',
-      _type: 'kyc_approved',
-      _metadata: {
-        approved_by: user.id,
-        approved_at: approvedAt,
-        reviewer_name: profile?.display_name || null
-      }
-    });
+    // Create notification for user via direct table insertion
+    const { error: notifyError } = await supabaseAdmin
+      .from('notifications')
+      .insert({
+        user_id: user_id,
+        message: 'Your identity verification has been approved! ✅',
+        link_url: '/verify-id',
+        type: 'kyc_approved',
+        metadata: {
+          approved_by: user.id,
+          approved_at: approvedAt,
+          reviewer_name: profile?.display_name || null
+        }
+      });
 
     if (notifyError) {
       console.error('Failed to create approval notification:', notifyError);
