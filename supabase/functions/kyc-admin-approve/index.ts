@@ -114,83 +114,31 @@ serve(async (req) => {
       }
     });
 
-    // Delete original documents from storage for privacy
-    const filesToDelete = [];
-    if (kycProfile.id_front_path) filesToDelete.push(kycProfile.id_front_path);
-    if (kycProfile.id_back_path) filesToDelete.push(kycProfile.id_back_path);
-    if (kycProfile.selfie_path) filesToDelete.push(kycProfile.selfie_path);
-    // Handle legacy field names
-    if (kycProfile.id_doc_path) filesToDelete.push(kycProfile.id_doc_path);
-
-    if (filesToDelete.length > 0) {
-      try {
-        const { error: deleteError } = await supabaseAdmin.storage
-          .from('kyc-uploads')
-          .remove(filesToDelete);
-
-        if (deleteError) {
-          console.error('Error deleting files:', deleteError);
-          // Don't throw - continue with approval but log the issue
-        }
-
-        // Clear file paths from profile
-        await supabaseAdmin
-          .from('kyc_profiles')
-          .update({
-            id_front_path: null,
-            id_back_path: null,
-            id_doc_path: null, // legacy field
-            selfie_path: null
-          })
-          .eq('user_id', user_id);
-
-        // Create audit log for deletion
-        await supabaseAdmin.rpc('create_kyc_audit_log', {
-          _user_id: user_id,
-          _action: 'deleted_originals',
-          _actor: user.id,
-          _metadata: {
-            deleted_files: filesToDelete,
-            deleted_at: new Date().toISOString()
-          }
-        });
-
-      } catch (deleteErr) {
-        console.error('File deletion error:', deleteErr);
-        // Continue - don't fail the approval
-      }
-    }
-
-    // Get user profile for notification context (optional)
-    const { data: profile } = await supabaseAdmin
+    // Get user profile for notification
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
       .select('display_name')
       .eq('user_id', user_id)
       .single();
 
-    const approvedAt = new Date().toISOString();
+    const userName = profile?.display_name || 'User';
 
-    // Create notification for user via direct table insertion
-    const { error: notifyError } = await supabaseAdmin
+    // Create notification for user
+    await supabaseAdmin
       .from('notifications')
       .insert({
         user_id: user_id,
-        message: 'Your identity verification has been approved! ✅',
+        message: `Your identity verification has been approved! ✅`,
         link_url: '/verify-id',
         type: 'kyc_approved',
         metadata: {
           approved_by: user.id,
-          approved_at: approvedAt,
-          reviewer_name: profile?.display_name || null
+          approved_at: new Date().toISOString(),
+          reviewer_name: userName
         }
       });
 
-    if (notifyError) {
-      console.error('Failed to create approval notification:', notifyError);
-    }
-
-    // TODO: Send email/SMS if needed
-    console.log(`KYC approved for ${profile?.display_name || 'user'} (${user_id}) by ${user.id}`);
+    console.log(`KYC approved for ${userName} (${user_id}) by ${user.id}`);
 
     return new Response(
       JSON.stringify({ 
