@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAccounting } from '@/hooks/useAccounting';
 import { useUserProperties } from '@/hooks/useUserProperties';
-import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle, Bell } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -26,6 +28,8 @@ export function AccountingOverview() {
 
   const { transactions, loading, fetchTransactions, calculateKPIs, getMonthlyData, getCategoryData } = useAccounting();
   const { properties } = useUserProperties();
+  const { toast } = useToast();
+  const [sendingReminder, setSendingReminder] = useState(false);
 
   useEffect(() => {
     const month = new Date(selectedMonth + '-01');
@@ -180,6 +184,80 @@ export function AccountingOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Actions: Payment Reminder */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            Send Payment Reminder
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select property" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
+                {properties.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>
+                    {property.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* Simple presets; advanced selection could target a specific tenant later */}
+            <Select onValueChange={() => {}}>
+              <SelectTrigger>
+                <SelectValue placeholder="Reminder Type (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="rent">Rent Due</SelectItem>
+                <SelectItem value="overdue">Overdue Notice</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              disabled={sendingReminder || selectedProperty === 'all'}
+              onClick={async () => {
+                if (selectedProperty === 'all') {
+                  toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+                  return;
+                }
+                try {
+                  setSendingReminder(true);
+                  const { data: tenancy } = await supabase
+                    .from('tenancies')
+                    .select('tenant_id')
+                    .eq('property_id', selectedProperty)
+                    .limit(1)
+                    .maybeSingle();
+                  if (!tenancy?.tenant_id) {
+                    toast({ variant: 'destructive', title: 'No tenant found', description: 'This property has no active tenant.' });
+                    setSendingReminder(false);
+                    return;
+                  }
+                  const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                    body: {
+                      tenant_id: tenancy.tenant_id,
+                      property_id: selectedProperty,
+                    }
+                  });
+                  if (error) throw error;
+                  toast({ title: 'Reminder sent', description: 'The tenant has been notified via app and email.' });
+                } catch (e: any) {
+                  toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                } finally {
+                  setSendingReminder(false);
+                }
+              }}
+            >
+              {sendingReminder ? 'Sending…' : 'Send Reminder'}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
