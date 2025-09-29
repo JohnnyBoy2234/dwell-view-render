@@ -11,6 +11,8 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { useLeaseContracts } from '@/hooks/useLeaseContracts';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { ContractBasicInfo } from './steps/ContractBasicInfo';
 import { ContractParties } from './steps/ContractParties';
 import { ContractTerms } from './steps/ContractTerms';
@@ -98,6 +100,7 @@ const getAutosaveKey = (userId?: string, contractId?: string, propertyId?: strin
 
 export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }: ContractBuilderProps) {
   const { contracts, createContract, updateContract, generatePDF } = useLeaseContracts();
+  const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [contract, setContract] = useState<LeaseContract | null>(null);
   const [contractData, setContractData] = useState<LeaseContractData>({
