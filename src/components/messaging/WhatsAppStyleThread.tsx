@@ -426,8 +426,25 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           )}
 
           {message.content && (
-            <div className="text-sm leading-relaxed whitespace-pre-line break-words">
-              {message.content}
+            <div className="text-sm leading-relaxed whitespace-pre-line break-words flex items-center gap-2">
+              <span className="whitespace-pre-line break-words">
+                {message.content}
+              </span>
+              <span className={cn(
+                'flex items-center gap-1 text-[11px] whitespace-nowrap',
+                isOwn ? 'text-white/70' : 'text-ios-gray'
+              )}>
+                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {isOwn && (
+                  <MessageStatusIndicator 
+                    status={messageStatus}
+                    className={cn(
+                      'transition-colors duration-200',
+                      messageStatus === 'read' ? 'text-green-400' : ''
+                    )}
+                  />
+                )}
+              </span>
             </div>
           )}
 
@@ -453,21 +470,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
             </div>
           )}
 
-          <div className={cn(
-            'mt-2 flex items-center gap-1 text-[11px]',
-            isOwn ? 'flex-row-reverse text-white/70' : 'text-ios-gray'
-          )}>
-            <span>{new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            {isOwn && (
-                <MessageStatusIndicator 
-                  status={messageStatus}
-                  className={cn(
-                    'transition-colors duration-200',
-                    messageStatus === 'read' ? 'text-green-400' : 'text-white/70'
-                  )}
-                />
-            )}
-          </div>
+          {/* Time and ticks are now inline next to the text */}
         </div>
       </div>
     );

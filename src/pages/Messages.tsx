@@ -426,9 +426,9 @@ export default function Messages() {
 
         {/* Chat Window - Mobile Full Screen (hides bottom menu) */}
         {!showConversations && selectedConversation && (
-          <div className="fixed inset-0 bg-background flex flex-col z-30 pt-20">
-              {/* Mobile Chat Header - fixed to viewport */}
-              <div className="fixed top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-50 flex-shrink-0">
+          <div className="fixed inset-0 bg-background flex flex-col z-30">
+              {/* Mobile Chat Header - sticky within chat container */}
+              <div className="sticky top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-50 flex-shrink-0" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
                 <Button
                   variant="ghost"
                   size="sm"
