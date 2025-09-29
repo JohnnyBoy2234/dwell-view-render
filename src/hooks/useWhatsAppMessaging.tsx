@@ -39,6 +39,7 @@ export function useWhatsAppMessaging() {
   const [messages, setMessages] = useState<OptimisticMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [typingVersion, setTypingVersion] = useState(0);
+  const [localTypingUsers, setLocalTypingUsers] = useState<Map<string, string>>(new Map());
   
   const messagesCache = useRef<Map<string, OptimisticMessage[]>>(new Map());
   const conversationsCache = useRef<ConversationData[]>([]);
@@ -49,7 +50,7 @@ export function useWhatsAppMessaging() {
     connectionStatus,
     onlineUsers,
     typingUsers,
-    sendTypingIndicator,
+    sendTypingIndicator: coreSendTypingIndicator,
     sendMessageAck,
     registerCallbacks
   } = useWebSocketConnection();
@@ -584,7 +585,17 @@ export function useWhatsAppMessaging() {
             const { userId, user_id, typing, conversationId, conversation_id } = payload as any;
             const cid = conversationId || conversation_id;
             if (cid !== activeConversation) return;
-            // Underlying connection hook updates typingUsers; we just trigger a re-render
+            const uid = userId || user_id;
+            if (!uid || uid === user?.id) return;
+            setLocalTypingUsers(prev => {
+              const next = new Map(prev);
+              if (typing) {
+                next.set(uid, cid);
+              } else {
+                next.delete(uid);
+              }
+              return next;
+            });
             setTypingVersion(v => v + 1);
           })
           .on('broadcast', { event: 'read_receipt' }, ({ payload }) => {
@@ -599,6 +610,7 @@ export function useWhatsAppMessaging() {
       }
     } else {
       setMessages([]);
+      setLocalTypingUsers(new Map());
       if (chatChannelRef.current) {
         supabase.removeChannel(chatChannelRef.current);
         chatChannelRef.current = null;
@@ -639,6 +651,28 @@ export function useWhatsAppMessaging() {
     }
   }, [user]);
 
+  // Merge core typing users with local per-conversation typing
+  const mergedTypingUsers = (() => {
+    const merged = new Map(typingUsers);
+    localTypingUsers.forEach((value, key) => merged.set(key, value));
+    return merged;
+  })();
+
+  // Unified typing indicator sender: send via unified channel and per-conversation channel
+  const sendTypingIndicator = useCallback((conversationId: string, typing: boolean) => {
+    try {
+      coreSendTypingIndicator(conversationId, typing);
+    } catch {}
+    try {
+      if (!chatChannelRef.current || (chatChannelRef.current as any).topic !== `realtime:chat-${conversationId}`) {
+        chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();
+      }
+      chatChannelRef.current.send({ type: 'broadcast', event: 'typing', payload: { user_id: user?.id, conversation_id: conversationId, typing } });
+    } catch (e) {
+      console.warn('Broadcast typing failed', e);
+    }
+  }, [coreSendTypingIndicator, user]);
+
   return {
     conversations,
     activeConversation,
@@ -647,7 +681,7 @@ export function useWhatsAppMessaging() {
     loading,
     connectionStatus,
     onlineUsers,
-    typingUsers,
+    typingUsers: mergedTypingUsers,
     sendMessage,
     sendTypingIndicator,
     fetchConversations,

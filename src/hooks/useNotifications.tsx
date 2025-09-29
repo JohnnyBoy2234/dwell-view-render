@@ -38,11 +38,14 @@ export const useNotifications = (filters?: NotificationFilters) => {
       }
 
       // Ensure data is an array and has the expected structure
-      const validNotifications = (data || []).filter(notification => 
-        notification && 
-        typeof notification === 'object' && 
-        notification.id
-      );
+      // Exclude chat message notifications from alerts (handled by chat badge)
+      const validNotifications = (data || [])
+        .filter(notification => 
+          notification && 
+          typeof notification === 'object' && 
+          notification.id
+        )
+        .filter((n: any) => n.type !== 'new_message');
       
       const unreadCount = validNotifications.filter(n => !n.is_read).length;
       

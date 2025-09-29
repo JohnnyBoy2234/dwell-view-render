@@ -85,19 +85,7 @@ export default function Notifications() {
         console.log('🔔 No notifications found in Notifications page');
       }
 
-      // Add message notifications if there are unread messages
-      if (messageUnread > 0) {
-        combinedNotifications.push({
-          id: 'messages',
-          type: 'message',
-          title: 'New Messages',
-          message: `You have ${messageUnread} unread message${messageUnread > 1 ? 's' : ''}`,
-          timestamp: new Date().toISOString(),
-          isRead: false,
-          actionUrl: '/messages',
-          priority: 'high'
-        });
-      }
+      // Do not add synthetic message notifications; unread count shows on Chat tab
 
       // Lease notifications removed
 
