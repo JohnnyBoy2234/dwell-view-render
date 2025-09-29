@@ -104,7 +104,7 @@ export function LeaseManagement() {
     if (contract.pdf_url) {
       actions.push(
         <Button key="view" variant="outline" size="sm" asChild>
-          <a href={contract.pdf_url} target="_blank" rel="noopener noreferrer">
+          <a href={`${contract.pdf_url}${contract.pdf_url.includes('?') ? '&' : '?'}ts=${Date.now()}`} target="_blank" rel="noopener noreferrer">
             <Eye className="h-4 w-4 mr-1" />
             View
           </a>

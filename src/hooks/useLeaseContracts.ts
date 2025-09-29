@@ -165,7 +165,7 @@ export function useLeaseContracts() {
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-lease-pdf', {
-        body: { contractId }
+        body: { contractId, force: true, ts: Date.now() }
       });
 
       if (error) throw error;

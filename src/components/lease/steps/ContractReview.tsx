@@ -355,7 +355,7 @@ export function ContractReview({ data, contract, onGeneratePDF }: ContractReview
 
             {contract?.pdf_url && (
               <Button variant="outline" asChild>
-                <a href={contract.pdf_url} target="_blank" rel="noopener noreferrer">
+                <a href={`${contract.pdf_url}${contract.pdf_url.includes('?') ? '&' : '?'}ts=${Date.now()}` } target="_blank" rel="noopener noreferrer">
                   <Eye className="h-4 w-4 mr-2" />
                   Preview PDF
                 </a>

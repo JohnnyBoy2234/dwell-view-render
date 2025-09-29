@@ -33,7 +33,8 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
       if (pdfUrl) {
         toast.success('PDF generated successfully');
         // Open PDF in new tab
-        window.open(pdfUrl, '_blank');
+        const joiner = pdfUrl.includes('?') ? '&' : '?';
+        window.open(`${pdfUrl}${joiner}ts=${Date.now()}`,'_blank');
       }
     } catch (error) {
       console.error('Error generating PDF:', error);
@@ -45,7 +46,8 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
 
   const handleDownloadPDF = async () => {
     if (contract.pdf_url) {
-      await downloadFileFromUrl(contract.pdf_url, `lease-${contract.id}.pdf`);
+      const joiner = contract.pdf_url.includes('?') ? '&' : '?';
+      await downloadFileFromUrl(`${contract.pdf_url}${joiner}ts=${Date.now()}`, `lease-${contract.id}.pdf`);
     } else {
       handleGeneratePDF();
     }
@@ -177,7 +179,10 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
           </Button>
 
           {contract.pdf_url && (
-            <Button variant="outline" size="sm" onClick={() => window.open(contract.pdf_url, '_blank')}>
+            <Button variant="outline" size="sm" onClick={() => {
+              const joiner = contract.pdf_url!.includes('?') ? '&' : '?';
+              window.open(`${contract.pdf_url}${joiner}ts=${Date.now()}`, '_blank');
+            }}>
               <Eye className="h-4 w-4 mr-2" />
               View PDF
             </Button>
