@@ -28,14 +28,22 @@ export interface LeaseContractData {
 
   // Parties Information  
   landlordName: string;
+  landloardIDNumber: string;
   landlordAddress: string;
   landlordEmail: string;
   landlordPhone?: string;
   
-  tenantName?: string;
-  tenantAddress?: string;
-  tenantEmail?: string;
+  tenantName: string;
+  tenantAddress: string;
+  tenantIDNumber:string;
+  tenantEmail: string;
   tenantPhone?: string;
+
+  // Bank Details
+  landlordBranchCode: string;
+  landlordBranchName: string;
+  landlordAccNumber: string;
+  landlordReference?: string;
 
   // Lease Terms
   leaseStartDate: string;
