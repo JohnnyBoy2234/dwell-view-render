@@ -921,6 +921,15 @@ export default function EnhancedLandlordDashboard() {
                         </Button>
                       </>
                     )}
+                    {application.status === 'accepted' && (
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/lease/builder?tenantId=${encodeURIComponent(application.tenant_id)}&propertyId=${encodeURIComponent(application.property_id)}`)}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Generate Lease
+                      </Button>
+                    )}
                     <Button
                       size="sm"
                       variant="outline"

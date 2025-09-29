@@ -136,6 +136,65 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   const [steps, setSteps] = useState(builderSteps);
   const [saving, setSaving] = useState(false);
   const [hasLoadedAutosave, setHasLoadedAutosave] = useState(false);
+  const [prefillAttempted, setPrefillAttempted] = useState(false);
+
+  // Prefill property and tenant info from context (URL params) and known profile data
+  useEffect(() => {
+    if (prefillAttempted) return;
+    try {
+      const url = new URL(window.location.href);
+      const urlTenantId = url.searchParams.get('tenantId') || undefined;
+      const urlPropertyId = url.searchParams.get('propertyId') || propertyId;
+
+      const doPrefill = async () => {
+        const updates: Partial<LeaseContractData> = {};
+
+        // Property prefill
+        if (urlPropertyId) {
+          const { data: prop } = await supabase
+            .from('properties')
+            .select('title, location')
+            .eq('id', urlPropertyId)
+            .maybeSingle();
+          if (prop) {
+            updates.propertyAddress = `${prop.title || ''}${prop.location ? ', ' + prop.location : ''}`.trim();
+          }
+        }
+
+        // Tenant prefill from accepted application or profiles
+        if (urlTenantId) {
+          const { data: app } = await supabase
+            .from('applications')
+            .select('status, tenant_id, screening_details(full_name, phone), profiles:tenant_id(display_name)')
+            .eq('tenant_id', urlTenantId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (app) {
+            const tenantName = app.screening_details?.full_name || app.profiles?.display_name || '';
+            updates.tenantName = tenantName;
+            updates.tenantPhone = app.screening_details?.phone || '';
+          } else {
+            const { data: prof } = await supabase
+              .from('profiles')
+              .select('display_name')
+              .eq('user_id', urlTenantId)
+              .maybeSingle();
+            if (prof?.display_name) updates.tenantName = prof.display_name;
+          }
+        }
+
+        if (Object.keys(updates).length > 0) {
+          setContractData((prev) => ({ ...prev, ...updates }));
+        }
+      };
+
+      doPrefill().finally(() => setPrefillAttempted(true));
+    } catch {
+      setPrefillAttempted(true);
+    }
+  }, [prefillAttempted, propertyId]);
 
   useEffect(() => {
     const loadData = async () => {
