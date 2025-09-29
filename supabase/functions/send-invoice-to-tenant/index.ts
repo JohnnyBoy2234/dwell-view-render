@@ -10,7 +10,7 @@ const corsHeaders = {
 
 interface Payload {
   tenant_id: string;
-  property_id: string;
+  property_id?: string; // optional
   filename: string;
   file_path: string; // storage path used
 }
@@ -25,7 +25,7 @@ serve(async (req) => {
     const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
     const { tenant_id, property_id, filename, file_path }: Payload = await req.json();
-    if (!tenant_id || !property_id || !filename || !file_path) {
+    if (!tenant_id || !filename || !file_path) {
       return new Response(JSON.stringify({ error: 'Missing fields' }), { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
     }
 
@@ -35,8 +35,10 @@ serve(async (req) => {
     const { data: tenantProfile } = await admin.from('profiles').select('display_name').eq('user_id', tenant_id).maybeSingle();
     const tenantName = tenantProfile?.display_name || 'Tenant';
 
-    // Fetch property title
-    const { data: property } = await admin.from('properties').select('title').eq('id', property_id).maybeSingle();
+    // Fetch property title if provided
+    const property = property_id
+      ? (await admin.from('properties').select('title').eq('id', property_id).maybeSingle()).data
+      : undefined;
 
     // Signed URL for attachment link
     const { data: signed } = await admin.storage.from('income-documents').createSignedUrl(file_path.replace('income-documents/',''), 60 * 60);
@@ -81,7 +83,7 @@ serve(async (req) => {
       _message: `New tax invoice${property?.title ? ` for ${property.title}` : ''}`,
       _link_url: '/tenant/proof-of-payment',
       _type: 'invoice_shared',
-      _metadata: { property_id, filename, file_path }
+      _metadata: { ...(property_id ? { property_id } : {}), filename, file_path }
     });
 
     return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } });
