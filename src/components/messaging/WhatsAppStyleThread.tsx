@@ -583,8 +583,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
       {/* Message Input */}
       <div
         className="px-3 py-2.5 bg-background/95 backdrop-blur border-t sticky bottom-0 z-10 flex-shrink-0"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2px)' }}
-      >
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2px)', marginBottom: '8px' }}
+     >
         <MessageComposer
           onSend={handleSendMessage}
           placeholder="Type a message..."

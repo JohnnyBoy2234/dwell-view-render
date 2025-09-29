@@ -45,6 +45,7 @@ export function useWhatsAppMessaging() {
   const conversationsCache = useRef<ConversationData[]>([]);
   const pendingMessages = useRef<Map<string, OptimisticMessage>>(new Map());
   const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const globalChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   const {
     connectionStatus,
@@ -343,6 +344,16 @@ export function useWhatsAppMessaging() {
         console.warn('Broadcast new_message failed', e);
       }
 
+      // Also notify globally for unread badge updates
+      try {
+        if (!globalChannelRef.current) {
+          globalChannelRef.current = supabase.channel('global-messages', { config: { broadcast: { self: true } } }).subscribe();
+        }
+        await globalChannelRef.current.send({ type: 'broadcast', event: 'new_message', payload: { conversation_id: conversationId, message_id: (data as any).id, sender_id: user.id } });
+      } catch (e) {
+        console.warn('Broadcast global new_message failed', e);
+      }
+
     } catch (error: any) {
       console.error('❌ Error sending message:', error);
       
@@ -538,6 +549,23 @@ export function useWhatsAppMessaging() {
       }
     });
   }, [registerCallbacks, handleRealtimeMessage, handleMessageAck, fetchConversations]);
+
+  // Subscribe to a global broadcast channel so other surfaces (e.g., bottom bar) can react instantly
+  useEffect(() => {
+    try {
+      if (!globalChannelRef.current) {
+        globalChannelRef.current = supabase.channel('global-messages', { config: { broadcast: { self: true } } }).subscribe();
+      }
+    } catch (e) {
+      console.warn('Failed to join global-messages channel', e);
+    }
+    return () => {
+      if (globalChannelRef.current) {
+        supabase.removeChannel(globalChannelRef.current);
+        globalChannelRef.current = null;
+      }
+    };
+  }, []);
 
   // Load conversations on mount
   useEffect(() => {

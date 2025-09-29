@@ -96,6 +96,20 @@ export function useUnreadMessages() {
     return () => clearInterval(interval);
   }, [user, fetchUnreadCount]);
 
+  // Listen to global broadcast for instant badge updates
+  useEffect(() => {
+    const channel = supabase.channel('global-messages', { config: { broadcast: { self: true } } })
+      .on('broadcast', { event: 'new_message' }, () => {
+        if (isMountedRef.current) {
+          fetchUnreadCount();
+        }
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchUnreadCount]);
+
   // Re-enable real-time subscription for unread messages
   useRealtime({
     onMessageChange: () => {
