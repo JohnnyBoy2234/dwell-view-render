@@ -426,9 +426,9 @@ export default function Messages() {
 
         {/* Chat Window - Mobile Full Screen (hides bottom menu) */}
         {!showConversations && selectedConversation && (
-          <div className="fixed inset-0 bg-background flex flex-col z-30">
+          <div className="fixed inset-0 bg-background flex flex-col z-30" style={{ height: '100svh', overscrollBehavior: 'contain' as any }}>
               {/* Mobile Chat Header - sticky within chat container */}
-              <div className="sticky top-0 left-0 right-0 flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm z-50 flex-shrink-0" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+              <div className="sticky top-0 left-0 right-0 flex items-center gap-3 border-b bg-background/95 backdrop-blur-sm z-50 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 8px)', paddingBottom: '10px', paddingLeft: '16px', paddingRight: '16px' }}>
                 <Button
                   variant="ghost"
                   size="sm"

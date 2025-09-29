@@ -535,8 +535,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         }}
       >
         <div
-          className="py-4 space-y-1"
-          style={{ paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}
+          className="py-3 space-y-1"
+          style={{ paddingBottom: 'calc(84px + env(safe-area-inset-bottom))' }}
         >
           {loading ? (
             <div className="flex justify-center py-10">
@@ -582,8 +582,8 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
       {/* Message Input */}
       <div
-        className="p-4 bg-background/95 backdrop-blur border-t sticky bottom-0 z-10 flex-shrink-0"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="px-3 py-2.5 bg-background/95 backdrop-blur border-t sticky bottom-0 z-10 flex-shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2px)' }}
       >
         <MessageComposer
           onSend={handleSendMessage}
