@@ -490,10 +490,14 @@ export function useWhatsAppMessaging() {
       onMessage: handleRealtimeMessage,
       onMessageAck: handleMessageAck,
       onUserTyping: (userId, conversationId) => {
-        console.log('⌨️ User typing:', userId, conversationId);
+        // Store typing state for this conversation
+        // We key by other user's ID and conversation ID to avoid cross-chat bleed
+        if (conversationId) {
+          typingUsers.set(userId, conversationId);
+        }
       },
       onUserStoppedTyping: (userId) => {
-        console.log('⌨️ User stopped typing:', userId);
+        typingUsers.delete(userId);
       },
       onConversationUpdate: (conversationId, data) => {
         console.log('💬 Conversation updated:', conversationId, data);
@@ -516,6 +520,24 @@ export function useWhatsAppMessaging() {
     } else {
       setMessages([]);
     }
+  }, [activeConversation, fetchMessages]);
+
+  // Watchdog fallback for realtime dropouts: poll messages if no changes detected
+  useEffect(() => {
+    if (!activeConversation) return;
+    let lastSeen = Date.now();
+    const interval = setInterval(() => {
+      // If we haven't received any new messages for a while, refresh
+      // Using cache size change as a simple heuristic
+      const cached = messagesCache.current.get(activeConversation) || [];
+      const latestTime = cached.length > 0 ? new Date(cached[cached.length - 1].created_at).getTime() : 0;
+      const elapsed = Date.now() - Math.max(lastSeen, latestTime);
+      if (elapsed > 10000) {
+        fetchMessages(activeConversation);
+        lastSeen = Date.now();
+      }
+    }, 7000);
+    return () => clearInterval(interval);
   }, [activeConversation, fetchMessages]);
 
   // Hydrate from localStorage on mount
