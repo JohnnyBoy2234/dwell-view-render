@@ -42,6 +42,7 @@ export function useWhatsAppMessaging() {
   const messagesCache = useRef<Map<string, OptimisticMessage[]>>(new Map());
   const conversationsCache = useRef<ConversationData[]>([]);
   const pendingMessages = useRef<Map<string, OptimisticMessage>>(new Map());
+  const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   const {
     connectionStatus,
@@ -320,6 +321,16 @@ export function useWhatsAppMessaging() {
 
       console.log('✅ Message sent successfully:', data);
 
+      // Broadcast instantly to other participant in this conversation
+      try {
+        if (!chatChannelRef.current) {
+          chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();
+        }
+        await chatChannelRef.current.send({ type: 'broadcast', event: 'new_message', payload: realMessage });
+      } catch (e) {
+        console.warn('Broadcast new_message failed', e);
+      }
+
     } catch (error: any) {
       console.error('❌ Error sending message:', error);
       
@@ -412,6 +423,19 @@ export function useWhatsAppMessaging() {
           msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
         );
         messagesCache.current.set(conversationId, updatedCache);
+      }
+
+      // Broadcast read receipts to the other participant for instant status update
+      try {
+        const updatedIds = (data || []).map((d: any) => d.id);
+        if (updatedIds.length > 0) {
+          if (!chatChannelRef.current) {
+            chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();
+          }
+          await chatChannelRef.current.send({ type: 'broadcast', event: 'read_receipt', payload: { messageIds: updatedIds } });
+        }
+      } catch (e) {
+        console.warn('Broadcast read_receipt failed', e);
       }
 
     } catch (error) {
@@ -517,8 +541,54 @@ export function useWhatsAppMessaging() {
   useEffect(() => {
     if (activeConversation) {
       fetchMessages(activeConversation);
+      // Join conversation broadcast channel for instant delivery and typing/read signals
+      try {
+        if (chatChannelRef.current) {
+          supabase.removeChannel(chatChannelRef.current);
+          chatChannelRef.current = null;
+        }
+        const channel = supabase.channel(`chat-${activeConversation}`, {
+          config: { broadcast: { self: true } }
+        });
+        channel
+          .on('broadcast', { event: 'new_message' }, ({ payload }) => {
+            const msg = payload as any;
+            if (!msg || msg.conversation_id !== activeConversation) return;
+            setMessages(prev => {
+              if (prev.some(m => m.id === msg.id || m.tempId === msg.id)) return prev;
+              const optimistic: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
+              return [...prev, optimistic];
+            });
+            const cached = messagesCache.current.get(activeConversation) || [];
+            if (!cached.some(m => m.id === (msg as any).id || m.tempId === (msg as any).id)) {
+              messagesCache.current.set(activeConversation, [...cached, { ...msg, tempId: msg.id, status: 'delivered' }]);
+            }
+          })
+          .on('broadcast', { event: 'typing' }, ({ payload }) => {
+            const { userId, typing, conversationId } = payload as any;
+            if (conversationId !== activeConversation) return;
+            if (typing) {
+              typingUsers.set(userId, conversationId);
+            } else {
+              typingUsers.delete(userId);
+            }
+          })
+          .on('broadcast', { event: 'read_receipt' }, ({ payload }) => {
+            const { messageIds } = payload as any;
+            if (!Array.isArray(messageIds) || messageIds.length === 0) return;
+            setMessages(prev => prev.map(m => (messageIds.includes(m.id) ? { ...m, status: 'read' as const } : m)));
+          })
+          .subscribe();
+        chatChannelRef.current = channel;
+      } catch (e) {
+        console.warn('Failed to join chat channel', e);
+      }
     } else {
       setMessages([]);
+      if (chatChannelRef.current) {
+        supabase.removeChannel(chatChannelRef.current);
+        chatChannelRef.current = null;
+      }
     }
   }, [activeConversation, fetchMessages]);
 
@@ -532,11 +602,11 @@ export function useWhatsAppMessaging() {
       const cached = messagesCache.current.get(activeConversation) || [];
       const latestTime = cached.length > 0 ? new Date(cached[cached.length - 1].created_at).getTime() : 0;
       const elapsed = Date.now() - Math.max(lastSeen, latestTime);
-      if (elapsed > 10000) {
+      if (elapsed > 3000) {
         fetchMessages(activeConversation);
         lastSeen = Date.now();
       }
-    }, 7000);
+    }, 2000);
     return () => clearInterval(interval);
   }, [activeConversation, fetchMessages]);
 
