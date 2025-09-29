@@ -99,16 +99,24 @@ export function useUnreadMessages() {
   // Listen to global broadcast for instant badge updates
   useEffect(() => {
     const channel = supabase.channel('global-messages', { config: { broadcast: { self: true } } })
-      .on('broadcast', { event: 'new_message' }, () => {
-        if (isMountedRef.current) {
-          fetchUnreadCount();
-        }
+      .on('broadcast', { event: 'new_message' }, ({ payload }: any) => {
+        if (!isMountedRef.current) return;
+        try {
+          // Fast-path: increment locally if message is from someone else
+          if (payload && payload.sender_id && payload.sender_id !== user?.id) {
+            setUnreadCount(prev => prev + 1);
+          }
+        } catch {}
+        // Reconcile with server shortly after
+        setTimeout(() => {
+          if (isMountedRef.current) fetchUnreadCount();
+        }, 250);
       })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [fetchUnreadCount]);
+  }, [fetchUnreadCount, user?.id]);
 
   // Re-enable real-time subscription for unread messages
   useRealtime({

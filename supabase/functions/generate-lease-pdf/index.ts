@@ -13,7 +13,7 @@ serve(async (req) => {
   }
 
   try {
-    const { contractId } = await req.json();
+    const { contractId, force, ts } = await req.json();
     
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -30,12 +30,15 @@ serve(async (req) => {
 
     console.log(`Generating PDF for contract ${contractId}`);
 
+    // Bump version if force requested
+    const nextVersion = (force ? ((contract as any).version || 0) + 1 : (contract as any).version) || 1;
+    
     // Generate PDF document (pass origin for logo fallback)
     const requestOrigin = req.headers.get('origin') || undefined;
-    const pdfBuffer = await generatePDFDocument(contract, requestOrigin);
+    const pdfBuffer = await generatePDFDocument({ ...contract, version: nextVersion }, requestOrigin, ts);
     
     // Upload PDF to storage
-    const fileName = `${contractId}/lease_${contract.version}_${Date.now()}.pdf`;
+    const fileName = `${contractId}/lease_${nextVersion}_${Date.now()}.pdf`;
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('lease-documents')
       .upload(fileName, pdfBuffer, {
@@ -64,6 +67,7 @@ serve(async (req) => {
       .update({
         pdf_url: pdfUrl,
         pdf_hash: pdfHash,
+        version: nextVersion,
         updated_at: new Date().toISOString()
       })
       .eq('id', contractId);
@@ -78,7 +82,7 @@ serve(async (req) => {
       details: { 
         pdf_url: pdfUrl,
         pdf_hash: pdfHash,
-        version: contract.version
+        version: nextVersion
       }
     });
 
@@ -88,7 +92,8 @@ serve(async (req) => {
       success: true,
       pdfUrl: pdfUrl,
       pdfHash: pdfHash,
-      contractId: contractId
+      contractId: contractId,
+      version: nextVersion
     }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
@@ -104,9 +109,9 @@ serve(async (req) => {
   }
 });
 
-async function generatePDFDocument(contract: any, requestOrigin?: string): Promise<Uint8Array> {
+async function generatePDFDocument(contract: any, requestOrigin?: string, ts?: number): Promise<Uint8Array> {
 	const data = contract.contract_data || {};
-	const today = new Date();
+  const today = new Date();
 	const doc = await PDFDocument.create();
 
 	// Document metadata
