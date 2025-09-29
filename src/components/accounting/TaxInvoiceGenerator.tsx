@@ -6,7 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { Download, Plus, Trash2 } from 'lucide-react';
+import { Download, Plus, Trash2, Send } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 
 interface LineItem {
@@ -35,6 +37,7 @@ interface InvoiceData {
 
 export function TaxInvoiceGenerator() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
     landlordName: '',
     landlordAddress: '',
@@ -398,13 +401,46 @@ export function TaxInvoiceGenerator() {
             </CardContent>
           </Card>
 
-          {/* Generate PDF */}
+          {/* Generate / Send PDF */}
           <Card>
             <CardContent className="pt-6">
-              <Button onClick={generatePDF} className="w-full" size="lg">
-                <Download className="w-4 h-4 mr-2" />
-                Generate PDF Invoice
-              </Button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <Button onClick={generatePDF} size="lg">
+                  <Download className="w-4 h-4 mr-2" />
+                  Download PDF Invoice
+                </Button>
+                <Button variant="outline" size="lg" onClick={async () => {
+                  try {
+                    const { generateTaxInvoicePDF } = await import('@/components/accounting/PDFGenerator');
+                    const result = await generateTaxInvoicePDF({ invoiceData, totals });
+                    if (!result?.blob) return;
+                    // Resolve tenant id by display name (basic heuristic); in production, prefer explicit selection
+                    const { data: prof } = await supabase
+                      .from('profiles')
+                      .select('user_id')
+                      .ilike('display_name', invoiceData.tenantName)
+                      .limit(1)
+                      .maybeSingle();
+                    const tenantId = prof?.user_id;
+                    if (!tenantId) {
+                      toast({ variant: 'destructive', title: 'Tenant not found', description: 'Please ensure the tenant profile exists and name matches.' });
+                      return;
+                    }
+                    const path = `invoices/${tenantId}/${result.filename}`;
+                    const upload = await supabase.storage.from('income-documents').upload(path, result.blob, { upsert: true, contentType: 'application/pdf' });
+                    if (upload.error) throw upload.error;
+                    await supabase.from('documents').insert({ user_id: tenantId, document_type: 'invoice', file_path: `income-documents/${path}`, file_type: 'application/pdf', status: 'uploaded' });
+                    const { error: fnErr } = await supabase.functions.invoke('send-invoice-to-tenant', { body: { tenant_id: tenantId, property_id: '', filename: result.filename, file_path: `income-documents/${path}` } });
+                    if (fnErr) throw fnErr;
+                    toast({ title: 'Invoice sent to tenant', description: 'Email sent and document added to Proof of Payments.' });
+                  } catch (e: any) {
+                    toast({ variant: 'destructive', title: 'Failed to send invoice', description: e?.message || 'Please try again.' });
+                  }
+                }}>
+                  <Send className="w-4 h-4 mr-2" />
+                  Send to Tenant
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>

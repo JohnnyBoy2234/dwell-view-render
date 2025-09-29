@@ -360,9 +360,11 @@ export const generateExpenseSummaryPDF = async (props: ExpenseSummaryPDFProps) =
 export const generateTaxInvoicePDF = async (props: TaxInvoicePDFProps) => {
   const blob = await pdf(<TaxInvoicePDF {...props} />).toBlob();
   const url = URL.createObjectURL(blob);
+  const filename = `tax-invoice-${props.invoiceData.invoiceNumber}.pdf`;
   const a = document.createElement('a');
   a.href = url;
-  a.download = `tax-invoice-${props.invoiceData.invoiceNumber}.pdf`;
+  a.download = filename;
   a.click();
   URL.revokeObjectURL(url);
+  return { blob, filename };
 };
