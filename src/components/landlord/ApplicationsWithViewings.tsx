@@ -56,7 +56,12 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
   };
 
   const handleAcceptApplication = async (applicationId: string) => {
-    await updateApplicationStatus(applicationId, 'accepted');
+    const ok = await updateApplicationStatus(applicationId, 'accepted');
+    if (ok) {
+      // Optimistically update local state to show Generate Lease button
+      // (Final state will be synced by the hook's refetch.)
+      // No setState here since applications come from the hook; rely on refetch.
+    }
   };
 
   const handleDeclineApplication = async (applicationId: string) => {
@@ -235,6 +240,19 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                               Decline
                             </Button>
                           </>
+                        )}
+
+                        {/* After acceptance: allow generating lease */}
+                        {application.status === 'accepted' && (
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              const url = `/lease/builder?tenantId=${encodeURIComponent(application.tenant_id)}&propertyId=${encodeURIComponent(application.property_id)}`;
+                              window.location.href = url;
+                            }}
+                          >
+                            Generate Lease
+                          </Button>
                         )}
                       </div>
                     </div>
