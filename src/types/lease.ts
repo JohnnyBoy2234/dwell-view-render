@@ -40,6 +40,7 @@ export interface LeaseContractData {
   tenantPhone?: string;
 
   // Bank Details
+  landlordBankName: string;
   landlordBranchCode: string;
   landlordBranchName: string;
   landlordAccNumber: string;

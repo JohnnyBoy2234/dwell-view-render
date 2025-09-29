@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ContractBasicInfo } from './steps/ContractBasicInfo';
 import { ContractParties } from './steps/ContractParties';
+import { ContractBankDetails } from './steps/ContractBankDetails';
 import { ContractTerms } from './steps/ContractTerms';
 import { ContractClauses } from './steps/ContractClauses';
 import { ContractReview } from './steps/ContractReview';
@@ -54,6 +55,22 @@ const builderSteps: ContractBuilderStep[] = [
       const errors = [];
       if (!data.landlordName) errors.push('Landlord name is required');
       if (!data.landlordEmail) errors.push('Landlord email is required');
+      return errors;
+    }
+  },
+  {
+    id: 'bank-details',
+    title: 'Bank Details',
+    description: 'Payment account information',
+    isRequired: true,
+    isCompleted: false,
+    component: 'ContractBankDetails',
+    validation: (data) => {
+      const errors = [];
+      if (!data.landlordBankName) errors.push('Bank name is required');
+      if (!data.landlordBranchCode) errors.push('Branch code is required');
+      if (!data.landlordBranchName) errors.push('Branch name is required');
+      if (!data.landlordAccNumber) errors.push('Account number is required');
       return errors;
     }
   },
@@ -115,15 +132,15 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
     tenantName: '',
     tenantAddress: '',
     tenantEmail: '',
-    tenatnIdNumber: '',
+    tenantIdNumber: '',
     tenantPhone: '',
+    landlordBankName: '',
     landlordBranchCode: '',
     landlordBranchName: '',
     landlordAccNumber: '',
     landlordReference: '',
     leaseStartDate: '',
     leaseEndDate: '',
-    leaseMonths: '',
     rentAmount: 0,
     rentCurrency: 'ZAR',
     rentPaymentFrequency: 'monthly',
@@ -171,28 +188,15 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
           }
         }
 
-        // Tenant prefill from accepted application or profiles
+        // Tenant prefill from profiles
         if (urlTenantId) {
-          const { data: app } = await supabase
-            .from('applications')
-            .select('status, tenant_id, screening_details(full_name, phone), profiles:tenant_id(display_name)')
-            .eq('tenant_id', urlTenantId)
-            .order('created_at', { ascending: false })
-            .limit(1)
+          const { data: prof } = await supabase
+            .from('profiles')
+            .select('display_name, phone')
+            .eq('user_id', urlTenantId)
             .maybeSingle();
-
-          if (app) {
-            const tenantName = app.screening_details?.full_name || app.profiles?.display_name || '';
-            updates.tenantName = tenantName;
-            updates.tenantPhone = app.screening_details?.phone || '';
-          } else {
-            const { data: prof } = await supabase
-              .from('profiles')
-              .select('display_name')
-              .eq('user_id', urlTenantId)
-              .maybeSingle();
-            if (prof?.display_name) updates.tenantName = prof.display_name;
-          }
+          if (prof?.display_name) updates.tenantName = prof.display_name;
+          if (prof?.phone) updates.tenantPhone = prof.phone;
         }
 
         // Landlord prefill
@@ -393,12 +397,14 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
         return <ContractBasicInfo {...props} />;
       case 'ContractParties':
         return <ContractParties {...props} />;
+      case 'ContractBankDetails':
+        return <ContractBankDetails {...props} />;
       case 'ContractTerms':
         return <ContractTerms {...props} />;
       case 'ContractClauses':
         return <ContractClauses {...props} />;
       case 'ContractReview':
-    return <ContractReview {...props} onGeneratePDF={handleGeneratePdfFlow} />;
+        return <ContractReview {...props} onGeneratePDF={handleGeneratePdfFlow} />;
       default:
         return <div>Step not found</div>;
     }
