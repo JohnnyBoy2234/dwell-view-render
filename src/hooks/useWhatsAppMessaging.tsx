@@ -38,6 +38,7 @@ export function useWhatsAppMessaging() {
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<OptimisticMessage[]>([]);
   const [loading, setLoading] = useState(true);
+  const [typingVersion, setTypingVersion] = useState(0);
   
   const messagesCache = useRef<Map<string, OptimisticMessage[]>>(new Map());
   const conversationsCache = useRef<ConversationData[]>([]);
@@ -253,6 +254,16 @@ export function useWhatsAppMessaging() {
     setMessages(prev => [...prev, optimisticMessage]);
     pendingMessages.current.set(tempId, optimisticMessage);
 
+    // Broadcast optimistic message immediately for instant delivery to recipient
+    try {
+      if (!chatChannelRef.current) {
+        chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();
+      }
+      await chatChannelRef.current.send({ type: 'broadcast', event: 'new_message', payload: { ...optimisticMessage } });
+    } catch (e) {
+      console.warn('Broadcast optimistic new_message failed', e);
+    }
+
     // Update conversation timestamp optimistically
     setConversations(prev => 
       prev.map(conv => 
@@ -321,12 +332,12 @@ export function useWhatsAppMessaging() {
 
       console.log('✅ Message sent successfully:', data);
 
-      // Broadcast instantly to other participant in this conversation
+      // Broadcast real message to replace optimistic on recipient
       try {
         if (!chatChannelRef.current) {
           chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();
         }
-        await chatChannelRef.current.send({ type: 'broadcast', event: 'new_message', payload: realMessage });
+        await chatChannelRef.current.send({ type: 'broadcast', event: 'new_message', payload: { ...realMessage, tempId } });
       } catch (e) {
         console.warn('Broadcast new_message failed', e);
       }
@@ -513,15 +524,12 @@ export function useWhatsAppMessaging() {
     registerCallbacks({
       onMessage: handleRealtimeMessage,
       onMessageAck: handleMessageAck,
-      onUserTyping: (userId, conversationId) => {
-        // Store typing state for this conversation
-        // We key by other user's ID and conversation ID to avoid cross-chat bleed
-        if (conversationId) {
-          typingUsers.set(userId, conversationId);
-        }
+      onUserTyping: (_userId, _conversationId) => {
+        // Connection hook maintains typingUsers state; bump version to re-render
+        setTypingVersion(v => v + 1);
       },
-      onUserStoppedTyping: (userId) => {
-        typingUsers.delete(userId);
+      onUserStoppedTyping: (_userId) => {
+        setTypingVersion(v => v + 1);
       },
       onConversationUpdate: (conversationId, data) => {
         console.log('💬 Conversation updated:', conversationId, data);
@@ -555,6 +563,13 @@ export function useWhatsAppMessaging() {
             const msg = payload as any;
             if (!msg || msg.conversation_id !== activeConversation) return;
             setMessages(prev => {
+              // If this is a real message carrying tempId, drop the temp optimistic one
+              if (msg.tempId) {
+                const withoutTemp = prev.filter(m => m.tempId !== msg.tempId);
+                if (withoutTemp.some(m => m.id === msg.id)) return withoutTemp; // already present
+                const delivered: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
+                return [...withoutTemp, delivered];
+              }
               if (prev.some(m => m.id === msg.id || m.tempId === msg.id)) return prev;
               const optimistic: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
               return [...prev, optimistic];
@@ -565,13 +580,12 @@ export function useWhatsAppMessaging() {
             }
           })
           .on('broadcast', { event: 'typing' }, ({ payload }) => {
-            const { userId, typing, conversationId } = payload as any;
-            if (conversationId !== activeConversation) return;
-            if (typing) {
-              typingUsers.set(userId, conversationId);
-            } else {
-              typingUsers.delete(userId);
-            }
+            // Normalize payload keys from different sources
+            const { userId, user_id, typing, conversationId, conversation_id } = payload as any;
+            const cid = conversationId || conversation_id;
+            if (cid !== activeConversation) return;
+            // Underlying connection hook updates typingUsers; we just trigger a re-render
+            setTypingVersion(v => v + 1);
           })
           .on('broadcast', { event: 'read_receipt' }, ({ payload }) => {
             const { messageIds } = payload as any;

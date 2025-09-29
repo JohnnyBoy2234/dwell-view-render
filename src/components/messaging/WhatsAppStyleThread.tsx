@@ -544,16 +544,21 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
               {messages.map(renderMessage)}
               
               {/* Show typing indicator */}
-              {Array.from(typingUsers.entries())
-                .filter(([userId, convId]) => convId === conversationId && userId !== user?.id)
-                .length > 0 && (
-                <TypingIndicator 
-                  userNames={Array.from(typingUsers.entries())
-                    .filter(([userId, convId]) => convId === conversationId && userId !== user?.id)
-                    .map(([userId]) => 'User')} // You could map to actual names if you have them
-                  className="mb-2"
-                />
-              )}
+              {(() => {
+                const entries = Array.from(typingUsers.entries()).filter(([userId, convId]) => convId === conversationId && userId !== user?.id);
+                if (entries.length === 0) return null;
+                // map user ids to display names where possible
+                const names = entries.map(([id]) => {
+                  const conv = messages.find(m => m.sender_id === id)?.profiles?.display_name;
+                  return conv || 'Someone';
+                });
+                return (
+                  <TypingIndicator 
+                    userNames={names}
+                    className="mb-2"
+                  />
+                );
+              })()}
             </>
           )}
           <div ref={messagesEndRef} />
