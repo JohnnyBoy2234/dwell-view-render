@@ -188,6 +188,13 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
           }
         }
 
+        // Landlord prefill
+        if (user) {
+          const landlordName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || '';
+          updates.landlordName = landlordName;
+          updates.landlordEmail = user.email || updates.landlordEmail || '';
+        }
+
         if (Object.keys(updates).length > 0) {
           setContractData((prev) => ({ ...prev, ...updates }));
         }
@@ -197,7 +204,23 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
     } catch {
       setPrefillAttempted(true);
     }
-  }, [prefillAttempted, propertyId]);
+  }, [prefillAttempted, propertyId, user]);
+
+  // Ensure PDF generation creates the contract if needed and stores the PDF URL/status
+  const handleGeneratePdfFlow = async () => {
+    // Create contract if we don't have one yet
+    let contractIdToUse = contract?.id;
+    if (!contractIdToUse) {
+      const createdId = await createContract(contractData, propertyId);
+      if (!createdId) return;
+      contractIdToUse = createdId;
+    }
+    // Generate PDF
+    const pdfUrl = await generatePDF(contractIdToUse);
+    if (pdfUrl) {
+      await updateContract(contractIdToUse, { pdf_url: pdfUrl, status: 'ready_for_signature' } as any);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -352,7 +375,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
       case 'ContractClauses':
         return <ContractClauses {...props} />;
       case 'ContractReview':
-        return <ContractReview {...props} onGeneratePDF={() => contract && generatePDF(contract.id)} />;
+    return <ContractReview {...props} onGeneratePDF={handleGeneratePdfFlow} />;
       default:
         return <div>Step not found</div>;
     }
