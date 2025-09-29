@@ -215,6 +215,8 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
       if (!createdId) return;
       contractIdToUse = createdId;
     }
+    // Ensure latest builder data (including clauses) is persisted before generating
+    await updateContract(contractIdToUse, { contract_data: contractData } as any);
     // Generate PDF
     const pdfUrl = await generatePDF(contractIdToUse);
     if (pdfUrl) {

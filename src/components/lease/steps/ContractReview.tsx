@@ -199,7 +199,7 @@ export function ContractReview({ data, contract, onGeneratePDF }: ContractReview
                     <span className="font-medium">{formatCurrency(data.keyDeposit)}</span>
                   </div>
                 ) : null}
-                <Separator />
+                <Separator className="my-4" />
                 <div className="flex justify-between font-medium">
                   <span>Total Deposits:</span>
                   <span>{formatCurrency(calculateTotalDeposits())}</span>
@@ -281,16 +281,26 @@ export function ContractReview({ data, contract, onGeneratePDF }: ContractReview
       {data.additionalClauses && data.additionalClauses.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Additional Clauses ({data.additionalClauses.length})</CardTitle>
+            <CardTitle className="flex items-center space-x-2">
+              <FileText className="h-5 w-5" />
+              <span>Lease Clauses</span>
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {data.additionalClauses.map((clause, index) => (
-                <div key={clause.id} className="border-l-2 border-primary pl-4">
-                  <h5 className="font-medium text-sm">{index + 1}. {clause.title}</h5>
-                  <p className="text-sm text-muted-foreground mt-1">{clause.content}</p>
-                </div>
-              ))}
+            <div className="space-y-4">
+              {data.additionalClauses
+                .slice()
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map((clause, index) => (
+                  <section key={clause.id} className="space-y-1">
+                    <h4 className="text-base font-semibold leading-tight">
+                      {index + 1}. {clause.title}
+                    </h4>
+                    <p className="text-sm leading-relaxed">
+                      {clause.content}
+                    </p>
+                  </section>
+                ))}
             </div>
           </CardContent>
         </Card>

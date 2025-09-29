@@ -16,25 +16,25 @@ interface ContractClausesProps {
 const standardClauses: Omit<ClauseSection, 'id'>[] = [
   {
     title: 'Maintenance and Repairs',
-    content: 'The tenant shall be responsible for minor maintenance and repairs up to R500 per incident. The landlord shall be responsible for major repairs and structural maintenance.',
+    content: 'The tenant is responsible for minor maintenance (up to the amount specified in this agreement) and must promptly report defects. The landlord will attend to structural and major repairs within a reasonable time, subject to access being granted by the tenant.',
     isRequired: false,
     order: 1
   },
   {
     title: 'Property Inspection',
-    content: 'The landlord reserves the right to inspect the property with 24 hours written notice to the tenant, except in cases of emergency.',
+    content: 'The landlord (or agent) may inspect the premises on reasonable notice (not less than 24 hours), at reasonable times, to assess maintenance and compliance. In emergencies, access may be granted without prior notice where necessary to protect life or property.',
     isRequired: false,
     order: 2
   },
   {
     title: 'Early Termination',
-    content: 'Either party may terminate this lease early with 30 days written notice and payment of one month\'s rent as penalty.',
+    content: 'Either party may terminate early in accordance with applicable law by giving the required written notice. Early termination fees, if any, shall be limited to reasonable costs and losses actually incurred by the non‑terminating party.',
     isRequired: false,
     order: 3
   },
   {
     title: 'Property Damage',
-    content: 'The tenant will be held responsible for any damage to the property beyond normal wear and tear. Repair costs will be deducted from the security deposit.',
+    content: 'The tenant is liable for damage beyond fair wear and tear and must take reasonable care of the premises. Repair costs attributable to the tenant may be deducted from the deposit or recovered as permitted by law after providing an itemised statement.',
     isRequired: false,
     order: 4
   }
