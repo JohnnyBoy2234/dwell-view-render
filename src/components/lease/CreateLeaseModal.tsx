@@ -50,7 +50,7 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
     if (!user) return;
 
     try {
-      // Fetch tenants from existing tenancies and applications
+      // Fetch tenants from existing tenancies and ACCEPTED applications
       const { data: tenanciesData, error: tenanciesError } = await supabase
         .from('tenancies')
         .select(`
@@ -67,6 +67,7 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
           tenant_profiles:profiles!tenant_id(display_name, user_id)
         `)
         .eq('landlord_id', user.id)
+        .eq('status', 'accepted')
         .not('tenant_profiles', 'is', null);
 
       if (tenanciesError && applicationsError) {
