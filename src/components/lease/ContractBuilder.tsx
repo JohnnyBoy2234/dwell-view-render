@@ -218,7 +218,21 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
     // Generate PDF
     const pdfUrl = await generatePDF(contractIdToUse);
     if (pdfUrl) {
-      await updateContract(contractIdToUse, { pdf_url: pdfUrl, status: 'ready_for_signature' } as any);
+      // Use a valid status per DB constraint: move to pending_tenant after PDF generation
+      await updateContract(contractIdToUse, { pdf_url: pdfUrl, status: 'pending_tenant' } as any);
+      // Refresh local contract state to surface preview button immediately
+      try {
+        const { data: updated } = await supabase
+          .from('lease_contracts')
+          .select('*')
+          .eq('id', contractIdToUse)
+          .maybeSingle();
+        if (updated) {
+          setContract(updated as any);
+        }
+      } catch {
+        // ignore UI refresh error
+      }
     }
   };
 
