@@ -8,9 +8,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Wrench, Building, Images, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Wrench, Building, Images } from 'lucide-react';
 import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
-import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 
 interface MaintenanceRequest {
   id: string;
@@ -38,7 +37,6 @@ export default function LandlordMaintenance() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { data: unreadCounts } = useUnreadCounts();
 
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -123,69 +121,12 @@ export default function LandlordMaintenance() {
     }
   };
 
-  const priorityColors: Record<NonNullable<MaintenanceRequest['priority']>, string> = {
-    low: 'bg-success-green text-white',
-    medium: 'bg-earth-warm text-white',
-    high: 'bg-destructive text-white',
-  };
-
-  const submittedCount = requests.filter(r => r.status === 'submitted').length;
-  const inProgressCount = requests.filter(r => r.status === 'in_progress').length;
-  const completedCount = requests.filter(r => r.status === 'completed').length;
-  const highPriorityCount = requests.filter(r => r.priority === 'high').length;
-
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Maintenance Requests</h1>
-          <p className="text-muted-foreground">View and manage maintenance requests from your tenants</p>
-        </div>
-        {unreadCounts && unreadCounts.total > 0 && (
-          <Badge className="bg-destructive text-white px-3 py-1">{unreadCounts.total} new responses</Badge>
-        )}
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Maintenance Requests</h1>
+        <p className="text-muted-foreground">View and manage maintenance requests from your tenants</p>
       </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Clock className="h-8 w-8 text-orange-600 mb-2" />
-              <div className="text-3xl font-bold text-orange-700 mb-1">{submittedCount}</div>
-              <p className="text-sm font-medium text-orange-600">Submitted</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Wrench className="h-8 w-8 text-blue-600 mb-2" />
-              <div className="text-3xl font-bold text-blue-700 mb-1">{inProgressCount}</div>
-              <p className="text-sm font-medium text-blue-600">In Progress</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <CheckCircle className="h-8 w-8 text-green-600 mb-2" />
-              <div className="text-3xl font-bold text-green-700 mb-1">{completedCount}</div>
-              <p className="text-sm font-medium text-green-600">Completed</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-red-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <AlertTriangle className="h-8 w-8 text-red-600 mb-2" />
-              <div className="text-3xl font-bold text-red-700 mb-1">{highPriorityCount}</div>
-              <p className="text-sm font-medium text-red-600">High Priority</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       <Card>
         <CardHeader>
           <CardTitle>All Requests</CardTitle>
@@ -205,50 +146,59 @@ export default function LandlordMaintenance() {
             </div>
           ) : (
             requests.map((req) => (
-              <Card key={req.id} className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-ocean-blue cursor-pointer" onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}>
-                <CardHeader className="pb-3">
+              <Card key={req.id}>
+                <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg truncate">{req.title}</CardTitle>
-                      <CardDescription className="flex items-center gap-2 mt-1">
+                    <div>
+                      <h4 className="font-semibold">{req.title}</h4>
+                      <p className="text-sm text-muted-foreground mb-1">{req.description}</p>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Building className="h-3 w-3" />
-                        <span className="truncate">{req.property_title}</span>
-                        <span className="text-muted-foreground">•</span>
-                        <span>{new Date(req.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge className={`${priorityColors[req.priority]} font-semibold px-3 py-1`}>{req.priority.toUpperCase()}</Badge>
-                      <Badge className={`${getStatusBadge(req.status)} font-semibold px-3 py-1`}>{req.status.replace('_', ' ').toUpperCase()}</Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground leading-relaxed line-clamp-4">{req.description}</p>
-                    {req.images && req.images.length > 0 && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Images className="h-4 w-4" />
-                          <span>{req.images.length} image(s) attached</span>
-                        </div>
-                        <MaintenanceImageGallery images={req.images} ticketTitle={req.title} />
+                        <span>{req.property_title}</span>
                       </div>
-                    )}
-                    <div className="flex items-center gap-3 pt-2 border-t border-muted">
-                      <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>
-                        <SelectTrigger className="w-[160px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="submitted">Submitted</SelectItem>
-                          <SelectItem value="in_progress">In Progress</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button size="sm" className="ml-auto bg-ocean-blue hover:bg-ocean-blue-dark" onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/maintenance/${req.id}`); }}>Respond</Button>
+                       <div className="text-xs text-muted-foreground mt-1">
+                        {new Date(req.created_at).toLocaleDateString()}
+                      </div>
                     </div>
+                    <Button
+                      size="sm"
+                      onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}
+                      className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
+                    >
+                      Respond
+                    </Button>
+                  </div>
+                  
+                  {req.images && req.images.length > 0 && (
+                    <div className="space-y-3 mt-4">
+                      <div className="flex items-center gap-2 text-sm font-medium">
+                        <Images className="h-4 w-4" />
+                        <span>{req.images.length} image(s) attached</span>
+                      </div>
+                      <MaintenanceImageGallery images={req.images} ticketTitle={req.title} />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <Select value={req.status} onValueChange={(value) => updateStatus(req.id, value as MaintenanceRequest['status'])}>
+                      <SelectTrigger className="w-[160px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="submitted">Submitted</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Badge className={
+                      req.priority === 'high'
+                        ? 'bg-destructive text-white'
+                        : req.priority === 'medium'
+                          ? 'bg-earth-warm text-white'
+                          : 'bg-success-green text-white'
+                    }>
+                      {req.priority} priority
+                    </Badge>
                   </div>
                 </CardContent>
               </Card>

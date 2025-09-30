@@ -344,31 +344,6 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     setTimeout(() => scrollToBottom(true), 300);
   };
 
-  // Auto-scroll when the on-screen keyboard resizes the viewport (mobile web)
-  useEffect(() => {
-    const vv = (window as any).visualViewport as VisualViewport | undefined;
-    if (!vv) return;
-    const onResize = () => {
-      // Give layout a tick to settle, then scroll
-      setTimeout(() => scrollToBottom(true), 100);
-    };
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
-  }, []);
-
-  // Ensure we auto-scroll when any input inside the thread gains focus
-  useEffect(() => {
-    const onFocusIn = (e: Event) => {
-      const target = e.target as HTMLElement | null;
-      if (!target) return;
-      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-        setTimeout(() => scrollToBottom(true), 100);
-      }
-    };
-    window.addEventListener('focusin', onFocusIn);
-    return () => window.removeEventListener('focusin', onFocusIn);
-  }, []);
-
   const handleMessageChange = (value: string) => {
     setNewMessage(value);
     
