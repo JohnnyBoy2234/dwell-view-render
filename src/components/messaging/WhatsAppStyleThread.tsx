@@ -516,7 +516,16 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   };
 
   return (
-    <div className="flex flex-col h-full" style={{ backgroundImage: 'linear-gradient(180deg, rgba(245, 240, 230, 0.9), rgba(245, 240, 230, 0.9)), url(/chat-pattern.png)', backgroundSize: 'auto', backgroundBlendMode: 'multiply' }}>
+    <div
+      className="flex flex-col h-full"
+      style={{
+        backgroundImage: 'linear-gradient(180deg, rgba(245, 240, 230, 0.9), rgba(245, 240, 230, 0.9)), url(/favicon2.png)',
+        backgroundSize: '128px auto',
+        backgroundRepeat: 'repeat',
+        backgroundPosition: 'top left',
+        backgroundBlendMode: 'multiply'
+      }}
+    >
       {/* Messages Area */}
       <ScrollArea 
         className="flex-1 px-4" 
