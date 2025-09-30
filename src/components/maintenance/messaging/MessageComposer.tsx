@@ -96,11 +96,11 @@ export function MessageComposer({
 
       {/* Message Input */}
       <div className={cn(
-        "flex items-end gap-2 p-2.5 bg-white/80 rounded-2xl border transition-all duration-300", 
+        "flex items-end gap-2 p-2.5 bg-white/90 rounded-2xl border transition-all duration-300",
         "backdrop-blur-md shadow-soft",
-        // Always show ocean blue border, and enhance on focus
-        "border-ocean-blue",
-        isFocused && "ring-2 ring-ocean-blue/20",
+        // Switch to a warm brown border palette
+        "border-[rgba(121,85,72,0.55)]",
+        isFocused && "ring-2 ring-[rgba(121,85,72,0.25)]",
         disabled && "opacity-60"
       )}>
         {showViewingButton && (

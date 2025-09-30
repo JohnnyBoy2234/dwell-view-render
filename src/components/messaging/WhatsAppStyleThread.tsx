@@ -519,11 +519,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     <div
       className="flex flex-col h-full"
       style={{
-        backgroundImage: 'linear-gradient(180deg, rgba(245, 240, 230, 0.9), rgba(245, 240, 230, 0.9)), url(/favicon2.png)',
-        backgroundSize: '128px auto',
-        backgroundRepeat: 'repeat',
-        backgroundPosition: 'top left',
-        backgroundBlendMode: 'multiply'
+        // Beige base + logo tile + subtle brown grid to suggest bordered tiles
+        backgroundImage:
+          'linear-gradient(180deg, rgba(245,240,230,0.95), rgba(245,240,230,0.95)), url(/favicon2.png), repeating-linear-gradient(0deg, rgba(121,85,72,0.18), rgba(121,85,72,0.18) 1px, transparent 1px, transparent 64px), repeating-linear-gradient(90deg, rgba(121,85,72,0.18), rgba(121,85,72,0.18) 1px, transparent 1px, transparent 64px)',
+        backgroundSize: 'auto, 64px auto, 64px 64px, 64px 64px',
+        backgroundRepeat: 'no-repeat, repeat, repeat, repeat',
+        backgroundPosition: 'top left, top left, top left, top left',
+        backgroundBlendMode: 'multiply, normal, normal, normal'
       }}
     >
       {/* Messages Area */}
