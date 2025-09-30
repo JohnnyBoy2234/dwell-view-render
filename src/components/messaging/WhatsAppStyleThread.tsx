@@ -519,12 +519,15 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     <div
       className="flex flex-col h-full"
       style={{
-        // Beige base + logo tile + subtle brown grid to suggest bordered tiles
+        // Beige base + subtle WhatsApp-like brown motif (dots + diagonal weave)
         backgroundImage:
-          'linear-gradient(180deg, rgba(245,240,230,0.95), rgba(245,240,230,0.95)), url(/favicon2.png), repeating-linear-gradient(0deg, rgba(121,85,72,0.18), rgba(121,85,72,0.18) 1px, transparent 1px, transparent 64px), repeating-linear-gradient(90deg, rgba(121,85,72,0.18), rgba(121,85,72,0.18) 1px, transparent 1px, transparent 64px)',
-        backgroundSize: 'auto, 64px auto, 64px 64px, 64px 64px',
+          'linear-gradient(180deg, rgba(245,240,230,0.96), rgba(245,240,230,0.96)),' +
+          'radial-gradient(rgba(121,85,72,0.10) 1px, transparent 1px),' +
+          'radial-gradient(rgba(121,85,72,0.08) 1px, transparent 1px),' +
+          'repeating-linear-gradient(45deg, rgba(121,85,72,0.06) 0, rgba(121,85,72,0.06) 2px, transparent 2px, transparent 14px)',
+        backgroundSize: 'auto, 18px 18px, 36px 36px, 24px 24px',
         backgroundRepeat: 'no-repeat, repeat, repeat, repeat',
-        backgroundPosition: 'top left, top left, top left, top left',
+        backgroundPosition: 'top left, 0 0, 9px 9px, 0 0',
         backgroundBlendMode: 'multiply, normal, normal, normal'
       }}
     >
