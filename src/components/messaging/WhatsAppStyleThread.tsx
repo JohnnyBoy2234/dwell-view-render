@@ -516,7 +516,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   };
 
   return (
-    <div className="flex flex-col h-full bg-gradient-to-b from-background to-muted/20">
+    <div className="flex flex-col h-full" style={{ backgroundImage: 'linear-gradient(180deg, rgba(245, 240, 230, 0.9), rgba(245, 240, 230, 0.9)), url(/chat-pattern.png)', backgroundSize: 'auto', backgroundBlendMode: 'multiply' }}>
       {/* Messages Area */}
       <ScrollArea 
         className="flex-1 px-4" 
@@ -582,9 +582,9 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
       {/* Message Input */}
       <div
-        className="px-3 py-2.5 bg-background/95 backdrop-blur border-t sticky bottom-0 z-10 flex-shrink-0"
+        className="px-3 py-2.5 bg-white/92 backdrop-blur border-t border-ocean-blue sticky bottom-0 z-10 flex-shrink-0"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2px)', marginBottom: '8px' }}
-     >
+      >
         <MessageComposer
           onSend={handleSendMessage}
           placeholder="Type a message..."

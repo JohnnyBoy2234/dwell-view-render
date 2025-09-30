@@ -98,7 +98,9 @@ export function MessageComposer({
       <div className={cn(
         "flex items-end gap-2 p-2.5 bg-white/80 rounded-2xl border transition-all duration-300", 
         "backdrop-blur-md shadow-soft",
-        isFocused ? "border-ocean-blue/40 ring-2 ring-ocean-blue/20" : "border-white/70",
+        // Always show ocean blue border, and enhance on focus
+        "border-ocean-blue",
+        isFocused && "ring-2 ring-ocean-blue/20",
         disabled && "opacity-60"
       )}>
         {showViewingButton && (
