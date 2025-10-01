@@ -217,6 +217,10 @@ export const useLandlordApplications = (propertyId?: string) => {
   });
 
   const updateApplicationStatus = useCallback(async (applicationId: string, status: string) => {
+    // Optimistically update local state so UI reflects immediately
+    const previous = applications;
+    setApplications((current) => current.map((app) => app.id === applicationId ? { ...app, status } : app));
+
     try {
       const { error } = await supabase
         .from('applications')
@@ -226,8 +230,12 @@ export const useLandlordApplications = (propertyId?: string) => {
 
       if (error) throw error;
 
-      // Refresh applications
-      await fetchApplications();
+      // Refresh from server to reconcile and pull any related changes
+      if (propertyId) {
+        await fetchApplications();
+      } else {
+        await fetchAllApplications();
+      }
       
       toast({
         title: "Success",
@@ -237,6 +245,8 @@ export const useLandlordApplications = (propertyId?: string) => {
       return true;
     } catch (error) {
       console.error('Error updating application:', error);
+      // Revert optimistic update on error
+      setApplications(previous);
       toast({
         title: "Error",
         description: "Failed to update application status",
@@ -244,7 +254,7 @@ export const useLandlordApplications = (propertyId?: string) => {
       });
       return false;
     }
-  }, [user, fetchApplications, toast]);
+  }, [applications, user, propertyId, fetchApplications, fetchAllApplications, toast]);
 
   return {
     applications,
