@@ -226,6 +226,30 @@ async function generatePDFDocument(contract, requestOrigin) {
       color: colors.invisible
     });
   }
+  async function embedSignatureFromDataUrl(dataUrl) {
+    try {
+      if (!dataUrl) return null;
+      if (dataUrl.startsWith('data:')) {
+        const base64Part = dataUrl.split(',')[1] || '';
+        const bytes = Uint8Array.from(atob(base64Part), c => c.charCodeAt(0));
+        try {
+          return await doc.embedPng(bytes);
+        } catch {
+          return await doc.embedJpg(bytes);
+        }
+      }
+      // Fallback: fetch remote URL
+      const res = await fetch(dataUrl, { cache: 'no-store' });
+      const bytes = new Uint8Array(await res.arrayBuffer());
+      try {
+        return await doc.embedPng(bytes);
+      } catch {
+        return await doc.embedJpg(bytes);
+      }
+    } catch {
+      return null;
+    }
+  }
   // --- Formatting Helpers ---
   const toText = (v)=>v === undefined || v === null ? "" : String(v);
   const formatMoney = (amount, currency)=>{
@@ -698,6 +722,67 @@ async function generatePDFDocument(contract, requestOrigin) {
   renderInspectionAndAccess();
   renderMaintenance();
   renderAlteration();
+  // If signatures exist, render them near the bottom anchors and include signed dates
+  try {
+    const landlordSigUrl = contract?.landlord_signature_data?.signature_image_url;
+    const tenantSigUrl = contract?.tenant_signature_data?.signature_image_url;
+    const landlordSignedAt = contract?.landlord_signed_at ? new Date(contract.landlord_signed_at) : null;
+    const tenantSignedAt = contract?.tenant_signed_at ? new Date(contract.tenant_signed_at) : null;
+
+    // Draw landlord signature image
+    if (landlordSigUrl) {
+      const img = await embedSignatureFromDataUrl(landlordSigUrl);
+      if (img) {
+        const targetHeight = 28;
+        const scale = targetHeight / img.height;
+        const targetWidth = img.width * scale;
+        page.drawImage(img, {
+          x: margin + 120,
+          y: margin + 80,
+          width: targetWidth,
+          height: targetHeight,
+        });
+        if (landlordSignedAt) {
+          const dateStr = landlordSignedAt.toLocaleDateString();
+          const label = `Signed: ${dateStr}`;
+          page.drawText(label, {
+            x: margin + 120 + targetWidth + 12,
+            y: margin + 88,
+            size: sizes.small,
+            font: fontBody,
+            color: colors.muted,
+          });
+        }
+      }
+    }
+
+    // Draw tenant signature image
+    if (tenantSigUrl) {
+      const img = await embedSignatureFromDataUrl(tenantSigUrl);
+      if (img) {
+        const targetHeight = 28;
+        const scale = targetHeight / img.height;
+        const targetWidth = img.width * scale;
+        page.drawImage(img, {
+          x: margin + 120,
+          y: margin + 40,
+          width: targetWidth,
+          height: targetHeight,
+        });
+        if (tenantSignedAt) {
+          const dateStr = tenantSignedAt.toLocaleDateString();
+          const label = `Signed: ${dateStr}`;
+          page.drawText(label, {
+            x: margin + 120 + targetWidth + 12,
+            y: margin + 48,
+            size: sizes.small,
+            font: fontBody,
+            color: colors.muted,
+          });
+        }
+      }
+    }
+  } catch {}
   // --- Finalize --- 
   drawFooter(page, pages.length);
   return await doc.save();
