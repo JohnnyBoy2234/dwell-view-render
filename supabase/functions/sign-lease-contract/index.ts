@@ -99,7 +99,6 @@ serve(async (req) => {
         signer_id: user.id,
         signer_role: signerRole,
         signature_hash: sigHashHex,
-        signature_image_url: signatureData.signature_image_url,
         ip_address: signatureData.ip_address,
         user_agent: signatureData.user_agent,
         document_hash: documentHash,
