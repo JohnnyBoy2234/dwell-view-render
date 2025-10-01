@@ -96,24 +96,24 @@ serve(async (req) => {
     const prettyAmount = typeof amount === "number" ? new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(amount) : undefined;
     const prettyDue = due_date ? new Date(due_date).toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' }) : undefined;
 
-    // Create in-app notification
+    // Create in-app notification (mark as high priority)
     await admin.rpc('create_notification', {
       _user_id: tenant_id,
       _message: `Payment reminder${property?.title ? `: ${property.title}` : ''}${prettyAmount ? ` • ${prettyAmount}` : ''}${prettyDue ? ` • Due ${prettyDue}` : ''}`,
       _link_url: '/tenant/payments',
       _type: 'payment_reminder',
-      _metadata: { property_id, landlord_id: landlordId, amount, due_date }
+      _metadata: { property_id, landlord_id: landlordId, amount, due_date, priority: 'high', severity: 'urgent' }
     });
 
     // Send email if we have a tenant email
     if (tenantEmail) {
       const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@swiftrent.co';
       const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'SwiftRent';
-      const subject = `SwiftRent Payment Reminder${property?.title ? ` • ${property.title}` : ''}`;
+      const subject = `URGENT: SwiftRent Payment Reminder${property?.title ? ` • ${property.title}` : ''}`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; padding:24px; background:#f8fafc;">
           <div style="background:#ffffff; padding:24px; border-radius:8px;">
-            <h2 style="margin:0 0 12px; color:#111827;">Payment Reminder</h2>
+            <h2 style="margin:0 0 12px; color:#b91c1c;">URGENT Payment Reminder</h2>
             <p style="margin:0 0 16px; color:#374151;">Hello ${tenantName},</p>
             <p style="margin:0 0 16px; color:#374151;">This is a friendly reminder regarding an outstanding payment${property?.title ? ` for <strong>${property.title}</strong>` : ''}.${prettyAmount ? ` The amount due is <strong>${prettyAmount}</strong>.` : ''}${prettyDue ? ` The due date is <strong>${prettyDue}</strong>.` : ''}</p>
             ${message ? `<p style="margin:0 0 16px; color:#374151;">Message from your landlord:<br/>${message}</p>` : ''}
@@ -128,7 +128,12 @@ serve(async (req) => {
         from: `${FROM_NAME} <${FROM_EMAIL}>`,
         to: [tenantEmail],
         subject,
-        html
+        html,
+        headers: {
+          'X-Priority': '1 (Highest)',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'High'
+        }
       });
     }
 
