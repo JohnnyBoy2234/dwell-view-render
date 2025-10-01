@@ -745,7 +745,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       )}
       <div className="ml-auto flex gap-3">
         {currentStep < steps.length - 1 && (
-          <Button type="button" onClick={goNext} disabled={submitting}>
+          <Button type="button" onClick={goNext} disabled={submitting || !canProceedFromStep(currentStep)}>
             Next
           </Button>
         )}

@@ -216,7 +216,7 @@ BEGIN
   PERFORM public.create_notification(
     NEW.landlord_id,
     'You have a new application from ' || tenant_name || ' for ' || COALESCE(prop.title, prop.location, 'a property') || '.',
-    '/dashboard?tab=applications',
+    '/enhancedlandlorddashboard/applications',
     'application_submitted',
     jsonb_build_object('application_id', NEW.id, 'property_id', NEW.property_id)
   );
