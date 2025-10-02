@@ -15,6 +15,7 @@ export function MobileSidebar() {
 
   const menuItems = [
     { path: '/safe-renting', label: 'Safe Renting', icon: Shield },
+    { path: '/pricing', label: 'Pricing', icon: Info },
     { path: '/about', label: 'About', icon: Info },
     { path: '/contact', label: 'Contact', icon: Mail },
     { path: '/blog', label: 'Blog', icon: FileText }

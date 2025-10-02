@@ -17,6 +17,7 @@ import Properties from "./pages/Properties";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
+import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
 import PropertyDetail from "./pages/PropertyDetail";
@@ -99,6 +100,7 @@ function AppRoutes() {
               <Route path="/contact" element={<><Navbar /><Contact /></>} />
               <Route path="/blog" element={<><Navbar /><Blog /></>} />
               <Route path="/safe-renting" element={<><Navbar /><SafeRenting /></>} />
+              <Route path="/pricing" element={<><Navbar /><Pricing /></>} />
 
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />

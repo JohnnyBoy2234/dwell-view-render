@@ -1,4 +1,4 @@
-import { Home, Search, Heart, User, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send } from "lucide-react";
+import { Home, Search, Heart, User, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send, BadgeDollarSign } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
@@ -11,6 +11,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Home", icon: Home },
   { path: "/safe-renting", label: "Safe Renting", icon: Shield },
   { path: "/properties", label: "Find Rental", icon: Search },
+  { path: "/pricing", label: "Pricing", icon: BadgeDollarSign },
   { path: "/about", label: "About", icon: Send },
   { path: "/contact", label: "Contact", icon: Send }
 ];
