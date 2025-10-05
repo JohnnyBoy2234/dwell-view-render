@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image } from "lucide-react";
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -134,6 +134,12 @@ export default function EnhancedLandlordDashboard() {
   const [invoiceHistory, setInvoiceHistory] = useState<Invoice[]>([]);
   const [nextInvoiceNumber, setNextInvoiceNumber] = useState(1);
 
+  // Landlord inventory state
+  const [landlordInventory, setLandlordInventory] = useState<any[]>([]);
+  const [inventoryLoading, setInventoryLoading] = useState(false);
+  const [selectedInventoryRecord, setSelectedInventoryRecord] = useState<any | null>(null);
+  const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
+
   // Global application leads (across all properties) for quick invites
   const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string; last_message_at?: string }>>([]);
   const [appInvitesMap, setAppInvitesMap] = useState<Record<string, any>>({}); // key: `${tenant_id}:${property_id}`
@@ -203,6 +209,9 @@ export default function EnhancedLandlordDashboard() {
       } catch (error) {
         console.log('Error loading reports data:', error);
       }
+    }
+    if (currentTab === '/enhancedlandlorddashboard/inventory') {
+      void fetchLandlordInventory();
     }
   }, [currentTab]);
 
@@ -731,6 +740,9 @@ export default function EnhancedLandlordDashboard() {
       case '/enhancedlandlorddashboard/reports':
         console.log('[Dashboard] Rendering reports tab');
         return <AccountingOverview />;
+      case '/enhancedlandlorddashboard/inventory':
+        console.log('[Dashboard] Rendering inventory tab');
+        return renderInventoryTab();
       case '/enhancedlandlorddashboard/maintenance':
         console.log('[Dashboard] Rendering maintenance tab');
         return renderMaintenanceTab();
@@ -739,6 +751,98 @@ export default function EnhancedLandlordDashboard() {
         return renderDashboardContent();
     }
   };
+
+  const fetchLandlordInventory = async () => {
+    if (!user) return;
+    setInventoryLoading(true);
+    try {
+      const { data, error } = await (supabase as any)
+        .from('inventory_records')
+        .select(`
+          *,
+          inventory_items (*)
+        `)
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      setLandlordInventory(data || []);
+    } catch (e) {
+      console.error('Error fetching landlord inventory:', e);
+    } finally {
+      setInventoryLoading(false);
+    }
+  };
+
+  const renderInventoryTab = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Camera className="h-6 w-6 text-ocean-blue" />
+        <h2 className="text-xl font-bold">Property Inventory</h2>
+        <Badge variant="secondary" className="ml-2">
+          {landlordInventory.length} Records
+        </Badge>
+      </div>
+
+      {inventoryLoading ? (
+        <div className="grid gap-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-muted animate-pulse rounded" />
+          ))}
+        </div>
+      ) : landlordInventory.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No inventory yet</h3>
+            <p className="text-muted-foreground">Tenant-submitted inventory photos and audio will appear here.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid gap-4">
+          {landlordInventory.map((record: any) => {
+            const photos: string[] = (record?.inventory_items || [])
+              .flatMap((it: any) => Array.isArray(it.photos) ? it.photos : [])
+              .filter(Boolean);
+            const preview = photos.slice(0, 6);
+            return (
+              <Card key={record.id} className="hover:shadow-medium transition-all duration-200">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-semibold text-lg">{record.property?.title || 'Property'}</h3>
+                      <p className="text-muted-foreground">Created: {new Date(record.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <Badge variant="secondary">{(record.status || 'in_progress').replace('_', ' ')}</Badge>
+                  </div>
+                  {preview.length > 0 ? (
+                    <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+                      {preview.map((url, idx) => (
+                        <img key={idx} src={url} alt="Inventory" className="w-full h-20 object-cover rounded border" />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No photos uploaded in this record.</p>
+                  )}
+                  <div className="flex justify-end mt-4">
+                    <Button size="sm" variant="outline" onClick={() => { setSelectedInventoryRecord(record); setInventoryModalOpen(true); }}>
+                      <Eye className="h-4 w-4 mr-2" /> View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <InventoryDetailModal
+        record={selectedInventoryRecord}
+        isOpen={inventoryModalOpen}
+        onClose={() => { setInventoryModalOpen(false); setSelectedInventoryRecord(null); }}
+        onDownloadReport={() => { /* optional: hook into report download */ }}
+      />
+    </div>
+  );
   const renderLeasesTab = () => (
     <div className="space-y-6">
       <div className="flex items-center gap-3 mb-6">
@@ -2208,14 +2312,14 @@ export default function EnhancedLandlordDashboard() {
               </button>
 
               <button
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-white" />
+                  <Camera className="w-5 h-5 text-white" />
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Calendar</p>
-                <p className="text-xs text-ios-gray">Schedule</p>
+                <p className="text-xs font-medium text-ios-gray-dark">Inventory</p>
+                <p className="text-xs text-ios-gray">Photos & Notes</p>
               </button>
 
               {/* Support */}

@@ -59,16 +59,19 @@ export default function Pricing() {
             <div className="text-ocean-blue font-semibold">Pro Landlord</div>
             <h3 className={PLAN_TITLE}>Monthly Subscription</h3>
             <div className={PLAN_PRICE}>R399<span className="text-base font-medium text-muted-foreground"> / month</span></div>
-            <p className={PLAN_DESC}>Everything in Basic, plus in-platform tools.</p>
+            <p className={PLAN_DESC}>Handle every part of the rental journey inside SwiftRent.</p>
           </div>
           <div className={PLAN_BODY}>
-            <Feature>Direct in-platform messaging</Feature>
-            <Feature>Direct link to Experian credit check facilitator</Feature>
-            <Feature>Digital contracts tailored for South African law</Feature>
-            <Feature>Unlimited eSignatures for leases</Feature>
+            <Feature>Unlimited property listings</Feature>
+            <Feature>Verified tenants</Feature>
+            <Feature>In-platform messaging</Feature>
+            <Feature>Digital lease agreements tailored for South African law</Feature>
+            <Feature>Legally binding e-signatures</Feature>
+            <Feature>Inventory tracker (upload & timestamped records)</Feature>
+            <Feature>Maintenance management — tenants submit requests from their dashboard</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Monthly subscription' })}>Upgrade to Pro</Button>
+            <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Pro Landlord monthly subscription' })}>Upgrade to Pro</Button>
           </div>
         </div>
 
@@ -78,17 +81,17 @@ export default function Pricing() {
             <div className="text-success-green font-semibold">Premium Landlord</div>
             <h3 className={PLAN_TITLE}>Monthly Subscription</h3>
             <div className={PLAN_PRICE}>R999<span className="text-base font-medium text-muted-foreground"> / month</span></div>
-            <p className={PLAN_DESC}>Everything in Pro, plus advanced management.</p>
+            <p className={PLAN_DESC}>Advanced tools for growing portfolios.</p>
           </div>
           <div className={PLAN_BODY}>
-            <Feature>Unlimited listings per year</Feature>
-            <Feature>Landlord dashboard (leases, inventory)</Feature>
-            <Feature>SwiftRent Accounting (income/expenses + tax-ready)</Feature>
-            <Feature>Push notifications for rent & payment reminders</Feature>
-            <Feature>Advanced tenant screening insights</Feature>
+            <Feature>🏠 Unlimited listings per year</Feature>
+            <Feature>📊 SwiftBooks: profit & loss + monthly tax invoices</Feature>
+            <Feature>🔔 Real-time notifications (rent, renewals, maintenance)</Feature>
+            <Feature>⚠️ Automated tenant payment reminders</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Monthly subscription' })}>Go Premium</Button>
+            <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Premium Landlord monthly subscription' })}>Go Premium</Button>
+            <p className="text-xs text-muted-foreground text-center mt-2">Added Benefit: Full-stack digital property management for small-to-mid portfolios.</p>
           </div>
         </div>
 
