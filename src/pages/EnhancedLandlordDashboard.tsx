@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -139,6 +140,9 @@ export default function EnhancedLandlordDashboard() {
   const [inventoryLoading, setInventoryLoading] = useState(false);
   const [selectedInventoryRecord, setSelectedInventoryRecord] = useState<any | null>(null);
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false);
+  // Payment reminder quick action state
+  const [reminderPropertyId, setReminderPropertyId] = useState<string>("");
+  const [sendingReminder, setSendingReminder] = useState(false);
 
   // Global application leads (across all properties) for quick invites
   const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string; last_message_at?: string }>>([]);
@@ -2213,6 +2217,70 @@ export default function EnhancedLandlordDashboard() {
             </p>
           </div>
           
+          {/* Payment Reminder Banner */}
+          <div className="bg-gradient-to-r from-ocean-blue/10 to-success-green/10 border border-ocean-blue/20 rounded-lg p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-ocean-blue text-white flex items-center justify-center">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold">Send Payment Reminder</div>
+                  <div className="text-sm text-ios-gray">Notify a tenant instantly via app and email</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Select value={reminderPropertyId} onValueChange={setReminderPropertyId}>
+                  <SelectTrigger className="w-[220px]">
+                    <SelectValue placeholder="Select property" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {properties.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  disabled={sendingReminder}
+                  onClick={async () => {
+                    if (!reminderPropertyId) {
+                      toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+                      return;
+                    }
+                    try {
+                      setSendingReminder(true);
+                      const { data: tenancy } = await supabase
+                        .from('tenancies')
+                        .select('tenant_id')
+                        .eq('landlord_id', user?.id)
+                        .eq('property_id', reminderPropertyId)
+                        .eq('status', 'active')
+                        .limit(1)
+                        .maybeSingle();
+                      if (!tenancy?.tenant_id) {
+                        toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
+                        setSendingReminder(false);
+                        return;
+                      }
+                      const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                        body: { tenant_id: tenancy.tenant_id, property_id: reminderPropertyId }
+                      });
+                      if (error) throw error;
+                      toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
+                    } catch (e: any) {
+                      toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                    } finally {
+                      setSendingReminder(false);
+                    }
+                  }}
+                  className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+                >
+                  {sendingReminder ? 'Sending…' : 'Send Reminder'}
+                </Button>
+              </div>
+            </div>
+          </div>
+
           {/* App-style Feature Grid */}
           <div>
             <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>
@@ -2277,38 +2345,6 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">Track</p>
               </button>
 
-              {/* Payment Reminder quick action */}
-              <button
-                onClick={async () => {
-                  try {
-                    const { data: tenancy } = await supabase
-                      .from('tenancies')
-                      .select('tenant_id, property_id')
-                      .eq('landlord_id', user?.id)
-                      .eq('status', 'active')
-                      .limit(1)
-                      .maybeSingle();
-                    if (!tenancy?.tenant_id || !tenancy?.property_id) {
-                      toast({ title: 'No active tenancy', description: 'Select a property with an active tenant to send a reminder.' });
-                      return;
-                    }
-                    const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                      body: { tenant_id: tenancy.tenant_id, property_id: tenancy.property_id }
-                    });
-                    if (error) throw error;
-                    toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
-                  } catch (e: any) {
-                    toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-                  }
-                }}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-green to-success-green rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Bell className="w-5 h-5 text-white" />
-                </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Send Reminder</p>
-                <p className="text-xs text-ios-gray">Quick action</p>
-              </button>
 
               {/* SwiftBooks */}
               <button 
