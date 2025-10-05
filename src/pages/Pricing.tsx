@@ -41,7 +41,7 @@ export default function Pricing() {
             <div className="text-ocean-blue font-semibold">Basic Listing</div>
             <h3 className={PLAN_TITLE}>Once-off Listing</h3>
             <div className="flex items-baseline gap-2">
-              <span className="text-lg text-muted-foreground line-through">R199</span>
+              <span className="text-lg text-muted-foreground line-through">R200</span>
               <span className="text-xs font-semibold text-white bg-red-500 rounded px-2 py-0.5">50% OFF</span>
             </div>
             <div className={PLAN_PRICE}>R99<span className="text-base font-medium text-muted-foreground"> / listing</span></div>
@@ -53,7 +53,6 @@ export default function Pricing() {
             <Feature>Tenant messaging via phone/email (outside platform)</Feature>
           </div>
           <div className="p-6 pt-0">
-            <p className="text-xs text-muted-foreground text-center mb-2">Added Benefit: No subscription — once-off listing stays live until rented.</p>
             <Button className="w-full" onClick={() => startPayfastCheckout({ plan_code: 'basic_listing', amount: 99, item_name: 'SwiftRent Basic Listing', item_description: 'Once-off listing fee' })}>Get Started</Button>
           </div>
         </div>
@@ -62,9 +61,9 @@ export default function Pricing() {
         <div className={`${PLAN_CARD} ring-1 ring-ocean-blue/10`}> 
           <div className={PLAN_HEADER}>
             <div className="text-ocean-blue font-semibold">Pro Landlord</div>
-            <h3 className={PLAN_TITLE}>Monthly Subscription</h3>
-            <div className={PLAN_PRICE}>R399<span className="text-base font-medium text-muted-foreground"> / month</span></div>
-            <p className={PLAN_DESC}>Handle every part of the rental journey inside SwiftRent.</p>
+            <h3 className={PLAN_TITLE}>Yearly Subscription</h3>
+            <div className={PLAN_PRICE}>R399<span className="text-base font-medium text-muted-foreground"> / year</span></div>
+            <p className={PLAN_DESC}>Handle every step from listing to lease inside SwiftRent.</p>
           </div>
           <div className={PLAN_BODY}>
             <Feature>Unlimited property listings</Feature>
@@ -74,10 +73,11 @@ export default function Pricing() {
             <Feature>Legally binding e-signatures</Feature>
             <Feature>Inventory tracker (upload & timestamped records)</Feature>
             <Feature>Maintenance management — tenants submit requests from their dashboard</Feature>
+            <Feature>Real-time notifications for rent payments, renewals & maintenance updates</Feature>
+            <Feature>Automated tenant reminders</Feature>
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Pro Landlord monthly subscription' })}>Upgrade to Pro</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Added Benefit: Handle every step from listing to lease inside SwiftRent.</p>
           </div>
         </div>
 
@@ -85,19 +85,16 @@ export default function Pricing() {
         <div className={`${PLAN_CARD} ring-2 ring-success-green/20`}> 
           <div className={PLAN_HEADER}>
             <div className="text-success-green font-semibold">Premium Landlord</div>
-            <h3 className={PLAN_TITLE}>Monthly Subscription</h3>
-            <div className={PLAN_PRICE}>R999<span className="text-base font-medium text-muted-foreground"> / month</span></div>
-            <p className={PLAN_DESC}>Advanced tools for growing portfolios.</p>
+            <h3 className={PLAN_TITLE}>Yearly Subscription</h3>
+            <div className={PLAN_PRICE}>R999<span className="text-base font-medium text-muted-foreground"> / year</span></div>
+            <p className={PLAN_DESC}>Everything in Pro, plus</p>
           </div>
           <div className={PLAN_BODY}>
             <Feature>Unlimited listings per year</Feature>
             <Feature>SwiftBooks generates profit and loss statements and monthly tax invoices</Feature>
-            <Feature>Real-time notifications for rent payments, renewals & maintenance updates</Feature>
-            <Feature>Automated tenant reminders</Feature>
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Premium Landlord monthly subscription' })}>Go Premium</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Added Benefit: Full-stack digital property management designed for small-to-mid portfolios.</p>
           </div>
         </div>
 
