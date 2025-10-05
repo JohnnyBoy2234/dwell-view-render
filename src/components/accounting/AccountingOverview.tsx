@@ -360,12 +360,7 @@ export function AccountingOverview() {
           </Link>
         </Button>
         
-        <Button variant="outline" asChild>
-          <Link to="/dashboard/accounting/reports/expense-summary">
-            <Receipt className="w-4 h-4 mr-2" />
-            Expense Summary (SARS)
-          </Link>
-        </Button>
+        {/* SARS Summary removed per request */}
         
         <Button variant="outline" asChild>
           <Link to="/dashboard/invoices/tax">

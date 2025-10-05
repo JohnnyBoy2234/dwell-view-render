@@ -2277,6 +2277,39 @@ export default function EnhancedLandlordDashboard() {
                 <p className="text-xs text-ios-gray">Track</p>
               </button>
 
+              {/* Payment Reminder quick action */}
+              <button
+                onClick={async () => {
+                  try {
+                    const { data: tenancy } = await supabase
+                      .from('tenancies')
+                      .select('tenant_id, property_id')
+                      .eq('landlord_id', user?.id)
+                      .eq('status', 'active')
+                      .limit(1)
+                      .maybeSingle();
+                    if (!tenancy?.tenant_id || !tenancy?.property_id) {
+                      toast({ title: 'No active tenancy', description: 'Select a property with an active tenant to send a reminder.' });
+                      return;
+                    }
+                    const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                      body: { tenant_id: tenancy.tenant_id, property_id: tenancy.property_id }
+                    });
+                    if (error) throw error;
+                    toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
+                  } catch (e: any) {
+                    toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                  }
+                }}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-green to-success-green rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Bell className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Send Reminder</p>
+                <p className="text-xs text-ios-gray">Quick action</p>
+              </button>
+
               {/* SwiftBooks */}
               <button 
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}

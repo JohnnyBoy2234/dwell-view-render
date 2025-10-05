@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,7 @@ interface LineItem {
   vatPercent: number;
   vatAmount: number;
   totalInclVat: number;
+  type?: 'charge' | 'expense';
 }
 
 interface InvoiceData {
@@ -55,12 +56,64 @@ export function TaxInvoiceGenerator() {
         vatPercent: 0,
         vatAmount: 0,
         totalInclVat: 0,
+        type: 'charge',
       }
     ],
     bankName: '',
     accountNumber: '',
     reference: '',
   });
+
+  // Autofill landlord and tenant details from landlord_settings and recent tenancy/profile
+  useEffect(() => {
+    const loadDefaults = async () => {
+      try {
+        if (!user) return;
+        // Landlord settings
+        const { data: settings } = await supabase
+          .from('landlord_settings')
+          .select('name, address, vat_number, bank, account_number')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        // Try get an active tenancy for tenant details and property
+        const { data: tenancy } = await supabase
+          .from('tenancies')
+          .select('id, tenant_id, property_id')
+          .eq('landlord_id', user.id)
+          .eq('status', 'active')
+          .order('start_date', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        let tenantName = '';
+        let tenantAddress = '';
+        let propertyAddress = '';
+        if (tenancy) {
+          const [{ data: tenantProfile }, { data: property }] = await Promise.all([
+            supabase.from('profiles').select('display_name,address').eq('user_id', tenancy.tenant_id).maybeSingle(),
+            supabase.from('properties').select('title,location').eq('id', tenancy.property_id).maybeSingle(),
+          ]);
+          tenantName = tenantProfile?.display_name || '';
+          tenantAddress = (tenantProfile as any)?.address || '';
+          propertyAddress = property?.title || property?.location || '';
+        }
+        setInvoiceData(prev => ({
+          ...prev,
+          landlordName: settings?.name || prev.landlordName,
+          landlordAddress: settings?.address || prev.landlordAddress,
+          landlordVatReg: settings?.vat_number || prev.landlordVatReg,
+          bankName: settings?.bank || prev.bankName,
+          accountNumber: settings?.account_number || prev.accountNumber,
+          tenantName: tenantName || prev.tenantName,
+          tenantAddress: tenantAddress || prev.tenantAddress,
+          propertyAddress: propertyAddress || prev.propertyAddress,
+        }));
+      } catch (e) {
+        // Silent fail; user can fill manually
+        console.log('TaxInvoice autofill skipped:', e);
+      }
+    };
+    void loadDefaults();
+  }, [user?.id]);
 
   const calculateLineItem = (item: LineItem, field: string, value: number): LineItem => {
     const updatedItem = { ...item };
@@ -102,6 +155,7 @@ export function TaxInvoiceGenerator() {
       vatPercent: 15,
       vatAmount: 0,
       totalInclVat: 0,
+      type: 'charge',
     };
     setInvoiceData(prev => ({
       ...prev,
@@ -117,19 +171,32 @@ export function TaxInvoiceGenerator() {
   };
 
   const calculateTotals = () => {
-    const totalExclVat = invoiceData.lineItems.reduce((sum, item) => sum + item.amountExclVat, 0);
-    const totalVat = invoiceData.lineItems.reduce((sum, item) => sum + item.vatAmount, 0);
-    const totalInclVat = invoiceData.lineItems.reduce((sum, item) => sum + item.totalInclVat, 0);
-    
+    const totalExclVat = invoiceData.lineItems.reduce((sum, item) => {
+      const sign = item.type === 'expense' ? -1 : 1;
+      return sum + sign * (item.amountExclVat || 0);
+    }, 0);
+    const totalVat = invoiceData.lineItems.reduce((sum, item) => {
+      const sign = item.type === 'expense' ? -1 : 1;
+      return sum + sign * (item.vatAmount || 0);
+    }, 0);
+    const totalInclVat = invoiceData.lineItems.reduce((sum, item) => {
+      const sign = item.type === 'expense' ? -1 : 1;
+      return sum + sign * (item.totalInclVat || 0);
+    }, 0);
     return { totalExclVat, totalVat, totalInclVat };
   };
 
   const generatePDF = async () => {
     // Generate PDF using react-pdf
     const { generateTaxInvoicePDF } = await import('@/components/accounting/PDFGenerator');
-    
+    // Adjust line items: expenses become negative in PDF display
+    const adjustedItems = invoiceData.lineItems.map((it) =>
+      it.type === 'expense'
+        ? { ...it, amountExclVat: -Math.abs(it.amountExclVat || 0), vatAmount: -Math.abs(it.vatAmount || 0), totalInclVat: -Math.abs(it.totalInclVat || 0) }
+        : it
+    );
     await generateTaxInvoicePDF({
-      invoiceData,
+      invoiceData: { ...invoiceData, lineItems: adjustedItems as any },
       totals,
     });
   };
@@ -342,6 +409,19 @@ export function TaxInvoiceGenerator() {
                         placeholder="Enter description"
                       />
                     </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Type</Label>
+                        <select
+                          className="w-full border rounded h-10 px-2 text-sm"
+                          value={item.type || 'charge'}
+                          onChange={(e) => updateLineItem(item.id, 'type', e.target.value as 'charge' | 'expense')}
+                        >
+                          <option value="charge">Charge</option>
+                          <option value="expense">Expense/Credit</option>
+                        </select>
+                      </div>
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-3">
                       <div>
@@ -368,8 +448,8 @@ export function TaxInvoiceGenerator() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
-                      <div>VAT Amount: {formatCurrency(item.vatAmount)}</div>
-                      <div>Total Incl. VAT: {formatCurrency(item.totalInclVat)}</div>
+                      <div>VAT Amount: {formatCurrency((item.type === 'expense' ? -1 : 1) * (item.vatAmount || 0))}</div>
+                      <div>Total Incl. VAT: {formatCurrency((item.type === 'expense' ? -1 : 1) * (item.totalInclVat || 0))}</div>
                     </div>
                   </div>
                 ))}
@@ -412,7 +492,12 @@ export function TaxInvoiceGenerator() {
                 <Button variant="outline" size="lg" onClick={async () => {
                   try {
                     const { generateTaxInvoicePDF } = await import('@/components/accounting/PDFGenerator');
-                    const result = await generateTaxInvoicePDF({ invoiceData, totals });
+                    const adjustedItems = invoiceData.lineItems.map((it) =>
+                      it.type === 'expense'
+                        ? { ...it, amountExclVat: -Math.abs(it.amountExclVat || 0), vatAmount: -Math.abs(it.vatAmount || 0), totalInclVat: -Math.abs(it.totalInclVat || 0) }
+                        : it
+                    );
+                    const result = await generateTaxInvoicePDF({ invoiceData: { ...invoiceData, lineItems: adjustedItems as any }, totals });
                     if (!result?.blob) return;
                     // Resolve tenant id by display name (basic heuristic); in production, prefer explicit selection
                     const { data: prof } = await supabase

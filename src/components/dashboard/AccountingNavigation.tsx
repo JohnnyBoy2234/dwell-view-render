@@ -23,11 +23,7 @@ export function AccountingNavigation() {
       path: '/dashboard/accounting/transactions',
       icon: FileText,
     },
-    {
-      label: 'SARS Summary',
-      path: '/dashboard/accounting/reports/expense-summary',
-      icon: Receipt,
-    },
+    // SARS Summary removed per request
     {
       label: 'Tax Invoice',
       path: '/dashboard/invoices/tax',
