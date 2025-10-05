@@ -40,6 +40,10 @@ export default function Pricing() {
           <div className={PLAN_HEADER}>
             <div className="text-ocean-blue font-semibold">Basic Listing</div>
             <h3 className={PLAN_TITLE}>Once-off Listing</h3>
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg text-muted-foreground line-through">R199</span>
+              <span className="text-xs font-semibold text-white bg-red-500 rounded px-2 py-0.5">50% OFF</span>
+            </div>
             <div className={PLAN_PRICE}>R99<span className="text-base font-medium text-muted-foreground"> / listing</span></div>
             <p className={PLAN_DESC}>One-time fee. Listing stays live until rented.</p>
           </div>
@@ -49,6 +53,7 @@ export default function Pricing() {
             <Feature>Tenant messaging via phone/email (outside platform)</Feature>
           </div>
           <div className="p-6 pt-0">
+            <p className="text-xs text-muted-foreground text-center mb-2">Added Benefit: No subscription — once-off listing stays live until rented.</p>
             <Button className="w-full" onClick={() => startPayfastCheckout({ plan_code: 'basic_listing', amount: 99, item_name: 'SwiftRent Basic Listing', item_description: 'Once-off listing fee' })}>Get Started</Button>
           </div>
         </div>
