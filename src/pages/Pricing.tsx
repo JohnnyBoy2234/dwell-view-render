@@ -1,6 +1,7 @@
 import React from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { startPayfastCheckout } from "@/services/payfastService";
 
 const PLAN_CARD = "rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col";
 const PLAN_HEADER = "p-6 border-b";
@@ -48,7 +49,7 @@ export default function Pricing() {
             <Feature>Tenant messaging via phone/email (outside platform)</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full">Get Started</Button>
+            <Button className="w-full" onClick={() => startPayfastCheckout({ plan_code: 'basic_listing', amount: 99, item_name: 'SwiftRent Basic Listing', item_description: 'Once-off listing fee' })}>Get Started</Button>
             <p className="text-xs text-muted-foreground text-center mt-2">Perfect for once-off landlords.</p>
           </div>
         </div>
@@ -68,7 +69,7 @@ export default function Pricing() {
             <Feature>Unlimited eSignatures for leases</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white">Upgrade to Pro</Button>
+            <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Monthly subscription' })}>Upgrade to Pro</Button>
             <p className="text-xs text-muted-foreground text-center mt-2">Great for 1–3 properties.</p>
           </div>
         </div>
@@ -89,7 +90,7 @@ export default function Pricing() {
             <Feature>Advanced tenant screening insights</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full bg-success-green hover:bg-success-green-dark text-white">Go Premium</Button>
+            <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Monthly subscription' })}>Go Premium</Button>
             <p className="text-xs text-muted-foreground text-center mt-2">Best for 5+ properties.</p>
           </div>
         </div>
@@ -110,7 +111,7 @@ export default function Pricing() {
             <Feature>Annual rental performance report</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white">Talk to Sales</Button>
+            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_gold', amount: 4999, item_name: 'SwiftRent Premium Gold', item_description: 'Annual plan' })}>Get Premium Gold</Button>
             <p className="text-xs text-muted-foreground text-center mt-2">Zero-hassle, white-glove experience.</p>
           </div>
         </div>
