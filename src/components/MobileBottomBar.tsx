@@ -114,19 +114,21 @@ export function MobileBottomBar() {
         {/* All navigation items with consistent spacing */}
         {leftNavItems.map(renderNavItem)}
         
-        <Link
-          to="/list-property"
-          className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
-            location.pathname === '/list-property'
-              ? 'text-white bg-black/20'
-              : 'text-white/80 hover:text-white'
-          }`}
-        >
-          <div className="relative">
-            <Plus className={`h-5 w-5 ${location.pathname === '/list-property' ? 'text-white' : ''}`} />
-          </div>
-          <span className="text-xs text-center">List</span>
-        </Link>
+        {isLandlord && (
+          <Link
+            to="/list-property"
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
+              location.pathname === '/list-property'
+                ? 'text-white bg-black/20'
+                : 'text-white/80 hover:text-white'
+            }`}
+          >
+            <div className="relative">
+              <Plus className={`h-5 w-5 ${location.pathname === '/list-property' ? 'text-white' : ''}`} />
+            </div>
+            <span className="text-xs text-center">List</span>
+          </Link>
+        )}
 
         {rightNavItems.map(renderNavItem)}
       </div>

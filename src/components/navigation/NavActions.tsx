@@ -36,14 +36,16 @@ export function NavActions({
   if (user) {
     return (
       <div className={NAVBAR_STYLES.DESKTOP_ACTIONS}>
-        <Button 
-          asChild 
-          className={NAVBAR_STYLES.LIST_PROPERTY_BUTTON}
-        >
-          <Link to={NAVBAR_ROUTES.LIST_PROPERTY}>
-            {NAVBAR_CONTENT.LIST_PROPERTY_LABEL}
-          </Link>
-        </Button>
+        {isLandlord && (
+          <Button 
+            asChild 
+            className={NAVBAR_STYLES.LIST_PROPERTY_BUTTON}
+          >
+            <Link to={NAVBAR_ROUTES.LIST_PROPERTY}>
+              {NAVBAR_CONTENT.LIST_PROPERTY_LABEL}
+            </Link>
+          </Button>
+        )}
         
         <NotificationBell />
         
@@ -60,14 +62,7 @@ export function NavActions({
 
   return (
     <div className={NAVBAR_STYLES.DESKTOP_ACTIONS}>
-      <Button 
-        asChild 
-        className={NAVBAR_STYLES.LIST_PROPERTY_BUTTON}
-      >
-        <Link to={NAVBAR_ROUTES.LIST_PROPERTY}>
-          {NAVBAR_CONTENT.LIST_PROPERTY_LABEL}
-        </Link>
-      </Button>
+      {/* Hide List Property for signed-out users to avoid tenant confusion */}
       
       <Button 
         asChild 
