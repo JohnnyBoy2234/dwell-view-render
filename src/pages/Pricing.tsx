@@ -50,7 +50,6 @@ export default function Pricing() {
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full" onClick={() => startPayfastCheckout({ plan_code: 'basic_listing', amount: 99, item_name: 'SwiftRent Basic Listing', item_description: 'Once-off listing fee' })}>Get Started</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Perfect for once-off landlords.</p>
           </div>
         </div>
 
@@ -70,7 +69,6 @@ export default function Pricing() {
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Monthly subscription' })}>Upgrade to Pro</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Great for 1–3 properties.</p>
           </div>
         </div>
 
@@ -91,7 +89,6 @@ export default function Pricing() {
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Monthly subscription' })}>Go Premium</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Best for 5+ properties.</p>
           </div>
         </div>
 
@@ -112,7 +109,6 @@ export default function Pricing() {
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_gold', amount: 4999, item_name: 'SwiftRent Premium Gold', item_description: 'Annual plan' })}>Get Premium Gold</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Zero-hassle, white-glove experience.</p>
           </div>
         </div>
       </div>

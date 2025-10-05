@@ -67,7 +67,9 @@ serve(async (req) => {
     const return_url = `${APP_BASE_URL}/payment-success?provider=payfast`;
     const cancel_url = `${APP_BASE_URL}/pricing?canceled=1`;
 
-    const pfEndpoint = mode === "live" ? "https://www.payfast.co.za/eng/process" : "https://sandbox.payfast.co.za/eng/process";
+    const baseUrl = Deno.env.get("PAYFAST_BASE_URL")
+      || (mode === "live" ? "https://www.payfast.io" : "https://sandbox.payfast.io");
+    const pfEndpoint = `${baseUrl}/eng/process`;
 
     const paymentFields: Record<string, string> = {
       merchant_id,
