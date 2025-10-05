@@ -72,6 +72,7 @@ export default function Pricing() {
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Pro Landlord monthly subscription' })}>Upgrade to Pro</Button>
+            <p className="text-xs text-muted-foreground text-center mt-2">Added Benefit: Handle every step from listing to lease inside SwiftRent.</p>
           </div>
         </div>
 
@@ -84,14 +85,14 @@ export default function Pricing() {
             <p className={PLAN_DESC}>Advanced tools for growing portfolios.</p>
           </div>
           <div className={PLAN_BODY}>
-            <Feature>🏠 Unlimited listings per year</Feature>
-            <Feature>📊 SwiftBooks: profit & loss + monthly tax invoices</Feature>
-            <Feature>🔔 Real-time notifications (rent, renewals, maintenance)</Feature>
-            <Feature>⚠️ Automated tenant payment reminders</Feature>
+            <Feature>Unlimited listings per year</Feature>
+            <Feature>SwiftBooks generates profit and loss statements and monthly tax invoices</Feature>
+            <Feature>Real-time notifications for rent payments, renewals & maintenance updates</Feature>
+            <Feature>Automated tenant reminders</Feature>
           </div>
           <div className="p-6 pt-0">
             <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Premium Landlord monthly subscription' })}>Go Premium</Button>
-            <p className="text-xs text-muted-foreground text-center mt-2">Added Benefit: Full-stack digital property management for small-to-mid portfolios.</p>
+            <p className="text-xs text-muted-foreground text-center mt-2">Added Benefit: Full-stack digital property management designed for small-to-mid portfolios.</p>
           </div>
         </div>
 
