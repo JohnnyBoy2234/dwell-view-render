@@ -12,6 +12,7 @@ import Navbar from "./components/Navbar";
 import { MobileBottomBar } from "./components/MobileBottomBar";
 import { MobileServices } from "@/services/mobileServices";
 import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
+import { AISupportChat } from "@/components/support/AISupportChat";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import About from "./pages/About";
@@ -169,6 +170,7 @@ const App = () => {
               <ScrollToTop />
               <ErrorBoundary>
               <MobileNetworkStatus />
+              <AISupportChat />
               <AppRoutes />
               <MobileBottomBar />
               </ErrorBoundary>
