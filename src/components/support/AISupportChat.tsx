@@ -17,8 +17,21 @@ export function AISupportChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isPaidCustomer, setIsPaidCustomer] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  // Load saved position or use defaults
+  useEffect(() => {
+    const saved = localStorage.getItem('aiChatPosition');
+    if (saved) {
+      setPosition(JSON.parse(saved));
+    } else {
+      setPosition({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+    }
+  }, []);
 
   // Check if user is logged in for paid features
   useEffect(() => {
@@ -138,13 +151,50 @@ export function AISupportChat() {
     sendMessage(action);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (isOpen) return; // Don't drag when chat is open
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return;
+    const newX = Math.max(0, Math.min(window.innerWidth - 56, e.clientX - dragStart.x));
+    const newY = Math.max(0, Math.min(window.innerHeight - 56, e.clientY - dragStart.y));
+    setPosition({ x: newX, y: newY });
+  };
+
+  const handleMouseUp = () => {
+    if (isDragging) {
+      setIsDragging(false);
+      localStorage.setItem('aiChatPosition', JSON.stringify(position));
+    }
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragStart, position]);
+
   return (
     <>
       {/* Floating Chat Button */}
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90"
+          onMouseDown={handleMouseDown}
+          style={{ 
+            left: `${position.x}px`, 
+            top: `${position.y}px`,
+            cursor: isDragging ? 'grabbing' : 'grab'
+          }}
+          className="fixed h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 transition-none"
           size="icon"
         >
           <MessageCircle className="h-6 w-6" />
