@@ -32,6 +32,15 @@ export function AccountingOverview() {
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
+  const [rangeMonths, setRangeMonths] = useState('12');
+  const [showIncomeModal, setShowIncomeModal] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [tempAmount, setTempAmount] = useState<number>(0);
+  // Sample data fallbacks for charts/KPIs
+  const sampleMonths = ['Jun','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
+  const sampleIncome = [4200,6100,4800,6400,5600,8200,6900,7800,6000];
+  const sampleExpenses = [1800,3200,2600,2400,3600,3000,2100,3300,2200];
 
   useEffect(() => {
     const month = new Date(selectedMonth + '-01');
@@ -92,97 +101,68 @@ export function AccountingOverview() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Navigation */}
-      <AccountingNavigation />
-      
+    <div className="space-y-6 px-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-3xl font-bold">Accounting Overview</h2>
-        
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Select value={selectedMonth} onValueChange={setSelectedMonth}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select month" />
-            </SelectTrigger>
-            <SelectContent>
-              {getMonthOptions().map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+      <div>
+        <h2 className="text-[30px] font-bold">Accounting</h2>
+      </div>
 
-          <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select property" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Properties</SelectItem>
-              {properties.map((property) => (
-                <SelectItem key={property.id} value={property.id}>
-                  {property.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+      {/* Filters */}
+      <div className="flex flex-col md:flex-row gap-4 items-stretch">
+        <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+          <SelectTrigger className="w-full md:w-[240px] h-10">
+            <SelectValue placeholder="All Properties" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Properties</SelectItem>
+            {properties.map((property) => (
+              <SelectItem key={property.id} value={property.id}>{property.title}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={rangeMonths} onValueChange={setRangeMonths}>
+          <SelectTrigger className="w-full md:w-[240px] h-10">
+            <SelectValue placeholder="Last 12 Months" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="12">Last 12 Months</SelectItem>
+            <SelectItem value="6">Last 6 Months</SelectItem>
+            <SelectItem value="3">Last 3 Months</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-wrap gap-4">
+        <Button onClick={() => setShowIncomeModal(true)}>Add Income</Button>
+        <Button variant="outline" onClick={() => setShowExpenseModal(true)}>Add Expense</Button>
+        <Button variant="outline" onClick={() => setShowInvoiceModal(true)}>Generate Tax Invoice</Button>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rent Collected</CardTitle>
-            <TrendingUp className="h-4 w-4 text-success-green" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Total Income</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success-green">
-              {formatCurrency(kpis.rentCollected)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(kpis.rentCollected)}</div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Expenses</CardTitle>
-            <TrendingDown className="h-4 w-4 text-destructive" />
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Total Expenses</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {formatCurrency(kpis.expenses)}
-            </div>
+            <div className="text-2xl font-bold">{formatCurrency(kpis.expenses)}</div>
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Net Income</CardTitle>
-            <RIcon className="h-6 w-6 text-ocean-blue" />
+        <Card className="shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base font-semibold">Profit</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className={`text-2xl font-bold ${kpis.netIncome >= 0 ? 'text-success-green' : 'text-destructive'}`}>
-              {formatCurrency(kpis.netIncome)}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Unpaid Rent</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-500">
-              {formatCurrency(kpis.unpaidRent)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              <Link to="#" className="text-ocean-blue hover:underline">
-                Connect Payments to track
-              </Link>
-            </p>
+            <div className="text-2xl font-bold">{formatCurrency(kpis.netIncome)}</div>
           </CardContent>
         </Card>
       </div>
