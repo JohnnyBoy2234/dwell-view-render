@@ -64,17 +64,11 @@ export function TaxInvoiceGenerator() {
     reference: '',
   });
 
-  // Autofill landlord and tenant details from landlord_settings and recent tenancy/profile
+  // Autofill tenant details from recent tenancy/profile
   useEffect(() => {
     const loadDefaults = async () => {
       try {
         if (!user) return;
-        // Landlord settings
-        const { data: settings } = await supabase
-          .from('landlord_settings')
-          .select('name, address, vat_number, bank, account_number')
-          .eq('user_id', user.id)
-          .maybeSingle();
         // Try get an active tenancy for tenant details and property
         const { data: tenancy } = await supabase
           .from('tenancies')
@@ -85,26 +79,18 @@ export function TaxInvoiceGenerator() {
           .limit(1)
           .maybeSingle();
         let tenantName = '';
-        let tenantAddress = '';
         let propertyAddress = '';
         if (tenancy) {
           const [{ data: tenantProfile }, { data: property }] = await Promise.all([
-            supabase.from('profiles').select('display_name,address').eq('user_id', tenancy.tenant_id).maybeSingle(),
+            supabase.from('profiles').select('display_name').eq('user_id', tenancy.tenant_id).maybeSingle(),
             supabase.from('properties').select('title,location').eq('id', tenancy.property_id).maybeSingle(),
           ]);
           tenantName = tenantProfile?.display_name || '';
-          tenantAddress = (tenantProfile as any)?.address || '';
           propertyAddress = property?.title || property?.location || '';
         }
         setInvoiceData(prev => ({
           ...prev,
-          landlordName: settings?.name || prev.landlordName,
-          landlordAddress: settings?.address || prev.landlordAddress,
-          landlordVatReg: settings?.vat_number || prev.landlordVatReg,
-          bankName: settings?.bank || prev.bankName,
-          accountNumber: settings?.account_number || prev.accountNumber,
           tenantName: tenantName || prev.tenantName,
-          tenantAddress: tenantAddress || prev.tenantAddress,
           propertyAddress: propertyAddress || prev.propertyAddress,
         }));
       } catch (e) {

@@ -17,6 +17,7 @@ import { format, startOfMonth, subMonths } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
 import { AccountingNavigation } from '@/components/dashboard/AccountingNavigation';
+import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
 
@@ -185,16 +186,25 @@ export function AccountingOverview() {
         </Card>
       </div>
 
-      {/* Actions: Payment Reminder */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Bell className="h-4 w-4" />
-            Send Payment Reminder
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+      {/* AI Insights & Quick Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <AIInsightsCard
+            rentCollected={kpis.rentCollected}
+            expenses={kpis.expenses}
+            netIncome={kpis.netIncome}
+            categoryBreakdown={categoryData}
+          />
+        </div>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="h-4 w-4" />
+              Payment Reminder
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
             <Select value={selectedProperty} onValueChange={setSelectedProperty}>
               <SelectTrigger>
                 <SelectValue placeholder="Select property" />
@@ -206,16 +216,6 @@ export function AccountingOverview() {
                     {property.title}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            {/* Simple presets; advanced selection could target a specific tenant later */}
-            <Select onValueChange={() => {}}>
-              <SelectTrigger>
-                <SelectValue placeholder="Reminder Type (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="rent">Rent Due</SelectItem>
-                <SelectItem value="overdue">Overdue Notice</SelectItem>
               </SelectContent>
             </Select>
             <Button
@@ -252,12 +252,13 @@ export function AccountingOverview() {
                   setSendingReminder(false);
                 }
               }}
+              className="w-full"
             >
               {sendingReminder ? 'Sending…' : 'Send Reminder'}
             </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

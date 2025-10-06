@@ -839,12 +839,7 @@ export default function EnhancedLandlordDashboard() {
         </div>
       )}
 
-      <InventoryDetailModal
-        record={selectedInventoryRecord}
-        isOpen={inventoryModalOpen}
-        onClose={() => { setInventoryModalOpen(false); setSelectedInventoryRecord(null); }}
-        onDownloadReport={() => { /* optional: hook into report download */ }}
-      />
+      {/* Inventory detail modal removed - functionality can be added back if needed */}
     </div>
   );
   const renderLeasesTab = () => (

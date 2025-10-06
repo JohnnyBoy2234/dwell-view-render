@@ -60,3 +60,6 @@ verify_jwt = true
 
 [functions.kyc-admin-decline]
 verify_jwt = true
+
+[functions.accounting-ai-assistant]
+verify_jwt = true
