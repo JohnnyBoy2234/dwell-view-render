@@ -17,6 +17,7 @@ import { format, startOfMonth, subMonths } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { AccountingNavigation } from '@/components/dashboard/AccountingNavigation';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
 
@@ -29,7 +30,7 @@ export function AccountingOverview() {
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
-  const { transactions, loading, fetchTransactions, calculateKPIs, getMonthlyData, getCategoryData } = useAccounting();
+  const { transactions, loading, fetchTransactions, calculateKPIs, getMonthlyData, getCategoryData, createTransaction } = useAccounting();
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
@@ -37,6 +38,12 @@ export function AccountingOverview() {
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [txnType, setTxnType] = useState<'income' | 'expense'>('income');
+  const [txnAmount, setTxnAmount] = useState<number>(0);
+  const [txnDate, setTxnDate] = useState<string>('');
+  const [txnPropertyId, setTxnPropertyId] = useState<string>('all');
+  const [txnCategory, setTxnCategory] = useState<string>('General');
+  const [txnNote, setTxnNote] = useState<string>('');
   const [tempAmount, setTempAmount] = useState<number>(0);
   // Sample data fallbacks for charts/KPIs
   const sampleMonths = ['Jun','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar'];
@@ -136,9 +143,9 @@ export function AccountingOverview() {
       {/* Actions */}
       <div className="flex flex-wrap gap-4 items-center">
         <Button variant="outline" onClick={() => navigate('/dashboard/accounting')}>Overview</Button>
-        <Button onClick={() => setShowIncomeModal(true)}>Add Income</Button>
-        <Button onClick={() => setShowExpenseModal(true)}>Add Expense</Button>
-        <Button variant="outline" onClick={() => setShowInvoiceModal(true)}>Generate Tax Invoice</Button>
+        <Button onClick={() => { setTxnType('income'); setTxnAmount(0); setTxnDate(''); setTxnPropertyId(selectedProperty); setTxnCategory('General'); setTxnNote(''); setShowIncomeModal(true); }}>Add Income</Button>
+        <Button onClick={() => { setTxnType('expense'); setTxnAmount(0); setTxnDate(''); setTxnPropertyId(selectedProperty); setTxnCategory('General'); setTxnNote(''); setShowExpenseModal(true); }}>Add Expense</Button>
+        <Button variant="outline" asChild><Link to="/dashboard/invoices/tax">Generate Tax Invoice</Link></Button>
         <Button
           variant="outline"
           disabled={selectedProperty === 'all' || sendingReminder}
@@ -255,6 +262,92 @@ export function AccountingOverview() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Add Income Modal */}
+      <Dialog open={showIncomeModal} onOpenChange={setShowIncomeModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Income</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input type="number" placeholder="Amount (R)" value={txnAmount || ''} onChange={(e) => setTxnAmount(parseFloat(e.target.value) || 0)} />
+            <Input type="date" value={txnDate} onChange={(e) => setTxnDate(e.target.value)} />
+            <Select value={txnPropertyId} onValueChange={setTxnPropertyId}>
+              <SelectTrigger className="h-10"><SelectValue placeholder="Property" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
+                {properties.map((p) => (<SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>))}
+              </SelectContent>
+            </Select>
+            <Input placeholder="Category" value={txnCategory} onChange={(e) => setTxnCategory(e.target.value)} />
+            <Input placeholder="Note" value={txnNote} onChange={(e) => setTxnNote(e.target.value)} />
+            <div className="flex gap-2 justify-end pt-2">
+              <Button variant="outline" onClick={() => setShowIncomeModal(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                try {
+                  const payload = {
+                    type: 'income' as const,
+                    date: txnDate || new Date().toISOString().slice(0,10),
+                    amount: txnAmount,
+                    vat_percent: 0,
+                    category: txnCategory,
+                    property_id: txnPropertyId === 'all' ? null : txnPropertyId,
+                    description: txnNote,
+                    billable: false,
+                  };
+                  const saved = await createTransaction(payload as any);
+                  if (saved) toast({ title: 'Income added' });
+                } finally {
+                  setShowIncomeModal(false);
+                }
+              }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Expense Modal */}
+      <Dialog open={showExpenseModal} onOpenChange={setShowExpenseModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Expense</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input type="number" placeholder="Amount (R)" value={txnAmount || ''} onChange={(e) => setTxnAmount(parseFloat(e.target.value) || 0)} />
+            <Input type="date" value={txnDate} onChange={(e) => setTxnDate(e.target.value)} />
+            <Select value={txnPropertyId} onValueChange={setTxnPropertyId}>
+              <SelectTrigger className="h-10"><SelectValue placeholder="Property" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
+                {properties.map((p) => (<SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>))}
+              </SelectContent>
+            </Select>
+            <Input placeholder="Category" value={txnCategory} onChange={(e) => setTxnCategory(e.target.value)} />
+            <Input placeholder="Note" value={txnNote} onChange={(e) => setTxnNote(e.target.value)} />
+            <div className="flex gap-2 justify-end pt-2">
+              <Button variant="outline" onClick={() => setShowExpenseModal(false)}>Cancel</Button>
+              <Button onClick={async () => {
+                try {
+                  const payload = {
+                    type: 'expense' as const,
+                    date: txnDate || new Date().toISOString().slice(0,10),
+                    amount: txnAmount,
+                    vat_percent: 0,
+                    category: txnCategory,
+                    property_id: txnPropertyId === 'all' ? null : txnPropertyId,
+                    description: txnNote,
+                    billable: false,
+                  };
+                  const saved = await createTransaction(payload as any);
+                  if (saved) toast({ title: 'Expense added' });
+                } finally {
+                  setShowExpenseModal(false);
+                }
+              }}>Save</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Recent Transactions */}
       <Card>
