@@ -15,7 +15,8 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { format, startOfMonth, subMonths } from 'date-fns';
 import { Link } from 'react-router-dom';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell } from 'recharts';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AccountingNavigation } from '@/components/dashboard/AccountingNavigation';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
 
