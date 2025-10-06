@@ -14,7 +14,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { format, startOfMonth, subMonths } from 'date-fns';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AccountingNavigation } from '@/components/dashboard/AccountingNavigation';
@@ -23,6 +23,7 @@ import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
 
 export function AccountingOverview() {
+  const navigate = useNavigate();
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [selectedProperty, setSelectedProperty] = useState('all');
   const [monthlyData, setMonthlyData] = useState([]);
@@ -133,10 +134,46 @@ export function AccountingOverview() {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 items-center">
+        <Button variant="outline" onClick={() => navigate('/dashboard/accounting')}>Overview</Button>
         <Button onClick={() => setShowIncomeModal(true)}>Add Income</Button>
-        <Button variant="outline" onClick={() => setShowExpenseModal(true)}>Add Expense</Button>
+        <Button onClick={() => setShowExpenseModal(true)}>Add Expense</Button>
         <Button variant="outline" onClick={() => setShowInvoiceModal(true)}>Generate Tax Invoice</Button>
+        <Button
+          variant="outline"
+          disabled={selectedProperty === 'all' || sendingReminder}
+          onClick={async () => {
+            if (selectedProperty === 'all') {
+              toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+              return;
+            }
+            try {
+              setSendingReminder(true);
+              const { data: tenancy } = await supabase
+                .from('tenancies')
+                .select('tenant_id')
+                .eq('property_id', selectedProperty)
+                .limit(1)
+                .maybeSingle();
+              if (!tenancy?.tenant_id) {
+                toast({ variant: 'destructive', title: 'No tenant found', description: 'This property has no active tenant.' });
+                setSendingReminder(false);
+                return;
+              }
+              const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
+              });
+              if (error) throw error;
+              toast({ title: 'Reminder sent', description: 'The tenant has been notified via app and email.' });
+            } catch (e: any) {
+              toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+            } finally {
+              setSendingReminder(false);
+            }
+          }}
+        >
+          {sendingReminder ? 'Sending…' : 'Send Reminder'}
+        </Button>
       </div>
 
       {/* KPI Cards */}
@@ -167,79 +204,7 @@ export function AccountingOverview() {
         </Card>
       </div>
 
-      {/* AI Insights & Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <AIInsightsCard
-            rentCollected={kpis.rentCollected}
-            expenses={kpis.expenses}
-            netIncome={kpis.netIncome}
-            categoryBreakdown={categoryData}
-          />
-        </div>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-4 w-4" />
-              Payment Reminder
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select property" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Properties</SelectItem>
-                {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>
-                    {property.title}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              disabled={sendingReminder || selectedProperty === 'all'}
-              onClick={async () => {
-                if (selectedProperty === 'all') {
-                  toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-                  return;
-                }
-                try {
-                  setSendingReminder(true);
-                  const { data: tenancy } = await supabase
-                    .from('tenancies')
-                    .select('tenant_id')
-                    .eq('property_id', selectedProperty)
-                    .limit(1)
-                    .maybeSingle();
-                  if (!tenancy?.tenant_id) {
-                    toast({ variant: 'destructive', title: 'No tenant found', description: 'This property has no active tenant.' });
-                    setSendingReminder(false);
-                    return;
-                  }
-                  const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                    body: {
-                      tenant_id: tenancy.tenant_id,
-                      property_id: selectedProperty,
-                    }
-                  });
-                  if (error) throw error;
-                  toast({ title: 'Reminder sent', description: 'The tenant has been notified via app and email.' });
-                } catch (e: any) {
-                  toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-                } finally {
-                  setSendingReminder(false);
-                }
-              }}
-              className="w-full"
-            >
-              {sendingReminder ? 'Sending…' : 'Send Reminder'}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Charts Section follows */}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
