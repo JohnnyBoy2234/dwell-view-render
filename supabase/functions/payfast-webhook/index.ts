@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { Md5 } from "https://deno.land/std@0.190.0/hash/md5.ts";
+import { crypto } from "https://deno.land/std@0.190.0/crypto/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,7 +36,11 @@ serve(async (req) => {
     
     // PayFast signature verification: hash the param string with passphrase
     const stringToHash = paramString + `&passphrase=${encodeURIComponent(payfastPassphrase)}`;
-    const hash = new Md5().update(stringToHash).toString();
+    const encoder = new TextEncoder();
+    const hashData = encoder.encode(stringToHash);
+    const hashBuffer = await crypto.subtle.digest('MD5', hashData);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
     if (hash !== signature) {
       console.error('Invalid signature');
