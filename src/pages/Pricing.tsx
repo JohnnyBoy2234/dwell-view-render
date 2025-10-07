@@ -2,99 +2,118 @@ import React, { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startPayfastCheckout } from "@/services/payfastService";
-
-const PLAN_CARD = "rounded-xl border bg-card text-card-foreground shadow-sm flex flex-col";
-const PLAN_HEADER = "p-6 border-b";
-const PLAN_TITLE = "text-xl font-semibold";
-const PLAN_PRICE = "text-3xl font-bold mt-2";
-const PLAN_DESC = "text-muted-foreground mt-2";
-const PLAN_BODY = "p-6 flex-1";
-const FEATURE = "flex items-start gap-2 text-sm mb-2";
-const CHECK_ICON = "h-4 w-4 text-green-600 mt-0.5";
-
-const SectionHeader: React.FC<{ title: string; subtitle?: string }> = ({ title, subtitle }) => (
-  <div className="text-center max-w-2xl mx-auto mb-10">
-    <h1 className="text-3xl md:text-4xl font-bold tracking-tight">{title}</h1>
-    {subtitle && <p className="text-muted-foreground mt-3">{subtitle}</p>}
-  </div>
-);
+import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className={FEATURE}>
-    <Check className={CHECK_ICON} />
-    <span>{children}</span>
+  <div className="flex items-start gap-2.5 text-sm">
+    <Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+    <span className="text-muted-foreground">{children}</span>
   </div>
 );
 
 export default function Pricing() {
-  const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('monthly');
-  return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <SectionHeader
-        title="SwiftRent Pricing Plans"
-        subtitle="Simple, transparent pricing for every type of landlord"
-      />
+  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {/* Basic Listing */}
-        <div className={`${PLAN_CARD}`}>
-          <div className={PLAN_HEADER}>
-            <div className="text-ocean-blue font-semibold">Basic Listing</div>
-            <h3 className={PLAN_TITLE}>Once-off Listing</h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg text-muted-foreground line-through">R200</span>
-              <span className="text-xs font-semibold text-white bg-red-500 rounded px-2 py-0.5">50% OFF</span>
-            </div>
-            <div className={PLAN_PRICE}>R99<span className="text-base font-medium text-muted-foreground"> / listing</span></div>
-            <p className={PLAN_DESC}>One-time fee. Listing stays live until rented.</p>
-          </div>
-          <div className={PLAN_BODY}>
-            <Feature>Single property listing on SwiftRent</Feature>
-            <Feature>Exposure to verified tenants</Feature>
-            <Feature>Tenant messaging via phone/email (outside platform)</Feature>
-          </div>
-          <div className="p-6 pt-0">
-            <Button className="w-full" onClick={() => startPayfastCheckout({ plan_code: 'basic_listing', amount: 99, item_name: 'SwiftRent Basic Listing', item_description: 'Once-off listing fee' })}>Get Started</Button>
+  return (
+    <div className="min-h-screen bg-background py-16 px-4">
+      <div className="max-w-7xl mx-auto">
+        <SectionHeader
+          title="Pricing"
+          subtitle="Start for free. Upgrade to get the capacity that exactly matches your needs."
+        />
+
+        {/* Billing Toggle */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg">
+            <button
+              onClick={() => setBilling('monthly')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                billing === 'monthly'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setBilling('yearly')}
+              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                billing === 'yearly'
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Annual
+            </button>
           </div>
         </div>
 
-        {/* Pro Landlord */}
-        <div className={`${PLAN_CARD} ring-1 ring-ocean-blue/10`}>
-          <div className={PLAN_HEADER}>
-            <div className="text-ocean-blue font-semibold">Pro Landlord</div>
-            <h3 className={PLAN_TITLE}>Subscription</h3>
-            <div className="flex items-center gap-2 mt-2">
-              <button className={`px-3 py-1 rounded-full text-sm ${proBilling === 'monthly' ? 'bg-ocean-blue text-white' : 'bg-muted text-foreground'}`} onClick={() => setProBilling('monthly')}>Monthly</button>
-              <button className={`px-3 py-1 rounded-full text-sm ${proBilling === 'yearly' ? 'bg-ocean-blue text-white' : 'bg-muted text-foreground'}`} onClick={() => setProBilling('yearly')}>Yearly</button>
+        {/* Pricing Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {/* Basic Listing */}
+          <div className="rounded-2xl border bg-card p-8 flex flex-col">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Basic Listing</h3>
+              <p className="text-sm text-muted-foreground mb-4">One-time fee. Listing stays live until rented.</p>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-4xl font-bold">R99</span>
+                <span className="text-muted-foreground">/ listing</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground line-through">R200</span>
+                <span className="text-xs font-semibold bg-red-500 text-white px-2 py-0.5 rounded">50% OFF</span>
+              </div>
             </div>
-            {proBilling === 'monthly' ? (
-              <>
-                <div className={PLAN_PRICE}>R199<span className="text-base font-medium text-muted-foreground"> / month</span></div>
-                <p className={PLAN_DESC}>Handle every step from listing to lease inside SwiftRent.</p>
-              </>
-            ) : (
-              <>
-                <div className={PLAN_PRICE}>R135<span className="text-base font-medium text-muted-foreground"> / month</span></div>
-                <p className="text-sm text-muted-foreground">Billed <span className="font-semibold">R1,600</span> / year</p>
-                <p className="text-xs font-semibold text-green-700">You save R700</p>
-              </>
-            )}
+
+            <Button 
+              className="w-full mb-6"
+              onClick={() => startPayfastCheckout({ 
+                plan_code: 'basic_listing', 
+                amount: 99, 
+                item_name: 'SwiftRent Basic Listing', 
+                item_description: 'Once-off listing fee' 
+              })}
+            >
+              Get Started
+            </Button>
+
+            <div className="space-y-3 flex-1">
+              <Feature>Single property listing on SwiftRent</Feature>
+              <Feature>Exposure to verified tenants</Feature>
+              <Feature>Tenant messaging via phone/email (outside platform)</Feature>
+            </div>
           </div>
-          <div className={PLAN_BODY}>
-            <Feature>Unlimited property listings</Feature>
-            <Feature>Verified tenants</Feature>
-            <Feature>In-platform messaging</Feature>
-            <Feature>Digital lease agreements tailored for South African law</Feature>
-            <Feature>Legally binding e-signatures</Feature>
-            <Feature>Inventory tracker (upload & timestamped records)</Feature>
-            <Feature>Maintenance management tenants submit requests from their dashboard</Feature>
-            <Feature>Automated tenant reminders</Feature>
-          </div>
-          <div className="p-6 pt-0">
-            <Button
-              className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+
+          {/* Pro Landlord - Highlighted */}
+          <div className="rounded-2xl border-2 border-primary bg-card p-8 flex flex-col relative shadow-lg">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-medium">
+              Most Popular
+            </div>
+            
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Pro Landlord</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                {billing === 'monthly' 
+                  ? 'Handle every step from listing to lease inside SwiftRent.' 
+                  : 'Save R700 per year with annual billing.'}
+              </p>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-4xl font-bold">
+                  R{billing === 'monthly' ? '199' : '135'}
+                </span>
+                <span className="text-muted-foreground">/ month</span>
+              </div>
+              {billing === 'yearly' && (
+                <p className="text-sm text-muted-foreground">
+                  Billed <span className="font-semibold">R1,600</span> / year
+                </p>
+              )}
+            </div>
+
+            <Button 
+              className="w-full mb-6"
               onClick={() => {
-                const isYearly = proBilling === 'yearly';
+                const isYearly = billing === 'yearly';
                 startPayfastCheckout({
                   plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
                   amount: isYearly ? 1600 : 199,
@@ -103,37 +122,59 @@ export default function Pricing() {
                 });
               }}
             >
-              {proBilling === 'yearly' ? 'Choose Yearly' : 'Choose Monthly'}
+              Get Started
             </Button>
+
+            <div className="space-y-3 flex-1">
+              <Feature>Unlimited property listings</Feature>
+              <Feature>Verified tenants</Feature>
+              <Feature>In-platform messaging</Feature>
+              <Feature>Digital lease agreements tailored for South African law</Feature>
+              <Feature>Legally binding e-signatures</Feature>
+              <Feature>Inventory tracker (upload & timestamped records)</Feature>
+              <Feature>Maintenance management - tenants submit requests from their dashboard</Feature>
+              <Feature>Automated tenant reminders</Feature>
+            </div>
+          </div>
+
+          {/* Premium Gold */}
+          <div className="rounded-2xl border bg-card p-8 flex flex-col">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold mb-2">Premium Gold</h3>
+              <p className="text-sm text-muted-foreground mb-4">Everything in Pro, plus concierge service.</p>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-4xl font-bold">R4,999</span>
+                <span className="text-muted-foreground">/ year</span>
+              </div>
+            </div>
+
+            <Button 
+              className="w-full mb-6"
+              variant="outline"
+              onClick={() => startPayfastCheckout({ 
+                plan_code: 'premium_gold', 
+                amount: 4999, 
+                item_name: 'SwiftRent Premium Gold', 
+                item_description: 'Annual plan' 
+              })}
+            >
+              Get Started
+            </Button>
+
+            <div className="space-y-3 flex-1">
+              <Feature>Full maintenance concierge service</Feature>
+              <Feature>SwiftRent intercepts and manages maintenance</Feature>
+              <Feature>We liaise with contractors; you approve</Feature>
+              <Feature>VIP landlord support line</Feature>
+              <Feature>Annual rental performance report</Feature>
+            </div>
           </div>
         </div>
 
-        {/* Premium Landlord removed */}
-
-        {/* Premium Gold */}
-        <div className={`${PLAN_CARD} border-2 border-amber-500`}> 
-          <div className={PLAN_HEADER}>
-            <div className="text-amber-600 font-semibold">Premium Gold</div>
-            <h3 className={PLAN_TITLE}>Annual (Once-off)</h3>
-            <div className={PLAN_PRICE}>R4,999<span className="text-base font-medium text-muted-foreground"> / year</span></div>
-            <p className={PLAN_DESC}>Everything in Premium, plus concierge.</p>
-          </div>
-          <div className={PLAN_BODY}>
-            <Feature>Full maintenance concierge service</Feature>
-            <Feature>SwiftRent intercepts and manages maintenance</Feature>
-            <Feature>We liaise with contractors; you approve</Feature>
-            <Feature>VIP landlord support line</Feature>
-            <Feature>Annual rental performance report</Feature>
-          </div>
-          <div className="p-6 pt-0">
-            <Button className="w-full bg-amber-600 hover:bg-amber-700 text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_gold', amount: 4999, item_name: 'SwiftRent Premium Gold', item_description: 'Annual plan' })}>Get Premium Gold</Button>
-          </div>
+        {/* Footer Note */}
+        <div className="mt-16 text-center text-sm text-muted-foreground max-w-2xl mx-auto">
+          Prices include VAT where applicable. Plans can be changed or cancelled anytime.
         </div>
-      </div>
-
-      {/* FAQ / Notes */}
-      <div className="mt-12 text-center text-sm text-muted-foreground">
-        Prices include VAT where applicable. Plans can be changed or cancelled anytime.
       </div>
     </div>
   );
