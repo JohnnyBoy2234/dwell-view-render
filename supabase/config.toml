@@ -66,3 +66,12 @@ verify_jwt = true
 
 [functions.ai-support-chat]
 verify_jwt = false
+
+[functions.ai-payment-ocr]
+verify_jwt = true
+
+[functions.verify-payment-proof]
+verify_jwt = true
+
+[functions.paystack-webhook]
+verify_jwt = false
