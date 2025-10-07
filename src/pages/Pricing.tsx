@@ -72,8 +72,7 @@ export default function Pricing() {
             <Feature>Digital lease agreements tailored for South African law</Feature>
             <Feature>Legally binding e-signatures</Feature>
             <Feature>Inventory tracker (upload & timestamped records)</Feature>
-            <Feature>Maintenance management — tenants submit requests from their dashboard</Feature>
-            <Feature>Real-time notifications for rent payments, renewals & maintenance updates</Feature>
+            <Feature>Maintenance management tenants submit requests from their dashboard</Feature>
             <Feature>Automated tenant reminders</Feature>
           </div>
           <div className="p-6 pt-0">
@@ -97,13 +96,11 @@ export default function Pricing() {
             <Feature>Legally binding e-signatures</Feature>
             <Feature>Inventory tracker (upload & timestamped records)</Feature>
             <Feature>Maintenance management tenants submit requests from their dashboard</Feature>
-            <Feature>Real-time notifications for rent payments, renewals & maintenance updates</Feature>
             <Feature>Automated tenant reminders</Feature>
 
             <div className="bg-green-100 border border-green-300 rounded-lg p-4 mt-4">
               <div className="text-sm font-semibold text-green-800 mb-2">Added Benefits: Manager Tools</div>
               <div className="space-y-1">
-                <div className="flex items-start gap-2 text-sm"><Check className="h-4 w-4 text-green-600 mt-0.5" /><span>Unlimited listings per year</span></div>
                 <div className="flex items-start gap-2 text-sm"><Check className="h-5 w-5 text-green-600 mt-0.5" /><span>SwiftBooks generates profit and loss statements and monthly tax invoices</span></div>
               </div>
             </div>
