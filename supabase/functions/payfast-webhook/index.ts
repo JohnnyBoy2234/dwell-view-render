@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHmac } from "https://deno.land/std@0.190.0/node/crypto.ts";
+import { HmacMd5 } from "https://deno.land/std@0.190.0/hash/hmac.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -34,9 +34,9 @@ serve(async (req) => {
       .map(key => `${key}=${encodeURIComponent(data[key]).replace(/%20/g, '+')}`)
       .join('&');
     
-    const hash = createHmac('md5', payfastPassphrase)
-      .update(paramString)
-      .digest('hex');
+    const hmac = new HmacMd5(payfastPassphrase);
+    hmac.update(paramString);
+    const hash = hmac.toString();
 
     if (hash !== signature) {
       console.error('Invalid signature');
