@@ -42,7 +42,7 @@ export function PlanSelectDialog({ open, onOpenChange }: PlanSelectDialogProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-5xl">
         <DialogHeader>
           <DialogTitle>Choose your plan</DialogTitle>
           <DialogDescription>Select a plan to continue. Annual options are shown first.</DialogDescription>
