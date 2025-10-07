@@ -1,10 +1,14 @@
-import { Upload, FileText, Download, Trash2, CheckCircle } from 'lucide-react';
+import { Upload, FileText, Download, Trash2, CheckCircle, Star } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useProofOfPayment } from '@/hooks/useProofOfPayment';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import PaymentVerificationUpload from '@/components/payments/PaymentVerificationUpload';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
 
 export default function TenantProofOfPayment() {
   const {
@@ -15,6 +19,28 @@ export default function TenantProofOfPayment() {
     deleteDocument,
     downloadDocument
   } = useProofOfPayment();
+
+  const [activeTenancy, setActiveTenancy] = useState<any>(null);
+  const [loadingTenancy, setLoadingTenancy] = useState(true);
+
+  useEffect(() => {
+    loadActiveTenancy();
+  }, []);
+
+  const loadActiveTenancy = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: tenancy } = await supabase
+      .from('tenancies')
+      .select('*, properties(*)')
+      .eq('tenant_id', user.id)
+      .eq('status', 'active')
+      .single();
+
+    setActiveTenancy(tenancy);
+    setLoadingTenancy(false);
+  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -71,6 +97,20 @@ export default function TenantProofOfPayment() {
     );
   }
 
+  if (loading || loadingTenancy) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Proof of Payment</h1>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+        <div className="flex items-center justify-center py-12">
+          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -81,133 +121,157 @@ export default function TenantProofOfPayment() {
         </p>
       </div>
 
-      {/* Upload Section */}
-      <Card className="bg-gradient-to-r from-ocean-blue/5 to-success-green/5 border-ocean-blue/20">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-ocean-blue">
-            <Upload className="h-5 w-5" />
-            Upload New Document
-          </CardTitle>
-          <CardDescription>
-            Upload bank statements, transfer receipts, or other payment proof documents
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
+      <Tabs defaultValue="ai-verification" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="ai-verification">AI Payment Verification</TabsTrigger>
+          <TabsTrigger value="documents">Document Archive</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="ai-verification" className="space-y-6">
+          {activeTenancy ? (
+            <PaymentVerificationUpload
+              tenancyId={activeTenancy.id}
+              expectedAmount={activeTenancy.monthly_rent}
+            />
+          ) : (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <p className="text-muted-foreground">No active tenancy found. You need an active lease to submit payments.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="documents" className="space-y-6">
+          {/* Upload Section */}
+          <Card className="bg-gradient-to-r from-primary/5 to-accent/5 border-primary/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-primary">
+                <Upload className="h-5 w-5" />
+                Upload Document Archive
+              </CardTitle>
+              <CardDescription>
+                Store historical documents for your records (not processed by AI)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="grid w-full max-w-sm items-center gap-1.5">
+                  <Label htmlFor="document">Choose file</Label>
+                  <Input 
+                    id="document" 
+                    type="file" 
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                    disabled={uploading}
+                  />
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p>Supported formats: PDF, JPG, PNG (Max 10MB)</p>
+                  <p>For archival purposes only - use AI Verification tab for payment processing</p>
+                </div>
+                {uploading && (
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                    Uploading document...
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Documents List */}
           <div className="space-y-4">
-            <div className="grid w-full max-w-sm items-center gap-1.5">
-              <Label htmlFor="document">Choose file</Label>
-              <Input 
-                id="document" 
-                type="file" 
-                accept=".pdf,.jpg,.jpeg,.png"
-                onChange={handleFileUpload}
-                disabled={uploading}
-              />
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Archived Documents</h2>
+              <Badge variant="secondary">{documents.length} documents</Badge>
             </div>
-            <div className="text-sm text-muted-foreground">
-              <p>Supported formats: PDF, JPG, PNG (Max 10MB)</p>
-              <p>Recommended: Bank statements, transfer receipts, payment confirmations</p>
-            </div>
-            {uploading && (
-              <div className="flex items-center gap-2 text-sm text-ocean-blue">
-                <div className="h-4 w-4 border-2 border-ocean-blue border-t-transparent rounded-full animate-spin" />
-                Uploading document...
+
+            {documents.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No archived documents</h3>
+                  <p className="text-muted-foreground">
+                    Upload documents for your records
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {documents.map((document) => (
+                  <Card key={document.id} className="hover:shadow-md transition-all duration-200">
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                            {getStatusIcon(document.status)}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg">{document.fileName}</h3>
+                            <p className="text-muted-foreground">{document.description}</p>
+                            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                              <span>{document.fileSize}</span>
+                              <span>Uploaded: {new Date(document.uploadDate).toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          {getStatusBadge(document.status)}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadDocument(document.id, document.filePath, document.fileName)}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteDocument(document.id, document.filePath)}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Documents List */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Your Documents</h2>
-          <Badge variant="secondary">{documents.length} documents</Badge>
-        </div>
-
-        {documents.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No documents uploaded yet</h3>
-              <p className="text-muted-foreground">
-                Upload your first proof of payment document to get started
-              </p>
+          {/* Help Section */}
+          <Card className="bg-muted/30">
+            <CardHeader>
+              <CardTitle className="text-lg">Document Guidelines</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <h4 className="font-semibold mb-1">AI Verification Tab:</h4>
+                  <ul className="list-disc ml-5 space-y-1 text-muted-foreground">
+                    <li>Upload current month's payment proof for instant verification</li>
+                    <li>Earn golden stars ⭐ for on-time or early payments</li>
+                    <li>Unlock annual "Reliable Tenant" badges (12 stars = 1 badge)</li>
+                    <li>AI verifies amount, date, and reference automatically</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-1">Document Archive Tab:</h4>
+                  <ul className="list-disc ml-5 space-y-1 text-muted-foreground">
+                    <li>Store historical statements for your records</li>
+                    <li>Not processed by AI - for archival purposes only</li>
+                    <li>Keep organized records of all your payment documentation</li>
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid gap-4">
-            {documents.map((document) => (
-              <Card key={document.id} className="hover:shadow-medium transition-all duration-200">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-ocean-blue/10 rounded-lg flex items-center justify-center">
-                        {getStatusIcon(document.status)}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{document.fileName}</h3>
-                        <p className="text-muted-foreground">{document.description}</p>
-                        <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                          <span>{document.fileSize}</span>
-                          <span>Uploaded: {new Date(document.uploadDate).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      {getStatusBadge(document.status)}
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadDocument(document.id, document.filePath, document.fileName)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteDocument(document.id, document.filePath)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Help Section */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="text-lg">Document Guidelines</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm">
-            <div>
-              <h4 className="font-semibold mb-1">What to upload:</h4>
-              <ul className="list-disc ml-5 space-y-1 text-muted-foreground">
-                <li>Monthly bank statements showing rent payments</li>
-                <li>Transfer receipts from rent payments</li>
-                <li>Payment confirmations from your bank</li>
-                <li>Any other proof of payment documents</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-1">Tips:</h4>
-              <ul className="list-disc ml-5 space-y-1 text-muted-foreground">
-                <li>Upload documents regularly to maintain good records</li>
-                <li>Ensure documents are clear and readable</li>
-                <li>Use descriptive file names for easy identification</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
