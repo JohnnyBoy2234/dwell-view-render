@@ -12,7 +12,8 @@ const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export default function Pricing() {
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('monthly');
+  const [premiumBilling, setPremiumBilling] = useState<'monthly' | 'yearly'>('monthly');
 
   return (
     <div className="min-h-screen bg-background py-16 px-4">
@@ -22,31 +23,7 @@ export default function Pricing() {
           subtitle="Start for free. Upgrade to get the capacity that exactly matches your needs."
         />
 
-        {/* Billing Toggle */}
-        <div className="flex justify-center mb-12">
-          <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg">
-            <button
-              onClick={() => setBilling('monthly')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                billing === 'monthly'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBilling('yearly')}
-              className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                billing === 'yearly'
-                  ? 'bg-background text-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Annual
-            </button>
-          </div>
-        </div>
+        
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -92,37 +69,45 @@ export default function Pricing() {
             
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Pro Landlord</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                {billing === 'monthly' 
-                  ? 'Handle every step from listing to lease inside SwiftRent.' 
-                  : 'Save R700 per year with annual billing.'}
-              </p>
+              <p className="text-sm text-muted-foreground mb-4">Handle every step from listing to lease inside SwiftRent.</p>
+              <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg mb-3">
+                <button
+                  onClick={() => setProBilling('monthly')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${proBilling === 'monthly' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setProBilling('yearly')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${proBilling === 'yearly' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                >
+                  Annual
+                </button>
+              </div>
               <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-4xl font-bold">
-                  R{billing === 'monthly' ? '199' : '135'}
+                  R{proBilling === 'monthly' ? '199' : '135'}
                 </span>
                 <span className="text-muted-foreground">/ month</span>
               </div>
-              {billing === 'yearly' && (
-                <p className="text-sm text-muted-foreground">
-                  Billed <span className="font-semibold">R1,600</span> / year
-                </p>
+              {proBilling === 'yearly' && (
+                <p className="text-xs font-bold inline-flex items-center gap-2 text-green-700 bg-green-100 border border-green-300 rounded-full px-3 py-1">Save R700</p>
               )}
             </div>
 
             <Button 
               className="w-full mb-6"
               onClick={() => {
-                const isYearly = billing === 'yearly';
+                const isYearly = proBilling === 'yearly';
                 startPayfastCheckout({
                   plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
                   amount: isYearly ? 1600 : 199,
                   item_name: isYearly ? 'SwiftRent Pro Landlord (Yearly)' : 'SwiftRent Pro Landlord (Monthly)',
-                  item_description: isYearly ? 'Billed annually (R1,600)' : 'Billed monthly',
+                  item_description: isYearly ? 'Annual billing' : 'Monthly billing',
                 });
               }}
             >
-              Get Started
+              {proBilling === 'yearly' ? 'Choose Annual' : 'Choose Monthly'}
             </Button>
 
             <div className="space-y-3 flex-1">
@@ -137,28 +122,47 @@ export default function Pricing() {
             </div>
           </div>
 
-          {/* Premium Gold */}
-          <div className="rounded-2xl border bg-card p-8 flex flex-col">
+          {/* Premium Landlord (Gold) */}
+          <div className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-8 flex flex-col">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Premium Gold</h3>
+              <h3 className="text-lg font-semibold mb-2">Premium Landlord</h3>
               <p className="text-sm text-muted-foreground mb-4">Everything in Pro, plus concierge service.</p>
-              <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-4xl font-bold">R4,999</span>
-                <span className="text-muted-foreground">/ year</span>
+              <div className="inline-flex items-center gap-1 p-1 bg-amber-200/60 rounded-lg mb-3">
+                <button
+                  onClick={() => setPremiumBilling('monthly')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${premiumBilling === 'monthly' ? 'bg-amber-100 text-amber-900 shadow-sm' : 'text-amber-900/70 hover:text-amber-900'}`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setPremiumBilling('yearly')}
+                  className={`px-4 py-1.5 rounded-md text-xs font-medium transition-all ${premiumBilling === 'yearly' ? 'bg-amber-100 text-amber-900 shadow-sm' : 'text-amber-900/70 hover:text-amber-900'}`}
+                >
+                  Annual
+                </button>
               </div>
+              <div className="flex items-baseline gap-2 mb-2">
+                <span className="text-4xl font-bold">R{premiumBilling === 'monthly' ? '700' : '500'}</span>
+                <span className="text-muted-foreground">/ month</span>
+              </div>
+              {premiumBilling === 'yearly' && (
+                <p className="text-xs font-bold inline-flex items-center gap-2 text-green-700 bg-green-100 border border-green-300 rounded-full px-3 py-1">Save R2,400</p>
+              )}
             </div>
 
             <Button 
               className="w-full mb-6"
-              variant="outline"
-              onClick={() => startPayfastCheckout({ 
-                plan_code: 'premium_gold', 
-                amount: 4999, 
-                item_name: 'SwiftRent Premium Gold', 
-                item_description: 'Annual plan' 
-              })}
+              onClick={() => {
+                const isYearly = premiumBilling === 'yearly';
+                startPayfastCheckout({
+                  plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
+                  amount: isYearly ? 6000 : 700,
+                  item_name: isYearly ? 'SwiftRent Premium Landlord (Yearly)' : 'SwiftRent Premium Landlord (Monthly)',
+                  item_description: isYearly ? 'Annual billing' : 'Monthly billing',
+                });
+              }}
             >
-              Get Started
+              {premiumBilling === 'yearly' ? 'Choose Annual' : 'Choose Monthly'}
             </Button>
 
             <div className="space-y-3 flex-1">
