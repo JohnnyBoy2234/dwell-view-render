@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startPayfastCheckout } from "@/services/payfastService";
@@ -12,6 +13,7 @@ const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export default function Pricing() {
+  const navigate = useNavigate();
   const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('yearly');
   const [premiumBilling, setPremiumBilling] = useState<'monthly' | 'yearly'>('yearly');
 
@@ -43,14 +45,9 @@ export default function Pricing() {
 
             <Button 
               className="w-full mb-6"
-              onClick={() => startPayfastCheckout({ 
-                plan_code: 'basic_listing', 
-                amount: 99, 
-                item_name: 'SwiftRent Basic Listing', 
-                item_description: 'Once-off listing fee' 
-              })}
+              onClick={() => navigate('/list-property')}
             >
-              Get Started
+              Start Listing (Free)
             </Button>
 
             <div className="space-y-3 flex-1">

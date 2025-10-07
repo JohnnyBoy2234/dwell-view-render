@@ -1,5 +1,5 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Home, Search, Heart, Send, User, Plus, Bell } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useTenantNotifications } from '@/hooks/useTenantNotifications';
 import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';
+import PlanSelectDialog from '@/components/pricing/PlanSelectDialog';
 
 export function MobileBottomBar() {
   const location = useLocation();
@@ -16,6 +17,7 @@ export function MobileBottomBar() {
   const { unreadCount: notificationUnread } = useNotifications();
   const { unreadCount: tenantUnread } = useTenantNotifications();
   const { unreadCount: landlordUnread } = useLandlordNotifications();
+  const [openPlan, setOpenPlan] = useState(false);
   
   
   const [searchParams] = useSearchParams();
@@ -115,22 +117,19 @@ export function MobileBottomBar() {
         {leftNavItems.map(renderNavItem)}
         
         {isLandlord && (
-          <Link
-            to="/list-property"
-            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
-              location.pathname === '/list-property'
-                ? 'text-white bg-black/20'
-                : 'text-white/80 hover:text-white'
-            }`}
+          <button
+            onClick={() => setOpenPlan(true)}
+            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 text-white/80 hover:text-white`}
           >
             <div className="relative">
-              <Plus className={`h-5 w-5 ${location.pathname === '/list-property' ? 'text-white' : ''}`} />
+              <Plus className={`h-5 w-5`} />
             </div>
             <span className="text-xs text-center">List</span>
-          </Link>
+          </button>
         )}
 
         {rightNavItems.map(renderNavItem)}
+        <PlanSelectDialog open={openPlan} onOpenChange={setOpenPlan} />
       </div>
     </div>
   );
