@@ -68,10 +68,16 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.ai-payment-ocr]
-verify_jwt = true
+verify_jwt = false
 
 [functions.verify-payment-proof]
 verify_jwt = true
 
 [functions.paystack-webhook]
+verify_jwt = false
+
+[functions.payfast-webhook]
+verify_jwt = false
+
+[functions.payment-reminder-scheduler]
 verify_jwt = false
