@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startPayfastCheckout } from "@/services/payfastService";
@@ -27,6 +27,7 @@ const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 export default function Pricing() {
+  const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('monthly');
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <SectionHeader
@@ -58,57 +59,56 @@ export default function Pricing() {
         </div>
 
         {/* Pro Landlord */}
-        <div className={`${PLAN_CARD} ring-1 ring-ocean-blue/10`}> 
+        <div className={`${PLAN_CARD} ring-1 ring-ocean-blue/10`}>
           <div className={PLAN_HEADER}>
             <div className="text-ocean-blue font-semibold">Pro Landlord</div>
-            <h3 className={PLAN_TITLE}>Yearly Subscription</h3>
-            <div className={PLAN_PRICE}>R399<span className="text-base font-medium text-muted-foreground"> / year</span></div>
-            <p className={PLAN_DESC}>Handle every step from listing to lease inside SwiftRent.</p>
-          </div>
-          <div className={PLAN_BODY}>
-            <Feature>Unlimited property listings</Feature>
-            <Feature>Verified tenants</Feature>
-            <Feature>In-platform messaging</Feature>
-            <Feature>Digital lease agreements tailored for South African law</Feature>
-            <Feature>Legally binding e-signatures</Feature>
-            <Feature>Inventory tracker (upload & timestamped records)</Feature>
-            <Feature>Maintenance management tenants submit requests from their dashboard</Feature>
-            <Feature>Automated tenant reminders</Feature>
-          </div>
-          <div className="p-6 pt-0">
-            <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'pro_landlord', amount: 399, item_name: 'SwiftRent Pro Landlord', item_description: 'Pro Landlord monthly subscription' })}>Upgrade to Pro</Button>
-          </div>
-        </div>
-
-        {/* Premium Landlord */}
-        <div className={`${PLAN_CARD} ring-2 ring-success-green/20`}> 
-          <div className={PLAN_HEADER}>
-            <div className="text-success-green font-semibold">Premium Landlord</div>
-            <h3 className={PLAN_TITLE}>Yearly Subscription</h3>
-            <div className={PLAN_PRICE}>R999<span className="text-base font-medium text-muted-foreground"> / year</span></div>
-            <p className={PLAN_DESC}>Everything in Pro, plus</p>
-          </div>
-          <div className={PLAN_BODY}>
-            <Feature>Unlimited property listings</Feature>
-            <Feature>Verified tenants</Feature>
-            <Feature>In-platform messaging</Feature>
-            <Feature>Digital lease agreements tailored for South African law</Feature>
-            <Feature>Legally binding e-signatures</Feature>
-            <Feature>Inventory tracker (upload & timestamped records)</Feature>
-            <Feature>Maintenance management tenants submit requests from their dashboard</Feature>
-            <Feature>Automated tenant reminders</Feature>
-
-            <div className="bg-green-100 border border-green-300 rounded-lg p-4 mt-4">
-              <div className="text-sm font-semibold text-green-800 mb-2">Added Benefits: Manager Tools</div>
-              <div className="space-y-1">
-                <div className="flex items-start gap-2 text-sm"><Check className="h-5 w-5 text-green-600 mt-0.5" /><span>SwiftBooks generates profit and loss statements and monthly tax invoices</span></div>
-              </div>
+            <h3 className={PLAN_TITLE}>Subscription</h3>
+            <div className="flex items-center gap-2 mt-2">
+              <button className={`px-3 py-1 rounded-full text-sm ${proBilling === 'monthly' ? 'bg-ocean-blue text-white' : 'bg-muted text-foreground'}`} onClick={() => setProBilling('monthly')}>Monthly</button>
+              <button className={`px-3 py-1 rounded-full text-sm ${proBilling === 'yearly' ? 'bg-ocean-blue text-white' : 'bg-muted text-foreground'}`} onClick={() => setProBilling('yearly')}>Yearly</button>
             </div>
+            {proBilling === 'monthly' ? (
+              <>
+                <div className={PLAN_PRICE}>R199<span className="text-base font-medium text-muted-foreground"> / month</span></div>
+                <p className={PLAN_DESC}>Handle every step from listing to lease inside SwiftRent.</p>
+              </>
+            ) : (
+              <>
+                <div className={PLAN_PRICE}>R135<span className="text-base font-medium text-muted-foreground"> / month</span></div>
+                <p className="text-sm text-muted-foreground">Billed <span className="font-semibold">R1,600</span> / year</p>
+                <p className="text-xs font-semibold text-green-700">You save R700</p>
+              </>
+            )}
+          </div>
+          <div className={PLAN_BODY}>
+            <Feature>Unlimited property listings</Feature>
+            <Feature>Verified tenants</Feature>
+            <Feature>In-platform messaging</Feature>
+            <Feature>Digital lease agreements tailored for South African law</Feature>
+            <Feature>Legally binding e-signatures</Feature>
+            <Feature>Inventory tracker (upload & timestamped records)</Feature>
+            <Feature>Maintenance management tenants submit requests from their dashboard</Feature>
+            <Feature>Automated tenant reminders</Feature>
           </div>
           <div className="p-6 pt-0">
-            <Button className="w-full bg-success-green hover:bg-success-green-dark text-white" onClick={() => startPayfastCheckout({ plan_code: 'premium_landlord', amount: 999, item_name: 'SwiftRent Premium Landlord', item_description: 'Premium Landlord monthly subscription' })}>Go Premium</Button>
+            <Button
+              className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+              onClick={() => {
+                const isYearly = proBilling === 'yearly';
+                startPayfastCheckout({
+                  plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
+                  amount: isYearly ? 1600 : 199,
+                  item_name: isYearly ? 'SwiftRent Pro Landlord (Yearly)' : 'SwiftRent Pro Landlord (Monthly)',
+                  item_description: isYearly ? 'Billed annually (R1,600)' : 'Billed monthly',
+                });
+              }}
+            >
+              {proBilling === 'yearly' ? 'Choose Yearly' : 'Choose Monthly'}
+            </Button>
           </div>
         </div>
+
+        {/* Premium Landlord removed */}
 
         {/* Premium Gold */}
         <div className={`${PLAN_CARD} border-2 border-amber-500`}> 
@@ -138,5 +138,6 @@ export default function Pricing() {
     </div>
   );
 }
+
 
 
