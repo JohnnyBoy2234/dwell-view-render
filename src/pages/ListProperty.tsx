@@ -14,6 +14,8 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import PlanSelectDialog from '@/components/pricing/PlanSelectDialog';
+import { startPayfastCheckout } from '@/services/payfastService';
 
 // Import step components
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
@@ -61,6 +63,7 @@ export default function ListProperty() {
   const { user, isLandlord } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPlanDialog, setShowPlanDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -319,7 +322,7 @@ export default function ListProperty() {
             </Button>
           ) : (
             <Button
-              onClick={handleSubmit(onSubmit)}
+              onClick={() => setShowPlanDialog(true)}
               disabled={isSubmitting}
               className="flex items-center gap-2"
             >
@@ -328,6 +331,33 @@ export default function ListProperty() {
             </Button>
           )}
         </div>
+        <PlanSelectDialog 
+          open={showPlanDialog} 
+          onOpenChange={setShowPlanDialog}
+          onChooseFree={() => {
+            // Proceed to actually publish for free
+            const submitFn = handleSubmit(onSubmit);
+            submitFn();
+          }}
+          onChoosePro={(billing) => {
+            const isYearly = billing === 'yearly';
+            startPayfastCheckout({
+              plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
+              amount: isYearly ? 1600 : 199,
+              item_name: isYearly ? 'SwiftRent Pro Landlord (Yearly)' : 'SwiftRent Pro Landlord (Monthly)',
+              item_description: isYearly ? 'Annual billing' : 'Monthly billing',
+            });
+          }}
+          onChoosePremium={(billing) => {
+            const isYearly = billing === 'yearly';
+            startPayfastCheckout({
+              plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
+              amount: isYearly ? 6000 : 700,
+              item_name: isYearly ? 'SwiftRent Premium Landlord (Yearly)' : 'SwiftRent Premium Landlord (Monthly)',
+              item_description: isYearly ? 'Annual billing' : 'Monthly billing',
+            });
+          }}
+        />
       </div>
     </div>
   );

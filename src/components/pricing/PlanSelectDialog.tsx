@@ -8,6 +8,9 @@ import { startPayfastCheckout } from "@/services/payfastService";
 interface PlanSelectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onChooseFree?: () => void;
+  onChoosePro?: (billing: "yearly" | "monthly") => void;
+  onChoosePremium?: (billing: "yearly" | "monthly") => void;
 }
 
 const Feature: React.FC<{ children: React.ReactNode; bold?: boolean }> = ({ children, bold }) => (
@@ -17,10 +20,14 @@ const Feature: React.FC<{ children: React.ReactNode; bold?: boolean }> = ({ chil
   </div>
 );
 
-export function PlanSelectDialog({ open, onOpenChange }: PlanSelectDialogProps) {
+export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro, onChoosePremium }: PlanSelectDialogProps) {
   const navigate = useNavigate();
 
   const choosePro = (billing: "yearly" | "monthly") => {
+    if (onChoosePro) {
+      onOpenChange(false);
+      return onChoosePro(billing);
+    }
     const isYearly = billing === "yearly";
     startPayfastCheckout({
       plan_code: isYearly ? "pro_landlord_yearly" : "pro_landlord_monthly",
@@ -31,6 +38,10 @@ export function PlanSelectDialog({ open, onOpenChange }: PlanSelectDialogProps) 
   };
 
   const choosePremium = (billing: "yearly" | "monthly") => {
+    if (onChoosePremium) {
+      onOpenChange(false);
+      return onChoosePremium(billing);
+    }
     const isYearly = billing === "yearly";
     startPayfastCheckout({
       plan_code: isYearly ? "premium_landlord_yearly" : "premium_landlord_monthly",
@@ -57,7 +68,7 @@ export function PlanSelectDialog({ open, onOpenChange }: PlanSelectDialogProps) 
               <Feature>Single property listing</Feature>
               <Feature>Exposure to verified tenants</Feature>
             </div>
-            <Button onClick={() => { onOpenChange(false); navigate('/list-property'); }} className="mt-auto">Continue with Free</Button>
+            <Button onClick={() => { onOpenChange(false); onChooseFree ? onChooseFree() : navigate('/list-property'); }} className="mt-auto">Continue with Free</Button>
           </div>
           {/* Pro */}
           <div className="rounded-xl border-2 border-blue-400 bg-blue-50 p-4 flex flex-col">

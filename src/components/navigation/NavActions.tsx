@@ -1,10 +1,8 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { UserDropdown } from './UserDropdown';
 import { NAVBAR_CONTENT, NAVBAR_ROUTES, NAVBAR_STYLES } from '@/constants/navbarConstants';
-import { useState } from 'react';
-import PlanSelectDialog from '@/components/pricing/PlanSelectDialog';
 
 interface NavActionsProps {
   loading: boolean;
@@ -27,8 +25,6 @@ export function NavActions({
   isAdmin, 
   onSignOut 
 }: NavActionsProps) {
-  const [openPlan, setOpenPlan] = useState(false);
-  const navigate = useNavigate();
   if (loading) {
     return (
       <div className={NAVBAR_STYLES.DESKTOP_ACTIONS}>
@@ -41,15 +37,14 @@ export function NavActions({
     return (
       <div className={NAVBAR_STYLES.DESKTOP_ACTIONS}>
         {isLandlord && (
-          <>
-            <Button 
-              className={NAVBAR_STYLES.LIST_PROPERTY_BUTTON}
-              onClick={() => setOpenPlan(true)}
-            >
+          <Button 
+            asChild 
+            className={NAVBAR_STYLES.LIST_PROPERTY_BUTTON}
+          >
+            <Link to={NAVBAR_ROUTES.LIST_PROPERTY}>
               {NAVBAR_CONTENT.LIST_PROPERTY_LABEL}
-            </Button>
-            <PlanSelectDialog open={openPlan} onOpenChange={setOpenPlan} />
-          </>
+            </Link>
+          </Button>
         )}
         
         <NotificationBell />
