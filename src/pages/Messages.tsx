@@ -31,6 +31,8 @@ import { ViewingReminderHeader } from '@/components/messaging/ViewingReminderHea
 import { useConfirmedViewing } from '@/hooks/useConfirmedViewing';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import TenantBadgeDisplay from '@/components/payments/TenantBadgeDisplay';
+import { useTenantBadges } from '@/hooks/useTenantBadges';
 
 export default function Messages() {
   // Initialize auth context; do not early-return before hooks are declared

@@ -134,44 +134,6 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     screening_consent: false,
   });
 
-  useEffect(() => {
-    let isMounted = true;
-    if (user) {
-      (async () => {
-        await loadExistingData();
-        if (isMounted) {
-          applySavedProgress();
-        }
-      })();
-    }
-    return () => {
-      isMounted = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id, propertyId, applySavedProgress]);
-
-  useEffect(() => {
-    if (!user || loading || !hasLoadedAutosave) return;
-
-    const handler = setTimeout(() => {
-      const key = getAutosaveKey(user.id, propertyId);
-      try {
-        localStorage.setItem(
-          key,
-          JSON.stringify({
-            formData,
-            currentStep,
-            updatedAt: Date.now(),
-          })
-        );
-      } catch (error) {
-        console.warn("Failed to autosave application", error);
-      }
-    }, 600);
-
-    return () => clearTimeout(handler);
-  }, [formData, currentStep, user?.id, propertyId, loading, hasLoadedAutosave]);
-
   // Quick apply using saved screening details
   const quickApply = async () => {
     if (!user) return;

@@ -24,6 +24,7 @@ import { downloadFileFromUrl } from '@/lib/download';
 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import TenantBadgeInline from './TenantBadgeInline';
 
 interface ApplicationsTabProps {
   propertyId: string;
@@ -394,7 +395,11 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
               {requests.map((req) => (
                 <div key={req.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-lg gap-3">
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{req.tenant_profile?.display_name || 'Tenant'}</div>
+                    <TenantBadgeInline 
+                      tenantId={req.tenant_id}
+                      tenantName={req.tenant_profile?.display_name || 'Tenant'}
+                      size="sm"
+                    />
                     <div className="text-xs text-muted-foreground truncate">{req.properties?.title}</div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -503,11 +508,15 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
                       <CardContent className="p-4 sm:p-6">
                         <div className="flex flex-col gap-4">
                           <div className="flex items-start gap-3">
-                            <div className="p-2 bg-primary/10 rounded-full flex-shrink-0">
-                              <User className="h-4 w-4 text-primary" />
+                            <div className="bg-primary/10 p-3 rounded-lg">
+                              <User className="h-6 w-6 text-primary" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold truncate">{tenantName}</h4>
+                              <TenantBadgeInline 
+                                tenantId={application.tenant_id}
+                                tenantName={tenantName}
+                                size="sm"
+                              />
                               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Calendar className="h-3 w-3 flex-shrink-0" />
                                 <span className="truncate">Applied {format(new Date(application.created_at), 'MMM dd, yyyy')}</span>
