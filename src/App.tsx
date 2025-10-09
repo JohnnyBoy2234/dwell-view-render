@@ -1,5 +1,6 @@
 import * as React from "react";
 import { useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -52,7 +53,6 @@ import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
 import InventoryStart from "@/pages/InventoryStart";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
-import { Analytics } from "@vercel/analytics/next";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
@@ -178,6 +178,7 @@ const App = () => {
           </AuthBootstrap>
         </AuthProvider>
       </TooltipProvider>
+      <Analytics />
     </QueryClientProvider>
   );
 };
