@@ -250,6 +250,7 @@ export default function Properties() {
             <PaginationLink
               onClick={() => handlePageChange(i)}
               isActive={currentPage === i}
+              className="cursor-pointer hover:bg-ocean-blue/10"
             >
               {i}
             </PaginationLink>
@@ -262,6 +263,7 @@ export default function Properties() {
           <PaginationLink
             onClick={() => handlePageChange(1)}
             isActive={currentPage === 1}
+            className="cursor-pointer hover:bg-ocean-blue/10"
           >
             1
           </PaginationLink>
@@ -281,6 +283,7 @@ export default function Properties() {
             <PaginationLink
               onClick={() => handlePageChange(i)}
               isActive={currentPage === i}
+              className="cursor-pointer hover:bg-ocean-blue/10"
             >
               {i}
             </PaginationLink>
@@ -297,6 +300,7 @@ export default function Properties() {
           <PaginationLink
             onClick={() => handlePageChange(totalPages)}
             isActive={currentPage === totalPages}
+            className="cursor-pointer hover:bg-ocean-blue/10"
           >
             {totalPages}
           </PaginationLink>
@@ -398,13 +402,13 @@ export default function Properties() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 mb-8 flex justify-center">
             <Pagination>
-              <PaginationContent>
+              <PaginationContent className="gap-2">
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-ocean-blue/10'}
                   />
                 </PaginationItem>
                 
@@ -413,7 +417,7 @@ export default function Properties() {
                 <PaginationItem>
                   <PaginationNext
                     onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-ocean-blue/10'}
                   />
                 </PaginationItem>
               </PaginationContent>
