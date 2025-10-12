@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,15 +23,69 @@ export function AISupportChat() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
+  const getButtonSize = useCallback(() => 56, []); // h-14 / w-14
+
+  const getHorizontalMargin = useCallback(() => {
+    if (typeof window === 'undefined') return 24;
+    return window.innerWidth <= 768 ? 16 : 24;
+  }, []);
+
+  const getBottomSafeArea = useCallback(() => {
+    if (typeof window === 'undefined') return 80;
+    return window.innerWidth <= 768 ? 120 : 80;
+  }, []);
+
+  const clampPosition = useCallback(
+    (x: number, y: number) => {
+      if (typeof window === 'undefined') return { x, y };
+      const buttonSize = getButtonSize();
+      const margin = getHorizontalMargin();
+      const bottomSafeArea = getBottomSafeArea();
+
+      const minX = margin;
+      const maxX = Math.max(margin, window.innerWidth - buttonSize - margin);
+      const minY = margin;
+      const maxY = Math.max(margin, window.innerHeight - bottomSafeArea - buttonSize);
+
+      return {
+        x: Math.min(Math.max(x, minX), maxX),
+        y: Math.min(Math.max(y, minY), maxY),
+      };
+    },
+    [getBottomSafeArea, getButtonSize, getHorizontalMargin],
+  );
+
+  const getDefaultPosition = useCallback(() => {
+    if (typeof window === 'undefined') return { x: 0, y: 0 };
+    const buttonSize = getButtonSize();
+    const margin = getHorizontalMargin();
+    const bottomSafeArea = getBottomSafeArea();
+
+    return clampPosition(
+      window.innerWidth - buttonSize - margin,
+      window.innerHeight - bottomSafeArea - buttonSize,
+    );
+  }, [clampPosition, getBottomSafeArea, getButtonSize, getHorizontalMargin]);
+
   // Load saved position or use defaults
   useEffect(() => {
     const saved = localStorage.getItem('aiChatPosition');
     if (saved) {
-      setPosition(JSON.parse(saved));
+      const parsed = JSON.parse(saved);
+      setPosition(clampPosition(parsed.x, parsed.y));
     } else {
-      setPosition({ x: window.innerWidth - 80, y: window.innerHeight - 80 });
+      setPosition(getDefaultPosition());
     }
-  }, []);
+  }, [clampPosition, getDefaultPosition]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setPosition(prev => clampPosition(prev.x, prev.y));
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [clampPosition]);
 
   // Check if user is logged in for paid features
   useEffect(() => {
@@ -151,36 +205,68 @@ export function AISupportChat() {
     sendMessage(action);
   };
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (isOpen) return; // Don't drag when chat is open
+  const startDrag = useCallback((clientX: number, clientY: number) => {
+    if (isOpen) return;
     setIsDragging(true);
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
-  };
+    setDragStart({ x: clientX - position.x, y: clientY - position.y });
+  }, [isOpen, position.x, position.y]);
 
-  const handleMouseMove = (e: MouseEvent) => {
+  const updateDragPosition = useCallback((clientX: number, clientY: number) => {
     if (!isDragging) return;
-    const newX = Math.max(0, Math.min(window.innerWidth - 56, e.clientX - dragStart.x));
-    const newY = Math.max(0, Math.min(window.innerHeight - 56, e.clientY - dragStart.y));
-    setPosition({ x: newX, y: newY });
-  };
+    const newX = clientX - dragStart.x;
+    const newY = clientY - dragStart.y;
+    setPosition(clampPosition(newX, newY));
+  }, [clampPosition, dragStart.x, dragStart.y, isDragging]);
 
-  const handleMouseUp = () => {
-    if (isDragging) {
-      setIsDragging(false);
-      localStorage.setItem('aiChatPosition', JSON.stringify(position));
-    }
-  };
+  const endDrag = useCallback(() => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    localStorage.setItem('aiChatPosition', JSON.stringify(position));
+  }, [isDragging, position]);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    startDrag(e.clientX, e.clientY);
+  }, [startDrag]);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    updateDragPosition(e.clientX, e.clientY);
+  }, [updateDragPosition]);
+
+  const handleMouseUp = useCallback(() => {
+    endDrag();
+  }, [endDrag]);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 0) return;
+    const touch = e.touches[0];
+    startDrag(touch.clientX, touch.clientY);
+  }, [startDrag]);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 0) return;
+    const touch = e.touches[0];
+    e.preventDefault();
+    updateDragPosition(touch.clientX, touch.clientY);
+  }, [updateDragPosition]);
+
+  const handleTouchEnd = useCallback(() => {
+    endDrag();
+  }, [endDrag]);
 
   useEffect(() => {
     if (isDragging) {
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
+      window.addEventListener('touchmove', handleTouchMove, { passive: false });
+      window.addEventListener('touchend', handleTouchEnd);
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
+        window.removeEventListener('touchmove', handleTouchMove);
+        window.removeEventListener('touchend', handleTouchEnd);
       };
     }
-  }, [isDragging, dragStart, position]);
+  }, [endDrag, handleMouseMove, handleMouseUp, handleTouchEnd, handleTouchMove, isDragging]);
 
   return (
     <>
@@ -189,6 +275,7 @@ export function AISupportChat() {
         <Button
           onClick={() => setIsOpen(true)}
           onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
           style={{ 
             left: `${position.x}px`, 
             top: `${position.y}px`,
