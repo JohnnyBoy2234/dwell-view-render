@@ -180,7 +180,7 @@ const App = () => {
       </TooltipProvider>
       <Analytics />
     </QueryClientProvider>
-  );
+    );
 };
+  
 
-export default App;
