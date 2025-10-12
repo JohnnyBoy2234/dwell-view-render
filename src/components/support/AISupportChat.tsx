@@ -361,15 +361,6 @@ export function AISupportChat() {
 
           {/* Input */}
           <div className="p-4 border-t space-y-2">
-            {isPaidCustomer && (
-              <Button
-                variant="outline"
-                className="w-full text-sm"
-                onClick={() => window.location.href = '/tenant-support'}
-              >
-                Contact Human Support
-              </Button>
-            )}
             <div className="flex gap-2">
               <Input
                 value={input}
