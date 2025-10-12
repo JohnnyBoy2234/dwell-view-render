@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import OpenAI from "npm:openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,10 +13,10 @@ serve(async (req) => {
 
   try {
     const { messages, currentPage } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+
+    if (!OPENAI_API_KEY) {
+      throw new Error('OPENAI_API_KEY not configured');
     }
 
     // Build system prompt with page context
@@ -49,43 +50,59 @@ RULES:
 - No inappropriate content
 - If unsure, suggest human support`;
 
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
+    const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          const responseStream = await openai.responses.stream({
+            model: 'gpt-5-nano',
+            input: [
+              {
+                role: 'system',
+                content: [{ type: 'text', text: systemPrompt }],
+              },
+              ...messages.map((message: { role: string; content: string }) => ({
+                role: message.role,
+                content: [{ type: 'text', text: message.content }],
+              })),
+            ],
+          });
+
+          for await (const event of responseStream) {
+            if (event.type === 'response.error') {
+              console.error('OpenAI streaming error:', event.error);
+              throw new Error(event.error?.message ?? 'OpenAI streaming error');
+            }
+
+            if (event.type === 'response.output_text.delta') {
+              const payload = {
+                choices: [
+                  {
+                    delta: {
+                      content: event.delta,
+                    },
+                  },
+                ],
+              };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
+            }
+
+            if (event.type === 'response.completed') {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+            }
+          }
+
+          await responseStream.finalResponse();
+          controller.close();
+        } catch (streamError) {
+          controller.error(streamError);
+        }
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages
-        ],
-        stream: true,
-      }),
     });
 
-    if (!response.ok) {
-      if (response.status === 429) {
-        return new Response(
-          JSON.stringify({ error: 'Too many requests. Please try again in a moment.' }),
-          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      if (response.status === 402) {
-        return new Response(
-          JSON.stringify({ error: 'Service temporarily unavailable. Please try again later.' }),
-          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
-      }
-      
-      const errorText = await response.text();
-      console.error('AI Gateway error:', response.status, errorText);
-      throw new Error('Failed to get AI response');
-    }
-
-    // Stream the response back to client
-    return new Response(response.body, {
+    return new Response(stream, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'text/event-stream',
