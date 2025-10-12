@@ -1,4 +1,4 @@
-import { Home, Search, Heart, User, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send, BadgeDollarSign } from "lucide-react";
+import { Home, Search, Heart, User, LogOut, LayoutDashboard, MessageCircle, Bell, Shield, Send, BadgeDollarSign, FileText } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
