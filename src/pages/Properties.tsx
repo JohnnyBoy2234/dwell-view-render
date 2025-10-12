@@ -5,6 +5,15 @@ import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 interface Property {
   id: string;
@@ -25,12 +34,16 @@ interface Property {
   created_at: string;
 }
 
+const ITEMS_PER_PAGE = 30;
+
 export default function Properties() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
   
   // Get search parameters from URL
@@ -146,7 +159,7 @@ export default function Properties() {
   useEffect(() => {
     console.log('[Properties] Component mounted, fetching properties...');
     fetchProperties();
-  }, []);
+  }, [currentPage]);
 
   const fetchProperties = async () => {
     try {
@@ -154,12 +167,16 @@ export default function Properties() {
       setLoading(true);
       setError(null);
       
-      const { data, error } = await supabase
+      const from = (currentPage - 1) * ITEMS_PER_PAGE;
+      const to = from + ITEMS_PER_PAGE - 1;
+      
+      const { data, error, count } = await supabase
         .from('properties')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('status', 'available')
         .order('featured', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(from, to);
 
       if (error) {
         console.error('[Properties] Supabase error:', error);
@@ -168,6 +185,7 @@ export default function Properties() {
       
       console.log('[Properties] Properties fetched successfully:', data?.length || 0, 'properties');
       setProperties(data || []);
+      setTotalCount(count || 0);
     } catch (error: any) {
       console.error('[Properties] Error fetching properties:', error);
       setError(error.message);
@@ -210,7 +228,87 @@ export default function Properties() {
 
   const handleClearFilters = () => {
     // Navigate back to properties page without search parameters
+    setCurrentPage(1);
     navigate('/properties');
+  };
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const renderPaginationItems = () => {
+    const items = [];
+    const maxVisible = 5;
+    
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePageChange(i)}
+              isActive={currentPage === i}
+              className="cursor-pointer hover:bg-ocean-blue/10"
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      items.push(
+        <PaginationItem key={1}>
+          <PaginationLink
+            onClick={() => handlePageChange(1)}
+            isActive={currentPage === 1}
+            className="cursor-pointer hover:bg-ocean-blue/10"
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+
+      if (currentPage > 3) {
+        items.push(<PaginationEllipsis key="ellipsis-1" />);
+      }
+
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink
+              onClick={() => handlePageChange(i)}
+              isActive={currentPage === i}
+              className="cursor-pointer hover:bg-ocean-blue/10"
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+
+      if (currentPage < totalPages - 2) {
+        items.push(<PaginationEllipsis key="ellipsis-2" />);
+      }
+
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink
+            onClick={() => handlePageChange(totalPages)}
+            isActive={currentPage === totalPages}
+            className="cursor-pointer hover:bg-ocean-blue/10"
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+
+    return items;
   };
 
   console.log('[Properties] Rendering properties page with', filteredProperties.length, 'filtered properties');
@@ -301,6 +399,31 @@ export default function Properties() {
           onClearFilters={handleClearFilters}
           onShowAllProperties={() => navigate('/properties')}
         />
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-8 mb-8 flex justify-center">
+            <Pagination>
+              <PaginationContent className="gap-2">
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-ocean-blue/10'}
+                  />
+                </PaginationItem>
+                
+                {renderPaginationItems()}
+                
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-ocean-blue/10'}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </div>
   );
