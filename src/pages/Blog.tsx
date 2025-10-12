@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { formatPublishedDate } from "@/utils/date";
 
 export default function Blog() {
   const { toast } = useToast();
@@ -66,7 +67,7 @@ export default function Blog() {
                     Why Paying Commission on Rentals Is Wrong
                   </CardTitle>
                   <p className="text-muted-foreground text-sm mt-2">
-                    Published on {new Date().toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' })}
+                    Published on {formatPublishedDate("2024-10-10")}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleShare} className="shrink-0">
