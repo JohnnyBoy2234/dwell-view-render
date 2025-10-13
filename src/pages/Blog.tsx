@@ -10,8 +10,8 @@ export default function Blog() {
 
   const handleShare = async () => {
     const shareData = {
-      title: "Why Paying Commission on Rentals Is Wrong - SwiftRent Blog",
-      text: "Read this insightful article about commission-free rentals and why the traditional model needs to change.",
+      title: "Safe, Simple, and Transparent - The New Way to Rent in South Africa - SwiftRent Blog",
+      text: "Discover how SwiftRent is revolutionizing rental safety and transparency in South Africa with verified users, POPIA compliance, and commission-free renting.",
       url: window.location.href
     };
 
@@ -64,10 +64,10 @@ export default function Blog() {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <CardTitle className="text-2xl md:text-3xl font-bold">
-                    Why Paying Commission on Rentals Is Wrong
+                    Safe, Simple, and Transparent - The New Way to Rent in South Africa
                   </CardTitle>
                   <p className="text-muted-foreground text-sm mt-2">
-                    Published on {formatPublishedDate("2024-10-10")}
+                    Published on {formatPublishedDate("2024-12-19")}
                   </p>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleShare} className="shrink-0">
@@ -79,11 +79,7 @@ export default function Blog() {
             
             <CardContent className="prose prose-gray max-w-none">
               <p className="text-lg text-muted-foreground mb-6">
-                When it comes to renting a home, most landlords and tenants in South Africa have been conditioned to believe that paying commission to middlemen is "just the way it's done." But let's pause and ask a simple question: Why should anyone pay thousands of rands in commission for something they can manage directly and securely online?
-              </p>
-              
-              <p className="mb-6">
-                The truth is, paying commission is outdated, unfair, and unnecessary in today's digital world. Here's why.
+                Renting shouldn't feel risky or confusing. Yet for too long, South Africans have had to navigate a system full of hidden fees, empty promises, and unnecessary middlemen. SwiftRent was built to change that — to make renting secure, straightforward, and fair for everyone.
               </p>
               
               <div className="border-l-4 border-primary pl-4 my-8">
@@ -92,12 +88,9 @@ export default function Blog() {
 
               <div className="space-y-8">
                 <section>
-                  <h3 className="text-xl font-semibold mb-4">1. Commission Punishes Success</h3>
+                  <h3 className="text-xl font-semibold mb-4">Verified Safety from Day One</h3>
                   <p>
-                    Think about it: the more your property is worth, the higher the agent's cut. A landlord renting out a R15,000/month apartment pays a lot more than someone renting out at R7,000/month — even though the effort to list and show the property is essentially the same.
-                  </p>
-                  <p className="mt-4">
-                    Commission isn't linked to the actual work done; it's simply a penalty for having a valuable property. That doesn't sit right.
+                    Every landlord and tenant who joins the platform is verified through ID and email. It's a quick but powerful safeguard that keeps things real — real names, real people, real accountability. Behind the scenes, our Safe Renting System quietly filters out scams, fake listings, and suspicious activity long before it reaches you.
                   </p>
                 </section>
 
@@ -106,12 +99,9 @@ export default function Blog() {
                 </div>
 
                 <section>
-                  <h3 className="text-xl font-semibold mb-4">2. Landlords Lose Hard-Earned Income</h3>
+                  <h3 className="text-xl font-semibold mb-4">Your Data, Protected</h3>
                   <p>
-                    Every rand you hand over in commission is money you could be using to pay your bond, cover maintenance, or reinvest in your property portfolio. For many landlords, those "small" commission percentages add up to tens of thousands of rands lost every year.
-                  </p>
-                  <p className="mt-4">
-                    Why should you, the property owner, take on all the financial risk while someone else reaps the ongoing reward?
+                    Your data is protected under full POPIA compliance, meaning your personal details stay private and are used only for what they should be: safe, transparent renting. All uploads, payments, and messages are encrypted and traceable, giving you peace of mind that what happens on SwiftRent stays secure.
                   </p>
                 </section>
 
@@ -120,12 +110,9 @@ export default function Blog() {
                 </div>
 
                 <section>
-                  <h3 className="text-xl font-semibold mb-4">3. Tenants End Up Paying More Too</h3>
+                  <h3 className="text-xl font-semibold mb-4">Complete Transparency</h3>
                   <p>
-                    Commission doesn't just hurt landlords — it filters down to tenants as well. Landlords often raise rental prices to cover agent fees, meaning tenants pay inflated rates. The very system that's supposed to "help" both parties ends up hurting both sides.
-                  </p>
-                  <p className="mt-4">
-                    A no-commission model means fairer rentals and more affordable housing.
+                    We also believe trust grows through honesty. That's why we've removed every hidden fee that used to chip away at your income — no placement costs, no renewal charges, no admin or inspection "surprises." The price you see is the price you pay. Landlords and tenants communicate directly, without agents adding noise or markup in between.
                   </p>
                 </section>
 
@@ -134,37 +121,9 @@ export default function Blog() {
                 </div>
 
                 <section>
-                  <h3 className="text-xl font-semibold mb-4">4. Technology Has Replaced the Middleman</h3>
+                  <h3 className="text-xl font-semibold mb-4">Community Protection</h3>
                   <p>
-                    Years ago, landlords may have needed agents to advertise properties, handle paperwork, and do credit checks. But today, platforms like SwiftRent provide all of this — instantly, securely, and without hidden costs.
-                  </p>
-                  <p className="mt-4">
-                    From ID verification and free credit checks to digital lease signing and automated maintenance requests, everything agents used to do can now be handled online at a fraction of the cost.
-                  </p>
-                </section>
-
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
-
-                <section>
-                  <h3 className="text-xl font-semibold mb-4">5. Transparency Builds Trust</h3>
-                  <p>
-                    Commission creates a conflict of interest: agents are incentivized to push higher rentals, faster turnovers, and quick deals — not necessarily what's best for you.
-                  </p>
-                  <p className="mt-4">
-                    With a no-commission platform, there's no hidden agenda. Landlords and tenants connect directly, with full transparency, safety, and accountability.
-                  </p>
-                </section>
-
-                <div className="border-l-4 border-primary pl-4 my-8">
-                  <div className="w-16 h-0.5 bg-muted-foreground"></div>
-                </div>
-
-                <section>
-                  <h3 className="text-xl font-semibold mb-4">6. Gratitude, Not Exploitation</h3>
-                  <p>
-                    At SwiftRent, we believe renting a home should be about building trust, not draining pockets. Landlords shouldn't feel exploited, and tenants shouldn't feel overcharged. A fair, subscription-based model ensures that everyone pays only for real value — not for outdated commission structures.
+                    But technology isn't the only line of defence. South Africans have always protected their neighbourhoods, and SwiftRent carries that same spirit online. Our members help keep the platform clean by reporting anything that doesn't feel right. The result is a self-policing community built on respect and accountability.
                   </p>
                 </section>
 
@@ -173,15 +132,12 @@ export default function Blog() {
                 </div>
 
                 <section className="bg-muted/50 p-6 rounded-lg">
-                  <h3 className="text-xl font-semibold mb-4">The Bottom Line</h3>
+                  <h3 className="text-xl font-semibold mb-4">The New Standard</h3>
                   <p>
-                    Paying commission on rentals belongs in the past. The future is direct, digital, and commission-free.
-                  </p>
-                  <p className="mt-4">
-                    Landlords deserve to keep their income. Tenants deserve fair rental prices. And both deserve a system that prioritizes safety, trust, and efficiency.
+                    Safety isn't a luxury here. It's a must. Transparency isn't optional. It's the baseline. SwiftRent combines both — creating a trusted space where people can rent, list, and live without fear or friction.
                   </p>
                   <p className="mt-4 font-medium">
-                    That's why SwiftRent exists — to make renting simple, secure, and commission-free.
+                    SwiftRent — Safe, Simple, Commission-Free Renting.
                   </p>
                 </section>
               </div>
