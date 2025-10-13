@@ -51,58 +51,18 @@ RULES:
 - If unsure, suggest human support`;
 
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
-    const encoder = new TextEncoder();
 
-    const stream = new ReadableStream({
-      async start(controller) {
-        try {
-          const responseStream = await openai.responses.stream({
-            model: 'gpt-5-nano',
-            input: [
-              {
-                role: 'system',
-                content: [{ type: 'text', text: systemPrompt }],
-              },
-              ...messages.map((message: { role: string; content: string }) => ({
-                role: message.role,
-                content: [{ type: 'text', text: message.content }],
-              })),
-            ],
-          });
-
-          for await (const event of responseStream) {
-            if (event.type === 'response.error') {
-              console.error('OpenAI streaming error:', event.error);
-              throw new Error(event.error?.message ?? 'OpenAI streaming error');
-            }
-
-            if (event.type === 'response.output_text.delta') {
-              const payload = {
-                choices: [
-                  {
-                    delta: {
-                      content: event.delta,
-                    },
-                  },
-                ],
-              };
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify(payload)}\n\n`));
-            }
-
-            if (event.type === 'response.completed') {
-              controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-            }
-          }
-
-          await responseStream.finalResponse();
-          controller.close();
-        } catch (streamError) {
-          controller.error(streamError);
-        }
-      },
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ],
+      stream: true,
     });
 
-    return new Response(stream, {
+    // Stream the response back to client
+    return new Response(response.body, {
       headers: {
         ...corsHeaders,
         'Content-Type': 'text/event-stream',
