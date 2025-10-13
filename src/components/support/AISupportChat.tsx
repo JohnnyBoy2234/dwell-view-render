@@ -124,6 +124,9 @@ export function AISupportChat() {
     try {
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
       
+      console.log('Sending request to:', CHAT_URL);
+      console.log('Messages:', [...messages, userMessage]);
+      
       const response = await fetch(CHAT_URL, {
         method: 'POST',
         headers: {
@@ -135,6 +138,9 @@ export function AISupportChat() {
           currentPage: location.pathname,
         }),
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -152,14 +158,21 @@ export function AISupportChat() {
       let assistantMessage = '';
       let buffer = '';
 
+      console.log('Starting to read stream...');
+
       // Add empty assistant message that we'll update
       setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          console.log('Stream ended');
+          break;
+        }
 
-        buffer += decoder.decode(value, { stream: true });
+        const chunk = decoder.decode(value, { stream: true });
+        console.log('Received chunk:', chunk);
+        buffer += chunk;
         let newlineIndex: number;
 
         while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
@@ -171,13 +184,19 @@ export function AISupportChat() {
           if (!line.startsWith('data: ')) continue;
 
           const jsonStr = line.slice(6).trim();
-          if (jsonStr === '[DONE]') break;
+          console.log('Processing line:', jsonStr);
+          
+          if (jsonStr === '[DONE]') {
+            console.log('Stream completed');
+            break;
+          }
 
           try {
             const parsed = JSON.parse(jsonStr);
             const content = parsed.choices?.[0]?.delta?.content;
             
             if (content) {
+              console.log('Received content:', content);
               assistantMessage += content;
               setMessages(prev => {
                 const newMessages = [...prev];
@@ -189,6 +208,7 @@ export function AISupportChat() {
               });
             }
           } catch (e) {
+            console.log('JSON parse error:', e, 'for line:', jsonStr);
             // Incomplete JSON, re-buffer
             buffer = line + '\n' + buffer;
             break;
