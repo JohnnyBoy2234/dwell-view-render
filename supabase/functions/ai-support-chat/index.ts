@@ -15,6 +15,9 @@ serve(async (req) => {
     const { messages, currentPage } = await req.json();
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
+    console.log('Received request:', { messagesCount: messages.length, currentPage });
+    console.log('OpenAI API Key present:', !!OPENAI_API_KEY);
+
     if (!OPENAI_API_KEY) {
       throw new Error('OPENAI_API_KEY not configured');
     }
@@ -52,6 +55,7 @@ RULES:
 
     const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
+    console.log('Calling OpenAI API...');
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -61,6 +65,7 @@ RULES:
       stream: true,
     });
 
+    console.log('OpenAI response received, streaming...');
     // Stream the response back to client
     return new Response(response.body, {
       headers: {

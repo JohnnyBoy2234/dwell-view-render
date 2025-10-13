@@ -136,8 +136,14 @@ export function AISupportChat() {
         }),
       });
 
-      if (!response.ok || !response.body) {
-        throw new Error('Failed to get response');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Chat API error:', response.status, errorText);
+        throw new Error(`API error: ${response.status} - ${errorText}`);
+      }
+
+      if (!response.body) {
+        throw new Error('No response body received');
       }
 
       // Stream the response
@@ -194,7 +200,7 @@ export function AISupportChat() {
       console.error('Chat error:', error);
       setMessages(prev => [
         ...prev,
-        { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' },
+        { role: 'assistant', content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.` },
       ]);
     } finally {
       setIsLoading(false);
