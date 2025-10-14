@@ -224,6 +224,18 @@ export class MobileServices {
     return Capacitor.getPlatform() === 'android';
   }
 
+  // Convert URL to File object
+  static async urlToFile(url: string, filename: string): Promise<File> {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      return new File([blob], filename, { type: blob.type });
+    } catch (error) {
+      console.error('URL to File conversion error:', error);
+      throw error;
+    }
+  }
+
   // Biometric Authentication
   static async isBiometricAvailable(): Promise<boolean> {
     if (!this.isNative) return false;

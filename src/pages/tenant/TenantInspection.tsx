@@ -3,10 +3,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Clipboard, Eye, Download, Mic, Camera } from 'lucide-react';
+import { Clipboard, Eye, Download, Mic, Camera, Plus, ArrowLeft } from 'lucide-react';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspection';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
+import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 
 export default function TenantInspection() {
   const { tenantProperty, loading } = useTenantDashboard();
@@ -20,6 +21,23 @@ export default function TenantInspection() {
   
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecordWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isCreatingInspection, setIsCreatingInspection] = useState(false);
+
+  // Show inspection creation mode
+  if (isCreatingInspection && tenantProperty) {
+    return (
+      <div className="space-y-4">
+        <Button
+          variant="outline"
+          onClick={() => setIsCreatingInspection(false)}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Inspections
+        </Button>
+        <InventoryStartPanel propertyId={tenantProperty.id} />
+      </div>
+    );
+  }
 
   if (loading || inspectionLoading) {
     return (
@@ -122,7 +140,18 @@ export default function TenantInspection() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Inspection Records</h2>
-          <Badge variant="secondary">{inspectionRecords.length} records</Badge>
+          <div className="flex items-center gap-3">
+            <Badge variant="secondary">{inspectionRecords.length} records</Badge>
+            {tenantProperty && (
+              <Button
+                onClick={() => setIsCreatingInspection(true)}
+                className="bg-ocean-blue hover:bg-ocean-blue/90"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Start New Inspection
+              </Button>
+            )}
+          </div>
         </div>
 
         {inspectionRecords.length === 0 ? (
@@ -208,16 +237,22 @@ export default function TenantInspection() {
       {/* Info Card */}
       <Card className="bg-muted/30">
         <CardHeader>
-          <CardTitle className="text-lg">About Inspections</CardTitle>
+          <CardTitle className="text-lg">How to Create an Inspection</CardTitle>
         </CardHeader>
-        <CardContent className="text-sm text-muted-foreground space-y-2">
+        <CardContent className="text-sm text-muted-foreground space-y-3">
           <p>
-            Your landlord uses inspections to document the property condition at key moments 
-            (move-in, move-out, periodic checks).
+            You can create inspection records to document the property condition at move-in, 
+            move-out, or report any issues during your tenancy.
           </p>
-          <p>
-            You can view all photos and listen to voice notes to stay informed about the 
-            property's documented state.
+          <ol className="list-decimal ml-5 space-y-2">
+            <li>Click "Start New Inspection" button above</li>
+            <li>Take multiple photos of each room (camera opens directly on mobile)</li>
+            <li>Optionally record voice notes to describe items or issues</li>
+            <li>Add text descriptions for additional clarity</li>
+            <li>Click "Save" to submit the inspection to your landlord</li>
+          </ol>
+          <p className="text-xs">
+            Your landlord will receive and review your inspection records.
           </p>
         </CardContent>
       </Card>

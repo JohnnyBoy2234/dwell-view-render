@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { X, Trash2 } from 'lucide-react';
+import { X, Trash2, Camera } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { MultiPhotoCapture } from '@/components/mobile/MultiPhotoCapture';
+import { PhotoGallery } from '@/components/inspection/PhotoGallery';
+import { PhotoLightbox } from '@/components/inspection/PhotoLightbox';
 
 interface InventoryStartPanelProps {
   propertyId?: string;
@@ -51,6 +54,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [saving, setSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const webpSupportedRef = useRef<boolean | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxNoteId, setLightboxNoteId] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
 
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
@@ -447,6 +453,31 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     toast({ title: 'All notes cleared' });
   };
 
+  const handleViewPhoto = (noteId: string, photoIndex: number) => {
+    setLightboxNoteId(noteId);
+    setLightboxIndex(photoIndex);
+    setLightboxOpen(true);
+  };
+
+  const getCurrentLightboxPhotos = () => {
+    if (!lightboxNoteId) return [];
+    const note = notes.find(n => n.id === lightboxNoteId);
+    return note?.photos || [];
+  };
+
+  const handleLightboxNext = () => {
+    const photos = getCurrentLightboxPhotos();
+    if (lightboxIndex < photos.length - 1) {
+      setLightboxIndex(lightboxIndex + 1);
+    }
+  };
+
+  const handleLightboxPrevious = () => {
+    if (lightboxIndex > 0) {
+      setLightboxIndex(lightboxIndex - 1);
+    }
+  };
+
   if (!propertyId) {
     return (
       <Card>
@@ -548,7 +579,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         {error && <p className="text-destructive mt-2">{error}</p>}
         <div className="mt-4 space-y-4">
           {notes.map((note) => (
-            <Card key={note.id} className={`p-4 space-y-2 ${
+            <Card key={note.id} className={`p-4 space-y-3 ${
               note.saved ? 'bg-success-green/5 border-success-green/20' : 
               note.savingInProgress ? 'bg-primary/5 border-primary/20' : 
               'bg-background'
@@ -570,27 +601,33 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
+
+              {/* Multi-photo capture component */}
+              <MultiPhotoCapture
+                onPhotosSelected={(files) => {
+                  const fileList = {
+                    length: files.length,
+                    item: (index: number) => files[index] || null,
+                    [Symbol.iterator]: function* () {
+                      for (let i = 0; i < files.length; i++) {
+                        yield files[i];
+                      }
+                    }
+                  } as FileList;
+                  handleAddPhotos(note.id, fileList);
+                }}
+                maxPhotos={10}
+              />
+
+              {/* Photo gallery */}
               {note.photos.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {note.photos.map((photo) => (
-                    <div key={photo.id} className="relative">
-                      <img
-                        src={photo.previewUrl}
-                        alt="Note attachment"
-                        className="h-20 w-20 object-cover rounded-md"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => deletePhoto(note.id, photo.id)}
-                        aria-label="Delete photo"
-                        className="absolute -top-2 -right-2 bg-background rounded-full p-1 shadow-md"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
+                <PhotoGallery
+                  photos={note.photos}
+                  onDelete={(photoId) => deletePhoto(note.id, photoId)}
+                  onView={(index) => handleViewPhoto(note.id, index)}
+                />
               )}
+
               <Textarea
                 placeholder="Add a note or description about this room/item (optional)"
                 value={note.text || ''}
@@ -602,21 +639,20 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                   setHasUnsavedChanges(true);
                 }}
               />
-              <Input
-                type="file"
-                multiple
-                accept="image/jpeg,image/png,image/webp"
-                capture="environment"
-                aria-label="Attach photos"
-                onChange={(e) => {
-                  handleAddPhotos(note.id, e.target.files);
-                  e.target.value = '';
-                }}
-              />
             </Card>
           ))}
         </div>
       </div>
+
+      {/* Photo Lightbox */}
+      <PhotoLightbox
+        photos={getCurrentLightboxPhotos()}
+        currentIndex={lightboxIndex}
+        isOpen={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        onNext={handleLightboxNext}
+        onPrevious={handleLightboxPrevious}
+      />
     </div>
   );
 }
