@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import OpenAI from "npm:openai";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,59 +12,99 @@ serve(async (req) => {
 
   try {
     const { messages, currentPage } = await req.json();
-    const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     console.log('Received request:', { messagesCount: messages.length, currentPage });
-    console.log('OpenAI API Key present:', !!OPENAI_API_KEY);
+    console.log('Lovable API Key present:', !!LOVABLE_API_KEY);
 
-    if (!OPENAI_API_KEY) {
-      throw new Error('OPENAI_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    // Build system prompt with page context
-    const systemPrompt = `You are SwiftRent AI Support - a friendly, helpful assistant for South African property management.
+    // Build system prompt with page context - WEBSITE QUESTIONS ONLY
+    const systemPrompt = `You are SwiftRent AI Support - a helpful assistant that ONLY answers questions about the SwiftRent website and platform.
 
-KEEP IT SIMPLE:
-- Max 3-4 sentences per response
-- Use bullet points for lists
-- Break complex tasks into steps
-- Be conversational and helpful
+STRICT RULES:
+- ONLY answer questions about SwiftRent features, navigation, and how to use the platform
+- If asked about anything else (general advice, legal matters, unrelated topics), politely redirect: "I can only help with questions about using the SwiftRent platform. How can I assist you with the website?"
+- Keep responses brief (2-3 sentences maximum)
+- Be friendly and conversational
 
-${currentPage ? `User is on: ${currentPage}` : ''}
+${currentPage ? `User is currently on: ${currentPage}` : ''}
+
+WHAT YOU CAN HELP WITH:
 
 LANDLORD FEATURES:
-• Add properties → "List Property"
-• Review applications → "Applications" tab
-• Create leases → "Leases" section
-• Track payments → SwiftBooks
-• Handle maintenance → "Maintenance" board
+• Adding properties → Navigate to "List Property" section
+• Reviewing applications → Check "Applications" tab
+• Creating leases → Go to "Leases" section
+• Tracking payments → Use SwiftBooks feature
+• Managing maintenance → Access "Maintenance" board
+• Property inspections → Create inspection reports with photos
 
 TENANT FEATURES:
-• Browse properties → "Properties" page
-• Book viewings → Click "Book Viewing"
-• Submit applications → Fill application form
-• Sign leases → Digital signature
-• Pay rent → "Payments" section
-• Request maintenance → "Maintenance" tab
+• Browsing properties → Visit "Properties" page
+• Booking viewings → Click "Book Viewing" on property cards
+• Submitting applications → Fill out the application form
+• Signing leases → Use digital signature feature
+• Paying rent → Access "Payments" section
+• Requesting maintenance → Submit requests via "Maintenance" tab
+• Property inspections → Document property condition with photos
 
-RULES:
-- Stay brief and friendly
-- No inappropriate content
-- If unsure, suggest human support`;
+NAVIGATION HELP:
+• Explain where to find specific features
+• Guide through multi-step processes
+• Clarify button locations and menu options
 
-    const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+WHAT YOU CANNOT HELP WITH:
+• Legal advice or tenant rights questions
+• Property management advice unrelated to the platform
+• General real estate questions
+• Technical support for external services
+• Personal financial advice`;
 
-    console.log('Calling OpenAI API...');
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...messages
-      ],
-      stream: true,
+    console.log('Calling Lovable AI Gateway...');
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...messages
+        ],
+        stream: true,
+      }),
     });
 
-    console.log('OpenAI response received, streaming...');
+    if (!response.ok) {
+      if (response.status === 429) {
+        return new Response(
+          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }), 
+          { 
+            status: 429, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI service temporarily unavailable. Please try again later.' }), 
+          { 
+            status: 402, 
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+          }
+        );
+      }
+      const errorText = await response.text();
+      console.error('Lovable AI Gateway error:', response.status, errorText);
+      throw new Error('AI Gateway error');
+    }
+
+    console.log('Lovable AI response received, streaming...');
     // Stream the response back to client
     return new Response(response.body, {
       headers: {
