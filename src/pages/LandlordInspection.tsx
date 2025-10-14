@@ -3,9 +3,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Camera, Mic, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 
 export default function LandlordInspection() {
   const navigate = useNavigate();
+  const { tenantProperty } = useTenantDashboard();
+  const propertyId = tenantProperty?.id;
   return (
     <div className="space-y-6">
       <div>
@@ -26,7 +29,7 @@ export default function LandlordInspection() {
             <div className="text-sm text-muted-foreground">
               Use your device camera and microphone to document condition.
             </div>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/inspection/start')} className="bg-ocean-blue hover:bg-ocean-blue-dark">
+            <Button onClick={() => navigate(`/enhancedlandlorddashboard/inspection/start${propertyId ? `?propertyId=${propertyId}` : ''}`)} className="bg-ocean-blue hover:bg-ocean-blue-dark">
               <Camera className="h-4 w-4 mr-2" />
               Start Inspection
             </Button>
