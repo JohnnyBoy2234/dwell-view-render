@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
@@ -2398,6 +2398,17 @@ export default function EnhancedLandlordDashboard() {
                 </div>
                 <p className="text-xs font-medium text-ios-gray-dark">Inventory</p>
                 <p className="text-xs text-ios-gray">Photos & Notes</p>
+              </button>
+
+              <button
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/inspection')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <Clipboard className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Inspection</p>
+                <p className="text-xs text-ios-gray">View & Start</p>
               </button>
 
               {/* Support */}
