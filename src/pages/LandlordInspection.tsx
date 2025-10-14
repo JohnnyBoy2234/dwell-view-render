@@ -26,7 +26,7 @@ export default function LandlordInspection() {
             <div className="text-sm text-muted-foreground">
               Use your device camera and microphone to document condition.
             </div>
-            <Button onClick={() => navigate('/tenant/inspection')} className="bg-ocean-blue hover:bg-ocean-blue-dark">
+            <Button onClick={() => navigate('/enhancedlandlorddashboard/inspection/start')} className="bg-ocean-blue hover:bg-ocean-blue-dark">
               <Camera className="h-4 w-4 mr-2" />
               Start Inspection
             </Button>

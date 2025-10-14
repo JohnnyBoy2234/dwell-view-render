@@ -4,6 +4,7 @@ import Messages from '@/pages/Messages';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import LandlordInspection from '@/pages/LandlordInspection';
+import InventoryStart from '@/pages/InventoryStart';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
 import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
 
@@ -116,6 +117,11 @@ export default function LandlordDashboardRoutes() {
       <Route path="inspection" element={
         <EnhancedDashboardLayout title="Property Inspection">
           <LandlordInspection />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="inspection/start" element={
+        <EnhancedDashboardLayout title="Start Inspection">
+          <InventoryStart />
         </EnhancedDashboardLayout>
       } />
       <Route path="maintenance/:ticketId" element={
