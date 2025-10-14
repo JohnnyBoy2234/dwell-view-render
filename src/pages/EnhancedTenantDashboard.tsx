@@ -142,7 +142,7 @@ export default function EnhancedTenantDashboard() {
       },
       {
         title: 'Inventory',
-        icon: Clipboard,
+        icon: FileText,
         color: 'hsl(var(--ios-green))',
         bgColor: 'bg-gradient-to-br from-green-50 to-green-100/50',
         iconBg: 'bg-green-500',
@@ -151,7 +151,7 @@ export default function EnhancedTenantDashboard() {
       },
       {
         title: 'Inspection',
-        icon: FileText,
+        icon: Clipboard,
         color: 'hsl(var(--ios-blue))',
         bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
         iconBg: 'bg-blue-500',
