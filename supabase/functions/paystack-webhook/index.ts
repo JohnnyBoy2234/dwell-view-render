@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { createHmac } from "https://deno.land/std@0.190.0/node/crypto.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,9 +21,22 @@ serve(async (req) => {
     const signature = req.headers.get('x-paystack-signature');
     const body = await req.text();
     
-    const hash = createHmac('sha512', paystackSecret)
-      .update(body)
-      .digest('hex');
+    // Use Web Crypto API to verify HMAC
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(paystackSecret);
+    const messageData = encoder.encode(body);
+    
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      keyData,
+      { name: 'HMAC', hash: 'SHA-512' },
+      false,
+      ['sign']
+    );
+    
+    const hashBuffer = await crypto.subtle.sign('HMAC', cryptoKey, messageData);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
     if (hash !== signature) {
       throw new Error('Invalid signature');
