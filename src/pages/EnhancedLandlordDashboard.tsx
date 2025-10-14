@@ -2210,9 +2210,9 @@ export default function EnhancedLandlordDashboard() {
                   <h3 className="text-xl font-bold">Inspection</h3>
                 </div>
                 <p className="text-sm text-muted-foreground mb-4">Start an inspection to capture photos and voice notes. Media will be visible to you and your tenant.</p>
-                <a href="/enhancedlandlorddashboard/inspection" className="inline-flex items-center px-4 py-2 rounded bg-ocean-blue text-white hover:bg-ocean-blue-dark">
+                <button onClick={() => navigate('/enhancedlandlorddashboard/inspection')} className="inline-flex items-center px-4 py-2 rounded bg-ocean-blue text-white hover:bg-ocean-blue-dark">
                   Start Inspection
-                </a>
+                </button>
               </div>
             </div>
           </div>
