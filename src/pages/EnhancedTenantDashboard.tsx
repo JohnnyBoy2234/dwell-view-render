@@ -150,6 +150,15 @@ export default function EnhancedTenantDashboard() {
         path: '/tenant/inventory'
       },
       {
+        title: 'Inspection',
+        icon: FileText,
+        color: 'hsl(var(--ios-blue))',
+        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
+        iconBg: 'bg-blue-500',
+        subtitle: 'Photos & voice notes',
+        path: '/tenant/inspection'
+      },
+      {
         title: 'Maintenance',
         icon: Settings,
         color: 'hsl(var(--ios-orange))',
