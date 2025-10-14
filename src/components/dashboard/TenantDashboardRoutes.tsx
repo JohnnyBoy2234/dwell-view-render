@@ -3,6 +3,7 @@ import { EnhancedDashboardLayout } from './EnhancedDashboardLayout';
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
+import TenantInspection from '@/pages/tenant/TenantInspection';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import TenantLeaseDocuments from '@/pages/tenant/TenantLeaseDocuments';
 import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
@@ -44,6 +45,11 @@ export default function TenantDashboardRoutes() {
       <Route path="/inventory" element={
         <EnhancedDashboardLayout title="Property Inventory">
           <TenantInventory />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="/inspection" element={
+        <EnhancedDashboardLayout title="Property Inspection">
+          <TenantInspection />
         </EnhancedDashboardLayout>
       } />
       <Route path="/proof-of-payment" element={
