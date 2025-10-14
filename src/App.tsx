@@ -19,6 +19,7 @@ import Properties from "./pages/Properties";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
@@ -101,6 +102,7 @@ function AppRoutes() {
               <Route path="/about" element={<><Navbar /><About /></>} />
               <Route path="/contact" element={<><Navbar /><Contact /></>} />
               <Route path="/blog" element={<><Navbar /><Blog /></>} />
+              <Route path="/blog/:postId" element={<><Navbar /><BlogPost /></>} />
               <Route path="/safe-renting" element={<><Navbar /><SafeRenting /></>} />
               <Route path="/pricing" element={<><Navbar /><Pricing /></>} />
 
