@@ -16,7 +16,7 @@ export default function Blog() {
     {
       id: 'safe-transparent-new-way',
       title: 'Safe, Simple, and Transparent - The New Way to Rent in South Africa',
-      publishedAt: '2024-12-19',
+      publishedAt: '2025-10-10',
       category: 'Safety & Trust',
       readTime: 4,
       excerpt: 'Renting shouldn\'t feel risky or confusing. Discover how SwiftRent combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.',
@@ -25,7 +25,7 @@ export default function Blog() {
     {
       id: 'why-commission-is-wrong',
       title: 'Why Paying Commission on Rentals Is Wrong',
-      publishedAt: '2024-10-10',
+      publishedAt: '2025-09-15',
       category: 'Industry Insights',
       readTime: 5,
       excerpt: 'The commission model punishes success, hurts landlords and tenants alike, and belongs in the past. Learn why technology has made middlemen unnecessary.',
