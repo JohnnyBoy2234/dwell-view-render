@@ -141,7 +141,9 @@ export function useWhatsAppMessaging() {
       // Cache in localStorage for faster loading
       try {
         localStorage.setItem('messaging_conversations', JSON.stringify(conversationsWithUnread));
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to cache conversations', e);
+      }
 
     } catch (error: any) {
       console.error('❌ Error fetching conversations:', error);
@@ -219,7 +221,9 @@ export function useWhatsAppMessaging() {
       // Cache in localStorage
       try {
         localStorage.setItem(`messaging_messages_${conversationId}`, JSON.stringify(updatedMessages));
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to cache messages for conversation', e);
+      }
 
     } catch (error: any) {
       console.error('❌ Error fetching messages:', error);
@@ -229,7 +233,7 @@ export function useWhatsAppMessaging() {
         description: error.message
       });
     }
-  }, [user, toast, isLandlord]);
+  }, [user, toast, isLandlord]); // Remove markMessagesAsRead from the dependency array since it's defined below
 
   // Send message with optimistic update
   const sendMessage = useCallback(async (conversationId: string, content: string, files?: File[]) => {
@@ -516,7 +520,7 @@ export function useWhatsAppMessaging() {
           : conv
       )
     );
-  }, [activeConversation, sendMessageAck]);
+  }, [activeConversation, sendMessageAck, setConversations]);
 
   // Handle message acknowledgments
   const handleMessageAck = useCallback((ack: MessageAck) => {
@@ -675,7 +679,9 @@ export function useWhatsAppMessaging() {
           setConversations(parsed);
           conversationsCache.current = parsed;
         }
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to hydrate conversations from cache', e);
+      }
     }
   }, [user]);
 
@@ -690,7 +696,9 @@ export function useWhatsAppMessaging() {
   const sendTypingIndicator = useCallback((conversationId: string, typing: boolean) => {
     try {
       coreSendTypingIndicator(conversationId, typing);
-    } catch {}
+    } catch (e) {
+      console.warn('Failed to send core typing indicator', e);
+    }
     try {
       if (!chatChannelRef.current || (chatChannelRef.current as any).topic !== `realtime:chat-${conversationId}`) {
         chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();

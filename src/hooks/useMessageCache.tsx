@@ -53,7 +53,9 @@ export function useMessageCache() {
           setCache(prev => ({ ...prev, [conversationId]: parsed }));
         }
       }
-    } catch {}
+    } catch (e) {
+      console.warn('Failed to hydrate messages from localStorage', e);
+    }
 
     // If already loading, return cached messages (don't block with empty array)
     if (loadingConversations.has(conversationId)) {
@@ -124,7 +126,9 @@ export function useMessageCache() {
         try {
           const localKey = `sr_msgs_${conversationId}`;
           localStorage.setItem(localKey, JSON.stringify(trimmed));
-        } catch {}
+        } catch (e) {
+          console.warn('Failed to persist messages to localStorage', e);
+        }
       }
 
       // Always clear loading state and return messages
@@ -171,7 +175,9 @@ export function useMessageCache() {
       };
       try {
         localStorage.setItem(`sr_msgs_${conversationId}`, JSON.stringify(next[conversationId]));
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to persist optimistic message', e);
+      }
       return next;
     });
 
@@ -187,7 +193,9 @@ export function useMessageCache() {
       const next = { ...prev, [conversationId]: updated };
       try {
         localStorage.setItem(`sr_msgs_${conversationId}`, JSON.stringify(updated));
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to persist confirmed message', e);
+      }
       return next;
     });
   }, []);
@@ -202,7 +210,9 @@ export function useMessageCache() {
       const next = { ...prev, [message.conversation_id]: sorted };
       try {
         localStorage.setItem(`sr_msgs_${message.conversation_id}`, JSON.stringify(sorted));
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to persist realtime message', e);
+      }
       return next;
     });
   }, []);

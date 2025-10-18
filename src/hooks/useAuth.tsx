@@ -112,7 +112,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, role: 'tenant' | 'landlord' = 'tenant') => {
+  type SignUpResult = { error: { message: string } | null; isNewUser?: boolean };
+  const signUp = async (email: string, password: string, role: 'tenant' | 'landlord' = 'tenant'): Promise<SignUpResult> => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -123,7 +124,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     
     if (error) {
-      return { error, isNewUser: false };
+      return { error: { message: error.message }, isNewUser: false };
     }
 
     if (data.user) {
@@ -150,14 +151,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null, isNewUser: true };
   };
 
-  const signIn = async (email: string, password: string) => {
+  type SignInResult = { error: { message: string } | null };
+  const signIn = async (email: string, password: string): Promise<SignInResult> => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
     
     if (error) {
-      return { error };
+      return { error: { message: error.message } };
     }
 
     // Check if email is verified
@@ -185,19 +187,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     });
-    return { error };
+    return { error: error ? { message: error.message } : null };
   };
 
   const signInWithGoogle = async (role: 'tenant' | 'landlord' = 'tenant') => signInWithProvider('google', role);
   const signInWithApple = async (role: 'tenant' | 'landlord' = 'tenant') => signInWithProvider('apple', role);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<{ error: { message: string } | null }> => {
     // Use the current domain for password reset to ensure proper routing
     const redirectUrl = `${window.location.origin}/reset-password`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: redirectUrl
     });
-    return { error };
+    return { error: error ? { message: error.message } : null };
   };
 
 

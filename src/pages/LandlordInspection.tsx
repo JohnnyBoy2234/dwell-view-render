@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,14 @@ import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspectio
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 import { supabase } from '@/integrations/supabase/client';
+
+type PropertyItem = {
+  id: string;
+  title: string;
+  location: string | null;
+  landlord_id: string;
+  created_at: string;
+};
 
 export default function LandlordInspection() {
   const navigate = useNavigate();
@@ -25,31 +33,35 @@ export default function LandlordInspection() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecordWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [properties, setProperties] = useState<any[]>([]);
+  const [properties, setProperties] = useState<PropertyItem[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(true);
 
   // Fetch landlord properties
-  useState(() => {
+  useEffect(() => {
     const fetchProperties = async () => {
-      if (!user) return;
+      if (!user) {
+        setProperties([]);
+        setLoadingProperties(false);
+        return;
+      }
       setLoadingProperties(true);
       try {
         const { data, error } = await supabase
           .from('properties')
-          .select('*')
+          .select('id,title,location,landlord_id,created_at')
           .eq('landlord_id', user.id)
           .order('created_at', { ascending: false });
-        
         if (error) throw error;
-        setProperties(data || []);
+        setProperties((data as PropertyItem[]) || []);
       } catch (error) {
         console.error('Error fetching properties:', error);
+        setProperties([]);
       } finally {
         setLoadingProperties(false);
       }
     };
-    fetchProperties();
-  });
+    void fetchProperties();
+  }, [user]);
 
   if (inspectionLoading || loadingProperties) {
     return (

@@ -1,4 +1,4 @@
-// @ts-nocheck
+// Removed @ts-nocheck — validate incoming payload shape
 // NOTE: Configure this endpoint URL inside DocuSign Connect settings.
 // Ensure validation of HMAC/signature in production.
 Deno.serve(async (req) => {
