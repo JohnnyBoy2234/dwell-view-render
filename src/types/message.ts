@@ -66,5 +66,5 @@ export const formatPreScreeningMessage = (data: PreScreeningData, propertyTitle:
 🏠 Ever Been Evicted: ${evictionHistoryText}
 ⚠️ Ever Listed for Non-Payment/Collections/Legal Recovery: ${collectionsHistoryText}
 
-Looking forward to hearing from you!`;
+Looking forward to hearing from you!`.trim();
 };
