@@ -63,12 +63,16 @@ export default function StartConversation({
   }, [user, landlordId]);
 
   const handleRequestViewingClick = () => {
+    console.log('🔵 Request Viewing clicked', { user, landlordId, isFirstMessage, showPreScreening, open });
+    
     if (!user) {
+      console.log('🔴 No user, navigating to auth');
       navigate('/auth');
       return;
     }
     
     if (user.id === landlordId) {
+      console.log('🔴 User is landlord, showing error');
       toast({
         variant: "destructive",
         title: "Cannot message yourself",
@@ -78,9 +82,12 @@ export default function StartConversation({
     }
     
     // Route to appropriate dialog based on first message status
+    console.log('🟢 Routing to dialog', { isFirstMessage });
     if (isFirstMessage) {
+      console.log('🟢 Setting showPreScreening to true');
       setShowPreScreening(true);
     } else {
+      console.log('🟢 Setting open to true');
       setOpen(true);
     }
   };
