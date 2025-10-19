@@ -157,7 +157,7 @@ export default function Auth() {
       return;
     }
 
-    const { error, isNewUser } = await signUp(signUpData.email, signUpData.password, signUpData.role as 'tenant' | 'landlord');
+    const { error } = await signUp(signUpData.email, signUpData.password, signUpData.role as 'tenant' | 'landlord');
     
     if (error) {
       let errorMessage = 'An error occurred during signup';
@@ -181,11 +181,9 @@ export default function Auth() {
       return;
     }
 
-    if (isNewUser) {
-      // Show email verification step
-      setPendingEmail(signUpData.email);
-      setShowEmailVerification(true);
-    }
+    // Show email verification step after signup
+    setPendingEmail(signUpData.email);
+    setShowEmailVerification(true);
     
     setSignUpLoading(false);
   };

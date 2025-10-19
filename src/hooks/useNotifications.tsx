@@ -45,7 +45,7 @@ export const useNotifications = (filters?: NotificationFilters) => {
           typeof notification === 'object' && 
           notification.id
         )
-        .filter((n: Notification) => n.type !== 'new_message') as Notification[];
+        .filter((n: any) => n.type !== 'new_message') as Notification[];
       
       const unreadCount = validNotifications.filter(n => !n.is_read).length;
       

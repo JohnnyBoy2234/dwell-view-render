@@ -260,7 +260,11 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
-    const conv = await createConversation(property.id, property.landlord_id, user.id);
+    const conv = await createConversation({
+      propertyId: property.id,
+      landlordId: property.landlord_id,
+      tenantId: user.id
+    });
     if (conv) {
       navigate(`/messages?c=${conv.id}`);
     }
@@ -279,10 +283,12 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
-    // Create conversation and navigate to messages with pre-typed viewing request
-    const conv = await createConversation(property.id, property.landlord_id, user.id);
+    const conv = await createConversation({
+      propertyId: property.id,
+      landlordId: property.landlord_id,
+      tenantId: user.id
+    });
     if (conv) {
-      // Navigate to messages with a pre-typed viewing request message
       const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
       navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
     }

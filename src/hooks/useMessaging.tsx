@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase, type SupabaseClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtime } from './useRealtime';
 
@@ -52,21 +52,17 @@ interface Conversation {
   last_message_at: string | null;
   created_at: string;
   updated_at: string;
-  archived_by_landlord: boolean;
-  archived_by_tenant: boolean;
   properties: {
     id: string;
     title: string;
     images: string[];
-    address?: string;
-    rent_amount?: number;
-    currency?: string;
+    location?: string;
+    price?: number;
   } | null;
   landlord_profile?: Pick<UserProfile, 'display_name' | 'avatar_url'> | null;
   tenant_profile?: Pick<UserProfile, 'display_name' | 'avatar_url'> | null;
   unread_count?: number;
   last_message?: Pick<Message, 'id' | 'content' | 'message_type' | 'created_at' | 'sender_id'> | null;
-  metadata?: Record<string, unknown>;
 }
 
 interface SendMessageParams {
@@ -156,7 +152,7 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
   const { toast } = useToast();
   const isMountedRef = useRef<boolean>(true);
   const hasHydratedFromCacheRef = useRef<boolean>(false);
-  const messageChannelRef = useRef<ReturnType<SupabaseClient['channel']> | null>(null);
+  const messageChannelRef = useRef<any | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchedRef = useRef<Record<string, number>>({});
   
@@ -414,7 +410,6 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
 
       if (!isMountedRef.current) return;
       setMessages(messagesWithProfiles as Message[]);
-      await markMessagesAsRead(conversationId);
       setLoading(false);
     } catch (error: any) {
       toast({
@@ -424,7 +419,7 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
       });
       setLoading(false);
     }
-  }, [userId, markMessagesAsRead, toast]);
+  }, [userId, toast]);
 
   /**
    * Updates the last message of a conversation in the local state
@@ -839,13 +834,25 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
             tenant_id: params.tenantId,
             inquiry_id: params.inquiryId,
             status: 'active',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            archived_by_landlord: false,
-            archived_by_tenant: false,
-            metadata: params.metadata
           })
-          .select('id, property_id, landlord_id, tenant_id, inquiry_id, status, created_at, updated_at, archived_by_landlord, archived_by_tenant, metadata')
+          .select(`
+            id, 
+            property_id, 
+            landlord_id, 
+            tenant_id, 
+            inquiry_id, 
+            status, 
+            created_at, 
+            updated_at,
+            last_message_at,
+            properties (
+              id,
+              title,
+              images,
+              location,
+              price
+            )
+          `)
           .single();
 
         if (error) {
@@ -853,19 +860,19 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
           throw error;
         }
 
-        if (params.initialMessage) {
+        if (params.initialMessage && user?.id) {
           await supabase
             .from('messages')
             .insert({
               conversation_id: data.id,
-              sender_id: user?.id,
+              sender_id: user.id,
               content: params.initialMessage,
               message_type: 'text',
-              created_at: new Date().toISOString()
             });
         }
 
-        return data;
+        await fetchConversations();
+        return data as Conversation;
       } catch (error) {
         console.error('Failed to create conversation:', error);
         throw error;
