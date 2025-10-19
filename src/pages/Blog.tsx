@@ -42,17 +42,6 @@ export default function Blog() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-primary/10 via-background to-accent/10 py-16 md:py-20">
-        <div className="container mx-auto px-4">
-          <SectionHeader
-            title="SwiftRent Blog"
-            subtitle="Insights, tips, and perspectives on the rental market"
-            showTagline={true}
-          />
-        </div>
-      </div>
-
       {/* Blog Posts Grid */}
       <div className="container mx-auto px-4 py-12 md:py-16">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
