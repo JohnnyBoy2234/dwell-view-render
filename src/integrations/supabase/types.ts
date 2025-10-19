@@ -83,6 +83,72 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_payments: {
+        Row: {
+          amount: number | null
+          created_at: string
+          id: string
+          pf_payment_id: string | null
+          plan_code: string | null
+          provider: string
+          raw: Json | null
+          reference: string | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          id?: string
+          pf_payment_id?: string | null
+          plan_code?: string | null
+          provider: string
+          raw?: Json | null
+          reference?: string | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          id?: string
+          pf_payment_id?: string | null
+          plan_code?: string | null
+          provider?: string
+          raw?: Json | null
+          reference?: string | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      billing_subscriptions: {
+        Row: {
+          plan_code: string
+          provider: string
+          started_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          plan_code: string
+          provider: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          plan_code?: string
+          provider?: string
+          started_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -1160,6 +1226,7 @@ export type Database = {
           link_url: string | null
           message: string
           metadata: Json | null
+          read_at: string | null
           type: string | null
           updated_at: string | null
           user_id: string
@@ -1171,6 +1238,7 @@ export type Database = {
           link_url?: string | null
           message: string
           metadata?: Json | null
+          read_at?: string | null
           type?: string | null
           updated_at?: string | null
           user_id: string
@@ -1182,6 +1250,7 @@ export type Database = {
           link_url?: string | null
           message?: string
           metadata?: Json | null
+          read_at?: string | null
           type?: string | null
           updated_at?: string | null
           user_id?: string
@@ -2233,13 +2302,22 @@ export type Database = {
         Returns: undefined
       }
       create_notification: {
-        Args: {
-          _link_url: string
-          _message: string
-          _metadata?: Json
-          _type?: string
-          _user_id: string
-        }
+        Args:
+          | {
+              _link_url: string
+              _message: string
+              _metadata?: Json
+              _title: string
+              _type?: string
+              _user_id: string
+            }
+          | {
+              _link_url: string
+              _message: string
+              _metadata?: Json
+              _type?: string
+              _user_id: string
+            }
         Returns: undefined
       }
       get_conversations_with_details: {
