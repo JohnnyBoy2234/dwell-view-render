@@ -35,7 +35,7 @@ import { TenantApplicationButton } from '@/components/tenant/TenantApplicationBu
 import { BookViewingDialog } from "@/components/viewing/BookViewingDialog";
 import { useViewingBooking } from "@/hooks/useViewingBooking";
 import { format } from "date-fns";
-// StartConversation is unused here; import removed to avoid unnecessary module initialization
+import StartConversation from '@/components/StartConversation';
 import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
 
 interface Property {
@@ -84,12 +84,7 @@ export default function PropertyDetail() {
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
-  const [preScreenOpen, setPreScreenOpen] = useState(false);
-  const [moveInDate, setMoveInDate] = useState<string>('');
-  const [monthlyIncome, setMonthlyIncome] = useState<string>('');
-  const [rentHistory, setRentHistory] = useState<'yes' | 'no' | ''>('');
-  const [preMessage, setPreMessage] = useState<string>('');
-
+  
   const { activeBooking } = useViewingBooking(property?.id || '', property?.landlord_id || '');
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<MessageFormData>();
   const { hasAppliedToProperty, submitApplication, loading: applicationLoading } = useApplications();
@@ -107,13 +102,6 @@ export default function PropertyDetail() {
     }
   }, [user]);
 
-  // Prefill default message when property loads
-  useEffect(() => {
-    if (property) {
-      setPreMessage(`Hi, I'm interested in viewing "${property.title}". I can be flexible with times and would appreciate the earliest available slot. Thanks!`);
-    }
-  }, [property]);
-
   const fetchUserProfile = async () => {
     if (!user) return;
 
@@ -130,6 +118,7 @@ export default function PropertyDetail() {
       console.error('Error fetching user profile:', error);
     }
   };
+
 
   const fetchProperty = async () => {
     if (!id) return;
@@ -257,6 +246,7 @@ export default function PropertyDetail() {
     }
   };
 
+
   const handleContactLandlord = async () => {
     if (!user) {
       toast({
@@ -270,11 +260,7 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
-    const conv = await createConversation({
-      propertyId: property.id,
-      landlordId: property.landlord_id,
-      tenantId: user.id
-    });
+    const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
       navigate(`/messages?c=${conv.id}`);
     }
@@ -293,63 +279,12 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
-    setPreScreenOpen(true);
-  };
-
-  const submitPreScreening = async () => {
-    if (!user || !property) return;
-
-    if (!moveInDate || !monthlyIncome || !rentHistory) {
-      toast({
-        variant: 'destructive',
-        title: 'Missing information',
-        description: 'Please complete all the questions before sending.'
-      });
-      return;
-    }
-
-    try {
-      setMessageLoading(true);
-      // Create or reuse a conversation
-      const conv = await createConversation({
-        propertyId: property.id,
-        landlordId: property.landlord_id,
-        tenantId: user.id
-      });
-      if (!conv) throw new Error('Could not create conversation');
-
-      const content = [
-        'Viewing request pre-screening:',
-        `- Move-in target: ${new Date(moveInDate).toLocaleDateString()}`,
-        `- Monthly income: R${Number(monthlyIncome).toLocaleString()}`,
-        `- Late on rent or evicted before: ${rentHistory === 'yes' ? 'Yes' : 'No'}`,
-        '',
-        'Message:',
-        preMessage.trim()
-      ].join('\n');
-
-      await sendMessage({
-        conversationId: conv.id,
-        content,
-        messageType: 'text',
-        metadata: { type: 'viewing_pre_screen', property_id: property.id }
-      });
-
-      toast({
-        title: 'Viewing request sent',
-        description: 'Your pre-screening info and message were sent to the landlord.'
-      });
-
-      setPreScreenOpen(false);
-      navigate(`/messages?c=${conv.id}`);
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Failed to send',
-        description: error?.message || 'Please try again.'
-      });
-    } finally {
-      setMessageLoading(false);
+    // Create conversation and navigate to messages with pre-typed viewing request
+    const conv = await createConversation(property.id, property.landlord_id, user.id);
+    if (conv) {
+      // Navigate to messages with a pre-typed viewing request message
+      const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
+      navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
     }
   };
 
@@ -793,65 +728,6 @@ export default function PropertyDetail() {
           open={bookingOpen}
           onOpenChange={setBookingOpen}
         />
-      )}
-
-      {/* Pre-screening dialog */}
-      {property && (
-        <Dialog open={preScreenOpen} onOpenChange={setPreScreenOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Request a Viewing</DialogTitle>
-              <DialogDescription>
-                Answer a few quick questions before we send your request to the landlord.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="moveInDate">When are you hoping to move in?</Label>
-                  <Input id="moveInDate" type="date" value={moveInDate} onChange={(e) => setMoveInDate(e.target.value)} />
-                </div>
-                <div>
-                  <Label htmlFor="monthlyIncome">What is your monthly income?</Label>
-                  <Input id="monthlyIncome" type="number" min="0" placeholder="e.g. 25000" value={monthlyIncome} onChange={(e) => setMonthlyIncome(e.target.value)} />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="rentHistory" className="mb-2 block">Have you ever been late on rent or been evicted?</Label>
-                <select
-                  id="rentHistory"
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  value={rentHistory}
-                  onChange={(e) => setRentHistory(e.target.value as 'yes' | 'no')}
-                >
-                  <option value="" disabled>Select an option</option>
-                  <option value="no">No</option>
-                  <option value="yes">Yes</option>
-                </select>
-              </div>
-
-              <div>
-                <Label htmlFor="message">Message to landlord</Label>
-                <Textarea id="message" rows={4} value={preMessage} onChange={(e) => setPreMessage(e.target.value)} />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <Button variant="outline" onClick={() => setPreScreenOpen(false)}>Cancel</Button>
-                <Button onClick={submitPreScreening} disabled={messageLoading}>
-                  {messageLoading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Sending...
-                    </>
-                  ) : (
-                    'Send request'
-                  )}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
       )}
     </div>
   );

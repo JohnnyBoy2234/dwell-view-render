@@ -157,19 +157,19 @@ export default function Auth() {
       return;
     }
 
-    const result = await signUp(signUpData.email, signUpData.password, signUpData.role as 'tenant' | 'landlord');
+    const { error, isNewUser } = await signUp(signUpData.email, signUpData.password, signUpData.role as 'tenant' | 'landlord');
     
-    if (result.error) {
+    if (error) {
       let errorMessage = 'An error occurred during signup';
       
-      if (result.error.message?.includes('already registered')) {
+      if (error.message?.includes('already registered')) {
         errorMessage = 'This email is already registered. Please sign in instead.';
-      } else if (result.error.message?.includes('Password')) {
+      } else if (error.message?.includes('Password')) {
         errorMessage = 'Password does not meet security requirements';
-      } else if (result.error.message?.includes('email')) {
+      } else if (error.message?.includes('email')) {
         errorMessage = 'Please enter a valid email address';
-      } else if (result.error.message) {
-        errorMessage = result.error.message;
+      } else if (error.message) {
+        errorMessage = error.message;
       }
       
       toast({
@@ -181,7 +181,7 @@ export default function Auth() {
       return;
     }
 
-    if (result.data?.isNewUser) {
+    if (isNewUser) {
       // Show email verification step
       setPendingEmail(signUpData.email);
       setShowEmailVerification(true);

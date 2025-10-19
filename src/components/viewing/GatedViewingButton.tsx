@@ -147,7 +147,7 @@ export function GatedViewingButton({
   }
 
   // Email verified but KYC not approved
-  if (gateStatus?.emailVerified && gateStatus?.kycStatus !== 'approved') {
+  if (gateStatus.emailVerified && gateStatus.kycStatus !== 'approved') {
     const kycMessage = gateStatus.kycStatus === 'not_started' 
       ? 'Complete ID verification to request a viewing.'
       : gateStatus.kycStatus === 'submitted'
@@ -197,7 +197,7 @@ export function GatedViewingButton({
   }
 
   // All requirements met - allow viewing request
-  if (gateStatus?.canRequestViewing) {
+  if (gateStatus.canRequestViewing) {
     const handleAllowedRequest = async () => {
       // Log successful viewing request
       await supabase.rpc('log_event', {

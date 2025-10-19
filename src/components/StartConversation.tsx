@@ -88,12 +88,12 @@ export default function StartConversation({
     
     try {
       console.log('Creating conversation with:', { propertyId, landlordId, userId: user.id, inquiryId });
-      const conversation = await createConversation({
+      const conversation = await createConversation(
         propertyId,
         landlordId,
-        tenantId: user.id,
+        user.id,
         inquiryId
-      });
+      );
 
       console.log('Conversation created:', conversation);
       if (conversation) {
@@ -129,12 +129,12 @@ export default function StartConversation({
     setLoading(true);
     
     try {
-      const conversation = await createConversation({
+      const conversation = await createConversation(
         propertyId,
         landlordId,
-        tenantId: user.id,
+        user.id,
         inquiryId
-      });
+      );
 
       if (conversation) {
         navigate(`/messages?c=${conversation.id}`);
