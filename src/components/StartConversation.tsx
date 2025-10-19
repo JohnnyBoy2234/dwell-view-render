@@ -189,13 +189,12 @@ export default function StartConversation({
 
   return (
     <>
+      <Button className="w-full" onClick={handleRequestViewingClick}>
+        <Calendar className="h-4 w-4 mr-2" />
+        Request Viewing
+      </Button>
+
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button className="w-full" onClick={handleRequestViewingClick}>
-            <Calendar className="h-4 w-4 mr-2" />
-            Request Viewing
-          </Button>
-        </DialogTrigger>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Request Viewing</DialogTitle>
