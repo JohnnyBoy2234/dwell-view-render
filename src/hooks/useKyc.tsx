@@ -196,12 +196,17 @@ export function useKyc() {
         }
       });
 
-      // Trigger notification to admins
-      await fetch('/api/kyc/notify-admin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: user.id })
-      });
+      // Trigger notification to admins (optional, don't fail if this errors)
+      try {
+        await fetch('/api/kyc/notify-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: user.id })
+        });
+      } catch (notifyError) {
+        console.error('Failed to notify admin:', notifyError);
+        // Don't fail the submission if notification fails
+      }
 
       toast({
         title: "Submitted for review",
