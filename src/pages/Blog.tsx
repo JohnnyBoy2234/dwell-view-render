@@ -23,6 +23,14 @@ export default function Blog() {
       featured: true,
     },
     {
+      id: 'two-pillars-sustainable-returns',
+      title: 'The Two Pillars of Sustainable Returns: Trust and Efficiency',
+      publishedAt: '2025-10-19',
+      category: 'Property Management',
+      readTime: 5,
+      excerpt: 'Discover how building your rental system on the pillars of trust and efficiency doesn\'t just reduce risk—it creates sustainable, long-term ROI.',
+    },
+    {
       id: 'why-commission-is-wrong',
       title: 'Why Paying Commission on Rentals Is Wrong',
       publishedAt: '2025-09-15',
