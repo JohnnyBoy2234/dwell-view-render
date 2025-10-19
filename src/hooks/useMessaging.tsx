@@ -355,6 +355,97 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
   }, [user, isLandlord, toast]);
 
   /**
+   * Marks all messages in a conversation as read for the current user
+   * @param conversationId - ID of the conversation to mark as read
+   * @throws {MessagingError} If marking messages as read fails
+   */
+  const markMessagesAsRead = useCallback(async (conversationId: string): Promise<void> => {
+    if (!userId) {
+      console.warn('Cannot mark messages as read: No user ID');
+      return;
+    }
+
+    if (!conversationId) {
+      console.warn('Cannot mark messages as read: No conversation ID');
+      return;
+    }
+
+    console.log('📖 Marking messages as read for conversation:', conversationId, 
+      'role:', isLandlord ? 'landlord' : 'tenant');
+
+    // Optimistic update
+    const previousConversations = conversations;
+    if (isMountedRef.current) {
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.id === conversationId 
+            ? { ...conv, unread_count: 0 }
+            : conv
+        )
+      );
+    }
+
+    try {
+      const { error, data } = await supabase.rpc('mark_messages_as_read', {
+        conversation_uuid: conversationId,
+        user_role: isLandlord ? 'landlord' : 'tenant'
+      });
+
+      if (error) {
+        console.error('❌ RPC function error:', error);
+        throw new MessagingError(
+          error.message || 'Failed to mark messages as read',
+          error.code || 'MARK_READ_FAILED',
+          { details: error.details }
+        );
+      }
+
+      console.log('✅ Messages marked as read successfully:', data);
+
+      // Verify the update if in development
+      if (process.env.NODE_ENV === 'development') {
+        const { data: verifyMessages } = await supabase
+          .from('messages')
+          .select('id, sender_id, read_by_landlord, read_by_tenant')
+          .eq('conversation_id', conversationId)
+          .neq('sender_id', userId)
+          .limit(5);
+
+        if (verifyMessages) {
+          const readField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
+          const unreadCount = verifyMessages.filter(m => !m[readField]).length;
+          console.log('🔍 Verification - remaining unread messages:', unreadCount);
+        }
+      }
+
+      // Notify other components about the read status change
+      window.dispatchEvent(new CustomEvent('messages-marked-read', { 
+        detail: { conversationId } 
+      }));
+    } catch (error) {
+      console.error('❌ Error marking messages as read:', error);
+      
+      // Revert optimistic update on error
+      if (isMountedRef.current) {
+        setConversations(previousConversations);
+      }
+
+      const errorMessage = error instanceof MessagingError
+        ? error.message
+        : 'An unexpected error occurred while marking messages as read';
+      
+      toast({
+        variant: 'destructive',
+        title: 'Failed to mark messages as read',
+        description: errorMessage,
+      });
+      
+      // Re-throw for error boundaries or callers to handle
+      throw error;
+    }
+  }, [userId, isLandlord, conversations, toast]);
+
+  /**
    * Fetches messages for a specific conversation
    * @param conversationId - ID of the conversation to fetch messages for
    * @throws {MessagingError} If fetching messages fails
@@ -454,97 +545,6 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
       });
     });
   }, [userId]);
-
-  /**
-   * Marks all messages in a conversation as read for the current user
-   * @param conversationId - ID of the conversation to mark as read
-   * @throws {MessagingError} If marking messages as read fails
-   */
-  const markMessagesAsRead = useCallback(async (conversationId: string): Promise<void> => {
-    if (!userId) {
-      console.warn('Cannot mark messages as read: No user ID');
-      return;
-    }
-
-    if (!conversationId) {
-      console.warn('Cannot mark messages as read: No conversation ID');
-      return;
-    }
-
-    console.log('📖 Marking messages as read for conversation:', conversationId, 
-      'role:', isLandlord ? 'landlord' : 'tenant');
-
-    // Optimistic update
-    const previousConversations = conversations;
-    if (isMountedRef.current) {
-      setConversations(prev =>
-        prev.map(conv =>
-          conv.id === conversationId 
-            ? { ...conv, unread_count: 0 }
-            : conv
-        )
-      );
-    }
-
-    try {
-      const { error, data } = await supabase.rpc('mark_messages_as_read', {
-        conversation_uuid: conversationId,
-        user_role: isLandlord ? 'landlord' : 'tenant'
-      });
-
-      if (error) {
-        console.error('❌ RPC function error:', error);
-        throw new MessagingError(
-          error.message || 'Failed to mark messages as read',
-          error.code || 'MARK_READ_FAILED',
-          { details: error.details }
-        );
-      }
-
-      console.log('✅ Messages marked as read successfully:', data);
-
-      // Verify the update if in development
-      if (process.env.NODE_ENV === 'development') {
-        const { data: verifyMessages } = await supabase
-          .from('messages')
-          .select('id, sender_id, read_by_landlord, read_by_tenant')
-          .eq('conversation_id', conversationId)
-          .neq('sender_id', userId)
-          .limit(5);
-
-        if (verifyMessages) {
-          const readField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
-          const unreadCount = verifyMessages.filter(m => !m[readField]).length;
-          console.log('🔍 Verification - remaining unread messages:', unreadCount);
-        }
-      }
-
-      // Notify other components about the read status change
-      window.dispatchEvent(new CustomEvent('messages-marked-read', { 
-        detail: { conversationId } 
-      }));
-    } catch (error) {
-      console.error('❌ Error marking messages as read:', error);
-      
-      // Revert optimistic update on error
-      if (isMountedRef.current) {
-        setConversations(previousConversations);
-      }
-
-      const errorMessage = error instanceof MessagingError
-        ? error.message
-        : 'An unexpected error occurred while marking messages as read';
-      
-      toast({
-        variant: 'destructive',
-        title: 'Failed to mark messages as read',
-        description: errorMessage,
-      });
-      
-      // Re-throw for error boundaries or callers to handle
-      throw error;
-    }
-  }, [userId, isLandlord, conversations, toast]);
 
   // Real-time subscription for conversation updates (last_message_at)
   useEffect(() => {
