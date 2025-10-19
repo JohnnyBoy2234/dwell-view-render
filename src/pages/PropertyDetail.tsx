@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { 
@@ -36,7 +35,7 @@ import { TenantApplicationButton } from '@/components/tenant/TenantApplicationBu
 import { BookViewingDialog } from "@/components/viewing/BookViewingDialog";
 import { useViewingBooking } from "@/hooks/useViewingBooking";
 import { format } from "date-fns";
-import StartConversation from '@/components/StartConversation';
+// StartConversation is unused here; import removed to avoid unnecessary module initialization
 import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
 
 interface Property {
@@ -819,17 +818,17 @@ export default function PropertyDetail() {
               </div>
 
               <div>
-                <Label className="mb-2 block">Have you ever been late on rent or been evicted?</Label>
-                <RadioGroup value={rentHistory} onValueChange={(v) => setRentHistory(v as 'yes' | 'no')} className="flex gap-6">
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="no" id="rent-no" />
-                    <Label htmlFor="rent-no">No</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="yes" id="rent-yes" />
-                    <Label htmlFor="rent-yes">Yes</Label>
-                  </div>
-                </RadioGroup>
+                <Label htmlFor="rentHistory" className="mb-2 block">Have you ever been late on rent or been evicted?</Label>
+                <select
+                  id="rentHistory"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  value={rentHistory}
+                  onChange={(e) => setRentHistory(e.target.value as 'yes' | 'no')}
+                >
+                  <option value="" disabled>Select an option</option>
+                  <option value="no">No</option>
+                  <option value="yes">Yes</option>
+                </select>
               </div>
 
               <div>
