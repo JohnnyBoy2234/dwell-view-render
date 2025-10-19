@@ -860,7 +860,16 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
             });
         }
 
-        return data;
+        // Cast to Conversation type with default values for missing properties
+        return {
+          ...data,
+          last_message_at: data.created_at,
+          properties: null,
+          landlord_profile: null,
+          tenant_profile: null,
+          unread_count: 0,
+          last_message: null
+        } as Conversation;
       } catch (error) {
         console.error('Failed to create conversation:', error);
         throw error;
