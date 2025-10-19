@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase, type SupabaseClient } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtime } from './useRealtime';
 
@@ -52,8 +52,6 @@ interface Conversation {
   last_message_at: string | null;
   created_at: string;
   updated_at: string;
-  archived_by_landlord: boolean;
-  archived_by_tenant: boolean;
   properties: {
     id: string;
     title: string;
@@ -156,7 +154,7 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
   const { toast } = useToast();
   const isMountedRef = useRef<boolean>(true);
   const hasHydratedFromCacheRef = useRef<boolean>(false);
-  const messageChannelRef = useRef<ReturnType<SupabaseClient['channel']> | null>(null);
+  const messageChannelRef = useRef<any>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastFetchedRef = useRef<Record<string, number>>({});
   
@@ -840,12 +838,9 @@ export function useMessaging(onViewingProposalChange?: () => void): UseMessaging
             inquiry_id: params.inquiryId,
             status: 'active',
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            archived_by_landlord: false,
-            archived_by_tenant: false,
-            metadata: params.metadata
+            updated_at: new Date().toISOString()
           })
-          .select('id, property_id, landlord_id, tenant_id, inquiry_id, status, created_at, updated_at, archived_by_landlord, archived_by_tenant, metadata')
+          .select('id, property_id, landlord_id, tenant_id, inquiry_id, status, created_at, updated_at')
           .single();
 
         if (error) {
