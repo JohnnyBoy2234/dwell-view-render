@@ -59,12 +59,12 @@ export const formatPreScreeningMessage = (data: PreScreeningData, propertyTitle:
   
   return `${data.message}
 
-📋 **Pre-Screening Information:**
+📋 Pre-Screening Information:
 
-📅 **Desired Move-in Date:** ${moveInDate}
-💰 **Monthly Income:** ${formattedIncome}
-🏠 **Ever Been Evicted:** ${evictionHistoryText}
-⚠️ **Ever Listed for Non-Payment/Collections/Legal Recovery:** ${collectionsHistoryText}
+📅 Desired Move-in Date: ${moveInDate}
+💰 Monthly Income: ${formattedIncome}
+🏠 Ever Been Evicted: ${evictionHistoryText}
+⚠️ Ever Listed for Non-Payment/Collections/Legal Recovery: ${collectionsHistoryText}
 
 Looking forward to hearing from you!`;
 };
