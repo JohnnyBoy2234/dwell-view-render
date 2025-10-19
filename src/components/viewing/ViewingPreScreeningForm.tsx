@@ -219,7 +219,7 @@ export default function ViewingPreScreeningForm({
               name="collectionsHistory"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Have you ever been listed for non-payment or had an account referred to collections or legal recovery?</FormLabel>
+                  <FormLabel>Have you ever been listed in the last 3 years for non-payment or had an account referred to collections or legal recovery?</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
