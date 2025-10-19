@@ -91,6 +91,51 @@ const CommissionPostContent = () => (
     </div>
   </>
 );
+const TwoPillarsPostContent = () => (
+  <>
+    <p className="text-lg text-muted-foreground mb-6">
+      Too many landlords lose money not because of bad tenants, but because their systems aren’t built for safety. Leases sit in inboxes. Deposits get mixed with personal funds. Tenant details end up on paper that goes missing. That kind of disorder doesn’t just waste time — it quietly erodes return on investment.
+    </p>
+    <p className="mb-6">
+      Real, lasting ROI rests on two pillars: <strong>trust</strong> and <strong>efficiency</strong>. Both depend on safety.
+    </p>
+
+    <div className="space-y-8">
+      <section>
+        <h3 className="text-xl font-semibold mb-4">Trust Isn’t a Feeling. It’s Structure.</h3>
+        <p>
+          It means every tenant has a verified ID and a clear credit check. It means every lease is stored securely and POPIA-compliant, where nothing can leak or be altered. It’s a complete record — timestamped, traceable, and undeniable when questions arise.
+        </p>
+        <p className="mt-4">
+          Safety is what gives control. It stops problems before they start and keeps a property stable. That’s what SwiftRent was designed for. It isn’t just about making renting easier; it’s about making it secure from every angle.
+        </p>
+      </section>
+
+      <section>
+        <h3 className="text-xl font-semibold mb-4">Efficiency Keeps Safety in Motion</h3>
+        <p>
+          The second pillar, efficiency, keeps that safety in motion. Automation doesn’t replace responsibility; it strengthens it. Rent reminders go out automatically or could be sent out by you. Every one of them carries the SwiftRent name, a mark that signals professionalism, authority, and accountability. It reminds tenants that this isn’t a casual arrangement. It’s a verified, lawful rental agreement backed by structure and trust.
+        </p>
+        <p className="mt-4">
+          Digital signatures are stored in an encrypted environment. Nothing gets lost, nothing is left to chance.
+        </p>
+      </section>
+
+      <section className="bg-muted/50 p-6 rounded-lg">
+        <h3 className="text-xl font-semibold mb-4">A Safe System is a Profitable One</h3>
+        <p>
+          This isn’t about convenience. It’s about building safety into every part of the rental process, because a safe system is a profitable one. If you want steady income, fewer disputes, and tenants who stay because they feel protected, you need more than a platform. You need pillars you can trust.
+        </p>
+        <p className="mt-4 font-medium">
+          That’s what SwiftRent offers: clarity you can measure, safety you can prove, and efficiency that never stops working.
+        </p>
+        <p className="mt-4 font-bold">
+          SwiftRent — Safe, Simple, Commission-Free Renting.
+        </p>
+      </section>
+    </div>
+  </>
+);
 
 const SafetyPostContent = () => (
   <>
@@ -183,6 +228,16 @@ const blogPosts: BlogPostData[] = [
     readTime: 5,
     excerpt: 'The commission model punishes success, hurts landlords and tenants alike, and belongs in the past. Learn why technology has made middlemen unnecessary.',
     content: <CommissionPostContent />,
+  },
+  {
+    id: 'two-pillars-sustainable-returns',
+    title: 'The Two Pillars of Sustainable Returns: Trust and Efficiency',
+    publishedAt: '2025-10-19',
+    shareText: 'Discover how trust and efficiency are the keys to sustainable returns in property management.',
+    category: 'Property Management',
+    readTime: 5,
+    excerpt: 'Discover how building your rental system on the pillars of trust and efficiency doesn\'t just reduce risk—it creates sustainable, long-term ROI.',
+    content: <TwoPillarsPostContent />,
   },
 ];
 
