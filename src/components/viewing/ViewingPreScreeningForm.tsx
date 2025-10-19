@@ -42,8 +42,11 @@ const preScreeningSchema = z.object({
     .min(1, "Monthly income is required")
     .transform((val) => parseFloat(val.replace(/[^0-9.]/g, '')))
     .refine((val) => val > 0, "Monthly income must be greater than 0"),
-  rentalHistory: z.enum(['clean', 'late', 'evicted', 'first'], {
-    required_error: "Please select your rental history",
+  evictionHistory: z.enum(['no', 'yes', 'first'], {
+    required_error: "Please answer this question",
+  }),
+  collectionsHistory: z.enum(['no', 'yes'], {
+    required_error: "Please answer this question",
   }),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -58,11 +61,15 @@ interface ViewingPreScreeningFormProps {
   propertyTitle: string;
 }
 
-const rentalHistoryOptions = [
-  { value: 'clean', label: 'No, I have a clean rental history' },
-  { value: 'late', label: 'Yes, I have been late on rent before' },
-  { value: 'evicted', label: 'Yes, I have been evicted before' },
+const evictionHistoryOptions = [
+  { value: 'no', label: 'No' },
+  { value: 'yes', label: 'Yes' },
   { value: 'first', label: 'This is my first rental' },
+];
+
+const collectionsHistoryOptions = [
+  { value: 'no', label: 'No' },
+  { value: 'yes', label: 'Yes' },
 ];
 
 export default function ViewingPreScreeningForm({
@@ -173,20 +180,53 @@ export default function ViewingPreScreeningForm({
               )}
             />
 
-            {/* Rental History */}
+            {/* Eviction History */}
             <FormField
               control={form.control}
-              name="rentalHistory"
+              name="evictionHistory"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Have you ever been late on rent or been evicted?</FormLabel>
+                  <FormLabel>Have you ever been evicted?</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
                       value={field.value}
                       className="flex flex-col space-y-2"
                     >
-                      {rentalHistoryOptions.map((option) => (
+                      {evictionHistoryOptions.map((option) => (
+                        <FormItem
+                          key={option.value}
+                          className="flex items-center space-x-3 space-y-0"
+                        >
+                          <FormControl>
+                            <RadioGroupItem value={option.value} />
+                          </FormControl>
+                          <FormLabel className="font-normal cursor-pointer">
+                            {option.label}
+                          </FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Collections History */}
+            <FormField
+              control={form.control}
+              name="collectionsHistory"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Have you ever been listed for non-payment or had an account referred to collections or legal recovery?</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex flex-col space-y-2"
+                    >
+                      {collectionsHistoryOptions.map((option) => (
                         <FormItem
                           key={option.value}
                           className="flex items-center space-x-3 space-y-0"

@@ -32,7 +32,8 @@ export type MessageRole = 'landlord' | 'tenant';
 export interface PreScreeningData {
   moveInDate: Date;
   monthlyIncome: number;
-  rentalHistory: 'clean' | 'late' | 'evicted' | 'first';
+  evictionHistory: 'no' | 'yes' | 'first';
+  collectionsHistory: 'no' | 'yes';
   message: string;
 }
 
@@ -45,12 +46,16 @@ export const formatPreScreeningMessage = (data: PreScreeningData, propertyTitle:
   
   const formattedIncome = `R${data.monthlyIncome.toLocaleString()}`;
   
-  const rentalHistoryText = {
-    clean: 'No, I have a clean rental history',
-    late: 'Yes, I have been late on rent before',
-    evicted: 'Yes, I have been evicted before',
+  const evictionHistoryText = {
+    no: 'No',
+    yes: 'Yes',
     first: 'This is my first rental',
-  }[data.rentalHistory];
+  }[data.evictionHistory];
+
+  const collectionsHistoryText = {
+    no: 'No',
+    yes: 'Yes',
+  }[data.collectionsHistory];
   
   return `${data.message}
 
@@ -58,7 +63,8 @@ export const formatPreScreeningMessage = (data: PreScreeningData, propertyTitle:
 
 📅 **Desired Move-in Date:** ${moveInDate}
 💰 **Monthly Income:** ${formattedIncome}
-🏠 **Rental History:** ${rentalHistoryText}
+🏠 **Ever Been Evicted:** ${evictionHistoryText}
+⚠️ **Ever Listed for Non-Payment/Collections/Legal Recovery:** ${collectionsHistoryText}
 
 Looking forward to hearing from you!`;
 };
