@@ -62,22 +62,12 @@ export default function StartConversation({
     checkFirstMessage();
   }, [user, landlordId]);
 
-  const handleStartConversation = async () => {
+  const handleRequestViewingClick = () => {
     if (!user) {
-      // Store current page to return after auth
-      const currentPath = window.location.pathname;
-      sessionStorage.setItem('returnTo', currentPath);
       navigate('/auth');
       return;
     }
     
-    // Show pre-screening form if this is the first conversation
-    if (isFirstMessage) {
-      setOpen(false);
-      setShowPreScreening(true);
-      return;
-    }
-
     if (user.id === landlordId) {
       toast({
         variant: "destructive",
@@ -86,7 +76,17 @@ export default function StartConversation({
       });
       return;
     }
+    
+    // Route to appropriate dialog based on first message status
+    if (isFirstMessage) {
+      setShowPreScreening(true);
+    } else {
+      setOpen(true);
+    }
+  };
 
+  const handleStartConversation = async () => {
+    // This is now only called for NON-first-time messages
     setLoading(true);
     
     try {
@@ -94,7 +94,7 @@ export default function StartConversation({
       const conversation = await createConversation(
         propertyId,
         landlordId,
-        user.id,
+        user!.id,
         inquiryId
       );
 
@@ -191,7 +191,7 @@ export default function StartConversation({
     <>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button className="w-full">
+          <Button className="w-full" onClick={handleRequestViewingClick}>
             <Calendar className="h-4 w-4 mr-2" />
             Request Viewing
           </Button>
@@ -204,21 +204,6 @@ export default function StartConversation({
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
-            {isFirstMessage && (
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start gap-3">
-                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                      Pre-screening required
-                    </p>
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
-                      To help landlords get to know you better, you'll need to provide some basic information before requesting a viewing.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
             <p className="text-sm text-muted-foreground">
               This will create a new conversation thread where you can discuss property details, 
               schedule viewings, and ask questions directly with the landlord.
@@ -236,7 +221,7 @@ export default function StartConversation({
                 ) : (
                   <>
                     <Send className="h-4 w-4 mr-2" />
-                    {isFirstMessage ? 'Continue' : 'Request Viewing'}
+                    Request Viewing
                   </>
                 )}
               </Button>
