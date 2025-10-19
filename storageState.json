@@ -1,0 +1,14 @@
+{
+  "cookies": [],
+  "origins": [
+    {
+      "origin": "http://localhost:5173",
+      "localStorage": [
+        {
+          "name": "sb-rsfrvjaqxhoqavvscvwf-auth-token",
+          "value": "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsImtpZCI6ImdKa0NHbXdFK1VPaHRVUmkiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3JzZnJ2amFxeGhvcWF2dnNjdndmLnN1cGFiYXNlLmNvL2F1dGgvdjEiLCJzdWIiOiJmMGE0NjQ1Zi00ZDg1LTQ2NmYtOTgzYy1jOGM4ZTMxOGYyZDAiLCJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNzYwODc5ODUwLCJpYXQiOjE3NjA4NzYyNTAsImVtYWlsIjoicmVudHN3aWZ0NEBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6ImVtYWlsIiwicHJvdmlkZXJzIjpbImVtYWlsIl19LCJ1c2VyX21ldGFkYXRhIjp7ImVtYWlsIjoicmVudHN3aWZ0NEBnbWFpbC5jb20iLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwicGhvbmVfdmVyaWZpZWQiOmZhbHNlLCJyb2xlIjoidGVuYW50Iiwic3ViIjoiZjBhNDY0NWYtNGQ4NS00NjZmLTk4M2MtYzhjOGUzMThmMmQwIn0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoicGFzc3dvcmQiLCJ0aW1lc3RhbXAiOjE3NjA4NzYyNTB9XSwic2Vzc2lvbl9pZCI6ImYzZWVjMWViLTg5NGEtNDNjNi1iZmE4LWU3ZmRhNjYwMGM1MCIsImlzX2Fub255bW91cyI6ZmFsc2V9.R66IEj3fC_W9SOeJyhxhIB8FuFP-o8qOnL70CE_5rFk\",\"token_type\":\"bearer\",\"expires_in\":3600,\"expires_at\":1760879850,\"refresh_token\":\"6s32e7xhkeu7\",\"user\":{\"id\":\"f0a4645f-4d85-466f-983c-c8c8e318f2d0\",\"aud\":\"authenticated\",\"role\":\"authenticated\",\"email\":\"rentswift4@gmail.com\",\"email_confirmed_at\":\"2025-08-31T16:41:00.092072Z\",\"phone\":\"\",\"confirmed_at\":\"2025-08-31T16:41:00.092072Z\",\"last_sign_in_at\":\"2025-10-19T12:17:29.925382235Z\",\"app_metadata\":{\"provider\":\"email\",\"providers\":[\"email\"]},\"user_metadata\":{\"email\":\"rentswift4@gmail.com\",\"email_verified\":true,\"phone_verified\":false,\"role\":\"tenant\",\"sub\":\"f0a4645f-4d85-466f-983c-c8c8e318f2d0\"},\"identities\":[{\"identity_id\":\"0f519e09-deb9-4f48-b92f-f2169af4bec5\",\"id\":\"f0a4645f-4d85-466f-983c-c8c8e318f2d0\",\"user_id\":\"f0a4645f-4d85-466f-983c-c8c8e318f2d0\",\"identity_data\":{\"email\":\"rentswift4@gmail.com\",\"email_verified\":false,\"phone_verified\":false,\"role\":\"tenant\",\"sub\":\"f0a4645f-4d85-466f-983c-c8c8e318f2d0\"},\"provider\":\"email\",\"last_sign_in_at\":\"2025-08-31T16:41:00.070541Z\",\"created_at\":\"2025-08-31T16:41:00.070602Z\",\"updated_at\":\"2025-08-31T16:41:00.070602Z\",\"email\":\"rentswift4@gmail.com\"}],\"created_at\":\"2025-08-31T16:41:00.038218Z\",\"updated_at\":\"2025-10-19T12:17:30.026114Z\",\"is_anonymous\":false},\"weak_password\":null}"
+        }
+      ]
+    }
+  ]
+}

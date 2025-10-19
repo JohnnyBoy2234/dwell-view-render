@@ -44,8 +44,6 @@ import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import LandlordInspection from "@/pages/LandlordInspection";
 import Applications from "./pages/Applications";
-import DocuSignCallback from "./pages/DocuSignCallback";
-import DocuSignRedirect from "./pages/DocuSignRedirect";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
@@ -109,9 +107,6 @@ function AppRoutes() {
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />
               <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/auth/callback" element={<DocuSignCallback />} />
-              <Route path="/docusign-callback" element={<DocuSignCallback />} />
-              <Route path="/docusign-redirect" element={<DocuSignRedirect />} />
               <Route path="/inventory/start" element={<InventoryStart />} />
               
               {/* Enhanced Dashboard Routes */}

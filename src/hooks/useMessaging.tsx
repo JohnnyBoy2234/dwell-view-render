@@ -1,23 +1,45 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, type SupabaseClient } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useRealtime } from './useRealtime';
+
+type MessageType = 'text' | 'attachment' | 'system' | 'proposal';
+type ConversationStatus = 'active' | 'archived' | 'pending' | 'blocked';
+
+interface UserProfile {
+  user_id: string;
+  display_name: string;
+  avatar_url?: string | null;
+}
+
+interface PropertyDetails {
+  id: string;
+  title: string;
+  images: string[];
+  address?: string;
+  rent_amount?: number;
+  currency?: string;
+}
 
 interface Message {
   id: string;
   conversation_id: string;
   sender_id: string;
   content: string;
-  message_type: string;
+  message_type: MessageType;
   attachment_url: string | null;
+  attachment_type?: string | null;
+  attachment_name?: string | null;
+  attachment_size?: number | null;
   read_by_landlord: boolean;
   read_by_tenant: boolean;
   created_at: string;
+  updated_at?: string;
+  deleted_at?: string | null;
   viewing_proposal_id?: string | null;
-  profiles?: {
-    display_name: string;
-  } | null;
+  profiles?: Pick<UserProfile, 'display_name' | 'avatar_url'> | null;
+  metadata?: Record<string, unknown>;
 }
 
 interface Conversation {
@@ -25,32 +47,121 @@ interface Conversation {
   property_id: string;
   landlord_id: string;
   tenant_id: string;
-  status: string;
+  inquiry_id?: string | null;
+  status: ConversationStatus;
   last_message_at: string | null;
+  created_at: string;
+  updated_at: string;
+  archived_by_landlord: boolean;
+  archived_by_tenant: boolean;
   properties: {
+    id: string;
     title: string;
     images: string[];
+    address?: string;
+    rent_amount?: number;
+    currency?: string;
   } | null;
-  landlord_profile?: {
-    display_name: string;
-  } | null;
-  tenant_profile?: {
-    display_name: string;
-  } | null;
+  landlord_profile?: Pick<UserProfile, 'display_name' | 'avatar_url'> | null;
+  tenant_profile?: Pick<UserProfile, 'display_name' | 'avatar_url'> | null;
   unread_count?: number;
+  last_message?: Pick<Message, 'id' | 'content' | 'message_type' | 'created_at' | 'sender_id'> | null;
+  metadata?: Record<string, unknown>;
 }
 
-export function useMessaging(onViewingProposalChange?: () => void) {
+interface SendMessageParams {
+  conversationId: string;
+  content: string;
+  messageType?: MessageType;
+  attachment?: File;
+  metadata?: Record<string, unknown>;
+}
+
+interface CreateConversationParams {
+  propertyId: string;
+  landlordId: string;
+  tenantId: string;
+  inquiryId?: string;
+  initialMessage?: string;
+  metadata?: Record<string, unknown>;
+}
+
+interface UseMessagingReturn {
+  conversations: Conversation[];
+  activeConversation: string | null;
+  setActiveConversation: (conversationId: string | null) => void;
+  messages: Message[];
+  loading: boolean;
+  onlineUsers: Set<string>;
+  sendMessage: (params: SendMessageParams) => Promise<void>;
+  sendMessageWithAttachment: (params: SendMessageParams & { files: File[] }) => Promise<void>;
+  createConversation: (params: CreateConversationParams) => Promise<Conversation | null>;
+  fetchConversations: () => Promise<void>;
+  fetchMessages: (conversationId: string) => Promise<void>;
+  markMessagesAsRead: (conversationId: string) => Promise<void>;
+  isUserOnline: (userId: string) => boolean;
+}
+
+// Type guards
+const isMessage = (data: unknown): data is Message => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'id' in data &&
+    'conversation_id' in data &&
+    'sender_id' in data &&
+    'content' in data
+  );
+};
+
+const isConversation = (data: unknown): data is Conversation => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'id' in data &&
+    'property_id' in data &&
+    'landlord_id' in data &&
+    'tenant_id' in data
+  );
+};
+
+// Error handling
+class MessagingError extends Error {
+  code: string;
+  details?: unknown;
+  
+  constructor(message: string, code: string, details?: unknown) {
+    super(message);
+    this.name = 'MessagingError';
+    this.code = code;
+    this.details = details;
+  }
+}
+
+// Constants
+const MESSAGE_PAGE_SIZE = 50;
+const RECONNECT_DELAY = 5000; // 5 seconds
+const MAX_RECONNECT_ATTEMPTS = 5;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+export function useMessaging(onViewingProposalChange?: () => void): UseMessagingReturn {
   const { user, isLandlord } = useAuth();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConversation, setActiveConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState<boolean>(true);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const [reconnectAttempts, setReconnectAttempts] = useState<number>(0);
+  
   const { toast } = useToast();
-  const isMountedRef = useRef(true);
-  const hasHydratedFromCacheRef = useRef(false);
-  const messageChannelRef = useRef<any | null>(null);
+  const isMountedRef = useRef<boolean>(true);
+  const hasHydratedFromCacheRef = useRef<boolean>(false);
+  const messageChannelRef = useRef<ReturnType<SupabaseClient['channel']> | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastFetchedRef = useRef<Record<string, number>>({});
+  
+  // Memoize user ID to prevent unnecessary effect re-runs
+  const userId = useMemo(() => user?.id, [user?.id]);
 
   // Component mount tracking
   useEffect(() => {
@@ -59,6 +170,17 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       isMountedRef.current = false;
     };
   }, []);
+
+  // Memoize the current user's ID to prevent unnecessary effect re-runs
+  const currentUserId = useMemo(() => user?.id, [user?.id]);
+
+  // Memoize the isLandlord value to prevent unnecessary effect re-runs
+  const currentUserIsLandlord = useMemo(() => isLandlord, [isLandlord]);
+
+  // Memoize the toast function
+  const showToast = useCallback((title: string, description: string, variant: 'default' | 'destructive' = 'destructive') => {
+    toast({ title, description, variant });
+  }, [toast]);
 
   // Update user presence
   useEffect(() => {
@@ -134,8 +256,11 @@ export function useMessaging(onViewingProposalChange?: () => void) {
     };
   }, []);
 
-  // Fetch conversations
-  const fetchConversations = async () => {
+  /**
+   * Fetches all conversations for the current user
+   * @throws {MessagingError} If fetching conversations fails
+   */
+  const fetchConversations = useCallback(async (): Promise<void> => {
     if (!user) {
       console.log('❌ Cannot fetch conversations: no user');
       setLoading(false);
@@ -229,10 +354,14 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       });
       setLoading(false);
     }
-  };
+  }, [user, isLandlord, toast]);
 
-  // Fetch messages for a conversation
-  const fetchMessages = useCallback(async (conversationId: string) => {
+  /**
+   * Fetches messages for a specific conversation
+   * @param conversationId - ID of the conversation to fetch messages for
+   * @throws {MessagingError} If fetching messages fails
+   */
+  const fetchMessages = useCallback(async (conversationId: string): Promise<void> => {
     console.log('📥 Fetching messages for conversation:', conversationId);
     try {
       setLoading(true);
@@ -284,7 +413,7 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       }));
 
       if (!isMountedRef.current) return;
-      setMessages(messagesWithProfiles as any);
+      setMessages(messagesWithProfiles as Message[]);
       await markMessagesAsRead(conversationId);
       setLoading(false);
     } catch (error: any) {
@@ -295,235 +424,69 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       });
       setLoading(false);
     }
-  }, [toast, isLandlord]);
+  }, [userId, markMessagesAsRead, toast]);
 
-  // Send a message
-  const sendMessage = async (conversationId: string, content: string) => {
-    if (!user || !content.trim()) {
-      console.log('❌ Cannot send message: missing user or content', { user: !!user, content: content.trim() });
+  /**
+   * Updates the last message of a conversation in the local state
+   */
+  const updateConversationLastMessage = useCallback((
+    conversationId: string,
+    content: string,
+    messageType: MessageType = 'text'
+  ) => {
+    if (!isMountedRef.current || !userId) return;
+    
+    setConversations(prev => {
+      const now = new Date().toISOString();
+      return prev.map(conv => {
+        if (conv.id === conversationId) {
+          return {
+            ...conv,
+            last_message_at: now,
+            last_message: {
+              id: `temp-${Date.now()}`,
+              content: content.length > 100 ? `${content.substring(0, 100)}...` : content,
+              message_type: messageType,
+              created_at: now,
+              sender_id: userId
+            }
+          };
+        }
+        return conv;
+      });
+    });
+  }, [userId]);
+
+  /**
+   * Marks all messages in a conversation as read for the current user
+   * @param conversationId - ID of the conversation to mark as read
+   * @throws {MessagingError} If marking messages as read fails
+   */
+  const markMessagesAsRead = useCallback(async (conversationId: string): Promise<void> => {
+    if (!userId) {
+      console.warn('Cannot mark messages as read: No user ID');
       return;
     }
 
-    console.log('📤 Sending message:', { conversationId, content: content.trim(), senderId: user.id });
-
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: content.trim(),
-          message_type: 'text'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error sending message:', error);
-        throw error;
-      }
-
-      console.log('✅ Message sent successfully:', data);
-
-      // Optimistically append for instant UI; realtime will reconcile
-      if (isMountedRef.current && activeConversation === conversationId) {
-        setMessages(prev => {
-          if (prev.some(m => m.id === (data as any).id)) return prev;
-          return [...prev, data as any];
-        });
-      }
-      
-      // Update conversation's last_message_at optimistically
-      if (isMountedRef.current) {
-        setConversations(prev => 
-          prev.map(conv => 
-            conv.id === conversationId 
-              ? { ...conv, last_message_at: new Date().toISOString() }
-              : conv
-          )
-        );
-      }
-    } catch (error: any) {
-      console.error('❌ Final error in sendMessage:', error);
-      toast({
-        variant: "destructive",
-        title: "Error sending message",
-        description: error.message
-      });
-    }
-  };
-
-  // Send a message with attachment
-  const sendMessageWithAttachment = async (conversationId: string, content: string, files: File[] = []) => {
-    if (!user || (!content.trim() && files.length === 0)) {
-      console.log('❌ Cannot send message: missing user or content/files');
+    if (!conversationId) {
+      console.warn('Cannot mark messages as read: No conversation ID');
       return;
     }
 
-    console.log('📤 Sending message with attachments:', { conversationId, content: content.trim(), files: files.length, senderId: user.id });
+    console.log('📖 Marking messages as read for conversation:', conversationId, 
+      'role:', isLandlord ? 'landlord' : 'tenant');
 
-    try {
-      let attachmentUrl = null;
-      let messageType = 'text';
-
-      // Upload file if provided
-      if (files.length > 0) {
-        const file = files[0]; // For now, handle single file
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-        
-        console.log('📎 Uploading file:', fileName);
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('chat-attachments')
-          .upload(fileName, file);
-
-        if (uploadError) {
-          console.error('❌ Error uploading file:', uploadError);
-          throw uploadError;
-        }
-
-        // Get public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('chat-attachments')
-          .getPublicUrl(uploadData.path);
-
-        attachmentUrl = publicUrl;
-        messageType = 'attachment';
-        console.log('✅ File uploaded successfully:', attachmentUrl);
-      }
-
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: user.id,
-          content: content.trim() || '',
-          message_type: messageType,
-          attachment_url: attachmentUrl
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error sending message:', error);
-        throw error;
-      }
-
-      console.log('✅ Message with attachment sent successfully:', data);
-
-      // Optimistically append for instant UI; realtime will reconcile
-      if (isMountedRef.current && activeConversation === conversationId) {
-        setMessages(prev => {
-          if (prev.some(m => m.id === (data as any).id)) return prev;
-          return [...prev, data as any];
-        });
-      }
-      
-      // Update conversation's last_message_at optimistically
-      if (isMountedRef.current) {
-        setConversations(prev => 
-          prev.map(conv => 
-            conv.id === conversationId 
-              ? { ...conv, last_message_at: new Date().toISOString() }
-              : conv
-          )
-        );
-      }
-    } catch (error: any) {
-      console.error('❌ Final error in sendMessageWithAttachment:', error);
-      toast({
-        variant: "destructive",
-        title: "Error sending message",
-        description: error.message
-      });
+    // Optimistic update
+    const previousConversations = conversations;
+    if (isMountedRef.current) {
+      setConversations(prev =>
+        prev.map(conv =>
+          conv.id === conversationId 
+            ? { ...conv, unread_count: 0 }
+            : conv
+        )
+      );
     }
-  };
-
-  // Create a new conversation
-  const createConversation = async (propertyId: string, landlordId: string, tenantId: string, inquiryId?: string) => {
-    if (!user) return null;
-
-    console.log('🚀 Creating conversation:', { propertyId, landlordId, tenantId, inquiryId, userId: user.id });
-
-    try {
-      // First check if conversation already exists
-      const { data: existing, error: checkError } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('property_id', propertyId)
-        .eq('landlord_id', landlordId)
-        .eq('tenant_id', tenantId)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error('❌ Error checking existing conversation:', checkError);
-        throw checkError;
-      }
-
-      if (existing) {
-        console.log('✅ Found existing conversation:', existing.id);
-        return existing;
-      }
-
-      // Create new conversation
-      console.log('🆕 Creating new conversation...');
-      const { data, error } = await supabase
-        .from('conversations')
-        .insert({
-          property_id: propertyId,
-          landlord_id: landlordId,
-          tenant_id: tenantId,
-          inquiry_id: inquiryId
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('❌ Error creating conversation:', error);
-        
-        // If conversation already exists due to race condition, try to fetch it again
-        if (error.code === '23505') {
-          console.log('🔄 Duplicate detected, fetching existing...');
-          const { data: duplicate, error: dupError } = await supabase
-            .from('conversations')
-            .select('*')
-            .eq('property_id', propertyId)
-            .eq('landlord_id', landlordId)
-            .eq('tenant_id', tenantId)
-            .single();
-          
-          if (dupError) {
-            console.error('❌ Error fetching duplicate:', dupError);
-            throw dupError;
-          }
-          
-          console.log('✅ Found duplicate conversation:', duplicate.id);
-          return duplicate;
-        }
-        throw error;
-      }
-
-      console.log('✅ Successfully created conversation:', data.id);
-      if (!isMountedRef.current) return data;
-      fetchConversations();
-      return data;
-    } catch (error: any) {
-      console.error('❌ Final error in createConversation:', error);
-      toast({
-        variant: "destructive",
-        title: "Error creating conversation",
-        description: error.message
-      });
-      return null;
-    }
-  };
-
-  // Mark messages as read with detailed logging
-  const markMessagesAsRead = useCallback(async (conversationId: string) => {
-    if (!user) return;
-
-    console.log('📖 [READ MARKING] Starting mark as read for conversation:', conversationId, 'role:', isLandlord ? 'landlord' : 'tenant');
 
     try {
       const { error, data } = await supabase.rpc('mark_messages_as_read', {
@@ -532,46 +495,58 @@ export function useMessaging(onViewingProposalChange?: () => void) {
       });
 
       if (error) {
-        console.error('❌ [READ MARKING] RPC function error:', error);
-        throw error;
+        console.error('❌ RPC function error:', error);
+        throw new MessagingError(
+          error.message || 'Failed to mark messages as read',
+          error.code || 'MARK_READ_FAILED',
+          { details: error.details }
+        );
       }
 
-      console.log('✅ [READ MARKING] RPC function completed successfully:', data);
+      console.log('✅ Messages marked as read successfully:', data);
 
-      // Verify that messages were actually updated by checking the database
-      const { data: verifyMessages, error: verifyError } = await supabase
-        .from('messages')
-        .select('id, sender_id, read_by_landlord, read_by_tenant')
-        .eq('conversation_id', conversationId)
-        .neq('sender_id', user.id)
-        .limit(5);
+      // Verify the update if in development
+      if (process.env.NODE_ENV === 'development') {
+        const { data: verifyMessages } = await supabase
+          .from('messages')
+          .select('id, sender_id, read_by_landlord, read_by_tenant')
+          .eq('conversation_id', conversationId)
+          .neq('sender_id', userId)
+          .limit(5);
 
-      if (verifyError) {
-        console.error('❌ [READ MARKING] Verification query error:', verifyError);
-      } else {
-        console.log('🔍 [READ MARKING] Verification - updated messages:', verifyMessages);
-        const readField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
-        const unreadCount = verifyMessages?.filter(m => !m[readField]).length || 0;
-        console.log('🔍 [READ MARKING] Remaining unread messages:', unreadCount);
+        if (verifyMessages) {
+          const readField = isLandlord ? 'read_by_landlord' : 'read_by_tenant';
+          const unreadCount = verifyMessages.filter(m => !m[readField]).length;
+          console.log('🔍 Verification - remaining unread messages:', unreadCount);
+        }
       }
 
-      if (!isMountedRef.current) return;
-      
-      // Update local conversation state
-      setConversations(prev =>
-        prev.map(conv =>
-          conv.id === conversationId ? { ...conv, unread_count: 0 } : conv
-        )
-      );
-
-      // Force refresh unread counts across the app by triggering a custom event
+      // Notify other components about the read status change
       window.dispatchEvent(new CustomEvent('messages-marked-read', { 
         detail: { conversationId } 
       }));
-    } catch (error: any) {
-      console.error('❌ [READ MARKING] Error marking messages as read:', error);
+    } catch (error) {
+      console.error('❌ Error marking messages as read:', error);
+      
+      // Revert optimistic update on error
+      if (isMountedRef.current) {
+        setConversations(previousConversations);
+      }
+
+      const errorMessage = error instanceof MessagingError
+        ? error.message
+        : 'An unexpected error occurred while marking messages as read';
+      
+      toast({
+        variant: 'destructive',
+        title: 'Failed to mark messages as read',
+        description: errorMessage,
+      });
+      
+      // Re-throw for error boundaries or callers to handle
+      throw error;
     }
-  }, [user, isLandlord]);
+  }, [userId, isLandlord, conversations, toast]);
 
   // Real-time subscription for conversation updates (last_message_at)
   useEffect(() => {
@@ -791,21 +766,128 @@ export function useMessaging(onViewingProposalChange?: () => void) {
         supabase.removeChannel(messageChannelRef.current);
         messageChannelRef.current = null;
       }
+      // Clear any pending timeouts
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
     };
   }, []);
 
-  return {
+  // Helper function to check if a user is online
+  const isUserOnline = useCallback((userId: string): boolean => {
+    return onlineUsers.has(userId);
+  }, [onlineUsers]);
+
+  // Return the public API of the hook
+  return useMemo(() => ({
     conversations,
     activeConversation,
     setActiveConversation,
     messages,
     loading,
     onlineUsers,
-    sendMessage,
-    sendMessageWithAttachment,
-    createConversation,
+    sendMessage: async (params: SendMessageParams) => {
+      try {
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: params.conversationId,
+            sender_id: user?.id,
+            content: params.content,
+            message_type: params.messageType || 'text',
+            attachment_url: params.attachment ? URL.createObjectURL(params.attachment) : null,
+            attachment_type: params.attachment ? params.attachment.type : null,
+            attachment_name: params.attachment ? params.attachment.name : null,
+            attachment_size: params.attachment ? params.attachment.size : null,
+            metadata: params.metadata
+          });
+        updateConversationLastMessage(params.conversationId, params.content, params.messageType);
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        throw error;
+      }
+    },
+    sendMessageWithAttachment: async (params: SendMessageParams & { files: File[] }) => {
+      try {
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: params.conversationId,
+            sender_id: user?.id,
+            content: params.content,
+            message_type: 'attachment',
+            attachment_url: URL.createObjectURL(params.files[0]),
+            attachment_type: params.files[0].type,
+            attachment_name: params.files[0].name,
+            attachment_size: params.files[0].size,
+            metadata: params.metadata
+          });
+        updateConversationLastMessage(params.conversationId, params.content, 'attachment');
+      } catch (error) {
+        console.error('Failed to send message with attachment:', error);
+        throw error;
+      }
+    },
+    createConversation: async (params: CreateConversationParams) => {
+      try {
+        const { data, error } = await supabase
+          .from('conversations')
+          .insert({
+            property_id: params.propertyId,
+            landlord_id: params.landlordId,
+            tenant_id: params.tenantId,
+            inquiry_id: params.inquiryId,
+            status: 'active',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            archived_by_landlord: false,
+            archived_by_tenant: false,
+            metadata: params.metadata
+          })
+          .select('id, property_id, landlord_id, tenant_id, inquiry_id, status, created_at, updated_at, archived_by_landlord, archived_by_tenant, metadata')
+          .single();
+
+        if (error) {
+          console.error('Error creating conversation:', error);
+          throw error;
+        }
+
+        if (params.initialMessage) {
+          await supabase
+            .from('messages')
+            .insert({
+              conversation_id: data.id,
+              sender_id: user?.id,
+              content: params.initialMessage,
+              message_type: 'text',
+              created_at: new Date().toISOString()
+            });
+        }
+
+        return data;
+      } catch (error) {
+        console.error('Failed to create conversation:', error);
+        throw error;
+      }
+    },
     fetchConversations,
     fetchMessages,
-    markMessagesAsRead
-  };
+    markMessagesAsRead,
+    isUserOnline
+  }), [
+    conversations,
+    activeConversation,
+    setActiveConversation,
+    messages,
+    loading,
+    onlineUsers,
+    user,
+    updateConversationLastMessage,
+    supabase,
+    fetchConversations,
+    fetchMessages,
+    markMessagesAsRead,
+    isUserOnline
+  ]);
 }
