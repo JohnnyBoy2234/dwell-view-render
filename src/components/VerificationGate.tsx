@@ -117,15 +117,7 @@ export function VerificationGate({
             <CardDescription>{status.description}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Button 
-              onClick={() => navigate(fallbackPath)}
-              className="w-full"
-              variant={status.variant === 'destructive' ? 'destructive' : 'default'}
-            >
-              {status.action}
-            </Button>
-            
-            {kycProfile?.status === 'submitted' && (
+            {kycProfile?.status === 'submitted' ? (
               <Alert>
                 <Clock className="h-4 w-4" />
                 <AlertDescription>
@@ -133,6 +125,14 @@ export function VerificationGate({
                   You'll receive a notification once your verification is complete.
                 </AlertDescription>
               </Alert>
+            ) : (
+              <Button 
+                onClick={() => navigate(fallbackPath)}
+                className="w-full"
+                variant={status.variant === 'destructive' ? 'destructive' : 'default'}
+              >
+                {status.action}
+              </Button>
             )}
           </CardContent>
         </Card>
