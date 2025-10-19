@@ -8,19 +8,18 @@ import { useGateStatus } from '@/hooks/useGateStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import StartConversation from '@/components/StartConversation';
 
 interface GatedViewingButtonProps {
   propertyId: string;
   landlordId: string;
   propertyTitle: string;
-  onRequestViewing: () => void;
 }
 
 export function GatedViewingButton({ 
   propertyId, 
   landlordId, 
-  propertyTitle, 
-  onRequestViewing 
+  propertyTitle
 }: GatedViewingButtonProps) {
   const { user } = useAuth();
   const { gateStatus, loading } = useGateStatus();
@@ -198,20 +197,6 @@ export function GatedViewingButton({
 
   // All requirements met - allow viewing request
   if (gateStatus.canRequestViewing) {
-    const handleAllowedRequest = async () => {
-      // Log successful viewing request
-      await supabase.rpc('log_event', {
-        _user_id: user.id,
-        _name: 'viewing_requested',
-        _properties: {
-          property_id: propertyId,
-          landlord_id: landlordId
-        }
-      });
-      
-      onRequestViewing();
-    };
-
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2 text-sm text-success-foreground">
@@ -219,10 +204,11 @@ export function GatedViewingButton({
           <span>Verified • Ready to request viewings</span>
         </div>
         
-        <Button onClick={handleAllowedRequest} className="w-full">
-          <Calendar className="h-4 w-4 mr-2" />
-          Request Viewing
-        </Button>
+        <StartConversation
+          propertyId={propertyId}
+          landlordId={landlordId}
+          propertyTitle={propertyTitle}
+        />
       </div>
     );
   }

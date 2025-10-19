@@ -568,29 +568,27 @@ export default function PropertyDetail() {
                       This is your property listing
                     </p>
                   </div>
-                 ) : user && property.landlord_id !== user.id ? (
-                   <div className="space-y-2">
-                      <GatedViewingButton
-                        propertyId={property.id}
-                        landlordId={property.landlord_id}
-                        propertyTitle={property.title}
-                        onRequestViewing={handleRequestViewing}
-                      />
-                      
-                      {/* Application Button */}
-                      <TenantApplicationButton 
-                        propertyId={property.id}
-                        className="w-full"
-                      />
-                    </div>
-                 ) : (
-                   <GatedViewingButton
-                     propertyId={property.id}
-                     landlordId={property.landlord_id}
-                     propertyTitle={property.title}
-                     onRequestViewing={handleRequestViewing}
-                   />
-                 )}
+                  ) : user && property.landlord_id !== user.id ? (
+                    <div className="space-y-2">
+                       <GatedViewingButton
+                         propertyId={property.id}
+                         landlordId={property.landlord_id}
+                         propertyTitle={property.title}
+                       />
+                       
+                       {/* Application Button */}
+                       <TenantApplicationButton 
+                         propertyId={property.id}
+                         className="w-full"
+                       />
+                     </div>
+                  ) : (
+                    <GatedViewingButton
+                      propertyId={property.id}
+                      landlordId={property.landlord_id}
+                      propertyTitle={property.title}
+                    />
+                  )}
 
                 
               </CardContent>
