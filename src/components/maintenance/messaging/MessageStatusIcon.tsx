@@ -17,11 +17,11 @@ export function MessageStatusIcon({ statusType, ariaLabel }: MessageStatusIconPr
   const getIcon = () => {
     switch (statusType) {
       case 'sending':
-        return <Clock className="h-3 w-3 opacity-60" />;
+        return <Clock className="h-4 w-4 opacity-60" />;
       case 'read':
-        return <CheckCheck className="h-3 w-3 text-green-400" />;
+        return <CheckCheck className="h-4 w-4 text-green-400" />;
       case 'delivered':
-        return <Check className="h-3 w-3 text-slate-400" />;
+        return <Check className="h-4 w-4 text-slate-400" />;
       default:
         return null;
     }
