@@ -7,6 +7,8 @@ import { Calendar, Send, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import ViewingPreScreeningForm from '@/components/viewing/ViewingPreScreeningForm';
+import { formatPreScreeningMessage, type PreScreeningData } from '@/types/message';
 
 interface StartConversationProps {
   propertyId: string;
@@ -22,10 +24,10 @@ export default function StartConversation({
   inquiryId 
 }: StartConversationProps) {
   const { user } = useAuth();
-  const { createConversation } = useMessaging();
+  const { createConversation, sendMessage } = useMessaging();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
-  const [showFirstMessageGuide, setShowFirstMessageGuide] = useState(false);
+  const [showPreScreening, setShowPreScreening] = useState(false);
   const [isFirstMessage, setIsFirstMessage] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -69,9 +71,10 @@ export default function StartConversation({
       return;
     }
     
-    // Show first message guide if this is the first conversation
+    // Show pre-screening form if this is the first conversation
     if (isFirstMessage) {
-      setShowFirstMessageGuide(true);
+      setOpen(false);
+      setShowPreScreening(true);
       return;
     }
 
@@ -124,30 +127,50 @@ export default function StartConversation({
     }
   };
 
-  const handleProceedWithMessage = async () => {
-    setShowFirstMessageGuide(false);
+  const handlePreScreeningSubmit = async (formData: PreScreeningData) => {
     setLoading(true);
     
     try {
+      // Create conversation first
+      console.log('Creating conversation with:', { propertyId, landlordId, userId: user.id, inquiryId });
       const conversation = await createConversation(
         propertyId,
         landlordId,
-        user.id,
+        user!.id,
         inquiryId
       );
 
       if (conversation) {
+        // Format and send the pre-screening message
+        const preScreeningMessage = formatPreScreeningMessage(formData, propertyTitle);
+        await sendMessage(conversation.id, preScreeningMessage);
+        
+        // Navigate to messages page
+        console.log('Navigating to:', `/messages?c=${conversation.id}`);
         navigate(`/messages?c=${conversation.id}`);
+        
+        toast({
+          title: "Viewing request sent!",
+          description: "The landlord will review your information and respond soon."
+        });
+      } else {
+        console.log('No conversation returned');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to create conversation"
+        });
       }
     } catch (error) {
-      console.error('Error creating conversation:', error);
+      console.error('Error sending viewing request:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to start conversation. Please try again."
+        description: "Failed to send viewing request. Please try again."
       });
     } finally {
       setLoading(false);
+      setShowPreScreening(false);
     }
   };
 
@@ -165,61 +188,70 @@ export default function StartConversation({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full">
-          <Calendar className="h-4 w-4 mr-2" />
-          Request Viewing
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Request Viewing</DialogTitle>
-          <DialogDescription>
-            Start a conversation with the landlord about "{propertyTitle}"
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4">
-          {isFirstMessage && (
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
-              <div className="flex items-start gap-3">
-                <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">
-                    How to request a viewing
-                  </p>
-                  <p className="text-sm text-blue-800 dark:text-blue-200">
-                    To arrange a viewing, please suggest a few times that work for you in your message. 
-                    The landlord will confirm the final time and date. Once agreed, you can formally request an application.
-                  </p>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button className="w-full">
+            <Calendar className="h-4 w-4 mr-2" />
+            Request Viewing
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Viewing</DialogTitle>
+            <DialogDescription>
+              Start a conversation with the landlord about "{propertyTitle}"
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {isFirstMessage && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                      Pre-screening required
+                    </p>
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      To help landlords get to know you better, you'll need to provide some basic information before requesting a viewing.
+                    </p>
+                  </div>
                 </div>
               </div>
+            )}
+            <p className="text-sm text-muted-foreground">
+              This will create a new conversation thread where you can discuss property details, 
+              schedule viewings, and ask questions directly with the landlord.
+            </p>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleStartConversation} disabled={loading}>
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    {isFirstMessage ? 'Continue' : 'Request Viewing'}
+                  </>
+                )}
+              </Button>
             </div>
-          )}
-          <p className="text-sm text-muted-foreground">
-            This will create a new conversation thread where you can discuss property details, 
-            schedule viewings, and ask questions directly with the landlord.
-          </p>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleStartConversation} disabled={loading}>
-              {loading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4 mr-2" />
-                  Request Viewing
-                </>
-              )}
-            </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <ViewingPreScreeningForm
+        open={showPreScreening}
+        onOpenChange={setShowPreScreening}
+        onSubmit={handlePreScreeningSubmit}
+        loading={loading}
+        propertyTitle={propertyTitle}
+      />
+    </>
   );
 }

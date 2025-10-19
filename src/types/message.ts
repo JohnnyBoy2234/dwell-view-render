@@ -28,3 +28,37 @@ export interface MessageBubbleProps {
 }
 
 export type MessageRole = 'landlord' | 'tenant';
+
+export interface PreScreeningData {
+  moveInDate: Date;
+  monthlyIncome: number;
+  rentalHistory: 'clean' | 'late' | 'evicted' | 'first';
+  message: string;
+}
+
+export const formatPreScreeningMessage = (data: PreScreeningData, propertyTitle: string): string => {
+  const moveInDate = new Date(data.moveInDate).toLocaleDateString('en-ZA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  
+  const formattedIncome = `R${data.monthlyIncome.toLocaleString()}`;
+  
+  const rentalHistoryText = {
+    clean: 'No, I have a clean rental history',
+    late: 'Yes, I have been late on rent before',
+    evicted: 'Yes, I have been evicted before',
+    first: 'This is my first rental',
+  }[data.rentalHistory];
+  
+  return `${data.message}
+
+📋 **Pre-Screening Information:**
+
+📅 **Desired Move-in Date:** ${moveInDate}
+💰 **Monthly Income:** ${formattedIncome}
+🏠 **Rental History:** ${rentalHistoryText}
+
+Looking forward to hearing from you!`;
+};
