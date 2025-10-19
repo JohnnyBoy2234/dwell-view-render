@@ -33,6 +33,7 @@ import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
+import { VerificationGate } from '@/components/VerificationGate';
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
@@ -262,12 +263,14 @@ export default function EnhancedTenantDashboard() {
   };
 
   return (
-    <EnhancedDashboardLayout 
-      title="Tenant Dashboard" 
-      currentTab={currentTab}
-      onTabChange={handleTabChange}
-    >
-      {renderTabContent()}
-    </EnhancedDashboardLayout>
+    <VerificationGate requireVerification={true}>
+      <EnhancedDashboardLayout 
+        title="Tenant Dashboard" 
+        currentTab={currentTab}
+        onTabChange={handleTabChange}
+      >
+        {renderTabContent()}
+      </EnhancedDashboardLayout>
+    </VerificationGate>
   );
 }

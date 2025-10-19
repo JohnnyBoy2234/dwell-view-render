@@ -25,6 +25,7 @@ import { MaintenanceRequest } from '@/types/maintenance';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 import { AccountingOverview } from '@/components/accounting/AccountingOverview';
+import { VerificationGate } from '@/components/VerificationGate';
 
 interface PropertyWithTenant {
   id: string;
@@ -2600,12 +2601,14 @@ export default function EnhancedLandlordDashboard() {
   };
 
   return (
-    <EnhancedDashboardLayout 
-      title="Landlord Dashboard" 
-      currentTab={currentTab}
-      onTabChange={handleTabChange}
-    >
-      {renderTabContent()}
-    </EnhancedDashboardLayout>
+    <VerificationGate requireVerification={true}>
+      <EnhancedDashboardLayout 
+        title="Landlord Dashboard" 
+        currentTab={currentTab}
+        onTabChange={handleTabChange}
+      >
+        {renderTabContent()}
+      </EnhancedDashboardLayout>
+    </VerificationGate>
   );
 }
