@@ -856,412 +856,201 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
 
-  const renderApplicationsTab = () => {
-    // Calculate stats
-    const pendingCount = applications.filter(a => a.status === 'pending').length;
-    const acceptedCount = applications.filter(a => a.status === 'accepted').length;
-    const declinedCount = applications.filter(a => a.status === 'declined').length;
-    const leadsCount = appLeads.filter(l => !appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status).length;
-
-    // Organize applications by status
-    const needsAction = applications.filter(a => a.status === 'pending');
-    const inProgress = applications.filter(a => a.status === 'accepted');
-    const completed = applications.filter(a => a.status === 'declined');
-
-    // Filter leads (not yet invited)
-    const filteredLeads = appLeads
-      .filter(l => {
-        const invited = appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status === 'invited';
-        if (hideInvited && invited) return false;
-        if (!leadQuery.trim()) return true;
-        const q = leadQuery.toLowerCase();
-        return l.tenant_name.toLowerCase().includes(q) || l.title.toLowerCase().includes(q);
-      })
-      .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
-
-    return (
-      <div className="space-y-6">
-        {/* Header with Stats */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Applications</h2>
-          </div>
-
-          {/* Stats Summary Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="border-l-4 border-l-yellow-500">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
-                <div className="text-sm text-muted-foreground">Needs Action</div>
-              </CardContent>
-            </Card>
-            <Card className="border-l-4 border-l-blue-500">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-blue-600">{leadsCount}</div>
-                <div className="text-sm text-muted-foreground">New Leads</div>
-              </CardContent>
-            </Card>
-            <Card className="border-l-4 border-l-green-500">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-green-600">{acceptedCount}</div>
-                <div className="text-sm text-muted-foreground">Accepted</div>
-              </CardContent>
-            </Card>
-            <Card className="border-l-4 border-l-gray-500">
-              <CardContent className="p-4">
-                <div className="text-2xl font-bold text-muted-foreground">{declinedCount}</div>
-                <div className="text-sm text-muted-foreground">Declined</div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Loading State */}
-        {applicationsLoading ? (
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <div className="animate-pulse space-y-3">
-                    <div className="h-4 bg-muted rounded w-1/4"></div>
-                    <div className="h-3 bg-muted rounded w-1/2"></div>
-                    <div className="h-3 bg-muted rounded w-1/3"></div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <>
-            {/* Needs Action Section */}
-            {needsAction.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                  <h3 className="text-lg font-semibold">Needs Your Review</h3>
-                  <Badge variant="secondary">{needsAction.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {needsAction.map((application) => (
-                    <Card key={application.id} className="border-l-4 border-l-yellow-500 hover:shadow-lg transition-shadow">
-                      <CardContent className="p-4 md:p-6">
-                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                          <div className="flex gap-4 flex-1 min-w-0">
-                            {/* Avatar */}
-                            <div className="flex-shrink-0">
-                              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-lg">
-                                {(application.tenant_profile?.display_name || 'T').charAt(0).toUpperCase()}
-                              </div>
-                            </div>
-                            
-                            {/* Info */}
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                <h4 className="font-semibold text-lg truncate">
-                                  {application.tenant_profile?.display_name || 'Unknown Tenant'}
-                                </h4>
-                                <Badge variant="outline" className="w-fit">Pending Review</Badge>
-                              </div>
-                              
-                              <div className="space-y-1 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                  <Building className="h-4 w-4" />
-                                  <span className="truncate">{application.properties?.title || 'Unknown Property'}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>Applied {new Date(application.created_at).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Actions */}
-                          <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => navigate(`/application/${application.id}`)}
-                              className="w-full sm:w-auto"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => updateApplicationStatus(application.id, 'accepted')}
-                              className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
-                            >
-                              <Check className="h-4 w-4 mr-2" />
-                              Accept
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => updateApplicationStatus(application.id, 'declined')}
-                              className="w-full sm:w-auto"
-                            >
-                              <X className="h-4 w-4 mr-2" />
-                              Decline
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Leads Section */}
-            {filteredLeads.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">New Leads</h3>
-                  <Badge variant="secondary">{filteredLeads.length}</Badge>
-                </div>
-                
-                {/* Search and Filter */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    value={leadQuery}
-                    onChange={(e) => setLeadQuery(e.target.value)}
-                    placeholder="Search tenant or property..."
-                    className="flex-1 border rounded-md px-3 py-2 text-sm"
-                  />
-                  <label className="flex items-center gap-2 text-sm px-3 py-2 border rounded-md bg-background cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={hideInvited} 
-                      onChange={(e) => setHideInvited(e.target.checked)}
-                      className="cursor-pointer"
-                    />
-                    Hide invited
-                  </label>
-                </div>
-
-                <div className="space-y-3">
-                  {filteredLeads.map((lead) => {
-                    const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
-                    return (
-                      <Card key={lead.conversation_id} className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
-                        <CardContent className="p-4 md:p-6">
-                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                            <div className="flex gap-4 flex-1 min-w-0">
-                              {/* Avatar */}
-                              <div className="flex-shrink-0">
-                                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 font-semibold text-lg">
-                                  {lead.tenant_name.charAt(0).toUpperCase()}
-                                </div>
-                              </div>
-                              
-                              {/* Info */}
-                              <div className="flex-1 min-w-0 space-y-2">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                  <h4 className="font-semibold text-lg truncate">{lead.tenant_name}</h4>
-                                  {invited && <Badge variant="secondary">Invited</Badge>}
-                                </div>
-                                
-                                <div className="space-y-1 text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-2">
-                                    <Building className="h-4 w-4" />
-                                    <span className="truncate">{lead.title}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <MessageCircle className="h-4 w-4" />
-                                    <span>Last chat {lead.last_message_at ? new Date(lead.last_message_at).toLocaleString() : 'N/A'}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Actions */}
-                            <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}
-                                className="w-full sm:w-auto"
-                              >
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                View Chat
-                              </Button>
-                              {!invited && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}
-                                  className="w-full sm:w-auto"
-                                >
-                                  Send Application
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Accepted Applications (In Progress) */}
-            {inProgress.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Check className="h-5 w-5 text-green-600" />
-                  <h3 className="text-lg font-semibold">Accepted Applications</h3>
-                  <Badge variant="secondary">{inProgress.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {inProgress.map((application) => (
-                    <Card key={application.id} className="border-l-4 border-l-green-500 hover:shadow-lg transition-shadow">
-                      <CardContent className="p-4 md:p-6">
-                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                          <div className="flex gap-4 flex-1 min-w-0">
-                            {/* Avatar */}
-                            <div className="flex-shrink-0">
-                              <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center text-green-600 font-semibold text-lg">
-                                {(application.tenant_profile?.display_name || 'T').charAt(0).toUpperCase()}
-                              </div>
-                            </div>
-                            
-                            {/* Info */}
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                <h4 className="font-semibold text-lg truncate">
-                                  {application.tenant_profile?.display_name || 'Unknown Tenant'}
-                                </h4>
-                                <Badge className="w-fit bg-green-600">Accepted</Badge>
-                              </div>
-                              
-                              <div className="space-y-1 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                  <Building className="h-4 w-4" />
-                                  <span className="truncate">{application.properties?.title || 'Unknown Property'}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>Applied {new Date(application.created_at).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Actions */}
-                          <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => navigate(`/application/${application.id}`)}
-                              className="w-full sm:w-auto"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => navigate(`/lease/builder?tenantId=${encodeURIComponent(application.tenant_id)}&propertyId=${encodeURIComponent(application.property_id)}`)}
-                              className="w-full sm:w-auto"
-                            >
-                              <FileText className="h-4 w-4 mr-2" />
-                              Create Lease
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Declined Applications */}
-            {completed.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <X className="h-5 w-5 text-muted-foreground" />
-                  <h3 className="text-lg font-semibold">Declined Applications</h3>
-                  <Badge variant="secondary">{completed.length}</Badge>
-                </div>
-                <div className="space-y-3">
-                  {completed.map((application) => (
-                    <Card key={application.id} className="border-l-4 border-l-gray-300 hover:shadow-lg transition-shadow opacity-75">
-                      <CardContent className="p-4 md:p-6">
-                        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                          <div className="flex gap-4 flex-1 min-w-0">
-                            {/* Avatar */}
-                            <div className="flex-shrink-0">
-                              <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-semibold text-lg">
-                                {(application.tenant_profile?.display_name || 'T').charAt(0).toUpperCase()}
-                              </div>
-                            </div>
-                            
-                            {/* Info */}
-                            <div className="flex-1 min-w-0 space-y-2">
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                <h4 className="font-semibold text-lg truncate">
-                                  {application.tenant_profile?.display_name || 'Unknown Tenant'}
-                                </h4>
-                                <Badge variant="outline" className="w-fit">Declined</Badge>
-                              </div>
-                              
-                              <div className="space-y-1 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                  <Building className="h-4 w-4" />
-                                  <span className="truncate">{application.properties?.title || 'Unknown Property'}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="h-4 w-4" />
-                                  <span>Applied {new Date(application.created_at).toLocaleDateString()}</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Actions */}
-                          <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => navigate(`/application/${application.id}`)}
-                              className="w-full sm:w-auto"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              View Details
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Empty State */}
-            {applications.length === 0 && filteredLeads.length === 0 && (
-              <Card className="border-dashed">
-                <CardContent className="p-12 text-center">
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <h3 className="text-xl font-semibold mb-2">No Applications Yet</h3>
-                  <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                    You haven't received any rental applications yet. Once tenants start applying or chatting about your properties, they'll appear here.
-                  </p>
-                  <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
-                    <Building className="h-4 w-4 mr-2" />
-                    View Your Properties
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </>
-        )}
+  const renderApplicationsTab = () => (
+    <div className="space-y-6">
+      <div className="flex items-center gap-3 mb-6">
+        <Users className="h-6 w-6 text-ocean-blue" />
+        <h2 className="text-xl font-bold">Rental Applications</h2>
+        <Badge variant="secondary" className="ml-2">
+          {applications.length} Total
+        </Badge>
       </div>
-    );
-  };
+
+      {/* Leads from recent chats across all properties */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Leads</CardTitle>
+          <div className="text-sm text-muted-foreground">Tenants you've chatted with recently</div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Controls */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+            <input
+              value={leadQuery}
+              onChange={(e) => setLeadQuery(e.target.value)}
+              placeholder="Search tenant or property..."
+              className="w-full sm:w-80 border rounded-md p-2"
+            />
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={hideInvited} onChange={(e) => setHideInvited(e.target.checked)} />
+              Hide invited
+            </label>
+          </div>
+
+          {appLeads.length === 0 ? (
+            <div className="text-sm text-muted-foreground">No recent leads.</div>
+          ) : (
+            (() => {
+              // Filter + sort leads
+              const filtered = appLeads
+                .filter(l => {
+                  const invited = appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status === 'invited';
+                  if (hideInvited && invited) return false;
+                  if (!leadQuery.trim()) return true;
+                  const q = leadQuery.toLowerCase();
+                  return l.tenant_name.toLowerCase().includes(q) || l.title.toLowerCase().includes(q);
+                })
+                .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
+
+              // Group by property title
+              const groups = filtered.reduce((acc: Record<string, typeof filtered>, lead) => {
+                const key = lead.title || 'Property';
+                acc[key] = acc[key] || [];
+                acc[key].push(lead);
+                return acc;
+              }, {});
+
+              const propertyTitles = Object.keys(groups).sort((a, b) => a.localeCompare(b));
+
+              return (
+                <div className="space-y-4">
+                  {propertyTitles.map((ptitle) => (
+                    <div key={ptitle} className="border rounded-lg">
+                      <div className="px-4 py-2 bg-muted/50 flex items-center justify-between">
+                        <div className="font-medium truncate">{ptitle}</div>
+                        <Badge variant="outline">{groups[ptitle].length}</Badge>
+                      </div>
+                      <div className="divide-y">
+                        {groups[ptitle].map((lead) => {
+                          const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
+                          return (
+                            <div key={lead.conversation_id} className="flex items-center justify-between p-3 gap-3">
+                              <div className="min-w-0">
+                                <div className="font-medium truncate">{lead.tenant_name}</div>
+                                <div className="text-xs text-muted-foreground">Last chat {lead.last_message_at ? new Date(lead.last_message_at).toLocaleString() : 'N/A'}</div>
+                              </div>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                {invited ? (
+                                  <Badge variant="secondary">Invited</Badge>
+                                ) : (
+                                  <Button size="sm" onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}>Send Application</Button>
+                                )}
+                                <Button variant="outline" size="sm" onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}>Chat</Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()
+          )}
+        </CardContent>
+      </Card>
+      
+      {applicationsLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-6">
+                <div className="animate-pulse space-y-3">
+                  <div className="h-4 bg-muted rounded w-1/4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                  <div className="h-3 bg-muted rounded w-1/3"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : applications.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No Applications Yet</h3>
+            <p className="text-muted-foreground mb-4">
+              You haven't received any rental applications yet. Once tenants start applying, they'll appear here.
+            </p>
+            <Button onClick={() => setCurrentTab('/enhancedlandlorddashboard/properties')}>
+              <Building className="h-4 w-4 mr-2" />
+              Manage Properties
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {applications.map((application) => (
+            <Card key={application.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <h3 className="font-semibold text-lg">
+                        {application.tenant_profile?.display_name || 'Unknown Tenant'}
+                      </h3>
+                      <Badge 
+                        variant={application.status === 'accepted' ? 'default' : 
+                                application.status === 'declined' ? 'destructive' : 'secondary'}
+                      >
+                        {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="text-sm text-muted-foreground space-y-1">
+                      <p>Property: {application.properties?.title || 'Unknown Property'}</p>
+                      <p>Applied: {new Date(application.created_at).toLocaleDateString()}</p>
+                      <p>Tenant: {application.tenant_profile?.display_name || 'Unknown Tenant'}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    {application.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => updateApplicationStatus(application.id, 'accepted')}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateApplicationStatus(application.id, 'declined')}
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Decline
+                        </Button>
+                      </>
+                    )}
+                    {application.status === 'accepted' && (
+                      <Button
+                        size="sm"
+                        onClick={() => navigate(`/lease/builder?tenantId=${encodeURIComponent(application.tenant_id)}&propertyId=${encodeURIComponent(application.property_id)}`)}
+                      >
+                        <FileText className="h-4 w-4 mr-1" />
+                        Generate Lease
+                      </Button>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => navigate(`/application/${application.id}`)}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View Application
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   const renderPropertiesTab = () => (
     <div className="space-y-6">
