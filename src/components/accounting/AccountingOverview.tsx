@@ -144,68 +144,99 @@ export function AccountingOverview() {
       </div>
 
       {/* Actions */}
-      <div className="flex flex-wrap gap-4 items-center">
-        <Button variant="outline" onClick={() => navigate('/dashboard/accounting')}>Overview</Button>
-        <Button onClick={() => { 
-          setTxnType('income');
-          setTxnAmount(0);
-          setTxnDate('');
-          setTxnPropertyId(selectedProperty);
-          setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-          setTxnVatPercent(0);
-          setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-          setTxnNote('');
-          setShowIncomeModal(true);
-        }}>Add Income</Button>
-        <Button onClick={() => { 
-          setTxnType('expense');
-          setTxnAmount(0);
-          setTxnDate('');
-          setTxnPropertyId(selectedProperty);
-          const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-          setTxnCategory(defaultCat);
-          setTxnVatPercent(getDefaultVATPercent(defaultCat));
-          setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-          setTxnNote('');
-          setShowExpenseModal(true);
-        }}>Add Expense</Button>
-        <Button variant="outline" asChild><Link to="/dashboard/invoices/tax">Generate Tax Invoice</Link></Button>
-        <Button
-          variant="outline"
-          disabled={selectedProperty === 'all' || sendingReminder}
-          onClick={async () => {
-            if (selectedProperty === 'all') {
-              toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-              return;
-            }
-            try {
-              setSendingReminder(true);
-              const { data: tenancy } = await supabase
-                .from('tenancies')
-                .select('tenant_id')
-                .eq('property_id', selectedProperty)
-                .limit(1)
-                .maybeSingle();
-              if (!tenancy?.tenant_id) {
-                toast({ variant: 'destructive', title: 'No tenant found', description: 'This property has no active tenant.' });
-                setSendingReminder(false);
-                return;
-              }
-              const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
-              });
-              if (error) throw error;
-              toast({ title: 'Reminder sent', description: 'The tenant has been notified via app and email.' });
-            } catch (e: any) {
-              toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-            } finally {
-              setSendingReminder(false);
-            }
-          }}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/dashboard/accounting')}
+          className="w-full h-11 text-sm font-medium"
         >
-          {sendingReminder ? 'Sending…' : 'Send Reminder'}
+          Overview
+        </Button>
+        <Button 
+          onClick={() => { 
+            setTxnType('income');
+            setTxnAmount(0);
+            setTxnDate('');
+            setTxnPropertyId(selectedProperty);
+            setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+            setTxnVatPercent(0);
+            setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+            setTxnNote('');
+            setShowIncomeModal(true);
+          }}
+          className="w-full h-11 text-sm font-medium"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Income
+        </Button>
+        <Button 
+          onClick={() => { 
+            setTxnType('expense');
+            setTxnAmount(0);
+            setTxnDate('');
+            setTxnPropertyId(selectedProperty);
+            const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+            setTxnCategory(defaultCat);
+            setTxnVatPercent(getDefaultVATPercent(defaultCat));
+            setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+            setTxnNote('');
+            setShowExpenseModal(true);
+          }}
+          className="w-full h-11 text-sm font-medium"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add Expense
+        </Button>
+        <Button 
+          variant="outline" 
+          asChild
+          className="w-full h-11 text-sm font-medium"
+        >
+          <Link to="/dashboard/invoices/tax">
+            <Receipt className="w-4 h-4 mr-2" />
+            Tax Invoice
+          </Link>
         </Button>
       </div>
+
+      {/* Payment Reminder - Separate row for better mobile UX */}
+      <Button
+        variant="outline"
+        disabled={selectedProperty === 'all' || sendingReminder}
+        onClick={async () => {
+          if (selectedProperty === 'all') {
+            toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+            return;
+          }
+          try {
+            setSendingReminder(true);
+            const { data: tenancy } = await supabase
+              .from('tenancies')
+              .select('tenant_id')
+              .eq('property_id', selectedProperty)
+              .limit(1)
+              .maybeSingle();
+            if (!tenancy?.tenant_id) {
+              toast({ variant: 'destructive', title: 'No tenant found', description: 'This property has no active tenant.' });
+              setSendingReminder(false);
+              return;
+            }
+            const { error } = await supabase.functions.invoke('send-payment-reminder', {
+              body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
+            });
+            if (error) throw error;
+            toast({ title: 'Reminder sent', description: 'The tenant has been notified via app and email.' });
+          } catch (e: any) {
+            toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+          } finally {
+            setSendingReminder(false);
+          }
+        }}
+        className="w-full sm:w-auto h-11 text-sm font-medium"
+      >
+        <Bell className="w-4 h-4 mr-2" />
+        {sendingReminder ? 'Sending…' : 'Send Payment Reminder'}
+      </Button>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
