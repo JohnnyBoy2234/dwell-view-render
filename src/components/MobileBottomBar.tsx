@@ -1,6 +1,6 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Home, Search, Heart, Send, User, Plus, Bell } from 'lucide-react';
+import { Home, Search, Heart, Send, User, Plus, Bell, Building } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
@@ -61,7 +61,7 @@ export function MobileBottomBar() {
   const rightNavItems = [
     { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
     { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: true },
-    { path: getDeskRoute(), icon: User, label: 'Desk' }
+    { path: getDeskRoute(), icon: Building, label: 'Properties' }
   ];
 
   const renderNavItem = (item: any) => {

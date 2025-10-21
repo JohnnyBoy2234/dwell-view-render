@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Camera, 
   Shield, 
@@ -22,7 +23,8 @@ import {
   XCircle,
   Clock,
   Upload,
-  Edit2
+  Edit2,
+  ArrowLeft
 } from 'lucide-react';
 
 interface UserProfile {
@@ -50,6 +52,8 @@ interface NotificationPreferences {
 export default function ProfilePage() {
   const { user } = useAuth();
   const { kycProfile } = useKyc();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
@@ -229,8 +233,31 @@ export default function ProfilePage() {
   const verificationStatus = getVerificationStatus();
   const StatusIcon = verificationStatus.icon;
 
+  // Check if user is landlord to show back button
+  const isLandlord = user?.user_metadata?.role === 'landlord';
+  const propertyId = searchParams.get('property');
+
+  const handleBackToDashboard = () => {
+    if (isLandlord) {
+      navigate(`/enhancedlandlorddashboard${propertyId ? '?property=' + propertyId : ''}`);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6 p-4">
+      {/* Back Button for Landlords */}
+      {isLandlord && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBackToDashboard}
+          className="flex items-center gap-2 mb-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Dashboard</span>
+        </Button>
+      )}
+      
       {/* Cover Image Section */}
       <Card className="relative overflow-hidden">
         <div className="h-48 bg-gradient-to-r from-ocean-blue/20 via-background to-success-green/20 relative">

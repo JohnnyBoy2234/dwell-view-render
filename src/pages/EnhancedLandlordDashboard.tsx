@@ -811,76 +811,31 @@ export default function EnhancedLandlordDashboard() {
     switch (currentTab) {
       case '/enhancedlandlorddashboard/properties':
         console.log('[Dashboard] Rendering properties tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderPropertiesTab()}
-          </>
-        );
+        return renderPropertiesTab();
       case '/enhancedlandlorddashboard/applications':
         console.log('[Dashboard] Rendering applications tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderApplicationsTab()}
-          </>
-        );
+        return renderApplicationsTab();
       case '/enhancedlandlorddashboard/leases':
         console.log('[Dashboard] Rendering leases tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderLeasesTab()}
-          </>
-        );
+        return renderLeasesTab();
       case '/enhancedlandlorddashboard/tenants':
         console.log('[Dashboard] Rendering tenants tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderTenantsTab()}
-          </>
-        );
+        return renderTenantsTab();
       case '/enhancedlandlorddashboard/payments':
         console.log('[Dashboard] Rendering payments tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderPaymentsTab()}
-          </>
-        );
+        return renderPaymentsTab();
       case '/enhancedlandlorddashboard/reports':
         console.log('[Dashboard] Rendering reports tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            <AccountingOverview />
-          </>
-        );
+        return <AccountingOverview />;
       case '/enhancedlandlorddashboard/inventory':
         console.log('[Dashboard] Rendering inventory tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderInventoryTab()}
-          </>
-        );
+        return renderInventoryTab();
       case '/enhancedlandlorddashboard/maintenance':
         console.log('[Dashboard] Rendering maintenance tab');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderMaintenanceTab()}
-          </>
-        );
+        return renderMaintenanceTab();
       default:
         console.log('[Dashboard] Rendering default dashboard content');
-        return (
-          <>
-            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
-            {renderDashboardContent()}
-          </>
-        );
+        return renderDashboardContent();
     }
   };
 
@@ -2783,17 +2738,6 @@ export default function EnhancedLandlordDashboard() {
             <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               <button
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/properties')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ios-blue-light rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Building className="w-5 h-5 text-white" />
-                </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Properties</p>
-                <p className="text-xs text-ios-gray">{properties.length}</p>
-              </button>
-
-              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2867,17 +2811,6 @@ export default function EnhancedLandlordDashboard() {
               </button>
 
               <button
-                onClick={() => navigate('/add-property')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-gray to-ios-gray-dark rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Plus className="w-5 h-5 text-white" />
-                </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Add Property</p>
-                <p className="text-xs text-ios-gray">New</p>
-              </button>
-
-              <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
@@ -2909,6 +2842,18 @@ export default function EnhancedLandlordDashboard() {
                 </div>
                 <p className="text-xs font-medium text-ios-gray-dark">Support</p>
                 <p className="text-xs text-ios-gray">Help & Resources</p>
+              </button>
+
+              {/* Settings */}
+              <button
+                onClick={() => navigate('/landlord/profile')}
+                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+              >
+                <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs font-medium text-ios-gray-dark">Settings</p>
+                <p className="text-xs text-ios-gray">Account</p>
               </button>
             </div>
           </div>
