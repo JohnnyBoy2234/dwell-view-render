@@ -74,10 +74,8 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 {/* Icon with gradient background */}
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-ocean-blue to-success-green p-[2px]">
-                  <div className="flex items-center justify-center w-full h-full rounded-lg bg-background">
-                    <PageIcon className="h-5 w-5 text-ocean-blue" />
-                  </div>
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-ocean-blue to-success-green">
+                  <PageIcon className="h-5 w-5 text-white" />
                 </div>
                 
                 {/* Dynamic title */}
