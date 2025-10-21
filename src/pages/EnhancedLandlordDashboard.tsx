@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
@@ -978,13 +978,27 @@ export default function EnhancedLandlordDashboard() {
   );
   const renderLeasesTab = () => (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <FileText className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Lease System</h2>
-        <Badge variant="secondary" className="ml-2">
-          Contract Management
-        </Badge>
+      {/* Back Button + Header */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setCurrentTab('/enhancedlandlorddashboard');
+            const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+            navigate(`/enhancedlandlorddashboard${params}`);
+          }}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+        </Button>
+        <div className="flex items-center gap-3 flex-1">
+          <FileText className="h-6 w-6 text-primary" />
+          <h2 className="text-xl sm:text-2xl font-bold">Lease Contracts</h2>
+        </div>
       </div>
+
       <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
     </div>
   );
@@ -1439,121 +1453,163 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
 
-  const renderTenantsTab = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Users className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Active Tenants</h2>
-        <Badge variant="secondary" className="ml-2">
-          {tenants.length} tenants
-        </Badge>
-      </div>
-      
-      {tenants.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Active Tenants</h3>
-            <p className="text-muted-foreground mb-4">
-              You don't have any active tenants yet. Tenants will appear here once they sign leases and move into your properties.
-            </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
-              <Building className="h-4 w-4 mr-2" />
-              View Properties
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {tenants.map((tenant) => (
-            <Card key={tenant.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-success-green to-success-green-dark rounded-full flex items-center justify-center">
-                        <Users className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{tenant.name}</h4>
-                        <p className="text-sm text-muted-foreground">{tenant.property_title}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-muted-foreground">Monthly Rent:</span>
-                        <p className="font-medium text-success-green">
-                          R{tenant.monthly_rent.toLocaleString()}/month
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Payment Status:</span>
-                        <Badge 
-                          variant={tenant.payment_status === 'paid' ? 'default' : tenant.payment_status === 'pending' ? 'secondary' : 'destructive'}
-                          className="ml-2"
-                        >
-                          {tenant.payment_status.charAt(0).toUpperCase() + tenant.payment_status.slice(1)}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Lease End Date:</span>
-                        <p className="font-medium">
-                          {new Date(tenant.lease_end_date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Days Remaining:</span>
-                        <p className="font-medium">
-                          {Math.ceil((new Date(tenant.lease_end_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex gap-2 ml-4">
-                    <Button 
-                      size="sm" 
-                      variant="outline"
-                      onClick={() => navigate('/messages')}
-                    >
-                      Message
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/tenant-profile/${tenant.id}`)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Profile
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+  const renderTenantsTab = () => {
+    // Calculate stats
+    const paidCount = tenants.filter(t => t.payment_status === 'paid').length;
+    const pendingCount = tenants.filter(t => t.payment_status === 'pending').length;
+    const overdueCount = tenants.filter(t => t.payment_status === 'overdue').length;
+
+    return (
+      <div className="space-y-6">
+        {/* Back Button + Header */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCurrentTab('/enhancedlandlorddashboard');
+              const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+              navigate(`/enhancedlandlorddashboard${params}`);
+            }}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+          </Button>
+          <div className="flex items-center gap-3 flex-1">
+            <Users className="h-6 w-6 text-primary" />
+            <h2 className="text-xl sm:text-2xl font-bold">Active Tenants</h2>
+          </div>
         </div>
-      )}
-    </div>
-  );
+
+        {tenants.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="p-12 text-center">
+              <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">No Active Tenants</h3>
+              <p className="text-muted-foreground mb-6">
+                Tenants will appear here once they sign leases and move into your properties.
+              </p>
+              <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+                <Building className="h-4 w-4 mr-2" />
+                View Properties
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Stats Summary Bar */}
+            <div className="grid grid-cols-3 gap-3">
+              <Card className="border-l-4 border-l-green-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-green-600">{paidCount}</div>
+                  <div className="text-sm text-muted-foreground">Paid Up</div>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-yellow-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
+                  <div className="text-sm text-muted-foreground">Pending</div>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-red-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-red-600">{overdueCount}</div>
+                  <div className="text-sm text-muted-foreground">Overdue</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tenants List */}
+            <div className="space-y-3">
+              {tenants.map((tenant) => (
+                <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
+                  <CardContent className="p-4 md:p-6">
+                    <div className="flex flex-col md:flex-row md:items-center gap-4">
+                      {/* Tenant Avatar & Info */}
+                      <div className="flex gap-3 flex-1 min-w-0">
+                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-lg flex-shrink-0">
+                          {tenant.name.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-semibold text-lg">{tenant.name}</h4>
+                          <p className="text-sm text-muted-foreground truncate">{tenant.property_title}</p>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <Badge variant={
+                              tenant.payment_status === 'paid' ? 'default' : 
+                              tenant.payment_status === 'pending' ? 'secondary' : 
+                              'destructive'
+                            }>
+                              {tenant.payment_status}
+                            </Badge>
+                            <span className="text-sm font-medium text-green-600">
+                              R{tenant.monthly_rent.toLocaleString()}/month
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full sm:w-auto"
+                          onClick={() => navigate('/messages')}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-2" />
+                          Message
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="w-full sm:w-auto"
+                          onClick={() => navigate(`/tenant-profile/${tenant.id}`)}
+                        >
+                          <Eye className="h-4 w-4 mr-2" />
+                          View Profile
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
 
   const renderPaymentsTab = () => (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <RIcon className="h-8 w-8 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Payment Management</h2>
-        <Badge variant="secondary" className="ml-2">
-          {tenants.length} active leases
-        </Badge>
+      {/* Back Button + Header */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setCurrentTab('/enhancedlandlorddashboard');
+            const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+            navigate(`/enhancedlandlorddashboard${params}`);
+          }}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+        </Button>
+        <div className="flex items-center gap-3 flex-1">
+          <RIcon className="h-8 w-8 text-primary" />
+          <h2 className="text-xl sm:text-2xl font-bold">Payment Management</h2>
+        </div>
       </div>
       
       {tenants.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <RIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Active Leases</h3>
-            <p className="text-muted-foreground mb-4">
-              You don't have any active leases yet. Once tenants sign leases, you'll be able to track rent payments here.
+        <Card className="border-dashed">
+          <CardContent className="p-12 text-center">
+            <RIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <h3 className="text-xl font-semibold mb-2">No Active Leases</h3>
+            <p className="text-muted-foreground mb-6">
+              Once tenants sign leases, you'll be able to track rent payments here.
             </p>
             <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
               <Building className="h-4 w-4 mr-2" />
@@ -1564,16 +1620,16 @@ export default function EnhancedLandlordDashboard() {
       ) : (
         <div className="space-y-6">
           {/* Payment Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <Card className="border-l-4 border-l-green-500">
+              <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center">
-                    <RIcon className="h-7 w-7 text-success-green" />
+                  <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <RIcon className="h-7 w-7 text-green-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Monthly Rent</p>
-                    <p className="text-2xl font-bold text-success-green">
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground">Total Monthly</p>
+                    <p className="text-xl md:text-2xl font-bold text-green-600 truncate">
                       R{tenants.reduce((sum, tenant) => sum + tenant.monthly_rent, 0).toLocaleString()}
                     </p>
                   </div>
@@ -1581,15 +1637,15 @@ export default function EnhancedLandlordDashboard() {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-l-4 border-l-blue-500">
+              <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-ocean-blue/10 rounded-full flex items-center justify-center">
-                    <Check className="h-5 w-5 text-ocean-blue" />
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Check className="h-5 w-5 text-blue-600" />
                   </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Paid This Month</p>
-                    <p className="text-2xl font-bold text-ocean-blue">
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground">Paid</p>
+                    <p className="text-xl md:text-2xl font-bold text-blue-600 truncate">
                       R{tenants
                         .filter(tenant => tenant.payment_status === 'paid')
                         .reduce((sum, tenant) => sum + tenant.monthly_rent, 0)
@@ -1600,15 +1656,15 @@ export default function EnhancedLandlordDashboard() {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardContent className="p-6">
+            <Card className="border-l-4 border-l-orange-500">
+              <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <AlertTriangle className="h-5 w-5 text-orange-500" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm text-muted-foreground">Outstanding</p>
-                    <p className="text-2xl font-bold text-orange-500">
+                    <p className="text-xl md:text-2xl font-bold text-orange-500 truncate">
                       R{tenants
                         .filter(tenant => tenant.payment_status !== 'paid')
                         .reduce((sum, tenant) => sum + tenant.monthly_rent, 0)
@@ -1620,57 +1676,58 @@ export default function EnhancedLandlordDashboard() {
             </Card>
           </div>
           
-          {/* Payment Details Table */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {tenants.map((tenant) => (
-                  <div key={tenant.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gradient-to-br from-success-green to-success-green-dark rounded-full flex items-center justify-center">
-                        <Users className="h-4 w-4 text-white" />
+          {/* Payment Cards - Mobile Friendly */}
+          <div className="space-y-3">
+            {tenants.map((tenant) => (
+              <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="p-4 md:p-6">
+                  <div className="flex flex-col md:flex-row md:items-center gap-4">
+                    <div className="flex gap-3 flex-1 min-w-0">
+                      <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold text-lg flex-shrink-0">
+                        {tenant.name.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-medium">{tenant.name}</p>
-                        <p className="text-sm text-muted-foreground">{tenant.property_title}</p>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-lg">{tenant.name}</h4>
+                        <p className="text-sm text-muted-foreground truncate">{tenant.property_title}</p>
+                        <div className="flex flex-wrap items-center gap-2 mt-1">
+                          <Badge variant={
+                            tenant.payment_status === 'paid' ? 'default' : 
+                            tenant.payment_status === 'pending' ? 'secondary' : 
+                            'destructive'
+                          }>
+                            {tenant.payment_status}
+                          </Badge>
+                          <span className="text-sm font-bold text-green-600">
+                            R{tenant.monthly_rent.toLocaleString()}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="text-right">
-                      <p className="font-medium">R{tenant.monthly_rent.toLocaleString()}</p>
-                      <Badge 
-                        variant={tenant.payment_status === 'paid' ? 'default' : tenant.payment_status === 'pending' ? 'secondary' : 'destructive'}
-                        className="ml-2"
-                      >
-                        {tenant.payment_status.charAt(0).toUpperCase() + tenant.payment_status.slice(1)}
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <Button 
                         size="sm" 
                         variant="outline"
+                        className="w-full sm:w-auto"
                         onClick={() => navigate('/messages')}
                       >
+                        <Bell className="h-4 w-4 mr-2" />
                         Remind
                       </Button>
                       <Button
                         size="sm"
                         variant="outline"
+                        className="w-full sm:w-auto"
                         onClick={() => navigate(`/tenant-profile/${tenant.id}`)}
                       >
-                        <Eye className="h-4 w-4 mr-1" />
+                        <Eye className="h-4 w-4 mr-2" />
                         View
                       </Button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
     </div>
@@ -1678,12 +1735,26 @@ export default function EnhancedLandlordDashboard() {
 
   const renderReportsTab = () => (
     <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <BarChart3 className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">SwiftBooks & Analytics</h2>
-        <Badge variant="secondary" className="ml-2">
-          Financial Overview
-        </Badge>
+      {/* Back Button + Header */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setCurrentTab('/enhancedlandlorddashboard');
+            const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+            navigate(`/enhancedlandlorddashboard${params}`);
+          }}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+        </Button>
+        <div className="flex items-center gap-3 flex-1">
+          <BarChart3 className="h-6 w-6 text-primary" />
+          <h2 className="text-xl sm:text-2xl font-bold">SwiftBooks</h2>
+          <Badge variant="secondary">Financial Overview</Badge>
+        </div>
       </div>
       
       {tenants.length === 0 ? (
@@ -2374,150 +2445,235 @@ export default function EnhancedLandlordDashboard() {
 
 
 
-  const renderMaintenanceTab = () => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3 mb-6">
-        <Wrench className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Maintenance Management</h2>
-        <Badge variant="secondary" className="ml-2">
-          {maintenanceRequests.length} requests
-        </Badge>
-      </div>
-      
-      {loadingMaintenance ? (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="bg-muted animate-pulse h-24 rounded-lg"></div>
-          ))}
+  const renderMaintenanceTab = () => {
+    // Calculate stats
+    const urgentCount = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed').length;
+    const submittedCount = maintenanceRequests.filter(r => r.status === 'submitted').length;
+    const inProgressCount = maintenanceRequests.filter(r => r.status === 'in_progress').length;
+    const completedCount = maintenanceRequests.filter(r => r.status === 'completed').length;
+
+    // Organize by status
+    const urgentRequests = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed');
+    const submittedRequests = maintenanceRequests.filter(r => r.status === 'submitted' && r.priority !== 'urgent');
+    const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
+
+    return (
+      <div className="space-y-6">
+        {/* Back Button + Header */}
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCurrentTab('/enhancedlandlorddashboard');
+              const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+              navigate(`/enhancedlandlorddashboard${params}`);
+            }}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+          </Button>
+          <div className="flex items-center gap-3 flex-1">
+            <Wrench className="h-6 w-6 text-primary" />
+            <h2 className="text-xl sm:text-2xl font-bold">Maintenance Manager</h2>
+          </div>
         </div>
-      ) : maintenanceRequests.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Wrench className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Maintenance Requests</h3>
-            <p className="text-muted-foreground mb-4">
-              You don't have any maintenance requests yet. Requests will appear here once tenants submit them.
-            </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
-              <Building className="h-4 w-4 mr-2" />
-              View Properties
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {maintenanceRequests.map((request) => (
-            <Card key={request.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                        request.priority === 'urgent' ? 'bg-red-500' :
-                        request.priority === 'high' ? 'bg-orange-500' :
-                        request.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                      }`}>
-                        <Wrench className="h-5 w-5 text-white" />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{request.title}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {properties.find(p => p.id === request.property_id)?.title || 'Unknown Property'}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-3">
-                      <div>
-                        <span className="text-muted-foreground">Priority:</span>
-                        <Badge 
-                          variant={
-                            request.priority === 'urgent' ? 'destructive' :
-                            request.priority === 'high' ? 'default' :
-                            request.priority === 'medium' ? 'secondary' : 'outline'
-                          }
-                          className="ml-2"
-                        >
-                          {request.priority.charAt(0).toUpperCase() + request.priority.slice(1)}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Category:</span>
-                        <p className="font-medium capitalize">{request.category.replace('_', ' ')}</p>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Status:</span>
-                        <Badge 
-                          variant={
-                            request.status === 'completed' ? 'default' :
-                            request.status === 'in_progress' ? 'secondary' :
-                            request.status === 'submitted' ? 'outline' : 'destructive'
-                          }
-                          className="ml-2"
-                        >
-                          {request.status.replace('_', ' ').charAt(0).toUpperCase() + request.status.replace('_', ' ').slice(1)}
-                        </Badge>
-                      </div>
-                      <div>
-                        <span className="text-muted-foreground">Submitted:</span>
-                        <p className="font-medium">
-                          {new Date(request.created_at).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mb-3">
-                      {request.description}
-                    </p>
-                    
-                    {request.estimated_cost && (
-                      <div className="flex items-center gap-4 text-sm">
-                        <span className="text-muted-foreground">Estimated Cost:</span>
-                        <p className="font-medium text-success-green">
-                          R{request.estimated_cost.toLocaleString()}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex gap-2 ml-4">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => navigate(`/maintenance/${request.id}`)}
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View Details
-                    </Button>
-                    {request.status === 'submitted' && (
-                      <Button
-                        size="sm"
-                        onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}
-                        className="bg-ocean-blue hover:bg-ocean-blue-dark"
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        Start Work
-                      </Button>
-                    )}
-                    {request.status === 'in_progress' && (
-                      <Button
-                        size="sm"
-                        onClick={() => updateMaintenanceStatus(request.id, 'completed')}
-                        className="bg-success-green hover:bg-success-green-dark"
-                      >
-                        <Check className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                    )}
-                  </div>
+
+        {loadingMaintenance ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="bg-muted animate-pulse h-24 rounded-lg"></div>
+            ))}
+          </div>
+        ) : maintenanceRequests.length === 0 ? (
+          <Card className="border-dashed">
+            <CardContent className="p-12 text-center">
+              <Wrench className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+              <h3 className="text-xl font-semibold mb-2">No Maintenance Requests</h3>
+              <p className="text-muted-foreground mb-6">
+                Requests will appear here once tenants submit them.
+              </p>
+              <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+                <Building className="h-4 w-4 mr-2" />
+                View Properties
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            {/* Stats Summary Bar */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Card className="border-l-4 border-l-red-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-red-600">{urgentCount}</div>
+                  <div className="text-sm text-muted-foreground">Urgent</div>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-yellow-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-yellow-600">{submittedCount}</div>
+                  <div className="text-sm text-muted-foreground">New</div>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-blue-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-blue-600">{inProgressCount}</div>
+                  <div className="text-sm text-muted-foreground">In Progress</div>
+                </CardContent>
+              </Card>
+              <Card className="border-l-4 border-l-green-500">
+                <CardContent className="p-4">
+                  <div className="text-2xl font-bold text-green-600">{completedCount}</div>
+                  <div className="text-sm text-muted-foreground">Completed</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Urgent Requests Section */}
+            {urgentRequests.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                  <h3 className="text-lg font-semibold">Urgent Requests</h3>
+                  <Badge variant="destructive">{urgentRequests.length}</Badge>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+                {urgentRequests.map((request) => (
+                  <Card key={request.id} className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col md:flex-row md:items-start gap-4">
+                        <div className="flex gap-3 flex-1 min-w-0">
+                          <div className="h-12 w-12 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                            <Wrench className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-lg">{request.title}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                              <Badge variant="destructive">{request.priority}</Badge>
+                              <Badge variant="secondary">{request.status.replace('_', ' ')}</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                          {request.status === 'submitted' && (
+                            <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
+                              <Play className="h-4 w-4 mr-2" />
+                              Start
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* New Requests Section */}
+            {submittedRequests.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <AlertCircle className="h-5 w-5 text-yellow-600" />
+                  <h3 className="text-lg font-semibold">New Requests</h3>
+                  <Badge variant="secondary">{submittedRequests.length}</Badge>
+                </div>
+                {submittedRequests.map((request) => (
+                  <Card key={request.id} className="border-l-4 border-l-yellow-500 hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col md:flex-row md:items-start gap-4">
+                        <div className="flex gap-3 flex-1 min-w-0">
+                          <div className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            request.priority === 'high' ? 'bg-orange-500' :
+                            request.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
+                          }`}>
+                            <Wrench className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-lg">{request.title}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                              <Badge variant={request.priority === 'high' ? 'default' : 'secondary'}>{request.priority}</Badge>
+                              <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                          <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
+                            <Play className="h-4 w-4 mr-2" />
+                            Start Work
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {/* In Progress Section */}
+            {inProgressRequests.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold">In Progress</h3>
+                  <Badge variant="secondary">{inProgressRequests.length}</Badge>
+                </div>
+                {inProgressRequests.map((request) => (
+                  <Card key={request.id} className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
+                    <CardContent className="p-4 md:p-6">
+                      <div className="flex flex-col md:flex-row md:items-start gap-4">
+                        <div className="flex gap-3 flex-1 min-w-0">
+                          <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
+                            <Wrench className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold text-lg">{request.title}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
+                            <div className="flex flex-wrap items-center gap-2 mt-2">
+                              <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
+                              <Badge>In Progress</Badge>
+                              <span className="text-xs text-muted-foreground">
+                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            View
+                          </Button>
+                          <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700" onClick={() => updateMaintenanceStatus(request.id, 'completed')}>
+                            <Check className="h-4 w-4 mr-2" />
+                            Complete
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  };
 
   const renderDashboardContent = () => {
     if (loading) {
