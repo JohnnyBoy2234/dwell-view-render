@@ -208,54 +208,48 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
       {contracts.map((contract) => (
         <Card key={contract.id} className="hover:shadow-md transition-shadow">
           <CardHeader>
-            <div className="flex justify-between items-start">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
               <div>
-                <CardTitle>{contract.title}</CardTitle>
+                <CardTitle className="truncate">{contract.title}</CardTitle>
                 <CardDescription>
-                  <div className="flex items-center space-x-4 text-sm">
-                    <span className="flex items-center space-x-1">
-                      <FileText className="h-3 w-3" />
-                      <span>Version {contract.version}</span>
-                    </span>
-                    <span className="flex items-center space-x-1">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
+                    <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
                       <span>Created {new Date(contract.created_at).toLocaleDateString()}</span>
                     </span>
                   </div>
                 </CardDescription>
               </div>
-              <Badge variant={getStatusColor(contract.status)}>
+              <Badge className="w-fit" variant={getStatusColor(contract.status)}>
                 {contract.status.replace('_', ' ').toUpperCase()}
               </Badge>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <div className="text-sm text-muted-foreground">
-                <p><strong>Property:</strong> {contract.contract_data?.propertyAddress || 'Not specified'}</p>
-                <div className="flex items-center space-x-1">
-                  <Users className="h-3 w-3" />
-                  <span><strong>Landlord:</strong> {contract.contract_data?.landlordName || 'Not specified'}</span>
-                </div>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p className="truncate"><strong>Property:</strong> {(
+                  (contract.contract_data?.propertyAddress || '')
+                ).split(',')[0] || 'Not specified'}</p>
                 {contract.tenant_id && (
-                  <p><strong>Tenant:</strong> {contract.contract_data?.tenantName || contract.contract_data?.tenantEmail}</p>
+                  <p className="truncate"><strong>Tenant:</strong> {contract.contract_data?.tenantName || contract.contract_data?.tenantEmail}</p>
                 )}
                 <p><strong>Rent:</strong> {contract.contract_data?.rentCurrency || 'ZAR'} {contract.contract_data?.rentAmount?.toLocaleString() || 'Not specified'}</p>
               </div>
-              
-              <div className="flex gap-2">
+
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button variant="outline" size="sm" onClick={() => onView(contract)}>
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
                 </Button>
-                
+
                 {contract.status === 'draft' && isLandlord && (
                   <Button variant="outline" size="sm" onClick={() => onEdit(contract)}>
                     <Edit className="h-4 w-4 mr-2" />
                     Edit
                   </Button>
                 )}
-                
+
                 {canSign(contract) && (
                   <Button size="sm" onClick={() => onSign(contract)}>
                     <PenTool className="h-4 w-4 mr-2" />
