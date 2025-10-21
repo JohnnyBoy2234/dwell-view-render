@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspection';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
+import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 
 export default function TenantInspection() {
   const { tenantProperty, loading } = useTenantDashboard();
@@ -23,17 +24,17 @@ export default function TenantInspection() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isCreatingInspection, setIsCreatingInspection] = useState(false);
 
+  // Filter inspections for current property only
+  const propertyInspections = useMemo(() => {
+    if (!tenantProperty) return [];
+    return inspectionRecords.filter(record => record.property_id === tenantProperty.id);
+  }, [inspectionRecords, tenantProperty]);
+
   // Show inspection creation mode
   if (isCreatingInspection && tenantProperty) {
     return (
       <div className="space-y-4">
-        <Button
-          variant="outline"
-          onClick={() => setIsCreatingInspection(false)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Inspections
-        </Button>
+        <MobileBackButton onBack={() => setIsCreatingInspection(false)} />
         <InventoryStartPanel propertyId={tenantProperty.id} />
       </div>
     );
@@ -141,7 +142,7 @@ export default function TenantInspection() {
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">Inspection Records</h2>
           <div className="flex items-center gap-3">
-            <Badge variant="secondary">{inspectionRecords.length} records</Badge>
+            <Badge variant="secondary">{propertyInspections.length} records</Badge>
             {tenantProperty && (
               <Button
                 onClick={() => setIsCreatingInspection(true)}
@@ -154,19 +155,19 @@ export default function TenantInspection() {
           </div>
         </div>
 
-        {inspectionRecords.length === 0 ? (
+        {propertyInspections.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <Clipboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold mb-2">No inspection records yet</h3>
               <p className="text-muted-foreground">
-                Your landlord hasn't shared any inspection records with you yet
+                No inspection records for this property yet
               </p>
             </CardContent>
           </Card>
         ) : (
           <div className="grid gap-4">
-            {inspectionRecords.map((record) => (
+            {propertyInspections.map((record) => (
               <Card key={record.id} className="hover:shadow-medium transition-all duration-200">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspectio
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 import { supabase } from '@/integrations/supabase/client';
+import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 
 export default function LandlordInspection() {
   const navigate = useNavigate();
@@ -118,23 +119,27 @@ export default function LandlordInspection() {
     );
   }
 
+  // Filter inspections for selected property
+  const propertyInspections = useMemo(() => {
+    if (!selectedPropertyId) return inspectionRecords;
+    return inspectionRecords.filter(record => record.property_id === selectedPropertyId);
+  }, [inspectionRecords, selectedPropertyId]);
+
   // If a property is selected for inspection, show the inspection panel
   if (selectedPropertyId) {
+    const selectedProperty = properties.find(p => p.id === selectedPropertyId);
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="space-y-4">
+          <MobileBackButton onBack={() => setSelectedPropertyId(null)} />
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Property Inspection</h1>
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              {selectedProperty?.title} - Inspection
+            </h1>
             <p className="text-muted-foreground">
               Record the condition of the property with voice notes and photos
             </p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => setSelectedPropertyId(null)}
-          >
-            Back to Overview
-          </Button>
         </div>
         <InventoryStartPanel propertyId={selectedPropertyId} />
       </div>
@@ -188,7 +193,7 @@ export default function LandlordInspection() {
       {/* Inspection Records */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Inspection Records</h2>
+          <h2 className="text-xl font-semibold">All Inspection Records</h2>
           <Badge variant="secondary">{inspectionRecords.length} records</Badge>
         </div>
 

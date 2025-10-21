@@ -2471,6 +2471,8 @@ export default function EnhancedLandlordDashboard() {
         </DialogContent>
       </Dialog>
       </div>
+      )}
+      </div>
     </div>
   );
   const getStatusBadgeVariant = (status: string) => {
