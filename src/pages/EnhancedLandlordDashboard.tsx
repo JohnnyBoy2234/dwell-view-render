@@ -867,39 +867,48 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderInventoryTab = () => (
-    <div className="space-y-6">
-      {/* Back Button */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => {
-          setCurrentTab('/enhancedlandlorddashboard');
-          navigate(`/enhancedlandlorddashboard?property=${selectedPropertyId}`);
-        }}
-        className="flex items-center gap-2"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        <span className="hidden sm:inline">Back to Dashboard</span>
-        <span className="sm:hidden">Back</span>
-      </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setCurrentTab('/enhancedlandlorddashboard');
+            navigate(`/enhancedlandlorddashboard?property=${selectedPropertyId}`);
+          }}
+          className="flex items-center gap-2 mt-4"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
+        </Button>
 
-      <div className="flex items-center gap-3 mb-6">
-        <Camera className="h-6 w-6 text-ocean-blue" />
-        <h2 className="text-xl font-bold">Property Inventory</h2>
-        <Badge variant="secondary" className="ml-2">
-          {landlordInventory.length} Records
-        </Badge>
-      </div>
+        {/* Enhanced Header */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+              <Camera className="h-6 w-6 text-white" />
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">Property Inventory</h2>
+              <p className="text-sm text-muted-foreground">View tenant-submitted inventory records</p>
+            </div>
+            <Badge variant="secondary" className="ml-auto">
+              {landlordInventory.length} Records
+            </Badge>
+          </div>
+        </div>
 
-      {inventoryLoading ? (
+        {inventoryLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-32 bg-muted animate-pulse rounded" />
           ))}
         </div>
-      ) : landlordInventory.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
+        ) : landlordInventory.length === 0 ? (
+          <Card className="shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
+            <CardContent className="py-12 text-center">
             <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No inventory yet</h3>
             <p className="text-muted-foreground">Tenant-submitted inventory photos and audio will appear here.</p>
@@ -913,7 +922,7 @@ export default function EnhancedLandlordDashboard() {
               .filter(Boolean);
             const preview = photos.slice(0, 6);
             return (
-              <Card key={record.id} className="hover:shadow-medium transition-all duration-200">
+              <Card key={record.id} className="shadow-md hover:shadow-lg transition-all duration-200 bg-white/90 backdrop-blur-sm border-l-4 border-l-cyan-500">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -943,34 +952,46 @@ export default function EnhancedLandlordDashboard() {
         </div>
       )}
 
-      {/* Inventory detail modal removed - functionality can be added back if needed */}
+        {/* Inventory detail modal removed - functionality can be added back if needed */}
+      </div>
     </div>
   );
   const renderLeasesTab = () => (
-    <div className="space-y-6">
-      {/* Back Button + Header */}
-      <div className="flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setCurrentTab('/enhancedlandlorddashboard');
-            const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
-            navigate(`/enhancedlandlorddashboard${params}`);
-          }}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back to Dashboard</span>
-          <span className="sm:hidden">Back</span>
-        </Button>
-        <div className="flex items-center gap-3 flex-1">
-          <FileText className="h-6 w-6 text-primary" />
-          <h2 className="text-xl sm:text-2xl font-bold">Lease Contracts</h2>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Back Button + Header */}
+        <div className="flex items-center gap-3 mt-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCurrentTab('/enhancedlandlorddashboard');
+              const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+              navigate(`/enhancedlandlorddashboard${params}`);
+            }}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
         </div>
-      </div>
+        
+        {/* Enhanced Header */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg flex items-center justify-center shadow-sm">
+              <FileText className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">Lease Contracts</h2>
+              <p className="text-sm text-muted-foreground">Manage and track lease agreements</p>
+            </div>
+          </div>
+        </div>
 
-      <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
+        <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
+      </div>
     </div>
   );
 
@@ -998,60 +1019,66 @@ export default function EnhancedLandlordDashboard() {
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
     return (
-      <div className="space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setCurrentTab('/enhancedlandlorddashboard');
-            navigate(`/enhancedlandlorddashboard?property=${selectedPropertyId}`);
-          }}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back to Dashboard</span>
-          <span className="sm:hidden">Back</span>
-        </Button>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          {/* Back Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setCurrentTab('/enhancedlandlorddashboard');
+              navigate(`/enhancedlandlorddashboard?property=${selectedPropertyId}`);
+            }}
+            className="flex items-center gap-2 mt-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
+          </Button>
 
-        {/* Header with Stats */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-3">
-            <Users className="h-6 w-6 text-primary" />
-            <h2 className="text-2xl font-bold">Applications</h2>
+          {/* Enhanced Header */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Applications</h2>
+                <p className="text-sm text-muted-foreground">Manage tenant applications and leads</p>
+              </div>
+            </div>
           </div>
 
           {/* Stats Summary Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Card className="border-l-4 border-l-yellow-500">
+            <Card className="border-l-4 border-l-yellow-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-yellow-600">{pendingCount}</div>
                 <div className="text-sm text-muted-foreground">Needs Action</div>
               </CardContent>
             </Card>
-            <Card className="border-l-4 border-l-blue-500">
+            <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-blue-600">{leadsCount}</div>
                 <div className="text-sm text-muted-foreground">New Leads</div>
               </CardContent>
             </Card>
-            <Card className="border-l-4 border-l-green-500">
+            <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-green-600">{acceptedCount}</div>
                 <div className="text-sm text-muted-foreground">Accepted</div>
               </CardContent>
             </Card>
-            <Card className="border-l-4 border-l-gray-500">
+            <Card className="border-l-4 border-l-gray-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
               <CardContent className="p-4">
                 <div className="text-2xl font-bold text-muted-foreground">{declinedCount}</div>
                 <div className="text-sm text-muted-foreground">Declined</div>
               </CardContent>
             </Card>
           </div>
-        </div>
 
-        {/* Loading State */}
-        {applicationsLoading ? (
+          {/* Loading State */}
+          {applicationsLoading ? (
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <Card key={i}>
@@ -1392,6 +1419,7 @@ export default function EnhancedLandlordDashboard() {
             )}
           </>
         )}
+        </div>
       </div>
     );
   };
@@ -1446,9 +1474,9 @@ export default function EnhancedLandlordDashboard() {
     const overdueCount = tenants.filter(t => t.payment_status === 'overdue').length;
 
     return (
-      <div className="space-y-6">
-        {/* Back Button + Header */}
-        <div className="flex items-center gap-3">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          {/* Back Button */}
           <Button
             variant="ghost"
             size="sm"
@@ -1457,20 +1485,28 @@ export default function EnhancedLandlordDashboard() {
               const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
               navigate(`/enhancedlandlorddashboard${params}`);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 mt-4"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Back to Dashboard</span>
             <span className="sm:hidden">Back</span>
           </Button>
-          <div className="flex items-center gap-3 flex-1">
-            <Users className="h-6 w-6 text-primary" />
-            <h2 className="text-xl sm:text-2xl font-bold">Active Tenants</h2>
+          
+          {/* Enhanced Header */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Users className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Active Tenants</h2>
+                <p className="text-sm text-muted-foreground">Manage tenant relationships and payments</p>
+              </div>
+            </div>
           </div>
-        </div>
 
         {tenants.length === 0 ? (
-          <Card className="border-dashed">
+          <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
             <CardContent className="p-12 text-center">
               <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-xl font-semibold mb-2">No Active Tenants</h3>
@@ -1563,14 +1599,15 @@ export default function EnhancedLandlordDashboard() {
             </div>
           </>
         )}
+        </div>
       </div>
     );
   };
 
   const renderPaymentsTab = () => (
-    <div className="space-y-6">
-      {/* Back Button + Header */}
-      <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Back Button */}
         <Button
           variant="ghost"
           size="sm"
@@ -1579,20 +1616,28 @@ export default function EnhancedLandlordDashboard() {
             const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
             navigate(`/enhancedlandlorddashboard${params}`);
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 mt-4"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to Dashboard</span>
           <span className="sm:hidden">Back</span>
         </Button>
-        <div className="flex items-center gap-3 flex-1">
-          <RIcon className="h-8 w-8 text-primary" />
-          <h2 className="text-xl sm:text-2xl font-bold">Payment Management</h2>
+        
+        {/* Enhanced Header */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-lg flex items-center justify-center shadow-sm">
+              <RIcon className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Payment Management</h2>
+              <p className="text-sm text-muted-foreground">Track and manage rent payments</p>
+            </div>
+          </div>
         </div>
-      </div>
       
-      {tenants.length === 0 ? (
-        <Card className="border-dashed">
+        {tenants.length === 0 ? (
+          <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
           <CardContent className="p-12 text-center">
             <RIcon className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
             <h3 className="text-xl font-semibold mb-2">No Active Leases</h3>
@@ -1609,7 +1654,7 @@ export default function EnhancedLandlordDashboard() {
         <div className="space-y-6">
           {/* Payment Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <Card className="border-l-4 border-l-green-500">
+            <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
               <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1667,7 +1712,7 @@ export default function EnhancedLandlordDashboard() {
           {/* Payment Cards - Mobile Friendly */}
           <div className="space-y-3">
             {tenants.map((tenant) => (
-              <Card key={tenant.id} className="hover:shadow-lg transition-shadow">
+              <Card key={tenant.id} className="hover:shadow-lg transition-shadow shadow-md bg-white/90 backdrop-blur-sm border-l-4 border-l-teal-500">
                 <CardContent className="p-4 md:p-6">
                   <div className="flex flex-col md:flex-row md:items-center gap-4">
                     <div className="flex gap-3 flex-1 min-w-0">
@@ -1718,6 +1763,7 @@ export default function EnhancedLandlordDashboard() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 
@@ -2417,6 +2463,8 @@ export default function EnhancedLandlordDashboard() {
           )}
         </DialogContent>
       </Dialog>
+        </div>
+      </div>
     </div>
   );
 
@@ -2447,9 +2495,8 @@ export default function EnhancedLandlordDashboard() {
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
     return (
-      <div className="space-y-6">
-        {/* Back Button + Header */}
-        <div className="flex items-center gap-3">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <Button
             variant="ghost"
             size="sm"
@@ -2458,17 +2505,24 @@ export default function EnhancedLandlordDashboard() {
               const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
               navigate(`/enhancedlandlorddashboard${params}`);
             }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 mt-4"
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Back to Dashboard</span>
             <span className="sm:hidden">Back</span>
           </Button>
-          <div className="flex items-center gap-3 flex-1">
-            <Wrench className="h-6 w-6 text-primary" />
-            <h2 className="text-xl sm:text-2xl font-bold">Maintenance Manager</h2>
+          
+          <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center shadow-sm">
+                <Wrench className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">Maintenance Manager</h2>
+                <p className="text-sm text-muted-foreground">Track and manage maintenance requests</p>
+              </div>
+            </div>
           </div>
-        </div>
 
         {loadingMaintenance ? (
           <div className="space-y-4">
@@ -2505,8 +2559,8 @@ export default function EnhancedLandlordDashboard() {
                   <div className="text-2xl font-bold text-yellow-600">{submittedCount}</div>
                   <div className="text-sm text-muted-foreground">New</div>
                 </CardContent>
-              </Card>
-              <Card className="border-l-4 border-l-blue-500">
+            </Card>
+            <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold text-blue-600">{inProgressCount}</div>
                   <div className="text-sm text-muted-foreground">In Progress</div>
@@ -2661,6 +2715,7 @@ export default function EnhancedLandlordDashboard() {
             )}
           </>
         )}
+        </div>
       </div>
     );
   };

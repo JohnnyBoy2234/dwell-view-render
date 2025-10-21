@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, Send, Clock, CheckCircle, AlertCircle } from 'lucide-react';
+import { MessageSquare, Send, Clock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useSupportMessages, SupportMessage, CreateSupportMessage } from '@/hooks/useSupportMessages';
 import { useToast } from '@/hooks/use-toast';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 const categoryOptions = [
   { value: 'general', label: 'General Inquiry', icon: '💬' },
@@ -34,6 +36,9 @@ const statusConfig = {
 export function SwiftRentSupport() {
   const { messages, loading, submitting, createMessage } = useSupportMessages();
   const { toast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState<CreateSupportMessage>({
     subject: '',
@@ -88,9 +93,32 @@ export function SwiftRentSupport() {
     return option?.icon || '❓';
   };
 
+  const isLandlord = user?.user_metadata?.role === 'landlord';
+  const propertyId = searchParams.get('property');
+
+  const handleBackToDashboard = () => {
+    if (isLandlord) {
+      navigate(`/enhancedlandlorddashboard${propertyId ? '?property=' + propertyId : ''}`);
+    }
+  };
+
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-4">
+    <div className="space-y-4">
+      {/* Back Button for Landlords */}
+      {isLandlord && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBackToDashboard}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Back to Dashboard</span>
+        </Button>
+      )}
+      
+      <Card className="w-full">
+        <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
@@ -252,5 +280,6 @@ export function SwiftRentSupport() {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 }
