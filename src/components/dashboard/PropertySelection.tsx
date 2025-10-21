@@ -1,8 +1,9 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Home, Plus, MapPin, DollarSign } from 'lucide-react';
+import { Home, Plus, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { RIcon } from '@/components/icons/RIcon';
 
 interface Property {
   id: string;
@@ -139,8 +140,8 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
               {/* Price */}
               <div className="flex items-center justify-between pt-2 border-t">
                 <div className="flex items-center text-lg font-bold text-primary">
-                  <DollarSign className="h-5 w-5 mr-1" />
-                  R{property.price.toLocaleString()}/mo
+                  <RIcon className="h-5 w-5 mr-1" />
+                  {property.price.toLocaleString()}/mo
                 </div>
                 <Button 
                   variant="ghost" 

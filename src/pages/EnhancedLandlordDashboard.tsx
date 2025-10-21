@@ -757,7 +757,9 @@ export default function EnhancedLandlordDashboard() {
 
   const handleSelectProperty = (propertyId: string) => {
     setSelectedPropertyId(propertyId);
+    setCurrentTab('/enhancedlandlorddashboard');
     setSearchParams({ property: propertyId });
+    navigate(`/enhancedlandlorddashboard?property=${propertyId}`);
     // Refetch data for the selected property
     fetchTenants(propertyId);
     fetchMaintenanceRequests(propertyId);
@@ -2914,12 +2916,9 @@ export default function EnhancedLandlordDashboard() {
   const handleTabChange = (tab: string) => {
     console.log('[Dashboard] Tab change requested:', tab);
     setCurrentTab(tab);
-    // Update the URL when changing tabs
-    if (tab !== '/enhancedlandlorddashboard') {
-      navigate(tab);
-    } else {
-      navigate('/enhancedlandlorddashboard');
-    }
+    // Update the URL when changing tabs, preserving property selection
+    const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+    navigate(`${tab}${params}`);
   };
 
   return (
