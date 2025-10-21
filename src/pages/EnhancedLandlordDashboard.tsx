@@ -3149,5 +3149,5 @@ export default function EnhancedLandlordDashboard() {
         ))}
       </div>
     );
-  }
+  };
 }
