@@ -2471,11 +2471,8 @@ export default function EnhancedLandlordDashboard() {
         </DialogContent>
       </Dialog>
       </div>
-      )}
     </div>
-  </div>
-);
-
+  );
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'available':
@@ -2490,12 +2487,12 @@ export default function EnhancedLandlordDashboard() {
 
 
 
-  const renderMaintenanceTab = () => {
-    // Calculate stats
-    const urgentCount = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed').length;
-    const submittedCount = maintenanceRequests.filter(r => r.status === 'submitted').length;
-    const inProgressCount = maintenanceRequests.filter(r => r.status === 'in_progress').length;
-    const completedCount = maintenanceRequests.filter(r => r.status === 'completed').length;
+      const renderMaintenanceTab = () => {
+        // Calculate stats
+        const urgentCount = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed').length;
+        const submittedCount = maintenanceRequests.filter(r => r.status === 'submitted').length;
+        const inProgressCount = maintenanceRequests.filter(r => r.status === 'in_progress').length;
+        const completedCount = maintenanceRequests.filter(r => r.status === 'completed').length;
 
     // Organize by status
     const urgentRequests = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed');
