@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
@@ -26,6 +26,8 @@ import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 import { AccountingOverview } from '@/components/accounting/AccountingOverview';
 import { VerificationGate } from '@/components/VerificationGate';
+import { PropertySelection } from '@/components/dashboard/PropertySelection';
+import { PropertyHeader } from '@/components/dashboard/PropertyHeader';
 
 interface PropertyWithTenant {
   id: string;
@@ -95,7 +97,15 @@ export default function EnhancedLandlordDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
-  const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications();
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Property selection state
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(() => {
+    const propertyParam = searchParams.get('property');
+    return propertyParam || null;
+  });
+
+  const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications(selectedPropertyId || undefined);
   
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
@@ -151,6 +161,14 @@ export default function EnhancedLandlordDashboard() {
   const [leadQuery, setLeadQuery] = useState('');
   const [hideInvited, setHideInvited] = useState(false);
 
+  // Sync selectedPropertyId with URL params
+  useEffect(() => {
+    const propertyParam = searchParams.get('property');
+    if (propertyParam !== selectedPropertyId) {
+      setSelectedPropertyId(propertyParam);
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     // Visible in production console to verify current deployed build
     // eslint-disable-next-line no-console
@@ -174,13 +192,13 @@ export default function EnhancedLandlordDashboard() {
     }
 
     fetchProperties();
-    fetchTenants();
-    fetchMaintenanceRequests();
+    fetchTenants(selectedPropertyId || undefined);
+    fetchMaintenanceRequests(selectedPropertyId || undefined);
     fetchLandlordSettings();
     fetchAdditionalCosts();
     fetchInvoiceScheduleSettings();
     fetchGlobalApplicationLeads();
-  }, [authLoading, user, isLandlord, navigate, location.pathname]);
+  }, [authLoading, user, isLandlord, navigate, location.pathname, selectedPropertyId]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
   useEffect(() => {
@@ -262,16 +280,17 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
-  const fetchTenants = async () => {
+  const fetchTenants = async (propertyId?: string) => {
     if (!user) return;
 
     try {
       // Fetch real tenants from tenancies and profiles
-      const { data: tenanciesData, error: tenanciesError } = await supabase
+      let query = supabase
         .from('tenancies')
         .select(`
           id,
           tenant_id,
+          property_id,
           monthly_rent,
           end_date,
           status,
@@ -280,6 +299,13 @@ export default function EnhancedLandlordDashboard() {
         `)
         .eq('landlord_id', user.id)
         .eq('status', 'active');
+
+      // Filter by property if specified
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      }
+
+      const { data: tenanciesData, error: tenanciesError } = await query;
 
       if (tenanciesError) {
         console.error('Error fetching tenants:', tenanciesError);
@@ -307,16 +333,22 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
-  const fetchMaintenanceRequests = async () => {
+  const fetchMaintenanceRequests = async (propertyId?: string) => {
     if (!user) return;
     
     setLoadingMaintenance(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('maintenance_requests')
         .select('*')
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('landlord_id', user.id);
+
+      // Filter by property if specified
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
       
       if (error) {
         console.error('Error fetching maintenance requests:', error);
@@ -723,37 +755,116 @@ export default function EnhancedLandlordDashboard() {
   };
 
 
+  const handleSelectProperty = (propertyId: string) => {
+    setSelectedPropertyId(propertyId);
+    setSearchParams({ property: propertyId });
+    // Refetch data for the selected property
+    fetchTenants(propertyId);
+    fetchMaintenanceRequests(propertyId);
+  };
+
+  const handleBackToProperties = () => {
+    setSelectedPropertyId(null);
+    setSearchParams({});
+    // Refetch all data
+    fetchTenants();
+    fetchMaintenanceRequests();
+  };
+
+  const getSelectedProperty = () => {
+    return properties.find(p => p.id === selectedPropertyId);
+  };
+
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
+    
+    // If no property is selected, show property selection
+    if (!selectedPropertyId) {
+      return (
+        <PropertySelection 
+          properties={properties}
+          onSelectProperty={handleSelectProperty}
+          loading={loading}
+        />
+      );
+    }
+
+    // Property is selected, show property-specific dashboard
+    const selectedProperty = getSelectedProperty();
     
     switch (currentTab) {
       case '/enhancedlandlorddashboard/properties':
         console.log('[Dashboard] Rendering properties tab');
-        return renderPropertiesTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderPropertiesTab()}
+          </>
+        );
       case '/enhancedlandlorddashboard/applications':
         console.log('[Dashboard] Rendering applications tab');
-        return renderApplicationsTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderApplicationsTab()}
+          </>
+        );
       case '/enhancedlandlorddashboard/leases':
         console.log('[Dashboard] Rendering leases tab');
-        return renderLeasesTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderLeasesTab()}
+          </>
+        );
       case '/enhancedlandlorddashboard/tenants':
         console.log('[Dashboard] Rendering tenants tab');
-        return renderTenantsTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderTenantsTab()}
+          </>
+        );
       case '/enhancedlandlorddashboard/payments':
         console.log('[Dashboard] Rendering payments tab');
-        return renderPaymentsTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderPaymentsTab()}
+          </>
+        );
       case '/enhancedlandlorddashboard/reports':
         console.log('[Dashboard] Rendering reports tab');
-        return <AccountingOverview />;
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            <AccountingOverview />
+          </>
+        );
       case '/enhancedlandlorddashboard/inventory':
         console.log('[Dashboard] Rendering inventory tab');
-        return renderInventoryTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderInventoryTab()}
+          </>
+        );
       case '/enhancedlandlorddashboard/maintenance':
         console.log('[Dashboard] Rendering maintenance tab');
-        return renderMaintenanceTab();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderMaintenanceTab()}
+          </>
+        );
       default:
         console.log('[Dashboard] Rendering default dashboard content');
-        return renderDashboardContent();
+        return (
+          <>
+            {selectedProperty && <PropertyHeader property={selectedProperty} onBack={handleBackToProperties} />}
+            {renderDashboardContent()}
+          </>
+        );
     }
   };
 
