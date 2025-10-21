@@ -2470,21 +2470,23 @@ export default function EnhancedLandlordDashboard() {
           )}
         </DialogContent>
       </Dialog>
-    </div>
-  </div>
-);
 
-      const getStatusBadgeVariant = (status: string) => {
-        switch (status) {
-          case 'available':
-            return 'default';
-          case 'rented':
-          case 'occupied':
-            return 'secondary';
-          default:
-            return 'outline';
-        }
-      };
+      </div>
+      </div>
+  );
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'available':
+        return 'default';
+      case 'rented':
+      case 'occupied':
+        return 'secondary';
+      default:
+        return 'outline';
+    }
+  };
+
+
 
       const renderMaintenanceTab = () => {
         // Calculate stats
