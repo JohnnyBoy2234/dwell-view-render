@@ -2,10 +2,13 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { EnhancedSidebar } from './EnhancedSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Menu, AlertTriangle } from 'lucide-react';
+import { LogOut, Menu, AlertTriangle, ArrowLeft, Home } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Component, ReactNode } from 'react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { LANDLORD_PAGE_CONFIG } from '@/constants/dashboardPageConfig';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
@@ -37,6 +40,12 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange }: EnhancedDashboardLayoutProps) {
   const { signOut, isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  
+  // Get page configuration based on current tab
+  const pageConfig = LANDLORD_PAGE_CONFIG[currentTab || '/enhancedlandlorddashboard'] || LANDLORD_PAGE_CONFIG['/enhancedlandlorddashboard'];
+  const PageIcon = pageConfig.icon;
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -46,19 +55,39 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
           <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.15] via-background/95 to-success-green/[0.15] backdrop-blur-md">
-            <SidebarTrigger className="md:hidden mr-3">
-              <Menu className="h-5 w-5" />
-            </SidebarTrigger>
+            {/* Mobile: Back button OR Sidebar trigger */}
+            {isMobile && pageConfig.showBackButton ? (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => navigate(pageConfig.backPath!)}
+                className="mr-3"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            ) : (
+              <SidebarTrigger className="md:hidden mr-3">
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
+            )}
             
             <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title}</h1>
+              <div className="flex items-center gap-3">
+                {/* Icon with gradient background */}
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-ocean-blue to-success-green p-[2px]">
+                  <div className="flex items-center justify-center w-full h-full rounded-lg bg-background">
+                    <PageIcon className="h-5 w-5 text-ocean-blue" />
+                  </div>
+                </div>
+                
+                {/* Dynamic title */}
+                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{pageConfig.title}</h1>
+                
                 <div className="hidden sm:block">
                   <Badge variant="secondary" className="text-xs">
                     {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
                   </Badge>
                 </div>
-                
               </div>
             </div>
             
