@@ -1,45 +1,56 @@
-import { cn } from '@/lib/utils';
-import { useMessageStatus } from '@/hooks/useMessageStatus';
-import { useMessageFormatting } from '@/hooks/useMessageFormatting';
-import { MessageContent } from './MessageContent';
-import { MessageStatusIcon } from './MessageStatusIcon';
-import { MESSAGE_STYLES } from '@/constants/messageConstants';
-import type { MessageBubbleProps } from '@/types/message';
+import { cn } from "@/lib/utils";
+import useMessageStatus from "@/hooks/useMessageStatus";
+import { useMessageFormatting } from "@/hooks/useMessageFormatting";
+import { MessageContent } from "./MessageContent";
+import { MessageStatusIcon } from "./MessageStatusIcon";
+import { MESSAGE_STYLES } from "@/constants/messageConstants";
+import type { MessageBubbleProps } from "@/types/message";
 
 /**
  * Message bubble component for maintenance messaging
  * Displays individual messages with proper styling, status indicators, and content parsing
  */
-export function MessageBubble({ 
-  message, 
-  currentUserId, 
-  isLandlord = false, 
-  showTime = false 
+export function MessageBubble({
+  message,
+  currentUserId,
+  isLandlord = false,
+  showTime = false,
 }: MessageBubbleProps) {
   const isOwn = message.sender_id === currentUserId;
   const isRead = isLandlord ? message.read_by_landlord : message.read_by_tenant;
-  
+
   // Custom hooks for business logic
-  const { displayTime } = useMessageFormatting({ createdAt: message.created_at });
+  const { displayTime } = useMessageFormatting({
+    createdAt: message.created_at,
+  });
   const { statusType, ariaLabel } = useMessageStatus({
     isOwn,
     isOptimistic: message.optimistic,
     isRead,
   });
 
-  const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
-  
+  const hasAttachment =
+    message.message_type === "attachment" && message.attachment_url;
+
   // Helper function to check if attachment is an image
   const isImageAttachment = (url: string) => {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.svg'];
-    return imageExtensions.some(ext => url.toLowerCase().includes(ext));
+    const imageExtensions = [
+      ".jpg",
+      ".jpeg",
+      ".png",
+      ".gif",
+      ".webp",
+      ".bmp",
+      ".svg",
+    ];
+    return imageExtensions.some((ext) => url.toLowerCase().includes(ext));
   };
 
   return (
-    <div 
+    <div
       className={cn(
-        'flex items-end gap-2 mb-2 animate-message-incoming',
-        isOwn ? 'justify-end' : 'justify-start'
+        "flex items-end gap-2 mb-2 animate-message-incoming",
+        isOwn ? "justify-end" : "justify-start"
       )}
       role="listitem"
     >
@@ -63,11 +74,13 @@ export function MessageBubble({
                   src={message.attachment_url!}
                   alt="Shared image"
                   className="max-w-[250px] max-h-[200px] rounded-xl object-cover cursor-pointer hover:opacity-95 transition-opacity"
-                  onClick={() => window.open(message.attachment_url!, '_blank')}
+                  onClick={() => window.open(message.attachment_url!, "_blank")}
                   onError={(e) => {
                     // Fallback to link if image fails to load
-                    e.currentTarget.style.display = 'none';
-                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling?.classList.remove(
+                      "hidden"
+                    );
                   }}
                 />
                 <a
@@ -93,22 +106,27 @@ export function MessageBubble({
             )}
           </div>
         )}
-        
+
         {message.content && (
-          <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} />
+          <MessageContent
+            content={message.content}
+            isOwn={isOwn}
+            isLandlord={isLandlord}
+          />
         )}
-        
-        <div className={cn(
-          MESSAGE_STYLES.TIMESTAMP_BASE,
-          isOwn ? MESSAGE_STYLES.TIMESTAMP_OWN : MESSAGE_STYLES.TIMESTAMP_OTHER
-        )}>
-          <time dateTime={message.created_at}>
-            {displayTime}
-          </time>
+
+        <div
+          className={cn(
+            MESSAGE_STYLES.TIMESTAMP_BASE,
+            isOwn
+              ? MESSAGE_STYLES.TIMESTAMP_OWN
+              : MESSAGE_STYLES.TIMESTAMP_OTHER
+          )}
+        >
+          <time dateTime={message.created_at}>{displayTime}</time>
           <MessageStatusIcon statusType={statusType} ariaLabel={ariaLabel} />
         </div>
       </div>
     </div>
   );
 }
-

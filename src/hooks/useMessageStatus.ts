@@ -16,7 +16,7 @@ export interface MessageStatusResult {
 /**
  * Hook to determine message status and accessibility label
  */
-export function useMessageStatus({ isOwn, isOptimistic, isRead }: MessageStatusConfig): MessageStatusResult {
+export default function useMessageStatus({ isOwn, isOptimistic, isRead }: MessageStatusConfig): MessageStatusResult {
   return useMemo(() => {
     if (!isOwn) {
       return {
