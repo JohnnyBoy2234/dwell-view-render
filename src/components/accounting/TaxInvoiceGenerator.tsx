@@ -64,19 +64,11 @@ export function TaxInvoiceGenerator() {
     reference: '',
   });
 
-  // Autofill landlord and tenant details from recent tenancy/profile
+  // Autofill tenant details from recent tenancy/profile
   useEffect(() => {
     const loadDefaults = async () => {
       try {
         if (!user) return;
-        
-        // Get landlord profile details
-        const { data: landlordProfile } = await supabase
-          .from('profiles')
-          .select('display_name')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        
         // Try get an active tenancy for tenant details and property
         const { data: tenancy } = await supabase
           .from('tenancies')
@@ -86,7 +78,6 @@ export function TaxInvoiceGenerator() {
           .order('start_date', { ascending: false })
           .limit(1)
           .maybeSingle();
-        
         let tenantName = '';
         let propertyAddress = '';
         if (tenancy) {
@@ -97,10 +88,8 @@ export function TaxInvoiceGenerator() {
           tenantName = tenantProfile?.display_name || '';
           propertyAddress = property?.title || property?.location || '';
         }
-        
         setInvoiceData(prev => ({
           ...prev,
-          landlordName: landlordProfile?.display_name || prev.landlordName,
           tenantName: tenantName || prev.tenantName,
           propertyAddress: propertyAddress || prev.propertyAddress,
         }));
