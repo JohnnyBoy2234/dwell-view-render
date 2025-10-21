@@ -1768,9 +1768,9 @@ export default function EnhancedLandlordDashboard() {
   );
 
   const renderReportsTab = () => (
-    <div className="space-y-6">
-      {/* Back Button + Header */}
-      <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        {/* Back Button */}
         <Button
           variant="ghost"
           size="sm"
@@ -1779,21 +1779,28 @@ export default function EnhancedLandlordDashboard() {
             const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
             navigate(`/enhancedlandlorddashboard${params}`);
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 mt-4"
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to Dashboard</span>
           <span className="sm:hidden">Back</span>
         </Button>
-        <div className="flex items-center gap-3 flex-1">
-          <BarChart3 className="h-6 w-6 text-primary" />
-          <h2 className="text-xl sm:text-2xl font-bold">SwiftBooks</h2>
-          <Badge variant="secondary">Financial Overview</Badge>
+        
+        {/* Enhanced Header */}
+        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+              <BarChart3 className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">SwiftBooks & Analytics</h2>
+              <p className="text-sm text-muted-foreground">Track financial performance and insights</p>
+            </div>
+          </div>
         </div>
-      </div>
       
-      {tenants.length === 0 ? (
-        <Card>
+        {tenants.length === 0 ? (
+          <Card className="shadow-md bg-white/90 backdrop-blur-sm">
           <CardContent className="p-8 text-center">
             <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Financial Data</h3>
@@ -1805,9 +1812,9 @@ export default function EnhancedLandlordDashboard() {
               View Properties
             </Button>
           </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-6">
+          </Card>
+        ) : (
+          <div className="space-y-6">
           {/* Financial Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
@@ -2464,9 +2471,10 @@ export default function EnhancedLandlordDashboard() {
         </DialogContent>
       </Dialog>
         </div>
-      </div>
+      )}
     </div>
-  );
+  </div>
+);
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
