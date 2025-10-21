@@ -197,7 +197,7 @@ export default function EnhancedLandlordDashboard() {
     fetchLandlordSettings();
     fetchAdditionalCosts();
     fetchInvoiceScheduleSettings();
-    fetchGlobalApplicationLeads();
+    fetchGlobalApplicationLeads(selectedPropertyId || undefined);
   }, [authLoading, user, isLandlord, navigate, location.pathname, selectedPropertyId]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
@@ -234,7 +234,7 @@ export default function EnhancedLandlordDashboard() {
       }
     }
     if (currentTab === '/enhancedlandlorddashboard/inventory') {
-      void fetchLandlordInventory();
+      void fetchLandlordInventory(selectedPropertyId || undefined);
     }
   }, [currentTab]);
 
@@ -382,15 +382,22 @@ export default function EnhancedLandlordDashboard() {
   };
 
   // Aggregate conversations across all properties to suggest tenants to invite
-  const fetchGlobalApplicationLeads = async () => {
+  const fetchGlobalApplicationLeads = async (propertyId?: string) => {
     if (!user) return;
     try {
-      const { data: convs } = await supabase
+      let convsQuery = supabase
         .from('conversations')
         .select('id, tenant_id, property_id, landlord_id, last_message_at, properties ( title )')
         .eq('landlord_id', user.id)
         .order('last_message_at', { ascending: false })
         .limit(50);
+      
+      // Filter by property if specified
+      if (propertyId) {
+        convsQuery = convsQuery.eq('property_id', propertyId);
+      }
+      
+      const { data: convs } = await convsQuery;
 
       const tenantIds = Array.from(new Set((convs || []).map(c => c.tenant_id)));
       const { data: profiles } = await supabase
@@ -410,10 +417,17 @@ export default function EnhancedLandlordDashboard() {
       }));
       setAppLeads(leads);
 
-      const { data: invites } = await supabase
+      let invitesQuery = supabase
         .from('application_invites')
         .select('*')
         .eq('landlord_id', user.id);
+      
+      // Filter invites by property if specified
+      if (propertyId) {
+        invitesQuery = invitesQuery.eq('property_id', propertyId);
+      }
+      
+      const { data: invites } = await invitesQuery;
       const map: Record<string, any> = {};
       (invites || []).forEach(i => { map[`${i.tenant_id}:${i.property_id}`] = i; });
       setAppInvitesMap(map);
@@ -445,7 +459,7 @@ export default function EnhancedLandlordDashboard() {
           message_type: 'text'
         });
       }
-      await fetchGlobalApplicationLeads();
+      await fetchGlobalApplicationLeads(selectedPropertyId || undefined);
       toast({ title: 'Invite sent', description: 'We notified the tenant with an application link.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Failed to send invite', description: e.message });
@@ -870,18 +884,24 @@ export default function EnhancedLandlordDashboard() {
     }
   };
 
-  const fetchLandlordInventory = async () => {
+  const fetchLandlordInventory = async (propertyId?: string) => {
     if (!user) return;
     setInventoryLoading(true);
     try {
-      const { data, error } = await (supabase as any)
+      let query = (supabase as any)
         .from('inventory_records')
         .select(`
           *,
           inventory_items (*)
         `)
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('landlord_id', user.id);
+      
+      // Filter by property if specified
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
       if (error) throw error;
       setLandlordInventory(data || []);
     } catch (e) {
@@ -965,7 +985,7 @@ export default function EnhancedLandlordDashboard() {
           Contract Management
         </Badge>
       </div>
-      <LeaseDashboardComponent />
+      <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
     </div>
   );
 

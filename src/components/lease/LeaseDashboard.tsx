@@ -12,9 +12,13 @@ import { LeaseSignaturePad } from './LeaseSignaturePad';
 import { CreateLeaseModal } from './CreateLeaseModal';
 import type { LeaseContract } from '@/types/lease';
 
-export function LeaseDashboard() {
+interface LeaseDashboardProps {
+  propertyId?: string;
+}
+
+export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   const navigate = useNavigate();
-  const { contracts, loading } = useLeaseContracts();
+  const { contracts, loading } = useLeaseContracts(propertyId);
   const { user, isLandlord } = useAuth();
   const [selectedContract, setSelectedContract] = useState<LeaseContract | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);

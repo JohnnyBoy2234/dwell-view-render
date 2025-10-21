@@ -4,7 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import type { LeaseContract, LeaseContractData, LeaseTemplate } from '@/types/lease';
 
-export function useLeaseContracts() {
+export function useLeaseContracts(propertyId?: string) {
   const { user } = useAuth();
   const [contracts, setContracts] = useState<LeaseContract[]>([]);
   const [templates, setTemplates] = useState<LeaseTemplate[]>([]);
@@ -16,11 +16,17 @@ export function useLeaseContracts() {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('lease_contracts')
         .select('*')
-        .or(`landlord_id.eq.${user.id},tenant_id.eq.${user.id}`)
-        .order('created_at', { ascending: false });
+        .or(`landlord_id.eq.${user.id},tenant_id.eq.${user.id}`);
+      
+      // Filter by property if specified
+      if (propertyId) {
+        query = query.eq('property_id', propertyId);
+      }
+      
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) throw error;
       setContracts((data || []) as unknown as LeaseContract[]);
@@ -204,7 +210,7 @@ export function useLeaseContracts() {
       fetchContracts();
       fetchTemplates();
     }
-  }, [user]);
+  }, [user, propertyId]);
 
   return {
     contracts,
