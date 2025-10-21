@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { EnhancedSidebar } from './EnhancedSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Menu, AlertTriangle } from 'lucide-react';
+import { LogOut, Menu, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Component, ReactNode } from 'react';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
@@ -13,6 +13,9 @@ interface EnhancedDashboardLayoutProps {
   actions?: React.ReactNode;
   currentTab?: string;
   onTabChange?: (tab: string) => void;
+  headerIcon?: React.ReactNode;
+  onMobileBack?: () => void;
+  hideSidebarOnMobile?: boolean;
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
@@ -34,24 +37,37 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange }: EnhancedDashboardLayoutProps) {
+export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange, headerIcon, onMobileBack, hideSidebarOnMobile = true }: EnhancedDashboardLayoutProps) {
   const { signOut, isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]">
-        <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
+      <div className="flex min-h-screen w-full bg-slate-100">
+        {hideSidebarOnMobile ? (
+          <div className="hidden md:block">
+            <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
+          </div>
+        ) : (
+          <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
+        )}
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
           <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.15] via-background/95 to-success-green/[0.15] backdrop-blur-md">
-            <SidebarTrigger className="md:hidden mr-3">
-              <Menu className="h-5 w-5" />
-            </SidebarTrigger>
+            {hideSidebarOnMobile ? (
+              <Button variant="ghost" size="icon" className="md:hidden mr-3" onClick={onMobileBack}>
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            ) : (
+              <SidebarTrigger className="md:hidden mr-3">
+                <Menu className="h-5 w-5" />
+              </SidebarTrigger>
+            )}
             
             <div className="flex-1">
               <div className="flex items-center gap-2">
+                {headerIcon && <div className="w-6 h-6 text-foreground/80">{headerIcon}</div>}
                 <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title}</h1>
                 <div className="hidden sm:block">
                   <Badge variant="secondary" className="text-xs">
