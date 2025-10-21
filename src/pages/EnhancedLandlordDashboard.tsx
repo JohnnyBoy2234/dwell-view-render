@@ -787,15 +787,6 @@ export default function EnhancedLandlordDashboard() {
     fetchMaintenanceRequests();
   };
 
-  const handleTabChange = (path: string) => {
-    setCurrentTab(path);
-    if (selectedPropertyId) {
-      navigate(`${path}?property=${selectedPropertyId}`);
-    } else {
-      navigate(path);
-    }
-  };
-  
   const getSelectedProperty = () => {
     return properties.find(p => p.id === selectedPropertyId);
   };
@@ -876,7 +867,7 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderInventoryTab = () => (
-    <div className="min-h-screen bg-slate-100 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Back Button */}
         <Button
@@ -966,7 +957,7 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
   const renderLeasesTab = () => (
-    <div className="min-h-screen bg-slate-100 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Back Button + Header */}
         <div className="flex items-center gap-3 mt-4">
@@ -1028,7 +1019,7 @@ export default function EnhancedLandlordDashboard() {
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
     return (
-      <div className="min-h-screen bg-slate-100 pb-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           {/* Back Button */}
           <Button
@@ -1222,7 +1213,7 @@ export default function EnhancedLandlordDashboard() {
                               {/* Avatar */}
                               <div className="flex-shrink-0">
                                 <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 font-semibold text-lg">
-                                  {lead.tenant_name.charAt(0)}
+                                  {lead.tenant_name.charAt(0).toUpperCase()}
                                 </div>
                               </div>
                               
@@ -1432,7 +1423,7 @@ export default function EnhancedLandlordDashboard() {
       </div>
     );
   };
-  
+
   const renderPropertiesTab = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between mb-6">
@@ -1483,7 +1474,7 @@ export default function EnhancedLandlordDashboard() {
     const overdueCount = tenants.filter(t => t.payment_status === 'overdue').length;
 
     return (
-      <div className="min-h-screen bg-slate-100 pb-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           {/* Back Button */}
           <Button
@@ -1614,7 +1605,7 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderPaymentsTab = () => (
-    <div className="min-h-screen bg-slate-100 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Back Button */}
         <Button
@@ -1666,7 +1657,7 @@ export default function EnhancedLandlordDashboard() {
             <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
               <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-green-500/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <RIcon className="h-7 w-7 text-green-600" />
                   </div>
                   <div className="min-w-0">
@@ -1682,7 +1673,7 @@ export default function EnhancedLandlordDashboard() {
             <Card className="border-l-4 border-l-blue-500">
               <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-blue-500/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <Check className="h-5 w-5 text-blue-600" />
                   </div>
                   <div className="min-w-0">
@@ -1701,7 +1692,7 @@ export default function EnhancedLandlordDashboard() {
             <Card className="border-l-4 border-l-orange-500">
               <CardContent className="p-4 md:p-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-orange-500/10 rounded-full flex items-center justify-center flex-shrink-0">
                     <AlertTriangle className="h-5 w-5 text-orange-500" />
                   </div>
                   <div className="min-w-0">
@@ -1777,7 +1768,7 @@ export default function EnhancedLandlordDashboard() {
   );
 
   const renderReportsTab = () => (
-    <div className="min-h-screen bg-slate-100 pb-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Back Button */}
         <Button
@@ -1927,10 +1918,8 @@ export default function EnhancedLandlordDashboard() {
                   return (
                     <div key={property.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className="flex-shrink-0">
-                          <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center">
-                            <Building className="h-4 w-4 text-white" />
-                          </div>
+                        <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center">
+                          <Building className="h-4 w-4 text-white" />
                         </div>
                         <div>
                           <p className="font-medium">{property.title}</p>
@@ -2259,7 +2248,7 @@ export default function EnhancedLandlordDashboard() {
             <div className="text-center py-8">
               <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
               <h3 className="text-lg font-semibold mb-2">No Active Tenants</h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-4">
                 You need active tenants to generate invoices. Add properties and tenants first.
               </p>
               <Button 
@@ -2498,12 +2487,13 @@ export default function EnhancedLandlordDashboard() {
   };
 
 
-  const renderMaintenanceTab = () => {
-    // Calculate stats
-    const urgentCount = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed').length;
-    const submittedCount = maintenanceRequests.filter(r => r.status === 'submitted').length;
-    const inProgressCount = maintenanceRequests.filter(r => r.status === 'in_progress').length;
-    const completedCount = maintenanceRequests.filter(r => r.status === 'completed').length;
+
+      const renderMaintenanceTab = () => {
+        // Calculate stats
+        const urgentCount = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed').length;
+        const submittedCount = maintenanceRequests.filter(r => r.status === 'submitted').length;
+        const inProgressCount = maintenanceRequests.filter(r => r.status === 'in_progress').length;
+        const completedCount = maintenanceRequests.filter(r => r.status === 'completed').length;
 
     // Organize by status
     const urgentRequests = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed');
@@ -2511,7 +2501,7 @@ export default function EnhancedLandlordDashboard() {
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
     return (
-      <div className="min-h-screen bg-slate-100 pb-8">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <Button
             variant="ghost"
@@ -2739,7 +2729,7 @@ export default function EnhancedLandlordDashboard() {
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="min-h-screen bg-slate-100">
+        <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white">
           <div className="animate-pulse space-y-4 p-4">
             <div className="h-20 bg-gray-300 rounded-ios"></div>
             <div className="grid grid-cols-2 gap-4">
@@ -2762,7 +2752,7 @@ export default function EnhancedLandlordDashboard() {
     const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
 
     return (
-      <div className="min-h-screen bg-slate-100 pb-24 md:pb-4">
+      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
         <div className="px-4 space-y-6">
           {/* Back to All Properties Button */}
           <Button
@@ -3089,7 +3079,7 @@ export default function EnhancedLandlordDashboard() {
                       e.stopPropagation();
                       navigate(`/manage-property/${property.id}`);
                     }}>
-                      Manage
+                      <Eye className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -3141,7 +3131,7 @@ export default function EnhancedLandlordDashboard() {
                   Message
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => navigate(`/tenant-profile/${tenant.id}`)}>
-                  View Profile
+                  <Eye className="h-3 w-3" />
                 </Button>
               </div>
             </div>
@@ -3150,4 +3140,24 @@ export default function EnhancedLandlordDashboard() {
       </div>
     );
   };
+
+  const handleTabChange = (tab: string) => {
+    console.log('[Dashboard] Tab change requested:', tab);
+    setCurrentTab(tab);
+    // Update the URL when changing tabs, preserving property selection
+    const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+    navigate(`${tab}${params}`);
+  };
+
+  return (
+    <VerificationGate requireVerification={true}>
+      <EnhancedDashboardLayout 
+        title="Landlord Dashboard" 
+        currentTab={currentTab}
+        onTabChange={handleTabChange}
+      >
+        {renderTabContent()}
+      </EnhancedDashboardLayout>
+    </VerificationGate>
+  );
 }
