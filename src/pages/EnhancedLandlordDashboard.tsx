@@ -868,6 +868,21 @@ export default function EnhancedLandlordDashboard() {
 
   const renderInventoryTab = () => (
     <div className="space-y-6">
+      {/* Back Button */}
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          setCurrentTab('/enhancedlandlorddashboard');
+          navigate(`/enhancedlandlorddashboard?property=${selectedPropertyId}`);
+        }}
+        className="flex items-center gap-2"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span className="hidden sm:inline">Back to Dashboard</span>
+        <span className="sm:hidden">Back</span>
+      </Button>
+
       <div className="flex items-center gap-3 mb-6">
         <Camera className="h-6 w-6 text-ocean-blue" />
         <h2 className="text-xl font-bold">Property Inventory</h2>
@@ -947,6 +962,7 @@ export default function EnhancedLandlordDashboard() {
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
         </Button>
         <div className="flex items-center gap-3 flex-1">
           <FileText className="h-6 w-6 text-primary" />
@@ -983,6 +999,21 @@ export default function EnhancedLandlordDashboard() {
 
     return (
       <div className="space-y-6">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setCurrentTab('/enhancedlandlorddashboard');
+            navigate(`/enhancedlandlorddashboard?property=${selectedPropertyId}`);
+          }}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
+        </Button>
+
         {/* Header with Stats */}
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -1430,6 +1461,7 @@ export default function EnhancedLandlordDashboard() {
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           <div className="flex items-center gap-3 flex-1">
             <Users className="h-6 w-6 text-primary" />
@@ -1551,6 +1583,7 @@ export default function EnhancedLandlordDashboard() {
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
         </Button>
         <div className="flex items-center gap-3 flex-1">
           <RIcon className="h-8 w-8 text-primary" />
@@ -1704,6 +1737,7 @@ export default function EnhancedLandlordDashboard() {
         >
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline">Back to Dashboard</span>
+          <span className="sm:hidden">Back</span>
         </Button>
         <div className="flex items-center gap-3 flex-1">
           <BarChart3 className="h-6 w-6 text-primary" />
@@ -2428,6 +2462,7 @@ export default function EnhancedLandlordDashboard() {
           >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden sm:inline">Back to Dashboard</span>
+            <span className="sm:hidden">Back</span>
           </Button>
           <div className="flex items-center gap-3 flex-1">
             <Wrench className="h-6 w-6 text-primary" />
@@ -2658,6 +2693,17 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
         <div className="px-4 space-y-6">
+          {/* Back to All Properties Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleBackToProperties}
+            className="flex items-center gap-2 mt-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Back to All Properties</span>
+          </Button>
+
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
@@ -2846,7 +2892,7 @@ export default function EnhancedLandlordDashboard() {
 
               {/* Settings */}
               <button
-                onClick={() => navigate('/landlord/profile')}
+                onClick={() => navigate('/enhancedlandlorddashboard/profile')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
