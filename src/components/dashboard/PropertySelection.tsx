@@ -109,11 +109,11 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
         {properties.map((property) => (
           <div
             key={property.id}
-            className="group cursor-pointer rounded-xl p-[2px] bg-gradient-to-br from-ocean-blue via-sky-400 to-success-green hover:shadow-lg transition-all duration-200"
+            className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
             onClick={() => onSelectProperty(property.id)}
           >
           <Card 
-            className="overflow-hidden rounded-[10px] bg-white"
+            className="overflow-hidden rounded-[14px] bg-white"
           >
             {/* Property Image */}
             <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
