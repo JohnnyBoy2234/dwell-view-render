@@ -2577,8 +2577,9 @@ export default function EnhancedLandlordDashboard() {
     const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
-        <div className="px-4 space-y-6">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-24 md:pb-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+        <div className="relative z-10 px-4 space-y-6">
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
