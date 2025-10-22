@@ -98,19 +98,22 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-normal text-ocean-blue">
+        <h2 className="text-2xl font-normal text-blue-900">
           Select a Property
         </h2>
-        <p className="text-ocean-blue/80">Choose a property to view its dashboard and manage its details</p>
+        <p className="text-blue-900/80">Choose a property to view its dashboard and manage its details</p>
       </div>
 
       {/* Property Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {properties.map((property) => (
-          <Card 
+          <div
             key={property.id}
-            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border-2 border-ocean-blue"
+            className="group cursor-pointer rounded-xl p-[2px] bg-gradient-to-br from-ocean-blue via-sky-400 to-success-green hover:shadow-lg transition-all duration-200"
             onClick={() => onSelectProperty(property.id)}
+          >
+          <Card 
+            className="overflow-hidden rounded-[10px] bg-white"
           >
             {/* Property Image */}
             <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
@@ -154,6 +157,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
               </div>
             </CardContent>
           </Card>
+          </div>
         ))}
       </div>
 
