@@ -2579,17 +2579,6 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
         <div className="px-4 space-y-6">
-          {/* Back to All Properties Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToProperties}
-            className="flex items-center gap-2 mt-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to All Properties</span>
-          </Button>
-
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
@@ -2667,7 +2656,6 @@ export default function EnhancedLandlordDashboard() {
 
           {/* App-style Feature Grid */}
           <div>
-            <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
