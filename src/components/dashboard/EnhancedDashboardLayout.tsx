@@ -74,21 +74,21 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
           <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
-            {/* Mobile: Back button if needed, otherwise Sidebar trigger */}
-            {isMobile && shouldShowBackButton ? (
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={handleBackClick}
-                className="mr-3"
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            ) : (
-              <SidebarTrigger className="md:hidden mr-3">
-                <Menu className="h-5 w-5" />
-              </SidebarTrigger>
-            )}
+          {/* Back button if needed, otherwise Sidebar trigger */}
+          {shouldShowBackButton ? (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              onClick={handleBackClick}
+              className="mr-3"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          ) : (
+            <SidebarTrigger className="md:hidden mr-3">
+              <Menu className="h-5 w-5" />
+            </SidebarTrigger>
+          )}
             
             <div className="flex-1">
               <div className="flex items-center gap-3">
