@@ -16,6 +16,8 @@ interface EnhancedDashboardLayoutProps {
   actions?: React.ReactNode;
   currentTab?: string;
   onTabChange?: (tab: string) => void;
+  selectedPropertyId?: string | null;
+  onBackToProperties?: () => void;
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
@@ -37,7 +39,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange }: EnhancedDashboardLayoutProps) {
+export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties }: EnhancedDashboardLayoutProps) {
   const { signOut, isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
@@ -47,6 +49,23 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const pageConfig = LANDLORD_PAGE_CONFIG[currentTab || '/enhancedlandlorddashboard'] || LANDLORD_PAGE_CONFIG['/enhancedlandlorddashboard'];
   const PageIcon = pageConfig.icon;
 
+  // Determine when to show back button
+  const shouldShowBackButton = 
+    (currentTab === '/enhancedlandlorddashboard' && selectedPropertyId) || // On Management Tools with property selected
+    (currentTab !== '/enhancedlandlorddashboard'); // On any sub-page
+
+  // Handle back button click
+  const handleBackClick = () => {
+    if (currentTab === '/enhancedlandlorddashboard' && selectedPropertyId) {
+      // On Management Tools page -> go back to Property Selection
+      onBackToProperties?.();
+    } else if (currentTab !== '/enhancedlandlorddashboard') {
+      // On sub-page -> go back to Management Tools
+      const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+      navigate(`/enhancedlandlorddashboard${params}`);
+    }
+  };
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]">
@@ -54,13 +73,13 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         
         <div className="flex-1 flex flex-col min-w-0">
           {/* Enhanced Header */}
-          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.15] via-background/95 to-success-green/[0.15] backdrop-blur-md">
-            {/* Mobile: Back button OR Sidebar trigger */}
-            {isMobile && pageConfig.showBackButton ? (
+          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
+            {/* Mobile: Back button if needed, otherwise Sidebar trigger */}
+            {isMobile && shouldShowBackButton ? (
               <Button 
                 variant="ghost" 
                 size="icon"
-                onClick={() => navigate(pageConfig.backPath!)}
+                onClick={handleBackClick}
                 className="mr-3"
               >
                 <ArrowLeft className="h-5 w-5" />
