@@ -100,7 +100,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-extrabold text-white drop-shadow-sm">
+        <h2 className="text-2xl font-normal text-white drop-shadow-sm">
           Select a Property
         </h2>
         <p className="text-white/90">Choose a property to view its dashboard and manage its details</p>
