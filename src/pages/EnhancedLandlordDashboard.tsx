@@ -25,6 +25,7 @@ import { MaintenanceRequest } from '@/types/maintenance';
 import { useLandlordMetrics } from '@/hooks/useLandlordMetrics';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 import { AccountingOverview } from '@/components/accounting/AccountingOverview';
+import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';
 import { PropertyHeader } from '@/components/dashboard/PropertyHeader';
@@ -2655,37 +2656,27 @@ export default function EnhancedLandlordDashboard() {
             </div>
           </div>
 
-          {/* App-style Feature Grid (restyled like PropertySelection cards) */}
+          {/* App-style Feature Grid (match Properties page card styles) */}
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <div
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Inbox className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Applications</p>
-                  <p className="text-xs text-black/70">{applications.length}</p>
-                </div>
+                  <p className="text-xs font-medium">Applications</p>
+                  <p className="text-xs text-muted-foreground">{applications.length}</p>
+                </Card>
               </div>
 
-              <div
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200 relative"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')} role="button" tabIndex={0} className="relative">
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Wrench className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Maintenance</p>
-                  <p className="text-xs text-black/70">{activeMaintenanceRequests}</p>
-                </div>
+                  <p className="text-xs font-medium">Maintenance</p>
+                  <p className="text-xs text-muted-foreground">{activeMaintenanceRequests}</p>
+                </Card>
                 {activeMaintenanceRequests > 0 && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-ios-red rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">{activeMaintenanceRequests}</span>
@@ -2693,113 +2684,78 @@ export default function EnhancedLandlordDashboard() {
                 )}
               </div>
 
-              <div
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <RIcon className="w-7 h-7 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Payments</p>
-                  <p className="text-xs text-black/70">Track</p>
-                </div>
+                  <p className="text-xs font-medium">Payments</p>
+                  <p className="text-xs text-muted-foreground">Track</p>
+                </Card>
               </div>
 
 
               {/* SwiftBooks */}
-              <div 
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/swiftbooks')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/swiftbooks')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <BarChart3 className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">SwiftBooks</p>
-                  <p className="text-xs text-black/70">Analytics</p>
-                </div>
+                  <p className="text-xs font-medium">SwiftBooks</p>
+                  <p className="text-xs text-muted-foreground">Analytics</p>
+                </Card>
               </div>
 
-              <div
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Leases</p>
-                  <p className="text-xs text-black/70">Manage</p>
-                </div>
+                  <p className="text-xs font-medium">Leases</p>
+                  <p className="text-xs text-muted-foreground">Manage</p>
+                </Card>
               </div>
 
-              <div
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Camera className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Inventory</p>
-                  <p className="text-xs text-black/70">Photos & Notes</p>
-                </div>
+                  <p className="text-xs font-medium">Inventory</p>
+                  <p className="text-xs text-muted-foreground">Photos & Notes</p>
+                </Card>
               </div>
 
-              <div
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/inspection')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/inspection')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Clipboard className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Inspection</p>
-                  <p className="text-xs text-black/70">View & Start</p>
-                </div>
+                  <p className="text-xs font-medium">Inspection</p>
+                  <p className="text-xs text-muted-foreground">View & Start</p>
+                </Card>
               </div>
 
               {/* Support */}
-              <div
-                onClick={() => navigate('/enhancedlandlorddashboard/support')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => navigate('/enhancedlandlorddashboard/support')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Home className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Support</p>
-                  <p className="text-xs text-black/70">Help & Resources</p>
-                </div>
+                  <p className="text-xs font-medium">Support</p>
+                  <p className="text-xs text-muted-foreground">Help & Resources</p>
+                </Card>
               </div>
 
               {/* Settings */}
-              <div
-                onClick={() => navigate('/enhancedlandlorddashboard/profile')}
-                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
-                role="button"
-                tabIndex={0}
-              >
-                <div className="rounded-[14px] bg-white p-4 text-center">
+              <div onClick={() => navigate('/enhancedlandlorddashboard/profile')} role="button" tabIndex={0}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <User className="w-5 h-5 text-white" />
                   </div>
-                  <p className="text-xs font-medium text-black">Settings</p>
-                  <p className="text-xs text-black/70">Account</p>
-                </div>
+                  <p className="text-xs font-medium">Settings</p>
+                  <p className="text-xs text-muted-foreground">Account</p>
+                </Card>
               </div>
             </div>
           </div>
