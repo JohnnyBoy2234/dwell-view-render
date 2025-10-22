@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
@@ -2579,17 +2579,6 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
         <div className="px-4 space-y-6">
-          {/* Back to All Properties Button */}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleBackToProperties}
-            className="flex items-center gap-2 mt-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Back to All Properties</span>
-          </Button>
-
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
@@ -2667,25 +2656,13 @@ export default function EnhancedLandlordDashboard() {
 
           {/* App-style Feature Grid */}
           <div>
-            <h3 className="text-lg font-semibold text-ios-gray-dark mb-4">Management Tools</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <button
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
-              >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-green to-ios-green-light rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-white" />
-                </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Tenants</p>
-                <p className="text-xs text-ios-gray">{tenants.length}</p>
-              </button>
-
               <button
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
+                  <Inbox className="w-5 h-5 text-white" />
                 </div>
                 <p className="text-xs font-medium text-ios-gray-dark">Applications</p>
                 <p className="text-xs text-ios-gray">{applications.length}</p>
