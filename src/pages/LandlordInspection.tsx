@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 
 export default function LandlordInspection() {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const { 
@@ -29,29 +28,30 @@ export default function LandlordInspection() {
   const [properties, setProperties] = useState<any[]>([]);
   const [loadingProperties, setLoadingProperties] = useState(true);
 
-  // Fetch landlord properties
-  useState(() => {
-    const fetchProperties = async () => {
-      if (!user) return;
-      setLoadingProperties(true);
-      try {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('landlord_id', user.id)
-          .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        setProperties(data || []);
-      } catch (error) {
-        console.error('Error fetching properties:', error);
-      } finally {
-        setLoadingProperties(false);
-      }
-    };
-    fetchProperties();
-  });
 
+  useEffect(() => {
+  const fetchProperties = async () => {
+    if (!user) return;
+    setLoadingProperties(true);
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (error) {
+      console.error('Error fetching properties:', error);
+    } finally {
+      setLoadingProperties(false);
+    }
+  };
+  
+  fetchProperties();
+  }, [user]); 
+  
   if (inspectionLoading || loadingProperties) {
     return (
       <div className="space-y-6">
