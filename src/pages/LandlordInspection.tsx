@@ -1,16 +1,15 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, Mic, FileText, Eye, Download, Home, Clipboard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Camera, FileText, Eye, Download, Home, Clipboard, Mic} from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspection';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
-import { supabase } from '@/integrations/supabase/client';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
+import { useProperties } from '@/hooks/useProperties';
 
 export default function LandlordInspection() {
   const { user } = useAuth();
@@ -25,32 +24,7 @@ export default function LandlordInspection() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecordWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [properties, setProperties] = useState<any[]>([]);
-  const [loadingProperties, setLoadingProperties] = useState(true);
-
-
-  useEffect(() => {
-  const fetchProperties = async () => {
-    if (!user) return;
-    setLoadingProperties(true);
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setProperties(data || []);
-    } catch (error) {
-      console.error('Error fetching properties:', error);
-    } finally {
-      setLoadingProperties(false);
-    }
-  };
-  
-  fetchProperties();
-  }, [user]); 
+  const { properties, loading: loadingProperties, error: propertiesError } = useProperties(user?.id);
   
   if (inspectionLoading || loadingProperties) {
     return (
@@ -100,8 +74,8 @@ export default function LandlordInspection() {
     }
   };
 
-  // Show error if there's an inspection error
-  if (inspectionError) {
+  // Show error if there's an error
+  if (inspectionError || propertiesError) {
     return (
       <div className="space-y-6">
         <div>
@@ -112,7 +86,12 @@ export default function LandlordInspection() {
         </div>
         <Card>
           <CardContent className="py-12 text-center">
-            <p className="text-destructive">Error loading inspection records: {inspectionError}</p>
+            {inspectionError && (
+              <p className="text-destructive mb-4">Error loading inspection records: {inspectionError}</p>
+            )}
+            {propertiesError && (
+              <p className="text-destructive">Error loading properties: {propertiesError}</p>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -205,7 +184,7 @@ export default function LandlordInspection() {
               <p className="text-muted-foreground mb-4">
                 Start documenting property conditions to create your first inspection record
               </p>
-              {properties.length > 0 && (
+              {properties && properties.length > 0 && (
                 <Button onClick={() => handleStartNewInspection(properties[0].id)}>
                   <Camera className="h-4 w-4 mr-2" />
                   Create First Inspection
