@@ -64,12 +64,13 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   };
 
   const isPropertySelection = !selectedPropertyId;
+  const isLandlordDashboardRoute = (currentTab || '').startsWith('/enhancedlandlorddashboard');
 
   return (
     <div className={
       `flex min-h-screen w-full ${
-        isPropertySelection
-          ? 'bg-slate-200'
+        isLandlordDashboardRoute
+          ? 'bg-transparent'
           : 'bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]'
       }`
     }>
@@ -126,7 +127,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
           </header>
           
           {/* Main Content with Error Boundary */}
-          <main className={`flex-1 ${isPropertySelection ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
+          <main className={`flex-1 ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
             {children}
           </main>
         </div>

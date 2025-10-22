@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Home, Plus, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RIcon } from '@/components/icons/RIcon';
+import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 
 interface Property {
   id: string;
@@ -98,59 +99,69 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
+        <h2 className="text-2xl font-normal text-blue-900">
           Select a Property
         </h2>
-        <p className="text-muted-foreground">Choose a property to view its dashboard and manage its details</p>
+        <p className="text-blue-900/80">Choose a property to view its dashboard and manage its details</p>
       </div>
 
       {/* Property Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((property) => (
           <Card 
             key={property.id}
-            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border border-ocean-blue/10 hover:border-ocean-blue/30 hover:ring-1 hover:ring-ocean-blue/20"
+            className={PROPERTY_CARD_STYLES.CARD}
+            role="button"
+            tabIndex={0}
             onClick={() => onSelectProperty(property.id)}
+            aria-label={`Manage ${property.title} in ${getSuburbAndCity(property.location)}`}
           >
             {/* Property Image */}
-            <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
+            <div className={`${PROPERTY_CARD_STYLES.IMAGE_CONTAINER} aspect-video`}>
               {property.images && property.images.length > 0 ? (
                 <img
                   src={property.images[0]}
-                  alt={property.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  alt={`${property.title} in ${getSuburbAndCity(property.location)}`}
+                  className={`${PROPERTY_CARD_STYLES.IMAGE} h-full`}
+                  loading="lazy"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <Home className="h-16 w-16 text-muted-foreground/30" />
+                <div className="w-full h-full flex items-center justify-center bg-muted/30">
+                  <Home className="h-10 w-10 text-muted-foreground/50" />
                 </div>
               )}
             </div>
 
             {/* Property Details */}
-            <CardContent className="p-4 space-y-3">
-              {/* Title */}
-              <div>
-                <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
-                  {property.title}
+            <CardContent className={PROPERTY_CARD_STYLES.CONTENT}>
+              <div className={PROPERTY_CARD_STYLES.CONTENT_INNER}>
+                {/* Price */}
+                <h3 className={PROPERTY_CARD_STYLES.PRICE}>
+                  R{property.price?.toLocaleString?.()}/month
                 </h3>
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {getSuburbAndCity(property.location)}
+
+                {/* Location */}
+                <div className={PROPERTY_CARD_STYLES.LOCATION_CONTAINER}>
+                  <MapPin className={PROPERTY_CARD_STYLES.LOCATION_ICON} aria-hidden="true" />
+                  <span className={PROPERTY_CARD_STYLES.LOCATION_TEXT}>
+                    {getSuburbAndCity(property.location)}
+                  </span>
                 </div>
-              </div>
-              <div className="pt-3 border-t">
-                <Button 
-                  variant="default" 
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onSelectProperty(property.id);
-                  }}
-                  className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white"
-                >
-                  Manage Tools
-                </Button>
+
+                {/* CTA */}
+                <div className="mt-3 pt-3 border-t">
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectProperty(property.id);
+                    }}
+                    className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white"
+                  >
+                    Manage Tools
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -867,8 +867,9 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderInventoryTab = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {inventoryLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
@@ -926,8 +927,9 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
   const renderLeasesTab = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-pink-50 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
       </div>
     </div>
@@ -957,8 +959,9 @@ export default function EnhancedLandlordDashboard() {
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           {/* Stats Summary Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card className="border-l-4 border-l-yellow-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
@@ -1486,8 +1489,9 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderPaymentsTab = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {tenants.length === 0 ? (
           <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
           <CardContent className="p-12 text-center">
@@ -2353,8 +2357,9 @@ export default function EnhancedLandlordDashboard() {
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-orange-50 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -2577,29 +2582,30 @@ export default function EnhancedLandlordDashboard() {
     const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white pb-24 md:pb-4">
-        <div className="px-4 space-y-6">
+      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-24 md:pb-4">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+        <div className="relative z-10 px-4 space-y-6">
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
-            <h1 className="text-2xl font-bold text-ios-gray-dark mb-1">
+            <h1 className="text-2xl font-bold text-white mb-1">
               Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}
             </h1>
-            <p className="text-ios-gray text-sm">
+            <p className="text-white/90 text-sm">
               {user?.email?.split('@')[0] || 'Landlord'}
             </p>
           </div>
           
           {/* Payment Reminder Banner */}
-          <div className="bg-gradient-to-r from-ocean-blue/10 to-success-green/10 border border-ocean-blue/20 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-sky-500 to-sky-600 rounded-lg p-4 shadow-md">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-ocean-blue text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-white/20 text-white flex items-center justify-center">
                   <Bell className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold">Send Payment Reminder</div>
-                  <div className="text-sm text-ios-gray">Notify a tenant instantly via app and email</div>
+                  <div className="font-semibold text-white">Send Payment Reminder</div>
+                  <div className="text-sm text-white/90">Notify a tenant instantly via app and email</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
