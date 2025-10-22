@@ -203,29 +203,17 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-200/60 to-gray-100/40">
       {/* Hero Section */}
       <section 
-        className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(rgba(33, 79, 197, 0.8), rgba(34, 197, 94, 0.8)), url(${heroBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
+        className="relative min-h-[60vh] flex items-center justify-center bg-white text-black overflow-hidden"
       >
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -bottom-10 -right-10 w-96 h-96 bg-success-green/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-2 sm:pt-8">
           {/* Hero Content */}
           <div className="mb-8 sm:mb-12">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-black">
               Safe, Simple,<br />
-              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                Commission-Free
-              </span><br />
+              Commission-Free<br />
               Renting
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-black/80 mb-8 max-w-3xl mx-auto leading-relaxed">
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
             
@@ -244,9 +232,6 @@ const Index = () => {
 
           {/* Quick Stats removed per request */}
         </div>
-        
-        {/* Seamless fade into page background */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-gray-200/50"></div>
       </section>
 
       {/* Feature Highlights */}
