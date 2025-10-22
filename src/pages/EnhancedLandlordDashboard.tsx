@@ -867,9 +867,8 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderInventoryTab = () => (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="min-h-screen bg-white pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
         {inventoryLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
@@ -927,9 +926,8 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
   const renderLeasesTab = () => (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="min-h-screen bg-white pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
         <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
       </div>
     </div>
@@ -959,9 +957,8 @@ export default function EnhancedLandlordDashboard() {
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="min-h-screen bg-white pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
           {/* Stats Summary Bar */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Card className="border-l-4 border-l-yellow-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
@@ -1489,9 +1486,8 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderPaymentsTab = () => (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="min-h-screen bg-white pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
         {tenants.length === 0 ? (
           <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
           <CardContent className="p-12 text-center">
@@ -2582,30 +2578,29 @@ export default function EnhancedLandlordDashboard() {
     const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-24 md:pb-4">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-        <div className="relative z-10 px-4 space-y-6">
+      <div className="min-h-screen bg-white pb-24 md:pb-4">
+        <div className="px-4 space-y-6">
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
-            <h1 className="text-2xl font-bold text-white mb-1">
+            <h1 className="text-2xl font-bold text-black mb-1">
               Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}
             </h1>
-            <p className="text-white/90 text-sm">
+            <p className="text-black/70 text-sm">
               {user?.email?.split('@')[0] || 'Landlord'}
             </p>
           </div>
           
           {/* Payment Reminder Banner */}
-          <div className="bg-gradient-to-r from-sky-500 to-sky-600 rounded-lg p-4 shadow-md">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-md">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white/20 text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
                   <Bell className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold text-white">Send Payment Reminder</div>
-                  <div className="text-sm text-white/90">Notify a tenant instantly via app and email</div>
+                  <div className="font-semibold text-black">Send Payment Reminder</div>
+                  <div className="text-sm text-black/70">Notify a tenant instantly via app and email</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -2660,116 +2655,152 @@ export default function EnhancedLandlordDashboard() {
             </div>
           </div>
 
-          {/* App-style Feature Grid */}
+          {/* App-style Feature Grid (restyled like PropertySelection cards) */}
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <button
+              <div
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Inbox className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <Inbox className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Applications</p>
+                  <p className="text-xs text-black/70">{applications.length}</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Applications</p>
-                <p className="text-xs text-ios-gray">{applications.length}</p>
-              </button>
+              </div>
 
-              <button
+              <div
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200 relative"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Wrench className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <Wrench className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Maintenance</p>
+                  <p className="text-xs text-black/70">{activeMaintenanceRequests}</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Maintenance</p>
-                <p className="text-xs text-ios-gray">{activeMaintenanceRequests}</p>
                 {activeMaintenanceRequests > 0 && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-ios-red rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">{activeMaintenanceRequests}</span>
                   </div>
                 )}
-              </button>
+              </div>
 
-              <button
+              <div
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <RIcon className="w-7 h-7 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <RIcon className="w-7 h-7 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Payments</p>
+                  <p className="text-xs text-black/70">Track</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Payments</p>
-                <p className="text-xs text-ios-gray">Track</p>
-              </button>
+              </div>
 
 
               {/* SwiftBooks */}
-              <button 
+              <div 
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/swiftbooks')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">SwiftBooks</p>
+                  <p className="text-xs text-black/70">Analytics</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">SwiftBooks</p>
-                <p className="text-xs text-ios-gray">Analytics</p>
-              </button>
+              </div>
 
-              <button
+              <div
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Leases</p>
+                  <p className="text-xs text-black/70">Manage</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Leases</p>
-                <p className="text-xs text-ios-gray">Manage</p>
-              </button>
+              </div>
 
-              <button
+              <div
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Camera className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <Camera className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Inventory</p>
+                  <p className="text-xs text-black/70">Photos & Notes</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Inventory</p>
-                <p className="text-xs text-ios-gray">Photos & Notes</p>
-              </button>
+              </div>
 
-              <button
+              <div
                 onClick={() => handleTabChange('/enhancedlandlorddashboard/inspection')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Clipboard className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <Clipboard className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Inspection</p>
+                  <p className="text-xs text-black/70">View & Start</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Inspection</p>
-                <p className="text-xs text-ios-gray">View & Start</p>
-              </button>
+              </div>
 
               {/* Support */}
-              <button
+              <div
                 onClick={() => navigate('/enhancedlandlorddashboard/support')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <Home className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <Home className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Support</p>
+                  <p className="text-xs text-black/70">Help & Resources</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Support</p>
-                <p className="text-xs text-ios-gray">Help & Resources</p>
-              </button>
+              </div>
 
               {/* Settings */}
-              <button
+              <div
                 onClick={() => navigate('/enhancedlandlorddashboard/profile')}
-                className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
+                className="group cursor-pointer rounded-2xl p-[3px] bg-gradient-to-r from-ocean-blue to-success-green shadow-md hover:shadow-xl hover:-translate-y-[2px] transition-all duration-200"
+                role="button"
+                tabIndex={0}
               >
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
-                  <User className="w-5 h-5 text-white" />
+                <div className="rounded-[14px] bg-white p-4 text-center">
+                  <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  <p className="text-xs font-medium text-black">Settings</p>
+                  <p className="text-xs text-black/70">Account</p>
                 </div>
-                <p className="text-xs font-medium text-ios-gray-dark">Settings</p>
-                <p className="text-xs text-ios-gray">Account</p>
-              </button>
+              </div>
             </div>
           </div>
 

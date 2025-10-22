@@ -99,10 +99,10 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-normal text-blue-900">
+        <h2 className="text-2xl font-normal text-black">
           Select a Property
         </h2>
-        <p className="text-blue-900/80">Choose a property to view its dashboard and manage its details</p>
+        <p className="text-black/80">Choose a property to view its dashboard and manage its details</p>
       </div>
 
       {/* Property Grid */}
@@ -159,7 +159,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                     }}
                     className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white"
                   >
-                    Manage Tools
+                    Management Tools
                   </Button>
                 </div>
               </div>
