@@ -136,15 +136,15 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                   {getSuburbAndCity(property.location)}
                 </div>
               </div>
-              <div className="flex items-center justify-end">
+              <div className="pt-3 border-t">
                 <Button 
-                  variant="ghost" 
+                  variant="default" 
                   size="sm"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectProperty(property.id);
                   }}
-                  className="text-xs"
+                  className="w-full"
                 >
                   Manage Tools
                 </Button>
