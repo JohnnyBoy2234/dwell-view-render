@@ -270,6 +270,10 @@ export const useViewings = (propertyId?: string, conversationId?: string) => {
 
       if (error) throw error;
 
+      // Send email to the tenant that they got an email
+      //TODO: FIX email
+      const {} = await supabase.functions.invoke('send-email', {body:})
+      
       await fetchViewings();
       toast({
         title: "Success",

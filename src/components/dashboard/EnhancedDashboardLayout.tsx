@@ -1,13 +1,9 @@
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { EnhancedSidebar } from './EnhancedSidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { LogOut, Menu, AlertTriangle, ArrowLeft, Home } from 'lucide-react';
+import { LogOut, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Component, ReactNode } from 'react';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { useNavigate } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { LANDLORD_PAGE_CONFIG } from '@/constants/dashboardPageConfig';
 
 interface EnhancedDashboardLayoutProps {
@@ -43,8 +39,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const { signOut, isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  
+
   // Get page configuration based on current tab
   const pageConfig = LANDLORD_PAGE_CONFIG[currentTab || '/enhancedlandlorddashboard'] || LANDLORD_PAGE_CONFIG['/enhancedlandlorddashboard'];
   const PageIcon = pageConfig.icon;
@@ -69,15 +64,12 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   };
 
   return (
-    <SidebarProvider defaultOpen={true}>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]">
-        <EnhancedSidebar currentTab={currentTab} onTabChange={onTabChange} />
-        
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Enhanced Header */}
-          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
+    <div className="flex min-h-screen w-full bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]">
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Enhanced Header */}
+        <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
           {/* Back button if needed, otherwise Sidebar trigger */}
-          {shouldShowBackButton ? (
+          {shouldShowBackButton && (
             <Button 
               variant="ghost" 
               size="icon"
@@ -86,10 +78,6 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-          ) : (
-            <SidebarTrigger className="md:hidden mr-3">
-              <Menu className="h-5 w-5" />
-            </SidebarTrigger>
           )}
             
             <div className="flex-1">
@@ -135,6 +123,5 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
           </main>
         </div>
       </div>
-    </SidebarProvider>
   );
 }
