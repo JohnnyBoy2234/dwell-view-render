@@ -94,8 +94,10 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="relative min-h-screen bg-gradient-to-r from-ocean-blue/[0.12] to-ocean-blue/[0.24]">
+      {/* Bottom white fade overlay */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white to-transparent"></div>
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
         <h2 className="text-2xl font-extrabold bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
