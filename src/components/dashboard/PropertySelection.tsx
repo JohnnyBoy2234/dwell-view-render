@@ -94,19 +94,16 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300/60 via-sky-400/70 to-sky-600/70">
-      {/* Decorative glow blobs */}
-      <div className="pointer-events-none absolute -top-16 -left-20 w-72 h-72 rounded-full bg-white/25 blur-3xl" />
-      <div className="pointer-events-none absolute top-10 -right-24 w-96 h-96 rounded-full bg-cyan-300/30 blur-3xl" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600">
       {/* Bottom white fade overlay */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-extrabold bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
+        <h2 className="text-2xl font-extrabold text-white drop-shadow-sm">
           Select a Property
         </h2>
-        <p className="text-muted-foreground">Choose a property to view its dashboard and manage its details</p>
+        <p className="text-white/90">Choose a property to view its dashboard and manage its details</p>
       </div>
 
       {/* Property Grid */}
