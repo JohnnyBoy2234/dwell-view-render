@@ -7,6 +7,7 @@ import {
   Wrench, 
   ClipboardList, 
   BarChart3,
+  Camera,
   LucideIcon 
 } from 'lucide-react';
 
@@ -63,6 +64,13 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   '/enhancedlandlorddashboard/maintenance': {
     title: 'Maintenance',
     icon: Wrench,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedlandlorddashboard',
+  },
+  '/enhancedlandlorddashboard/inventory': {
+    title: 'Inventory',
+    icon: Camera,
     showSidebar: false,
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',

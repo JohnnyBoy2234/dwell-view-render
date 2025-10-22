@@ -223,7 +223,7 @@ export default function EnhancedLandlordDashboard() {
         // Maintenance will show sample data from the function
       }
     }
-    if (currentTab === '/enhancedlandlorddashboard/reports') {
+    if (currentTab === '/enhancedlandlorddashboard/swiftbooks') {
       try {
         fetchLandlordSettings();
         fetchAdditionalCosts();
@@ -824,8 +824,8 @@ export default function EnhancedLandlordDashboard() {
       case '/enhancedlandlorddashboard/payments':
         console.log('[Dashboard] Rendering payments tab');
         return renderPaymentsTab();
-      case '/enhancedlandlorddashboard/reports':
-        console.log('[Dashboard] Rendering reports tab');
+      case '/enhancedlandlorddashboard/swiftbooks':
+        console.log('[Dashboard] Rendering swiftbooks tab');
         return <AccountingOverview />;
       case '/enhancedlandlorddashboard/inventory':
         console.log('[Dashboard] Rendering inventory tab');
@@ -2698,7 +2698,7 @@ export default function EnhancedLandlordDashboard() {
 
               {/* SwiftBooks */}
               <button 
-                onClick={() => handleTabChange('/enhancedlandlorddashboard/reports')}
+                onClick={() => handleTabChange('/enhancedlandlorddashboard/swiftbooks')}
                 className="bg-white rounded-ios-card p-4 shadow-ios-sm active:scale-95 transition-all duration-200 border border-gray-100"
               >
                 <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
