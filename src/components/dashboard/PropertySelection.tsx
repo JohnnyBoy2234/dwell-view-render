@@ -36,6 +36,17 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
     }
   };
 
+  const getSuburbAndCity = (location: string) => {
+    if (!location) return location;
+    const parts = location.split(',').map(p => p.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      const suburb = parts[parts.length - 2];
+      const city = parts[parts.length - 1];
+      return `${suburb}, ${city}`;
+    }
+    return location;
+  };
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -86,7 +97,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold">Select a Property</h2>
+        <h2 className="text-xl font-semibold">Select a Property</h2>
         <p className="text-muted-foreground">Choose a property to view its dashboard and manage its details</p>
       </div>
 
@@ -111,17 +122,6 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                   <Home className="h-16 w-16 text-muted-foreground/30" />
                 </div>
               )}
-              
-              {/* Status Badge */}
-              <div className="absolute top-3 right-3">
-                <Badge 
-                  variant="secondary" 
-                  className="bg-background/90 backdrop-blur-sm"
-                >
-                  <div className={`w-2 h-2 rounded-full ${getStatusColor(property.status)} mr-2`} />
-                  {property.status}
-                </Badge>
-              </div>
             </div>
 
             {/* Property Details */}
@@ -133,16 +133,10 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                 </h3>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <MapPin className="h-4 w-4 mr-1" />
-                  {property.location}
+                  {getSuburbAndCity(property.location)}
                 </div>
               </div>
-
-              {/* Price */}
-              <div className="flex items-center justify-between pt-2 border-t">
-                <div className="flex items-center text-lg font-bold text-primary">
-                  <RIcon className="h-5 w-5 mr-1" />
-                  {property.price.toLocaleString()}/mo
-                </div>
+              <div className="flex items-center justify-end">
                 <Button 
                   variant="ghost" 
                   size="sm"
@@ -150,9 +144,9 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                     e.stopPropagation();
                     onSelectProperty(property.id);
                   }}
-                  className="group-hover:bg-primary group-hover:text-primary-foreground"
+                  className="text-sm"
                 >
-                  Manage
+                  Select
                 </Button>
               </div>
             </CardContent>

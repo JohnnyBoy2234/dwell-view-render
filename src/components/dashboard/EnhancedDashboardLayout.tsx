@@ -100,7 +100,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                 </div>
                 
                 {/* Dynamic title */}
-                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{pageConfig.title}</h1>
+                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title || pageConfig.title}</h1>
                 
                 <div className="hidden sm:block">
                   <Badge variant="secondary" className="text-xs">
