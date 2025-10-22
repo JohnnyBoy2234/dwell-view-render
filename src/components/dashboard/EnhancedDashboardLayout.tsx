@@ -62,6 +62,8 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
     } else if (currentTab !== '/enhancedlandlorddashboard') {
       // On sub-page -> go back to Management Tools
       const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+      // Update parent state immediately for snappy UI, then navigate
+      onTabChange?.('/enhancedlandlorddashboard');
       navigate(`/enhancedlandlorddashboard${params}`);
     }
   };
