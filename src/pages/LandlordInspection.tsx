@@ -12,10 +12,11 @@ import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 import { useProperties } from '@/hooks/useProperties';
 
 export default function LandlordInspection() {
+  // All hooks called unconditionally at the top
   const { user } = useAuth();
   const { toast } = useToast();
   const { 
-    inspectionRecords, 
+    inspectionRecords = [], 
     loading: inspectionLoading, 
     error: inspectionError,
     downloadInspectionReport
@@ -24,9 +25,24 @@ export default function LandlordInspection() {
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecordWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const { properties, loading: loadingProperties, error: propertiesError } = useProperties(user?.id);
+  const { 
+    properties = [], 
+    loading: loadingProperties, 
+    error: propertiesError 
+  } = useProperties(user?.id);
   
-  if (inspectionLoading || loadingProperties) {
+  // Derived state
+  const isLoading = inspectionLoading || loadingProperties;
+  const hasError = Boolean(inspectionError || propertiesError);
+  
+  // Memoize filtered inspections
+  const propertyInspections = useMemo(() => {
+    if (!selectedPropertyId) return inspectionRecords;
+    return inspectionRecords.filter(record => record.property_id === selectedPropertyId);
+  }, [inspectionRecords, selectedPropertyId]);
+  
+  // Loading state
+  if (isLoading) {
     return (
       <div className="space-y-6">
         <div className="h-8 bg-muted animate-pulse rounded"></div>
@@ -74,8 +90,8 @@ export default function LandlordInspection() {
     }
   };
 
-  // Show error if there's an error
-  if (inspectionError || propertiesError) {
+  // Error state
+  if (hasError) {
     return (
       <div className="space-y-6">
         <div>
@@ -97,12 +113,6 @@ export default function LandlordInspection() {
       </div>
     );
   }
-
-  // Filter inspections for selected property
-  const propertyInspections = useMemo(() => {
-    if (!selectedPropertyId) return inspectionRecords;
-    return inspectionRecords.filter(record => record.property_id === selectedPropertyId);
-  }, [inspectionRecords, selectedPropertyId]);
 
   // If a property is selected for inspection, show the inspection panel
   if (selectedPropertyId) {
