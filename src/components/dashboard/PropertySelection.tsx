@@ -94,16 +94,14 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-ocean-blue to-success-green">
-      {/* Bottom white fade overlay */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[75%] bg-gradient-to-t from-white to-transparent"></div>
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-2xl font-normal text-white drop-shadow-sm">
+        <h2 className="text-2xl font-normal text-ocean-blue">
           Select a Property
         </h2>
-        <p className="text-white/90">Choose a property to view its dashboard and manage its details</p>
+        <p className="text-ocean-blue/80">Choose a property to view its dashboard and manage its details</p>
       </div>
 
       {/* Property Grid */}
@@ -111,7 +109,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
         {properties.map((property) => (
           <Card 
             key={property.id}
-            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border border-ocean-blue/10 hover:border-ocean-blue/30 hover:ring-1 hover:ring-ocean-blue/20"
+            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border-2 border-ocean-blue"
             onClick={() => onSelectProperty(property.id)}
           >
             {/* Property Image */}
