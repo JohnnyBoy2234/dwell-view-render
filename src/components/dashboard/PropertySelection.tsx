@@ -102,11 +102,11 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
       </div>
 
       {/* Property Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {properties.map((property) => (
           <Card 
             key={property.id}
-            className="overflow-hidden cursor-pointer group hover:shadow-lg transition-all duration-200 border-2 hover:border-primary"
+            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border hover:border-primary/60"
             onClick={() => onSelectProperty(property.id)}
           >
             {/* Property Image */}
@@ -125,10 +125,10 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
             </div>
 
             {/* Property Details */}
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-4 space-y-3">
               {/* Title */}
               <div>
-                <h3 className="text-xl font-bold mb-1 group-hover:text-primary transition-colors">
+                <h3 className="text-lg font-semibold mb-1 group-hover:text-primary transition-colors">
                   {property.title}
                 </h3>
                 <div className="flex items-center text-sm text-muted-foreground">
@@ -144,9 +144,9 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                     e.stopPropagation();
                     onSelectProperty(property.id);
                   }}
-                  className="text-sm"
+                  className="text-xs"
                 >
-                  Select
+                  Manage Tools
                 </Button>
               </div>
             </CardContent>

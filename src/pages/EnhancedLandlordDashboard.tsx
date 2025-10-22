@@ -2974,10 +2974,16 @@ export default function EnhancedLandlordDashboard() {
     navigate(`${tab}${params}`);
   };
 
+  const headerTitle = !selectedPropertyId
+    ? 'Property Portfolio'
+    : currentTab === '/enhancedlandlorddashboard'
+      ? 'Management Tools'
+      : '';
+
   return (
     <VerificationGate requireVerification={true}>
       <EnhancedDashboardLayout 
-        title="Landlord Dashboard" 
+        title={headerTitle}
         currentTab={currentTab}
         onTabChange={handleTabChange}
         selectedPropertyId={selectedPropertyId}
