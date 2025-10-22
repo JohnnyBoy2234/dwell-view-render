@@ -64,13 +64,16 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   };
 
   const isPropertySelection = !selectedPropertyId;
+  const isManagementTools = currentTab === '/enhancedlandlorddashboard';
 
   return (
     <div className={
       `flex min-h-screen w-full ${
         isPropertySelection
           ? 'bg-slate-200'
-          : 'bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]'
+          : isManagementTools
+            ? 'bg-transparent'
+            : 'bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]'
       }`
     }>
       <div className="flex-1 flex flex-col min-w-0">
@@ -126,7 +129,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
           </header>
           
           {/* Main Content with Error Boundary */}
-          <main className={`flex-1 ${isPropertySelection ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
+          <main className={`flex-1 ${isPropertySelection || isManagementTools ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
             {children}
           </main>
         </div>

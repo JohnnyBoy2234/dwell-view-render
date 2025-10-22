@@ -2583,24 +2583,24 @@ export default function EnhancedLandlordDashboard() {
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header */}
           <div className="pt-4">
-            <h1 className="text-2xl font-bold text-ios-gray-dark mb-1">
+            <h1 className="text-2xl font-bold text-white mb-1">
               Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}
             </h1>
-            <p className="text-ios-gray text-sm">
+            <p className="text-white/90 text-sm">
               {user?.email?.split('@')[0] || 'Landlord'}
             </p>
           </div>
           
           {/* Payment Reminder Banner */}
-          <div className="bg-gradient-to-r from-ocean-blue/10 to-success-green/10 border border-ocean-blue/20 rounded-lg p-4">
+          <div className="bg-gradient-to-r from-sky-500 to-sky-600 rounded-lg p-4 shadow-md">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-ocean-blue text-white flex items-center justify-center">
+                <div className="w-9 h-9 rounded-full bg-white/20 text-white flex items-center justify-center">
                   <Bell className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="font-semibold">Send Payment Reminder</div>
-                  <div className="text-sm text-ios-gray">Notify a tenant instantly via app and email</div>
+                  <div className="font-semibold text-white">Send Payment Reminder</div>
+                  <div className="text-sm text-white/90">Notify a tenant instantly via app and email</div>
                 </div>
               </div>
               <div className="flex items-center gap-2 w-full sm:w-auto">
