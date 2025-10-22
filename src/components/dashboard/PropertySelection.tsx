@@ -94,10 +94,13 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-ocean-blue/[0.12] via-slate-100 to-success-green/[0.12]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h2 className="text-xl font-semibold">Select a Property</h2>
+        <h2 className="text-xl font-extrabold bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent">
+          Select a Property
+        </h2>
         <p className="text-muted-foreground">Choose a property to view its dashboard and manage its details</p>
       </div>
 
@@ -106,7 +109,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
         {properties.map((property) => (
           <Card 
             key={property.id}
-            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border hover:border-primary/60"
+            className="overflow-hidden cursor-pointer group hover:shadow-md transition-all duration-200 border border-ocean-blue/10 hover:border-ocean-blue/30 hover:ring-1 hover:ring-ocean-blue/20"
             onClick={() => onSelectProperty(property.id)}
           >
             {/* Property Image */}
@@ -144,7 +147,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                     e.stopPropagation();
                     onSelectProperty(property.id);
                   }}
-                  className="w-full"
+                  className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white"
                 >
                   Manage Tools
                 </Button>
@@ -164,6 +167,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
           <Plus className="h-5 w-5 mr-2" />
           Add Another Property
         </Button>
+      </div>
       </div>
     </div>
   );
