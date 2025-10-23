@@ -1670,7 +1670,7 @@ export default function EnhancedLandlordDashboard() {
           <div className="space-y-6">
           {/* Financial Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
+            <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-success-green/10 rounded-full flex items-center justify-center">
@@ -1686,7 +1686,7 @@ export default function EnhancedLandlordDashboard() {
               </CardContent>
             </Card>
             
-            <Card>
+            <Card className="shadow-md hover:shadow-lg transition-shadow duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-ocean-blue/10 rounded-full flex items-center justify-center">
@@ -2585,7 +2585,7 @@ export default function EnhancedLandlordDashboard() {
           {/* Header removed per request */}
           
           {/* Payment Reminder Banner */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-md">
+          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
