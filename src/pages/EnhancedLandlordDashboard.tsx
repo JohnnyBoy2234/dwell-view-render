@@ -2580,7 +2580,7 @@ export default function EnhancedLandlordDashboard() {
 
     return (
       <div className="min-h-screen bg-white pb-24 md:pb-4">
-        <div className="px-4 space-y-6">
+        <div className="px-4 space-y-6 pt-3">
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header removed per request */}
           
