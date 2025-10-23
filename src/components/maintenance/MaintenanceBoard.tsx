@@ -72,7 +72,7 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-white p-6 rounded-lg">
       <BoardHeader
         selectedPriority={selectedPriority}
         onPriorityChange={setSelectedPriority}
@@ -92,7 +92,7 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
           
           return (
             <div key={column.status} className="space-y-4">
-              <Card className={`${column.color} border-2`}>
+              <Card className={`${column.color} border-2 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
@@ -106,7 +106,7 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
 
               <div className="space-y-3 max-h-[600px] overflow-y-auto">
                 {columnTickets.length === 0 ? (
-                  <Card className="border-dashed">
+                  <Card className="border-dashed transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
                     <CardContent className="p-6 text-center text-muted-foreground">
                       <div className="text-sm">{MAINTENANCE_LABELS.NO_TICKETS}</div>
                     </CardContent>
@@ -127,7 +127,7 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
       </div>
 
       {tickets.length === 0 && (
-        <Card className="max-w-md mx-auto">
+        <Card className="max-w-md mx-auto transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
           <CardContent className="p-8 text-center">
             <div className="text-4xl mb-4">🔧</div>
             <h3 className="font-semibold mb-2">{MAINTENANCE_LABELS.NO_MAINTENANCE_REQUESTS}</h3>

@@ -162,8 +162,8 @@ export function MaintenanceTicketCard({ ticket, showActions = true }: Maintenanc
   const slaStatus = getSLAStatus();
 
   return (
-    <Card className="w-full">
-      <CardHeader className="pb-3">
+    <Card className="w-full transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
+      <CardHeader className="pb-3 bg-gray-50 rounded-t-lg">
         <div className="flex items-start justify-between">
           <div>
             <h3 className="font-semibold text-lg">{ticket.title}</h3>
@@ -183,7 +183,7 @@ export function MaintenanceTicketCard({ ticket, showActions = true }: Maintenanc
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 bg-white rounded-b-lg">
         <div>
           <p className="text-sm">{ticket.description}</p>
         </div>
