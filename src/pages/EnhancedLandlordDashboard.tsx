@@ -2750,43 +2750,6 @@ export default function EnhancedLandlordDashboard() {
               </div>
             </div>
           </div>
-
-          {/* Recent Activity */}
-          {(properties.length > 0 || tenants.length > 0) && (
-            <div className="bg-white rounded-ios-card p-4 shadow-ios-sm border border-gray-100">
-              <h3 className="text-sm font-semibold text-ios-gray-dark mb-3">Recent Activity</h3>
-              
-              {tenants.length > 0 && (
-                <div className="space-y-3">
-                  {tenants.slice(0, 3).map((tenant) => (
-                    <div key={tenant.id} className="flex items-center gap-3 p-2 rounded-ios bg-ios-gray-light/30">
-                      <div className="w-8 h-8 bg-gradient-to-br from-ios-green to-ios-green-light rounded-full flex items-center justify-center">
-                        <Users className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-ios-gray-dark">{tenant.name}</p>
-                        <p className="text-xs text-ios-gray">R{tenant.monthly_rent.toLocaleString()}/month</p>
-                      </div>
-                      <div className="text-right">
-                        <div className={`w-2 h-2 rounded-full ${
-                          tenant.payment_status === 'paid' ? 'bg-ios-green' : 
-                          tenant.payment_status === 'pending' ? 'bg-ios-orange' : 'bg-ios-red'
-                        }`}></div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-              
-              {properties.length > 0 && tenants.length === 0 && (
-                <div className="text-center py-4">
-                  <Building className="w-8 h-8 text-ios-gray mx-auto mb-2" />
-                  <p className="text-sm text-ios-gray">No active tenants yet</p>
-                  <p className="text-xs text-ios-gray">Your tenants will appear here</p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     );
