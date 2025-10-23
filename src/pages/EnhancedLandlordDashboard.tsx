@@ -2354,9 +2354,8 @@ export default function EnhancedLandlordDashboard() {
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="min-h-screen bg-white pb-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 py-6">
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -2416,7 +2415,7 @@ export default function EnhancedLandlordDashboard() {
                   <Badge variant="destructive">{urgentRequests.length}</Badge>
                 </div>
                 {urgentRequests.map((request) => (
-                  <Card key={request.id} className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow">
+                  <Card key={request.id} className="mb-4 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
                     <CardContent className="p-4 md:p-6">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex gap-3 flex-1 min-w-0">
@@ -2463,7 +2462,7 @@ export default function EnhancedLandlordDashboard() {
                   <Badge variant="secondary">{submittedRequests.length}</Badge>
                 </div>
                 {submittedRequests.map((request) => (
-                  <Card key={request.id} className="border-l-4 border-l-yellow-500 hover:shadow-lg transition-shadow">
+                  <Card key={request.id} className="mb-4 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
                     <CardContent className="p-4 md:p-6">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex gap-3 flex-1 min-w-0">
@@ -2511,7 +2510,7 @@ export default function EnhancedLandlordDashboard() {
                   <Badge variant="secondary">{inProgressRequests.length}</Badge>
                 </div>
                 {inProgressRequests.map((request) => (
-                  <Card key={request.id} className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
+                  <Card key={request.id} className="mb-4 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
                     <CardContent className="p-4 md:p-6">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex gap-3 flex-1 min-w-0">
