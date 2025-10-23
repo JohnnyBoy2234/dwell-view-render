@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from './useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { 
   ApplicationRequest, 
   ApplicationRequestFilters, 
@@ -103,7 +104,7 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
       // First, get the property to get the landlord_id
       const { data: property, error: propertyError } = await supabase
         .from('properties')
-        .select('user_id')
+        .select('landlord_id')
         .eq('id', propertyId)
         .single();
 
@@ -114,7 +115,7 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
       const newRequest = await createApplicationRequest({
         property_id: propertyId,
         tenant_id: user.id,
-        landlord_id: property.user_id,
+        landlord_id: property.landlord_id,
       });
 
       // Refresh the list
@@ -128,7 +129,7 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
     }
   };
 
-  const updateRequestStatus = async (requestId: string, status: ApplicationRequestStatus) => {
+  const updateRequestStatus = async (requestId: string, status: 'approved' | 'rejected') => {
     try {
       const updatedRequest = await updateApplicationRequestStatus(requestId, status);
       

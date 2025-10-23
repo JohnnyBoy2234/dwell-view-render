@@ -1,4 +1,4 @@
-import { Database } from '@/types/supabase';
+import { Database } from '@/integrations/supabase/types';
 
 export type ApplicationRequestStatus = 'pending' | 'approved' | 'rejected';
 
