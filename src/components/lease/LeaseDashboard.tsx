@@ -188,7 +188,7 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
 
   if (contracts.length === 0) {
     return (
-      <Card>
+      <Card className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
         <CardContent className="flex flex-col items-center justify-center py-16">
           <FileText className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No contracts found</h3>
@@ -206,7 +206,7 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
   return (
     <div className="grid gap-4">
       {contracts.map((contract) => (
-        <Card key={contract.id} className="hover:shadow-md transition-shadow">
+        <Card key={contract.id} className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
               <div>

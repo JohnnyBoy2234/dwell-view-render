@@ -382,7 +382,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
   return (
     <div className="space-y-6">
       {/* Requests */}
-      <Card>
+      <Card className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
         <CardHeader>
           <CardTitle>Application Requests</CardTitle>
           <CardDescription>Approve requests to send an application to the tenant</CardDescription>
@@ -413,7 +413,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
         </CardContent>
       </Card>
       {/* Leads / Inquiries */}
-      <Card>
+      <Card className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
         <CardHeader>
           <CardTitle>Leads</CardTitle>
           <CardDescription>Tenants you've chatted with about this property</CardDescription>
@@ -456,7 +456,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
       </Card>
 
       {/* Applications List */}
-      <Card>
+      <Card className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
         <CardHeader>
           <CardTitle>Applications</CardTitle>
           <CardDescription>
@@ -504,7 +504,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
                     : application.tenant_profile?.display_name || 'Unknown Tenant';
 
                   return (
-                    <Card key={application.id} className="border-l-4 border-l-primary/20">
+                    <Card key={application.id} className="border-l-4 border-l-primary/20 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
                       <CardContent className="p-4 sm:p-6">
                         <div className="flex flex-col gap-4">
                           <div className="flex items-start gap-3">

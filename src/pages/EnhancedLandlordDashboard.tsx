@@ -2652,7 +2652,7 @@ export default function EnhancedLandlordDashboard() {
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Inbox className="w-5 h-5 text-white" />
                   </div>
@@ -2662,7 +2662,7 @@ export default function EnhancedLandlordDashboard() {
               </div>
 
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')} role="button" tabIndex={0} className="relative">
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Wrench className="w-5 h-5 text-white" />
                   </div>
@@ -2677,7 +2677,7 @@ export default function EnhancedLandlordDashboard() {
               </div>
 
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <RIcon className="w-7 h-7 text-white" />
                   </div>
@@ -2689,7 +2689,7 @@ export default function EnhancedLandlordDashboard() {
 
               {/* SwiftBooks */}
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/swiftbooks')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <BarChart3 className="w-5 h-5 text-white" />
                   </div>
@@ -2699,7 +2699,7 @@ export default function EnhancedLandlordDashboard() {
               </div>
 
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-white" />
                   </div>
@@ -2709,7 +2709,7 @@ export default function EnhancedLandlordDashboard() {
               </div>
 
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Camera className="w-5 h-5 text-white" />
                   </div>
@@ -2719,7 +2719,7 @@ export default function EnhancedLandlordDashboard() {
               </div>
 
               <div onClick={() => handleTabChange('/enhancedlandlorddashboard/inspection')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Clipboard className="w-5 h-5 text-white" />
                   </div>
@@ -2730,7 +2730,7 @@ export default function EnhancedLandlordDashboard() {
 
               {/* Support */}
               <div onClick={() => navigate('/enhancedlandlorddashboard/support')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Home className="w-5 h-5 text-white" />
                   </div>
@@ -2741,7 +2741,7 @@ export default function EnhancedLandlordDashboard() {
 
               {/* Settings */}
               <div onClick={() => navigate('/enhancedlandlorddashboard/profile')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center`}>
+                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <User className="w-5 h-5 text-white" />
                   </div>
