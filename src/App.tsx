@@ -122,8 +122,8 @@ function AppRoutes() {
               <Route path="/tenant/*" element={<TenantDashboardRoutes />} />
               <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
               {/* Direct landlord inspection routes to bypass dashboard tab handling */}
-              <Route path="/enhancedlandlorddashboard/inspection" element={<><Navbar /><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></>} />
-              <Route path="/enhancedlandlorddashboard/inspection/start" element={<><Navbar /><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></>} />
+              <Route path="/enhancedlandlorddashboard/inspection" element={<><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></>} />
+              <Route path="/enhancedlandlorddashboard/inspection/start" element={<><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></>} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}
               <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
               <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
