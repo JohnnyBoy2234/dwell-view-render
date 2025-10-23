@@ -137,48 +137,6 @@ export default function LandlordInspection() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Property Inspection</h1>
-        <p className="text-muted-foreground">
-          Capture photos and voice notes for inspections. Media is shared with your tenant.
-        </p>
-      </div>
-
-      {/* Properties Section */}
-      {properties.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Your Properties</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {properties.map((property) => (
-              <Card key={property.id} className="bg-gradient-to-r from-ocean-blue/5 to-success-green/5 border-ocean-blue/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-ocean-blue">
-                    <Home className="h-5 w-5" />
-                    {property.title}
-                  </CardTitle>
-                  <CardDescription>{property.location}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      Start a new inspection for this property
-                    </div>
-                    <Button 
-                      onClick={() => handleStartNewInspection(property.id)} 
-                      className="bg-ocean-blue hover:bg-ocean-blue-dark"
-                    >
-                      <Camera className="h-4 w-4 mr-2" />
-                      Start Inspection
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
-
       {/* Inspection Records */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
