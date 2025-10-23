@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -76,8 +77,26 @@ export default function LandlordInspection() {
     }
   };
 
+  const navigate = useNavigate();
+
   const handleStartNewInspection = (propertyId: string) => {
-    setSelectedPropertyId(propertyId);
+    if (!propertyId || !properties.length) {
+      toast({
+        title: "Error",
+        description: "No property selected or available",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Navigate to the new inspection page with the property ID
+    navigate(`/inspections/new?propertyId=${propertyId}`);
+    
+    // Optional: Show a toast notification
+    toast({
+      title: "Starting New Inspection",
+      description: `Creating inspection for property: ${properties.find(p => p.id === propertyId)?.title || 'Selected Property'}`,
+    });
   };
 
   const getStatusBadge = (status: string, landlordApproved: boolean) => {
@@ -139,11 +158,6 @@ export default function LandlordInspection() {
     <div className="space-y-6">
       {/* Inspection Records */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">All Inspection Records</h2>
-          <Badge variant="secondary">{inspectionRecords.length} records</Badge>
-        </div>
-
         {inspectionRecords.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">

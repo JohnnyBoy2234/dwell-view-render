@@ -59,6 +59,7 @@ import { VerificationGate } from "@/components/VerificationGate";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
+import CreateInspection from "@/pages/CreateInspection";
 // Accounting imports
 import AccountingDashboard from "@/pages/accounting/AccountingDashboard";
 import AddTransactionPage from "@/pages/accounting/AddTransactionPage";
@@ -124,6 +125,7 @@ function AppRoutes() {
               {/* Direct landlord inspection routes to bypass dashboard tab handling */}
               <Route path="/enhancedlandlorddashboard/inspection" element={<><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></>} />
               <Route path="/enhancedlandlorddashboard/inspection/start" element={<><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></>} />
+              <Route path="/inspections/new" element={<AuthenticatedRoute><EnhancedDashboardLayout title="New Inspection"><CreateInspection /></EnhancedDashboardLayout></AuthenticatedRoute>} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}
               <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
               <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
