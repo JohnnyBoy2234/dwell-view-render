@@ -1,10 +1,17 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ApplicationRequest, ApplicationRequestInsert, ApplicationRequestUpdate, ApplicationRequestFilters, ApplicationRequestResponse } from '@/types/application';
 
-export const createApplicationRequest = async (request: Omit<ApplicationRequestInsert, 'status' | 'created_at' | 'updated_at'>) => {
+export type ApplicationStatus = 'invited' | 'submitted' | 'pending_credit_check' | 'pending' | 'accepted' | 'declined';
+
+export const createApplicationRequest = async (request: Omit<ApplicationRequestInsert, 'status' | 'created_at' | 'updated_at'>, status: ApplicationStatus = 'pending') => {
   const { data, error } = await supabase
     .from('application_requests')
-    .insert([{ ...request, status: 'pending' }])
+    .insert([{ 
+      ...request, 
+      status,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }])
     .select('*')
     .single();
 
@@ -31,7 +38,7 @@ export const getApplicationRequest = async (id: string): Promise<ApplicationRequ
   return data as ApplicationRequest;
 };
 
-export const updateApplicationRequestStatus = async (id: string, status: 'approved' | 'rejected'): Promise<ApplicationRequest> => {
+export const updateApplicationRequestStatus = async (id: string, status: ApplicationStatus): Promise<ApplicationRequest> => {
   const { data, error } = await supabase
     .from('application_requests')
     .update({ status })

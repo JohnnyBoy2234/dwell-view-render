@@ -129,9 +129,15 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
     }
   };
 
-  const updateRequestStatus = async (requestId: string, status: 'approved' | 'rejected') => {
+  const updateRequestStatus = async (requestId: string, status: ApplicationRequestStatus | 'approved' | 'rejected') => {
     try {
-      const updatedRequest = await updateApplicationRequestStatus(requestId, status);
+      // Map 'approved' to 'accepted' and 'rejected' to 'declined' for backward compatibility
+      const mappedStatus: ApplicationRequestStatus = 
+        status === 'approved' ? 'accepted' : 
+        status === 'rejected' ? 'declined' : 
+        status;
+      
+      const updatedRequest = await updateApplicationRequestStatus(requestId, mappedStatus);
       
       // Update local state
       setRequests(prev => 

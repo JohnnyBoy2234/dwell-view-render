@@ -6,6 +6,7 @@ import { Check, FileText, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { ApplicationRequestStatus } from '@/types/application';
 
 interface ApplicationRequestCardProps {
   propertyId: string;
@@ -27,12 +28,15 @@ export function ApplicationRequestCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Check if there's an approved request for this property
+  // Check if there's an approved/accepted request for this property
   const approvedRequest = requests?.find(
-    req => 
-      req.property_id === propertyId && 
-      req.status === 'approved' &&
-      req.tenant_id === user?.id
+    req => {
+      const isStatusMatch = req.status === 'accepted' || 
+                          req.status === ('approved' as ApplicationRequestStatus);
+      return req.property_id === propertyId && 
+             isStatusMatch &&
+             req.tenant_id === user?.id;
+    }
   );
 
   const handleRequestApplication = async () => {
@@ -46,9 +50,12 @@ export function ApplicationRequestCard({
       await createRequest(propertyId);
       toast.success('Application request sent successfully!');
       onSuccess?.();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error requesting application:', error);
-      toast.error('Failed to send application request. Please try again.');
+      const errorMessage = error?.message?.includes('duplicate key value') 
+        ? 'You have already requested an application for this property.'
+        : 'Failed to send application request. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
