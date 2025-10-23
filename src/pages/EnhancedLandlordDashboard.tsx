@@ -2380,25 +2380,25 @@ export default function EnhancedLandlordDashboard() {
           <>
             {/* Stats Summary Bar */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Card className="border-l-4 border-l-red-500">
+              <Card className="border-l-4 border-l-red-500 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.01] bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold text-red-600">{urgentCount}</div>
                   <div className="text-sm text-muted-foreground">Urgent</div>
                 </CardContent>
               </Card>
-              <Card className="border-l-4 border-l-yellow-500">
+              <Card className="border-l-4 border-l-yellow-500 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.01] bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold text-yellow-600">{submittedCount}</div>
                   <div className="text-sm text-muted-foreground">New</div>
                 </CardContent>
-            </Card>
-            <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
+              </Card>
+              <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.01] bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold text-blue-600">{inProgressCount}</div>
                   <div className="text-sm text-muted-foreground">In Progress</div>
                 </CardContent>
               </Card>
-              <Card className="border-l-4 border-l-green-500">
+              <Card className="border-l-4 border-l-green-500 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.01] bg-white/90 backdrop-blur-sm">
                 <CardContent className="p-4">
                   <div className="text-2xl font-bold text-green-600">{completedCount}</div>
                   <div className="text-sm text-muted-foreground">Completed</div>
