@@ -2582,15 +2582,7 @@ export default function EnhancedLandlordDashboard() {
       <div className="min-h-screen bg-white pb-24 md:pb-4">
         <div className="px-4 space-y-6">
           {/* Quick tile: Inspection (removed per request) */}
-          {/* Header */}
-          <div className="pt-4">
-            <h1 className="text-2xl font-bold text-black mb-1">
-              Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 17 ? 'Afternoon' : 'Evening'}
-            </h1>
-            <p className="text-black/70 text-sm">
-              {user?.email?.split('@')[0] || 'Landlord'}
-            </p>
-          </div>
+          {/* Header removed per request */}
           
           {/* Payment Reminder Banner */}
           <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-md">
