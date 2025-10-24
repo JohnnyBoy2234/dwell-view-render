@@ -60,8 +60,14 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
   };
 
   return (
-    <div>
-      <div className={MESSAGE_STYLES.CONTENT_TEXT}>
+    <div className="space-y-2 w-full">
+      <div className={cn(
+        "w-full",
+        "break-words",
+        "whitespace-pre-wrap",
+        "overflow-hidden",
+        "text-left"
+      )}>
         {renderContentWithLinks()}
       </div>
       
