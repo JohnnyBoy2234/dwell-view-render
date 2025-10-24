@@ -2,9 +2,8 @@ import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Camera, FileText, Eye, Download, Home, Clipboard, Mic} from 'lucide-react';
+import { Plus, Eye, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspection';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,31 +13,23 @@ import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 import { useProperties } from '@/hooks/useProperties';
 
 export default function LandlordInspection() {
-  // All hooks called unconditionally at the top
+  // Hooks
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  // State management
+  // State
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecordWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   
-  // Get property data
-  const { 
-    properties = [], 
-    loading: loadingProperties, 
-    error: propertiesError 
-  } = useProperties(user?.id);
+  // Data fetching
+  const { properties = [], loading: loadingProperties } = useProperties(user?.id);
+  const { inspectionRecords = [], loading: inspectionLoading } = useInspection({ 
+    propertyId: selectedPropertyId || '' 
+  });
   
-  // Get inspection data
-  const { 
-    inspectionRecords = [], 
-    loading: inspectionLoading, 
-    error: inspectionError 
-  } = useInspection({ propertyId: selectedPropertyId || '' });
-  
-  // Set the selected property ID when properties are loaded
+  // Effects
   useEffect(() => {
     if (properties.length > 0 && !selectedPropertyId) {
       setSelectedPropertyId(properties[0].id);
@@ -47,15 +38,8 @@ export default function LandlordInspection() {
   
   // Derived state
   const isLoading = inspectionLoading || loadingProperties;
-  const hasError = Boolean(inspectionError || propertiesError);
   
-  // Memoize filtered inspections
-  const propertyInspections = useMemo(() => {
-    if (!selectedPropertyId) return inspectionRecords;
-    return inspectionRecords.filter(record => record.property_id === selectedPropertyId);
-  }, [inspectionRecords, selectedPropertyId]);
-  
-  // Download inspection report handler
+  // Handlers
   const downloadInspectionReport = useCallback(async (inspectionId: string) => {
     try {
       const { data, error } = await supabase.storage
@@ -86,237 +70,219 @@ export default function LandlordInspection() {
       });
     }
   }, [toast]);
-  
-  
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-8 bg-muted animate-pulse rounded"></div>
-        <div className="grid gap-6">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-48 bg-muted animate-pulse rounded-lg"></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
-  const handleViewInspection = (record: InspectionRecordWithDetails) => {
-    setSelectedRecord(record);
-    setIsDetailModalOpen(true);
-  };
+  // Group inspections by status
+  const [activeTab, setActiveTab] = useState('all');
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
-  const handleDownloadReport = async (recordId: string) => {
-    try {
-      await downloadInspectionReport(recordId);
-      toast({
-        title: "Report Download",
-        description: "Inspection report download initiated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Failed to download inspection report. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  const currentChecklist = useMemo(() => {
+    return checklist[activeTab as keyof typeof checklist] || [];
+  }, [checklist, activeTab]);
 
-  const navigate = useNavigate();
-
-  const handleStartNewInspection = (propertyId: string) => {
-    if (!propertyId || !properties.length) {
-      toast({
-        title: "Error",
-        description: "No property selected or available",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Navigate to the new inspection page with the property ID
-    navigate(`/inspections/new?propertyId=${propertyId}`);
-    
-    // Optional: Show a toast notification
-    toast({
-      title: "Starting New Inspection",
-      description: `Creating inspection for property: ${properties.find(p => p.id === propertyId)?.title || 'Selected Property'}`,
-    });
-  };
-
-  const getStatusBadge = (status: string, landlordApproved: boolean) => {
-    if (status === 'completed' && landlordApproved) {
-      return <Badge variant="default" className="bg-success-green text-white">Approved</Badge>;
-    } else if (status === 'completed') {
-      return <Badge variant="secondary">Awaiting Approval</Badge>;
+  const toggleItemSelection = (inspectionId: string) => {
+    const newSelection = new Set(selectedItems);
+    if (newSelection.has(inspectionId)) {
+      newSelection.delete(inspectionId);
     } else {
-      return <Badge variant="outline">In Progress</Badge>;
+      newSelection.add(inspectionId);
     }
+    setSelectedItems(newSelection);
   };
 
-  // Error state
-  if (hasError) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Property Inspection</h1>
-          <p className="text-muted-foreground">
-            Capture photos and voice notes for inspections
-          </p>
-        </div>
-        <Card>
-          <CardContent className="py-12 text-center">
-            {inspectionError && (
-              <p className="text-destructive mb-4">Error loading inspection records: {inspectionError}</p>
-            )}
-            {propertiesError && (
-              <p className="text-destructive">Error loading properties: {propertiesError}</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const inspectionChecklist = {
+    ext: [
+      { id: 'ext-1', label: 'Roof condition', checked: false },
+      { id: 'ext-2', label: 'Gutters and downspouts', checked: false },
+      { id: 'ext-3', label: 'Exterior walls', checked: false },
+      { id: 'ext-4', label: 'Windows and doors', checked: false },
+      { id: 'ext-5', label: 'Driveway and walkways', checked: false },
+      { id: 'ext-6', label: 'Landscaping', checked: false },
+    ],
+    living: [
+      { id: 'living-1', label: 'Walls and ceilings', checked: false },
+      { id: 'living-2', label: 'Flooring condition', checked: false },
+      { id: 'living-3', label: 'Windows and window coverings', checked: false },
+      { id: 'living-4', label: 'Doors and locks', checked: false },
+      { id: 'living-5', label: 'Light fixtures', checked: false },
+    ],
+    kitchen: [
+      { id: 'kitchen-1', label: 'Cabinets and countertops', checked: false },
+      { id: 'kitchen-2', label: 'Sink and faucet', checked: false },
+      { id: 'kitchen-3', label: 'Appliances', checked: false },
+      { id: 'kitchen-4', label: 'Ventilation', checked: false },
+    ],
+    beds: [
+      { id: 'bed-1', label: 'Walls and ceilings', checked: false },
+      { id: 'bed-2', label: 'Flooring', checked: false },
+      { id: 'bed-3', label: 'Closet doors and hardware', checked: false },
+      { id: 'bed-4', label: 'Windows and coverings', checked: false },
+    ],
+    elec: [
+      { id: 'elec-1', label: 'Outlets and switches', checked: false },
+      { id: 'elec-2', label: 'Circuit breaker panel', checked: false },
+      { id: 'elec-3', label: 'Light fixtures', checked: false },
+      { id: 'elec-4', label: 'Smoke detectors', checked: false },
+    ],
+    plum: [
+      { id: 'plum-1', label: 'Water pressure', checked: false },
+      { id: 'plum-2', label: 'Drains and pipes', checked: false },
+      { id: 'plum-3', label: 'Toilets', checked: false },
+      { id: 'plum-4', label: 'Water heater', checked: false },
+    ],
+  };
 
-  // If a property is selected for inspection, show the inspection panel
-  if (selectedPropertyId) {
-    const selectedProperty = properties.find(p => p.id === selectedPropertyId);
-    return (
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <MobileBackButton onBack={() => setSelectedPropertyId(null)} />
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              {selectedProperty?.title} - Inspection
-            </h1>
-            <p className="text-muted-foreground">
-              Record the condition of the property with voice notes and photos
-            </p>
-          </div>
-        </div>
-        <InventoryStartPanel propertyId={selectedPropertyId} />
-      </div>
-    );
-  }
+  const tabs = [
+    { id: 'ext', label: 'Exterior', icon: '🏠' },
+    { id: 'living', label: 'Living Area', icon: '🛋️' },
+    { id: 'kitchen', label: 'Kitchen', icon: '🍳' },
+    { id: 'beds', label: 'Bedrooms', icon: '🛏️' },
+    { id: 'elec', label: 'Electrical', icon: '💡' },
+    { id: 'plum', label: 'Plumbing', icon: '🚿' },
+  ];
+  
+  const [checklist, setChecklist] = useState(inspectionChecklist);
+  
+  const toggleChecklistItem = (category: keyof typeof inspectionChecklist, itemId: string) => {
+    setChecklist(prev => ({
+      ...prev,
+      [category]: prev[category].map(item => 
+        item.id === itemId ? { ...item, checked: !item.checked } : item
+      )
+    }));
+  };
 
   return (
-    <div className="space-y-6">
-      {/* Inspection Records */}
-      <div className="space-y-4">
-        {inspectionRecords.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Clipboard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No inspection records yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Start documenting property conditions to create your first inspection record
-              </p>
-              {properties && properties.length > 0 && (
-                <Button onClick={() => handleStartNewInspection(properties[0].id)}>
-                  <Camera className="h-4 w-4 mr-2" />
-                  Create First Inspection
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {inspectionRecords.map((record) => (
-              <Card key={record.id} className="hover:shadow-medium transition-all duration-200">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{record.property?.title || 'Property'}</h3>
-                      <p className="text-muted-foreground">
-                        Created: {new Date(record.created_at).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Country: {record.country}
-                      </p>
-                    </div>
-                    {getStatusBadge(record.status, record.landlord_approved)}
-                  </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-ocean-blue">{record.rooms_recorded}</div>
-                      <div className="text-sm text-muted-foreground">Rooms</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-success-green">{record.photos_count}</div>
-                      <div className="text-sm text-muted-foreground">Photos</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-earth-warm">{record.voice_notes_count}</div>
-                      <div className="text-sm text-muted-foreground">Voice Notes</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-muted-foreground">
-                        {record.landlord_approved ? '✓' : '⏳'}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Status</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mic className="h-4 w-4" />
-                      <span>Audio recordings & photos available</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewInspection(record)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadReport(record.id)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Report
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Property Inspections</h1>
+        <button 
+          onClick={() => navigate('/inspections/new')}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+        >
+          <Plus className="h-4 w-4" />
+          New Inspection
+        </button>
       </div>
-
-      {/* Guidance Section */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Mic className="h-5 w-5" />
-            Inspection Guidance
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
-            <li>Capture wide shots and close-ups of issues</li>
-            <li>Add short voice notes to describe context</li>
-            <li>Include meters, appliances, walls, floors, and fixtures</li>
-            <li>Submit promptly so your tenant can review</li>
-          </ul>
-        </CardContent>
-      </Card>
-
-      {/* Inspection Detail Modal */}
+      
+      {selectedPropertyId && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          {/* Tabs */}
+          <div className="border-b border-gray-200">
+            <nav className="flex -mb-px">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`px-4 py-3 text-sm font-medium flex items-center gap-2 ${
+                    activeTab === tab.id
+                      ? 'border-b-2 border-blue-500 text-blue-600'
+                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <span className="text-lg">{tab.icon}</span>
+                  {tab.label}
+                </button>
+              ))}
+            </nav>
+          </div>
+          
+          {/* Checklist */}
+          <div className="p-6">
+            <div className="space-y-4">
+              {currentChecklist.map((item) => (
+                <div key={item.id} className="flex items-start">
+                  <div className="flex items-center h-5">
+                    <input
+                      id={item.id}
+                      name={item.id}
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={() => toggleChecklistItem(activeTab as keyof typeof inspectionChecklist, item.id)}
+                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label 
+                      htmlFor={item.id} 
+                      className={`font-medium ${
+                        item.checked ? 'text-gray-500 line-through' : 'text-gray-700'
+                      }`}
+                    >
+                      {item.label}
+                    </label>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Notes Section */}
+            <div className="mt-8">
+              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
+                Additional Notes
+              </label>
+              <textarea
+                id="notes"
+                name="notes"
+                rows={3}
+                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
+                placeholder="Add any additional notes or observations here..."
+              />
+            </div>
+            
+            {/* Photo Upload */}
+            <div className="mt-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Add Photos
+              </label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <div className="space-y-1 text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 48 48"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="file-upload"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                    >
+                      <span>Upload photos</span>
+                      <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Save Button */}
+            <div className="mt-8 flex justify-end">
+              <button
+                type="button"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Save Inspection
+              </button>
+            </div>
+          </div>
+          )}
+        </div>
+      )}
+      
       <InspectionDetailModal
         record={selectedRecord}
         isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedRecord(null);
-        }}
-        onDownloadReport={handleDownloadReport}
+        onClose={() => setIsDetailModalOpen(false)}
       />
     </div>
   );
