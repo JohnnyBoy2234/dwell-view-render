@@ -27,7 +27,7 @@ export const TIME_FORMATS = {
 
 // Button labels
 export const BUTTON_LABELS = {
-  START_APPLICATION: 'Start Application',
+  START_APPLICATION: 'Request Application',
 } as const;
 
 // ARIA labels

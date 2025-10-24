@@ -47,15 +47,26 @@ export function ApplicationRequestCard({
 
     try {
       setIsSubmitting(true);
+      
+      // Check if there's already a pending request
+      const existingRequest = requests?.find(
+        req => req.property_id === propertyId && 
+               req.tenant_id === user.id && 
+               req.status === 'pending'
+      );
+
+      if (existingRequest) {
+        toast.info('You already have a pending application request for this property');
+        return;
+      }
+
+      // Only pass propertyId as createRequest now fetches landlord_id
       await createRequest(propertyId);
-      toast.success('Application request sent successfully!');
+      toast.success('Application requested successfully');
       onSuccess?.();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error requesting application:', error);
-      const errorMessage = error?.message?.includes('duplicate key value') 
-        ? 'You have already requested an application for this property.'
-        : 'Failed to send application request. Please try again.';
-      toast.error(errorMessage);
+      toast.error('Failed to request application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -109,16 +120,25 @@ export function ApplicationRequestCard({
       <CardFooter>
         <Button
           onClick={handleRequestApplication}
-          disabled={isSubmitting || loading}
+          disabled={isSubmitting || loading || !!approvedRequest}
           className="w-full"
+          variant={approvedRequest ? 'outline' : 'default'}
         >
-          {isSubmitting ? (
+          {isSubmitting || loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Sending Request...
+              Processing...
+            </>
+          ) : approvedRequest ? (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              Application Requested
             </>
           ) : (
-            'Request Application'
+            <>
+              <FileText className="mr-2 h-4 w-4" />
+              Request Application
+            </>
           )}
         </Button>
       </CardFooter>

@@ -15,6 +15,7 @@ import {
   getApplicationRequestStats,
   subscribeToApplicationRequests
 } from '@/services/applicationRequestService';
+import { toast } from 'sonner';
 
 export const useApplicationRequests = (initialFilters: ApplicationRequestFilters = {}) => {
   const { user } = useAuth();
@@ -97,11 +98,25 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
     };
   }, [user?.id, fetchRequests, fetchStats]);
 
-  const createRequest = async (propertyId: string) => {
+  const createRequest = useCallback(async (propertyId: string) => {
     if (!user?.id) throw new Error('User not authenticated');
 
     try {
-      // First, get the property to get the landlord_id
+      setLoading(true);
+      
+      // Check if there's already a pending request
+      const existingRequest = requests.find(
+        req => req.property_id === propertyId && 
+               req.tenant_id === user.id && 
+               req.status === 'pending'
+      );
+
+      if (existingRequest) {
+        toast.info('You already have a pending application request for this property');
+        return existingRequest;
+      }
+
+      // Get property details to get landlord_id
       const { data: property, error: propertyError } = await supabase
         .from('properties')
         .select('landlord_id')
@@ -109,52 +124,78 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
         .single();
 
       if (propertyError || !property) {
-        throw propertyError || new Error('Property not found');
+        throw new Error('Property not found');
       }
 
-      const newRequest = await createApplicationRequest({
+      // Create the request without the status field
+      const requestData = {
         property_id: propertyId,
         tenant_id: user.id,
-        landlord_id: property.landlord_id,
-      });
+        landlord_id: property.landlord_id
+      };
 
-      // Refresh the list
-      await fetchRequests();
-      await fetchStats();
+      const newRequest = await createApplicationRequest(requestData);
 
-      return newRequest;
-    } catch (err) {
-      console.error('Error creating application request:', err);
-      throw err;
-    }
-  };
-
-  const updateRequestStatus = async (requestId: string, status: ApplicationRequestStatus | 'approved' | 'rejected') => {
-    try {
-      // Map 'approved' to 'accepted' and 'rejected' to 'declined' for backward compatibility
-      const mappedStatus: ApplicationRequestStatus = 
-        status === 'approved' ? 'accepted' : 
-        status === 'rejected' ? 'declined' : 
-        status;
+      // Update local state with the new request
+      setRequests(prev => [{
+        ...newRequest,
+        status: 'pending' // Add status for local state
+      }, ...prev]);
       
-      const updatedRequest = await updateApplicationRequestStatus(requestId, mappedStatus);
+      // Update stats
+      if (user.id) {
+        const updatedStats = await getApplicationRequestStats(user.id);
+        setStats(prev => ({
+          ...prev,
+          pending: updatedStats.pending || 0,
+          total: updatedStats.total || 0
+        }));
+      }
+
+      toast.success('Application requested successfully');
+      return newRequest;
+    } catch (error) {
+      console.error('Error creating application request:', error);
+      toast.error('Failed to request application. Please try again.');
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, requests]);
+
+  const updateRequestStatus = useCallback(async (requestId: string, status: ApplicationRequestStatus) => {
+    if (!user?.id) throw new Error('User not authenticated');
+
+    try {
+      setLoading(true);
+      const updatedRequest = await updateApplicationRequestStatus(requestId, status, user.id);
       
       // Update local state
       setRequests(prev => 
         prev.map(req => 
-          req.id === requestId ? updatedRequest : req
+          req.id === requestId ? { ...req, status, updated_at: new Date().toISOString() } : req
         )
       );
       
-      // Refresh stats
-      await fetchStats();
-      
+      // Update stats
+      const updatedStats = await getApplicationRequestStats(user.id);
+      setStats({
+        total: updatedStats.total,
+        pending: updatedStats.pending,
+        approved: updatedStats.approved,
+        rejected: updatedStats.rejected
+      });
+
+      toast.success(`Application ${status} successfully`);
       return updatedRequest;
-    } catch (err) {
-      console.error('Error updating application request status:', err);
-      throw err;
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      toast.error(`Failed to ${status} application. Please try again.`);
+      throw error;
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [user?.id]);
 
   const refetch = () => {
     fetchRequests();
@@ -196,9 +237,9 @@ export const useApplicationRequests = (initialFilters: ApplicationRequestFilters
     stats,
     createRequest,
     updateRequestStatus,
-    refetch,
-    setPage,
-    setLimit,
-    updateFilters,
+    fetchRequests,
+    setFilters,
+    setPagination,
+    refetch: fetchRequests
   };
 };
