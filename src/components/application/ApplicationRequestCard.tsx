@@ -48,25 +48,35 @@ export function ApplicationRequestCard({
     try {
       setIsSubmitting(true);
       
-      // Check if there's already a pending request
+      // Check if there's already a pending, submitted, or accepted request
       const existingRequest = requests?.find(
         req => req.property_id === propertyId && 
                req.tenant_id === user.id && 
-               req.status === 'pending'
+               (req.status === 'pending' || req.status === 'submitted' || req.status === 'accepted')
       );
 
       if (existingRequest) {
-        toast.info('You already have a pending application request for this property');
+        if (existingRequest.status === 'pending') {
+          toast.info('You already have a pending application request for this property');
+        } else if (existingRequest.status === 'accepted') {
+          toast.info('Your application for this property has been accepted');
+        } else {
+          toast.info('Your application for this property has already been submitted');
+        }
         return;
       }
 
-      // Only pass propertyId as createRequest now fetches landlord_id
-      await createRequest(propertyId);
-      toast.success('Application requested successfully');
-      onSuccess?.();
-    } catch (error) {
+      // Create the application request
+      const newRequest = await createRequest(propertyId);
+      
+      if (newRequest) {
+        toast.success('Application requested successfully');
+        onSuccess?.();
+      }
+    } catch (error: any) {
       console.error('Error requesting application:', error);
-      toast.error('Failed to request application. Please try again.');
+      const errorMessage = error?.message || 'Failed to request application. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -121,24 +131,24 @@ export function ApplicationRequestCard({
         <Button
           onClick={handleRequestApplication}
           disabled={isSubmitting || loading || !!approvedRequest}
-          className="w-full"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
           variant={approvedRequest ? 'outline' : 'default'}
         >
           {isSubmitting || loading ? (
-            <>
+            <span className="flex items-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Processing...
-            </>
+            </span>
           ) : approvedRequest ? (
-            <>
+            <span className="flex items-center text-green-600">
               <Check className="mr-2 h-4 w-4" />
-              Application Requested
-            </>
+              {approvedRequest.status === 'accepted' ? 'Application Accepted' : 'Application Requested'}
+            </span>
           ) : (
-            <>
+            <span className="flex items-center">
               <FileText className="mr-2 h-4 w-4" />
               Request Application
-            </>
+            </span>
           )}
         </Button>
       </CardFooter>
