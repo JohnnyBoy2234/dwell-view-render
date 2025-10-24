@@ -4,23 +4,28 @@ import { ApplicationRequest, ApplicationRequestInsert, ApplicationRequestUpdate,
 export type ApplicationStatus = 'invited' | 'submitted' | 'pending_credit_check' | 'pending' | 'accepted' | 'declined';
 
 export const createApplicationRequest = async (request: Omit<ApplicationRequestInsert, 'status' | 'created_at' | 'updated_at'>, status: ApplicationStatus = 'pending') => {
-  const { data, error } = await supabase
-    .from('application_requests')
-    .insert([{ 
-      ...request, 
-      status,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }])
-    .select('*')
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('applications')  // Changed from 'application_requests' to 'applications'
+      .insert([{ 
+        ...request, 
+        status: 'pending', // Ensure we always use a valid status
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
+      .select('*')
+      .single();
 
-  if (error) {
-    console.error('Error creating application request:', error);
+    if (error) {
+      console.error('Error creating application:', error);
+      throw error;
+    }
+
+    return data as ApplicationRequest;
+  } catch (error) {
+    console.error('Error in createApplicationRequest:', error);
     throw error;
   }
-
-  return data as ApplicationRequest;
 };
 
 export const getApplicationRequest = async (id: string): Promise<ApplicationRequest> => {
