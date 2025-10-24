@@ -57,7 +57,8 @@ export function MessageBubble({
       <div
         className={cn(
           MESSAGE_STYLES.BUBBLE_BASE,
-          isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE
+          isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE,
+          "text-sm"
         )}
       >
         {!isOwn && message.profiles?.display_name && (

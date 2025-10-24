@@ -6,6 +6,7 @@ import { Check, FileText, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { ApplicationRequestStatus } from '@/types/application';
 
 interface ApplicationRequestCardProps {
   propertyId: string;
@@ -27,12 +28,15 @@ export function ApplicationRequestCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Check if there's an approved request for this property
+  // Check if there's an approved/accepted request for this property
   const approvedRequest = requests?.find(
-    req => 
-      req.property_id === propertyId && 
-      req.status === 'approved' &&
-      req.tenant_id === user?.id
+    req => {
+      const isStatusMatch = req.status === 'accepted' || 
+                          req.status === ('approved' as ApplicationRequestStatus);
+      return req.property_id === propertyId && 
+             isStatusMatch &&
+             req.tenant_id === user?.id;
+    }
   );
 
   const handleRequestApplication = async () => {
@@ -43,12 +47,26 @@ export function ApplicationRequestCard({
 
     try {
       setIsSubmitting(true);
+      
+      // Check if there's already a pending request
+      const existingRequest = requests?.find(
+        req => req.property_id === propertyId && 
+               req.tenant_id === user.id && 
+               req.status === 'pending'
+      );
+
+      if (existingRequest) {
+        toast.info('You already have a pending application request for this property');
+        return;
+      }
+
+      // Only pass propertyId as createRequest now fetches landlord_id
       await createRequest(propertyId);
-      toast.success('Application request sent successfully!');
+      toast.success('Application requested successfully');
       onSuccess?.();
     } catch (error) {
       console.error('Error requesting application:', error);
-      toast.error('Failed to send application request. Please try again.');
+      toast.error('Failed to request application. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -102,16 +120,25 @@ export function ApplicationRequestCard({
       <CardFooter>
         <Button
           onClick={handleRequestApplication}
-          disabled={isSubmitting || loading}
+          disabled={isSubmitting || loading || !!approvedRequest}
           className="w-full"
+          variant={approvedRequest ? 'outline' : 'default'}
         >
-          {isSubmitting ? (
+          {isSubmitting || loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Sending Request...
+              Processing...
+            </>
+          ) : approvedRequest ? (
+            <>
+              <Check className="mr-2 h-4 w-4" />
+              Application Requested
             </>
           ) : (
-            'Request Application'
+            <>
+              <FileText className="mr-2 h-4 w-4" />
+              Request Application
+            </>
           )}
         </Button>
       </CardFooter>

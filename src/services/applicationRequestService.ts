@@ -1,19 +1,37 @@
 import { supabase } from '@/integrations/supabase/client';
 import { ApplicationRequest, ApplicationRequestInsert, ApplicationRequestUpdate, ApplicationRequestFilters, ApplicationRequestResponse } from '@/types/application';
 
-export const createApplicationRequest = async (request: Omit<ApplicationRequestInsert, 'status' | 'created_at' | 'updated_at'>) => {
-  const { data, error } = await supabase
-    .from('application_requests')
-    .insert([{ ...request, status: 'pending' }])
-    .select('*')
-    .single();
+// Import the status type from the types file
+import { ApplicationRequestStatus } from '@/types/application';
 
-  if (error) {
-    console.error('Error creating application request:', error);
+// Re-export for backward compatibility
+export type ApplicationStatus = ApplicationRequestStatus;
+
+export const createApplicationRequest = async (
+  request: Omit<ApplicationRequestInsert, 'status' | 'created_at' | 'updated_at'>
+): Promise<ApplicationRequest> => {
+  try {
+    const { data, error } = await supabase
+      .from('application_requests')
+      .insert([{ 
+        ...request, 
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Error creating application request:', error);
+      throw error;
+    }
+
+    return data as ApplicationRequest;
+  } catch (error) {
+    console.error('Error in createApplicationRequest:', error);
     throw error;
   }
-
-  return data as ApplicationRequest;
 };
 
 export const getApplicationRequest = async (id: string): Promise<ApplicationRequest> => {
@@ -31,10 +49,18 @@ export const getApplicationRequest = async (id: string): Promise<ApplicationRequ
   return data as ApplicationRequest;
 };
 
-export const updateApplicationRequestStatus = async (id: string, status: 'approved' | 'rejected'): Promise<ApplicationRequest> => {
+export const updateApplicationRequestStatus = async (
+  id: string, 
+  status: ApplicationRequestStatus,
+  userId: string
+): Promise<ApplicationRequest> => {
   const { data, error } = await supabase
     .from('application_requests')
-    .update({ status })
+    .update({ 
+      status,
+      updated_at: new Date().toISOString(),
+      updated_by: userId
+    })
     .eq('id', id)
     .select('*')
     .single();
