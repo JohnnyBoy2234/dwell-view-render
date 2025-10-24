@@ -10,7 +10,7 @@ export const URL_PATTERNS = {
 
 // CSS classes
 export const MESSAGE_STYLES = {
-  BUBBLE_BASE: 'max-w-[85%] sm:max-[75%] rounded-2xl px-3 py-2 shadow-sm transition-all duration-200',
+  BUBBLE_BASE: 'max-w-[90%] sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] xl:max-w-[50%] rounded-2xl px-3 py-2 shadow-sm transition-all duration-200 break-words whitespace-pre-wrap overflow-hidden',
   OWN_MESSAGE: 'bg-ios-blue text-white rounded-br-sm',
   OTHER_MESSAGE: 'bg-card border border-border rounded-bl-sm',
   CONTENT_TEXT: 'text-sm leading-relaxed whitespace-pre-wrap break-words',

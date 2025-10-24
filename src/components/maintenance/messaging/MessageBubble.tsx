@@ -58,10 +58,6 @@ export function MessageBubble({
         className={cn(
           MESSAGE_STYLES.BUBBLE_BASE,
           isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE,
-          "max-w-[90%] sm:max-w-[80%] md:max-w-[70%] lg:max-w-[60%] xl:max-w-[50%]",
-          "break-words",
-          "whitespace-pre-wrap",
-          "overflow-hidden",
           "text-sm"
         )}
       >
