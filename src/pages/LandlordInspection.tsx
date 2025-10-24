@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Camera, FileText, Eye, Download, Home, Clipboard, Mic} from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspection';
+import { supabase } from '@/integrations/supabase/client';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
@@ -16,21 +17,33 @@ export default function LandlordInspection() {
   // All hooks called unconditionally at the top
   const { user } = useAuth();
   const { toast } = useToast();
-  const { 
-    inspectionRecords = [], 
-    loading: inspectionLoading, 
-    error: inspectionError,
-    downloadInspectionReport
-  } = useInspection();
+  const navigate = useNavigate();
   
+  // State management
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [selectedRecord, setSelectedRecord] = useState<InspectionRecordWithDetails | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  
+  // Get property data
   const { 
     properties = [], 
     loading: loadingProperties, 
     error: propertiesError 
   } = useProperties(user?.id);
+  
+  // Get inspection data
+  const { 
+    inspectionRecords = [], 
+    loading: inspectionLoading, 
+    error: inspectionError 
+  } = useInspection({ propertyId: selectedPropertyId || '' });
+  
+  // Set the selected property ID when properties are loaded
+  useEffect(() => {
+    if (properties.length > 0 && !selectedPropertyId) {
+      setSelectedPropertyId(properties[0].id);
+    }
+  }, [properties, selectedPropertyId]);
   
   // Derived state
   const isLoading = inspectionLoading || loadingProperties;
@@ -41,6 +54,39 @@ export default function LandlordInspection() {
     if (!selectedPropertyId) return inspectionRecords;
     return inspectionRecords.filter(record => record.property_id === selectedPropertyId);
   }, [inspectionRecords, selectedPropertyId]);
+  
+  // Download inspection report handler
+  const downloadInspectionReport = useCallback(async (inspectionId: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('inspection-reports')
+        .download(`report-${inspectionId}.pdf`);
+        
+      if (error) throw error;
+      
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `inspection-report-${inspectionId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+      
+      toast({
+        title: 'Success',
+        description: 'Report downloaded successfully',
+      });
+    } catch (err) {
+      console.error('Error downloading report:', err);
+      toast({
+        title: 'Error',
+        description: 'Failed to download report',
+        variant: 'destructive',
+      });
+    }
+  }, [toast]);
+  
   
   // Loading state
   if (isLoading) {
@@ -101,7 +147,7 @@ export default function LandlordInspection() {
 
   const getStatusBadge = (status: string, landlordApproved: boolean) => {
     if (status === 'completed' && landlordApproved) {
-      return <Badge className="bg-success-green text-white">Approved</Badge>;
+      return <Badge variant="default" className="bg-success-green text-white">Approved</Badge>;
     } else if (status === 'completed') {
       return <Badge variant="secondary">Awaiting Approval</Badge>;
     } else {
