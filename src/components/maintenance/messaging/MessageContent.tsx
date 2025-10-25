@@ -30,11 +30,11 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
     if (!content) return null;
     
     if (!textParts || textParts.length === 0) {
-      return content;
+      return <span>{content}</span>;
     }
 
     if (urls.length === 0) {
-      return textParts[0] || content;
+      return <span>{textParts[0] || content}</span>;
     }
 
     const elements: (string | JSX.Element)[] = [];
@@ -42,7 +42,7 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
     textParts.forEach((textPart, index) => {
       // Only push text part if it's not empty
       if (textPart) {
-        elements.push(textPart);
+        elements.push(<span key={`text-${index}`}>{textPart}</span>);
       }
       
       // Add URL if it exists at this index
@@ -66,7 +66,7 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
       }
     });
 
-    return elements.length > 0 ? elements : content;
+    return elements.length > 0 ? elements : <span>{content}</span>;
   };
 
   const contentToRender = renderContentWithLinks();
@@ -77,7 +77,7 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
     <div className="space-y-2 w-full">
       <div className="w-full break-words overflow-hidden">
         <div className="whitespace-pre-wrap">
-          {contentToRender}
+          {Array.isArray(contentToRender) ? contentToRender : <>{contentToRender}</>}
         </div>
       </div>
       
