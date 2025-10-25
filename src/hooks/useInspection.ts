@@ -28,6 +28,7 @@ export interface InspectionItem {
 export function useInspection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const [inspectionRecords, setInspectionRecords] = useState<InspectionRecord[]>([]);
   const { toast } = useToast();
 
   const createInspectionRecord = useCallback(async (inspectionData: Omit<InspectionRecord, 'id' | 'created_at' | 'updated_at'>) => {
@@ -235,14 +236,44 @@ export function useInspection() {
     }
   }, [toast]);
 
+  const fetchAllInspections = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const { data, error: supabaseError } = await supabase
+        .from('inspection_records')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (supabaseError) throw supabaseError;
+
+      setInspectionRecords(data || []);
+      return { data, error: null };
+    } catch (err: any) {
+      console.error('Error fetching all inspections:', err);
+      setError(err);
+      toast({
+        title: 'Error',
+        description: err.message || 'Failed to fetch inspections',
+        variant: 'destructive',
+      });
+      return { data: null, error: err };
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
   return {
     loading,
     error,
+    inspectionRecords,
     createInspectionRecord,
     createInspectionItem,
     getInspection,
     getPropertyInspections,
     updateInspectionStatus,
     uploadPhoto,
+    fetchAllInspections,
   };
 }

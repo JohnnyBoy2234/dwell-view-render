@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Eye, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useInspection, InspectionRecordWithDetails } from '@/hooks/useInspection';
+import { useInspection } from '@/hooks/useInspection';
+import { InspectionRecordWithDetails } from '@/types/inspection';
 import { supabase } from '@/integrations/supabase/client';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
@@ -77,9 +78,20 @@ export default function LandlordInspection() {
   
   // Data fetching
   const { properties = [], loading: loadingProperties } = useProperties(user?.id);
-  const { inspectionRecords = [], loading: inspectionLoading } = useInspection({ 
-    propertyId: selectedPropertyId || '' 
-  });
+  const { inspectionRecords: allInspectionRecords = [], loading: inspectionLoading, fetchAllInspections } = useInspection();
+  
+  // Fetch inspections on mount and when needed
+  useEffect(() => {
+    fetchAllInspections();
+  }, [fetchAllInspections]);
+  
+  // Filter inspection records by selected property
+  const inspectionRecords = useMemo(() => 
+    selectedPropertyId 
+      ? allInspectionRecords.filter(record => record.property_id === selectedPropertyId)
+      : allInspectionRecords,
+    [allInspectionRecords, selectedPropertyId]
+  );
   
   // Effects
   useEffect(() => {
@@ -279,17 +291,15 @@ export default function LandlordInspection() {
                 Save Inspection
               </button>
             </div>
-          </div>
-          )}
         </div>
-      )}
-      
-      <InspectionDetailModal
-        record={selectedRecord}
-        isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
-        onDownloadReport={handleDownloadReport}
-      />
+      </div>
+    )}
+    <InspectionDetailModal
+      record={selectedRecord}
+      isOpen={isDetailModalOpen}
+      onClose={() => setIsDetailModalOpen(false)}
+      onDownloadReport={handleDownloadReport}
+    />
     </div>
   );
 }
