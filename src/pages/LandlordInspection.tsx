@@ -12,6 +12,58 @@ import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 import { useProperties } from '@/hooks/useProperties';
 
+// Move the inspectionChecklist to the top level
+const inspectionChecklist = {
+  ext: [
+    { id: 'ext-1', label: 'Roof condition', checked: false },
+    { id: 'ext-2', label: 'Gutters and downspouts', checked: false },
+    { id: 'ext-3', label: 'Exterior walls', checked: false },
+    { id: 'ext-4', label: 'Windows and doors', checked: false },
+    { id: 'ext-5', label: 'Driveway and walkways', checked: false },
+    { id: 'ext-6', label: 'Landscaping', checked: false },
+  ],
+  living: [
+    { id: 'living-1', label: 'Walls and ceilings', checked: false },
+    { id: 'living-2', label: 'Flooring condition', checked: false },
+    { id: 'living-3', label: 'Windows and window coverings', checked: false },
+    { id: 'living-4', label: 'Doors and locks', checked: false },
+    { id: 'living-5', label: 'Light fixtures', checked: false },
+  ],
+  kitchen: [
+    { id: 'kitchen-1', label: 'Cabinets and countertops', checked: false },
+    { id: 'kitchen-2', label: 'Sink and faucet', checked: false },
+    { id: 'kitchen-3', label: 'Appliances', checked: false },
+    { id: 'kitchen-4', label: 'Ventilation', checked: false },
+  ],
+  beds: [
+    { id: 'bed-1', label: 'Walls and ceilings', checked: false },
+    { id: 'bed-2', label: 'Flooring', checked: false },
+    { id: 'bed-3', label: 'Closet doors and hardware', checked: false },
+    { id: 'bed-4', label: 'Windows and coverings', checked: false },
+  ],
+  elec: [
+    { id: 'elec-1', label: 'Outlets and switches', checked: false },
+    { id: 'elec-2', label: 'Circuit breaker panel', checked: false },
+    { id: 'elec-3', label: 'Light fixtures', checked: false },
+    { id: 'elec-4', label: 'Smoke detectors', checked: false },
+  ],
+  plum: [
+    { id: 'plum-1', label: 'Water pressure', checked: false },
+    { id: 'plum-2', label: 'Drains and pipes', checked: false },
+    { id: 'plum-3', label: 'Toilets', checked: false },
+    { id: 'plum-4', label: 'Water heater', checked: false },
+  ],
+};
+
+const tabs = [
+  { id: 'ext', label: 'Exterior', icon: '🏠' },
+  { id: 'living', label: 'Living Area', icon: '🛋️' },
+  { id: 'kitchen', label: 'Kitchen', icon: '🍳' },
+  { id: 'beds', label: 'Bedrooms', icon: '🛏️' },
+  { id: 'elec', label: 'Electrical', icon: '💡' },
+  { id: 'plum', label: 'Plumbing', icon: '🚿' },
+];
+
 export default function LandlordInspection() {
   // Hooks
   const { user } = useAuth();
@@ -38,6 +90,16 @@ export default function LandlordInspection() {
   
   // Derived state
   const isLoading = inspectionLoading || loadingProperties;
+  
+  // State for tabs and checklist
+  const [activeTab, setActiveTab] = useState('ext');
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [checklist, setChecklist] = useState(inspectionChecklist);
+  
+  // Memoized checklist for the active tab
+  const currentChecklist = useMemo(() => {
+    return checklist[activeTab as keyof typeof inspectionChecklist] || [];
+  }, [checklist, activeTab]);
   
   // Handlers
   const downloadInspectionReport = useCallback(async (inspectionId: string) => {
@@ -71,13 +133,9 @@ export default function LandlordInspection() {
     }
   }, [toast]);
 
-  // Group inspections by status
-  const [activeTab, setActiveTab] = useState('all');
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-
-  const currentChecklist = useMemo(() => {
-    return checklist[activeTab as keyof typeof checklist] || [];
-  }, [checklist, activeTab]);
+  const handleDownloadReport = useCallback((recordId: string) => {
+    downloadInspectionReport(recordId);
+  }, [downloadInspectionReport]);
 
   const toggleItemSelection = (inspectionId: string) => {
     const newSelection = new Set(selectedItems);
@@ -89,59 +147,6 @@ export default function LandlordInspection() {
     setSelectedItems(newSelection);
   };
 
-  const inspectionChecklist = {
-    ext: [
-      { id: 'ext-1', label: 'Roof condition', checked: false },
-      { id: 'ext-2', label: 'Gutters and downspouts', checked: false },
-      { id: 'ext-3', label: 'Exterior walls', checked: false },
-      { id: 'ext-4', label: 'Windows and doors', checked: false },
-      { id: 'ext-5', label: 'Driveway and walkways', checked: false },
-      { id: 'ext-6', label: 'Landscaping', checked: false },
-    ],
-    living: [
-      { id: 'living-1', label: 'Walls and ceilings', checked: false },
-      { id: 'living-2', label: 'Flooring condition', checked: false },
-      { id: 'living-3', label: 'Windows and window coverings', checked: false },
-      { id: 'living-4', label: 'Doors and locks', checked: false },
-      { id: 'living-5', label: 'Light fixtures', checked: false },
-    ],
-    kitchen: [
-      { id: 'kitchen-1', label: 'Cabinets and countertops', checked: false },
-      { id: 'kitchen-2', label: 'Sink and faucet', checked: false },
-      { id: 'kitchen-3', label: 'Appliances', checked: false },
-      { id: 'kitchen-4', label: 'Ventilation', checked: false },
-    ],
-    beds: [
-      { id: 'bed-1', label: 'Walls and ceilings', checked: false },
-      { id: 'bed-2', label: 'Flooring', checked: false },
-      { id: 'bed-3', label: 'Closet doors and hardware', checked: false },
-      { id: 'bed-4', label: 'Windows and coverings', checked: false },
-    ],
-    elec: [
-      { id: 'elec-1', label: 'Outlets and switches', checked: false },
-      { id: 'elec-2', label: 'Circuit breaker panel', checked: false },
-      { id: 'elec-3', label: 'Light fixtures', checked: false },
-      { id: 'elec-4', label: 'Smoke detectors', checked: false },
-    ],
-    plum: [
-      { id: 'plum-1', label: 'Water pressure', checked: false },
-      { id: 'plum-2', label: 'Drains and pipes', checked: false },
-      { id: 'plum-3', label: 'Toilets', checked: false },
-      { id: 'plum-4', label: 'Water heater', checked: false },
-    ],
-  };
-
-  const tabs = [
-    { id: 'ext', label: 'Exterior', icon: '🏠' },
-    { id: 'living', label: 'Living Area', icon: '🛋️' },
-    { id: 'kitchen', label: 'Kitchen', icon: '🍳' },
-    { id: 'beds', label: 'Bedrooms', icon: '🛏️' },
-    { id: 'elec', label: 'Electrical', icon: '💡' },
-    { id: 'plum', label: 'Plumbing', icon: '🚿' },
-  ];
-  
-  const [checklist, setChecklist] = useState(inspectionChecklist);
-  
   const toggleChecklistItem = (category: keyof typeof inspectionChecklist, itemId: string) => {
     setChecklist(prev => ({
       ...prev,
@@ -283,6 +288,7 @@ export default function LandlordInspection() {
         record={selectedRecord}
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
+        onDownloadReport={handleDownloadReport}
       />
     </div>
   );
