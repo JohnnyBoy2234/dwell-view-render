@@ -27,16 +27,26 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
 
   // Render content with inline links
   const renderContentWithLinks = () => {
+    if (!content) return null;
+    
+    if (!textParts || textParts.length === 0) {
+      return content;
+    }
+
     if (urls.length === 0) {
-      return textParts[0];
+      return textParts[0] || content;
     }
 
     const elements: (string | JSX.Element)[] = [];
     
     textParts.forEach((textPart, index) => {
-      elements.push(textPart);
+      // Only push text part if it's not empty
+      if (textPart) {
+        elements.push(textPart);
+      }
       
-      if (index < urls.length) {
+      // Add URL if it exists at this index
+      if (index < urls.length && urls[index]) {
         const url = urls[index];
         elements.push(
           <a
@@ -56,13 +66,19 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
       }
     });
 
-    return elements;
+    return elements.length > 0 ? elements : content;
   };
+
+  const contentToRender = renderContentWithLinks();
+  
+  if (!contentToRender) return null;
 
   return (
     <div className="space-y-2 w-full">
-      <div className="w-full">
-        {renderContentWithLinks()}
+      <div className="w-full break-words overflow-hidden">
+        <div className="whitespace-pre-wrap">
+          {contentToRender}
+        </div>
       </div>
       
       {inviteUrl && !isLandlord && (
