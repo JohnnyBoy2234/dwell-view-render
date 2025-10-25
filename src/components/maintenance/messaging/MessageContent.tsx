@@ -61,8 +61,10 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
 
   return (
     <div className="space-y-2 w-full">
-      <div className="w-full">
-        {renderContentWithLinks()}
+      <div className="w-full break-words overflow-hidden">
+        <div className="whitespace-pre-wrap">
+          {renderContentWithLinks()}
+        </div>
       </div>
       
       {inviteUrl && !isLandlord && (

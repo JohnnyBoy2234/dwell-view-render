@@ -58,7 +58,7 @@ export function MessageBubble({
         className={cn(
           MESSAGE_STYLES.BUBBLE_BASE,
           isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE,
-          "text-sm"
+          "text-sm max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] px-4 py-2"
         )}
       >
         {!isOwn && message.profiles?.display_name && (
