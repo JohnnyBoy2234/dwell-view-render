@@ -23,7 +23,18 @@ export interface MessageParsingOptions {
  */
 export function useMessageParsing({ content }: MessageParsingOptions): ParsedContent {
   return useMemo(() => {
-    const urlMatches = Array.from(content.matchAll(URL_PATTERNS.GENERAL));
+    // Handle empty or null content
+    if (!content) {
+      return {
+        textParts: [''],
+        urls: [],
+        inviteUrl: null,
+        hasUrls: false,
+      };
+    }
+
+    // Safely get URL matches
+    const urlMatches = content ? Array.from(content.matchAll(URL_PATTERNS.GENERAL)) : [];
     const urls: ParsedURL[] = urlMatches.map(match => ({
       href: match[0],
       startIndex: match.index!,
@@ -34,7 +45,7 @@ export function useMessageParsing({ content }: MessageParsingOptions): ParsedCon
     
     if (urls.length === 0) {
       return {
-        textParts: [content],
+        textParts: [content || ''],
         urls: [],
         inviteUrl,
         hasUrls: false,
