@@ -1,5 +1,3 @@
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { DashboardSidebar } from './DashboardSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { DASHBOARD_LAYOUT, DASHBOARD_ARIA_LABELS } from '@/constants/dashboardConstants';
 
@@ -11,26 +9,22 @@ interface DashboardLayoutProps {
 
 /**
  * Main dashboard layout component
- * Provides consistent layout structure with sidebar, header, and main content area
+ * Provides consistent layout structure with header and main content area
  */
 export function DashboardLayout({ children, title, actions }: DashboardLayoutProps) {
   return (
-    <SidebarProvider>
-      <div className={`flex min-h-screen w-full ${DASHBOARD_LAYOUT.BACKGROUND_GRADIENT}`}>
-        <DashboardSidebar />
+    <div className={`min-h-screen w-full ${DASHBOARD_LAYOUT.BACKGROUND_GRADIENT}`}>
+      <div className="flex flex-col">
+        <DashboardHeader title={title} actions={actions} showMobileSidebarToggle={false} />
         
-        <div className="flex-1 flex flex-col">
-          <DashboardHeader title={title} actions={actions} />
-          
-          <main 
-            className="flex-1 p-4 lg:p-6 overflow-x-hidden"
-            role="main"
-            aria-label={DASHBOARD_ARIA_LABELS.MAIN_CONTENT}
-          >
-            {children}
-          </main>
-        </div>
+        <main 
+          className="flex-1 p-4 lg:p-6 overflow-x-hidden"
+          role="main"
+          aria-label={DASHBOARD_ARIA_LABELS.MAIN_CONTENT}
+        >
+          {children}
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
