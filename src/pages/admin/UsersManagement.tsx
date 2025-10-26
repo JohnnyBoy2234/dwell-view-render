@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface User {
   id: string;
   email: string;
+  full_name?: string;
   created_at: string;
   last_sign_in_at?: string;
   is_banned?: boolean;
@@ -30,16 +31,26 @@ export function UsersManagement() {
     try {
       setLoading(true);
       
-      // Get all users from auth
-      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
-      
-      // Get user profiles
-      const { data: profiles, error: profileError } = await supabase
+      // First, get all profiles with user data
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, warning_count, is_banned, created_at, updated_at');
+        .select(`
+          user_id,
+          email,
+          full_name,
+          warning_count,
+          is_banned,
+          created_at,
+          updated_at,
+          user:auth.users!inner(
+            id,
+            email,
+            last_sign_in_at,
+            created_at
+          )
+        `);
       
-      if (profileError) throw profileError;
+      if (profilesError) throw profilesError;
 
       // Combine auth and profile data
       const usersWithProfiles = authUsers.map(user => {
@@ -58,9 +69,9 @@ export function UsersManagement() {
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
-        variant: "destructive",
-        title: "Error loading users",
-        description: "Failed to fetch user data."
+        title: 'Error',
+        description: 'Failed to load users. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
@@ -68,27 +79,11 @@ export function UsersManagement() {
   };
 
   const handleWarnUser = async (userId: string) => {
-    try {
-      // Call the increment_warning_count function
-      const { error } = await supabase.rpc('increment_warning_count', { user_id: userId });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "User warned",
-        description: "A warning has been issued to the user."
-      });
-      
-      // Refresh user list
-      await fetchUsers();
-    } catch (error) {
-      console.error('Error warning user:', error);
-      toast({
-        variant: "destructive",
-        title: "Error warning user",
-        description: "Failed to issue warning."
-      });
-    }
+    toast({
+      variant: "destructive",
+      title: "Feature not available",
+      description: "User warning feature is not yet configured."
+    });
   };
 
   const handleDeleteUser = async (userId: string) => {

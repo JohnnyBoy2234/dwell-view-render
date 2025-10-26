@@ -144,40 +144,6 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 ))}
               </SelectContent>
             </Select>
-            <div className="grid grid-cols-5 gap-2 w-full md:w-auto items-center">
-              <div className="col-span-2">
-                <Input
-                  type="date"
-                  value={format(dateRange.from, 'yyyy-MM-dd')}
-                  onChange={(e) => {
-                    const newFrom = parseISO(e.target.value);
-                    setDateRange(prev => ({
-                      from: newFrom,
-                      to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
-                    }));
-                  }}
-                  className="h-10 w-full text-sm"
-                />
-              </div>
-              <div className="text-center text-muted-foreground text-sm">
-                to
-              </div>
-              <div className="col-span-2">
-                <Input
-                  type="date"
-                  value={format(dateRange.to, 'yyyy-MM-dd')}
-                  onChange={(e) => {
-                    const newTo = parseISO(e.target.value);
-                    setDateRange(prev => ({
-                      from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
-                      to: newTo
-                    }));
-                  }}
-                  className="h-10 w-full text-sm"
-                  min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
-                />
-              </div>
-            </div>
           </div>
 
           {/* Navigation */}
@@ -247,6 +213,49 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         <Bell className="w-4 h-4 mr-2" />
         {sendingReminder ? 'Sending…' : 'Send Payment Reminder'}
       </Button>
+
+      {/* Overview Heading */}
+      <div className="text-center">
+        <h2 className="text-2xl font-normal text-black dark:text-white">Overview</h2>
+      </div>
+
+      {/* Date Range Filters */}
+      <div className="flex justify-center">
+        <div className="grid grid-cols-5 gap-2 w-full md:w-auto items-center">
+          <div className="col-span-2">
+            <Input
+              type="date"
+              value={format(dateRange.from, 'yyyy-MM-dd')}
+              onChange={(e) => {
+                const newFrom = parseISO(e.target.value);
+                setDateRange(prev => ({
+                  from: newFrom,
+                  to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
+                }));
+              }}
+              className="h-10 w-full text-sm"
+            />
+          </div>
+          <div className="text-center text-muted-foreground text-sm">
+            to
+          </div>
+          <div className="col-span-2">
+            <Input
+              type="date"
+              value={format(dateRange.to, 'yyyy-MM-dd')}
+              onChange={(e) => {
+                const newTo = parseISO(e.target.value);
+                setDateRange(prev => ({
+                  from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
+                  to: newTo
+                }));
+              }}
+              className="h-10 w-full text-sm"
+              min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
+            />
+          </div>
+        </div>
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
