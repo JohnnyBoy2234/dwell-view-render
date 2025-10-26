@@ -8,12 +8,17 @@ import { DASHBOARD_LABELS, DASHBOARD_ARIA_LABELS } from '@/constants/dashboardCo
 interface DashboardHeaderProps {
   title: string;
   actions?: React.ReactNode;
+  showMobileSidebarToggle?: boolean;
 }
 
 /**
  * Dashboard header component with navigation and actions
  */
-export function DashboardHeader({ title, actions }: DashboardHeaderProps) {
+export function DashboardHeader({ 
+  title, 
+  actions, 
+  showMobileSidebarToggle = true 
+}: DashboardHeaderProps) {
   const { signOut } = useAuth();
 
   return (
@@ -23,7 +28,7 @@ export function DashboardHeader({ title, actions }: DashboardHeaderProps) {
       aria-label={DASHBOARD_ARIA_LABELS.HEADER}
     >
       <div className="flex-1 flex items-center">
-        <SidebarTrigger className="lg:hidden" />
+        {showMobileSidebarToggle && <SidebarTrigger className="lg:hidden" />}
         <div className="hidden lg:block w-10"></div>
       </div>
       

@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 
 const landlordItems = [
   { title: 'Home', url: '/', icon: Home },
-  { title: 'Properties', url: '/dashboard', icon: Home },
   { title: 'Messages', url: '/messages', icon: MessageSquare },
   { title: 'Payments', url: '/payments', icon: BarChart3 },
   { title: 'Alerts', url: '/alerts', icon: Eye },
