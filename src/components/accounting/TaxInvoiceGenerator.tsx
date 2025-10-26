@@ -213,7 +213,7 @@ export function TaxInvoiceGenerator() {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/dashboard/management-tools');
+    navigate('/enhancedlandlorddashboard');
   };
 
   // Handle add income/expense from nav
@@ -225,24 +225,30 @@ export function TaxInvoiceGenerator() {
     navigate('/dashboard/accounting', { state: { showExpenseModal: true } });
   };
 
+  // Override the back button in the header to go to management tools
+  useEffect(() => {
+    const handleBackButton = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleBackButton);
+    return () => {
+      window.removeEventListener('keydown', handleBackButton);
+    };
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* Navigation */}
-      <AccountingNav 
-        onAddIncome={handleAddIncome}
-        onAddExpense={handleAddExpense}
-      />
-      
-      {/* Back button that navigates to management tools */}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={handleBack}
-        className="flex items-center gap-2 mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Management Tools
-      </Button>
+      <div className="mb-6">
+        <AccountingNav 
+          onAddIncome={handleAddIncome}
+          onAddExpense={handleAddExpense}
+          className="max-w-md mx-auto"
+        />
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Invoice Details */}

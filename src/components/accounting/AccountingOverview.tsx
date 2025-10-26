@@ -120,7 +120,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }
 
   return (
-    <div className="space-y-6 px-6">
+    <div className="space-y-6 px-6 pt-6">
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 items-stretch">
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>
