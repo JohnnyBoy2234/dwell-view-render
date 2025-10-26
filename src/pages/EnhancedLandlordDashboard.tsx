@@ -2074,8 +2074,7 @@ const renderReportsTab = () => (
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
+      <div className="min-h-screen bg-white pb-8">
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         {loadingMaintenance ? (
           <div className="space-y-4">
