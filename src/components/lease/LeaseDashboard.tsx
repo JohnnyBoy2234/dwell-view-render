@@ -64,7 +64,10 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Lease Management</h1>
+        <div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Lease Management</h1>
+          <p className="text-sm text-muted-foreground">Manage your property leases and agreements</p>
+        </div>
         {isLandlord && (
           <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -188,11 +191,11 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
 
   if (contracts.length === 0) {
     return (
-      <Card className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
-        <CardContent className="flex flex-col items-center justify-center py-16">
+      <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden">
+        <CardContent className="flex flex-col items-center justify-center py-12">
           <FileText className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No contracts found</h3>
-          <p className="text-muted-foreground text-center mb-6">
+          <p className="text-muted-foreground text-center mb-6 px-4">
             {isLandlord 
               ? "Get started by creating your first lease contract"
               : "You don't have any lease contracts yet"
@@ -206,7 +209,7 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
   return (
     <div className="grid gap-4">
       {contracts.map((contract) => (
-        <Card key={contract.id} className="transform transition-all duration-300 hover:scale-[1.01] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]">
+        <Card key={contract.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden">
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
               <div>
@@ -237,7 +240,7 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
                 <p><strong>Rent:</strong> {contract.contract_data?.rentCurrency || 'ZAR'} {contract.contract_data?.rentAmount?.toLocaleString() || 'Not specified'}</p>
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" onClick={() => onView(contract)}>
                   <Eye className="h-4 w-4 mr-2" />
                   View Details
