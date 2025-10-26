@@ -121,16 +121,31 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Accounting</h1>
+          <p className="text-muted-foreground">Track your property finances and generate reports</p>
+        </div>
+      </div>
+      
+      {/* Overview Section */}
+      <div className="text-center mb-6">
+        <h2 className="text-2xl font-bold text-foreground">Overview</h2>
+      </div>
+      
+      <div className="w-full">
+        <AccountingNav 
+          onAddIncome={() => setShowIncomeModal(true)}
+          onAddExpense={() => setShowExpenseModal(true)}
+          selectedDateRange={dateRange}
+          onDateRangeChange={setDateRange}
+        />
+      </div>
+      
       {/* Subtitle and Content Card */}
       <Card className={PROPERTY_CARD_STYLES.CARD}>
         <div className="p-6 space-y-4">
-          {/* Subtitle */}
-          <div className="text-center space-y-2 mb-8">
-            <h2 className="text-2xl font-normal text-black dark:text-white">Accounting</h2>
-            <p className="text-black/80 dark:text-white/80">Track your property finances and generate reports</p>
-          </div>
-          
           {/* Filters */}
           <div className="flex flex-col md:flex-row gap-4 items-stretch">
             <Select value={selectedProperty} onValueChange={setSelectedProperty}>
