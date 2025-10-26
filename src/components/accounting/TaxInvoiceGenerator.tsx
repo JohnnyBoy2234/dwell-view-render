@@ -213,7 +213,7 @@ export function TaxInvoiceGenerator() {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/dashboard/management-tools');
+    navigate('/enhancedlandlorddashboard');
   };
 
   // Handle add income/expense from nav
@@ -241,23 +241,6 @@ export function TaxInvoiceGenerator() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Header with back button */}
-      <div className="flex items-center justify-between mb-6">
-        <Button 
-          variant="ghost"
-          size="icon"
-          onClick={handleBack}
-          className="h-8 w-8 p-0 -ml-2"
-          aria-label="Back to Management Tools"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-center">Generate Tax Invoice</h1>
-        </div>
-        <div className="w-8"></div> {/* Spacer for alignment */}
-      </div>
-      
       {/* Navigation */}
       <div className="mb-6">
         <AccountingNav 
