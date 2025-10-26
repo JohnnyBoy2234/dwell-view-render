@@ -93,7 +93,8 @@ function AppRoutes() {
               <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
               <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
               <Route path="/admin/management" element={<RouteGuard><AdminManagement /></RouteGuard>} />
-              <Route path="/admin/users" element={<RouteGuard><AdminManagement /></RouteGuard>} />
+              <Route path="/admin/users" element={<RouteGuard><UsersManagement /></RouteGuard>} />
+              <Route path="/admin/admin-users" element={<RouteGuard><AdminManagement /></RouteGuard>} />
               <Route path="/admin/properties" element={<RouteGuard><AdminProperties /></RouteGuard>} />
               <Route path="/admin/documents" element={<RouteGuard><DocumentReview /></RouteGuard>} />
               <Route path="/admin/kyc" element={<KycManagement />} />
