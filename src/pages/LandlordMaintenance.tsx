@@ -10,6 +10,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Button } from '@/components/ui/button';
 import { Wrench, Building, Images } from 'lucide-react';
 import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
+import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 
 interface MaintenanceRequest {
   id: string;
@@ -122,7 +123,7 @@ export default function LandlordMaintenance() {
   };
 
   return (
-    <div className="space-y-6 bg-background">
+    <div className="space-y-6 bg-white">
       <div>
         <h1 className="text-3xl font-bold mb-2">Maintenance Requests</h1>
         <p className="text-muted-foreground">View and manage maintenance requests from your tenants</p>
@@ -146,15 +147,15 @@ export default function LandlordMaintenance() {
             </div>
           ) : (
             requests.map((req) => (
-              <Card key={req.id}>
+              <Card key={req.id} className={PROPERTY_CARD_STYLES.CARD}>
                 <CardContent className="p-4 space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-semibold">{req.title}</h4>
-                      <p className="text-sm text-muted-foreground mb-1">{req.description}</p>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <h4 className="font-semibold line-clamp-1">{req.title}</h4>
+                      <p className="text-sm text-muted-foreground mb-1 line-clamp-2">{req.description}</p>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Building className="h-3 w-3" />
-                        <span>{req.property_title}</span>
+                        <Building className="h-3 w-3 flex-shrink-0" />
+                        <span className="line-clamp-1">{req.property_title}</span>
                       </div>
                        <div className="text-xs text-muted-foreground mt-1">
                         {new Date(req.created_at).toLocaleDateString()}
@@ -163,7 +164,7 @@ export default function LandlordMaintenance() {
                     <Button
                       size="sm"
                       onClick={() => navigate(`/dashboard/maintenance/${req.id}`)}
-                      className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white"
+                      className="bg-blue-500 hover:bg-green-500 active:bg-green-600 text-white flex-shrink-0"
                     >
                       Respond
                     </Button>
