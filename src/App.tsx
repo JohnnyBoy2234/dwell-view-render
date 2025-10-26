@@ -27,6 +27,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
+import { UsersManagement } from "./pages/admin/UsersManagement";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
