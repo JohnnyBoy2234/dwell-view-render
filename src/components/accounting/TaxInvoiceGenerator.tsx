@@ -6,10 +6,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { Download, Plus, Trash2, Send } from 'lucide-react';
+import { Download, Plus, Trash2, Send, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { AccountingNav } from './AccountingNav';
 
 interface LineItem {
   id: string;
@@ -209,7 +210,23 @@ export function TaxInvoiceGenerator() {
   const totals = calculateTotals();
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto p-4 space-y-6">
+      {/* Navigation */}
+      <AccountingNav />
+      
+      <div className="flex items-center justify-between mb-6">
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={() => window.history.back()}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <h1 className="text-2xl font-bold">Tax Invoice Generator</h1>
+        <div className="w-24"></div> {/* Spacer for alignment */}
+      </div>
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

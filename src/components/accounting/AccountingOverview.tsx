@@ -13,21 +13,25 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { format, startOfMonth, subMonths } from 'date-fns';
+import { format, subDays, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
-import { AccountingNavigation } from '@/components/dashboard/AccountingNavigation';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
+import { AccountingNav } from './AccountingNav';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
 
-export function AccountingOverview() {
+interface AccountingOverviewProps {
+  defaultPropertyId?: string;
+}
+
+export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProps) {
   const navigate = useNavigate();
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
-  const [selectedProperty, setSelectedProperty] = useState('all');
+  const [selectedProperty, setSelectedProperty] = useState(defaultPropertyId || 'all');
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
@@ -35,7 +39,10 @@ export function AccountingOverview() {
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
-  const [rangeMonths, setRangeMonths] = useState('12');
+  const [dateRange, setDateRange] = useState({
+    from: subDays(new Date(), 30),
+    to: new Date()
+  });
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -68,8 +75,6 @@ export function AccountingOverview() {
     loadChartData();
   }, [transactions]);
 
-  const kpis = calculateKPIs(transactions);
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
       style: 'currency',
@@ -78,15 +83,18 @@ export function AccountingOverview() {
     }).format(amount);
   };
 
-  const getMonthOptions = () => {
-    const options = [];
-    for (let i = 0; i < 12; i++) {
-      const date = subMonths(new Date(), i);
-      const value = format(date, 'yyyy-MM');
-      const label = format(date, 'MMMM yyyy');
-      options.push({ value, label });
-    }
-    return options;
+  // Filter transactions based on selected date range
+  const filteredTransactions = transactions.filter(transaction => {
+    const transactionDate = new Date(transaction.date);
+    return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
+  });
+
+  // Calculate KPIs based on filtered transactions
+  const kpis = calculateKPIs(filteredTransactions);
+
+  // Generate date range label
+  const getDateRangeLabel = () => {
+    return `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`;
   };
 
   if (loading) {
@@ -131,73 +139,62 @@ export function AccountingOverview() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={rangeMonths} onValueChange={setRangeMonths}>
-          <SelectTrigger className="w-full md:w-[240px] h-10">
-            <SelectValue placeholder="Last 12 Months" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="12">Last 12 Months</SelectItem>
-            <SelectItem value="6">Last 6 Months</SelectItem>
-            <SelectItem value="3">Last 3 Months</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Input
+            type="date"
+            value={format(dateRange.from, 'yyyy-MM-dd')}
+            onChange={(e) => {
+              const newFrom = parseISO(e.target.value);
+              setDateRange(prev => ({
+                from: newFrom,
+                to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
+              }));
+            }}
+            className="h-10 w-full md:w-auto"
+          />
+          <span className="text-muted-foreground">to</span>
+          <Input
+            type="date"
+            value={format(dateRange.to, 'yyyy-MM-dd')}
+            onChange={(e) => {
+              const newTo = parseISO(e.target.value);
+              setDateRange(prev => ({
+                from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
+                to: newTo
+              }));
+            }}
+            className="h-10 w-full md:w-auto"
+            min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
+          />
+        </div>
       </div>
 
-      {/* Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/dashboard/accounting')}
-          className="w-full h-11 text-sm font-medium"
-        >
-          Overview
-        </Button>
-        <Button 
-          onClick={() => { 
-            setTxnType('income');
-            setTxnAmount(0);
-            setTxnDate('');
-            setTxnPropertyId(selectedProperty);
-            setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-            setTxnVatPercent(0);
-            setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-            setTxnNote('');
-            setShowIncomeModal(true);
-          }}
-          className="w-full h-11 text-sm font-medium"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Income
-        </Button>
-        <Button 
-          onClick={() => { 
-            setTxnType('expense');
-            setTxnAmount(0);
-            setTxnDate('');
-            setTxnPropertyId(selectedProperty);
-            const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-            setTxnCategory(defaultCat);
-            setTxnVatPercent(getDefaultVATPercent(defaultCat));
-            setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-            setTxnNote('');
-            setShowExpenseModal(true);
-          }}
-          className="w-full h-11 text-sm font-medium"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Expense
-        </Button>
-        <Button 
-          variant="outline" 
-          asChild
-          className="w-full h-11 text-sm font-medium"
-        >
-          <Link to="/dashboard/invoices/tax">
-            <Receipt className="w-4 h-4 mr-2" />
-            Tax Invoice
-          </Link>
-        </Button>
-      </div>
+      {/* Navigation */}
+      <AccountingNav
+        onAddIncome={() => {
+          setTxnType('income');
+          setTxnAmount(0);
+          setTxnDate('');
+          setTxnPropertyId(selectedProperty);
+          setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+          setTxnVatPercent(0);
+          setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+          setTxnNote('');
+          setShowIncomeModal(true);
+        }}
+        onAddExpense={() => {
+          setTxnType('expense');
+          setTxnAmount(0);
+          setTxnDate('');
+          setTxnPropertyId(selectedProperty);
+          const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+          setTxnCategory(defaultCat);
+          setTxnVatPercent(getDefaultVATPercent(defaultCat));
+          setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+          setTxnNote('');
+          setShowExpenseModal(true);
+        }}
+      />
 
       {/* Payment Reminder - Separate row for better mobile UX */}
       <Button
@@ -239,31 +236,51 @@ export function AccountingOverview() {
       </Button>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Total Income</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpis.rentCollected)}</div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Total Expenses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpis.expenses)}</div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base font-semibold">Profit</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(kpis.netIncome)}</div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-4 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Total Income</h3>
+              <TrendingUp className="h-4 w-4 text-green-500" />
+            </div>
+            <div className="text-2xl font-semibold">{formatCurrency(kpis.rentCollected)}</div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Last 30 days
+            </div>
+          </div>
+        </div>
+        
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-4 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Total Expenses</h3>
+              <TrendingDown className="h-4 w-4 text-red-500" />
+            </div>
+            <div className="text-2xl font-semibold">{formatCurrency(kpis.expenses)}</div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              Last 30 days
+            </div>
+          </div>
+        </div>
+        
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-4 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground">Net Profit</h3>
+              {kpis.netIncome >= 0 ? (
+                <TrendingUp className="h-4 w-4 text-green-500" />
+              ) : (
+                <TrendingDown className="h-4 w-4 text-red-500" />
+              )}
+            </div>
+            <div className={`text-2xl font-semibold ${kpis.netIncome >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+              {formatCurrency(kpis.netIncome)}
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              {kpis.netIncome >= 0 ? 'Profit' : 'Loss'} this period
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Charts Section follows */}
@@ -271,51 +288,103 @@ export function AccountingOverview() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expense Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Income vs Expense (Last 6 Months)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                <Bar dataKey="income" fill="#22c55e" name="Income" />
-                <Bar dataKey="expense" fill="#ef4444" name="Expense" />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-4 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold">Income vs Expense</h3>
+              <span className="text-xs text-muted-foreground">{getDateRangeLabel()}</span>
+            </div>
+            <div className="flex-1">
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlyData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis 
+                      dataKey="month" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fontSize: 12 }}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tickFormatter={(value) => `R${value}`}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(Number(value))}
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--popover))',
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: 'var(--radius)',
+                        padding: '0.5rem',
+                        fontSize: '0.875rem'
+                      }}
+                    />
+                    <Bar dataKey="income" fill="#22c55e" name="Income" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="expense" fill="#ef4444" name="Expense" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Expense by Category Chart */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Expense by Category</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={categoryData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="amount"
-                >
-                  {categoryData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-              </PieChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-4 flex flex-col h-full">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold">Expense by Category</h3>
+              <span className="text-xs text-muted-foreground">{getDateRangeLabel()}</span>
+            </div>
+            <div className="flex-1">
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="value"
+                      nameKey="name"
+                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={COLORS[index % COLORS.length]} 
+                          stroke="hsl(var(--background))"
+                          strokeWidth={2}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(Number(value))}
+                      contentStyle={{
+                        backgroundColor: 'hsl(var(--popover))',
+                        borderColor: 'hsl(var(--border))',
+                        borderRadius: 'var(--radius)',
+                        padding: '0.5rem',
+                        fontSize: '0.875rem'
+                      }}
+                    />
+                    <Legend 
+                      layout="vertical"
+                      align="right"
+                      verticalAlign="middle"
+                      wrapperStyle={{
+                        paddingLeft: '1rem',
+                        fontSize: '0.75rem',
+                        color: 'hsl(var(--muted-foreground))'
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Add Income Modal */}
@@ -461,31 +530,6 @@ export function AccountingOverview() {
         </CardContent>
       </Card>
 
-      {/* Action Buttons */}
-      <div className="flex flex-wrap gap-4">
-        <Button asChild>
-          <Link to="/dashboard/accounting/new">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Transaction
-          </Link>
-        </Button>
-        
-        <Button variant="outline" asChild>
-          <Link to="/dashboard/accounting/transactions">
-            <FileText className="w-4 h-4 mr-2" />
-            View All Transactions
-          </Link>
-        </Button>
-        
-        {/* SARS Summary removed per request */}
-        
-        <Button variant="outline" asChild>
-          <Link to="/dashboard/invoices/tax">
-            <FileText className="w-4 h-4 mr-2" />
-            Generate Tax Invoice
-          </Link>
-        </Button>
-      </div>
     </div>
   );
 }
