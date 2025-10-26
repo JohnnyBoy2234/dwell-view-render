@@ -129,11 +129,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         </div>
       </div>
       
-      {/* Overview Section */}
-      <div className="text-center mb-6">
-        <h2 className="text-2xl font-bold text-foreground">Overview</h2>
-      </div>
-      
+      {/* Accounting Navigation with Date Range */}
       <div className="w-full">
         <AccountingNav 
           onAddIncome={() => setShowIncomeModal(true)}
@@ -141,6 +137,11 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           selectedDateRange={dateRange}
           onDateRangeChange={setDateRange}
         />
+      </div>
+      
+      {/* Overview Section */}
+      <div className="text-center py-2">
+        <h2 className="text-lg font-medium text-muted-foreground">Overview</h2>
       </div>
       
       {/* Subtitle and Content Card */}
