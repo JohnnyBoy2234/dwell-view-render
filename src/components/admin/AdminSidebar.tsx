@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { FileText, Users, Shield, LogOut, Home, UserCheck, Building, Flag } from 'lucide-react';
+import { FileText, Users, Shield, LogOut, Home, UserCheck, Building, Flag, LayoutDashboard } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -16,11 +16,13 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
 const adminItems = [
+  { title: 'Dashboard', url: '/admin/dashboard', icon: LayoutDashboard },
+  { title: 'User Management', url: '/admin/users', icon: Users },
+  { title: 'Admin Users', url: '/admin/admin-users', icon: Shield },
+  { title: 'Property Management', url: '/admin/properties', icon: Building },
   { title: 'Document Review', url: '/admin/documents', icon: FileText },
   { title: 'KYC Management', url: '/admin/kyc', icon: UserCheck },
-  { title: 'Property Management', url: '/admin/properties', icon: Building },
-  { title: 'Property Reports', url: '/admin/reports', icon: Flag },
-  { title: 'Admin Management', url: '/admin/users', icon: Users },
+  { title: 'Reports', url: '/admin/reports', icon: Flag },
 ];
 
 export function AdminSidebar() {
