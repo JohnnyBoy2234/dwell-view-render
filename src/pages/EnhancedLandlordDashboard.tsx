@@ -26,6 +26,7 @@ import { AccountingOverview } from '@/components/accounting/AccountingOverview';
 import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';
+import { ApplicationRequestsManager } from '@/components/landlord/ApplicationRequestsManager';
 
 interface PropertyWithTenant {
   id: string;
@@ -955,6 +956,9 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-white pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+          {/* Application Requests Section */}
+          <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
+          
           {/* Loading State */}
           {applicationsLoading ? (
           <div className="space-y-4">
@@ -2058,21 +2062,14 @@ const renderReportsTab = () => (
 
 
       const renderMaintenanceTab = () => {
-        // Calculate stats
-        const urgentCount = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed').length;
-        const submittedCount = maintenanceRequests.filter(r => r.status === 'submitted').length;
-        const inProgressCount = maintenanceRequests.filter(r => r.status === 'in_progress').length;
-        const completedCount = maintenanceRequests.filter(r => r.status === 'completed').length;
-
     // Organize by status
     const urgentRequests = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed');
     const submittedRequests = maintenanceRequests.filter(r => r.status === 'submitted' && r.priority !== 'urgent');
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
     return (
-      <div className="relative min-h-screen overflow-hidden bg-gradient-to-r from-sky-300 via-sky-400 to-sky-600 pb-8">
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-white to-transparent"></div>
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="min-h-screen bg-white pb-8">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8">
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -2095,33 +2092,7 @@ const renderReportsTab = () => (
           </Card>
         ) : (
           <>
-            {/* Stats Summary Bar */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Card className="border-l-4 border-l-red-500">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-red-600">{urgentCount}</div>
-                  <div className="text-sm text-muted-foreground">Urgent</div>
-                </CardContent>
-              </Card>
-              <Card className="border-l-4 border-l-yellow-500">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-yellow-600">{submittedCount}</div>
-                  <div className="text-sm text-muted-foreground">New</div>
-                </CardContent>
-            </Card>
-            <Card className="border-l-4 border-l-blue-500 shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-blue-600">{inProgressCount}</div>
-                  <div className="text-sm text-muted-foreground">In Progress</div>
-                </CardContent>
-              </Card>
-              <Card className="border-l-4 border-l-green-500">
-                <CardContent className="p-4">
-                  <div className="text-2xl font-bold text-green-600">{completedCount}</div>
-                  <div className="text-sm text-muted-foreground">Completed</div>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Section headers only, no stats cards */}
 
             {/* Urgent Requests Section */}
             {urgentRequests.length > 0 && (
@@ -2132,8 +2103,8 @@ const renderReportsTab = () => (
                   <Badge variant="destructive">{urgentRequests.length}</Badge>
                 </div>
                 {urgentRequests.map((request) => (
-                  <Card key={request.id} className="border-l-4 border-l-red-500 hover:shadow-lg transition-shadow">
-                    <CardContent className="p-4 md:p-6">
+                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-red-500`}>
+                    <CardContent className="p-4">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex gap-3 flex-1 min-w-0">
                           <div className="h-12 w-12 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
@@ -2179,8 +2150,8 @@ const renderReportsTab = () => (
                   <Badge variant="secondary">{submittedRequests.length}</Badge>
                 </div>
                 {submittedRequests.map((request) => (
-                  <Card key={request.id} className="border-l-4 border-l-yellow-500 hover:shadow-lg transition-shadow">
-                    <CardContent className="p-4 md:p-6">
+                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-yellow-500`}>
+                    <CardContent className="p-4">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex gap-3 flex-1 min-w-0">
                           <div className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${
@@ -2227,8 +2198,8 @@ const renderReportsTab = () => (
                   <Badge variant="secondary">{inProgressRequests.length}</Badge>
                 </div>
                 {inProgressRequests.map((request) => (
-                  <Card key={request.id} className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
-                    <CardContent className="p-4 md:p-6">
+                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-blue-500`}>
+                    <CardContent className="p-4">
                       <div className="flex flex-col md:flex-row md:items-start gap-4">
                         <div className="flex gap-3 flex-1 min-w-0">
                           <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">

@@ -56,6 +56,25 @@ export const createApplicationNotifications = {
 
   async statusUpdate(applicantId: string, status: string, propertyAddress: string, applicationId: string) {
     await NotificationService.notifyApplicationStatusUpdate(applicantId, status, propertyAddress, applicationId);
+  },
+
+  async requestApproved(tenantId: string, propertyTitle: string, requestId: string) {
+    await NotificationService.createSystemNotification(
+      tenantId,
+      'Application Request Approved',
+      `Your request to apply for ${propertyTitle} has been approved. You can now start your application.`,
+      'high',
+      `/enhancedtenantdashboard`
+    );
+  },
+
+  async requestDeclined(tenantId: string, propertyTitle: string, requestId: string) {
+    await NotificationService.createSystemNotification(
+      tenantId,
+      'Application Request Declined',
+      `Your request to apply for ${propertyTitle} was declined by the landlord.`,
+      'normal'
+    );
   }
 };
 

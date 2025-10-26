@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { useMaintenanceTickets } from '@/hooks/useMaintenanceTickets';
-import { useMaintenanceStats } from '@/hooks/useMaintenanceStats';
 import { useMaintenanceFilters } from '@/hooks/useMaintenanceFilters';
 import { MaintenanceTicketCard } from './MaintenanceTicketCard';
 import { CreateMaintenanceTicket } from './CreateMaintenanceTicket';
 import { BoardHeader } from './BoardHeader';
-import { BoardStats } from './BoardStats';
 import { OverdueAlert } from './OverdueAlert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -28,7 +26,6 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
   const [showCreateForm, setShowCreateForm] = useState(false);
   
   // Custom hooks for business logic
-  const stats = useMaintenanceStats({ tickets });
   const {
     selectedPriority,
     filteredTickets,
@@ -79,8 +76,6 @@ export function MaintenanceBoard({ propertyId, showCreateButton = true }: Mainte
         onCreateClick={() => setShowCreateForm(true)}
         showCreateButton={showCreateButton}
       />
-
-      <BoardStats stats={stats} />
 
       <OverdueAlert overdueTickets={overdueTickets} />
 
