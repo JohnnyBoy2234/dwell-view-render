@@ -970,31 +970,6 @@ export default function EnhancedLandlordDashboard() {
             {/* Leads Section */}
             {filteredLeads.length > 0 && (
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">New Leads</h3>
-                  <Badge variant="secondary">{filteredLeads.length}</Badge>
-                </div>
-                
-                {/* Search and Filter */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <input
-                    value={leadQuery}
-                    onChange={(e) => setLeadQuery(e.target.value)}
-                    placeholder="Search tenant or property..."
-                    className="flex-1 border rounded-md px-3 py-2 text-sm"
-                  />
-                  <label className="flex items-center gap-2 text-sm px-3 py-2 border rounded-md bg-background cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={hideInvited} 
-                      onChange={(e) => setHideInvited(e.target.checked)}
-                      className="cursor-pointer"
-                    />
-                    Hide invited
-                  </label>
-                </div>
-
                 <div className="space-y-3">
                   {filteredLeads.map((lead) => {
                     const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
