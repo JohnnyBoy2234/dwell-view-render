@@ -122,7 +122,7 @@ export default function LandlordMaintenance() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 bg-background">
       <div>
         <h1 className="text-3xl font-bold mb-2">Maintenance Requests</h1>
         <p className="text-muted-foreground">View and manage maintenance requests from your tenants</p>
