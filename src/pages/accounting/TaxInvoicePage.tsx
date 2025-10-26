@@ -7,6 +7,8 @@ export default function TaxInvoicePage() {
     <EnhancedDashboardLayout 
       title="SwiftBooks" 
       currentTab="/enhancedlandlorddashboard/tax-invoice"
+      showBackButton={true}
+      backPath="/enhancedlandlorddashboard/accounting"
     >
       <TaxInvoiceGenerator />
     </EnhancedDashboardLayout>
