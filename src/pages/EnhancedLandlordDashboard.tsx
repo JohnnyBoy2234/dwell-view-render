@@ -3,8 +3,8 @@ import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
+import { BackButton } from '@/components/common/BackButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
-import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -1343,28 +1343,14 @@ export default function EnhancedLandlordDashboard() {
     </div>
   );
 
-  const renderReportsTab = () => (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => {
-            setCurrentTab('/enhancedlandlorddashboard');
-            const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
-            navigate(`/enhancedlandlorddashboard${params}`);
-          }}
-          className="flex items-center gap-2 mt-4"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="hidden sm:inline">Back to Dashboard</span>
-          <span className="sm:hidden">Back</span>
-        </Button>
-        
-        {/* Enhanced Header */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-lg p-6 shadow-md border border-gray-100">
-          <div className="flex items-center gap-3">
+const renderReportsTab = () => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 pb-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      {/* Back Button */}
+      <BackButton 
+        defaultPath="/enhancedlandlorddashboard"
+        className="mt-4"
+      />
             <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
