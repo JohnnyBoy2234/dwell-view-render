@@ -10,6 +10,7 @@ import { Download, Plus, Trash2, Send, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { AccountingNav } from './AccountingNav';
 
 interface LineItem {
@@ -209,40 +210,39 @@ export function TaxInvoiceGenerator() {
 
   const totals = calculateTotals();
 
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    navigate('/dashboard/management-tools');
+  };
+
+  // Handle add income/expense from nav
+  const handleAddIncome = () => {
+    navigate('/dashboard/accounting', { state: { showIncomeModal: true } });
+  };
+
+  const handleAddExpense = () => {
+    navigate('/dashboard/accounting', { state: { showExpenseModal: true } });
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
       {/* Navigation */}
-      <AccountingNav />
+      <AccountingNav 
+        onAddIncome={handleAddIncome}
+        onAddExpense={handleAddExpense}
+      />
       
-      <div className="flex items-center justify-between mb-6">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
-        <h1 className="text-2xl font-bold">Tax Invoice Generator</h1>
-        <div className="w-24"></div> {/* Spacer for alignment */}
-      </div>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold">Generate Tax Invoice</h2>
-          <div className="flex items-center mt-2">
-            <img 
-              src="/favicon-32x32.png" 
-              alt="SwiftRent Logo" 
-              className="h-6 w-6 mr-2" 
-            />
-            <span className="text-sm text-muted-foreground">
-              SwiftRent.co.za – Safe, Simple, Commission-Free Renting
-            </span>
-          </div>
-        </div>
-      </div>
+      {/* Back button that navigates to management tools */}
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={handleBack}
+        className="flex items-center gap-2 mb-6"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Management Tools
+      </Button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Invoice Details */}

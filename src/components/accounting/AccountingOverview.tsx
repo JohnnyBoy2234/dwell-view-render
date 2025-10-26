@@ -121,11 +121,6 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
   return (
     <div className="space-y-6 px-6">
-      {/* Header */}
-      <div>
-        <h2 className="text-[30px] font-bold">Accounting</h2>
-      </div>
-
       {/* Filters */}
       <div className="flex flex-col md:flex-row gap-4 items-stretch">
         <Select value={selectedProperty} onValueChange={setSelectedProperty}>

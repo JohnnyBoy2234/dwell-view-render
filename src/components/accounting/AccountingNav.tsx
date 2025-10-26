@@ -22,7 +22,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
             className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Link to="/dashboard/accounting">
-              Overview
+              Accounting
             </Link>
           </Button>
         </li>
