@@ -932,7 +932,19 @@ export default function EnhancedLandlordDashboard() {
   );
 
   const renderApplicationsTab = () => {
-    // No need to calculate leads count or filter leads anymore
+    // Calculate stats
+    const leadsCount = appLeads.filter(l => !appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status).length;
+
+    // Filter leads (not yet invited)
+    const filteredLeads = appLeads
+      .filter(l => {
+        const invited = appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status === 'invited';
+        if (hideInvited && invited) return false;
+        if (!leadQuery.trim()) return true;
+        const q = leadQuery.toLowerCase();
+        return l.tenant_name.toLowerCase().includes(q) || l.title.toLowerCase().includes(q);
+      })
+      .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
     return (
       <div className="min-h-screen bg-white pb-8">
@@ -955,9 +967,101 @@ export default function EnhancedLandlordDashboard() {
         ) : (
           <>
     
+            {/* Leads Section */}
+            {filteredLeads.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5 text-blue-600" />
+                  <h3 className="text-lg font-semibold">New Leads</h3>
+                  <Badge variant="secondary">{filteredLeads.length}</Badge>
+                </div>
+                
+                {/* Search and Filter */}
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    value={leadQuery}
+                    onChange={(e) => setLeadQuery(e.target.value)}
+                    placeholder="Search tenant or property..."
+                    className="flex-1 border rounded-md px-3 py-2 text-sm"
+                  />
+                  <label className="flex items-center gap-2 text-sm px-3 py-2 border rounded-md bg-background cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={hideInvited} 
+                      onChange={(e) => setHideInvited(e.target.checked)}
+                      className="cursor-pointer"
+                    />
+                    Hide invited
+                  </label>
+                </div>
+
+                <div className="space-y-3">
+                  {filteredLeads.map((lead) => {
+                    const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
+                    return (
+                      <Card key={lead.conversation_id} className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
+                        <CardContent className="p-4 md:p-6">
+                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                            <div className="flex gap-4 flex-1 min-w-0">
+                              {/* Avatar */}
+                              <div className="flex-shrink-0">
+                                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 font-semibold text-lg">
+                                  {lead.tenant_name.charAt(0).toUpperCase()}
+                                </div>
+                              </div>
+                              
+                              {/* Info */}
+                              <div className="flex-1 min-w-0 space-y-2">
+                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                  <h4 className="font-semibold text-lg truncate">{lead.tenant_name}</h4>
+                                  {invited && <Badge variant="secondary">Invited</Badge>}
+                                </div>
+                                
+                                <div className="space-y-1 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-2">
+                                    <Building className="h-4 w-4" />
+                                    <span className="truncate">{lead.title}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <MessageCircle className="h-4 w-4" />
+                                    <span>Last chat {lead.last_message_at ? new Date(lead.last_message_at).toLocaleString() : 'N/A'}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Actions */}
+                            <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}
+                                className="w-full sm:w-auto"
+                              >
+                                <MessageCircle className="h-4 w-4 mr-2" />
+                                View Chat
+                              </Button>
+                              {!invited && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}
+                                  className="w-full sm:w-auto"
+                                >
+                                  Send Application
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* Empty State */}
-            {applications.length === 0 && (
+            {applications.length === 0 && filteredLeads.length === 0 && (
               <Card className="border-dashed">
                 <CardContent className="p-12 text-center">
                   <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
