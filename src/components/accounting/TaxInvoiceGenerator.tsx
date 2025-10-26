@@ -241,25 +241,30 @@ export function TaxInvoiceGenerator() {
 
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Navigation with back button in header */}
+      {/* Header with back button */}
       <div className="flex items-center justify-between mb-6">
         <Button 
           variant="ghost"
-          size="sm" 
+          size="icon"
           onClick={handleBack}
-          className="flex items-center gap-2 -ml-2"
+          className="h-8 w-8 p-0 -ml-2"
+          aria-label="Back to Management Tools"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Management
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex-1">
-          <AccountingNav 
-            onAddIncome={handleAddIncome}
-            onAddExpense={handleAddExpense}
-            className="max-w-md mx-auto"
-          />
+          <h1 className="text-xl font-semibold text-center">Generate Tax Invoice</h1>
         </div>
-        <div className="w-10"></div> {/* Spacer for alignment */}
+        <div className="w-8"></div> {/* Spacer for alignment */}
+      </div>
+      
+      {/* Navigation */}
+      <div className="mb-6">
+        <AccountingNav 
+          onAddIncome={handleAddIncome}
+          onAddExpense={handleAddExpense}
+          className="max-w-md mx-auto"
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
