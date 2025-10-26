@@ -43,6 +43,7 @@ import Notifications from "./pages/Notifications";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import LandlordInspection from "@/pages/LandlordInspection";
+import UsersManagement from "@/pages/admin/UsersManagement";
 import Applications from "./pages/Applications";
 import DocuSignCallback from "./pages/DocuSignCallback";
 import DocuSignRedirect from "./pages/DocuSignRedirect";
