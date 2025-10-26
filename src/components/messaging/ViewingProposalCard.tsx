@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -163,6 +163,84 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
   const canTakeAction = user && !effectiveIsLandlord && user.id === proposal.tenant_id && proposal.status === 'proposed';
   const canStartApplication = user && !effectiveIsLandlord && user.id === proposal.tenant_id && proposal.status === 'confirmed';
 
+  const [applicationRequest, setApplicationRequest] = useState<{ id: string; status: string } | null>(null);
+
+  // Check for existing application request
+  useEffect(() => {
+    if (user && proposal.status === 'confirmed') {
+      checkApplicationRequest();
+    }
+  }, [user, proposal.status]);
+
+  const checkApplicationRequest = async () => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('application_requests')
+        .select('id, status')
+        .eq('property_id', proposal.property_id)
+        .eq('tenant_id', user.id)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+
+      setApplicationRequest(data);
+    } catch (error: any) {
+      console.error('Error checking application request:', error);
+    }
+  };
+
+  const handleRequestApplication = async () => {
+    if (!user) return;
+    setLoading(true);
+    
+    try {
+      // Create application request
+      const { error } = await supabase
+        .from('application_requests')
+        .insert({
+          property_id: proposal.property_id,
+          tenant_id: user.id,
+          landlord_id: proposal.landlord_id,
+          status: 'pending'
+        });
+
+      if (error) throw error;
+
+      // Send notification to landlord
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: proposal.landlord_id,
+          type: 'application_request',
+          message: `A tenant has requested to apply for ${proposal.properties?.title || 'your property'}`,
+          metadata: {
+            tenantId: user.id,
+            propertyId: proposal.property_id,
+            propertyTitle: proposal.properties?.title
+          }
+        });
+
+      toast({
+        title: 'Application requested',
+        description: 'The landlord will review your request. You\'ll be notified once approved.'
+      });
+
+      // Refresh the request status
+      await checkApplicationRequest();
+    } catch (error: any) {
+      console.error('Error requesting application:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Could not request application',
+        description: error?.message || 'Please try again later.'
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleStartApplication = async () => {
     if (!user) return;
     setLoading(true);
@@ -296,17 +374,47 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
         )}
 
         {/* Status message for confirmed viewings */}
-        {proposal.status === 'confirmed' && (
+        {proposal.status === 'confirmed' && canStartApplication && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-2">
-            <div className="flex items-center gap-2 text-green-800 text-sm">
+            <div className="flex items-center gap-2 text-green-800 text-sm mb-2">
               <CheckCircle className="h-4 w-4" />
               <span className="font-medium">Viewing confirmed! You'll receive reminders.</span>
             </div>
-            {canStartApplication && (
-              <div className="pt-2">
-                <Button size="sm" onClick={handleStartApplication} disabled={loading}>
-                  {loading ? 'Opening…' : 'Start Application'}
-                </Button>
+            
+            {/* Show different UI based on application request status */}
+            {!applicationRequest && (
+              <Button 
+                size="sm" 
+                onClick={handleRequestApplication} 
+                disabled={loading}
+                className="w-full"
+              >
+                {loading ? 'Requesting...' : 'Request Application'}
+              </Button>
+            )}
+            
+            {applicationRequest?.status === 'pending' && (
+              <div className="flex items-center gap-2 text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded p-2">
+                <Clock className="h-4 w-4" />
+                <span>Application request pending approval</span>
+              </div>
+            )}
+            
+            {applicationRequest?.status === 'accepted' && (
+              <Button 
+                size="sm" 
+                onClick={handleStartApplication} 
+                disabled={loading}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                {loading ? 'Opening...' : 'Start Application'}
+              </Button>
+            )}
+            
+            {applicationRequest?.status === 'declined' && (
+              <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 border border-red-200 rounded p-2">
+                <XCircle className="h-4 w-4" />
+                <span>Application request declined</span>
               </div>
             )}
           </div>

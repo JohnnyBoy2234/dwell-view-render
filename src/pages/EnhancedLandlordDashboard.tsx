@@ -26,6 +26,7 @@ import { AccountingOverview } from '@/components/accounting/AccountingOverview';
 import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';
+import { ApplicationRequestsManager } from '@/components/landlord/ApplicationRequestsManager';
 
 interface PropertyWithTenant {
   id: string;
@@ -955,6 +956,9 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-white pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+          {/* Application Requests Section */}
+          <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
+          
           {/* Loading State */}
           {applicationsLoading ? (
           <div className="space-y-4">
