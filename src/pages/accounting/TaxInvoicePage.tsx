@@ -7,7 +7,7 @@ export default function TaxInvoicePage() {
   const navigate = useNavigate();
   
   const handleBack = () => {
-    navigate('/enhancedlandlorddashboard/accounting');
+    navigate('/dashboard/accounting');
   };
 
   return (

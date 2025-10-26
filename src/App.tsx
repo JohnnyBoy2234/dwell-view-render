@@ -34,6 +34,7 @@ import AdminManagement from "./pages/admin/AdminManagement";
 import AdminProperties from "./pages/admin/AdminProperties";
 import PropertyReports from "./pages/admin/PropertyReports";
 import DocumentReview from "./pages/admin/DocumentReview";
+import UsersManagement from "./pages/admin/UsersManagement";
 import ApplyInvite from "./pages/ApplyInvite";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import RentalApplication from "./pages/RentalApplication";

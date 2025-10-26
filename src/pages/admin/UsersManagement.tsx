@@ -37,7 +37,7 @@ export function UsersManagement() {
       // Get user profiles
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
-        .select('user_id, warning_count, is_banned, created_at, updated_at');
+        .select('user_id, created_at, updated_at');
       
       if (profileError) throw profileError;
 
@@ -49,8 +49,8 @@ export function UsersManagement() {
           email: user.email || 'No email',
           created_at: user.created_at,
           last_sign_in_at: user.last_sign_in_at,
-          is_banned: profile?.is_banned || false,
-          warning_count: profile?.warning_count || 0
+          is_banned: false,
+          warning_count: 0
         };
       });
 
@@ -68,27 +68,11 @@ export function UsersManagement() {
   };
 
   const handleWarnUser = async (userId: string) => {
-    try {
-      // Call the increment_warning_count function
-      const { error } = await supabase.rpc('increment_warning_count', { user_id: userId });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "User warned",
-        description: "A warning has been issued to the user."
-      });
-      
-      // Refresh user list
-      await fetchUsers();
-    } catch (error) {
-      console.error('Error warning user:', error);
-      toast({
-        variant: "destructive",
-        title: "Error warning user",
-        description: "Failed to issue warning."
-      });
-    }
+    toast({
+      variant: "destructive",
+      title: "Feature not available",
+      description: "User warning feature is not yet configured."
+    });
   };
 
   const handleDeleteUser = async (userId: string) => {
