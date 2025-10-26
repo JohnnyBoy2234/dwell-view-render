@@ -2,6 +2,21 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, List } from 'lucide-react';
 
+// Custom styles for accounting page buttons
+const accountingButtonStyle = {
+  border: '1px solid #1e40af', // Dark blue border
+  backgroundColor: '#dbeafe',   // Light blue background
+  color: '#1e40af',             // Dark blue text
+  transition: 'all 0.2s',
+  '&:hover': {
+    backgroundColor: '#bfdbfe', // Slightly darker blue on hover
+    borderColor: '#1e3a8a',    // Darker blue border on hover
+  },
+  '&:focus': {
+    boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.3)',
+  },
+};
+
 interface AccountingNavProps {
   onAddIncome?: () => void;
   onAddExpense?: () => void;
@@ -19,6 +34,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
           <Button 
             variant="outline" 
             onClick={onAddIncome}
+            style={accountingButtonStyle}
             className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
@@ -29,6 +45,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
           <Button 
             variant="outline" 
             onClick={onAddExpense}
+            style={accountingButtonStyle}
             className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
@@ -39,7 +56,8 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
           <Button 
             asChild 
             variant={isInvoicePage ? 'default' : 'outline'} 
-            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
+            style={!isInvoicePage ? accountingButtonStyle : {}}
+            className={`w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap ${isInvoicePage ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
           >
             <Link to="/dashboard/invoices/tax">
               <span>Generate Tax Invoice</span>
@@ -50,7 +68,8 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
           <Button 
             asChild 
             variant={location.pathname.includes('/accounting/transactions') ? 'default' : 'outline'} 
-            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
+            style={!location.pathname.includes('/accounting/transactions') ? accountingButtonStyle : {}}
+            className={`w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap ${location.pathname.includes('/accounting/transactions') ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
           >
             <Link to="/dashboard/accounting/transactions" className="flex items-center justify-center gap-2">
               <List className="w-4 h-4 flex-shrink-0" />
