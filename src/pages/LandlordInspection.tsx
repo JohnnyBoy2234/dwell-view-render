@@ -95,6 +95,16 @@ export default function LandlordInspection() {
   const [activeTab, setActiveTab] = useState('ext');
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
   const [checklist, setChecklist] = useState(inspectionChecklist);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [tabNotes, setTabNotes] = useState<Record<string, string>>({
+    ext: '',
+    living: '',
+    kitchen: '',
+    beds: '',
+    elec: '',
+    plum: ''
+  });
   
   // Memoized checklist for the active tab
   const currentChecklist = useMemo(() => {
@@ -154,6 +164,73 @@ export default function LandlordInspection() {
         item.id === itemId ? { ...item, checked: !item.checked } : item
       )
     }));
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const files = Array.from(e.target.files);
+      setSelectedFiles(prev => [...prev, ...files]);
+    }
+  };
+
+  const handleFileUpload = async () => {
+    if (!selectedPropertyId || selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    const uploadPromises = selectedFiles.map(async (file) => {
+      try {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `inspections/${selectedPropertyId}/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('inspection-images')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('inspection-images')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        toast({
+          title: 'Upload Error',
+          description: `Failed to upload ${file.name}`,
+          variant: 'destructive',
+        });
+        return null;
+      }
+    });
+
+    try {
+      const uploadedUrls = await Promise.all(uploadPromises);
+      const successfulUploads = uploadedUrls.filter(url => url !== null);
+      
+      if (successfulUploads.length > 0) {
+        toast({
+          title: 'Upload Successful',
+          description: `Successfully uploaded ${successfulUploads.length} file(s)`,
+        });
+        setSelectedFiles([]);
+      }
+    } catch (error) {
+      console.error('Error during upload:', error);
+      toast({
+        title: 'Upload Error',
+        description: 'An error occurred during file upload',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -222,15 +299,20 @@ export default function LandlordInspection() {
             
             {/* Notes Section */}
             <div className="mt-8">
-              <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
-                Additional Notes
+              <label htmlFor={`notes-${activeTab}`} className="block text-sm font-medium text-gray-700 mb-2">
+                Additional Notes for {tabs.find(tab => tab.id === activeTab)?.label || 'this section'}
               </label>
               <textarea
-                id="notes"
-                name="notes"
+                id={`notes-${activeTab}`}
+                name={`notes-${activeTab}`}
                 rows={3}
+                value={tabNotes[activeTab] || ''}
+                onChange={(e) => setTabNotes(prev => ({
+                  ...prev,
+                  [activeTab]: e.target.value
+                }))}
                 className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
-                placeholder="Add any additional notes or observations here..."
+                placeholder={`Add notes about ${tabs.find(tab => tab.id === activeTab)?.label?.toLowerCase() || 'this section'}...`}
               />
             </div>
             
@@ -240,7 +322,7 @@ export default function LandlordInspection() {
                 Add Photos
               </label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                <div className="space-y-1 text-center">
+                <div className="space-y-1 text-center w-full">
                   <svg
                     className="mx-auto h-12 w-12 text-gray-400"
                     stroke="currentColor"
@@ -255,17 +337,57 @@ export default function LandlordInspection() {
                       strokeLinejoin="round"
                     />
                   </svg>
-                  <div className="flex text-sm text-gray-600">
+                  <div className="flex text-sm text-gray-600 justify-center">
                     <label
                       htmlFor="file-upload"
                       className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
                     >
                       <span>Upload photos</span>
-                      <input id="file-upload" name="file-upload" type="file" className="sr-only" multiple />
+                      <input 
+                        id="file-upload" 
+                        name="file-upload" 
+                        type="file" 
+                        className="sr-only" 
+                        multiple 
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
                     </label>
                     <p className="pl-1">or drag and drop</p>
                   </div>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                  
+                  {selectedFiles.length > 0 && (
+                    <div className="mt-4 space-y-2">
+                      <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+                      <ul className="space-y-1">
+                        {selectedFiles.map((file, index) => (
+                          <li key={index} className="flex items-center justify-between text-sm text-gray-600">
+                            <span className="truncate max-w-xs">{file.name}</span>
+                            <button 
+                              type="button" 
+                              onClick={() => removeFile(index)}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              Remove
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                      <button
+                        type="button"
+                        onClick={handleFileUpload}
+                        disabled={isUploading}
+                        className={`mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                          isUploading 
+                            ? 'bg-blue-400' 
+                            : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                        }`}
+                      >
+                        {isUploading ? 'Uploading...' : `Upload ${selectedFiles.length} File(s)`}
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
