@@ -4,16 +4,17 @@ import { Plus, List } from 'lucide-react';
 
 // Custom styles for accounting page buttons
 const accountingButtonStyle = {
-  border: '1px solid #1e40af', // Dark blue border
+  border: '1px solid #00f0ff', // Neon blue border
   backgroundColor: '#dbeafe',   // Light blue background
-  color: '#1e40af',             // Dark blue text
+  color: '#1e40af',            // Dark blue text
   transition: 'all 0.2s',
   '&:hover': {
     backgroundColor: '#bfdbfe', // Slightly darker blue on hover
-    borderColor: '#1e3a8a',    // Darker blue border on hover
+    borderColor: '#00c4d4',    // Slightly darker neon blue on hover
+    boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)', // Subtle glow on hover
   },
   '&:focus': {
-    boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.3)',
+    boxShadow: '0 0 0 2px rgba(0, 240, 255, 0.4)',
   },
 };
 
