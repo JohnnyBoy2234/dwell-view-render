@@ -225,24 +225,42 @@ export function TaxInvoiceGenerator() {
     navigate('/dashboard/accounting', { state: { showExpenseModal: true } });
   };
 
+  // Override the back button in the header to go to management tools
+  useEffect(() => {
+    const handleBackButton = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        handleBack();
+      }
+    };
+
+    window.addEventListener('keydown', handleBackButton);
+    return () => {
+      window.removeEventListener('keydown', handleBackButton);
+    };
+  }, []);
+
   return (
     <div className="max-w-4xl mx-auto p-4 space-y-6">
-      {/* Navigation */}
-      <AccountingNav 
-        onAddIncome={handleAddIncome}
-        onAddExpense={handleAddExpense}
-      />
-      
-      {/* Back button that navigates to management tools */}
-      <Button 
-        variant="outline" 
-        size="sm" 
-        onClick={handleBack}
-        className="flex items-center gap-2 mb-6"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Management Tools
-      </Button>
+      {/* Navigation with back button in header */}
+      <div className="flex items-center justify-between mb-6">
+        <Button 
+          variant="ghost"
+          size="sm" 
+          onClick={handleBack}
+          className="flex items-center gap-2 -ml-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Management
+        </Button>
+        <div className="flex-1">
+          <AccountingNav 
+            onAddIncome={handleAddIncome}
+            onAddExpense={handleAddExpense}
+            className="max-w-md mx-auto"
+          />
+        </div>
+        <div className="w-10"></div> {/* Spacer for alignment */}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column - Invoice Details */}
