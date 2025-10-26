@@ -1,22 +1,14 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Plus, List, Calendar } from 'lucide-react';
-import { DateRange } from 'react-day-picker';
-import { format } from 'date-fns';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Plus, List } from 'lucide-react';
 
 interface AccountingNavProps {
   onAddIncome?: () => void;
   onAddExpense?: () => void;
   className?: string;
-  selectedDateRange?: { from: Date; to: Date };
-  onDateRangeChange?: (range: { from: Date; to: Date }) => void;
 }
 
-export function AccountingNav({ onAddIncome, onAddExpense, className = '', selectedDateRange, onDateRangeChange }: AccountingNavProps) {
+export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: AccountingNavProps) {
   const location = useLocation();
   const isInvoicePage = location.pathname.includes('/invoices/tax');
   
@@ -43,15 +35,14 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '', selec
             <span>Add Expense</span>
           </Button>
         </li>
-        <li className="w-full md:col-span-2">
+        <li className="w-full">
           <Button 
-            asChild
+            asChild 
             variant={isInvoicePage ? 'default' : 'outline'} 
             className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
-            <Link to="/enhancedlandlorddashboard/tax-invoice" className="flex items-center justify-center">
-              <CalendarIcon className="w-4 h-4 mr-2" />
-              <span>Generate Tax Invoice</span>
+            <Link to="/dashboard/invoices/tax">
+              <span>Tax Invoice</span>
             </Link>
           </Button>
         </li>
@@ -79,52 +70,6 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '', selec
           }
         `
       }} />
-      {/* Date Range Picker */}
-      <div className="mt-4 flex items-center justify-center space-x-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id="date"
-              variant="outline"
-              className={cn(
-                'w-full justify-start text-left font-normal',
-                !selectedDateRange && 'text-muted-foreground'
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {selectedDateRange?.from ? (
-                selectedDateRange.to ? (
-                  <>
-                    {format(selectedDateRange.from, 'MMM d, yyyy')} -{' '}
-                    {format(selectedDateRange.to, 'MMM d, yyyy')}
-                  </>
-                ) : (
-                  format(selectedDateRange.from, 'MMM d, yyyy')
-                )
-              ) : (
-                <span>Pick a date range</span>
-              )}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
-            <CalendarComponent
-              initialFocus
-              mode="range"
-              defaultMonth={selectedDateRange?.from}
-              selected={selectedDateRange}
-              onSelect={(range) => {
-                if (range?.from && range?.to) {
-                  onDateRangeChange?.({
-                    from: range.from,
-                    to: range.to
-                  });
-                }
-              }}
-              numberOfMonths={1}
-            />
-          </PopoverContent>
-        </Popover>
-      </div>
     </nav>
   );
 }
