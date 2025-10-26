@@ -14,6 +14,7 @@ interface EnhancedDashboardLayoutProps {
   onTabChange?: (tab: string) => void;
   selectedPropertyId?: string | null;
   onBackToProperties?: () => void;
+  hideHeader?: boolean;
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
@@ -35,7 +36,16 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties }: EnhancedDashboardLayoutProps) {
+export function EnhancedDashboardLayout({ 
+  children, 
+  title, 
+  actions, 
+  currentTab, 
+  onTabChange, 
+  selectedPropertyId, 
+  onBackToProperties, 
+  hideHeader = false 
+}: EnhancedDashboardLayoutProps) {
   const { signOut, isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
@@ -82,18 +92,19 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
     }>
       <div className="flex-1 flex flex-col min-w-0">
         {/* Enhanced Header */}
-        <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
-          {/* Back button if needed, otherwise Sidebar trigger */}
-          {shouldShowBackButton && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleBackClick}
-              className="mr-3"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          )}
+        {!hideHeader && (
+          <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
+            {/* Back button if needed, otherwise Sidebar trigger */}
+            {shouldShowBackButton && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={handleBackClick}
+                className="mr-3"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            )}
             
             <div className="flex-1">
               <div className="flex items-center gap-3">
@@ -105,32 +116,36 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
                 {/* Dynamic title */}
                 <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title || pageConfig.title}</h1>
                 
+                {/* Role badge - only show on desktop */}
                 <div className="hidden sm:block">
-                  <Badge variant="secondary" className="text-xs">
+                  <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs">
                     {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
-                  </Badge>
+                  </div>
                 </div>
               </div>
             </div>
             
             <div className="flex items-center gap-2 sm:gap-4 ml-auto">
               {/* Notifications */}
-              <NotificationBell className="hidden sm:block" />
-              
-              {/* Custom Actions */}
-              {actions}
+              <div className="relative hidden sm:block">
+                <NotificationBell />
+              </div>
               
               {/* Sign Out Button */}
               <Button 
                 variant="outline" 
-                size="sm"
-                onClick={signOut}
+                size="sm" 
+                onClick={() => {
+                  signOut();
+                }} 
+                className="h-9"
               >
                 <LogOut className="h-4 w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Sign Out</span>
               </Button>
             </div>
           </header>
+        )}
           
           {/* Main Content with Error Boundary */}
           <main className={`flex-1 ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>

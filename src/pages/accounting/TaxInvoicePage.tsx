@@ -1,32 +1,44 @@
 import React from 'react';
 import { TaxInvoiceGenerator } from '@/components/accounting/TaxInvoiceGenerator';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
+import { AccountingLayout } from '@/components/accounting/AccountingLayout';
 import { useNavigate } from 'react-router-dom';
+import { AccountingNav } from '@/components/accounting/AccountingNav';
 
 export default function TaxInvoicePage() {
   const navigate = useNavigate();
   
-  // This will be used by the back button in the header
-  const handleBack = () => {
-    navigate('/enhancedlandlorddashboard');
+  // Handle add income/expense from nav
+  const handleAddIncome = () => {
+    navigate('/dashboard/accounting/add-transaction?type=income');
+  };
+
+  const handleAddExpense = () => {
+    navigate('/dashboard/accounting/add-transaction?type=expense');
+  };
+
+  // Create a custom layout props object to avoid TypeScript errors
+  const layoutProps = {
+    title: "SwiftBooks",
+    currentTab: "/accounting",
+    hideHeader: true
   };
 
   return (
-    <EnhancedDashboardLayout 
-      title="Generate Tax Invoice"
-      currentTab="/accounting" // This should match the tab you want to be active in the sidebar
-      onTabChange={(tab) => {
-        // Only navigate if trying to change to a different tab
-        if (tab !== '/accounting') {
-          navigate(tab);
-        }
-      }}
-      // Force the back button to always go to management tools
-      onBackToProperties={handleBack}
-      // This will make the back button always visible
-      selectedPropertyId="dummy"
-    >
-      <TaxInvoiceGenerator />
+    <EnhancedDashboardLayout {...layoutProps}>
+      <AccountingLayout 
+        title="SwiftBooks"
+        subtitle="Generate Tax Invoice"
+      >
+        <div className="mb-6">
+          <AccountingNav 
+            onAddIncome={handleAddIncome}
+            onAddExpense={handleAddExpense}
+            className="max-w-md mx-auto"
+          />
+        </div>
+        <TaxInvoiceGenerator />
+      </AccountingLayout>
     </EnhancedDashboardLayout>
   );
 }

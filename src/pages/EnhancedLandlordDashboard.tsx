@@ -2614,15 +2614,19 @@ const renderReportsTab = () => (
       ? 'Management Tools'
       : '';
 
+  // Create a layout props object to avoid TypeScript errors
+  const layoutProps = {
+    title: headerTitle,
+    currentTab: currentTab,
+    onTabChange: handleTabChange,
+    selectedPropertyId: selectedPropertyId,
+    onBackToProperties: handleBackToProperties,
+    hideHeader: false // Always show header for the main dashboard
+  };
+
   return (
     <VerificationGate requireVerification={true}>
-      <EnhancedDashboardLayout 
-        title={headerTitle}
-        currentTab={currentTab}
-        onTabChange={handleTabChange}
-        selectedPropertyId={selectedPropertyId}
-        onBackToProperties={handleBackToProperties}
-      >
+      <EnhancedDashboardLayout {...layoutProps}>
         {renderTabContent()}
       </EnhancedDashboardLayout>
     </VerificationGate>
