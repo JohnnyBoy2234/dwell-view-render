@@ -40,9 +40,13 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
-  const [dateRange, setDateRange] = useState({
-    from: subDays(new Date(), 30),
-    to: new Date()
+  // Initialize with previous month by default
+  const [dateRange, setDateRange] = useState(() => {
+    const now = new Date();
+    return {
+      from: new Date(now.getFullYear(), now.getMonth() - 1, 1),
+      to: new Date(now.getFullYear(), now.getMonth(), 0)
+    };
   });
   const [showIncomeModal, setShowIncomeModal] = useState(false);
   const [showExpenseModal, setShowExpenseModal] = useState(false);
@@ -204,44 +208,69 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         </div>
       </Card>
 
-      {/* Payment Reminder - Separate row for better mobile UX */}
-      <Button
-        variant="outline"
-        disabled={selectedProperty === 'all' || sendingReminder}
-        onClick={async () => {
-          if (selectedProperty === 'all') {
-            toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-            return;
-          }
-          try {
-            setSendingReminder(true);
-            const { data: tenancy } = await supabase
-              .from('tenancies')
-              .select('tenant_id')
-              .eq('property_id', selectedProperty)
-              .limit(1)
-              .maybeSingle();
-            if (!tenancy?.tenant_id) {
-              toast({ variant: 'destructive', title: 'No tenant found', description: 'This property has no active tenant.' });
-              setSendingReminder(false);
-              return;
-            }
-            const { error } = await supabase.functions.invoke('send-payment-reminder', {
-              body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
-            });
-            if (error) throw error;
-            toast({ title: 'Reminder sent', description: 'The tenant has been notified via app and email.' });
-          } catch (e: any) {
-            toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-          } finally {
-            setSendingReminder(false);
-          }
-        }}
-        className="w-full sm:w-auto h-11 text-sm font-medium"
-      >
-        <Bell className="w-4 h-4 mr-2" />
-        {sendingReminder ? 'Sending…' : 'Send Payment Reminder'}
-      </Button>
+      {/* Payment Reminder Banner */}
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
+              <Bell className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-semibold text-black dark:text-white">Send Payment Reminder</div>
+              <div className="text-sm text-black/70 dark:text-white/70">Notify a tenant instantly via app and email</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Select property" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
+                {properties.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button
+              disabled={sendingReminder || selectedProperty === 'all'}
+              onClick={async () => {
+                if (selectedProperty === 'all') {
+                  toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+                  return;
+                }
+                try {
+                  setSendingReminder(true);
+                  const { data: tenancy } = await supabase
+                    .from('tenancies')
+                    .select('tenant_id')
+                    .eq('property_id', selectedProperty)
+                    .eq('status', 'active')
+                    .limit(1)
+                    .maybeSingle();
+                  if (!tenancy?.tenant_id) {
+                    toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
+                    setSendingReminder(false);
+                    return;
+                  }
+                  const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                    body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
+                  });
+                  if (error) throw error;
+                  toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
+                } catch (e: any) {
+                  toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                } finally {
+                  setSendingReminder(false);
+                }
+              }}
+              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+            >
+              {sendingReminder ? 'Sending…' : 'Send Reminder'}
+            </Button>
+          </div>
+        </div>
+      </div>
 
       {/* Overview Heading */}
       <div className="text-center">
