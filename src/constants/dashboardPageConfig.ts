@@ -41,7 +41,7 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
     backPath: '/enhancedlandlorddashboard',
   },
   '/enhancedlandlorddashboard/leases': {
-    title: 'Lease System',
+    title: 'Lease Management',
     icon: FileText,
     showSidebar: false,
     showBackButton: true,

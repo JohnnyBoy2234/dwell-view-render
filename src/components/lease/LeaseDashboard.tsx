@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { LeaseDocumentViewer } from './LeaseDocumentViewer';
 import { LeaseSignaturePad } from './LeaseSignaturePad';
 import { CreateLeaseModal } from './CreateLeaseModal';
+import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 import type { LeaseContract } from '@/types/lease';
 
 interface LeaseDashboardProps {
@@ -63,11 +64,7 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Lease Management</h1>
-          <p className="text-sm text-muted-foreground">Manage your property leases and agreements</p>
-        </div>
+      <div className="flex justify-end items-center">
         {isLandlord && (
           <Button onClick={() => setShowCreateModal(true)}>
             <Plus className="h-4 w-4 mr-2" />
@@ -191,7 +188,7 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
 
   if (contracts.length === 0) {
     return (
-      <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden">
+      <Card className={PROPERTY_CARD_STYLES.CARD}>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <FileText className="h-12 w-12 text-muted-foreground mb-4" />
           <h3 className="text-lg font-semibold mb-2">No contracts found</h3>
@@ -209,21 +206,21 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
   return (
     <div className="grid gap-4">
       {contracts.map((contract) => (
-        <Card key={contract.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden">
+        <Card key={contract.id} className={PROPERTY_CARD_STYLES.CARD}>
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
-              <div>
-                <CardTitle className="truncate">{contract.title}</CardTitle>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="line-clamp-1">{contract.title}</CardTitle>
                 <CardDescription>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      <span>Created {new Date(contract.created_at).toLocaleDateString()}</span>
+                      <Calendar className="h-3 w-3 flex-shrink-0" />
+                      <span className="line-clamp-1">Created {new Date(contract.created_at).toLocaleDateString()}</span>
                     </span>
                   </div>
                 </CardDescription>
               </div>
-              <Badge className="w-fit" variant={getStatusColor(contract.status)}>
+              <Badge className="w-fit flex-shrink-0" variant={getStatusColor(contract.status)}>
                 {contract.status.replace('_', ' ').toUpperCase()}
               </Badge>
             </div>
@@ -231,13 +228,13 @@ function ContractsList({ contracts, onView, onSign, onEdit, canSign, isLandlord 
           <CardContent>
             <div className="space-y-3">
               <div className="text-sm text-muted-foreground space-y-1">
-                <p className="truncate"><strong>Property:</strong> {(
+                <p className="line-clamp-1"><strong>Property:</strong> {(
                   (contract.contract_data?.propertyAddress || '')
                 ).split(',')[0] || 'Not specified'}</p>
                 {contract.tenant_id && (
-                  <p className="truncate"><strong>Tenant:</strong> {contract.contract_data?.tenantName || contract.contract_data?.tenantEmail}</p>
+                  <p className="line-clamp-1"><strong>Tenant:</strong> {contract.contract_data?.tenantName || contract.contract_data?.tenantEmail}</p>
                 )}
-                <p><strong>Rent:</strong> {contract.contract_data?.rentCurrency || 'ZAR'} {contract.contract_data?.rentAmount?.toLocaleString() || 'Not specified'}</p>
+                <p className="line-clamp-1"><strong>Rent:</strong> {contract.contract_data?.rentCurrency || 'ZAR'} {contract.contract_data?.rentAmount?.toLocaleString() || 'Not specified'}</p>
               </div>
 
               <div className="flex flex-wrap gap-2">
