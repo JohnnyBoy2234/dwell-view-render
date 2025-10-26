@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface User {
   id: string;
   email: string;
+  full_name?: string;
   created_at: string;
   last_sign_in_at?: string;
   is_banned?: boolean;
@@ -30,37 +31,45 @@ export function UsersManagement() {
     try {
       setLoading(true);
       
-      // Get all users from auth
-      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
-      
-      // Get user profiles
-      const { data: profiles, error: profileError } = await supabase
+      // First, get all profiles with user data
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('user_id, warning_count, is_banned, created_at, updated_at');
+        .select(`
+          user_id,
+          email,
+          full_name,
+          warning_count,
+          is_banned,
+          created_at,
+          updated_at,
+          user:auth.users!inner(
+            id,
+            email,
+            last_sign_in_at,
+            created_at
+          )
+        `);
       
-      if (profileError) throw profileError;
+      if (profilesError) throw profilesError;
 
-      // Combine auth and profile data
-      const usersWithProfiles = authUsers.map(user => {
-        const profile = profiles?.find(p => p.user_id === user.id);
-        return {
-          id: user.id,
-          email: user.email || 'No email',
-          created_at: user.created_at,
-          last_sign_in_at: user.last_sign_in_at,
-          is_banned: profile?.is_banned || false,
-          warning_count: profile?.warning_count || 0
-        };
-      });
+      // Transform the data to match our User interface
+      const usersWithProfiles = (profiles || []).map(profile => ({
+        id: profile.user_id,
+        email: profile.email || profile.user?.email || 'No email',
+        full_name: profile.full_name || '',
+        created_at: profile.user?.created_at || profile.created_at,
+        last_sign_in_at: profile.user?.last_sign_in_at || null,
+        is_banned: profile.is_banned || false,
+        warning_count: profile.warning_count || 0
+      }));
 
       setUsers(usersWithProfiles);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
-        variant: "destructive",
-        title: "Error loading users",
-        description: "Failed to fetch user data."
+        title: 'Error',
+        description: 'Failed to load users. Please try again.',
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);
