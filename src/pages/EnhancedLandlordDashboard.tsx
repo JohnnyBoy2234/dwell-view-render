@@ -1351,15 +1351,17 @@ const renderReportsTab = () => (
         defaultPath="/enhancedlandlorddashboard"
         className="mt-4"
       />
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
-              <BarChart3 className="h-6 w-6 text-white" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">SwiftBooks & Analytics</h2>
-              <p className="text-sm text-muted-foreground">Track financial performance and insights</p>
-            </div>
-          </div>
+      
+      {/* Page Header */}
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
+          <BarChart3 className="h-6 w-6 text-white" />
         </div>
+        <div>
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">SwiftBooks & Analytics</h2>
+          <p className="text-sm text-muted-foreground">Track financial performance and insights</p>
+        </div>
+      </div>
       
         {tenants.length === 0 ? (
           <Card className="shadow-md bg-white/90 backdrop-blur-sm">
@@ -2032,10 +2034,9 @@ const renderReportsTab = () => (
           )}
         </DialogContent>
       </Dialog>
-
-      </div>
-      </div>
-  );
+    </div>
+  </div>
+);
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'available':
@@ -2604,19 +2605,15 @@ const renderReportsTab = () => (
       ? 'Management Tools'
       : '';
 
-  // Create a layout props object to avoid TypeScript errors
-  const layoutProps = {
-    title: headerTitle,
-    currentTab: currentTab,
-    onTabChange: handleTabChange,
-    selectedPropertyId: selectedPropertyId,
-    onBackToProperties: handleBackToProperties,
-    hideHeader: false // Always show header for the main dashboard
-  };
-
   return (
     <VerificationGate requireVerification={true}>
-      <EnhancedDashboardLayout {...layoutProps}>
+      <EnhancedDashboardLayout 
+        title={headerTitle}
+        currentTab={currentTab}
+        onTabChange={handleTabChange}
+        selectedPropertyId={selectedPropertyId}
+        onBackToProperties={handleBackToProperties}
+      >
         {renderTabContent()}
       </EnhancedDashboardLayout>
     </VerificationGate>

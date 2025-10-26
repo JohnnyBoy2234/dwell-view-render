@@ -41,8 +41,8 @@ export function LeaseManagement() {
   const { 
     contracts = [], 
     loading, 
-    fetchContracts, 
-    searchContracts 
+    searchContracts,
+    refetch
   } = useLeaseContracts();
   
   const { isLandlord, user } = useAuth();
@@ -56,7 +56,7 @@ export function LeaseManagement() {
   useEffect(() => {
     const loadLeases = async () => {
       try {
-        await fetchContracts();
+        await refetch();
       } catch (error) {
         console.error('Error loading leases:', error);
         toast({
@@ -68,7 +68,7 @@ export function LeaseManagement() {
     };
     
     loadLeases();
-  }, [fetchContracts, toast]);
+  }, [refetch, toast]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
@@ -81,9 +81,9 @@ export function LeaseManagement() {
         // Client-side search fallback
         const searchTerm = query.toLowerCase();
         const filtered = contracts.filter(contract => 
-          (contract.property?.name?.toLowerCase().includes(searchTerm)) ||
-          (contract.tenant?.firstName?.toLowerCase().includes(searchTerm)) ||
-          (contract.tenant?.lastName?.toLowerCase().includes(searchTerm)) ||
+          (contract.contract_data?.propertyAddress?.toLowerCase().includes(searchTerm)) ||
+          (contract.contract_data?.tenantName?.toLowerCase().includes(searchTerm)) ||
+          (contract.contract_data?.landlordName?.toLowerCase().includes(searchTerm)) ||
           (contract.status?.toLowerCase().includes(searchTerm))
         );
         setFilteredContracts(filtered);
@@ -280,7 +280,7 @@ export function LeaseManagement() {
                               <div className="space-y-2 flex-1">
                                 <div className="flex items-center gap-3">
                                   <h3 className="text-lg font-semibold">
-                                    {contract.property?.name || 'Unnamed Property'}
+                                    {contract.title || 'Lease Agreement'}
                                   </h3>
                                   <Badge className={status.className}>
                                     {status.text}
@@ -290,21 +290,21 @@ export function LeaseManagement() {
                                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
                                   <div className="flex items-center">
                                     <User className="h-4 w-4 mr-1.5" />
-                                    <span>{contract.tenant?.firstName} {contract.tenant?.lastName || 'No tenant assigned'}</span>
+                                    <span>{contract.contract_data?.tenantName || 'No tenant assigned'}</span>
                                   </div>
                                   <div className="flex items-center">
                                     <MapPin className="h-4 w-4 mr-1.5" />
-                                    <span>{contract.property?.address?.split(',')[0] || 'No address'}</span>
+                                    <span>{contract.contract_data?.propertyAddress?.split(',')[0] || 'No address'}</span>
                                   </div>
                                   <div className="flex items-center">
                                     <Calendar className="h-4 w-4 mr-1.5" />
                                     <span>
-                                      {formatDate(contract.startDate)} - {formatDate(contract.endDate)}
+                                      {formatDate(contract.contract_data?.leaseStartDate)} - {formatDate(contract.contract_data?.leaseEndDate)}
                                     </span>
                                   </div>
                                   <div className="flex items-center">
                                     <span className="font-medium">
-                                      {formatCurrency(contract.monthlyRent, contract.currency)}/mo
+                                      {formatCurrency(contract.contract_data?.rentAmount, contract.contract_data?.rentCurrency)}/mo
                                     </span>
                                   </div>
                                 </div>
