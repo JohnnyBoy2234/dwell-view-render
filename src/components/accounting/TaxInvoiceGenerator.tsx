@@ -246,8 +246,9 @@ export function TaxInvoiceGenerator() {
       <Card className={PROPERTY_CARD_STYLES.CARD}>
         <div className="p-6 space-y-4">
           {/* Subtitle */}
-          <div className="pb-2 border-b">
-            <h2 className="text-xl font-semibold text-muted-foreground/70">Tax Invoice</h2>
+          <div className="text-center space-y-2 mb-8">
+            <h2 className="text-2xl font-normal text-black dark:text-white">Tax Invoice</h2>
+            <p className="text-black/80 dark:text-white/80">Create and manage tax invoices</p>
           </div>
           
           {/* Navigation */}
