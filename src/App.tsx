@@ -27,6 +27,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -90,16 +91,70 @@ function AppRoutes() {
 
   return (
     <Routes>
-              {/* Admin Routes - No Navbar */}
-              <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
-              <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
-              <Route path="/admin/management" element={<RouteGuard><AdminManagement /></RouteGuard>} />
-              <Route path="/admin/users" element={<RouteGuard><UsersManagement /></RouteGuard>} />
-              <Route path="/admin/admin-users" element={<RouteGuard><AdminManagement /></RouteGuard>} />
-              <Route path="/admin/properties" element={<RouteGuard><AdminProperties /></RouteGuard>} />
-              <Route path="/admin/documents" element={<RouteGuard><DocumentReview /></RouteGuard>} />
-              <Route path="/admin/kyc" element={<KycManagement />} />
-              <Route path="/admin/reports" element={<RouteGuard><PropertyReports /></RouteGuard>} />
+              {/* Admin Routes */}
+              <Route path="/admin" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <AdminDashboard />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/dashboard" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <AdminDashboard />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/management" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <AdminManagement />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/users" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <UsersManagement />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/admin-users" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <AdminManagement />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/properties" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <AdminProperties />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/documents" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <DocumentReview />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/kyc" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <KycManagement />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/reports" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <PropertyReports />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
 
               {/* Routes with Navbar */}
               <Route path="/" element={<><Navbar /><Index /></>} />
