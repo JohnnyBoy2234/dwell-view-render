@@ -14,58 +14,58 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
   
   return (
     <nav className={`bg-card border rounded-lg p-2 shadow-sm ${className}`}>
-      <ul className="flex items-center justify-between space-x-1 overflow-x-auto no-scrollbar">
-        <li className="flex-1 min-w-0">
+      <ul className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-row gap-2">
+        <li className="w-full">
           <Button 
             asChild 
-            variant={!isInvoicePage ? 'default' : 'outline'} 
-            className="w-full justify-center py-2 text-sm font-medium h-10"
+            variant={!isInvoicePage && !location.pathname.includes('/accounting/transactions') ? 'default' : 'outline'} 
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Link to="/dashboard/accounting">
               Overview
             </Link>
           </Button>
         </li>
-        <li className="flex-1 min-w-0">
+        <li className="w-full">
           <Button 
             variant="outline" 
             onClick={onAddIncome}
-            className="w-full justify-center py-2 text-sm font-medium h-10"
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 mr-1" />
-            <span className="truncate">Add Income</span>
+            <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
+            <span>Add Income</span>
           </Button>
         </li>
-        <li className="flex-1 min-w-0">
+        <li className="w-full">
           <Button 
             variant="outline" 
             onClick={onAddExpense}
-            className="w-full justify-center py-2 text-sm font-medium h-10"
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 mr-1" />
-            <span className="truncate">Add Expense</span>
+            <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
+            <span>Add Expense</span>
           </Button>
         </li>
-        <li className="flex-1 min-w-0">
+        <li className="w-full">
           <Button 
             asChild 
             variant={isInvoicePage ? 'default' : 'outline'} 
-            className="w-full justify-center py-2 text-sm font-medium h-10"
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Link to="/dashboard/invoices/tax">
-              <span className="truncate">Generate Tax Invoice</span>
+              <span>Tax Invoice</span>
             </Link>
           </Button>
         </li>
-        <li className="flex-1 min-w-0">
+        <li className="w-full">
           <Button 
             asChild 
             variant={location.pathname.includes('/accounting/transactions') ? 'default' : 'outline'} 
-            className="w-full justify-center py-2 text-sm font-medium h-10"
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Link to="/dashboard/accounting/transactions">
               <List className="w-4 h-4 mr-1 flex-shrink-0" />
-              <span className="truncate">View All</span>
+              <span>View All</span>
             </Link>
           </Button>
         </li>
