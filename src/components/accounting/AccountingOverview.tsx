@@ -143,33 +143,39 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <Input
-                type="date"
-                value={format(dateRange.from, 'yyyy-MM-dd')}
-                onChange={(e) => {
-                  const newFrom = parseISO(e.target.value);
-                  setDateRange(prev => ({
-                    from: newFrom,
-                    to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
-                  }));
-                }}
-                className="h-10 w-full md:w-auto"
-              />
-              <span className="text-muted-foreground">to</span>
-              <Input
-                type="date"
-                value={format(dateRange.to, 'yyyy-MM-dd')}
-                onChange={(e) => {
-                  const newTo = parseISO(e.target.value);
-                  setDateRange(prev => ({
-                    from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
-                    to: newTo
-                  }));
-                }}
-                className="h-10 w-full md:w-auto"
-                min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
-              />
+            <div className="grid grid-cols-5 gap-2 w-full md:w-auto items-center">
+              <div className="col-span-2">
+                <Input
+                  type="date"
+                  value={format(dateRange.from, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const newFrom = parseISO(e.target.value);
+                    setDateRange(prev => ({
+                      from: newFrom,
+                      to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
+                    }));
+                  }}
+                  className="h-10 w-full text-sm"
+                />
+              </div>
+              <div className="text-center text-muted-foreground text-sm">
+                to
+              </div>
+              <div className="col-span-2">
+                <Input
+                  type="date"
+                  value={format(dateRange.to, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const newTo = parseISO(e.target.value);
+                    setDateRange(prev => ({
+                      from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
+                      to: newTo
+                    }));
+                  }}
+                  className="h-10 w-full text-sm"
+                  min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
+                />
+              </div>
             </div>
           </div>
 
