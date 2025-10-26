@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -15,38 +15,85 @@ import {
   Calendar,
   User,
   MapPin,
-  Clock
+  Clock,
+  FileSignature,
+  FileCheck,
+  FileClock,
+  FileEdit,
+  FileX
 } from 'lucide-react';
-// Simple R icon for South African Rand
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
-    R
-  </div>
-);
 import { useLeaseContracts } from '@/hooks/useLeaseContracts';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import type { LeaseContract } from '@/types/lease';
+import { useToast } from '@/hooks/use-toast';
+
+// Tab configuration
+const tabs = [
+  { id: 'all', label: 'All Leases', icon: <FileText className="h-4 w-4" /> },
+  { id: 'draft', label: 'Drafts', icon: <FileEdit className="h-4 w-4" /> },
+  { id: 'pending', label: 'Pending', icon: <FileClock className="h-4 w-4" /> },
+  { id: 'signed', label: 'Signed', icon: <FileCheck className="h-4 w-4" /> },
+  { id: 'expired', label: 'Expired', icon: <FileX className="h-4 w-4" /> },
+];
 
 export function LeaseManagement() {
-  const { contracts, loading, searchContracts } = useLeaseContracts();
-  const { isLandlord } = useAuth();
+  const { 
+    contracts = [], 
+    loading, 
+    fetchContracts, 
+    searchContracts 
+  } = useLeaseContracts();
+  
+  const { isLandlord, user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredContracts, setFilteredContracts] = useState<LeaseContract[]>([]);
   const [activeTab, setActiveTab] = useState('all');
+  
+  // Fetch leases on component mount
+  useEffect(() => {
+    const loadLeases = async () => {
+      try {
+        await fetchContracts();
+      } catch (error) {
+        console.error('Error loading leases:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to load leases. Please try again.',
+          variant: 'destructive',
+        });
+      }
+    };
+    
+    loadLeases();
+  }, [fetchContracts, toast]);
 
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
     if (query.trim()) {
-      const results = await searchContracts(query);
-      setFilteredContracts(results);
+      // If searchContracts is not available, implement client-side search
+      if (typeof searchContracts === 'function') {
+        const results = await searchContracts(query);
+        setFilteredContracts(Array.isArray(results) ? results : []);
+      } else {
+        // Client-side search fallback
+        const searchTerm = query.toLowerCase();
+        const filtered = contracts.filter(contract => 
+          (contract.property?.name?.toLowerCase().includes(searchTerm)) ||
+          (contract.tenant?.firstName?.toLowerCase().includes(searchTerm)) ||
+          (contract.tenant?.lastName?.toLowerCase().includes(searchTerm)) ||
+          (contract.status?.toLowerCase().includes(searchTerm))
+        );
+        setFilteredContracts(filtered);
+      }
     } else {
       setFilteredContracts([]);
     }
   };
 
-  const getDisplayContracts = () => {
+  const displayContracts = useMemo(() => {
     const baseContracts = searchQuery.trim() ? filteredContracts : contracts;
     
     switch (activeTab) {
@@ -56,19 +103,27 @@ export function LeaseManagement() {
         return baseContracts.filter(c => c.status.includes('pending'));
       case 'signed':
         return baseContracts.filter(c => c.status === 'signed');
+      case 'expired':
+        return baseContracts.filter(c => c.status === 'expired');
       default:
         return baseContracts;
     }
-  };
+  }, [activeTab, contracts, filteredContracts, searchQuery]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'signed': return 'default';
-      case 'pending_tenant': return 'secondary';
-      case 'pending_landlord': return 'secondary';
-      case 'draft': return 'outline';
-      case 'expired': return 'destructive';
-      default: return 'outline';
+      case 'signed':
+        return { text: 'Signed', className: 'bg-success-green text-white' };
+      case 'pending_tenant':
+        return { text: 'Pending Tenant', className: 'bg-amber-500 text-white' };
+      case 'pending_landlord':
+        return { text: 'Pending Landlord', className: 'bg-amber-500 text-white' };
+      case 'draft':
+        return { text: 'Draft', className: 'bg-gray-500 text-white' };
+      case 'expired':
+        return { text: 'Expired', className: 'bg-destructive text-white' };
+      default:
+        return { text: status, className: 'bg-gray-200 text-gray-800' };
     }
   };
 
@@ -125,177 +180,151 @@ export function LeaseManagement() {
     return actions;
   };
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        {[...Array(3)].map((_, i) => (
-          <Card key={i}>
-            <CardContent className="p-6">
-              <div className="animate-pulse space-y-3">
-                <div className="h-4 bg-muted rounded w-1/3"></div>
-                <div className="h-3 bg-muted rounded w-full"></div>
-                <div className="h-3 bg-muted rounded w-2/3"></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-semibold">Lease Management</h2>
+          <h1 className="text-2xl font-bold tracking-tight">Lease Management</h1>
           <p className="text-muted-foreground">
-            Manage your lease contracts and track signatures
+            Manage all your lease agreements in one place
           </p>
         </div>
-        
-        {isLandlord && (
-          <Button onClick={() => navigate('/lease/builder')}>
-            <Plus className="h-4 w-4 mr-2" />
-            New Contract
-          </Button>
-        )}
+        <Button onClick={() => navigate('/lease/builder')} className="w-full md:w-auto">
+          <Plus className="h-4 w-4 mr-2" />
+          New Lease
+        </Button>
       </div>
 
-      {/* Search */}
       <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center space-x-2">
-            <Search className="h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search contracts by property address, tenant name..."
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="flex-1"
-            />
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4" />
+        <CardHeader className="pb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="Search leases..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  handleSearch(e.target.value);
+                }}
+              />
+            </div>
+            <Button variant="outline" className="hidden sm:flex">
+              <Filter className="h-4 w-4 mr-2" />
+              Filter
             </Button>
           </div>
+        </CardHeader>
+        
+        <CardContent>
+          <Tabs 
+            value={activeTab} 
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="w-full justify-start overflow-x-auto py-0 h-auto">
+              {tabs.map((tab) => (
+                <TabsTrigger 
+                  key={tab.id} 
+                  value={tab.id}
+                  className="flex items-center gap-2 py-2 px-4"
+                >
+                  {tab.icon}
+                  <span className="whitespace-nowrap">{tab.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <div className="mt-6">
+              {loading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-24 bg-muted/50 animate-pulse rounded-lg" />
+                  ))}
+                </div>
+              ) : displayContracts.length === 0 ? (
+                <div className="text-center py-12 space-y-4">
+                  <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-muted/50">
+                    <FileText className="h-8 w-8 text-muted-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-medium">
+                      No {activeTab !== 'all' ? activeTab : ''} leases found
+                    </h3>
+                    <p className="text-muted-foreground mt-1">
+                      {activeTab === 'all' 
+                        ? 'Get started by creating a new lease agreement.'
+                        : `You don't have any ${activeTab} leases at the moment.`}
+                    </p>
+                  </div>
+                  {activeTab === 'all' && (
+                    <Button 
+                      onClick={() => navigate('/lease/builder')} 
+                      className="mt-4"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create New Lease
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {displayContracts.map((contract) => {
+                    const status = getStatusBadge(contract.status);
+                    return (
+                      <Card key={contract.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                        <CardContent className="p-0">
+                          <div className="p-4 md:p-6">
+                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                              <div className="space-y-2 flex-1">
+                                <div className="flex items-center gap-3">
+                                  <h3 className="text-lg font-semibold">
+                                    {contract.property?.name || 'Unnamed Property'}
+                                  </h3>
+                                  <Badge className={status.className}>
+                                    {status.text}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                                  <div className="flex items-center">
+                                    <User className="h-4 w-4 mr-1.5" />
+                                    <span>{contract.tenant?.firstName} {contract.tenant?.lastName || 'No tenant assigned'}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <MapPin className="h-4 w-4 mr-1.5" />
+                                    <span>{contract.property?.address?.split(',')[0] || 'No address'}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Calendar className="h-4 w-4 mr-1.5" />
+                                    <span>
+                                      {formatDate(contract.startDate)} - {formatDate(contract.endDate)}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="font-medium">
+                                      {formatCurrency(contract.monthlyRent, contract.currency)}/mo
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col sm:flex-row gap-2">
+                                {getContractActions(contract)}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </Tabs>
         </CardContent>
       </Card>
-
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="all">All Contracts</TabsTrigger>
-          <TabsTrigger value="draft">Drafts</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="signed">Signed</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab} className="space-y-4">
-          {getDisplayContracts().map((contract) => (
-            <Card key={contract.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                  {/* Contract Info */}
-                  <div className="space-y-3 flex-1">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="font-semibold text-lg">{contract.title}</h3>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant={getStatusColor(contract.status)}>
-                            {contract.status.replace('_', ' ')}
-                          </Badge>
-                          <span className="text-sm text-muted-foreground">
-                            Version {contract.version}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                      <div className="flex items-center space-x-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{contract.contract_data?.propertyAddress || 'Address not set'}</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <RIcon className="h-6 w-6 text-muted-foreground" />
-                        <span>
-                          {formatCurrency(
-                            contract.contract_data?.rentAmount, 
-                            contract.contract_data?.rentCurrency
-                          )}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                        <span>{formatDate(contract.contract_data?.leaseStartDate)}</span>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span>
-                          {contract.contract_data?.tenantName || 
-                           contract.contract_data?.tenantEmail || 
-                           'Tenant TBD'}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                      <div className="flex items-center space-x-1">
-                        <Clock className="h-3 w-3" />
-                        <span>Created {formatDate(contract.created_at)}</span>
-                      </div>
-                      
-                      {contract.landlord_signed_at && (
-                        <div className="flex items-center space-x-1">
-                          <FileText className="h-3 w-3" />
-                          <span>Landlord signed {formatDate(contract.landlord_signed_at)}</span>
-                        </div>
-                      )}
-                      
-                      {contract.tenant_signed_at && (
-                        <div className="flex items-center space-x-1">
-                          <FileText className="h-3 w-3" />
-                          <span>Tenant signed {formatDate(contract.tenant_signed_at)}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap gap-2">
-                    {getContractActions(contract)}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {getDisplayContracts().length === 0 && (
-            <Card>
-              <CardContent className="text-center py-12">
-                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium mb-2">
-                  {searchQuery ? 'No contracts found' : 'No contracts yet'}
-                </h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchQuery 
-                    ? 'Try adjusting your search terms or filters'
-                    : 'Create your first lease contract to get started'
-                  }
-                </p>
-                {!searchQuery && isLandlord && (
-                  <Button onClick={() => navigate('/lease/builder')}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Contract
-                  </Button>
-                )}
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }
