@@ -51,18 +51,21 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
 
   // Handle back button click
   const handleBackClick = () => {
-    if (title === 'Generate Tax Invoice') {
+    if (title === 'Generate Tax Invoice' || currentTab?.includes('tax-invoice')) {
       // Always navigate to management tools when on Tax Invoice page
-      navigate('/dashboard/management-tools');
+      navigate('/enhancedlandlorddashboard');
     } else if (currentTab === '/enhancedlandlorddashboard' && selectedPropertyId) {
       // On Management Tools page -> go back to Property Selection
       onBackToProperties?.();
-    } else if (currentTab !== '/enhancedlandlorddashboard') {
+    } else if (currentTab && currentTab !== '/enhancedlandlorddashboard') {
       // On sub-page -> go back to Management Tools
       const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
       // Update parent state immediately for snappy UI, then navigate
       onTabChange?.('/enhancedlandlorddashboard');
       navigate(`/enhancedlandlorddashboard${params}`);
+    } else {
+      // Default fallback
+      navigate('/enhancedlandlorddashboard');
     }
   };
 
