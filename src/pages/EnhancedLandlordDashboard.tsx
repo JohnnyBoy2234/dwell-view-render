@@ -2448,16 +2448,6 @@ const renderReportsTab = () => (
                 </Card>
               </div>
 
-              {/* Settings */}
-              <div onClick={() => navigate('/enhancedlandlorddashboard/profile')} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <User className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Settings</p>
-                  <p className="text-xs text-muted-foreground">Account</p>
-                </Card>
-              </div>
             </div>
           </div>
         </div>

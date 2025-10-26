@@ -60,6 +60,7 @@ import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
 import CreateInspection from "@/pages/CreateInspection";
+import SettingsPage from "@/pages/SettingsPage";
 // Accounting imports
 import AccountingDashboard from "@/pages/accounting/AccountingDashboard";
 import AddTransactionPage from "@/pages/accounting/AddTransactionPage";
@@ -162,6 +163,7 @@ function AppRoutes() {
               <Route path="/kyc/test" element={<KycCapture />} />
               <Route path="/apply/:id" element={<PropertyDetail />} />
               <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
+              <Route path="/settings" element={<RouteGuard><EnhancedDashboardLayout title="Account Settings"><SettingsPage /></EnhancedDashboardLayout></RouteGuard>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
   );

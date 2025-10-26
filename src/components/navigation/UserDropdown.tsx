@@ -1,7 +1,7 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { User, LayoutDashboard, MessageCircle, Shield, LogOut } from "lucide-react";
+import { User, Settings, LogOut } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { NAVBAR_CONTENT, NAVBAR_ROUTES, NAVBAR_STYLES } from '@/constants/navbarConstants';
+import { NAVBAR_CONTENT, NAVBAR_STYLES } from '@/constants/navbarConstants';
 
 interface UserDropdownProps {
   user: {
@@ -32,10 +32,13 @@ export function UserDropdown({
   isAdmin, 
   onSignOut 
 }: UserDropdownProps) {
+  const navigate = useNavigate();
   const displayName = user.email?.split('@')[0] || 'User';
-  const dashboardRoute = isLandlord 
-    ? NAVBAR_ROUTES.LANDLORD_DASHBOARD 
-    : NAVBAR_ROUTES.TENANT_DASHBOARD;
+
+  const handleSettingsClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate('/settings');
+  };
 
   return (
     <DropdownMenu>
@@ -43,55 +46,39 @@ export function UserDropdown({
         <Button 
           variant="outline" 
           size="sm" 
-          className={NAVBAR_STYLES.USER_BUTTON}
+          className={`${NAVBAR_STYLES.USER_BUTTON} p-0 h-9 w-9 rounded-full`}
         >
-          <User className={NAVBAR_STYLES.USER_ICON} />
-          {displayName}
+          <User className="h-5 w-5" />
         </Button>
       </DropdownMenuTrigger>
       
       <DropdownMenuContent 
-        className={NAVBAR_STYLES.DROPDOWN_CONTENT} 
+        className="w-56 p-2 rounded-xl shadow-lg border border-gray-100 dark:border-gray-800"
         align="end"
       >
-        <DropdownMenuItem asChild>
-          <Link to={dashboardRoute} className="cursor-pointer">
-            <LayoutDashboard className={NAVBAR_STYLES.DROPDOWN_ICON} />
-            {NAVBAR_CONTENT.DASHBOARD_LABEL}
-          </Link>
+        <div className="px-2 py-1.5">
+          <p className="text-sm font-medium">{displayName}</p>
+          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+        </div>
+        
+        <DropdownMenuSeparator className="my-1" />
+        
+        <DropdownMenuItem 
+          onClick={handleSettingsClick}
+          className="px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          <span>Settings</span>
         </DropdownMenuItem>
         
-        <DropdownMenuItem asChild>
-          <Link to={NAVBAR_ROUTES.MESSAGES} className="cursor-pointer">
-            <MessageCircle className={NAVBAR_STYLES.DROPDOWN_ICON} />
-            {NAVBAR_CONTENT.MESSAGES_LABEL}
-            {messageUnread > 0 && (
-              <Badge 
-                variant="destructive" 
-                className={NAVBAR_STYLES.MESSAGE_BADGE}
-              >
-                {messageUnread > 99 ? '99+' : messageUnread}
-              </Badge>
-            )}
-          </Link>
-        </DropdownMenuItem>
+        <DropdownMenuSeparator className="my-1" />
         
-        {isAdmin && (
-          <>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link to={NAVBAR_ROUTES.ADMIN_DASHBOARD} className="cursor-pointer">
-                <Shield className={NAVBAR_STYLES.DROPDOWN_ICON} />
-                {NAVBAR_CONTENT.ADMIN_PANEL_LABEL}
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
-        
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onSignOut} className="cursor-pointer">
-          <LogOut className={NAVBAR_STYLES.DROPDOWN_ICON} />
-          {NAVBAR_CONTENT.SIGN_OUT_LABEL}
+        <DropdownMenuItem 
+          onClick={onSignOut}
+          className="px-3 py-2 text-sm rounded-md cursor-pointer text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
