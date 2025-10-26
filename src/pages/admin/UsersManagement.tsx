@@ -31,34 +31,36 @@ export function UsersManagement() {
     try {
       setLoading(true);
       
-      // First, get all profiles with user data
+      // Get all users from auth
+      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
+      if (authError) throw authError;
+      
+      // Get all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          user_id,
-          email,
-          full_name,
-          warning_count,
-          is_banned,
-          created_at,
-          updated_at,
-          user:auth.users!inner(
-            id,
-            email,
-            last_sign_in_at,
-            created_at
-          )
-        `);
+        .select('*');
       
       if (profilesError) throw profilesError;
+
+      // Get all user roles
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('*');
+      
+      if (rolesError) throw rolesError;
 
       // Combine auth and profile data
       const usersWithProfiles = authUsers.map(user => {
         const profile = profiles?.find(p => p.user_id === user.id);
+        const roles = userRoles?.filter(ur => ur.user_id === user.id).map(ur => ur.role) || [];
+        const isAdmin = roles.includes('admin');
+        const isLandlord = roles.includes('landlord');
+        
         return {
           id: user.id,
           email: user.email || 'No email',
-          created_at: user.created_at,
+          full_name: profile?.display_name || '',
+          created_at: user.created_at || '',
           last_sign_in_at: user.last_sign_in_at,
           is_banned: profile?.is_banned || false,
           warning_count: profile?.warning_count || 0
