@@ -13,7 +13,7 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { format, subDays, parseISO, isBefore, isAfter, addDays } from 'date-fns';
+import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -96,6 +96,35 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   // Generate date range label
   const getDateRangeLabel = () => {
     return `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`;
+  };
+
+  // Determine which preset matches the current date range
+  const getDateRangePreset = () => {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    const sixMonthsAgo = subMonths(now, 6);
+    const twelveMonthsAgo = subMonths(now, 12);
+    
+    // Check fiscal year (March 1 to Feb 28/29)
+    const currentYear = now.getFullYear();
+    const fiscalYearStart = new Date(now.getMonth() >= 2 ? currentYear : currentYear - 1, 2, 1);
+    
+    if (dateRange.from.getTime() === startOfMonth.getTime() && dateRange.to >= now) {
+      return 'this-month';
+    } else if (dateRange.from.getTime() === lastMonth.getTime() && 
+               dateRange.to.getTime() === endOfLastMonth.getTime()) {
+      return 'last-month';
+    } else if (dateRange.from >= sixMonthsAgo && dateRange.to >= now) {
+      return 'last-6-months';
+    } else if (dateRange.from >= twelveMonthsAgo && dateRange.to >= now) {
+      return 'last-12-months';
+    } else if (dateRange.from.getTime() === fiscalYearStart.getTime() && dateRange.to >= now) {
+      return 'fiscal-year';
+    }
+    
+    return 'custom';
   };
 
   if (loading) {
@@ -219,42 +248,61 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         <h2 className="text-2xl font-normal text-black dark:text-white">Overview</h2>
       </div>
 
-      {/* Date Range Filters */}
+      {/* Date Range Dropdown */}
       <div className="flex justify-center">
-        <div className="grid grid-cols-5 gap-2 w-full md:w-auto items-center">
-          <div className="col-span-2">
-            <Input
-              type="date"
-              value={format(dateRange.from, 'yyyy-MM-dd')}
-              onChange={(e) => {
-                const newFrom = parseISO(e.target.value);
-                setDateRange(prev => ({
-                  from: newFrom,
-                  to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
-                }));
-              }}
-              className="h-10 w-full text-sm"
-            />
-          </div>
-          <div className="text-center text-muted-foreground text-sm">
-            to
-          </div>
-          <div className="col-span-2">
-            <Input
-              type="date"
-              value={format(dateRange.to, 'yyyy-MM-dd')}
-              onChange={(e) => {
-                const newTo = parseISO(e.target.value);
-                setDateRange(prev => ({
-                  from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
-                  to: newTo
-                }));
-              }}
-              className="h-10 w-full text-sm"
-              min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
-            />
-          </div>
-        </div>
+        <Select
+          value={getDateRangePreset()}
+          onValueChange={(value) => {
+            const now = new Date();
+            let newFrom = new Date();
+            let newTo = new Date();
+
+            switch (value) {
+              case 'this-month':
+                newFrom = new Date(now.getFullYear(), now.getMonth(), 1);
+                newTo = now;
+                break;
+              case 'last-month':
+                newFrom = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                newTo = new Date(now.getFullYear(), now.getMonth(), 0);
+                break;
+              case 'last-6-months':
+                newFrom = subMonths(now, 6);
+                newTo = now;
+                break;
+              case 'last-12-months':
+                newFrom = subMonths(now, 12);
+                newTo = now;
+                break;
+              case 'fiscal-year':
+                // Assuming fiscal year starts March 1st
+                const currentYear = now.getFullYear();
+                const fiscalYearStart = new Date(now.getMonth() >= 2 ? currentYear : currentYear - 1, 2, 1);
+                newFrom = fiscalYearStart;
+                newTo = now;
+                break;
+              default:
+                newFrom = subDays(now, 30);
+                newTo = now;
+            }
+
+            setDateRange({
+              from: newFrom,
+              to: newTo
+            });
+          }}
+        >
+          <SelectTrigger className="w-full max-w-xs">
+            <SelectValue placeholder="Select date range" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="this-month">This Month</SelectItem>
+            <SelectItem value="last-month">Previous Month</SelectItem>
+            <SelectItem value="last-6-months">Last 6 Months</SelectItem>
+            <SelectItem value="last-12-months">Last 12 Months</SelectItem>
+            <SelectItem value="fiscal-year">Current Fiscal Year</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* KPI Cards */}
