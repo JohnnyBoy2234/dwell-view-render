@@ -89,7 +89,7 @@ function AppRoutes() {
 
   return (
     <Routes>
-              {/* Admin Routes - No Navbar */}
+              {/* Admin Routes - No Navbar */}   
               <Route path="/admin" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
               <Route path="/admin/dashboard" element={<RouteGuard><AdminDashboard /></RouteGuard>} />
               <Route path="/admin/management" element={<RouteGuard><AdminManagement /></RouteGuard>} />
