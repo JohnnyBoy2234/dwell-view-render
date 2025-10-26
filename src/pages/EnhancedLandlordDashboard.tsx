@@ -824,7 +824,13 @@ export default function EnhancedLandlordDashboard() {
         return renderPaymentsTab();
       case '/enhancedlandlorddashboard/swiftbooks':
         console.log('[Dashboard] Rendering swiftbooks tab');
-        return <AccountingOverview defaultPropertyId={selectedPropertyId} />;
+        return (
+          <div className="min-h-screen bg-white pb-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+              <AccountingOverview defaultPropertyId={selectedPropertyId} />
+            </div>
+          </div>
+        );
       case '/enhancedlandlorddashboard/inventory':
         console.log('[Dashboard] Rendering inventory tab');
         return renderInventoryTab();
