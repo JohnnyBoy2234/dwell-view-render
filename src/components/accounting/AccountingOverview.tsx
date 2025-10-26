@@ -21,7 +21,6 @@ import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
 import { AccountingNav } from './AccountingNav';
-import { AccountingHeader } from './AccountingHeader';
 import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#FFC658'];
@@ -122,79 +121,86 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }
 
   return (
-    <div className="space-y-6 px-6 pt-6">
-      {/* SwiftBooks Header with Navigation */}
-      <AccountingHeader subtitle="Accounting">
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 items-stretch pt-4">
-          <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-            <SelectTrigger className="w-full md:w-[240px] h-10">
-              <SelectValue placeholder="All Properties" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Properties</SelectItem>
-              {properties.map((property) => (
-                <SelectItem key={property.id} value={property.id}>{property.title}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <Input
-              type="date"
-              value={format(dateRange.from, 'yyyy-MM-dd')}
-              onChange={(e) => {
-                const newFrom = parseISO(e.target.value);
-                setDateRange(prev => ({
-                  from: newFrom,
-                  to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
-                }));
-              }}
-              className="h-10 w-full md:w-auto"
-            />
-            <span className="text-muted-foreground">to</span>
-            <Input
-              type="date"
-              value={format(dateRange.to, 'yyyy-MM-dd')}
-              onChange={(e) => {
-                const newTo = parseISO(e.target.value);
-                setDateRange(prev => ({
-                  from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
-                  to: newTo
-                }));
-              }}
-              className="h-10 w-full md:w-auto"
-              min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
-            />
+    <div className="space-y-6 p-6">
+      {/* Subtitle and Content Card */}
+      <Card className={PROPERTY_CARD_STYLES.CARD}>
+        <div className="p-6 space-y-4">
+          {/* Subtitle */}
+          <div className="pb-2 border-b">
+            <h2 className="text-xl font-semibold text-muted-foreground/70">Accounting</h2>
           </div>
-        </div>
+          
+          {/* Filters */}
+          <div className="flex flex-col md:flex-row gap-4 items-stretch">
+            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+              <SelectTrigger className="w-full md:w-[240px] h-10">
+                <SelectValue placeholder="All Properties" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Properties</SelectItem>
+                {properties.map((property) => (
+                  <SelectItem key={property.id} value={property.id}>{property.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <Input
+                type="date"
+                value={format(dateRange.from, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const newFrom = parseISO(e.target.value);
+                  setDateRange(prev => ({
+                    from: newFrom,
+                    to: isAfter(prev.to, newFrom) ? prev.to : addDays(newFrom, 1)
+                  }));
+                }}
+                className="h-10 w-full md:w-auto"
+              />
+              <span className="text-muted-foreground">to</span>
+              <Input
+                type="date"
+                value={format(dateRange.to, 'yyyy-MM-dd')}
+                onChange={(e) => {
+                  const newTo = parseISO(e.target.value);
+                  setDateRange(prev => ({
+                    from: isBefore(prev.from, newTo) ? prev.from : subDays(newTo, 1),
+                    to: newTo
+                  }));
+                }}
+                className="h-10 w-full md:w-auto"
+                min={format(addDays(dateRange.from, 1), 'yyyy-MM-dd')}
+              />
+            </div>
+          </div>
 
-        {/* Navigation */}
-        <AccountingNav
-          onAddIncome={() => {
-            setTxnType('income');
-            setTxnAmount(0);
-            setTxnDate('');
-            setTxnPropertyId(selectedProperty);
-            setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-            setTxnVatPercent(0);
-            setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-            setTxnNote('');
-            setShowIncomeModal(true);
-          }}
-          onAddExpense={() => {
-            setTxnType('expense');
-            setTxnAmount(0);
-            setTxnDate('');
-            setTxnPropertyId(selectedProperty);
-            const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-            setTxnCategory(defaultCat);
-            setTxnVatPercent(getDefaultVATPercent(defaultCat));
-            setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-            setTxnNote('');
-            setShowExpenseModal(true);
-          }}
-        />
-      </AccountingHeader>
+          {/* Navigation */}
+          <AccountingNav
+            onAddIncome={() => {
+              setTxnType('income');
+              setTxnAmount(0);
+              setTxnDate('');
+              setTxnPropertyId(selectedProperty);
+              setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+              setTxnVatPercent(0);
+              setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+              setTxnNote('');
+              setShowIncomeModal(true);
+            }}
+            onAddExpense={() => {
+              setTxnType('expense');
+              setTxnAmount(0);
+              setTxnDate('');
+              setTxnPropertyId(selectedProperty);
+              const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+              setTxnCategory(defaultCat);
+              setTxnVatPercent(getDefaultVATPercent(defaultCat));
+              setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+              setTxnNote('');
+              setShowExpenseModal(true);
+            }}
+          />
+        </div>
+      </Card>
 
       {/* Payment Reminder - Separate row for better mobile UX */}
       <Button

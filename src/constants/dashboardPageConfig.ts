@@ -89,4 +89,11 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
   },
+  '/enhancedlandlorddashboard/tax-invoice': {
+    title: 'SwiftBooks',
+    icon: BarChart3,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedlandlorddashboard',
+  },
 };
