@@ -2069,7 +2069,7 @@ const renderReportsTab = () => (
 
     return (
       <div className="min-h-screen bg-white pb-8">
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8">
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
