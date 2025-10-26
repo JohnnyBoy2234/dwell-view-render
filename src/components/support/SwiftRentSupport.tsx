@@ -99,8 +99,7 @@ export function SwiftRentSupport() {
   const handleBackToDashboard = () => {
     if (isLandlord) {
       navigate('/landlord/dashboard');
-      return;
-    }
+    } else {
       navigate(`/enhancedlandlorddashboard${propertyId ? '?property=' + propertyId : ''}`);
     }
   };

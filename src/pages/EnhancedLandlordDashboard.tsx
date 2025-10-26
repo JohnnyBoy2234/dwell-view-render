@@ -1351,6 +1351,11 @@ const renderReportsTab = () => (
         defaultPath="/enhancedlandlorddashboard"
         className="mt-4"
       />
+      
+      {/* Header */}
+      <Card className="shadow-md bg-white/90 backdrop-blur-sm">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
             <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shadow-sm">
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
@@ -1359,7 +1364,8 @@ const renderReportsTab = () => (
               <p className="text-sm text-muted-foreground">Track financial performance and insights</p>
             </div>
           </div>
-        </div>
+        </CardContent>
+      </Card>
       
         {tenants.length === 0 ? (
           <Card className="shadow-md bg-white/90 backdrop-blur-sm">
