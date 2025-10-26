@@ -52,16 +52,18 @@ export function UsersManagement() {
       
       if (profilesError) throw profilesError;
 
-      // Transform the data to match our User interface
-      const usersWithProfiles = (profiles || []).map(profile => ({
-        id: profile.user_id,
-        email: profile.email || profile.user?.email || 'No email',
-        full_name: profile.full_name || '',
-        created_at: profile.user?.created_at || profile.created_at,
-        last_sign_in_at: profile.user?.last_sign_in_at || null,
-        is_banned: profile.is_banned || false,
-        warning_count: profile.warning_count || 0
-      }));
+      // Combine auth and profile data
+      const usersWithProfiles = authUsers.map(user => {
+        const profile = profiles?.find(p => p.user_id === user.id);
+        return {
+          id: user.id,
+          email: user.email || 'No email',
+          created_at: user.created_at,
+          last_sign_in_at: user.last_sign_in_at,
+          is_banned: profile?.is_banned || false,
+          warning_count: profile?.warning_count || 0
+        };
+      });
 
       setUsers(usersWithProfiles);
     } catch (error) {
@@ -77,27 +79,11 @@ export function UsersManagement() {
   };
 
   const handleWarnUser = async (userId: string) => {
-    try {
-      // Call the increment_warning_count function
-      const { error } = await supabase.rpc('increment_warning_count', { user_id: userId });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "User warned",
-        description: "A warning has been issued to the user."
-      });
-      
-      // Refresh user list
-      await fetchUsers();
-    } catch (error) {
-      console.error('Error warning user:', error);
-      toast({
-        variant: "destructive",
-        title: "Error warning user",
-        description: "Failed to issue warning."
-      });
-    }
+    toast({
+      variant: "destructive",
+      title: "Feature not available",
+      description: "User warning feature is not yet configured."
+    });
   };
 
   const handleDeleteUser = async (userId: string) => {
