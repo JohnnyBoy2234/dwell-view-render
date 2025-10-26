@@ -14,18 +14,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
   
   return (
     <nav className={`bg-card border rounded-lg p-2 shadow-sm ${className}`}>
-      <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-        <li className="w-full">
-          <Button 
-            asChild 
-            variant={!isInvoicePage && !location.pathname.includes('/accounting/transactions') ? 'default' : 'outline'} 
-            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
-          >
-            <Link to="/dashboard/accounting">
-              Accounting
-            </Link>
-          </Button>
-        </li>
+      <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
         <li className="w-full">
           <Button 
             variant="outline" 
