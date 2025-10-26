@@ -51,35 +51,7 @@ export function UserDropdown({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-2">
-      {/* Desktop Buttons - Only show on larger screens */}
-      <div className="hidden md:flex items-center space-x-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleDashboardClick}
-          className="p-2 h-9 w-9 rounded-full"
-          title="Dashboard"
-        >
-          <LayoutDashboard className="h-5 w-5" />
-        </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleMessagesClick}
-          className="p-2 h-9 w-9 rounded-full relative"
-          title="Messages"
-        >
-          <MessageSquare className="h-5 w-5" />
-          {messageUnread > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-              {messageUnread}
-            </span>
-          )}
-        </Button>
-      </div>
-
+    <div className="flex items-center">
       {/* Profile Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -105,7 +77,7 @@ export function UserDropdown({
           
           <DropdownMenuItem 
             onClick={handleDashboardClick}
-            className="md:hidden px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <LayoutDashboard className="mr-2 h-4 w-4" />
             <span>Dashboard</span>
@@ -113,7 +85,7 @@ export function UserDropdown({
 
           <DropdownMenuItem 
             onClick={handleMessagesClick}
-            className="md:hidden px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 relative"
+            className="px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 relative"
           >
             <MessageSquare className="mr-2 h-4 w-4" />
             <span>Messages</span>
@@ -123,6 +95,16 @@ export function UserDropdown({
               </span>
             )}
           </DropdownMenuItem>
+          
+          {isAdmin && (
+            <DropdownMenuItem 
+              onClick={() => navigate('/admin')}
+              className="px-3 py-2 text-sm rounded-md cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+            >
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              <span>Admin Panel</span>
+            </DropdownMenuItem>
+          )}
           
           <DropdownMenuItem 
             onClick={handleSettingsClick}
