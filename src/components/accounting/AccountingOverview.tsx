@@ -126,8 +126,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       <Card className={PROPERTY_CARD_STYLES.CARD}>
         <div className="p-6 space-y-4">
           {/* Subtitle */}
-          <div className="pb-2 border-b">
-            <h2 className="text-xl font-semibold text-muted-foreground/70">Accounting</h2>
+          <div className="pb-4">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Accounting</h2>
           </div>
           
           {/* Filters */}
