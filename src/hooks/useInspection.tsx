@@ -1,10 +1,25 @@
 import { useInventory, InventoryRecordWithDetails } from '@/hooks/useInventory';
 
+export type InspectionRecordWithDetails = InventoryRecordWithDetails;
+
 /**
  * Hook for managing property inspections
  * Reuses inventory infrastructure but provides inspection-specific interface
  */
-export function useInspection() {
+interface UseInspectionReturn {
+  inspectionRecords: any[];
+  loading: boolean;
+  error: Error | null;
+  fetchInspectionRecords: () => Promise<void>;
+  createInspectionRecord: (data: any) => Promise<any>;
+  updateInspectionRecord: (id: string, data: any) => Promise<any>;
+  createInspectionItem: (data: any) => Promise<any>;
+  generateInspectionReport: (id: string) => Promise<string>;
+  downloadInspectionReport: (id: string, fileName: string) => Promise<void>;
+  viewInspectionRecord: (id: string) => Promise<void>;
+}
+
+export function useInspection(): UseInspectionReturn {
   const {
     inventoryRecords,
     loading,
@@ -36,4 +51,6 @@ export function useInspection() {
   };
 }
 
+// Re-export the types
+export type { InventoryRecordWithDetails };
 export type { InventoryRecordWithDetails as InspectionRecordWithDetails };
