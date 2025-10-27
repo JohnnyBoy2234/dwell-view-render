@@ -87,7 +87,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       setCategoryData(category);
     };
     loadChartData();
-  }, [transactions, selectedProperty, dateRange, getMonthlyDataByRange, getCategoryData, filteredTransactions]);
+  }, [transactions, selectedProperty, dateRange, getMonthlyDataByRange, getCategoryData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
