@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Transaction, AccountingKPIs, MonthlyData, CategoryData } from '@/types/accounting';
@@ -49,7 +49,7 @@ export function useAccounting() {
     }
   };
 
-  const fetchTransactionsByDateRange = async (from: Date, to: Date, propertyId?: string) => {
+  const fetchTransactionsByDateRange = useCallback(async (from: Date, to: Date, propertyId?: string) => {
     if (!user) return;
 
     try {
@@ -80,7 +80,7 @@ export function useAccounting() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
 
   const createTransaction = async (transactionData: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user) return null;
@@ -246,7 +246,7 @@ export function useAccounting() {
     }
   };
 
-  const getMonthlyDataByRange = async (from: Date, to: Date, propertyId?: string): Promise<MonthlyData[]> => {
+  const getMonthlyDataByRange = useCallback(async (from: Date, to: Date, propertyId?: string): Promise<MonthlyData[]> => {
     if (!user) return [];
 
     try {
@@ -299,9 +299,9 @@ export function useAccounting() {
       console.error('Error fetching monthly data:', error);
       return [];
     }
-  };
+  }, [user]);
 
-  const getCategoryData = (transactionList: Transaction[]): CategoryData[] => {
+  const getCategoryData = useCallback((transactionList: Transaction[]): CategoryData[] => {
     const categoryMap = new Map<string, number>();
     
     transactionList
@@ -315,7 +315,7 @@ export function useAccounting() {
       category,
       amount,
     }));
-  };
+  }, []);
 
   useEffect(() => {
     if (user) {
