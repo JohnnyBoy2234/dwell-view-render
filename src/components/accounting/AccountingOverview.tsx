@@ -157,7 +157,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     <div className="min-h-screen bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Subtitle and Content Card */}
-      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
+      <Card className="bg-gray-900 border border-gray-900 shadow-xl">
         <div className="p-6 space-y-4">
           {/* Subtitle */}
           <div className="text-center space-y-2 mb-8">
@@ -337,7 +337,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-900 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-400">Total Income</h3>
@@ -352,7 +352,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           </div>
         </div>
         
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-900 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-400">Total Expenses</h3>
@@ -367,7 +367,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           </div>
         </div>
         
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-900 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-sm font-medium text-gray-400">Net Profit</h3>
@@ -394,7 +394,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expense Chart */}
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-900 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-white">Income vs Expense</h3>
@@ -446,7 +446,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         </div>
 
         {/* Income & Expense Trend */}
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-900 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-4 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-base font-semibold text-white">Income & Expense Trend</h3>
@@ -646,7 +646,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       </Dialog>
 
       {/* Recent Transactions */}
-      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
+      <Card className="bg-gray-900 border border-gray-900 shadow-xl">
         <CardHeader>
           <CardTitle className="text-white">Recent Transactions</CardTitle>
         </CardHeader>
