@@ -72,13 +72,13 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
   useEffect(() => {
     const loadChartData = async () => {
-      const monthly = await getMonthlyData(6);
+      const monthly = await getMonthlyData(6, selectedProperty);
       const category = getCategoryData(transactions);
       setMonthlyData(monthly);
       setCategoryData(category);
     };
     loadChartData();
-  }, [transactions]);
+  }, [transactions, selectedProperty]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
@@ -155,131 +155,136 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
   return (
     <div className="min-h-screen bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-      {/* Subtitle and Content Card */}
-      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
-        <div className="p-6 space-y-4">
-          {/* Subtitle */}
-          <div className="text-center space-y-2 mb-8">
-            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Accounting</h2>
-            <p className="text-gray-300">Track your property finances and generate reports</p>
-          </div>
+      {/* White Top Section */}
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <Card className="bg-white border border-gray-200 shadow-sm">
+            <div className="p-6 space-y-4">
+              {/* Subtitle */}
+              <div className="text-center space-y-2 mb-8">
+                <h2 className="text-3xl font-bold text-gray-900">Accounting</h2>
+                <p className="text-gray-600">Track your property finances and generate reports</p>
+              </div>
           
-          {/* Filters */}
-          <div className="flex flex-col md:flex-row gap-4 items-stretch">
-            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-              <SelectTrigger className="w-full md:w-[240px] h-10">
-                <SelectValue placeholder="All Properties" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Properties</SelectItem>
-                {properties.map((property) => (
-                  <SelectItem key={property.id} value={property.id}>{property.title}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              {/* Filters */}
+              <div className="flex flex-col md:flex-row gap-4 items-stretch">
+                <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                  <SelectTrigger className="w-full md:w-[240px] h-10 bg-white border-gray-300">
+                    <SelectValue placeholder="All Properties" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Properties</SelectItem>
+                    {properties.map((property) => (
+                      <SelectItem key={property.id} value={property.id}>{property.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          {/* Navigation */}
-          <AccountingNav
-            onAddIncome={() => {
-              setTxnType('income');
-              setTxnAmount(0);
-              setTxnDate('');
-              setTxnPropertyId(selectedProperty);
-              setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-              setTxnVatPercent(0);
-              setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-              setTxnNote('');
-              setShowIncomeModal(true);
-            }}
-            onAddExpense={() => {
-              setTxnType('expense');
-              setTxnAmount(0);
-              setTxnDate('');
-              setTxnPropertyId(selectedProperty);
-              const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-              setTxnCategory(defaultCat);
-              setTxnVatPercent(getDefaultVATPercent(defaultCat));
-              setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-              setTxnNote('');
-              setShowExpenseModal(true);
-            }}
-          />
-        </div>
-      </Card>
+              {/* Navigation */}
+              <AccountingNav
+                onAddIncome={() => {
+                  setTxnType('income');
+                  setTxnAmount(0);
+                  setTxnDate('');
+                  setTxnPropertyId(selectedProperty);
+                  setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+                  setTxnVatPercent(0);
+                  setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+                  setTxnNote('');
+                  setShowIncomeModal(true);
+                }}
+                onAddExpense={() => {
+                  setTxnType('expense');
+                  setTxnAmount(0);
+                  setTxnDate('');
+                  setTxnPropertyId(selectedProperty);
+                  const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+                  setTxnCategory(defaultCat);
+                  setTxnVatPercent(getDefaultVATPercent(defaultCat));
+                  setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+                  setTxnNote('');
+                  setShowExpenseModal(true);
+                }}
+              />
+            </div>
+          </Card>
 
-      {/* Payment Reminder Banner */}
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
-              <Bell className="w-4 h-4" />
+          {/* Payment Reminder Banner */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-600 flex items-center justify-center">
+                  <Bell className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Send Payment Reminder</div>
+                  <div className="text-sm text-gray-600">Notify a tenant instantly via app and email</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Select value={selectedProperty} onValueChange={setSelectedProperty}>
+                  <SelectTrigger className="w-[220px] bg-white border-gray-300">
+                    <SelectValue placeholder="Select property" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Properties</SelectItem>
+                    {properties.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  disabled={sendingReminder || selectedProperty === 'all'}
+                  onClick={async () => {
+                    if (selectedProperty === 'all') {
+                      toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+                      return;
+                    }
+                    try {
+                      setSendingReminder(true);
+                      const { data: tenancy } = await supabase
+                        .from('tenancies')
+                        .select('tenant_id')
+                        .eq('property_id', selectedProperty)
+                        .eq('status', 'active')
+                        .limit(1)
+                        .maybeSingle();
+                      if (!tenancy?.tenant_id) {
+                        toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
+                        setSendingReminder(false);
+                        return;
+                      }
+                      const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                        body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
+                      });
+                      if (error) throw error;
+                      toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
+                    } catch (e: any) {
+                      toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                    } finally {
+                      setSendingReminder(false);
+                    }
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {sendingReminder ? 'Sending…' : 'Send Reminder'}
+                </Button>
+              </div>
             </div>
-            <div>
-              <div className="font-semibold text-white">Send Payment Reminder</div>
-              <div className="text-sm text-gray-300">Notify a tenant instantly via app and email</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 w-full sm:w-auto">
-            <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-              <SelectTrigger className="w-[220px]">
-                <SelectValue placeholder="Select property" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Properties</SelectItem>
-                {properties.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button
-              disabled={sendingReminder || selectedProperty === 'all'}
-              onClick={async () => {
-                if (selectedProperty === 'all') {
-                  toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-                  return;
-                }
-                try {
-                  setSendingReminder(true);
-                  const { data: tenancy } = await supabase
-                    .from('tenancies')
-                    .select('tenant_id')
-                    .eq('property_id', selectedProperty)
-                    .eq('status', 'active')
-                    .limit(1)
-                    .maybeSingle();
-                  if (!tenancy?.tenant_id) {
-                    toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
-                    setSendingReminder(false);
-                    return;
-                  }
-                  const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                    body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
-                  });
-                  if (error) throw error;
-                  toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
-                } catch (e: any) {
-                  toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-                } finally {
-                  setSendingReminder(false);
-                }
-              }}
-              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
-            >
-              {sendingReminder ? 'Sending…' : 'Send Reminder'}
-            </Button>
           </div>
         </div>
       </div>
 
-      {/* Overview Heading */}
-      <div className="text-center">
-        <h2 className="text-2xl font-bold text-white">Overview</h2>
-      </div>
+      {/* Dark Bottom Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Overview Heading */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-white">Overview</h2>
+        </div>
 
-      {/* Date Range Dropdown */}
-      <div className="flex justify-center">
+        {/* Date Range Dropdown */}
+        <div className="flex justify-center">
         <Select
           value={getDateRangePreset()}
           onValueChange={(value) => {
@@ -332,11 +337,11 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
             <SelectItem value="last-12-months">Last 12 Months</SelectItem>
             <SelectItem value="fiscal-year">Current Fiscal Year</SelectItem>
           </SelectContent>
-        </Select>
-      </div>
+          </Select>
+        </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+        {/* KPI Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
@@ -386,13 +391,13 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               {kpis.netIncome >= 0 ? 'Profit' : 'Loss'} this period
             </div>
           </div>
+          </div>
         </div>
-      </div>
 
-      {/* Charts Section follows */}
+        {/* Charts Section follows */}
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Charts */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expense Chart */}
         <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
@@ -533,12 +538,12 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 <span className="text-xs text-gray-300">Expense</span>
               </div>
             </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Add Income Modal */}
-      <Dialog open={showIncomeModal} onOpenChange={setShowIncomeModal}>
+        {/* Add Income Modal */}
+        <Dialog open={showIncomeModal} onOpenChange={setShowIncomeModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Income</DialogTitle>
@@ -588,11 +593,11 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               }}>Save</Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {/* Add Expense Modal */}
-      <Dialog open={showExpenseModal} onOpenChange={setShowExpenseModal}>
+        {/* Add Expense Modal */}
+        <Dialog open={showExpenseModal} onOpenChange={setShowExpenseModal}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add Expense</DialogTitle>
@@ -642,11 +647,11 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               }}>Save</Button>
             </div>
           </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {/* Recent Transactions */}
-      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
+        {/* Recent Transactions */}
+        <Card className="bg-gray-900 border border-gray-800 shadow-xl">
         <CardHeader>
           <CardTitle className="text-white">Recent Transactions</CardTitle>
         </CardHeader>
@@ -676,10 +681,9 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 </div>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
-
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -161,17 +161,23 @@ export function useAccounting() {
     };
   };
 
-  const getMonthlyData = async (months: number = 6): Promise<MonthlyData[]> => {
+  const getMonthlyData = async (months: number = 6, propertyId?: string): Promise<MonthlyData[]> => {
     if (!user) return [];
 
     try {
       const startDate = subMonths(new Date(), months - 1);
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
         .gte('date', format(startOfMonth(startDate), 'yyyy-MM-dd'))
         .order('date', { ascending: true });
+
+      if (propertyId && propertyId !== 'all') {
+        query = query.eq('property_id', propertyId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 

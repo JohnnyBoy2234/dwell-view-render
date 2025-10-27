@@ -29,7 +29,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
   const isInvoicePage = location.pathname.includes('/invoices/tax');
   
   return (
-    <nav className={`bg-gray-900 border border-gray-800 rounded-lg p-2 shadow-sm ${className}`}>
+    <nav className={`bg-white border border-gray-200 rounded-lg p-2 shadow-sm ${className}`}>
       <ul className="grid grid-cols-2 gap-2">
         <li className="w-full">
           <Button 
