@@ -160,7 +160,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     <div className="min-h-screen bg-gray-900">
       {/* White Top Section */}
       <div className="bg-white">
-        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
+        <div className="w-full px-6 sm:px-8 lg:px-12 py-6">
           <Card className="bg-white border border-gray-200 shadow-sm">
             <div className="p-8 space-y-6">
               {/* Subtitle */}
