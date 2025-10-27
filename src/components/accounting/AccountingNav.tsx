@@ -2,19 +2,19 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, List } from 'lucide-react';
 
-// Custom styles for accounting page buttons
+// Custom styles for accounting page buttons with dark theme
 const accountingButtonStyle = {
-  border: '1px solid #00f0ff', // Neon blue border
-  backgroundColor: '#dbeafe',   // Light blue background
-  color: '#1e40af',            // Dark blue text
+  border: '1px solid #3b82f6', // Blue border
+  backgroundColor: 'transparent', // Transparent background
+  color: '#ffffff', // White text
   transition: 'all 0.2s',
   '&:hover': {
-    backgroundColor: '#bfdbfe', // Slightly darker blue on hover
-    borderColor: '#00c4d4',    // Slightly darker neon blue on hover
-    boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)', // Subtle glow on hover
+    backgroundColor: 'rgba(59, 130, 246, 0.1)', // Slight blue tint on hover
+    borderColor: '#60a5fa', // Lighter blue border on hover
+    boxShadow: '0 0 8px rgba(59, 130, 246, 0.4)', // Subtle glow on hover
   },
   '&:focus': {
-    boxShadow: '0 0 0 2px rgba(0, 240, 255, 0.4)',
+    boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.4)', // Focus ring
   },
 };
 
@@ -29,14 +29,14 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
   const isInvoicePage = location.pathname.includes('/invoices/tax');
   
   return (
-    <nav className={`bg-card border rounded-lg p-2 shadow-sm ${className}`}>
-      <ul className="grid grid-cols-2 gap-2">
+    <nav className={`bg-gray-800 border border-gray-700 rounded-lg p-2 shadow-sm ${className}`}>
+      <ul className="grid grid-cols-3 gap-2">
         <li className="w-full">
           <Button 
             variant="outline" 
             onClick={onAddIncome}
             style={accountingButtonStyle}
-            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap hover:bg-gray-700 transition-colors"
           >
             <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
             <span>Add Income</span>
@@ -47,7 +47,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
             variant="outline" 
             onClick={onAddExpense}
             style={accountingButtonStyle}
-            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
+            className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap hover:bg-gray-700 transition-colors"
           >
             <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
             <span>Add Expense</span>
