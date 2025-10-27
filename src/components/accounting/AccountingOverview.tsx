@@ -160,8 +160,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     <div className="min-h-screen bg-gray-900">
       {/* White Top Section */}
       <div className="bg-white">
-        <div className="w-full px-6 sm:px-8 lg:px-12 py-6">
-          <Card className="bg-white border border-gray-200 shadow-sm">
+        <div className="w-full py-6">
+          <Card className="bg-white border-0 shadow-none rounded-none">
             <div className="p-8 space-y-6">
               {/* Subtitle */}
               <div className="text-center space-y-2 mb-8">
@@ -191,8 +191,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 </Select>
               </div>
 
-              {/* Navigation - Wider Section */}
-              <div className="max-w-4xl mx-auto">
+              {/* Navigation - Full Width Section */}
+              <div className="w-full">
                 <AccountingNav
                   onAddIncome={() => {
                     setTxnType('income');
