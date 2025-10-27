@@ -212,12 +212,12 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
+            <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center">
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-semibold text-black dark:text-white">Send Payment Reminder</div>
-              <div className="text-sm text-black/70 dark:text-white/70">Notify a tenant instantly via app and email</div>
+              <div className="font-semibold text-white">Send Payment Reminder</div>
+              <div className="text-sm text-gray-300">Notify a tenant instantly via app and email</div>
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -647,28 +647,28 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       {/* Recent Transactions */}
       <Card className="bg-gray-900 border border-gray-800 shadow-xl">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle className="text-white">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {transactions.slice(0, 6).map((transaction) => {
               const property = properties.find(p => p.id === transaction.property_id);
               return (
-                <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={transaction.id} className="flex items-center justify-between p-3 border border-gray-800 rounded-lg bg-gray-900">
                   <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${transaction.type === 'income' ? 'bg-success-green' : 'bg-destructive'}`} />
+                    <div className={`w-2 h-2 rounded-full ${transaction.type === 'income' ? 'bg-green-500' : 'bg-red-500'}`} />
                     <div>
-                      <p className="font-medium">{transaction.category || transaction.vendor}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-white">{transaction.category || transaction.vendor}</p>
+                      <p className="text-sm text-gray-400">
                         {property?.title || 'No Property'} • {format(new Date(transaction.date), 'MMM dd, yyyy')}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className={`font-medium ${transaction.type === 'income' ? 'text-success-green' : 'text-destructive'}`}>
+                    <p className={`font-medium ${transaction.type === 'income' ? 'text-green-400' : 'text-red-400'}`}>
                       {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Number(transaction.amount))}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-gray-500">
                       VAT: {transaction.vat_percent}%
                     </p>
                   </div>
