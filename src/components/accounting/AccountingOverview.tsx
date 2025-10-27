@@ -170,10 +170,10 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               </div>
           
               {/* Filters */}
-              <div className="flex flex-col md:flex-row gap-4 items-stretch">
+              <div className="flex flex-col md:flex-row gap-6 items-stretch mb-4">
                 <Select value={selectedProperty} onValueChange={setSelectedProperty}>
                   <SelectTrigger 
-                    className="w-full md:w-[240px] h-10 text-black"
+                    className="w-full md:w-[320px] h-12 text-black"
                     style={{
                       border: '1px solid #00f0ff',
                       backgroundColor: '#dbeafe',
@@ -191,32 +191,34 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 </Select>
               </div>
 
-              {/* Navigation */}
-              <AccountingNav
-                onAddIncome={() => {
-                  setTxnType('income');
-                  setTxnAmount(0);
-                  setTxnDate('');
-                  setTxnPropertyId(selectedProperty);
-                  setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-                  setTxnVatPercent(0);
-                  setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-                  setTxnNote('');
-                  setShowIncomeModal(true);
-                }}
-                onAddExpense={() => {
-                  setTxnType('expense');
-                  setTxnAmount(0);
-                  setTxnDate('');
-                  setTxnPropertyId(selectedProperty);
-                  const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-                  setTxnCategory(defaultCat);
-                  setTxnVatPercent(getDefaultVATPercent(defaultCat));
-                  setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-                  setTxnNote('');
-                  setShowExpenseModal(true);
-                }}
-              />
+              {/* Navigation - Wider Section */}
+              <div className="max-w-4xl mx-auto">
+                <AccountingNav
+                  onAddIncome={() => {
+                    setTxnType('income');
+                    setTxnAmount(0);
+                    setTxnDate('');
+                    setTxnPropertyId(selectedProperty);
+                    setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+                    setTxnVatPercent(0);
+                    setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+                    setTxnNote('');
+                    setShowIncomeModal(true);
+                  }}
+                  onAddExpense={() => {
+                    setTxnType('expense');
+                    setTxnAmount(0);
+                    setTxnDate('');
+                    setTxnPropertyId(selectedProperty);
+                    const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+                    setTxnCategory(defaultCat);
+                    setTxnVatPercent(getDefaultVATPercent(defaultCat));
+                    setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+                    setTxnNote('');
+                    setShowExpenseModal(true);
+                  }}
+                />
+              </div>
             </div>
           </Card>
 
