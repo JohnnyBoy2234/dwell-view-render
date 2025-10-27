@@ -170,10 +170,10 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               </div>
           
               {/* Filters */}
-              <div className="flex flex-col md:flex-row gap-6 items-stretch mb-4">
+              <div className="max-w-4xl mx-auto mb-4">
                 <Select value={selectedProperty} onValueChange={setSelectedProperty}>
                   <SelectTrigger 
-                    className="w-full md:w-[320px] h-12 text-black"
+                    className="w-full h-12 text-black"
                     style={{
                       border: '1px solid #00f0ff',
                       backgroundColor: '#dbeafe',
@@ -191,8 +191,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 </Select>
               </div>
 
-              {/* Navigation - Full Width Section */}
-              <div className="w-full">
+              {/* Navigation - Matched Width Section */}
+              <div className="max-w-4xl mx-auto">
                 <AccountingNav
                   onAddIncome={() => {
                     setTxnType('income');
@@ -223,7 +223,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           </Card>
 
           {/* Payment Reminder Banner */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
+          <div className="max-w-4xl mx-auto bg-blue-50 border border-blue-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full bg-blue-500/20 text-blue-600 flex items-center justify-center">
