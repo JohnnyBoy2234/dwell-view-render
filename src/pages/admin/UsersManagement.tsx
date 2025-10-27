@@ -62,8 +62,8 @@ export function UsersManagement() {
           full_name: profile?.display_name || '',
           created_at: user.created_at || '',
           last_sign_in_at: user.last_sign_in_at,
-          is_banned: profile?.is_banned || false,
-          warning_count: profile?.warning_count || 0
+          is_banned: false,
+          warning_count: 0
         };
       });
 

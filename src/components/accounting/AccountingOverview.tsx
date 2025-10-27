@@ -17,7 +17,6 @@ import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
