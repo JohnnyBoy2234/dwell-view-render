@@ -228,26 +228,28 @@ function AppRoutes() {
 
 const App = () => {
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <AuthBootstrap>
-            <BrowserRouter>
-              <ScrollToTop />
-              <ErrorBoundary>
-              <MobileNetworkStatus />
-              <AISupportChat />
-              <AppRoutes />
-              <MobileBottomBar />
-              </ErrorBoundary>
-            </BrowserRouter>
-          </AuthBootstrap>
-        </AuthProvider>
-      </TooltipProvider>
-      <Analytics />
-    </QueryClientProvider>
+    <div className="min-h-screen bg-gray-900">
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <AuthProvider>
+            <AuthBootstrap>
+              <BrowserRouter>
+                <ScrollToTop />
+                <ErrorBoundary>
+                  <MobileNetworkStatus />
+                  <AISupportChat />
+                  <AppRoutes />
+                  <MobileBottomBar />
+                </ErrorBoundary>
+              </BrowserRouter>
+            </AuthBootstrap>
+          </AuthProvider>
+        </TooltipProvider>
+        <Analytics />
+      </QueryClientProvider>
+    </div>
   );
 };
 
