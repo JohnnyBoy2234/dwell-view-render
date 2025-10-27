@@ -37,7 +37,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
-  const { transactions, loading, fetchTransactions, calculateKPIs, getMonthlyData, getCategoryData, createTransaction } = useAccounting();
+  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction } = useAccounting();
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
@@ -67,9 +67,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const sampleExpenses = [1800,3200,2600,2400,3600,3000,2100,3300,2200];
 
   useEffect(() => {
-    const month = new Date(selectedMonth + '-01');
-    fetchTransactions(month, selectedProperty);
-  }, [selectedMonth, selectedProperty]);
+    fetchTransactionsByDateRange(dateRange.from, dateRange.to, selectedProperty);
+  }, [dateRange, selectedProperty, fetchTransactionsByDateRange]);
 
   // Filter transactions based on selected date range
   const filteredTransactions = transactions.filter(transaction => {
@@ -82,13 +81,13 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
   useEffect(() => {
     const loadChartData = async () => {
-      const monthly = await getMonthlyData(6, selectedProperty);
+      const monthly = await getMonthlyDataByRange(dateRange.from, dateRange.to, selectedProperty);
       const category = getCategoryData(filteredTransactions);
       setMonthlyData(monthly);
       setCategoryData(category);
     };
     loadChartData();
-  }, [transactions, selectedProperty, dateRange, getMonthlyData, getCategoryData]);
+  }, [transactions, selectedProperty, dateRange, getMonthlyDataByRange, getCategoryData, filteredTransactions]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
@@ -423,7 +422,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               <span className="text-xs text-gray-400">{getDateRangeLabel()}</span>
             </div>
             <div className="flex-1">
-              <div className="h-[300px] w-full">
+              <div className="h-[250px] sm:h-[300px] w-full min-h-[250px]">
                 <ChartContainer
                   config={{
                     amount: { label: "Amount" },
@@ -435,41 +434,43 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                     swiftrent: { label: "SwiftRent", color: "#ec4899" },
                     other: { label: "Other", color: "#6366f1" },
                   }}
-                  className="mx-auto aspect-square max-h-[300px]"
+                  className="mx-auto w-full h-full"
                 >
-                  <PieChart>
-                    <Pie 
-                      data={categoryData.map((item) => ({
-                        category: item.category,
-                        amount: item.amount,
-                        fill: item.category === 'Maintenance' ? '#3b82f6' :
-                              item.category.includes('Utilities') ? '#10b981' :
-                              item.category.includes('Rates') ? '#f59e0b' :
-                              item.category === 'Insurance' ? '#ef4444' :
-                              item.category.includes('Bank') ? '#8b5cf6' :
-                              item.category.includes('SwiftRent') ? '#ec4899' :
-                              '#6366f1'
-                      }))}
-                      dataKey="amount"
-                      nameKey="category"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={2}
-                    />
-                    <ChartLegend
-                      content={<ChartLegendContent nameKey="category" />}
-                      className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center text-white"
-                    />
-                    <Tooltip
-                      contentStyle={{ 
-                        backgroundColor: '#1F2937', 
-                        border: '1px solid #374151',
-                        borderRadius: '0.5rem',
-                        color: 'white'
-                      }}
-                      formatter={(value) => formatCurrency(Number(value))}
-                    />
-                  </PieChart>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie 
+                        data={categoryData.map((item) => ({
+                          category: item.category,
+                          amount: item.amount,
+                          fill: item.category === 'Maintenance' ? '#3b82f6' :
+                                item.category.includes('Utilities') ? '#10b981' :
+                                item.category.includes('Rates') ? '#f59e0b' :
+                                item.category === 'Insurance' ? '#ef4444' :
+                                item.category.includes('Bank') ? '#8b5cf6' :
+                                item.category.includes('SwiftRent') ? '#ec4899' :
+                                '#6366f1'
+                        }))}
+                        dataKey="amount"
+                        nameKey="category"
+                        innerRadius={50}
+                        outerRadius={80}
+                        paddingAngle={2}
+                      />
+                      <ChartLegend
+                        content={<ChartLegendContent nameKey="category" />}
+                        className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center text-white text-xs"
+                      />
+                      <Tooltip
+                        contentStyle={{ 
+                          backgroundColor: '#1F2937', 
+                          border: '1px solid #374151',
+                          borderRadius: '0.5rem',
+                          color: 'white'
+                        }}
+                        formatter={(value) => formatCurrency(Number(value))}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
                 </ChartContainer>
               </div>
             </div>
