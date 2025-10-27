@@ -429,11 +429,11 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         </div>
 
         {/* Income & Expense Trend */}
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-4 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">Income & Expense Trend</h3>
-              <span className="text-xs text-muted-foreground">{getDateRangeLabel()}</span>
+              <h3 className="text-base font-semibold text-white">Income & Expense Trend</h3>
+              <span className="text-xs text-gray-400">{getDateRangeLabel()}</span>
             </div>
             <div className="flex-1">
               <div className="h-[300px] w-full">
@@ -447,18 +447,18 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                   >
                     <defs>
                       <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
+                        <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#60a5fa" stopOpacity={0.1} />
                       </linearGradient>
                       <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
+                        <stop offset="5%" stopColor="#1e40af" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#1e40af" stopOpacity={0.1} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                     <XAxis 
                       dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="#a0aec0"
                       tick={{ fontSize: 12 }}
                       tickLine={false}
                       axisLine={false}
@@ -466,24 +466,29 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                       tickFormatter={(value) => value.slice(0, 3)}
                     />
                     <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
+                      stroke="#a0aec0"
                       tickFormatter={(value) => `R${value}`}
                       tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
                     />
                     <Tooltip 
                       formatter={(value) => formatCurrency(Number(value))}
                       contentStyle={{
-                        backgroundColor: 'hsl(var(--popover))',
-                        borderColor: 'hsl(var(--border))',
-                        borderRadius: 'var(--radius)',
+                        backgroundColor: '#1a202c',
+                        borderColor: '#2d3748',
+                        borderRadius: '0.375rem',
                         padding: '0.5rem',
-                        fontSize: '0.875rem'
+                        fontSize: '0.875rem',
+                        color: 'white'
                       }}
+                      labelStyle={{ color: '#a0aec0' }}
                     />
                     <Area
                       type="monotone"
                       dataKey="income"
-                      stroke="#22c55e"
+                      stroke="#60a5fa"
+                      strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorIncome)"
                       name="Income"
@@ -491,7 +496,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                     <Area
                       type="monotone"
                       dataKey="expense"
-                      stroke="#ef4444"
+                      stroke="#1e40af"
+                      strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorExpense)"
                       name="Expense"
@@ -500,9 +506,15 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 </ResponsiveContainer>
               </div>
             </div>
-            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-3 w-3 text-green-500" />
-              <span>Showing trends for the selected period</span>
+            <div className="mt-4 flex items-center justify-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-400"></div>
+                <span className="text-xs text-gray-300">Income</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-blue-800"></div>
+                <span className="text-xs text-gray-300">Expense</span>
+              </div>
             </div>
           </div>
         </div>
