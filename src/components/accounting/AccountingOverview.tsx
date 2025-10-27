@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAccounting } from '@/hooks/useAccounting';
 import { useUserProperties } from '@/hooks/useUserProperties';
-import { useAuth } from '@/hooks/useAuth';
 import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle, Bell } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -14,11 +13,11 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays, startOfMonth } from 'date-fns';
-import { MonthlyData, Transaction } from '@/types/accounting';
+import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
@@ -38,8 +37,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
-  const { transactions, loading, fetchTransactions, createTransaction, getCategoryData } = useAccounting();
-  const { user } = useAuth();
+  const { transactions, loading, fetchTransactions, calculateKPIs, getMonthlyData, getCategoryData, createTransaction } = useAccounting();
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
@@ -73,69 +71,15 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     fetchTransactions(month, selectedProperty);
   }, [selectedMonth, selectedProperty]);
 
-  // Get monthly data with property filtering
-  const getMonthlyData = async (months: number = 6, propertyId?: string): Promise<MonthlyData[]> => {
-    if (!user) return [];
-    
-    try {
-      const startDate = subMonths(new Date(), months - 1);
-      let query = supabase
-        .from('transactions')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('date', format(startOfMonth(startDate), 'yyyy-MM-dd'))
-        .order('date', { ascending: true });
-
-      if (propertyId) {
-        query = query.eq('property_id', propertyId);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      const monthlyMap = new Map<string, { income: number; expense: number }>();
-      
-      // Initialize all months
-      for (let i = 0; i < months; i++) {
-        const month = subMonths(new Date(), months - 1 - i);
-        const key = format(month, 'MMM yyyy');
-        monthlyMap.set(key, { income: 0, expense: 0 });
-      }
-
-      // Aggregate data
-      (data as Transaction[])?.forEach(transaction => {
-        const month = format(new Date(transaction.date), 'MMM yyyy');
-        const existing = monthlyMap.get(month);
-        if (existing) {
-          if (transaction.type === 'income') {
-            existing.income += Number(transaction.amount);
-          } else {
-            existing.expense += Number(transaction.amount);
-          }
-        }
-      });
-
-      return Array.from(monthlyMap.entries()).map(([month, data]) => ({
-        month,
-        ...data,
-      }));
-    } catch (error) {
-      console.error('Error fetching monthly data:', error);
-      return [];
-    }
-  };
-
   useEffect(() => {
     const loadChartData = async () => {
-      const monthly = await getMonthlyData(6, selectedProperty === 'all' ? undefined : selectedProperty);
-      const category = getCategoryData(transactions.filter(t => 
-        selectedProperty === 'all' || t.property_id === selectedProperty
-      ));
+      const monthly = await getMonthlyData(6);
+      const category = getCategoryData(transactions);
       setMonthlyData(monthly);
       setCategoryData(category);
     };
     loadChartData();
-  }, [transactions, selectedProperty]);
+  }, [transactions]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
@@ -145,30 +89,10 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     }).format(amount);
   };
 
-  // Calculate KPIs for the filtered transactions
-  const calculateKPIs = (transactionList: Transaction[]) => {
-    const income = transactionList
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    const expenses = transactionList
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
-
-    return {
-      rentCollected: income,
-      expenses,
-      netIncome: income - expenses,
-      unpaidRent: 0, // Placeholder for now
-    };
-  };
-
-  // Filter transactions based on selected date range and property
+  // Filter transactions based on selected date range
   const filteredTransactions = transactions.filter(transaction => {
     const transactionDate = new Date(transaction.date);
-    const matchesDate = transactionDate >= dateRange.from && transactionDate <= dateRange.to;
-    const matchesProperty = selectedProperty === 'all' || transaction.property_id === selectedProperty;
-    return matchesDate && matchesProperty;
+    return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
   });
 
   // Calculate KPIs based on filtered transactions
@@ -231,10 +155,9 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+    <div className="space-y-6 p-6 bg-gray-900 min-h-screen">
       {/* Subtitle and Content Card */}
-      <Card className="bg-gray-800 border border-gray-700 shadow-xl">
+      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
         <div className="p-6 space-y-4">
           {/* Subtitle */}
           <div className="text-center space-y-2 mb-8">
@@ -258,36 +181,33 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           </div>
 
           {/* Navigation */}
-          <div className="bg-gray-800 p-4 rounded-lg">
-            <AccountingNav
-              onAddIncome={() => {
-                setTxnType('income');
-                setTxnAmount(0);
-                setTxnDate('');
-                setTxnPropertyId(selectedProperty);
-                setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-                setTxnVatPercent(0);
-                setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-                setTxnNote('');
-                setShowIncomeModal(true);
-              }}
-              onAddExpense={() => {
-                setTxnType('expense');
-                setTxnAmount(0);
-                setTxnDate('');
-                setTxnPropertyId(selectedProperty);
-                const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-                setTxnCategory(defaultCat);
-                setTxnVatPercent(getDefaultVATPercent(defaultCat));
-                setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-                setTxnNote('');
-                setShowExpenseModal(true);
-              }}
-            />
-          </div>
+          <AccountingNav
+            onAddIncome={() => {
+              setTxnType('income');
+              setTxnAmount(0);
+              setTxnDate('');
+              setTxnPropertyId(selectedProperty);
+              setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+              setTxnVatPercent(0);
+              setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+              setTxnNote('');
+              setShowIncomeModal(true);
+            }}
+            onAddExpense={() => {
+              setTxnType('expense');
+              setTxnAmount(0);
+              setTxnDate('');
+              setTxnPropertyId(selectedProperty);
+              const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+              setTxnCategory(defaultCat);
+              setTxnVatPercent(getDefaultVATPercent(defaultCat));
+              setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+              setTxnNote('');
+              setShowExpenseModal(true);
+            }}
+          />
         </div>
       </Card>
-      </div>
 
       {/* Payment Reminder Banner */}
       <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
@@ -297,8 +217,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-semibold text-white">Send Payment Reminder</div>
-              <div className="text-sm text-gray-300">Notify a tenant instantly via app and email</div>
+              <div className="font-semibold text-black dark:text-white">Send Payment Reminder</div>
+              <div className="text-sm text-black/70 dark:text-white/70">Notify a tenant instantly via app and email</div>
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -726,41 +646,40 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       </Dialog>
 
       {/* Recent Transactions */}
-      <div className="space-y-6">
-        <Card className="bg-gray-800 border border-gray-700 shadow-xl">
-          <CardHeader className="bg-gray-800 border-b border-gray-700">
-            <CardTitle className="text-white">Recent Transactions</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {transactions.slice(0, 6).map((transaction) => {
-                const property = properties.find(p => p.id === transaction.property_id);
-                return (
-                  <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-2 h-2 rounded-full ${transaction.type === 'income' ? 'bg-success-green' : 'bg-destructive'}`} />
-                      <div>
-                        <p className="font-medium text-white">{transaction.category || transaction.vendor}</p>
-                        <p className="text-sm text-gray-400">
-                          {property?.title || 'No Property'} • {format(new Date(transaction.date), 'MMM dd, yyyy')}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-medium ${transaction.type === 'income' ? 'text-success-green' : 'text-destructive'}`}>
-                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Number(transaction.amount))}
-                      </p>
+      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
+        <CardHeader>
+          <CardTitle>Recent Transactions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {transactions.slice(0, 6).map((transaction) => {
+              const property = properties.find(p => p.id === transaction.property_id);
+              return (
+                <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-2 h-2 rounded-full ${transaction.type === 'income' ? 'bg-success-green' : 'bg-destructive'}`} />
+                    <div>
+                      <p className="font-medium">{transaction.category || transaction.vendor}</p>
                       <p className="text-sm text-muted-foreground">
-                        VAT: {transaction.vat_percent}%
+                        {property?.title || 'No Property'} • {format(new Date(transaction.date), 'MMM dd, yyyy')}
                       </p>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                  <div className="text-right">
+                    <p className={`font-medium ${transaction.type === 'income' ? 'text-success-green' : 'text-destructive'}`}>
+                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Number(transaction.amount))}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      VAT: {transaction.vat_percent}%
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
     </div>
   );
 }

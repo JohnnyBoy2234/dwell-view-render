@@ -2,19 +2,19 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, List } from 'lucide-react';
 
-// Light blue button styles for accounting navigation
-const buttonBaseStyle = {
-  border: '1px solid #7dd3fc', // Light blue border
-  backgroundColor: 'rgba(191, 219, 254, 0.1)', // Very light blue transparent background
-  color: '#e0f2fe', // Light blue text
-  transition: 'all 0.2s ease-in-out',
+// Custom styles for accounting page buttons
+const accountingButtonStyle = {
+  border: '1px solid #00f0ff', // Neon blue border
+  backgroundColor: '#dbeafe',   // Light blue background
+  color: '#1e40af',            // Dark blue text
+  transition: 'all 0.2s',
   '&:hover': {
-    backgroundColor: 'rgba(147, 197, 253, 0.2)', // Slightly more opaque on hover
-    borderColor: '#93c5fd', // Lighter blue border on hover
-    boxShadow: '0 0 10px rgba(147, 197, 253, 0.3)', // Soft blue glow on hover
+    backgroundColor: '#bfdbfe', // Slightly darker blue on hover
+    borderColor: '#00c4d4',    // Slightly darker neon blue on hover
+    boxShadow: '0 0 8px rgba(0, 240, 255, 0.4)', // Subtle glow on hover
   },
   '&:focus': {
-    boxShadow: '0 0 0 2px rgba(147, 197, 253, 0.4)', // Light blue focus ring
+    boxShadow: '0 0 0 2px rgba(0, 240, 255, 0.4)',
   },
 };
 
@@ -29,13 +29,13 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
   const isInvoicePage = location.pathname.includes('/invoices/tax');
   
   return (
-    <nav className={`bg-gray-800 rounded-lg p-3 shadow-lg ${className}`}>
-      <ul className="grid grid-cols-3 gap-3">
+    <nav className={`bg-card border rounded-lg p-2 shadow-sm ${className}`}>
+      <ul className="grid grid-cols-2 gap-2">
         <li className="w-full">
           <Button 
             variant="outline" 
             onClick={onAddIncome}
-            style={buttonBaseStyle}
+            style={accountingButtonStyle}
             className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
@@ -46,18 +46,18 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
           <Button 
             variant="outline" 
             onClick={onAddExpense}
-            style={buttonBaseStyle}
+            style={accountingButtonStyle}
             className="w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap"
           >
             <Plus className="w-4 h-4 mr-1 flex-shrink-0" />
             <span>Add Expense</span>
           </Button>
         </li>
-        <li className="col-span-1 w-full">
+        <li className="col-span-2 w-full">
           <Button 
             asChild 
-            variant="outline"
-            style={buttonBaseStyle}
+            variant={isInvoicePage ? 'default' : 'outline'} 
+            style={!isInvoicePage ? accountingButtonStyle : {}}
             className={`w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap ${isInvoicePage ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
           >
             <Link to="/dashboard/invoices/tax">
@@ -69,7 +69,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
           <Button 
             asChild 
             variant={location.pathname.includes('/accounting/transactions') ? 'default' : 'outline'} 
-            style={!location.pathname.includes('/accounting/transactions') ? buttonBaseStyle : {}}
+            style={!location.pathname.includes('/accounting/transactions') ? accountingButtonStyle : {}}
             className={`w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap ${location.pathname.includes('/accounting/transactions') ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
           >
             <Link to="/dashboard/accounting/transactions" className="flex items-center justify-center gap-2">
