@@ -155,14 +155,14 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-6 bg-gray-900 min-h-screen">
       {/* Subtitle and Content Card */}
-      <Card className={PROPERTY_CARD_STYLES.CARD}>
+      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
         <div className="p-6 space-y-4">
           {/* Subtitle */}
           <div className="text-center space-y-2 mb-8">
-            <h2 className="text-2xl font-normal text-black dark:text-white">Accounting</h2>
-            <p className="text-black/80 dark:text-white/80">Track your property finances and generate reports</p>
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent">Accounting</h2>
+            <p className="text-gray-300">Track your property finances and generate reports</p>
           </div>
           
           {/* Filters */}
@@ -210,7 +210,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       </Card>
 
       {/* Payment Reminder Banner */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
@@ -275,7 +275,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
       {/* Overview Heading */}
       <div className="text-center">
-        <h2 className="text-2xl font-normal text-black dark:text-white">Overview</h2>
+        <h2 className="text-2xl font-bold text-white">Overview</h2>
       </div>
 
       {/* Date Range Dropdown */}
@@ -646,7 +646,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       </Dialog>
 
       {/* Recent Transactions */}
-      <Card>
+      <Card className="bg-gray-900 border border-gray-800 shadow-xl">
         <CardHeader>
           <CardTitle>Recent Transactions</CardTitle>
         </CardHeader>
