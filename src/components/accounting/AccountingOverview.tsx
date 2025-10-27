@@ -15,7 +15,8 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar, Pie, PieChart } from 'recharts';
+import { ChartContainer, ChartConfig, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
@@ -40,12 +41,12 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
-  // Initialize with previous month by default
+  // Initialize to current month by default
   const [dateRange, setDateRange] = useState(() => {
     const now = new Date();
     return {
-      from: new Date(now.getFullYear(), now.getMonth() - 1, 1),
-      to: new Date(now.getFullYear(), now.getMonth(), 0)
+      from: new Date(now.getFullYear(), now.getMonth(), 1),
+      to: now
     };
   });
   const [showIncomeModal, setShowIncomeModal] = useState(false);
@@ -70,24 +71,6 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     fetchTransactions(month, selectedProperty);
   }, [selectedMonth, selectedProperty]);
 
-  useEffect(() => {
-    const loadChartData = async () => {
-      const monthly = await getMonthlyData(6, selectedProperty);
-      const category = getCategoryData(transactions);
-      setMonthlyData(monthly);
-      setCategoryData(category);
-    };
-    loadChartData();
-  }, [transactions, selectedProperty]);
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-ZA', {
-      style: 'currency',
-      currency: 'ZAR',
-      minimumFractionDigits: 2,
-    }).format(amount);
-  };
-
   // Filter transactions based on selected date range
   const filteredTransactions = transactions.filter(transaction => {
     const transactionDate = new Date(transaction.date);
@@ -97,6 +80,24 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   // Calculate KPIs based on filtered transactions
   const kpis = calculateKPIs(filteredTransactions);
 
+  useEffect(() => {
+    const loadChartData = async () => {
+      const monthly = await getMonthlyData(6, selectedProperty);
+      const category = getCategoryData(filteredTransactions);
+      setMonthlyData(monthly);
+      setCategoryData(category);
+    };
+    loadChartData();
+  }, [transactions, selectedProperty, dateRange, getMonthlyData, getCategoryData]);
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-ZA', {
+      style: 'currency',
+      currency: 'ZAR',
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
   // Generate date range label
   const getDateRangeLabel = () => {
     return `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`;
@@ -105,30 +106,32 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   // Determine which preset matches the current date range
   const getDateRangePreset = () => {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
-    const sixMonthsAgo = subMonths(now, 6);
-    const twelveMonthsAgo = subMonths(now, 12);
+    const { from, to } = dateRange;
     
-    // Check fiscal year (March 1 to Feb 28/29)
-    const currentYear = now.getFullYear();
-    const fiscalYearStart = new Date(now.getMonth() >= 2 ? currentYear : currentYear - 1, 2, 1);
-    
-    if (dateRange.from.getTime() === startOfMonth.getTime() && dateRange.to >= now) {
-      return 'this-month';
-    } else if (dateRange.from.getTime() === lastMonth.getTime() && 
-               dateRange.to.getTime() === endOfLastMonth.getTime()) {
-      return 'last-month';
-    } else if (dateRange.from >= sixMonthsAgo && dateRange.to >= now) {
-      return 'last-6-months';
-    } else if (dateRange.from >= twelveMonthsAgo && dateRange.to >= now) {
-      return 'last-12-months';
-    } else if (dateRange.from.getTime() === fiscalYearStart.getTime() && dateRange.to >= now) {
-      return 'fiscal-year';
+    // All Properties - Year
+    const yearStart = new Date(now.getFullYear(), 0, 1);
+    if (selectedProperty === 'all' && 
+        from.getFullYear() === yearStart.getFullYear() &&
+        from.getMonth() === 0 && 
+        from.getDate() === 1) {
+      return 'all-properties-year';
     }
     
-    return 'custom';
+    // This month
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    if (from.getTime() === startOfMonth.getTime() && to >= now) {
+      return 'this-month';
+    }
+    
+    // Previous month
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+    if (from.getTime() === lastMonth.getTime() && 
+        to.getTime() === endOfLastMonth.getTime()) {
+      return 'last-month';
+    }
+    
+    return 'this-month'; // Default fallback
   };
 
   if (loading) {
@@ -157,9 +160,9 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     <div className="min-h-screen bg-gray-900">
       {/* White Top Section */}
       <div className="bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6">
           <Card className="bg-white border border-gray-200 shadow-sm">
-            <div className="p-6 space-y-4">
+            <div className="p-8 space-y-6">
               {/* Subtitle */}
               <div className="text-center space-y-2 mb-8">
                 <h2 className="text-3xl font-bold text-gray-900">Accounting</h2>
@@ -169,7 +172,14 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               {/* Filters */}
               <div className="flex flex-col md:flex-row gap-4 items-stretch">
                 <Select value={selectedProperty} onValueChange={setSelectedProperty}>
-                  <SelectTrigger className="w-full md:w-[240px] h-10 bg-white border-gray-300">
+                  <SelectTrigger 
+                    className="w-full md:w-[240px] h-10 text-black"
+                    style={{
+                      border: '1px solid #00f0ff',
+                      backgroundColor: '#dbeafe',
+                      color: '#000000'
+                    }}
+                  >
                     <SelectValue placeholder="All Properties" />
                   </SelectTrigger>
                   <SelectContent>
@@ -277,7 +287,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       </div>
 
       {/* Dark Bottom Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+      <div className="max-w-[1400px] mx-auto px-6 sm:px-8 lg:px-12 py-6 space-y-6">
         {/* Overview Heading */}
         <div className="text-center">
           <h2 className="text-2xl font-bold text-white">Overview</h2>
@@ -310,11 +320,15 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 newTo = now;
                 break;
               case 'fiscal-year':
-                // Assuming fiscal year starts March 1st
                 const currentYear = now.getFullYear();
                 const fiscalYearStart = new Date(now.getMonth() >= 2 ? currentYear : currentYear - 1, 2, 1);
                 newFrom = fiscalYearStart;
                 newTo = now;
+                break;
+              case 'all-properties-year':
+                newFrom = new Date(now.getFullYear(), 0, 1);
+                newTo = now;
+                setSelectedProperty('all');
                 break;
               default:
                 newFrom = subDays(now, 30);
@@ -327,15 +341,16 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
             });
           }}
         >
-          <SelectTrigger className="w-full max-w-xs">
-            <SelectValue placeholder="Select date range" />
+          <SelectTrigger className="w-full max-w-xs bg-gray-800 border-gray-700 text-white">
+            <SelectValue />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="this-month">This Month</SelectItem>
-            <SelectItem value="last-month">Previous Month</SelectItem>
-            <SelectItem value="last-6-months">Last 6 Months</SelectItem>
-            <SelectItem value="last-12-months">Last 12 Months</SelectItem>
-            <SelectItem value="fiscal-year">Current Fiscal Year</SelectItem>
+          <SelectContent className="bg-gray-800 border-gray-700">
+            <SelectItem value="this-month" className="text-white hover:bg-gray-700">Current Month</SelectItem>
+            <SelectItem value="last-month" className="text-white hover:bg-gray-700">Previous Month</SelectItem>
+            <SelectItem value="last-6-months" className="text-white hover:bg-gray-700">Last 6 Months</SelectItem>
+            <SelectItem value="last-12-months" className="text-white hover:bg-gray-700">Last 12 Months</SelectItem>
+            <SelectItem value="fiscal-year" className="text-white hover:bg-gray-700">Fiscal Year (Mar-Feb)</SelectItem>
+            <SelectItem value="all-properties-year" className="text-white hover:bg-gray-700">All Properties - Year</SelectItem>
           </SelectContent>
           </Select>
         </div>
@@ -398,53 +413,62 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Income vs Expense Chart */}
+        {/* Expense Breakdown Pie Chart */}
         <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold text-white">Income vs Expense</h3>
+              <h3 className="text-base font-semibold text-white">Expense Breakdown</h3>
               <span className="text-xs text-gray-400">{getDateRangeLabel()}</span>
             </div>
             <div className="flex-1">
               <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart 
-                    data={monthlyData}
-                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-                    <XAxis 
-                      dataKey="month" 
-                      stroke="hsl(var(--muted-foreground))"
-                      tick={{ fontSize: 12 }}
+                <ChartContainer
+                  config={{
+                    amount: { label: "Amount" },
+                    maintenance: { label: "Maintenance", color: "#3b82f6" },
+                    utilities: { label: "Utilities", color: "#10b981" },
+                    rates: { label: "Rates & Taxes", color: "#f59e0b" },
+                    insurance: { label: "Insurance", color: "#ef4444" },
+                    bank: { label: "Bank Fees", color: "#8b5cf6" },
+                    swiftrent: { label: "SwiftRent", color: "#ec4899" },
+                    other: { label: "Other", color: "#6366f1" },
+                  }}
+                  className="mx-auto aspect-square max-h-[300px]"
+                >
+                  <PieChart>
+                    <Pie 
+                      data={categoryData.map((item) => ({
+                        category: item.category,
+                        amount: item.amount,
+                        fill: item.category === 'Maintenance' ? '#3b82f6' :
+                              item.category.includes('Utilities') ? '#10b981' :
+                              item.category.includes('Rates') ? '#f59e0b' :
+                              item.category === 'Insurance' ? '#ef4444' :
+                              item.category.includes('Bank') ? '#8b5cf6' :
+                              item.category.includes('SwiftRent') ? '#ec4899' :
+                              '#6366f1'
+                      }))}
+                      dataKey="amount"
+                      nameKey="category"
+                      innerRadius={60}
+                      outerRadius={100}
+                      paddingAngle={2}
                     />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      tickFormatter={(value) => `R${value}`}
-                      tick={{ fontSize: 12 }}
+                    <ChartLegend
+                      content={<ChartLegendContent nameKey="category" />}
+                      className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center text-white"
                     />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ 
                         backgroundColor: '#1F2937', 
                         border: '1px solid #374151',
-                        borderRadius: '0.5rem'
+                        borderRadius: '0.5rem',
+                        color: 'white'
                       }}
-                      labelStyle={{ color: '#E5E7EB' }}
+                      formatter={(value) => formatCurrency(Number(value))}
                     />
-                    <Bar 
-                      dataKey="income" 
-                      fill="#60a5fa" 
-                      name="Income"
-                      radius={[4, 4, 0, 0]}
-                    />
-                    <Bar 
-                      dataKey="expense" 
-                      fill="#3b82f6" 
-                      name="Expense"
-                      radius={[4, 4, 0, 0]}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                  </PieChart>
+                </ChartContainer>
               </div>
             </div>
           </div>
