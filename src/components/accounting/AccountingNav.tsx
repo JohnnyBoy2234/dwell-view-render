@@ -6,7 +6,7 @@ import { Plus, List } from 'lucide-react';
 const accountingButtonStyle = {
   border: '1px solid #00f0ff', // Neon blue border
   backgroundColor: '#dbeafe',   // Light blue background
-  color: '#1e40af',            // Dark blue text
+  color: '#000000',            // Black text
   transition: 'all 0.2s',
   '&:hover': {
     backgroundColor: '#bfdbfe', // Slightly darker blue on hover
