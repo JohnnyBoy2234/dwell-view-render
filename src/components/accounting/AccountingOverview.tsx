@@ -17,7 +17,6 @@ import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
@@ -181,31 +180,33 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           </div>
 
           {/* Navigation */}
-          <AccountingNav
-            onAddIncome={() => {
-              setTxnType('income');
-              setTxnAmount(0);
-              setTxnDate('');
-              setTxnPropertyId(selectedProperty);
-              setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
-              setTxnVatPercent(0);
-              setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
-              setTxnNote('');
-              setShowIncomeModal(true);
-            }}
-            onAddExpense={() => {
-              setTxnType('expense');
-              setTxnAmount(0);
-              setTxnDate('');
-              setTxnPropertyId(selectedProperty);
-              const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
-              setTxnCategory(defaultCat);
-              setTxnVatPercent(getDefaultVATPercent(defaultCat));
-              setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
-              setTxnNote('');
-              setShowExpenseModal(true);
-            }}
-          />
+          <div className="bg-gray-900">
+            <AccountingNav
+              onAddIncome={() => {
+                setTxnType('income');
+                setTxnAmount(0);
+                setTxnDate('');
+                setTxnPropertyId(selectedProperty);
+                setTxnCategory(INCOME_CATEGORIES[0] || 'Rent');
+                setTxnVatPercent(0);
+                setTxnVendor(localStorage.getItem('swiftbooks:last_income_payer') || '');
+                setTxnNote('');
+                setShowIncomeModal(true);
+              }}
+              onAddExpense={() => {
+                setTxnType('expense');
+                setTxnAmount(0);
+                setTxnDate('');
+                setTxnPropertyId(selectedProperty);
+                const defaultCat = EXPENSE_CATEGORIES[0] || 'Maintenance';
+                setTxnCategory(defaultCat);
+                setTxnVatPercent(getDefaultVATPercent(defaultCat));
+                setTxnVendor(localStorage.getItem('swiftbooks:last_expense_vendor') || '');
+                setTxnNote('');
+                setShowExpenseModal(true);
+              }}
+            />
+          </div>
         </div>
       </Card>
 
@@ -217,8 +218,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
               <Bell className="w-4 h-4" />
             </div>
             <div>
-              <div className="font-semibold text-black dark:text-white">Send Payment Reminder</div>
-              <div className="text-sm text-black/70 dark:text-white/70">Notify a tenant instantly via app and email</div>
+              <div className="font-semibold text-white">Send Payment Reminder</div>
+              <div className="text-sm text-gray-300">Notify a tenant instantly via app and email</div>
             </div>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
@@ -648,7 +649,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       {/* Recent Transactions */}
       <Card className="bg-gray-900 border border-gray-800 shadow-xl">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle className="text-white">Recent Transactions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -659,8 +660,8 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                   <div className="flex items-center space-x-3">
                     <div className={`w-2 h-2 rounded-full ${transaction.type === 'income' ? 'bg-success-green' : 'bg-destructive'}`} />
                     <div>
-                      <p className="font-medium">{transaction.category || transaction.vendor}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-white">{transaction.category || transaction.vendor}</p>
+                      <p className="text-sm text-gray-400">
                         {property?.title || 'No Property'} • {format(new Date(transaction.date), 'MMM dd, yyyy')}
                       </p>
                     </div>
