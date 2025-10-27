@@ -337,46 +337,52 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
-          <div className="p-4 flex flex-col h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Income</h3>
-              <TrendingUp className="h-4 w-4 text-green-500" />
+              <h3 className="text-sm font-medium text-gray-400">Total Income</h3>
+              <div className="p-1.5 rounded-full bg-blue-500/20">
+                <TrendingUp className="h-4 w-4 text-blue-400" />
+              </div>
             </div>
-            <div className="text-2xl font-semibold">{formatCurrency(kpis.rentCollected)}</div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              Last 30 days
+            <div className="text-2xl font-semibold text-white">{formatCurrency(kpis.rentCollected)}</div>
+            <div className="mt-2 text-xs text-gray-400">
+              {getDateRangeLabel()}
             </div>
           </div>
         </div>
         
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
-          <div className="p-4 flex flex-col h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Total Expenses</h3>
-              <TrendingDown className="h-4 w-4 text-red-500" />
+              <h3 className="text-sm font-medium text-gray-400">Total Expenses</h3>
+              <div className="p-1.5 rounded-full bg-blue-500/20">
+                <TrendingDown className="h-4 w-4 text-blue-300" />
+              </div>
             </div>
-            <div className="text-2xl font-semibold">{formatCurrency(kpis.expenses)}</div>
-            <div className="mt-2 text-xs text-muted-foreground">
-              Last 30 days
+            <div className="text-2xl font-semibold text-white">{formatCurrency(kpis.expenses)}</div>
+            <div className="mt-2 text-xs text-gray-400">
+              {getDateRangeLabel()}
             </div>
           </div>
         </div>
         
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
-          <div className="p-4 flex flex-col h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-muted-foreground">Net Profit</h3>
-              {kpis.netIncome >= 0 ? (
-                <TrendingUp className="h-4 w-4 text-green-500" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-500" />
-              )}
+              <h3 className="text-sm font-medium text-gray-400">Net Profit</h3>
+              <div className={`p-1.5 rounded-full ${kpis.netIncome >= 0 ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                {kpis.netIncome >= 0 ? (
+                  <TrendingUp className="h-4 w-4 text-green-400" />
+                ) : (
+                  <TrendingDown className="h-4 w-4 text-red-400" />
+                )}
+              </div>
             </div>
-            <div className={`text-2xl font-semibold ${kpis.netIncome >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            <div className={`text-2xl font-semibold ${kpis.netIncome >= 0 ? 'text-green-400' : 'text-red-400'}`}>
               {formatCurrency(kpis.netIncome)}
             </div>
-            <div className="mt-2 text-xs text-muted-foreground">
+            <div className="mt-2 text-xs text-gray-400">
               {kpis.netIncome >= 0 ? 'Profit' : 'Loss'} this period
             </div>
           </div>
@@ -388,16 +394,19 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income vs Expense Chart */}
-        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
-          <div className="p-4 flex flex-col h-full">
+        <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 bg-gray-900 border border-gray-800 shadow-lg rounded-lg overflow-hidden h-full">
+          <div className="p-5 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">Income vs Expense</h3>
-              <span className="text-xs text-muted-foreground">{getDateRangeLabel()}</span>
+              <h3 className="text-base font-semibold text-white">Income vs Expense</h3>
+              <span className="text-xs text-gray-400">{getDateRangeLabel()}</span>
             </div>
             <div className="flex-1">
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={monthlyData}>
+                  <BarChart 
+                    data={monthlyData}
+                    margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
                     <XAxis 
                       dataKey="month" 
@@ -410,17 +419,25 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                       tick={{ fontSize: 12 }}
                     />
                     <Tooltip 
-                      formatter={(value) => formatCurrency(Number(value))}
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--popover))',
-                        borderColor: 'hsl(var(--border))',
-                        borderRadius: 'var(--radius)',
-                        padding: '0.5rem',
-                        fontSize: '0.875rem'
+                      contentStyle={{ 
+                        backgroundColor: '#1F2937', 
+                        border: '1px solid #374151',
+                        borderRadius: '0.5rem'
                       }}
+                      labelStyle={{ color: '#E5E7EB' }}
                     />
-                    <Bar dataKey="income" fill="#22c55e" name="Income" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="expense" fill="#ef4444" name="Expense" radius={[4, 4, 0, 0]} />
+                    <Bar 
+                      dataKey="income" 
+                      fill="#60a5fa" 
+                      name="Income"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar 
+                      dataKey="expense" 
+                      fill="#3b82f6" 
+                      name="Expense"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
