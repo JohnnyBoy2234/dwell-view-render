@@ -726,42 +726,6 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       </Dialog>
 
       {/* Recent Transactions */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 space-y-6">
-        <Card className="bg-gray-800 border border-gray-700 shadow-xl">
-          <CardHeader className="bg-gray-800 border-b border-gray-700">
-          <CardTitle className="text-white">Recent Transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {transactions.slice(0, 6).map((transaction) => {
-              const property = properties.find(p => p.id === transaction.property_id);
-              return (
-                <div key={transaction.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-2 h-2 rounded-full ${transaction.type === 'income' ? 'bg-success-green' : 'bg-destructive'}`} />
-                    <div>
-                      <p className="font-medium text-white">{transaction.category || transaction.vendor}</p>
-                      <p className="text-sm text-gray-400">
-                        {property?.title || 'No Property'} • {format(new Date(transaction.date), 'MMM dd, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-medium ${transaction.type === 'income' ? 'text-success-green' : 'text-destructive'}`}>
-                      {transaction.type === 'income' ? '+' : '-'}{formatCurrency(Number(transaction.amount))}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      VAT: {transaction.vat_percent}%
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Recent Transactions */}
       <div className="space-y-6">
         <Card className="bg-gray-800 border border-gray-700 shadow-xl">
           <CardHeader className="bg-gray-800 border-b border-gray-700">
