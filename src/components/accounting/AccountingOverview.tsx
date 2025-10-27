@@ -15,8 +15,9 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TrendingUp } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@/types/accounting';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
@@ -427,37 +428,48 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           </div>
         </div>
 
-        {/* Expense by Category Chart */}
+        {/* Income & Expense Trend */}
         <div className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-2 backdrop-blur-sm bg-white/95 dark:bg-black/40 border border-white/20 shadow-lg rounded-lg overflow-hidden h-full">
           <div className="p-4 flex flex-col h-full">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold">Expense by Category</h3>
+              <h3 className="text-base font-semibold">Income & Expense Trend</h3>
               <span className="text-xs text-muted-foreground">{getDateRangeLabel()}</span>
             </div>
             <div className="flex-1">
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={categoryData}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      dataKey="value"
-                      nameKey="name"
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {categoryData.map((entry, index) => (
-                        <Cell 
-                          key={`cell-${index}`} 
-                          fill={COLORS[index % COLORS.length]} 
-                          stroke="hsl(var(--background))"
-                          strokeWidth={2}
-                        />
-                      ))}
-                    </Pie>
+                  <AreaChart
+                    data={monthlyData}
+                    margin={{
+                      left: 12,
+                      right: 12,
+                    }}
+                  >
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0.1} />
+                      </linearGradient>
+                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0.1} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                    <XAxis 
+                      dataKey="month" 
+                      stroke="hsl(var(--muted-foreground))"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      tickFormatter={(value) => value.slice(0, 3)}
+                    />
+                    <YAxis 
+                      stroke="hsl(var(--muted-foreground))"
+                      tickFormatter={(value) => `R${value}`}
+                      tick={{ fontSize: 12 }}
+                    />
                     <Tooltip 
                       formatter={(value) => formatCurrency(Number(value))}
                       contentStyle={{
@@ -468,19 +480,29 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                         fontSize: '0.875rem'
                       }}
                     />
-                    <Legend 
-                      layout="vertical"
-                      align="right"
-                      verticalAlign="middle"
-                      wrapperStyle={{
-                        paddingLeft: '1rem',
-                        fontSize: '0.75rem',
-                        color: 'hsl(var(--muted-foreground))'
-                      }}
+                    <Area
+                      type="monotone"
+                      dataKey="income"
+                      stroke="#22c55e"
+                      fillOpacity={1}
+                      fill="url(#colorIncome)"
+                      name="Income"
                     />
-                  </PieChart>
+                    <Area
+                      type="monotone"
+                      dataKey="expense"
+                      stroke="#ef4444"
+                      fillOpacity={1}
+                      fill="url(#colorExpense)"
+                      name="Expense"
+                    />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
+            </div>
+            <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
+              <TrendingUp className="h-3 w-3 text-green-500" />
+              <span>Showing trends for the selected period</span>
             </div>
           </div>
         </div>
