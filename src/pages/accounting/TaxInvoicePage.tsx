@@ -8,9 +8,16 @@ export default function TaxInvoicePage() {
   const location = useLocation();
   const [key, setKey] = useState(0);
   
+  // Debug: Log the current location and search params
+  console.log('Current location:', location);
+  console.log('Search params:', location.search);
+  
   // Get property ID from URL
   const searchParams = new URLSearchParams(location.search);
   const propertyId = searchParams.get('property');
+  
+  // Debug: Log the extracted propertyId
+  console.log('Extracted propertyId:', propertyId);
   
   const handleBack = () => {
     if (propertyId) {

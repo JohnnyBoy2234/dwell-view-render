@@ -47,17 +47,29 @@ interface TaxInvoiceGeneratorProps {
 export function TaxInvoiceGenerator({ refreshKey, propertyId }: TaxInvoiceGeneratorProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
+  // Debug: Log when component mounts or updates
+  useEffect(() => {
+    console.log('TaxInvoiceGenerator mounted/updated with propertyId:', propertyId);
+  }, [propertyId]);
+
   // Fetch property data when component mounts or propertyId changes
   useEffect(() => {
     const fetchPropertyData = async () => {
-      if (!propertyId) return;
+      console.log('fetchPropertyData called with propertyId:', propertyId);
+      if (!propertyId) {
+        console.log('No propertyId provided, skipping fetch');
+        return;
+      }
       
       try {
+        console.log('Fetching property data for ID:', propertyId);
         const { data: property, error } = await supabase
           .from('properties')
           .select('title, location, rent_amount')
           .eq('id', propertyId)
           .single();
+          
+        console.log('Property fetch result:', { property, error });
           
         if (error) throw error;
         
