@@ -37,7 +37,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
-  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction, calculateMonthlyDataFromTransactions } = useAccounting();
+  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction } = useAccounting();
   const { properties } = useUserProperties();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
@@ -80,16 +80,14 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const kpis = calculateKPIs(filteredTransactions);
 
   useEffect(() => {
-    // Calculate monthly data from filtered transactions (client-side)
-    const monthly = calculateMonthlyDataFromTransactions(
-      filteredTransactions, 
-      dateRange.from, 
-      dateRange.to
-    );
-    const category = getCategoryData(filteredTransactions);
-    setMonthlyData(monthly);
-    setCategoryData(category);
-  }, [filteredTransactions, dateRange, calculateMonthlyDataFromTransactions, getCategoryData]);
+    const loadChartData = async () => {
+      const monthly = await getMonthlyDataByRange(dateRange.from, dateRange.to, selectedProperty);
+      const category = getCategoryData(filteredTransactions);
+      setMonthlyData(monthly);
+      setCategoryData(category);
+    };
+    loadChartData();
+  }, [transactions, selectedProperty, dateRange, getMonthlyDataByRange, getCategoryData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
@@ -508,7 +506,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                       </Pie>
                       <ChartLegend
                         content={<ChartLegendContent nameKey="category" />}
-                        className="flex flex-wrap gap-2 justify-center text-xs text-white"
+                        className="flex flex-wrap gap-2 justify-center text-xs"
                         wrapperStyle={{ paddingTop: '20px' }}
                       />
                       <Tooltip
