@@ -183,6 +183,7 @@ function AppRoutes() {
               {/* Direct landlord inspection routes to bypass dashboard tab handling */}
               <Route path="/enhancedlandlorddashboard/inspection" element={<><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></>} />
               <Route path="/enhancedlandlorddashboard/inspection/start" element={<><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></>} />
+              <Route path="/enhancedlandlorddashboard/tax-invoice" element={<AuthenticatedRoute><TaxInvoicePage /></AuthenticatedRoute>} />
               <Route path="/inspections/new" element={<AuthenticatedRoute><EnhancedDashboardLayout title="New Inspection"><CreateInspection /></EnhancedDashboardLayout></AuthenticatedRoute>} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}
               <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
