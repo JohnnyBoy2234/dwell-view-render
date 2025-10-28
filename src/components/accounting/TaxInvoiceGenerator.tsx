@@ -39,70 +39,9 @@ interface InvoiceData {
   reference: string;
 }
 
-interface TaxInvoiceGeneratorProps {
-  refreshKey?: number;
-  propertyId?: string;
-}
-
-export function TaxInvoiceGenerator({ refreshKey, propertyId }: TaxInvoiceGeneratorProps = {}) {
+export function TaxInvoiceGenerator() {
   const { user } = useAuth();
   const { toast } = useToast();
-  // Debug: Log when component mounts or updates
-  useEffect(() => {
-    console.log('TaxInvoiceGenerator mounted/updated with propertyId:', propertyId);
-  }, [propertyId]);
-
-  // Fetch property data when component mounts or propertyId changes
-  useEffect(() => {
-    const fetchPropertyData = async () => {
-      console.log('fetchPropertyData called with propertyId:', propertyId);
-      if (!propertyId) {
-        console.log('No propertyId provided, skipping fetch');
-        return;
-      }
-      
-      try {
-        console.log('Fetching property data for ID:', propertyId);
-        const { data: property, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', propertyId)
-          .single();
-          
-        console.log('Property fetch result:', { property, error });
-          
-        if (error) {
-          console.error('Error fetching property:', error);
-          throw error;
-        }
-        
-        if (property) {
-          // Use property.price as the rent amount if it exists, otherwise use 0
-          const rentAmount = property.price || 0;
-          
-          setInvoiceData(prev => ({
-            ...prev,
-            propertyAddress: property.title || property.address || property.location || '',
-            lineItems: prev.lineItems.map((item, index) => 
-              index === 0 && item.description.includes('Monthly Rental') 
-                ? { 
-                    ...item, 
-                    amountExclVat: rentAmount,
-                    vatAmount: rentAmount * 0.15,
-                    totalInclVat: rentAmount * 1.15
-                  }
-                : item
-            )
-          }));
-        }
-      } catch (error) {
-        console.error('Error fetching property data:', error);
-      }
-    };
-    
-    fetchPropertyData();
-  }, [propertyId]);
-
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
     landlordName: '',
     landlordAddress: '',
@@ -174,7 +113,7 @@ export function TaxInvoiceGenerator({ refreshKey, propertyId }: TaxInvoiceGenera
       }
     };
     void loadDefaults();
-  }, [user, refreshKey]);
+  }, [user?.id]);
 
   const calculateLineItem = (item: LineItem, field: string, value: number): LineItem => {
     const updatedItem = { ...item };

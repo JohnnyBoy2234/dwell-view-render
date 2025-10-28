@@ -87,10 +87,6 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
       dateRange.to
     );
     const category = getCategoryData(filteredTransactions);
-    
-    console.log('Calculated monthly data:', monthly);
-    console.log('Filtered transactions:', filteredTransactions);
-    
     setMonthlyData(monthly);
     setCategoryData(category);
   }, [filteredTransactions, dateRange, calculateMonthlyDataFromTransactions, getCategoryData]);
@@ -541,79 +537,73 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
             </div>
             <div className="flex-1">
               <div className="h-[300px] w-full">
-                {monthlyData && monthlyData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={monthlyData}
-                      margin={{
-                        left: 12,
-                        right: 12,
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={monthlyData}
+                    margin={{
+                      left: 12,
+                      right: 12,
+                    }}
+                  >
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#60a5fa" stopOpacity={0.1} />
+                      </linearGradient>
+                      <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#1e40af" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#1e40af" stopOpacity={0.1} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
+                    <XAxis 
+                      dataKey="month" 
+                      stroke="#a0aec0"
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                      tickMargin={8}
+                      tickFormatter={(value) => value.slice(0, 3)}
+                    />
+                    <YAxis 
+                      stroke="#a0aec0"
+                      tickFormatter={(value) => `R${value}`}
+                      tick={{ fontSize: 12 }}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip 
+                      formatter={(value) => formatCurrency(Number(value))}
+                      contentStyle={{
+                        backgroundColor: '#1a202c',
+                        borderColor: '#2d3748',
+                        borderRadius: '0.375rem',
+                        padding: '0.5rem',
+                        fontSize: '0.875rem',
+                        color: 'white'
                       }}
-                    >
-                      <defs>
-                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#60a5fa" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#60a5fa" stopOpacity={0.1} />
-                        </linearGradient>
-                        <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#1e40af" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#1e40af" stopOpacity={0.1} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
-                      <XAxis 
-                        dataKey="month" 
-                        stroke="#a0aec0"
-                        tick={{ fontSize: 12 }}
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={8}
-                        tickFormatter={(value) => value.slice(0, 3)}
-                      />
-                      <YAxis 
-                        stroke="#a0aec0"
-                        tickFormatter={(value) => `R${value}`}
-                        tick={{ fontSize: 12 }}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <Tooltip 
-                        formatter={(value) => formatCurrency(Number(value))}
-                        contentStyle={{
-                          backgroundColor: '#1a202c',
-                          borderColor: '#2d3748',
-                          borderRadius: '0.375rem',
-                          padding: '0.5rem',
-                          fontSize: '0.875rem',
-                          color: 'white'
-                        }}
-                        labelStyle={{ color: '#a0aec0' }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="income"
-                        stroke="#60a5fa"
-                        strokeWidth={2}
-                        fillOpacity={1}
-                        fill="url(#colorIncome)"
-                        name="Income"
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="expense"
-                        stroke="#1e40af"
-                        strokeWidth={2}
-                        fillOpacity={1}
-                        fill="url(#colorExpense)"
-                        name="Expense"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    <p>No data available for the selected period</p>
-                  </div>
-                )}
+                      labelStyle={{ color: '#a0aec0' }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="income"
+                      stroke="#60a5fa"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorIncome)"
+                      name="Income"
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="expense"
+                      stroke="#1e40af"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorExpense)"
+                      name="Expense"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
             <div className="mt-4 flex items-center justify-center gap-4">
