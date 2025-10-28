@@ -15,7 +15,7 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar, Pie, PieChart } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar, Pie, PieChart, Label } from 'recharts';
 import { ChartContainer, ChartConfig, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -46,7 +46,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
     const now = new Date();
     return {
       from: new Date(now.getFullYear(), now.getMonth(), 1),
-      to: now
+      to: new Date(now.getFullYear(), now.getMonth() + 1, 0) // Last day of current month
     };
   });
   const [showIncomeModal, setShowIncomeModal] = useState(false);
@@ -426,39 +426,88 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                 <ChartContainer
                   config={{
                     amount: { label: "Amount" },
-                    maintenance: { label: "Maintenance", color: "#3b82f6" },
-                    utilities: { label: "Utilities", color: "#10b981" },
-                    rates: { label: "Rates & Taxes", color: "#f59e0b" },
-                    insurance: { label: "Insurance", color: "#ef4444" },
-                    bank: { label: "Bank Fees", color: "#8b5cf6" },
-                    swiftrent: { label: "SwiftRent", color: "#ec4899" },
-                    other: { label: "Other", color: "#6366f1" },
+                    "Maintenance": { label: "Maintenance", color: "#3b82f6" },
+                    "Utilities (Water/Electricity)": { label: "Utilities", color: "#10b981" },
+                    "Rates & Taxes": { label: "Rates & Taxes", color: "#f59e0b" },
+                    "Insurance": { label: "Insurance", color: "#ef4444" },
+                    "Bank Fees": { label: "Bank Fees", color: "#8b5cf6" },
+                    "SwiftRent Subscription": { label: "SwiftRent", color: "#ec4899" },
+                    "Other": { label: "Other", color: "#6366f1" },
                   }}
                   className="mx-auto w-full h-full"
                 >
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie 
-                        data={categoryData.map((item) => ({
-                          category: item.category,
-                          amount: item.amount,
-                          fill: item.category === 'Maintenance' ? '#3b82f6' :
-                                item.category.includes('Utilities') ? '#10b981' :
-                                item.category.includes('Rates') ? '#f59e0b' :
-                                item.category === 'Insurance' ? '#ef4444' :
-                                item.category.includes('Bank') ? '#8b5cf6' :
-                                item.category.includes('SwiftRent') ? '#ec4899' :
-                                '#6366f1'
-                        }))}
+                        data={categoryData.map((item) => {
+                          const getCategoryColor = (category: string) => {
+                            switch (category) {
+                              case 'Maintenance':
+                                return '#3b82f6';
+                              case 'Utilities (Water/Electricity)':
+                                return '#10b981';
+                              case 'Rates & Taxes':
+                                return '#f59e0b';
+                              case 'Insurance':
+                                return '#ef4444';
+                              case 'Bank Fees':
+                                return '#8b5cf6';
+                              case 'SwiftRent Subscription':
+                                return '#ec4899';
+                              case 'Other':
+                                return '#6366f1';
+                              default:
+                                return '#6366f1';
+                            }
+                          };
+                          
+                          return {
+                            category: item.category,
+                            amount: item.amount,
+                            fill: getCategoryColor(item.category)
+                          };
+                        })}
                         dataKey="amount"
                         nameKey="category"
                         innerRadius={50}
                         outerRadius={80}
                         paddingAngle={2}
-                      />
+                      >
+                        <Label
+                          content={({ viewBox }) => {
+                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                              const total = categoryData.reduce((sum, item) => sum + item.amount, 0);
+                              return (
+                                <text
+                                  x={viewBox.cx}
+                                  y={viewBox.cy}
+                                  textAnchor="middle"
+                                  dominantBaseline="middle"
+                                >
+                                  <tspan
+                                    x={viewBox.cx}
+                                    y={viewBox.cy}
+                                    className="fill-white text-2xl font-bold"
+                                  >
+                                    {formatCurrency(total)}
+                                  </tspan>
+                                  <tspan
+                                    x={viewBox.cx}
+                                    y={(viewBox.cy || 0) + 24}
+                                    className="fill-gray-400 text-sm"
+                                  >
+                                    Total Expenses
+                                  </tspan>
+                                </text>
+                              );
+                            }
+                          }}
+                        />
+                      </Pie>
                       <ChartLegend
                         content={<ChartLegendContent nameKey="category" />}
-                        className="-translate-y-2 flex-wrap gap-2 [&>*]:basis-1/4 [&>*]:justify-center text-white text-xs"
+                        className="flex flex-wrap gap-2 justify-center text-xs"
+                        wrapperStyle={{ paddingTop: '20px' }}
                       />
                       <Tooltip
                         contentStyle={{ 
