@@ -32,7 +32,7 @@ export function DashboardSidebar() {
   const isActive = (path: string) => currentPath === path || currentPath.startsWith(path + '/');
 
   return (
-    <Sidebar className="hidden md:flex border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium">
+    <Sidebar className="border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium">
       <SidebarContent>
         {/* Logo */}
         <div className="p-6 border-b">
