@@ -65,25 +65,31 @@ export function TaxInvoiceGenerator({ refreshKey, propertyId }: TaxInvoiceGenera
         console.log('Fetching property data for ID:', propertyId);
         const { data: property, error } = await supabase
           .from('properties')
-          .select('title, location, rent_amount')
+          .select('*')
           .eq('id', propertyId)
           .single();
           
         console.log('Property fetch result:', { property, error });
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching property:', error);
+          throw error;
+        }
         
         if (property) {
+          // Use property.price as the rent amount if it exists, otherwise use 0
+          const rentAmount = property.price || 0;
+          
           setInvoiceData(prev => ({
             ...prev,
-            propertyAddress: property.title || property.location || '',
+            propertyAddress: property.title || property.address || property.location || '',
             lineItems: prev.lineItems.map((item, index) => 
               index === 0 && item.description.includes('Monthly Rental') 
                 ? { 
                     ...item, 
-                    amountExclVat: property.rent_amount || 0,
-                    vatAmount: (property.rent_amount || 0) * 0.15,
-                    totalInclVat: (property.rent_amount || 0) * 1.15
+                    amountExclVat: rentAmount,
+                    vatAmount: rentAmount * 0.15,
+                    totalInclVat: rentAmount * 1.15
                   }
                 : item
             )
