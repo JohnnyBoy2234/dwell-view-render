@@ -113,7 +113,7 @@ export function TaxInvoiceGenerator() {
       }
     };
     void loadDefaults();
-  }, [user?.id]);
+  }, [user]);
 
   const calculateLineItem = (item: LineItem, field: string, value: number): LineItem => {
     const updatedItem = { ...item };
