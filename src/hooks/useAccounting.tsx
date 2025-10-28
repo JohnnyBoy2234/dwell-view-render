@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Transaction, AccountingKPIs, MonthlyData, CategoryData } from '@/types/accounting';
@@ -48,6 +48,39 @@ export function useAccounting() {
       setLoading(false);
     }
   };
+
+  const fetchTransactionsByDateRange = useCallback(async (from: Date, to: Date, propertyId?: string) => {
+    if (!user) return;
+
+    try {
+      setLoading(true);
+      let query = supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', format(from, 'yyyy-MM-dd'))
+        .lte('date', format(to, 'yyyy-MM-dd'))
+        .order('date', { ascending: false });
+
+      if (propertyId && propertyId !== 'all') {
+        query = query.eq('property_id', propertyId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setTransactions((data || []) as Transaction[]);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch transactions",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   const createTransaction = async (transactionData: Omit<Transaction, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
     if (!user) return null;
@@ -161,17 +194,23 @@ export function useAccounting() {
     };
   };
 
-  const getMonthlyData = async (months: number = 6): Promise<MonthlyData[]> => {
+  const getMonthlyData = async (months: number = 6, propertyId?: string): Promise<MonthlyData[]> => {
     if (!user) return [];
 
     try {
       const startDate = subMonths(new Date(), months - 1);
-      const { data, error } = await supabase
+      let query = supabase
         .from('transactions')
         .select('*')
         .eq('user_id', user.id)
         .gte('date', format(startOfMonth(startDate), 'yyyy-MM-dd'))
         .order('date', { ascending: true });
+
+      if (propertyId && propertyId !== 'all') {
+        query = query.eq('property_id', propertyId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -207,7 +246,62 @@ export function useAccounting() {
     }
   };
 
-  const getCategoryData = (transactionList: Transaction[]): CategoryData[] => {
+  const getMonthlyDataByRange = useCallback(async (from: Date, to: Date, propertyId?: string): Promise<MonthlyData[]> => {
+    if (!user) return [];
+
+    try {
+      let query = supabase
+        .from('transactions')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', format(from, 'yyyy-MM-dd'))
+        .lte('date', format(to, 'yyyy-MM-dd'))
+        .order('date', { ascending: true });
+
+      if (propertyId && propertyId !== 'all') {
+        query = query.eq('property_id', propertyId);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+
+      const monthlyMap = new Map<string, { income: number; expense: number }>();
+
+      // Initialize months within the range
+      let currentMonth = new Date(from.getFullYear(), from.getMonth(), 1);
+      const endMonth = new Date(to.getFullYear(), to.getMonth(), 1);
+
+      while (currentMonth <= endMonth) {
+        const key = format(currentMonth, 'MMM yyyy');
+        monthlyMap.set(key, { income: 0, expense: 0 });
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+      }
+
+      // Aggregate data
+      (data as Transaction[])?.forEach(transaction => {
+        const month = format(new Date(transaction.date), 'MMM yyyy');
+        const existing = monthlyMap.get(month);
+        if (existing) {
+          if (transaction.type === 'income') {
+            existing.income += Number(transaction.amount);
+          } else {
+            existing.expense += Number(transaction.amount);
+          }
+        }
+      });
+
+      return Array.from(monthlyMap.entries()).map(([month, data]) => ({
+        month,
+        ...data,
+      }));
+    } catch (error) {
+      console.error('Error fetching monthly data:', error);
+      return [];
+    }
+  }, [user]);
+
+  const getCategoryData = useCallback((transactionList: Transaction[]): CategoryData[] => {
     const categoryMap = new Map<string, number>();
     
     transactionList
@@ -221,7 +315,7 @@ export function useAccounting() {
       category,
       amount,
     }));
-  };
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -267,12 +361,14 @@ export function useAccounting() {
     transactions,
     loading,
     fetchTransactions,
+    fetchTransactionsByDateRange,
     createTransaction,
     createBatchTransactions,
     updateTransaction,
     deleteTransaction,
     calculateKPIs,
     getMonthlyData,
+    getMonthlyDataByRange,
     getCategoryData,
   };
 }
