@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +11,7 @@ import { PropertyOverview } from '@/components/property/PropertyOverview';
 import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
 import { TenantRelations } from '@/components/property/TenantRelations';
 import { PropertyOperations } from '@/components/property/PropertyOperations';
+import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 
 interface MaintenanceRequest {
   id: string;
@@ -139,6 +140,10 @@ export default function PropertyManagement() {
     }
   ];
 
+  // Get the current location for the active tab
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white flex items-center justify-center">
@@ -167,91 +172,84 @@ export default function PropertyManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white">
-      {/* iOS-style Header */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-ios-gray/10">
-        <div className="px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/enhancedlandlorddashboard')}
-            className="p-2 hover:bg-ios-gray/10 rounded-ios"
-          >
-           <ArrowLeft className="h-5 w-5 text-ios-blue" />
-          </Button>
-          <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ios-blue-light rounded-ios flex items-center justify-center">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-semibold text-ios-gray-dark">R{property.price.toLocaleString()}/month</h1>
-                  <p className="text-sm text-ios-gray">{property.property_type} • {property.location}</p>
-              </div>
-          </div>
+    <EnhancedDashboardLayout 
+      title={`${property.property_type} • ${property.location}`}
+      currentTab={currentPath}
+      onTabChange={(tab) => navigate(tab)}
+      selectedPropertyId={id}
+      onBackToProperties={() => navigate('/enhancedlandlorddashboard')}
+    >
+      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-gradient-to-br from-ios-blue to-ios-blue-light rounded-xl flex items-center justify-center">
+              <Home className="h-6 w-6 text-white" />
             </div>
-            <Badge className={`${getStatusColor(property.status)} rounded-ios font-medium px-3 py-1`}>
-              {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-            </Badge>
+            <div>
+              <h1 className="text-xl font-semibold text-ios-gray-dark">R{property.price.toLocaleString()}/month</h1>
+              <p className="text-sm text-ios-gray">{property.property_type} • {property.location}</p>
+            </div>
           </div>
-        </div>
+          <Badge className={`${getStatusColor(property.status)} rounded-lg font-medium px-3 py-1`}>
+            {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+          </Badge>
         </div>
 
         {/* Navigation Pills */}
-      <div className="px-4 py-4">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleTabChange(item.id)}
-                className={`
-                  flex items-center gap-2 px-4 py-3 rounded-ios-card transition-all duration-200 min-w-fit
-                  ${isActive 
-                    ? `bg-gradient-to-r from-${item.color} to-${item.color}-light text-white shadow-ios-sm` 
-                    : 'bg-white/60 text-ios-gray hover:bg-white/80 border border-ios-gray/10'
-                  }
-                `}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium text-sm">{item.label}</span>
-              </button>
-            );
-          })}
+        <div className="mb-6">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-2">
+            {navigationItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleTabChange(item.id)}
+                  className={`
+                    flex items-center gap-2 px-4 py-3 rounded-lg transition-all duration-200 min-w-fit
+                    ${isActive 
+                      ? `bg-gradient-to-r from-${item.color} to-${item.color}-light text-white shadow-md` 
+                      : 'bg-white/60 text-ios-gray hover:bg-white/80 border border-ios-gray/10'
+                    }
+                  `}
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="font-medium text-sm">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-            </div>
 
-           {/* Content Area */}
-      <div className="px-4 pb-8 space-y-6">
-        {activeTab === 'overview' && (
-          <PropertyOverview 
-            property={property} 
-            maintenanceRequests={maintenanceRequests}
-          />
-        )}
-        
-        {activeTab === 'management' && (
-          <PropertyManagementSection 
-            property={property}
-          />
-        )}
-        
-        {activeTab === 'tenants' && (
-          <TenantRelations 
-            property={property}
-          />
-        )}
-        
-        {activeTab === 'operations' && (
-          <PropertyOperations 
-            property={property}
-            maintenanceRequests={maintenanceRequests}
-          />
-              )}
+        {/* Content Area */}
+        <div className="space-y-6">
+          {activeTab === 'overview' && (
+            <PropertyOverview 
+              property={property} 
+              maintenanceRequests={maintenanceRequests}
+            />
+          )}
+          
+          {activeTab === 'management' && (
+            <PropertyManagementSection 
+              property={property}
+            />
+          )}
+          
+          {activeTab === 'tenants' && (
+            <TenantRelations 
+              property={property}
+            />
+          )}
+          
+          {activeTab === 'operations' && (
+            <PropertyOperations 
+              property={property}
+              maintenanceRequests={maintenanceRequests}
+            />
+          )}
+        </div>
       </div>
-    </div>
+    </EnhancedDashboardLayout>
   );
 }
