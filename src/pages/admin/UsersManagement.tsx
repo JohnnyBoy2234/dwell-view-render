@@ -31,43 +31,14 @@ export function UsersManagement() {
     try {
       setLoading(true);
       
-      // Get all users from auth
-      const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
-      if (authError) throw authError;
-      
-      // Get all profiles
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*');
-      
-      if (profilesError) throw profilesError;
-
-      // Get all user roles
-      const { data: userRoles, error: rolesError } = await supabase
-        .from('user_roles')
-        .select('*');
-      
-      if (rolesError) throw rolesError;
-
-      // Combine auth and profile data
-      const usersWithProfiles = authUsers.map(user => {
-        const profile = profiles?.find(p => p.user_id === user.id);
-        const roles = userRoles?.filter(ur => ur.user_id === user.id).map(ur => ur.role) || [];
-        const isAdmin = roles.includes('admin');
-        const isLandlord = roles.includes('landlord');
-        
-        return {
-          id: user.id,
-          email: user.email || 'No email',
-          full_name: profile?.display_name || '',
-          created_at: user.created_at || '',
-          last_sign_in_at: user.last_sign_in_at,
-          is_banned: profile?.is_banned || false,
-          warning_count: profile?.warning_count || 0
-        };
+      // Call our serverless function
+      const { data, error } = await supabase.functions.invoke('admin/users', {
+        method: 'GET'
       });
 
-      setUsers(usersWithProfiles);
+      if (error) throw error;
+      
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
