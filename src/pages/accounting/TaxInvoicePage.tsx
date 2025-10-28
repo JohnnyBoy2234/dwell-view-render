@@ -23,7 +23,7 @@ export default function TaxInvoicePage() {
       currentTab="/enhancedlandlorddashboard/tax-invoice"
       onBackToProperties={handleBack}
     >
-      <TaxInvoiceGenerator key={key} />
+      <TaxInvoiceGenerator key={key} refreshKey={key} />
     </EnhancedDashboardLayout>
   );
 }

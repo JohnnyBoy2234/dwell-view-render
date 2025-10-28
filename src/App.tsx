@@ -204,7 +204,7 @@ function AppRoutes() {
               <Route path="/dashboard/accounting/new" element={<AuthenticatedRoute><AddTransactionPage /></AuthenticatedRoute>} />
               <Route path="/dashboard/accounting/transactions" element={<AuthenticatedRoute><TransactionsPage /></AuthenticatedRoute>} />
               <Route path="/dashboard/accounting/reports/expense-summary" element={<AuthenticatedRoute><ExpenseSummaryPage /></AuthenticatedRoute>} />
-              <Route path="/dashboard/invoices/tax" element={<AuthenticatedRoute><TaxInvoicePage /></AuthenticatedRoute>} />
+              <Route path="/enhancedlandlorddashboard/tax-invoice" element={<AuthenticatedRoute><TaxInvoicePage /></AuthenticatedRoute>} />
               
               <Route path="/messages" element={<AuthenticatedRoute requireVerification={false}><VerificationGate requireVerification={true}><Messages /></VerificationGate></AuthenticatedRoute>} />
               <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />

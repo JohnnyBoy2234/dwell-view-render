@@ -39,7 +39,11 @@ interface InvoiceData {
   reference: string;
 }
 
-export function TaxInvoiceGenerator() {
+interface TaxInvoiceGeneratorProps {
+  refreshKey?: number;
+}
+
+export function TaxInvoiceGenerator({ refreshKey }: TaxInvoiceGeneratorProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
@@ -113,7 +117,7 @@ export function TaxInvoiceGenerator() {
       }
     };
     void loadDefaults();
-  }, [user]);
+  }, [user, refreshKey]);
 
   const calculateLineItem = (item: LineItem, field: string, value: number): LineItem => {
     const updatedItem = { ...item };

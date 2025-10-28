@@ -26,7 +26,7 @@ export function AccountingNavigation() {
     // SARS Summary removed per request
     {
       label: 'Tax Invoice',
-      path: '/dashboard/invoices/tax',
+      path: '/enhancedlandlorddashboard/tax-invoice',
       icon: Calculator,
     },
   ];

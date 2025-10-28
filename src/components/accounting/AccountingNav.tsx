@@ -26,7 +26,7 @@ interface AccountingNavProps {
 
 export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: AccountingNavProps) {
   const location = useLocation();
-  const isInvoicePage = location.pathname.includes('/invoices/tax');
+  const isInvoicePage = location.pathname.includes('/tax-invoice');
   
   return (
     <nav className={`bg-white border border-gray-200 rounded-lg p-4 shadow-sm ${className}`}>
@@ -60,7 +60,7 @@ export function AccountingNav({ onAddIncome, onAddExpense, className = '' }: Acc
             style={!isInvoicePage ? accountingButtonStyle : {}}
             className={`w-full justify-center py-2 text-sm font-medium h-10 whitespace-nowrap ${isInvoicePage ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
           >
-            <Link to="/dashboard/invoices/tax">
+            <Link to="/enhancedlandlorddashboard/tax-invoice">
               <span>Generate Tax Invoice</span>
             </Link>
           </Button>
