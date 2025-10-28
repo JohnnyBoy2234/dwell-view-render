@@ -8,14 +8,22 @@ export default function TaxInvoicePage() {
   const location = useLocation();
   const [key, setKey] = useState(0);
   
+  // Get property ID from URL
+  const searchParams = new URLSearchParams(location.search);
+  const propertyId = searchParams.get('property');
+  
   const handleBack = () => {
-    navigate('/enhancedlandlorddashboard');
+    if (propertyId) {
+      navigate(`/enhancedlandlorddashboard/swiftbooks?property=${propertyId}`);
+    } else {
+      navigate('/enhancedlandlorddashboard');
+    }
   };
 
-  // Force a re-render when the location changes
+  // Force a re-render when the location or property ID changes
   useEffect(() => {
     setKey(prevKey => prevKey + 1);
-  }, [location.pathname]);
+  }, [location.pathname, propertyId]);
 
   return (
     <EnhancedDashboardLayout 
@@ -23,7 +31,11 @@ export default function TaxInvoicePage() {
       currentTab="/enhancedlandlorddashboard/tax-invoice"
       onBackToProperties={handleBack}
     >
-      <TaxInvoiceGenerator key={key} refreshKey={key} />
+      <TaxInvoiceGenerator 
+        key={key} 
+        refreshKey={key} 
+        propertyId={propertyId || undefined}
+      />
     </EnhancedDashboardLayout>
   );
 }

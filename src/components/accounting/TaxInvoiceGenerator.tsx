@@ -41,11 +41,50 @@ interface InvoiceData {
 
 interface TaxInvoiceGeneratorProps {
   refreshKey?: number;
+  propertyId?: string;
 }
 
-export function TaxInvoiceGenerator({ refreshKey }: TaxInvoiceGeneratorProps = {}) {
+export function TaxInvoiceGenerator({ refreshKey, propertyId }: TaxInvoiceGeneratorProps = {}) {
   const { user } = useAuth();
   const { toast } = useToast();
+  // Fetch property data when component mounts or propertyId changes
+  useEffect(() => {
+    const fetchPropertyData = async () => {
+      if (!propertyId) return;
+      
+      try {
+        const { data: property, error } = await supabase
+          .from('properties')
+          .select('title, location, rent_amount')
+          .eq('id', propertyId)
+          .single();
+          
+        if (error) throw error;
+        
+        if (property) {
+          setInvoiceData(prev => ({
+            ...prev,
+            propertyAddress: property.title || property.location || '',
+            lineItems: prev.lineItems.map((item, index) => 
+              index === 0 && item.description.includes('Monthly Rental') 
+                ? { 
+                    ...item, 
+                    amountExclVat: property.rent_amount || 0,
+                    vatAmount: (property.rent_amount || 0) * 0.15,
+                    totalInclVat: (property.rent_amount || 0) * 1.15
+                  }
+                : item
+            )
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching property data:', error);
+      }
+    };
+    
+    fetchPropertyData();
+  }, [propertyId]);
+
   const [invoiceData, setInvoiceData] = useState<InvoiceData>({
     landlordName: '',
     landlordAddress: '',
