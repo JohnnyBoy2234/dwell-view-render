@@ -51,7 +51,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
 
   // Handle back button click
   const handleBackClick = () => {
-    if (title === 'Generate Tax Invoice' || currentTab?.includes('tax-invoice')) {
+    if (title === 'Generate Invoice' || currentTab?.includes('tax-invoice')) {
       // Always navigate to management tools when on Tax Invoice page
       navigate('/enhancedlandlorddashboard');
     } else if (currentTab === '/enhancedlandlorddashboard' && selectedPropertyId) {

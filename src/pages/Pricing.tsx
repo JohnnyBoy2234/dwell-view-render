@@ -114,7 +114,7 @@ export default function Pricing() {
               <Feature>Legally binding e-signatures</Feature>
               <Feature>Inventory tracker (upload & timestamped records)</Feature>
               <Feature>Maintenance management - tenants submit requests from their dashboard</Feature>
-              <Feature>SwiftBooks (income/expenses + tax invoices)</Feature>
+              <Feature>SwiftBooks (income/expenses + invoices)</Feature>
               <Feature>AI support</Feature>
               <Feature>Automated tenant reminders</Feature>
             </div>
@@ -173,7 +173,7 @@ export default function Pricing() {
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Legally binding e-signatures</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Inventory tracker (upload & timestamped records)</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Maintenance management - tenants submit requests from their dashboard</div>
-                <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />SwiftBooks (income/expenses + tax invoices)</div>
+                <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />SwiftBooks (income/expenses + invoices)</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />AI support</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Automated tenant reminders</div>
               </div>

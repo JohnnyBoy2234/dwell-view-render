@@ -84,7 +84,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
               <Feature>Unlimited property listings</Feature>
               <Feature>In-platform messaging</Feature>
               <Feature>Digital SA lease agreements</Feature>
-              <Feature>SwiftBooks (income/expenses + tax invoices)</Feature>
+              <Feature>SwiftBooks (income/expenses + invoices)</Feature>
               <Feature>AI support</Feature>
               <Feature>Automated tenant reminders</Feature>
             </div>

@@ -247,8 +247,8 @@ export function TaxInvoiceGenerator() {
         <div className="p-6 space-y-4">
           {/* Subtitle */}
           <div className="text-center space-y-2 mb-8">
-            <h2 className="text-2xl font-normal text-black dark:text-white">Tax Invoice</h2>
-            <p className="text-black/80 dark:text-white/80">Create and manage tax invoices</p>
+            <h2 className="text-2xl font-normal text-black dark:text-white">Invoice</h2>
+            <p className="text-black/80 dark:text-white/80">Create and manage Invoices</p>
           </div>
           
           {/* Navigation */}
@@ -285,15 +285,6 @@ export function TaxInvoiceGenerator() {
                   onChange={(e) => setInvoiceData(prev => ({ ...prev, landlordAddress: e.target.value }))}
                   placeholder="Enter landlord address"
                   rows={3}
-                />
-              </div>
-              <div>
-                <Label htmlFor="landlordVatReg">VAT Registration Number (Optional)</Label>
-                <Input
-                  id="landlordVatReg"
-                  value={invoiceData.landlordVatReg}
-                  onChange={(e) => setInvoiceData(prev => ({ ...prev, landlordVatReg: e.target.value }))}
-                  placeholder="VAT registration number"
                 />
               </div>
             </CardContent>
@@ -406,7 +397,7 @@ export function TaxInvoiceGenerator() {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <CardTitle>Line Items</CardTitle>
+                <CardTitle>Items Charged</CardTitle>
                 <Button onClick={addLineItem} size="sm">
                   <Plus className="w-4 h-4 mr-2" />
                   Add Item

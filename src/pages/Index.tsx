@@ -133,8 +133,8 @@ const Index = () => {
       },
       {
         icon: Calculator,
-        title: "Built-In Accounting & Tax Invoices",
-        description: "SwiftRent generates professional tax invoices, saving you time and giving you peace of mind.",
+        title: "Built-In Accounting & Invoices",
+        description: "SwiftRent generates professional invoices, saving you time and giving you peace of mind.",
         gradient: "from-teal-500 to-teal-600"
       },
     {

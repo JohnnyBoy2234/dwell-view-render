@@ -258,7 +258,7 @@ const TaxInvoicePDF: React.FC<TaxInvoicePDFProps> = ({ invoiceData, totals }) =>
         {/* Header */}
         <View style={styles.header}>
           <Text style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 'bold' }}>SwiftRent</Text>
-          <Text style={styles.title}>TAX INVOICE</Text>
+          <Text style={styles.title}>INVOICE</Text>
         </View>
 
         {/* Invoice Details */}

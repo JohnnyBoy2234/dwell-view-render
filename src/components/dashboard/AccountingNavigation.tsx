@@ -25,7 +25,7 @@ export function AccountingNavigation() {
     },
     // SARS Summary removed per request
     {
-      label: 'Tax Invoice',
+      label: 'Invoice',
       path: '/dashboard/invoices/tax',
       icon: Calculator,
     },
