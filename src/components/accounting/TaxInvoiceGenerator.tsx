@@ -105,6 +105,7 @@ export function TaxInvoiceGenerator() {
           ...prev,
           landlordName: landlordProfile?.display_name || prev.landlordName,
           tenantName: tenantName || prev.tenantName,
+          tenantAddress: propertyAddress || prev.tenantAddress, // Set tenant address to property address
           propertyAddress: propertyAddress || prev.propertyAddress,
         }));
       } catch (e) {
