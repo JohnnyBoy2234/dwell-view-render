@@ -202,7 +202,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[40vh] flex items-center justify-center">
+      <section className="relative min-h-[55vh] flex items-center justify-center">
         {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -211,27 +211,27 @@ const Index = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             ...(window.innerWidth < 768 && {
-              backgroundSize: 'auto 60%',
+              backgroundSize: 'auto 90%',
               backgroundPosition: 'center 50%'
             })
           }}
         >
-          <div className="absolute inset-0 bg-black/20"></div>
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
 
         {/* Main Content Container */}
         <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Heading on Image */}
-          <div className="text-center mb-2 pt-6 px-4">
-            <h1 className="text-3xl font-bold text-white mb-2 leading-tight drop-shadow">
+          <div className="text-center mb-4 pt-10 px-4">
+            <h1 className="text-4xl font-bold text-white mb-3 leading-tight drop-shadow">
               Safe, Simple,
-              <span className="block text-white mt-1">
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100 mt-1">
                 Commission-Free
               </span>
               <span className="block mt-1">Renting</span>
             </h1>
-            <p className="text-base text-white/90 max-w-md mx-auto mb-4 drop-shadow px-2">
-              Direct landlord-tenant connections with full verification
+            <p className="text-base text-white/90 max-w-md mx-auto mb-6 drop-shadow px-2">
+              Direct landlord-tenant connections with full verification and peace of mind
             </p>
           </div>
 
