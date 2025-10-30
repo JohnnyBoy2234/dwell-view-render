@@ -37,8 +37,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
-  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction } = useAccounting();
-  const { properties } = useUserProperties();
+  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction, calculateMonthlyDataFromTransactions } = useAccounting();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
   // Initialize to current month by default
@@ -81,13 +80,16 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
 
   useEffect(() => {
     const loadChartData = async () => {
-      const monthly = await getMonthlyDataByRange(dateRange.from, dateRange.to, selectedProperty);
-      const category = getCategoryData(filteredTransactions);
+      // Calculate monthly data from filtered transactions (client-side)
+    const monthly = calculateMonthlyDataFromTransactions(
+      filteredTransactions, 
+      dateRange.from, 
+      dateRange.to
+    );
       setMonthlyData(monthly);
       setCategoryData(category);
-    };
-    loadChartData();
-  }, [transactions, selectedProperty, dateRange, getMonthlyDataByRange, getCategoryData]);
+      }, [filteredTransactions, dateRange, calculateMonthlyDataFromTransactions, getCategoryData]);
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
@@ -506,8 +508,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                       </Pie>
                       <ChartLegend
                         content={<ChartLegendContent nameKey="category" />}
-                        className="flex flex-wrap gap-2 justify-center text-xs"
-                        wrapperStyle={{ paddingTop: '20px' }}
+                        className="flex flex-wrap gap-2 justify-center text-xs text-white"
                       />
                       <Tooltip
                         contentStyle={{ 

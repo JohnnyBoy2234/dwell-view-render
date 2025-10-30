@@ -370,15 +370,15 @@ const Index = () => {
               size="lg" 
               className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              <Link to="/auth">Join as Landlord</Link>
+              <Link to="/enhancedlandlorddashboard">Landlord Dashboard</Link>
             </Button>
             <Button 
               asChild
               size="lg" 
               variant="outline"
-              className="bg-white/20 text-ocean-blue-dark border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Link to="/auth">Join as Tenant</Link>
+              <Link to="/enhancedtenantdashboard">Tenant Dashboard</Link>
             </Button>
           </div>
         </div>
