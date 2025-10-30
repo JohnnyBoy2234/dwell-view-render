@@ -211,8 +211,8 @@ const Index = () => {
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             ...(window.innerWidth < 768 && {
-              backgroundSize: 'auto 90%',
-              backgroundPosition: 'center 50%'
+              backgroundSize: '120% auto',
+              backgroundPosition: 'center 40%'
             })
           }}
         >
