@@ -205,15 +205,15 @@ const Index = () => {
       <section className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center">
         {/* Background Image with Overlay */}
         <div 
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-center bg-fixed bg-no-repeat"
           style={{
             backgroundImage: 'url(/hero.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            // Optimize for mobile
-            backgroundAttachment: 'fixed',
-            // Ensure image covers the area without distortion
-            backgroundRepeat: 'no-repeat'
+            ...(window.innerWidth < 640 && {
+              backgroundSize: 'auto 100%',
+              backgroundPosition: 'center 30%'
+            })
           }}
         >
           <div className="absolute inset-0 bg-black/40"></div>
