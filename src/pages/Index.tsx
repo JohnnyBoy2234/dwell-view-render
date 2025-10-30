@@ -202,36 +202,36 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[80vh] sm:min-h-[90vh] flex items-center justify-center">
+      <section className="relative min-h-[40vh] flex items-center justify-center">
         {/* Background Image with Overlay */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-fixed bg-no-repeat"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: 'url(/hero.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            ...(window.innerWidth < 640 && {
-              backgroundSize: 'auto 100%',
-              backgroundPosition: 'center 30%'
+            ...(window.innerWidth < 768 && {
+              backgroundSize: 'auto 60%',
+              backgroundPosition: 'center 50%'
             })
           }}
         >
-          <div className="absolute inset-0 bg-black/40"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
         {/* Main Content Container */}
         <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Heading on Image */}
-          <div className="text-center mb-8 sm:mb-12 pt-12 sm:pt-16 md:pt-24 lg:pt-32 px-4">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-4 sm:mb-6 leading-tight drop-shadow-lg">
+          <div className="text-center mb-2 pt-6 px-4">
+            <h1 className="text-3xl font-bold text-white mb-2 leading-tight drop-shadow">
               Safe, Simple,
-              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100 mt-1 sm:mt-2">
+              <span className="block text-white mt-1">
                 Commission-Free
               </span>
-              <span className="block mt-1 sm:mt-2">Renting</span>
+              <span className="block mt-1">Renting</span>
             </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 sm:mb-12 drop-shadow px-2">
-              Direct landlord-tenant connections with full verification and peace of mind
+            <p className="text-base text-white/90 max-w-md mx-auto mb-4 drop-shadow px-2">
+              Direct landlord-tenant connections with full verification
             </p>
           </div>
 
