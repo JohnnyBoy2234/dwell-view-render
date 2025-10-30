@@ -202,7 +202,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] flex items-center justify-center">
+      <section className="relative min-h-[40vh] flex items-center justify-center">
         {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -223,7 +223,7 @@ const Index = () => {
         <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Heading on Image */}
           <div className="text-center mb-4 pt-10 px-4">
-            <h1 className="text-4xl font-bold text-white mb-3 leading-tight drop-shadow">
+            <h1 className="text-3xl font-bold text-white mb-2 leading-tight drop-shadow">
               Safe, Simple,
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100 mt-1">
                 Commission-Free
@@ -236,7 +236,7 @@ const Index = () => {
           </div>
 
           {/* Spacer to prevent content from being hidden behind the search bar */}
-          <div className="h-16 sm:h-20"></div>
+          <div className="h-8"></div>
 
           {/* Quick Stats removed per request */}
         </div>
@@ -246,8 +246,8 @@ const Index = () => {
       </section>
 
       {/* Search Bar Card */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-4 max-w-2xl mx-auto">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-3 max-w-lg mx-auto">
           <Property24SearchBar
             onSearch={handleSearch}
             onFiltersChange={onFiltersChange}
