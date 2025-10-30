@@ -23,7 +23,11 @@ import {
   Phone,
   Mail,
   FileText,
-  CheckCircle
+  CheckCircle,
+  Ruler,
+  Layers,
+  Droplets,
+  ParkingMeter
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -449,26 +453,22 @@ export default function PropertyDetail() {
                       <p className="text-muted-foreground leading-relaxed break-words">{property.description}</p>
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-                      <div className="text-center p-4 bg-gradient-to-br from-ocean-blue/10 to-ocean-blue/5 border border-ocean-blue/20 rounded-lg shadow-sm">
-                        <Bed className="h-8 w-8 mx-auto mb-2 text-ocean-blue" />
-                        <div className="font-semibold">{property.bedrooms}</div>
-                        <div className="text-sm text-muted-foreground">Bedrooms</div>
+                    <div className="flex flex-wrap gap-6 mt-6">
+                      <div className="flex items-center gap-2">
+                        <Bed className="h-5 w-5 text-ocean-blue" />
+                        <span className="font-medium">{property.bedrooms} Bedrooms</span>
                       </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-earth-warm/10 to-earth-warm/5 border border-earth-warm/20 rounded-lg shadow-sm">
-                        <Bath className="h-8 w-8 mx-auto mb-2 text-earth-warm" />
-                        <div className="font-semibold">{property.bathrooms}</div>
-                        <div className="text-sm text-muted-foreground">Bathrooms</div>
+                      <div className="flex items-center gap-2">
+                        <Droplets className="h-5 w-5 text-earth-warm" />
+                        <span className="font-medium">{property.bathrooms} Bathrooms</span>
                       </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-success-green/10 to-success-green/5 border border-success-green/20 rounded-lg shadow-sm">
-                        <Car className="h-8 w-8 mx-auto mb-2 text-success-green" />
-                        <div className="font-semibold">{property.parking_spaces}</div>
-                        <div className="text-sm text-muted-foreground">Parking</div>
+                      <div className="flex items-center gap-2">
+                        <ParkingMeter className="h-5 w-5 text-success-green" />
+                        <span className="font-medium">{property.parking_spaces} Parking</span>
                       </div>
-                      <div className="text-center p-4 bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-lg shadow-sm">
-                        <Home className="h-8 w-8 mx-auto mb-2 text-primary" />
-                        <div className="font-semibold">{property.size_sqm || 'N/A'}</div>
-                        <div className="text-sm text-muted-foreground">Size (sqm)</div>
+                      <div className="flex items-center gap-2">
+                        <Layers className="h-5 w-5 text-primary" />
+                        <span className="font-medium">{property.size_sqm || 'N/A'} m²</span>
                       </div>
                     </div>
                   </CardContent>
