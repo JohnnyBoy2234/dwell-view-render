@@ -200,10 +200,10 @@ const Index = () => {
  const stats: never[] = [];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-200/60 to-gray-100/40">
+    <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image */}
+      <section className="relative min-h-[90vh] flex items-center justify-center">
+        {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center"
           style={{
@@ -212,45 +212,63 @@ const Index = () => {
             backgroundPosition: 'center'
           }}
         >
-          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
-        {/* Blue Block with Content */}
-        <div className="relative z-10 w-full max-w-5xl mx-4 sm:mx-8 mt-16 mb-8 bg-gradient-to-br from-ocean-blue to-ocean-blue/90 text-white rounded-xl shadow-2xl overflow-hidden">
-          <div className="p-8 text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+        {/* Main Content Container */}
+        <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+          {/* Heading on Image */}
+          <div className="text-center mb-12">
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-lg">
               Safe, Simple,
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100">
+              <span className="block bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-100">
                 Commission-Free
               </span>
               Renting
             </h1>
-            <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-12 drop-shadow">
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
-            
-            {/* Search Bar */}
-            <div className="bg-white rounded-lg p-1 shadow-lg max-w-2xl mx-auto mb-4">
-              <div className="flex flex-col sm:flex-row gap-2">
+          </div>
+
+          {/* Glass Search Bar */}
+          <div className="max-w-4xl mx-auto p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
                 <input
                   type="text"
                   placeholder="Search for properties..."
-                  className="flex-1 px-4 py-3 rounded-md border-0 text-gray-900 focus:ring-2 focus:ring-ocean-blue focus:outline-none"
+                  className="w-full px-5 py-4 pr-12 text-gray-900 bg-white/90 rounded-lg border-0 focus:ring-2 focus:ring-ocean-blue/50 focus:bg-white transition-all duration-200"
                 />
-                <button className="bg-success-green hover:bg-green-600 text-white font-medium py-3 px-6 rounded-md transition-colors">
-                  Search
-                </button>
+                <svg 
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24" 
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                  />
+                </svg>
               </div>
+              <button className="bg-ocean-blue hover:bg-blue-700 text-white font-medium py-4 px-8 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg">
+                Search
+              </button>
             </div>
           </div>
 
           {/* Property Search Module */}
-          <div className="max-w-4xl mx-auto p-4">
+          <div className="max-w-4xl mx-auto mt-6">
             <Property24SearchBar
               onSearch={handleSearch}
               onFiltersChange={onFiltersChange}
               onMoreFiltersOpen={() => setShowMoreFilters(true)}
               filters={filters}
+              className="bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg"
             />
           </div>
 
