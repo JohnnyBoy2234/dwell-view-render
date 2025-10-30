@@ -202,44 +202,56 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-200/60 to-gray-100/40">
       {/* Hero Section */}
-      <section 
-        className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(rgba(33, 79, 197, 0.8), rgba(34, 197, 94, 0.8)), url(${heroBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -bottom-10 -right-10 w-96 h-96 bg-success-green/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Background Image */}
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: 'url(/hero.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        >
+          <div className="absolute inset-0 bg-black/30"></div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-2 sm:pt-8">
-          {/* Hero Content */}
-          <div className="mb-8 sm:mb-12">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Safe, Simple,<br />
-              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
+        {/* Blue Block with Content */}
+        <div className="relative z-10 w-full max-w-5xl mx-4 sm:mx-8 mt-16 mb-8 bg-gradient-to-br from-ocean-blue to-ocean-blue/90 text-white rounded-xl shadow-2xl overflow-hidden">
+          <div className="p-8 text-center">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 leading-tight">
+              Safe, Simple,
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100">
                 Commission-Free
-              </span><br />
+              </span>
               Renting
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
             
-            {/* CTA Buttons removed per request */}
+            {/* Search Bar */}
+            <div className="bg-white rounded-lg p-1 shadow-lg max-w-2xl mx-auto mb-4">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="text"
+                  placeholder="Search for properties..."
+                  className="flex-1 px-4 py-3 rounded-md border-0 text-gray-900 focus:ring-2 focus:ring-ocean-blue focus:outline-none"
+                />
+                <button className="bg-success-green hover:bg-green-600 text-white font-medium py-3 px-6 rounded-md transition-colors">
+                  Search
+                </button>
+              </div>
+            </div>
           </div>
 
-          {/* Search Module wrapper removed; keep only the search bar */}
-          <div className="max-w-4xl mx-auto">
-                <Property24SearchBar
-                  onSearch={handleSearch}
-                  onFiltersChange={onFiltersChange}
-                  onMoreFiltersOpen={() => setShowMoreFilters(true)}
-                  filters={filters}
-                />
+          {/* Property Search Module */}
+          <div className="max-w-4xl mx-auto p-4">
+            <Property24SearchBar
+              onSearch={handleSearch}
+              onFiltersChange={onFiltersChange}
+              onMoreFiltersOpen={() => setShowMoreFilters(true)}
+              filters={filters}
+            />
           </div>
 
           {/* Quick Stats removed per request */}
