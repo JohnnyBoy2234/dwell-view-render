@@ -202,7 +202,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[40vh] flex items-center justify-center">
+      <section className="relative min-h-[40vh] flex items-center justify-center -mx-4">
         {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -222,7 +222,7 @@ const Index = () => {
         {/* Main Content Container */}
         <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Heading on Image */}
-          <div className="text-center mb-4 pt-10 px-4">
+          <div className="text-center mb-4 pt-8">
             <h1 className="text-3xl font-bold text-white mb-2 leading-tight drop-shadow">
               Safe, Simple,
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100 mt-1">
@@ -230,7 +230,7 @@ const Index = () => {
               </span>
               <span className="block mt-1">Renting</span>
             </h1>
-            <p className="text-base text-white/90 max-w-md mx-auto mb-6 drop-shadow px-2">
+            <p className="text-sm text-white/90 max-w-md mx-auto mb-4 drop-shadow">
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
           </div>
@@ -247,7 +247,7 @@ const Index = () => {
 
       {/* Search Bar Card */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-8">
-        <div className="bg-white rounded-xl shadow-lg p-3 max-w-lg mx-auto">
+        <div className="bg-white rounded-lg shadow-md p-2 max-w-md mx-auto">
           <Property24SearchBar
             onSearch={handleSearch}
             onFiltersChange={onFiltersChange}
