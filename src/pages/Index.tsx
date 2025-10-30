@@ -232,7 +232,7 @@ const Index = () => {
           </div>
 
           {/* Property Search Module */}
-          <div className="max-w-4xl mx-auto mt-6">
+          <div className="max-w-4xl mx-auto -mt-16 sm:-mt-20">
             <Property24SearchBar
               onSearch={handleSearch}
               onFiltersChange={onFiltersChange}
