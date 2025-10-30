@@ -202,7 +202,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[55vh] flex items-center justify-center">
+      <section className="relative min-h-[50vh] flex items-center justify-center">
         {/* Background Image with Overlay */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -235,16 +235,8 @@ const Index = () => {
             </p>
           </div>
 
-          {/* Property Search Module */}
-          <div className="max-w-4xl mx-auto -mt-16 sm:-mt-20">
-            <Property24SearchBar
-              onSearch={handleSearch}
-              onFiltersChange={onFiltersChange}
-              onMoreFiltersOpen={() => setShowMoreFilters(true)}
-              filters={filters}
-              className="bg-white/80 backdrop-blur-sm rounded-xl p-2 shadow-lg"
-            />
-          </div>
+          {/* Spacer to prevent content from being hidden behind the search bar */}
+          <div className="h-16 sm:h-20"></div>
 
           {/* Quick Stats removed per request */}
         </div>
@@ -252,6 +244,19 @@ const Index = () => {
         {/* Seamless fade into page background */}
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-gray-200/50"></div>
       </section>
+
+      {/* Search Bar Card */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 -mt-8 sm:-mt-12 mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-4 max-w-2xl mx-auto">
+          <Property24SearchBar
+            onSearch={handleSearch}
+            onFiltersChange={onFiltersChange}
+            onMoreFiltersOpen={() => setShowMoreFilters(true)}
+            filters={filters}
+            className="!p-0 !shadow-none"
+          />
+        </div>
+      </div>
 
       {/* Feature Highlights */}
       <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
