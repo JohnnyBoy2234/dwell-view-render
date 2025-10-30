@@ -34,6 +34,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const navigate = useNavigate();
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [selectedProperty, setSelectedProperty] = useState(defaultPropertyId || 'all');
+  const { properties = [], loading: propertiesLoading } = useUserProperties();
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
@@ -81,14 +82,17 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   useEffect(() => {
     const loadChartData = async () => {
       // Calculate monthly data from filtered transactions (client-side)
-    const monthly = calculateMonthlyDataFromTransactions(
-      filteredTransactions, 
-      dateRange.from, 
-      dateRange.to
-    );
+      const monthly = calculateMonthlyDataFromTransactions(
+        filteredTransactions, 
+        dateRange.from, 
+        dateRange.to
+      );
       setMonthlyData(monthly);
-      setCategoryData(category);
-      }, [filteredTransactions, dateRange, calculateMonthlyDataFromTransactions, getCategoryData]);
+      const categoryData = await getCategoryData(filteredTransactions);
+      setCategoryData(categoryData);
+    };
+    loadChartData();
+  }, [filteredTransactions, dateRange, calculateMonthlyDataFromTransactions, getCategoryData]);
 
 
   const formatCurrency = (amount: number) => {
