@@ -209,14 +209,16 @@ const Index = () => {
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{
             backgroundImage: 'url(/hero.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundSize: '100% auto',  // Changed from 'cover' to show more of the image
+            backgroundPosition: 'center 30%',  // Slightly adjusted to show more of the bottom
+            backgroundRepeat: 'no-repeat',
+            transform: 'scale(1.1)',  // Slightly zoom out the image
+            transformOrigin: 'center'
           }}
         />
 
-        {/* Bottom fade effect with search bar */}
-        <div className="absolute bottom-0 left-0 right-0 pt-12 pb-8 bg-gradient-to-t from-gray-100 via-gray-100/90 via-80% to-transparent">
+        {/* Bottom fade effect with search bar - Positioned higher */}
+        <div className="absolute bottom-0 left-0 right-0 pt-16 pb-12 bg-gradient-to-t from-gray-100 via-gray-100/70 via-60% to-transparent">
           <div className="relative z-10 w-full px-4 md:px-8 max-w-7xl mx-auto">
             <div className="w-full mx-auto">
               <Property24SearchBar
