@@ -45,8 +45,8 @@ serve(async (req) => {
     const link = signed?.signedUrl;
 
     if (tenantEmail) {
-      const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@swiftrent.co';
-      const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'SwiftRent';
+      const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@RentLekker.co';
+      const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'RentLekker';
       const subject = `Invoice • ${property?.title || 'Your rental'}`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; padding:24px; background:#f8fafc;">
@@ -55,7 +55,7 @@ serve(async (req) => {
             <p style="margin:0 0 16px; color:#374151;">Hello ${tenantName},</p>
             <p style="margin:0 0 16px; color:#374151;">Your landlord shared a new invoice${property?.title ? ` for <strong>${property.title}</strong>` : ''}. You can download it using the link below.</p>
             ${link ? `<div style=\"margin:24px 0;\"><a href=\"${link}\" style=\"display:inline-block; background:#2563eb; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;\">Download Invoice</a></div>` : ''}
-            <p style="margin:16px 0 0; color:#6b7280; font-size:12px;">This email was sent by SwiftRent on behalf of your landlord.</p>
+            <p style="margin:16px 0 0; color:#6b7280; font-size:12px;">This email was sent by RentLekker on behalf of your landlord.</p>
           </div>
         </div>
       `;

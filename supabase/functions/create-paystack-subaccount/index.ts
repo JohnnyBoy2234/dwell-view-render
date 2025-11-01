@@ -67,13 +67,13 @@ serve(async (req) => {
         settlement_bank: bankName,
         account_number: accountNumber,
         percentage_charge: 0, // Platform takes no commission from landlord payments
-        description: `SwiftRent landlord account for ${user.email}`,
+        description: `RentLekker landlord account for ${user.email}`,
         primary_contact_email: user.email,
         primary_contact_name: accountHolderName,
         primary_contact_phone: "", // Optional - can be added later
         metadata: {
           landlord_id: user.id,
-          platform: "SwiftRent"
+          platform: "RentLekker"
         }
       }),
     });

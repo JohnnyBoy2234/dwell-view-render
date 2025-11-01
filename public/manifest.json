@@ -1,6 +1,6 @@
 {
-  "name": "SwiftRent - Property Management",
-  "short_name": "SwiftRent",
+  "name": "RentLekker - Property Management",
+  "short_name": "RentLekker",
   "description": "Comprehensive property management and rental platform for landlords and tenants in South Africa",
   "start_url": "/",
   "display": "standalone",

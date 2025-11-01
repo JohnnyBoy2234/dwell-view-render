@@ -18,7 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 export const NAVBAR_CONTENT = {
-  BRAND_NAME: "SwiftRent",
+  BRAND_NAME: "RentLekker",
   LIST_PROPERTY_LABEL: "List Property",
   SIGN_IN_LABEL: "Sign In",
   DASHBOARD_LABEL: "Dashboard",

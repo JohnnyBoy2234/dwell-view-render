@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-	<string>SwiftRent</string>
+	<string>RentLekker</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -46,12 +46,12 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>SwiftRent needs access to your camera to take photos of properties and documents for verification purposes.</string>
+	<string>RentLekker needs access to your camera to take photos of properties and documents for verification purposes.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>SwiftRent needs access to your photo library to select images of properties and documents.</string>
+	<string>RentLekker needs access to your photo library to select images of properties and documents.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>SwiftRent uses your location to help you find properties nearby and verify property locations.</string>
+	<string>RentLekker uses your location to help you find properties nearby and verify property locations.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>SwiftRent needs access to your microphone for voice notes in maintenance requests.</string>
+	<string>RentLekker needs access to your microphone for voice notes in maintenance requests.</string>
 </dict>
 </plist>

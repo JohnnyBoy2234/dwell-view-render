@@ -844,11 +844,11 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                   <CardDescription className="space-y-3">
                     <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-3 rounded-lg">
                       <p className="text-sm font-medium text-primary">
-                        ✨ Check your Experian Credit Report for FREE in under 5 minutes — instantly downloadable and ready to upload to your SwiftRent application for landlord review. ✨
+                        ✨ Check your Experian Credit Report for FREE in under 5 minutes — instantly downloadable and ready to upload to your RentLekker application for landlord review. ✨
                       </p>
                     </div>
                     <div className="text-xs text-muted-foreground leading-relaxed">
-                      <strong>Disclaimer:</strong> SwiftRent provides this link for your convenience. Credit reports and related services are offered directly by Experian Credit Bureau South Africa. SwiftRent does not manage or store this information. This is a free service under the National Credit Act. Reports are generally available in less than 5 minutes and can be added to your rental documents for landlord review.
+                      <strong>Disclaimer:</strong> RentLekker provides this link for your convenience. Credit reports and related services are offered directly by Experian Credit Bureau South Africa. RentLekker does not manage or store this information. This is a free service under the National Credit Act. Reports are generally available in less than 5 minutes and can be added to your rental documents for landlord review.
                     </div>
                   </CardDescription>
                 </CardHeader>

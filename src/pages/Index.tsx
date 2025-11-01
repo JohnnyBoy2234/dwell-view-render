@@ -110,7 +110,7 @@ const Index = () => {
     {
       icon: RIcon,
       title: "Commission-Free Renting",
-      description: "Renting the way it should be! Stop paying agents thousands. With SwiftRent, you keep 100% of your rental income always.",
+      description: "Renting the way it should be! Stop paying agents thousands. With RentLekker, you keep 100% of your rental income always.",
       gradient: "from-success-green to-success-green-glow"
     },
     {
@@ -134,7 +134,7 @@ const Index = () => {
       {
         icon: Calculator,
         title: "Built-In Accounting & Invoices",
-        description: "SwiftRent generates professional invoices, saving you time and giving you peace of mind.",
+        description: "RentLekker generates professional invoices, saving you time and giving you peace of mind.",
         gradient: "from-teal-500 to-teal-600"
       },
     {
@@ -146,13 +146,13 @@ const Index = () => {
     {
       icon: MessageSquare,
       title: "Seamless On-Board Communication",
-      description: "Landlords and tenants can chat, share documents, and track updates directly inside SwiftRent no lost WhatsApps, no messy email chains. Everything in one secure place.",
+      description: "Landlords and tenants can chat, share documents, and track updates directly inside RentLekker no lost WhatsApps, no messy email chains. Everything in one secure place.",
       gradient: "from-indigo-500 to-indigo-600"
     },
     {
       icon: Layers,
       title: "Unlimited Property Management",
-      description: "SwiftRent lets you manage one property or a hundred with ease scalable, simple, and hassle-free.",
+      description: "RentLekker lets you manage one property or a hundred with ease scalable, simple, and hassle-free.",
       gradient: "from-amber-400 to-amber-600"
     }
   ];
@@ -269,7 +269,7 @@ const Index = () => {
       <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Why Choose SwiftRent?
+            Why Choose RentLekker?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             The complete rental platform designed for South African landlords and tenants
@@ -375,7 +375,7 @@ const Index = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Rent Smarter. Rent Safer.<br />
-            <span className="text-white/90">With SwiftRent.</span>
+            <span className="text-white/90">With RentLekker.</span>
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join South Africa's most trusted rental platform today

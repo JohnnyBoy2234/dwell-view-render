@@ -437,7 +437,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                     "Rates & Taxes": { label: "Rates & Taxes", color: "#f59e0b" },
                     "Insurance": { label: "Insurance", color: "#ef4444" },
                     "Bank Fees": { label: "Bank Fees", color: "#8b5cf6" },
-                    "SwiftRent Subscription": { label: "SwiftRent", color: "#ec4899" },
+                    "RentLekker Subscription": { label: "RentLekker", color: "#ec4899" },
                     "Other": { label: "Other", color: "#6366f1" },
                   }}
                   className="mx-auto w-full h-full"
@@ -458,7 +458,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                                 return '#ef4444';
                               case 'Bank Fees':
                                 return '#8b5cf6';
-                              case 'SwiftRent Subscription':
+                              case 'RentLekker Subscription':
                                 return '#ec4899';
                               case 'Other':
                                 return '#6366f1';

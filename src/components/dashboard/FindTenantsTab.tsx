@@ -36,7 +36,7 @@ export function FindTenantsTab({ property, inquiriesCount, applicationsCount }: 
             <div className="flex items-center gap-2">
               <Badge variant="secondary" className="bg-green-500/10 text-green-700">
                 <Eye className="w-3 h-3 mr-1" />
-                Active on SwiftRent
+                Active on RentLekker
               </Badge>
             </div>
           </div>

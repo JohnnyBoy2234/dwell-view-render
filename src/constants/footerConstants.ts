@@ -34,16 +34,16 @@ export const FOOTER_LINKS = {
 } as const;
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  { icon: Facebook, href: "https://facebook.com/swiftrent", label: "Facebook" },
-  { icon: Twitter, href: "https://twitter.com/swiftrent", label: "Twitter" },
-  { icon: Instagram, href: "https://instagram.com/swiftrent", label: "Instagram" },
-  { icon: Linkedin, href: "https://linkedin.com/company/swiftrent", label: "LinkedIn" }
+  { icon: Facebook, href: "https://facebook.com/RentLekker", label: "Facebook" },
+  { icon: Twitter, href: "https://twitter.com/RentLekker", label: "Twitter" },
+  { icon: Instagram, href: "https://instagram.com/RentLekker", label: "Instagram" },
+  { icon: Linkedin, href: "https://linkedin.com/company/RentLekker", label: "LinkedIn" }
 ];
 
 export const FOOTER_CONTENT = {
-  BRAND_NAME: "SwiftRent",
+  BRAND_NAME: "RentLekker",
   TAGLINE: "Safe, Simple, Commission-Free Renting. Direct landlord-tenant connections with full verification and peace of mind.",
-  COPYRIGHT: "© 2024 SwiftRent.co.za. All rights reserved.",
+  COPYRIGHT: "© 2024 RentLekker.co.za. All rights reserved.",
   MADE_WITH: "Made with ❤️ in South Africa",
   SECTIONS: {
     COMPANY: "Company",

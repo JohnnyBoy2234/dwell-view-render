@@ -198,7 +198,7 @@ export default function AddProperty() {
 
       toast({
         title: "Property added successfully!",
-        description: "Your property is now listed on SwiftRent."
+        description: "Your property is now listed on RentLekker."
       });
 
       clearAutosave();

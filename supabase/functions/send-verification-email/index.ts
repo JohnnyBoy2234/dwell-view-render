@@ -63,23 +63,23 @@ serve(async (req) => {
     const verificationUrl = `${Deno.env.get('SUPABASE_URL')?.replace('/v1', '')}/verify-email?token=${token}`;
 
     // Send verification email
-    const emailSubject = isResend ? 'SwiftRent - Verify Your Email (Resent)' : 'SwiftRent - Verify Your Email';
+    const emailSubject = isResend ? 'RentLekker - Verify Your Email (Resent)' : 'RentLekker - Verify Your Email';
     const emailResponse = await resend.emails.send({
-      from: 'SwiftRent <onboarding@resend.dev>',
+      from: 'RentLekker <onboarding@resend.dev>',
       to: [email],
       subject: emailSubject,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
           <div style="background-color: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #2563eb; margin: 0; font-size: 28px;">SwiftRent</h1>
+              <h1 style="color: #2563eb; margin: 0; font-size: 28px;">RentLekker</h1>
               <p style="color: #6b7280; margin-top: 5px;">Your rental platform</p>
             </div>
             
             <h2 style="color: #1f2937; margin-bottom: 20px;">Verify Your Email Address</h2>
             
             <p style="color: #374151; line-height: 1.6; margin-bottom: 25px;">
-              Welcome to SwiftRent! To complete your account setup and start using our platform, 
+              Welcome to RentLekker! To complete your account setup and start using our platform, 
               please verify your email address by clicking the button below.
             </p>
             
@@ -91,13 +91,13 @@ serve(async (req) => {
             </div>
             
             <p style="color: #6b7280; font-size: 14px; line-height: 1.5; margin-top: 25px;">
-              This verification link will expire in 24 hours. If you didn't create an account with SwiftRent, 
+              This verification link will expire in 24 hours. If you didn't create an account with RentLekker, 
               you can safely ignore this email.
             </p>
             
             <div style="border-top: 1px solid #e5e7eb; margin-top: 30px; padding-top: 20px; text-align: center;">
               <p style="color: #9ca3af; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} SwiftRent. All rights reserved.
+                © ${new Date().getFullYear()} RentLekker. All rights reserved.
               </p>
             </div>
           </div>

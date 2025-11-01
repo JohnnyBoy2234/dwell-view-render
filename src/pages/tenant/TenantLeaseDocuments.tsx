@@ -55,7 +55,7 @@ export default function TenantLeaseDocuments() {
   const handleDownload = async (lease: any) => {
     const title = lease.property?.title || 'Lease_Agreement';
     const safe = title.replace(/[^a-z0-9]/gi, '_');
-    const fileName = `SwiftRent_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `RentLekker_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
     
     try {
       // First try the leases table (new lease pack system)
@@ -101,7 +101,7 @@ export default function TenantLeaseDocuments() {
       }
 
       // Fallback to legacy lease_agreements table (if it exists)
-      const { data: swiftRentLease } = await supabase
+      const { data: RentLekkerLease } = await supabase
         .from('lease_agreements')
         .select('pdf_url, pdf_path, created_at')
         .eq('property_id', lease.property_id)
@@ -109,9 +109,9 @@ export default function TenantLeaseDocuments() {
         .limit(1)
         .maybeSingle();
 
-      if (swiftRentLease?.pdf_url) {
-        await downloadFileFromUrl(swiftRentLease.pdf_url, fileName);
-        toast({ title: 'SwiftRent lease downloaded successfully!' });
+      if (RentLekkerLease?.pdf_url) {
+        await downloadFileFromUrl(RentLekkerLease.pdf_url, fileName);
+        toast({ title: 'RentLekker lease downloaded successfully!' });
         return;
       }
 
@@ -250,7 +250,7 @@ export default function TenantLeaseDocuments() {
                     )}
                     <Button
                       size="sm"
-                      onClick={() => window.location.href = `/swiftrent-lease/${lease.id}`}
+                      onClick={() => window.location.href = `/RentLekker-lease/${lease.id}`}
                       className="bg-ocean-blue hover:bg-ocean-blue-dark"
                     >
                       <PenTool className="h-4 w-4 mr-2" />

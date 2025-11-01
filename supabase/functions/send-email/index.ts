@@ -12,7 +12,7 @@ serve(async (res: Request) => {
 
         const data = await resend.emails.send({
         
-            from: `SwiftRent <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@swiftrent.co"}>`,
+            from: `RentLekker <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@RentLekker.co"}>`,
             to: [to],
             subject: subject,
             html: html

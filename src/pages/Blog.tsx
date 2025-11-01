@@ -19,7 +19,7 @@ export default function Blog() {
       publishedAt: '2025-10-10',
       category: 'Safety & Trust',
       readTime: 4,
-      excerpt: 'Renting shouldn\'t feel risky or confusing. Discover how SwiftRent combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.',
+      excerpt: 'Renting shouldn\'t feel risky or confusing. Discover how RentLekker combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.',
       featured: true,
     },
     {

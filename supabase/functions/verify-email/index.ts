@@ -142,7 +142,7 @@ serve(async (req) => {
     return new Response(
       `<html>
         <head>
-          <title>Email Verified - SwiftRent</title>
+          <title>Email Verified - RentLekker</title>
           <meta name="viewport" content="width=device-width, initial-scale=1">
         </head>
         <body style="font-family: Arial, sans-serif; text-align: center; padding: 50px; background-color: #f8f9fa;">
@@ -154,7 +154,7 @@ serve(async (req) => {
             </p>
             <div style="margin-top: 30px;">
               <div style="display: inline-block; width: 30px; height: 30px; border: 3px solid #e5e7eb; border-top: 3px solid #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-              <p style="color: #6b7280; margin-top: 10px;">Redirecting to SwiftRent...</p>
+              <p style="color: #6b7280; margin-top: 10px;">Redirecting to RentLekker...</p>
             </div>
           </div>
           <style>

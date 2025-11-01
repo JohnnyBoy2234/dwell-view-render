@@ -133,7 +133,7 @@ serve(async (req) => {
     `;
 
     const { error: emailError } = await resend.emails.send({
-      from: `SwiftRent <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@swiftrent.co"}>`,
+      from: `RentLekker <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@RentLekker.co"}>`,
       to: [tenantEmail],
       subject: `Lease Agreement Ready - ${propertyAddress}`,
       html: emailHtml,

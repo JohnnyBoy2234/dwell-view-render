@@ -1,6 +1,6 @@
 {
-  "name": "SwiftRent - Find Your Perfect Rental Home",
-  "short_name": "SwiftRent",
+  "name": "RentLekker - Find Your Perfect Rental Home",
+  "short_name": "RentLekker",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

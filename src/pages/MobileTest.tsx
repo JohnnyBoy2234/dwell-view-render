@@ -20,7 +20,7 @@ export default function MobileTest() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            This page helps test mobile-specific features of your SwiftRent app. 
+            This page helps test mobile-specific features of your RentLekker app. 
             For full testing, export your project and run it on a physical device or emulator.
           </AlertDescription>
         </Alert>

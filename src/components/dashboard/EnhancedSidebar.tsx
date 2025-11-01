@@ -116,7 +116,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
             <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
-<h1 className="text-xl font-bold">SwiftRent</h1>
+<h1 className="text-xl font-bold">RentLekker</h1>
           </button>
         </div>
 

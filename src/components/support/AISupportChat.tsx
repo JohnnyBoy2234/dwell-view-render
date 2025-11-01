@@ -322,8 +322,8 @@ export function AISupportChat() {
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5" />
               <div>
-                <h3 className="font-semibold">SwiftRent AI Support</h3>
-                <p className="text-xs opacity-90">Ask me anything about SwiftRent</p>
+                <h3 className="font-semibold">RentLekker AI Support</h3>
+                <p className="text-xs opacity-90">Ask me anything about RentLekker</p>
               </div>
             </div>
             <Button
@@ -341,7 +341,7 @@ export function AISupportChat() {
             {messages.length === 0 && (
               <div className="space-y-4">
                 <div className="text-center text-muted-foreground text-sm">
-                  <p className="mb-4">👋 Hi! I'm your SwiftRent AI assistant.</p>
+                  <p className="mb-4">👋 Hi! I'm your RentLekker AI assistant.</p>
                   <p className="mb-4">Ask me anything about using the platform:</p>
                 </div>
                 <div className="space-y-2">

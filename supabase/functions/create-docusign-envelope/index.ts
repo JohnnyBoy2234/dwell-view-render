@@ -149,16 +149,16 @@ Deno.serve(async (req) => {
       roleName: "tenant",
       tabs: {
         signHereTabs: [
-          { anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "RentLekker_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
         dateSignedTabs: [
-          { anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
+          { anchorString: "RentLekker_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
         ],
         fullNameTabs: [
-          { anchorString: "SWIFTRENT_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
+          { anchorString: "RentLekker_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
         ],
         initialHereTabs: [
-          { anchorString: "SWIFTRENT_INIT_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "RentLekker_INIT_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
       },
     } as any;
@@ -172,16 +172,16 @@ Deno.serve(async (req) => {
       roleName: "landlord",
       tabs: {
         signHereTabs: [
-          { anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "RentLekker_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
         dateSignedTabs: [
-          { anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
+          { anchorString: "RentLekker_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
         ],
         fullNameTabs: [
-          { anchorString: "SWIFTRENT_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
+          { anchorString: "RentLekker_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
         ],
         initialHereTabs: [
-          { anchorString: "SWIFTRENT_INIT_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "RentLekker_INIT_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
       },
     } as any;
