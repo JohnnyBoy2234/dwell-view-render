@@ -199,72 +199,59 @@ const Index = () => {
  // Stats removed per request
  const stats: never[] = [];
 
+  // State for filters and search
+  const [filters, setFilters] = useState({});
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
+
+  // Handle search
+  const handleSearch = (searchParams) => {
+    // Implement search functionality
+    console.log('Searching with params:', searchParams);
+  };
+
+  // Handle filter changes
+  const onFiltersChange = (newFilters) => {
+    setFilters(prev => ({ ...prev, ...newFilters }));
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setFilters({});
+  };
+
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative h-[500px] md:h-[600px] w-full flex items-center">
-        {/* Background Image with Overlay - Responsive */}
-        <div className="absolute inset-0 w-full h-full">
-          <picture>
-            <source 
-              media="(max-width: 768px)" 
-              srcSet="/images/hero/hero-mobile.webp 1x, /images/hero/hero-mobile@2x.webp 2x"
-              type="image/webp"
-            />
-            <source 
-              media="(min-width: 769px)" 
-              srcSet="/images/hero/hero-desktop.webp 1x, /images/hero/hero-desktop@2x.webp 2x"
-              type="image/webp"
-            />
-            <source 
-              media="(max-width: 768px)" 
-              srcSet="/images/hero/hero-mobile.jpg"
-            />
-            <img 
-              src="/images/hero/hero-desktop.jpg" 
-              alt="Find your perfect rental property"
-              className="w-full h-full object-cover object-center"
-              loading="eager"
-              width="1600"
-              height="600"
-            />
-          </picture>
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/20"></div>
+      {/* Hero Section - Property24 Style */}
+      <section className="relative w-full h-[400px] md:h-[520px] flex items-center justify-center transition-all duration-300">
+        {/* Background Image with Gradient Overlay */}
+        <div 
+          className="absolute inset-0 w-full h-full bg-cover bg-center"
+          style={{
+            backgroundImage: 'linear-gradient(to right, rgba(0, 119, 182, 0.7) 0%, rgba(0, 119, 182, 0.3) 50%, rgba(0, 119, 182, 0) 100%), url(/hero.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
+          }}
+        >
+          {/* Mobile-specific gradient overlay */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-blue-800/70 to-transparent"></div>
         </div>
 
-        {/* Main Content Container */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Hero Content - Centered */}
-          <div className="max-w-3xl mx-auto text-center px-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
-              Find Your Perfect
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100 mt-2">
-                Rental Property
-              </span>
-            </h1>
-            <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 drop-shadow-md">
-              Direct landlord-tenant connections with full verification and peace of mind
-            </p>
-            
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
-                Browse Properties
-              </button>
-              <button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-medium py-3 px-6 rounded-lg border border-white/20 transition-colors">
-                List Your Property
-              </button>
-            </div>
+        {/* Search Bar Container */}
+        <div className="relative z-10 w-full px-5 md:px-[5%] max-w-7xl mx-auto">
+          <div className="w-full md:w-[60%] lg:w-1/2 mx-auto">
+            <Property24SearchBar
+              onSearch={handleSearch}
+              onFiltersChange={onFiltersChange}
+              onMoreFiltersOpen={() => setShowMoreFilters(true)}
+              filters={filters}
+              className="w-full"
+            />
           </div>
-
-          {/* Spacer to prevent content from being hidden behind the search bar */}
-          <div className="h-8"></div>
-
-          {/* Quick Stats removed per request */}
         </div>
         
-        {/* Seamless fade into page background */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-gray-200/50"></div>
+        {/* Bottom fade effect */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-100 to-transparent"></div>
       </section>
 
       {/* Search Bar Card */}
