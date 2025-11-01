@@ -199,25 +199,6 @@ const Index = () => {
  // Stats removed per request
  const stats: never[] = [];
 
-  // State for filters and search
-  const [filters, setFilters] = useState({});
-  const [showMoreFilters, setShowMoreFilters] = useState(false);
-
-  // Handle search
-  const handleSearch = (searchParams) => {
-    // Implement search functionality
-    console.log('Searching with params:', searchParams);
-  };
-
-  // Handle filter changes
-  const onFiltersChange = (newFilters) => {
-    setFilters(prev => ({ ...prev, ...newFilters }));
-  };
-
-  // Clear all filters
-  const clearFilters = () => {
-    setFilters({});
-  };
 
   return (
     <div className="min-h-screen">
@@ -244,7 +225,17 @@ const Index = () => {
               onSearch={handleSearch}
               onFiltersChange={onFiltersChange}
               onMoreFiltersOpen={() => setShowMoreFilters(true)}
-              filters={filters}
+              filters={{
+                searchTerm: filters.searchTerm,
+                propertyType: filters.propertyType,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                bedrooms: filters.bedrooms,
+                bathrooms: filters.bathrooms,
+                propertyTypes: filters.propertyTypes || [],
+                amenities: filters.amenities || [],
+                availableFrom: filters.availableFrom
+              }}
               className="w-full"
             />
           </div>
@@ -254,18 +245,6 @@ const Index = () => {
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-100 to-transparent"></div>
       </section>
 
-      {/* Search Bar Card */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-8">
-        <div className="bg-white rounded-lg shadow-md p-2 max-w-md mx-auto">
-          <Property24SearchBar
-            onSearch={handleSearch}
-            onFiltersChange={onFiltersChange}
-            onMoreFiltersOpen={() => setShowMoreFilters(true)}
-            filters={filters}
-            className="!p-0 !shadow-none"
-          />
-        </div>
-      </div>
 
       {/* Feature Highlights */}
       <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -409,7 +388,11 @@ const Index = () => {
       <MoreFiltersModal
         open={showMoreFilters}
         onClose={() => setShowMoreFilters(false)}
-        filters={filters}
+        filters={{
+          amenities: filters.amenities,
+          bathrooms: filters.bathrooms,
+          availableFrom: filters.availableFrom
+        }}
         onFiltersChange={onFiltersChange}
         onClearFilters={clearFilters}
         onApplyFilters={handleSearch}
