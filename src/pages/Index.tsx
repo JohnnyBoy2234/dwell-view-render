@@ -223,12 +223,14 @@ const Index = () => {
               }}
             />
 
-            {/* Header with no blur effect and smaller font */}
+            {/* Header with blur effect and white text */}
             <div className="relative z-10 flex flex-col items-start justify-start h-full px-6 sm:px-8 md:px-16 lg:px-24 pt-16 sm:pt-24">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-3 text-left max-w-2xl leading-tight">
-                Safe, Simple,<br />
-                <span className="text-blue-500">Commission-Free</span> Renting
-              </h1>
+              <div className="bg-black/40 p-5 rounded-lg backdrop-blur-sm">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 text-left max-w-2xl leading-tight">
+                  Safe, Simple,<br />
+                  <span className="text-blue-300">Commission-Free</span> Renting
+                </h1>
+              </div>
             </div>
           
           {/* Chat Button */}
