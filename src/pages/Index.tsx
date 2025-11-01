@@ -202,37 +202,59 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative min-h-[40vh] flex items-center justify-center -mx-4">
-        {/* Background Image with Overlay */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: 'url(/hero.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            ...(window.innerWidth < 768 && {
-              backgroundSize: '120% auto',
-              backgroundPosition: 'center 40%'
-            })
-          }}
-        >
-          <div className="absolute inset-0 bg-black/30"></div>
+      <section className="relative h-[500px] md:h-[600px] w-full flex items-center">
+        {/* Background Image with Overlay - Responsive */}
+        <div className="absolute inset-0 w-full h-full">
+          <picture>
+            <source 
+              media="(max-width: 768px)" 
+              srcSet="/images/hero/hero-mobile.webp 1x, /images/hero/hero-mobile@2x.webp 2x"
+              type="image/webp"
+            />
+            <source 
+              media="(min-width: 769px)" 
+              srcSet="/images/hero/hero-desktop.webp 1x, /images/hero/hero-desktop@2x.webp 2x"
+              type="image/webp"
+            />
+            <source 
+              media="(max-width: 768px)" 
+              srcSet="/images/hero/hero-mobile.jpg"
+            />
+            <img 
+              src="/images/hero/hero-desktop.jpg" 
+              alt="Find your perfect rental property"
+              className="w-full h-full object-cover object-center"
+              loading="eager"
+              width="1600"
+              height="600"
+            />
+          </picture>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-black/20"></div>
         </div>
 
         {/* Main Content Container */}
-        <div className="relative z-10 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Heading on Image */}
-          <div className="text-center mb-4 pt-8">
-            <h1 className="text-3xl font-bold text-white mb-2 leading-tight drop-shadow">
-              Safe, Simple,
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100 mt-1">
-                Commission-Free
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Hero Content - Centered */}
+          <div className="max-w-3xl mx-auto text-center px-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+              Find Your Perfect
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-white to-blue-100 mt-2">
+                Rental Property
               </span>
-              <span className="block mt-1">Renting</span>
             </h1>
-            <p className="text-sm text-white/90 max-w-md mx-auto mb-4 drop-shadow">
+            <p className="text-lg text-white/90 max-w-2xl mx-auto mb-8 drop-shadow-md">
               Direct landlord-tenant connections with full verification and peace of mind
             </p>
+            
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                Browse Properties
+              </button>
+              <button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-medium py-3 px-6 rounded-lg border border-white/20 transition-colors">
+                List Your Property
+              </button>
+            </div>
           </div>
 
           {/* Spacer to prevent content from being hidden behind the search bar */}
