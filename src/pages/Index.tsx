@@ -209,7 +209,7 @@ const Index = () => {
           <div 
             className="absolute inset-0 w-full h-full bg-cover bg-center"
             style={{
-              backgroundImage: 'url(/hero.jpg)',
+              backgroundImage: 'url(/hero1.jpg)',
               backgroundSize: '100% auto',
               backgroundPosition: 'center 30%',
               backgroundRepeat: 'no-repeat',
@@ -224,7 +224,7 @@ const Index = () => {
           <div className="relative z-10 flex flex-col items-center justify-start h-full text-center px-4 pt-20 md:pt-32">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
               Safe, Simple,<br />
-              <span className="text-primary">Commission-Free</span> Renting
+              <span className="text-blue-400">Commission-Free</span> Renting
             </h1>
           </div>
           
