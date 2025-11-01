@@ -203,30 +203,28 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section - Updated Design with extra bottom padding for mobile */}
-      <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300 pb-16 md:pb-0">
-        {/* Background Image with Dark Overlay */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden">
-          <div 
-            className="absolute inset-0 w-full h-full bg-cover bg-center"
-            style={{
-              backgroundImage: 'url(/hero1.jpg)',
-              backgroundSize: '100% auto',
-              backgroundPosition: 'center 30%',
-              backgroundRepeat: 'no-repeat',
-              transform: 'scale(1.1)',
-              transformOrigin: 'center'
-            }}
-          />
-          {/* Dark Overlay */}
-          <div className="absolute inset-0 bg-black/40" />
-          
-          {/* Heading - Positioned higher */}
-          <div className="relative z-10 flex flex-col items-center justify-start h-full text-center px-4 pt-20 md:pt-32">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-              Safe, Simple,<br />
-              <span className="text-blue-400">Commission-Free</span> Renting
-            </h1>
-          </div>
+        <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300 pb-16 md:pb-0">
+          {/* Background Image */}
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
+            <div
+              className="absolute inset-0 w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: 'url(/hero1.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+                transform: 'scale(1)',
+                transformOrigin: 'center'
+              }}
+            />
+
+            {/* Heading - Aligned to left */}
+            <div className="relative z-10 flex flex-col items-start justify-center h-full px-8 md:px-16 lg:px-24">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 text-left max-w-2xl">
+                Safe, Simple,<br />
+                <span className="text-blue-400">Commission-Free</span> Renting
+              </h1>
+            </div>
           
           {/* Chat Button */}
           <button 
