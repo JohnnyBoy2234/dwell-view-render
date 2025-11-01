@@ -213,8 +213,15 @@ const Index = () => {
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                transform: 'scale(1)',
-                transformOrigin: 'center'
+                transform: 'scale(0.8) translate(-50%, -50%)',
+                transformOrigin: 'center',
+                minWidth: '125%',
+                minHeight: '125%',
+                width: 'auto',
+                height: 'auto',
+                position: 'absolute',
+                top: '50%',
+                left: '50%'
               }}
             />
 
