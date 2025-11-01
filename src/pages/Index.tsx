@@ -223,10 +223,10 @@ const Index = () => {
               }}
             />
 
-            {/* Heading - Aligned to left with better spacing */}
-            <div className="relative z-10 flex flex-col items-start justify-center h-full px-6 sm:px-8 md:px-16 lg:px-24">
-              <div className="bg-black/40 p-6 rounded-lg backdrop-blur-sm">
-                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 text-left max-w-2xl leading-tight">
+            {/* Header positioned higher with smaller font */}
+            <div className="relative z-10 flex flex-col items-start justify-start h-full px-6 sm:px-8 md:px-16 lg:px-24 pt-16 sm:pt-24">
+              <div className="bg-black/40 p-5 rounded-lg backdrop-blur-sm">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3 text-left max-w-2xl leading-tight">
                   Safe, Simple,<br />
                   <span className="text-blue-300">Commission-Free</span> Renting
                 </h1>
