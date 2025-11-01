@@ -209,28 +209,28 @@ const Index = () => {
             <div
               className="absolute inset-0 w-full h-full bg-cover bg-center"
               style={{
-                backgroundImage: 'url(/hero1.jpg)',
+                backgroundImage: 'url(/hero2.jpg)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
-                transform: 'scale(0.8) translate(-50%, -50%)',
+                transform: 'scale(1.1)',
                 transformOrigin: 'center',
-                minWidth: '125%',
-                minHeight: '125%',
-                width: 'auto',
-                height: 'auto',
+                width: '100%',
+                height: '100%',
                 position: 'absolute',
-                top: '50%',
-                left: '50%'
+                top: 0,
+                left: 0
               }}
             />
 
-            {/* Heading - Aligned to left */}
-            <div className="relative z-10 flex flex-col items-start justify-center h-full px-8 md:px-16 lg:px-24">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 text-left max-w-2xl">
-                Safe, Simple,<br />
-                <span className="text-blue-400">Commission-Free</span> Renting
-              </h1>
+            {/* Heading - Aligned to left with better spacing */}
+            <div className="relative z-10 flex flex-col items-start justify-center h-full px-6 sm:px-8 md:px-16 lg:px-24">
+              <div className="bg-black/40 p-6 rounded-lg backdrop-blur-sm">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 text-left max-w-2xl leading-tight">
+                  Safe, Simple,<br />
+                  <span className="text-blue-300">Commission-Free</span> Renting
+                </h1>
+              </div>
             </div>
           
           {/* Chat Button */}
