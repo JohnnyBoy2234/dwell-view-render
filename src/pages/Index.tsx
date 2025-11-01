@@ -204,18 +204,30 @@ const Index = () => {
     <div className="min-h-screen">
       {/* Hero Section - Updated Design */}
       <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300">
-        {/* Background Image */}
-        <div 
-          className="absolute inset-0 w-full h-full bg-cover bg-center"
-          style={{
-            backgroundImage: 'url(/hero.jpg)',
-            backgroundSize: '100% auto',  // Changed from 'cover' to show more of the image
-            backgroundPosition: 'center 30%',  // Slightly adjusted to show more of the bottom
-            backgroundRepeat: 'no-repeat',
-            transform: 'scale(1.1)',  // Slightly zoom out the image
-            transformOrigin: 'center'
-          }}
-        />
+        {/* Background Image with Dark Overlay */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <div 
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/hero.jpg)',
+              backgroundSize: '100% auto',
+              backgroundPosition: 'center 30%',
+              backgroundRepeat: 'no-repeat',
+              transform: 'scale(1.1)',
+              transformOrigin: 'center'
+            }}
+          />
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-black/40" />
+          
+          {/* Heading */}
+          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
+              Safe, Simple,<br />
+              <span className="text-primary">Commission-Free</span> Renting
+            </h1>
+          </div>
+        </div>
 
         {/* Bottom fade effect with search bar - Positioned higher */}
         <div className="absolute bottom-0 left-0 right-0 pt-16 pb-12 bg-gradient-to-t from-gray-100 via-gray-100/70 via-60% to-transparent">
