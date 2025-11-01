@@ -215,12 +215,12 @@ const Index = () => {
           }}
         >
           {/* Mobile-specific gradient overlay */}
-          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-blue-800/70 to-transparent"></div>
+          {/* Mobile Overlay - Removed as per request */}
         </div>
 
         {/* Search Bar Container */}
-        <div className="relative z-10 w-full px-5 md:px-[5%] max-w-7xl mx-auto">
-          <div className="w-full md:w-[60%] lg:w-1/2 mx-auto">
+        <div className="relative z-10 w-full px-4 md:px-8 max-w-7xl mx-auto">
+          <div className="w-full mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
               onFiltersChange={onFiltersChange}
@@ -232,9 +232,6 @@ const Index = () => {
                 maxPrice: filters.maxPrice,
                 bedrooms: filters.bedrooms,
                 bathrooms: filters.bathrooms,
-                propertyTypes: filters.propertyTypes || [],
-                amenities: filters.amenities || [],
-                availableFrom: filters.availableFrom
               }}
               className="w-full"
             />
