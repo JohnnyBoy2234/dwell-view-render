@@ -202,44 +202,43 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Property24 Style */}
-      <section className="relative w-full h-[400px] md:h-[520px] flex items-center justify-center transition-all duration-300">
-        {/* Background Image with Gradient Overlay */}
+      {/* Hero Section - Updated Design */}
+      <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300">
+        {/* Background Image */}
         <div 
           className="absolute inset-0 w-full h-full bg-cover bg-center"
           style={{
-            backgroundImage: 'linear-gradient(to right, rgba(0, 119, 182, 0.7) 0%, rgba(0, 119, 182, 0.3) 50%, rgba(0, 119, 182, 0) 100%), url(/hero.jpg)',
+            backgroundImage: 'url(/hero.jpg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
             backgroundRepeat: 'no-repeat'
           }}
-        >
-          {/* Mobile-specific gradient overlay */}
-          {/* Mobile Overlay - Removed as per request */}
-        </div>
+        />
 
-        {/* Search Bar Container */}
-        <div className="relative z-10 w-full px-4 md:px-8 max-w-7xl mx-auto">
-          <div className="w-full mx-auto">
-            <Property24SearchBar
-              onSearch={handleSearch}
-              onFiltersChange={onFiltersChange}
-              onMoreFiltersOpen={() => setShowMoreFilters(true)}
-              filters={{
-                searchTerm: filters.searchTerm,
-                propertyType: filters.propertyType,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-                bedrooms: filters.bedrooms,
-                bathrooms: filters.bathrooms,
-              }}
-              className="w-full"
-            />
+        {/* Bottom fade effect with search bar */}
+        <div className="absolute bottom-0 left-0 right-0 pt-12 pb-8 bg-gradient-to-t from-gray-100 via-gray-100/90 via-80% to-transparent">
+          <div className="relative z-10 w-full px-4 md:px-8 max-w-7xl mx-auto">
+            <div className="w-full mx-auto">
+              <Property24SearchBar
+                onSearch={handleSearch}
+                onFiltersChange={onFiltersChange}
+                onMoreFiltersOpen={() => setShowMoreFilters(true)}
+                filters={{
+                  searchTerm: filters.searchTerm,
+                  propertyType: filters.propertyType,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  bedrooms: filters.bedrooms,
+                  bathrooms: filters.bathrooms,
+                  propertyTypes: filters.propertyTypes || [],
+                  amenities: filters.amenities || [],
+                  availableFrom: filters.availableFrom
+                }}
+                className="w-full shadow-lg"
+              />
+            </div>
           </div>
         </div>
-        
-        {/* Bottom fade effect */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-gray-100 to-transparent"></div>
       </section>
 
 
