@@ -202,8 +202,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Updated Design */}
-      <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300">
+      {/* Hero Section - Updated Design with extra bottom padding for mobile */}
+      <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300 pb-16 md:pb-0">
         {/* Background Image with Dark Overlay */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
           <div 
@@ -220,12 +220,21 @@ const Index = () => {
           {/* Dark Overlay */}
           <div className="absolute inset-0 bg-black/40" />
           
-          {/* Heading */}
-          <div className="relative z-10 flex flex-col items-center justify-center h-full text-center px-4">
+          {/* Heading - Positioned higher */}
+          <div className="relative z-10 flex flex-col items-center justify-start h-full text-center px-4 pt-20 md:pt-32">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
               Safe, Simple,<br />
               <span className="text-primary">Commission-Free</span> Renting
             </h1>
+          </div>
+          
+          {/* Chat Button - Positioned above mobile bottom bar */}
+          <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
+            <button className="bg-primary hover:bg-primary/90 text-white rounded-full p-3 shadow-lg transition-all transform hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
           </div>
         </div>
 
