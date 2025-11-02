@@ -169,6 +169,13 @@ const Index = () => {
       @media (max-width: 768px) {
         .hero-image {
           transform: scale(1.0) !important;
+          background-position: center 25% !important;
+          height: 60% !important;
+          top: 0;
+        }
+        .hero-section {
+          position: relative;
+          overflow: hidden;
         }
       }
       @media (min-width: 769px) {
@@ -188,7 +195,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section - Updated Design */}
-      <section className="relative w-full h-screen min-h-[600px] flex flex-col">
+      <section className="relative w-full h-screen min-h-[600px] flex flex-col hero-section">
         {/* Top Fade with Heading */}
         <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -222,7 +229,7 @@ const Index = () => {
         {/* Search Bar Section - Centered with mobile adjustments */}
         <div className="flex-1 flex items-center justify-center px-4 z-10">
           {/* Mobile overlay to create the half-half effect */}
-          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/70 top-1/2" />
+          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/70 top-[40%]" />
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
