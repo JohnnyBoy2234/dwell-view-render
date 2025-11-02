@@ -175,25 +175,7 @@ const Index = () => {
         }
         .hero-section {
           position: relative;
-<<<<<<< HEAD
-          overflow: visible;
-          min-height: 60vh;
-        }
-        .features-section {
-          position: relative;
-          margin-top: -80px;
-          padding-top: 60px;
-        }
-        .features-container {
-          position: relative;
-          z-index: 10;
-          background: white;
-          border-radius: 24px 24px 0 0;
-          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-          padding: 2rem 1rem 3rem;
-=======
           overflow: hidden;
->>>>>>> 4b06cad0c53b873477297d67552085f5b9053979
         }
       }
       @media (min-width: 769px) {
@@ -247,7 +229,7 @@ const Index = () => {
         {/* Search Bar Section - Centered with mobile adjustments */}
         <div className="flex-1 flex items-center justify-center px-4 z-10">
           {/* Mobile overlay to create the half-half effect */}
-          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/40 to-transparent h-[60%]" />
+          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/70 top-[40%]" />
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
@@ -272,12 +254,7 @@ const Index = () => {
 
 
       {/* Feature Highlights */}
-<<<<<<< HEAD
-      <section className="features-section bg-white">
-        <div className="features-container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12">
-=======
       <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
->>>>>>> 4b06cad0c53b873477297d67552085f5b9053979
         <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?
