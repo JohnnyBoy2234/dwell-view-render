@@ -118,25 +118,25 @@ const Index = () => {
       title: "State-of-the-Art Platform",
       description: "Cutting-edge tech built for landlords and tenants: smart dashboards, digital leases, e-signatures",
       gradient: "from-ocean-blue to-ocean-blue-glow"
-      },
-      {
-        icon: Zap,
-        title: "Speed & Simplicity",
-        description: "List, screen, and sign in minutes. No delays, no middlemen just fast, simple renting.",
-        gradient: "from-purple-500 to-purple-600"
-      },
-      {
-        icon: LayoutDashboard,
-        title: "All-in-One Dashboard",
-        description: "Manage listings, leases, rent, maintenance and even accounting from one clean dashboard.",
-        gradient: "from-orange-500 to-orange-600"
-      },
-      {
-        icon: Calculator,
-        title: "Built-In Accounting & Invoices",
-        description: "RentLekker generates professional invoices, saving you time and giving you peace of mind.",
-        gradient: "from-teal-500 to-teal-600"
-      },
+    },
+    {
+      icon: Zap,
+      title: "Speed & Simplicity",
+      description: "List, screen, and sign in minutes. No delays, no middlemen just fast, simple renting.",
+      gradient: "from-purple-500 to-purple-600"
+    },
+    {
+      icon: LayoutDashboard,
+      title: "All-in-One Dashboard",
+      description: "Manage listings, leases, rent, maintenance and even accounting from one clean dashboard.",
+      gradient: "from-orange-500 to-orange-600"
+    },
+    {
+      icon: Calculator,
+      title: "Built-In Accounting & Invoices",
+      description: "RentLekker generates professional invoices, saving you time and giving you peace of mind.",
+      gradient: "from-teal-500 to-teal-600"
+    },
     {
       icon: Shield,
       title: "Safety & Trust",
@@ -157,44 +157,7 @@ const Index = () => {
     }
   ];
 
-  // Featured properties using the existing format
-  const featuredProperties = [
-    {
-      id: "1",
-      title: "Modern 2-Bedroom Apartment in Sandton",
-      location: "Sandton, Johannesburg",
-      price: 15000,
-      beds: 2,
-      baths: 2,
-      parking: 1,
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      type: "Apartment" as const,
-      featured: true,
-    },
-    {
-      id: "2",
-      title: "Spacious Family House with Garden",
-      location: "Rosebank, Cape Town",
-      price: 22000,
-      beds: 4,
-      baths: 3,
-      parking: 2,
-      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      type: "House" as const,
-    },
-    {
-      id: "3",
-      title: "Luxury Townhouse Near Waterfront",
-      location: "V&A Waterfront, Cape Town",
-      price: 35000,
-      beds: 3,
-      baths: 2,
-      parking: 2,
-      image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      type: "Townhouse" as const,
-      featured: true,
-    },
-  ];
+  // Featured properties will be loaded from the API
 
  // Stats removed per request
  const stats: never[] = [];
@@ -239,24 +202,23 @@ const Index = () => {
         {/* Search Bar Section - Centered */}
         <div className="flex-1 flex items-center justify-center px-4 z-10">
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
-              <Property24SearchBar
-                onSearch={handleSearch}
-                onFiltersChange={onFiltersChange}
-                onMoreFiltersOpen={() => setShowMoreFilters(true)}
-                filters={{
-                  searchTerm: filters.searchTerm,
-                  propertyType: filters.propertyType,
-                  minPrice: filters.minPrice,
-                  maxPrice: filters.maxPrice,
-                  bedrooms: filters.bedrooms,
-                  bathrooms: filters.bathrooms,
-                  propertyTypes: filters.propertyTypes || [],
-                  amenities: filters.amenities || [],
-                  availableFrom: filters.availableFrom
-                }}
-                className="w-full shadow-lg"
-              />
-            </div>
+            <Property24SearchBar
+              onSearch={handleSearch}
+              onFiltersChange={onFiltersChange}
+              onMoreFiltersOpen={() => setShowMoreFilters(true)}
+              filters={{
+                searchTerm: filters.searchTerm,
+                propertyType: filters.propertyType,
+                minPrice: filters.minPrice,
+                maxPrice: filters.maxPrice,
+                bedrooms: filters.bedrooms,
+                bathrooms: filters.bathrooms,
+                propertyTypes: filters.propertyTypes || [],
+                amenities: filters.amenities || [],
+                availableFrom: filters.availableFrom
+              }}
+              className="w-full shadow-lg"
+            />
           </div>
         </div>
       </section>
@@ -333,7 +295,7 @@ const Index = () => {
       {/* Featured Properties */}
       <section className="pt-4 md:pt-6 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Featured Properties
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -342,12 +304,9 @@ const Index = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {featuredProperties.map((property) => (
-            <PropertyCard 
-              key={property.id} 
-              {...property}
-            />
-          ))}
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Featured properties coming soon</p>
+          </div>
         </div>
 
         <div className="text-center">
