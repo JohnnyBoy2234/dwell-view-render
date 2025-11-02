@@ -170,7 +170,7 @@ const Index = () => {
         .hero-image {
           transform: scale(1.0) !important;
           background-position: center 25% !important;
-          height: 60% !important;
+          height: 100% !important;
           top: 0;
         }
         .hero-section {
@@ -194,20 +194,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Updated Design */}
-      <section className="relative w-full h-screen min-h-[600px] flex flex-col hero-section">
-        {/* Top Fade with Heading */}
-        <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center">
-              <span className="inline-block mr-2">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
-              <span className="inline-block ml-2">Renting</span>
-            </h1>
-          </div>
-        </div>
-
-        {/* Background Image with Overlay - Updated for mobile half-half effect */}
+      {/* Hero Section - Simplified Design */}
+      <section className="relative w-full h-auto md:h-[70vh] min-h-[500px] flex flex-col hero-section">
+        {/* Background Image */}
         <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
@@ -223,13 +212,20 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
         </div>
 
-        {/* Search Bar Section - Centered with mobile adjustments */}
-        <div className="flex-1 flex items-center justify-center px-4 z-10">
-          {/* Mobile overlay to create the half-half effect */}
-          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/70 top-[40%]" />
+        {/* Content Overlay */}
+        <div className="flex-1 flex flex-col justify-center px-4 z-10 pt-24 pb-12">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+              <span className="inline-block mr-2">Safe, Simple,</span>
+              <span className="text-blue-300">Commission-Free</span>
+              <span className="inline-block ml-2">Renting</span>
+            </h1>
+          </div>
+
+          {/* Search Bar Section */}
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
@@ -252,11 +248,10 @@ const Index = () => {
         </div>
       </section>
 
-
-      {/* Feature Highlights */}
-      <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Feature Highlights - Moved up */}
+      <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
