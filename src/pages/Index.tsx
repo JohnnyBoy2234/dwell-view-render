@@ -162,7 +162,7 @@ const Index = () => {
   // Stats removed per request
   const stats: never[] = [];
 
-  // Add styles for the hero image and transitions
+  // Add styles for the hero image
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -176,28 +176,12 @@ const Index = () => {
         .hero-section {
           position: relative;
           overflow: hidden;
-          min-height: 70vh;
-        }
-        .features-section {
-          position: relative;
-          margin-top: -100px;
-          padding-top: 40px;
-          background: linear-gradient(to bottom, transparent, #0f172a 30%);
-        }
-        .features-container {
-          position: relative;
-          z-index: 10;
-          padding-top: 40px;
         }
       }
       @media (min-width: 769px) {
         .hero-image {
           transform: scale(1.1);
           transform-origin: center;
-        }
-        .features-section {
-          margin-top: 0;
-          padding-top: 4rem;
         }
       }
     `;
@@ -268,9 +252,9 @@ const Index = () => {
         </div>
       </section>
 
+
       {/* Feature Highlights */}
-      <section className="features-section">
-        <div className="features-container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12">
+      <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?
@@ -325,7 +309,6 @@ const Index = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
         </div>
       </section>
 
