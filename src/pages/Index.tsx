@@ -222,9 +222,10 @@ const Index = () => {
                 left: 0
               }}
             />
+          </div>
 
             {/* Header with blur effect and stacked text */}
-            <div className="relative z-10 flex flex-col items-start justify-start h-full px-4 sm:px-8 md:px-16 lg:px-24 pt-16 sm:pt-24">
+            <div className="relative z-10 flex flex-col items-start justify-start h-full px-4 sm:px-8 md:px-16 lg:px-24 pt-8 sm:pt-12">
               <div className="bg-black/40 p-5 rounded-lg backdrop-blur-sm">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-left max-w-2xl leading-tight">
                   Safe, Simple,<br />
@@ -234,17 +235,14 @@ const Index = () => {
               </div>
             </div>
           
-          {/* Chat Button */}
-          <button 
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground fixed h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 transition-none" 
-            type="button" 
-            style={{ left: '350px', top: '466px', cursor: 'grab' }}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle h-6 w-6" aria-hidden="true">
-              <path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"></path>
-            </svg>
-          </button>
-        </div>
+                    {/* Chat Button - Positioned above mobile bottom bar */}
+          <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
+            <button className="bg-primary hover:bg-primary/90 text-white rounded-full p-3 shadow-lg transition-all transform hover:scale-105">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+            </button>
+          </div>
 
         {/* Bottom fade effect with search bar - Positioned higher */}
         <div className="absolute bottom-0 left-0 right-0 pt-16 pb-12 bg-gradient-to-t from-gray-100 via-gray-100/70 via-60% to-transparent">
