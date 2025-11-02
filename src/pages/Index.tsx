@@ -202,50 +202,41 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Updated Design with extra bottom padding for mobile */}
-        <section className="relative w-full h-[500px] md:h-[600px] transition-all duration-300 pb-16 md:pb-0">
-          {/* Background Image */}
-          <div className="absolute inset-0 w-full h-full overflow-hidden">
-            <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center"
-              style={{
-                backgroundImage: 'url(/hero2.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-                transform: 'scale(1.1)',
-                transformOrigin: 'center',
-                width: '100%',
-                height: '100%',
-                position: 'absolute',
-                top: 0,
-                left: 0
-              }}
-            />
-          </div>
+      {/* Hero Section - Updated Design */}
+      <section className="relative w-full h-auto min-h-[500px] md:min-h-[600px] transition-all duration-300">
+        {/* Background Image */}
+        <div className="relative w-full h-[400px] md:h-[500px] overflow-hidden">
+          <div
+            className="absolute inset-0 w-full h-full bg-cover bg-center"
+            style={{
+              backgroundImage: 'url(/hero2.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              transform: 'scale(1.1)',
+              transformOrigin: 'center',
+              width: '100%',
+              height: '100%',
+              position: 'absolute',
+              top: 0,
+              left: 0
+            }}
+          />
+        </div>
 
-            {/* Header with blur effect and stacked text */}
-            <div className="relative z-10 flex flex-col items-start justify-start h-full px-4 sm:px-8 md:px-16 lg:px-24 pt-8 sm:pt-12">
-              <div className="bg-black/40 p-5 rounded-lg backdrop-blur-sm">
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-left max-w-2xl leading-tight">
-                  Safe, Simple,<br />
-                  <span className="text-blue-300">Commission-Free</span><br />
-                  <span className="inline-block mt-1">Renting</span>
-                </h1>
-              </div>
-            </div>
-          
-                    {/* Chat Button - Positioned above mobile bottom bar */}
-          <div className="fixed bottom-20 right-4 z-50 md:bottom-8 md:right-8">
-            <button className="bg-primary hover:bg-primary/90 text-white rounded-full p-3 shadow-lg transition-all transform hover:scale-105">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-            </button>
+        {/* Heading Section - Positioned below image */}
+        <div className="relative z-10 w-full px-4 sm:px-8 md:px-16 lg:px-24 py-8 md:py-12">
+          <div className="bg-black/40 p-5 rounded-lg backdrop-blur-sm inline-block">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white text-left max-w-2xl leading-tight">
+              Safe, Simple,<br />
+              <span className="text-blue-300">Commission-Free</span><br />
+              <span className="inline-block mt-1">Renting</span>
+            </h1>
           </div>
+        </div>
 
-        {/* Bottom fade effect with search bar - Positioned higher */}
-        <div className="absolute bottom-0 left-0 right-0 pt-16 pb-12 bg-gradient-to-t from-gray-100 via-gray-100/70 via-60% to-transparent">
+        {/* Search Bar Section - Moved lower */}
+        <div className="relative w-full bg-gradient-to-t from-gray-100 via-gray-100/70 via-60% to-transparent pt-24 pb-16 -mt-16">
           <div className="relative z-10 w-full px-4 md:px-8 max-w-7xl mx-auto">
             <div className="w-full mx-auto">
               <Property24SearchBar

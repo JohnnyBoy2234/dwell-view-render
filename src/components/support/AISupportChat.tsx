@@ -87,15 +87,9 @@ export function AISupportChat() {
     return () => window.removeEventListener('resize', handleResize);
   }, [clampPosition]);
 
-  // Check if user is logged in for paid features
+  // Show chat button to all users
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      // For now, show support button to all logged-in users
-      // TODO: Add proper subscription check when billing is implemented
-      setIsPaidCustomer(!!user);
-    };
-    checkAuth();
+    setIsPaidCustomer(true);
   }, []);
 
   // Auto-scroll to bottom
