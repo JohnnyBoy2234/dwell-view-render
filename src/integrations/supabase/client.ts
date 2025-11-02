@@ -5,8 +5,13 @@ import type { Database } from './types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://rsfrvjaqxhoqavvscvwf.supabase.co";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZnJ2amFxeGhvcWF2dnNjdndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMDIzOTYsImV4cCI6MjA2OTg3ODM5Nn0.3yeCVbJs6twyx62wYh9BxCUoqpqiMt-174JmdRyhJig";
 
-// Get site URL for auth redirects
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://rentlekker.com';
+// Get site URL for auth redirects - use current domain by default
+const getSiteUrl = () => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+};
 
 // Create the Supabase client
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -24,8 +29,8 @@ if (typeof window !== 'undefined') {
   // Handle redirects after sign in
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      // Set the redirect URL in the session
-      const redirectTo = sessionStorage.getItem('redirectTo') || `${siteUrl}/dashboard`;
+      // Set the redirect URL in the session - default to home page
+      const redirectTo = sessionStorage.getItem('redirectTo') || '/';
       sessionStorage.removeItem('redirectTo');
       
       // If we have a redirect URL, navigate there
@@ -40,8 +45,8 @@ if (typeof window !== 'undefined') {
   if (currentUrl.pathname === '/auth/callback') {
     const { data, error } = await supabase.auth.getSession();
     if (data?.session) {
-      // User is signed in, redirect to dashboard or intended URL
-      const redirectTo = sessionStorage.getItem('redirectTo') || `${siteUrl}/dashboard`;
+      // User is signed in, redirect to intended URL or home page
+      const redirectTo = sessionStorage.getItem('redirectTo') || '/';
       sessionStorage.removeItem('redirectTo');
       window.location.href = redirectTo;
     } else if (error) {
