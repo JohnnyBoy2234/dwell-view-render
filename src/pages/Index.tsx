@@ -159,8 +159,30 @@ const Index = () => {
 
   // Featured properties will be loaded from the API
 
- // Stats removed per request
- const stats: never[] = [];
+  // Stats removed per request
+  const stats: never[] = [];
+
+  // Add styles for the hero image
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @media (max-width: 768px) {
+        .hero-image {
+          transform: scale(1.0) !important;
+        }
+      }
+      @media (min-width: 769px) {
+        .hero-image {
+          transform: scale(1.1);
+          transform-origin: center;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
 
   return (
@@ -178,17 +200,15 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Background Image with Overlay */}
+        {/* Background Image with Overlay - Updated for mobile half-half effect */}
         <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
           <div
-            className="absolute inset-0 w-full h-full bg-cover bg-center"
+            className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
             style={{
               backgroundImage: 'url(/hero2.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
-              transform: 'scale(1.1)',
-              transformOrigin: 'center',
               width: '100%',
               height: '100%',
               position: 'absolute',
@@ -199,8 +219,10 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
         </div>
 
-        {/* Search Bar Section - Centered */}
+        {/* Search Bar Section - Centered with mobile adjustments */}
         <div className="flex-1 flex items-center justify-center px-4 z-10">
+          {/* Mobile overlay to create the half-half effect */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/70 top-1/2" />
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
@@ -217,7 +239,7 @@ const Index = () => {
                 amenities: filters.amenities || [],
                 availableFrom: filters.availableFrom
               }}
-              className="w-full shadow-lg"
+              className="w-full shadow-lg relative z-20"
             />
           </div>
         </div>
