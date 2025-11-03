@@ -168,10 +168,13 @@ const Index = () => {
     style.textContent = `
       @media (max-width: 768px) {
         .hero-image {
-          transform: scale(1.0) !important;
-          background-position: center 25% !important;
+          transform: scale(1) !important;
+          background-position: center center !important;
+          background-size: cover !important;
+          width: 100% !important;
           height: 100% !important;
-          top: 0;
+          object-fit: cover;
+          object-position: center;
         }
         .hero-section {
           position: relative;
