@@ -168,8 +168,8 @@ const Index = () => {
     style.textContent = `
       @media (max-width: 768px) {
         .hero-image {
-          transform: scale(1) !important;
-          background-position: center center !important;
+          transform: scale(1.2) !important;
+          background-position: center 40% !important;
           background-size: cover !important;
           width: 100% !important;
           height: 100% !important;
@@ -179,6 +179,7 @@ const Index = () => {
         .hero-section {
           position: relative;
           overflow: hidden;
+          min-height: 60vh;
         }
       }
       @media (min-width: 769px) {
@@ -215,7 +216,7 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent" />
         </div>
 
         {/* Content Overlay - Desktop */}
@@ -251,9 +252,9 @@ const Index = () => {
         </div>
 
         {/* Mobile Layout with Fade */}
-        <div className="md:hidden flex-1 flex flex-col">
+        <div className="md:hidden flex-1 flex flex-col justify-start">
           {/* Fade in heading at the top */}
-          <div className="animate-fade-in px-4 pt-16 pb-8 text-center">
+          <div className="animate-fade-in px-4 pt-8 pb-4 text-center">
             <h1 className="text-3xl font-bold text-white">
               <span className="block">Safe, Simple,</span>
               <span className="text-blue-300">Commission-Free</span>
