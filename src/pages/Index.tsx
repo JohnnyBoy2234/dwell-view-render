@@ -162,7 +162,7 @@ const Index = () => {
   // Stats removed per request
   const stats: never[] = [];
 
-  // Add styles for the hero image
+  // Add styles for the hero image and transitions
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -170,18 +170,36 @@ const Index = () => {
         .hero-image {
           transform: scale(1.0) !important;
           background-position: center 25% !important;
-          height: 100% !important;
+          height: 60% !important;
           top: 0;
         }
         .hero-section {
           position: relative;
-          overflow: hidden;
+          overflow: visible;
+          min-height: 60vh;
+        }
+        .features-section {
+          position: relative;
+          margin-top: -80px;
+          padding-top: 60px;
+        }
+        .features-container {
+          position: relative;
+          z-index: 10;
+          background: white;
+          border-radius: 24px 24px 0 0;
+          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+          padding: 2rem 1rem 3rem;
         }
       }
       @media (min-width: 769px) {
         .hero-image {
           transform: scale(1.1);
           transform-origin: center;
+        }
+        .features-section {
+          margin-top: 0;
+          padding-top: 4rem;
         }
       }
     `;
@@ -194,9 +212,20 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Simplified Design */}
-      <section className="relative w-full h-auto md:h-[70vh] min-h-[500px] flex flex-col hero-section">
-        {/* Background Image */}
+      {/* Hero Section - Updated Design */}
+      <section className="relative w-full h-screen min-h-[600px] flex flex-col hero-section">
+        {/* Top Fade with Heading */}
+        <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center">
+              <span className="inline-block mr-2">Safe, Simple,</span>
+              <span className="text-blue-300">Commission-Free</span>
+              <span className="inline-block ml-2">Renting</span>
+            </h1>
+          </div>
+        </div>
+
+        {/* Background Image with Overlay - Updated for mobile half-half effect */}
         <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
@@ -212,20 +241,13 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
         </div>
 
-        {/* Content Overlay */}
-        <div className="flex-1 flex flex-col justify-center px-4 z-10 pt-24 pb-12">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
-              <span className="inline-block mr-2">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
-              <span className="inline-block ml-2">Renting</span>
-            </h1>
-          </div>
-
-          {/* Search Bar Section */}
+        {/* Search Bar Section - Centered with mobile adjustments */}
+        <div className="flex-1 flex items-center justify-center px-4 z-10">
+          {/* Mobile overlay to create the half-half effect */}
+          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/40 to-transparent h-[60%]" />
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
@@ -248,10 +270,11 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Feature Highlights - Moved up */}
-      <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+      {/* Feature Highlights */}
+      <section className="features-section bg-white">
+        <div className="features-container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -304,6 +327,7 @@ const Index = () => {
               </CardContent>
             </Card>
           ))}
+        </div>
         </div>
       </section>
 
@@ -366,7 +390,7 @@ const Index = () => {
               size="lg" 
               className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              <Link to="/landlord/dashboard">Landlord Dashboard</Link>
+              <Link to="/enhancedlandlorddashboard">Landlord Dashboard</Link>
             </Button>
             <Button 
               asChild
@@ -374,7 +398,7 @@ const Index = () => {
               variant="outline"
               className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Link to="/tenant/dashboard">Tenant Dashboard</Link>
+              <Link to="/enhancedtenantdashboard">Tenant Dashboard</Link>
             </Button>
           </div>
         </div>
