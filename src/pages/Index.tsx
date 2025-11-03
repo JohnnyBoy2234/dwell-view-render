@@ -162,44 +162,18 @@ const Index = () => {
   // Stats removed per request
   const stats: never[] = [];
 
-  // Add styles for the hero image and transitions
+  // Add styles for the hero image
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
+      .hero-image {
+        transform: scale(1.1);
+        transform-origin: center;
+      }
       @media (max-width: 768px) {
         .hero-image {
-          transform: scale(1.0) !important;
-          background-position: center 25% !important;
-          height: 60% !important;
-          top: 0;
-        }
-        .hero-section {
-          position: relative;
-          overflow: visible;
-          min-height: 60vh;
-        }
-        .features-section {
-          position: relative;
-          margin-top: -80px;
-          padding-top: 60px;
-        }
-        .features-container {
-          position: relative;
-          z-index: 10;
-          background: white;
-          border-radius: 24px 24px 0 0;
-          box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-          padding: 2rem 1rem 3rem;
-        }
-      }
-      @media (min-width: 769px) {
-        .hero-image {
-          transform: scale(1.1);
-          transform-origin: center;
-        }
-        .features-section {
-          margin-top: 0;
-          padding-top: 4rem;
+          transform: scale(1.0);
+          background-position: center 25%;
         }
       }
     `;
@@ -213,7 +187,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section - Updated Design */}
-      <section className="relative w-full h-screen min-h-[600px] flex flex-col hero-section">
+      <section className="relative w-full h-screen min-h-[600px] flex flex-col overflow-visible">
         {/* Top Fade with Heading */}
         <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -241,14 +215,13 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-black/60 pointer-events-none" />
         </div>
 
         {/* Search Bar Section - Centered with mobile adjustments */}
-        <div className="flex-1 flex items-center justify-center px-4 z-10">
-          {/* Mobile overlay to create the half-half effect */}
-          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/40 to-transparent h-[60%]" />
-          <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
+        <div className="flex-1 flex items-center justify-center px-4 z-50 relative">
+          <div className="w-full px-4 md:px-8 max-w-4xl mx-auto relative z-50">
             <Property24SearchBar
               onSearch={handleSearch}
               onFiltersChange={onFiltersChange}
@@ -271,8 +244,8 @@ const Index = () => {
       </section>
 
       {/* Feature Highlights */}
-      <section className="features-section bg-white">
-        <div className="features-container px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12">
+      <section className="relative -mt-32 md:-mt-48 pt-20 md:pt-32 z-30">
+        <div className="relative z-30 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12 bg-gradient-to-b from-transparent via-white/95 to-white pt-24 rounded-t-3xl">
         <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?
