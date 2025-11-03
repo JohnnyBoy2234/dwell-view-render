@@ -166,14 +166,22 @@ const Index = () => {
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
-      .hero-image {
-        transform: scale(1.1);
-        transform-origin: center;
-      }
       @media (max-width: 768px) {
         .hero-image {
-          transform: scale(1.0);
-          background-position: center 25%;
+          transform: scale(1.0) !important;
+          background-position: center 25% !important;
+          height: 100% !important;
+          top: 0;
+        }
+        .hero-section {
+          position: relative;
+          overflow: hidden;
+        }
+      }
+      @media (min-width: 769px) {
+        .hero-image {
+          transform: scale(1.1);
+          transform-origin: center;
         }
       }
     `;
@@ -186,20 +194,9 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Updated Design */}
-      <section className="relative w-full h-screen min-h-[600px] flex flex-col overflow-visible">
-        {/* Top Fade with Heading */}
-        <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center">
-              <span className="inline-block mr-2">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
-              <span className="inline-block ml-2">Renting</span>
-            </h1>
-          </div>
-        </div>
-
-        {/* Background Image with Overlay - Updated for mobile half-half effect */}
+      {/* Hero Section - Simplified Design */}
+      <section className="relative w-full h-auto md:h-[70vh] min-h-[500px] flex flex-col hero-section">
+        {/* Background Image */}
         <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
@@ -215,11 +212,9 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-b from-transparent to-black/60 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
         </div>
 
-<<<<<<< HEAD
         {/* Content Overlay - Desktop */}
         <div className="hidden md:flex flex-1 flex-col justify-center px-4 z-10 pt-24 pb-12">
           <div className="text-center mb-8">
@@ -232,11 +227,6 @@ const Index = () => {
 
           {/* Search Bar Section - Desktop */}
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
-=======
-        {/* Search Bar Section - Centered with mobile adjustments */}
-        <div className="flex-1 flex items-center justify-center px-4 z-50 relative">
-          <div className="w-full px-4 md:px-8 max-w-4xl mx-auto relative z-50">
->>>>>>> db90715b26db760811a5791101a525a45a273253
             <Property24SearchBar
               onSearch={handleSearch}
               onFiltersChange={onFiltersChange}
@@ -293,7 +283,7 @@ const Index = () => {
       </div>
       <div className="bg-white w-full h-8 -mt-6 md:hidden"></div>
 
-      {/* Feature Highlights */}
+      {/* Feature Highlights - Moved up */}
       <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -349,7 +339,6 @@ const Index = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
         </div>
       </section>
 
@@ -412,7 +401,7 @@ const Index = () => {
               size="lg" 
               className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              <Link to="/enhancedlandlorddashboard">Landlord Dashboard</Link>
+              <Link to="/landlord/dashboard">Landlord Dashboard</Link>
             </Button>
             <Button 
               asChild
@@ -420,7 +409,7 @@ const Index = () => {
               variant="outline"
               className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Link to="/enhancedtenantdashboard">Tenant Dashboard</Link>
+              <Link to="/tenant/dashboard">Tenant Dashboard</Link>
             </Button>
           </div>
         </div>
