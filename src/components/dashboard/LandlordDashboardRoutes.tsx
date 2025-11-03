@@ -6,7 +6,7 @@ import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import LandlordInspection from '@/pages/LandlordInspection';
 import InventoryStart from '@/pages/InventoryStart';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
-import { RentLekkerSupport } from '@/components/support/RentLekkerSupport';
+import { RentLekkerSupport } from '@/components/support/SwiftRentSupport';
 
 import ProfilePage from '@/components/profile/ProfilePage';
 

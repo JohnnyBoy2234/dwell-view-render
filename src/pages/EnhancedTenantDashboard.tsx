@@ -31,7 +31,7 @@ import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
-import { RentLekkerSupport } from '@/components/support/RentLekkerSupport';
+import { RentLekkerSupport } from '@/components/support/SwiftRentSupport';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 import { VerificationGate } from '@/components/VerificationGate';
 

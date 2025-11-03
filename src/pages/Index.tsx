@@ -244,8 +244,8 @@ const Index = () => {
       </section>
 
       {/* Feature Highlights */}
-      <section className="relative -mt-32 md:-mt-48 pt-20 md:pt-32 z-30">
-        <div className="relative z-30 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12 bg-gradient-to-b from-transparent via-white/95 to-white pt-24 rounded-t-3xl">
+      <section className="relative -mt-[280px] md:-mt-[280px] pt-32 md:pt-32 z-20">
+        <div className="relative z-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto pb-8 md:pb-12 bg-gradient-to-b from-transparent via-white/95 to-white pt-24 rounded-t-3xl">
         <div className="text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?
