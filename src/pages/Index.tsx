@@ -201,7 +201,7 @@ const Index = () => {
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
             style={{
-              backgroundImage: 'url(/hero2.jpg)',
+              backgroundImage: 'url(/hero3.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -215,8 +215,8 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
         </div>
 
-        {/* Content Overlay */}
-        <div className="flex-1 flex flex-col justify-center px-4 z-10 pt-24 pb-12">
+        {/* Content Overlay - Desktop */}
+        <div className="hidden md:flex flex-1 flex-col justify-center px-4 z-10 pt-24 pb-12">
           <div className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
               <span className="inline-block mr-2">Safe, Simple,</span>
@@ -225,7 +225,7 @@ const Index = () => {
             </h1>
           </div>
 
-          {/* Search Bar Section */}
+          {/* Search Bar Section - Desktop */}
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
@@ -246,7 +246,42 @@ const Index = () => {
             />
           </div>
         </div>
+
+        {/* Mobile Layout */}
+        <div className="md:hidden flex-1 flex flex-col">
+          <div className="flex-1 flex items-center justify-center px-4 pt-16 pb-8">
+            <h1 className="text-3xl font-bold text-white text-center">
+              <span className="block">Safe, Simple,</span>
+              <span className="text-blue-300">Commission-Free</span>
+              <span className="block">Renting</span>
+            </h1>
+          </div>
+        </div>
       </section>
+
+      {/* Mobile Search Bar and White Block */}
+      <div className="md:hidden -mt-12 relative z-20 px-4">
+        <div className="bg-white rounded-lg shadow-xl p-4 mb-6">
+          <Property24SearchBar
+            onSearch={handleSearch}
+            onFiltersChange={onFiltersChange}
+            onMoreFiltersOpen={() => setShowMoreFilters(true)}
+            filters={{
+              searchTerm: filters.searchTerm,
+              propertyType: filters.propertyType,
+              minPrice: filters.minPrice,
+              maxPrice: filters.maxPrice,
+              bedrooms: filters.bedrooms,
+              bathrooms: filters.bathrooms,
+              propertyTypes: filters.propertyTypes || [],
+              amenities: filters.amenities || [],
+              availableFrom: filters.availableFrom
+            }}
+            className="w-full"
+          />
+        </div>
+      </div>
+      <div className="bg-white w-full h-8 -mt-6 md:hidden"></div>
 
       {/* Feature Highlights - Moved up */}
       <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
