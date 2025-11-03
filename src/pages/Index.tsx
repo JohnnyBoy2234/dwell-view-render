@@ -216,17 +216,13 @@ const Index = () => {
       <section className="relative w-full h-screen min-h-[600px] flex flex-col hero-section">
         {/* Top Fade with Heading */}
         <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
-          <div className="hidden md:flex flex-1 flex-col justify-center items-start px-8 pb-16">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center">
+              <span className="inline-block mr-2">Safe, Simple,</span>
+              <span className="text-ocean-blue">Commission-Free</span>
+              <span className="inline-block ml-2">Renting</span>
+            </h1>
           </div>
-        </div>
-
-        {/* Heading - Moved outside overlay */}
-        <div className="relative z-20 w-full pt-20 px-4 md:px-8">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center md:text-left">
-            <span className="inline-block mr-2">Safe, Simple,</span>
-            <span className="text-ocean-blue">Commission-Free</span>
-            <span className="inline-block ml-2">Renting</span>
-          </h1>
         </div>
 
         {/* Background Image with Overlay - Updated for mobile half-half effect */}
@@ -245,11 +241,11 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40" />
         </div>
 
-        {/* Content container */}
-        <div className="relative z-10 flex-1 flex flex-col">
+        {/* Search Bar Section - Centered with mobile adjustments */}
+        <div className="flex-1 flex items-center justify-center px-4 z-10">
           {/* Mobile overlay to create the half-half effect */}
           <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/40 to-transparent h-[60%]" />
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
