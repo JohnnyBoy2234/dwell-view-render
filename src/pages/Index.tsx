@@ -247,41 +247,41 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Mobile Layout */}
+        {/* Mobile Layout with Fade */}
         <div className="md:hidden flex-1 flex flex-col">
-          <div className="flex-1 flex items-center justify-center px-4 pt-16 pb-8">
-            <h1 className="text-3xl font-bold text-white text-center">
+          {/* Fade in heading at the top */}
+          <div className="animate-fade-in px-4 pt-16 pb-8 text-center">
+            <h1 className="text-3xl font-bold text-white">
               <span className="block">Safe, Simple,</span>
               <span className="text-blue-300">Commission-Free</span>
               <span className="block">Renting</span>
             </h1>
           </div>
+          
+          {/* Fade in white block with search bar */}
+          <div className="animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
+            <div className="bg-white rounded-t-3xl pt-6 pb-8 px-4 mt-12 shadow-2xl">
+              <Property24SearchBar
+                onSearch={handleSearch}
+                onFiltersChange={onFiltersChange}
+                onMoreFiltersOpen={() => setShowMoreFilters(true)}
+                filters={{
+                  searchTerm: filters.searchTerm,
+                  propertyType: filters.propertyType,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  bedrooms: filters.bedrooms,
+                  bathrooms: filters.bathrooms,
+                  propertyTypes: filters.propertyTypes || [],
+                  amenities: filters.amenities || [],
+                  availableFrom: filters.availableFrom
+                }}
+                className="w-full"
+              />
+            </div>
+          </div>
         </div>
       </section>
-
-      {/* Mobile Search Bar and White Block */}
-      <div className="md:hidden -mt-12 relative z-20 px-4">
-        <div className="bg-white rounded-lg shadow-xl p-4 mb-6">
-          <Property24SearchBar
-            onSearch={handleSearch}
-            onFiltersChange={onFiltersChange}
-            onMoreFiltersOpen={() => setShowMoreFilters(true)}
-            filters={{
-              searchTerm: filters.searchTerm,
-              propertyType: filters.propertyType,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              bedrooms: filters.bedrooms,
-              bathrooms: filters.bathrooms,
-              propertyTypes: filters.propertyTypes || [],
-              amenities: filters.amenities || [],
-              availableFrom: filters.availableFrom
-            }}
-            className="w-full"
-          />
-        </div>
-      </div>
-      <div className="bg-white w-full h-8 -mt-6 md:hidden"></div>
 
       {/* Feature Highlights - Moved up */}
       <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
