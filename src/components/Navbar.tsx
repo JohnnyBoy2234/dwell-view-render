@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { Home } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { MobileSidebar } from "@/components/MobileSidebar";
@@ -20,13 +21,11 @@ const Navbar = () => {
       <div className={NAVBAR_STYLES.CONTAINER}>
         <div className={NAVBAR_STYLES.HEADER}>
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/android-chrome-512x512.png"
-              alt={NAVBAR_CONTENT.BRAND_NAME} 
-              className="h-10 w-auto"
-            />
-            <span className="text-xl font-bold text-foreground">
+          <Link to="/" className={NAVBAR_STYLES.LOGO_CONTAINER}>
+            <div className={NAVBAR_STYLES.LOGO_ICON}>
+              <Home className={NAVBAR_STYLES.LOGO_ICON_INNER} />
+            </div>
+            <span className={NAVBAR_STYLES.BRAND_TEXT}>
               {NAVBAR_CONTENT.BRAND_NAME}
             </span>
           </Link>

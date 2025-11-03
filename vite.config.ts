@@ -1,13 +1,13 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import { fileURLToPath } from 'url';
-import { dirname, resolve } from 'path';
+import path from "path";
+import { componentTagger } from "lovable-tagger";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+process.env.ESBUILD_BINARY_PATH = path.resolve('./node_modules/esbuild/bin/esbuild')
+
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
@@ -19,21 +19,13 @@ export default defineConfig({
       interval: 100,
     },
   },
-  plugins: [react()],
+  plugins: [
+    react(),
+    mode === 'development' && componentTagger(),
+  ].filter(Boolean),
   resolve: {
     alias: {
-      "@": resolve(__dirname, "./src"),
+      "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    esbuildOptions: {
-      // Node.js global to browser globalThis
-      define: {
-        global: 'globalThis',
-      },
-    },
-  },
-  build: {
-    target: 'esnext',
-  },
-});
+}));

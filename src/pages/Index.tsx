@@ -168,19 +168,14 @@ const Index = () => {
     style.textContent = `
       @media (max-width: 768px) {
         .hero-image {
-          transform: scale(1.1) !important;
-          background-position: 30% 50% !important;
-          background-size: cover !important;
-          width: 100% !important;
+          transform: scale(1.0) !important;
+          background-position: center 25% !important;
           height: 100% !important;
-          object-fit: cover;
-          object-position: left center;
-          margin-left: -15%;
+          top: 0;
         }
         .hero-section {
           position: relative;
           overflow: hidden;
-          min-height: 60vh;
         }
       }
       @media (min-width: 769px) {
@@ -206,7 +201,7 @@ const Index = () => {
           <div
             className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
             style={{
-              backgroundImage: 'url(/hero3.jpg)',
+              backgroundImage: 'url(/hero2.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
@@ -217,11 +212,11 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
         </div>
 
-        {/* Content Overlay - Desktop */}
-        <div className="hidden md:flex flex-1 flex-col justify-center px-4 z-10 pt-24 pb-12">
+        {/* Content Overlay */}
+        <div className="flex-1 flex flex-col justify-center px-4 z-10 pt-24 pb-12">
           <div className="text-center mb-8">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
               <span className="inline-block mr-2">Safe, Simple,</span>
@@ -230,7 +225,7 @@ const Index = () => {
             </h1>
           </div>
 
-          {/* Search Bar Section - Desktop */}
+          {/* Search Bar Section */}
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
@@ -249,41 +244,6 @@ const Index = () => {
               }}
               className="w-full shadow-lg relative z-20"
             />
-          </div>
-        </div>
-
-        {/* Mobile Layout with Fade */}
-        <div className="md:hidden flex-1 flex flex-col">
-          {/* Fade in heading at the top */}
-          <div className="animate-fade-in px-4 pt-6 pb-2 bg-white w-full text-center shadow-md">
-            <h1 className="text-2xl font-bold text-gray-900">
-              <span className="block">Safe, Simple,</span>
-              <span className="text-ocean-blue">Commission-Free</span>
-              <span className="block">Renting</span>
-            </h1>
-          </div>
-          
-          {/* Fade in white block with search bar */}
-          <div className="animate-fade-in flex-1 flex flex-col" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
-            <div className="bg-white rounded-t-3xl pt-4 pb-6 px-4 shadow-2xl flex-1">
-              <Property24SearchBar
-                onSearch={handleSearch}
-                onFiltersChange={onFiltersChange}
-                onMoreFiltersOpen={() => setShowMoreFilters(true)}
-                filters={{
-                  searchTerm: filters.searchTerm,
-                  propertyType: filters.propertyType,
-                  minPrice: filters.minPrice,
-                  maxPrice: filters.maxPrice,
-                  bedrooms: filters.bedrooms,
-                  bathrooms: filters.bathrooms,
-                  propertyTypes: filters.propertyTypes || [],
-                  amenities: filters.amenities || [],
-                  availableFrom: filters.availableFrom
-                }}
-                className="w-full text-sm"
-              />
-            </div>
           </div>
         </div>
       </section>
@@ -406,7 +366,7 @@ const Index = () => {
               size="lg" 
               className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              <Link to="/landlord/dashboard">Landlord Dashboard</Link>
+              <Link to="/enhancedlandlorddashboard">Landlord Dashboard</Link>
             </Button>
             <Button 
               asChild
@@ -414,7 +374,7 @@ const Index = () => {
               variant="outline"
               className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <Link to="/tenant/dashboard">Tenant Dashboard</Link>
+              <Link to="/enhancedtenantdashboard">Tenant Dashboard</Link>
             </Button>
           </div>
         </div>
