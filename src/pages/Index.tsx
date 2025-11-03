@@ -168,13 +168,14 @@ const Index = () => {
     style.textContent = `
       @media (max-width: 768px) {
         .hero-image {
-          transform: scale(1.2) !important;
-          background-position: center 40% !important;
+          transform: scale(1.1) !important;
+          background-position: 30% 50% !important;
           background-size: cover !important;
           width: 100% !important;
           height: 100% !important;
           object-fit: cover;
-          object-position: center;
+          object-position: left center;
+          margin-left: -15%;
         }
         .hero-section {
           position: relative;
@@ -252,19 +253,19 @@ const Index = () => {
         </div>
 
         {/* Mobile Layout with Fade */}
-        <div className="md:hidden flex-1 flex flex-col justify-start">
+        <div className="md:hidden flex-1 flex flex-col">
           {/* Fade in heading at the top */}
-          <div className="animate-fade-in px-4 pt-8 pb-4 text-center">
-            <h1 className="text-3xl font-bold text-white">
+          <div className="animate-fade-in px-4 pt-6 pb-2 bg-white w-full text-center shadow-md">
+            <h1 className="text-2xl font-bold text-gray-900">
               <span className="block">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
+              <span className="text-ocean-blue">Commission-Free</span>
               <span className="block">Renting</span>
             </h1>
           </div>
           
           {/* Fade in white block with search bar */}
-          <div className="animate-fade-in" style={{ animationDelay: '300ms', animationFillMode: 'forwards' }}>
-            <div className="bg-white rounded-t-3xl pt-6 pb-8 px-4 mt-12 shadow-2xl">
+          <div className="animate-fade-in flex-1 flex flex-col" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
+            <div className="bg-white rounded-t-3xl pt-4 pb-6 px-4 shadow-2xl flex-1">
               <Property24SearchBar
                 onSearch={handleSearch}
                 onFiltersChange={onFiltersChange}
@@ -280,7 +281,7 @@ const Index = () => {
                   amenities: filters.amenities || [],
                   availableFrom: filters.availableFrom
                 }}
-                className="w-full"
+                className="w-full text-sm"
               />
             </div>
           </div>
