@@ -162,7 +162,7 @@ const Index = () => {
   // Stats removed per request
   const stats: never[] = [];
 
-  // Add styles for the hero image and animations
+  // Add styles for the hero section with fades
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -170,12 +170,30 @@ const Index = () => {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .fade-in-heading {
-        animation: fadeIn 0.8s ease-out forwards;
+      .hero-content {
+        position: relative;
+        z-index: 10;
+        padding-top: 4rem;
+        padding-bottom: 4rem;
       }
-      .fade-in-image {
-        animation: fadeIn 1s ease-out 0.2s forwards;
-        opacity: 0;
+      .hero-heading {
+        animation: fadeIn 0.8s ease-out forwards;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      }
+      .hero-image-container {
+        position: relative;
+        margin-top: -2rem;
+        z-index: 5;
+      }
+      .hero-image-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(255,255,255,0.8) 100%);
+        z-index: 1;
       }
       @media (max-width: 768px) {
         .hero-image {
@@ -205,21 +223,10 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Heading, then Image, then Search Bar */}
-      <section className="relative w-full">
-        {/* Main Heading with Fade */}
-        <div className="w-full bg-white py-8 md:py-12 px-4 md:px-8 fade-in-heading">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 text-center">
-              <span className="inline-block mr-2">Safe, Simple,</span>
-              <span className="text-ocean-blue">Commission-Free</span>
-              <span className="inline-block ml-2">Renting</span>
-            </h1>
-          </div>
-        </div>
-
-        {/* Hero Image with Fade */}
-        <div className="relative w-full h-[40vh] md:h-[50vh] min-h-[300px] md:min-h-[400px] fade-in-image">
+      {/* Hero Section with Overlay Heading */}
+      <section className="relative">
+        {/* Hero Image with Gradient Overlay */}
+        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
           <div className="absolute inset-0 w-full h-full">
             <img
               src="/hero3.jpg"
@@ -227,12 +234,24 @@ const Index = () => {
               className="w-full h-full object-cover"
             />
           </div>
+          
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-white/90" />
+          
+          {/* Centered Heading */}
+          <div className="relative z-10 h-full flex items-center justify-center text-center px-4">
+            <h1 className="text-3xl md:text-4xl font-bold text-white hero-heading">
+              <span className="block">Safe, Simple,</span>
+              <span className="text-blue-300">Commission-Free</span>
+              <span className="block">Renting</span>
+            </h1>
+          </div>
         </div>
 
-        {/* Search Bar - Positioned below image */}
-        <div className="relative z-10 w-full px-4 md:px-8 -mt-12 md:-mt-16 mb-8 md:mb-16">
+        {/* Search Bar - Fading into white */}
+        <div className="relative z-10 w-full px-4 -mt-20 md:-mt-24 mb-12">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-lg shadow-xl p-4 md:p-6">
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white">
               <Property24SearchBar
                 onSearch={handleSearch}
                 onFiltersChange={onFiltersChange}
