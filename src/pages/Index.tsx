@@ -194,12 +194,12 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Heading Above Image */}
-      <section className="relative w-full flex flex-col">
-        {/* Heading Section - Above Image */}
-        <div className="w-full bg-white py-12 px-4 md:px-8 z-10">
+      {/* Hero Section - Heading, then Image, then Search Bar */}
+      <section className="relative w-full">
+        {/* Main Heading */}
+        <div className="w-full bg-white py-8 md:py-12 px-4 md:px-8">
           <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center">
+            <h1 className="text-3xl md:text-5xl font-bold text-gray-900 text-center">
               <span className="inline-block mr-2">Safe, Simple,</span>
               <span className="text-ocean-blue">Commission-Free</span>
               <span className="inline-block ml-2">Renting</span>
@@ -207,78 +207,42 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Image Section */}
-        <div className="relative w-full h-[50vh] min-h-[400px] md:h-[60vh]">
-          <div className="absolute inset-0 w-full h-full overflow-hidden">
-            <div
-              className="w-full h-full bg-cover bg-center"
-              style={{
-                backgroundImage: 'url(/hero3.jpg)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
-          </div>
-
-          {/* Search Bar Section - Desktop */}
-          <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
-            <Property24SearchBar
-              onSearch={handleSearch}
-              onFiltersChange={onFiltersChange}
-              onMoreFiltersOpen={() => setShowMoreFilters(true)}
-              filters={{
-                searchTerm: filters.searchTerm,
-                propertyType: filters.propertyType,
-                minPrice: filters.minPrice,
-                maxPrice: filters.maxPrice,
-                bedrooms: filters.bedrooms,
-                bathrooms: filters.bathrooms,
-                propertyTypes: filters.propertyTypes || [],
-                amenities: filters.amenities || [],
-                availableFrom: filters.availableFrom
-              }}
-              className="w-full shadow-lg relative z-20"
+        {/* Hero Image */}
+        <div className="relative w-full h-[40vh] md:h-[50vh] min-h-[300px] md:min-h-[400px]">
+          <div className="absolute inset-0 w-full h-full">
+            <img
+              src="/hero3.jpg"
+              alt="Modern apartment building"
+              className="w-full h-full object-cover"
             />
           </div>
         </div>
 
-        {/* Mobile Layout */}
-        <div className="md:hidden flex-1 flex flex-col">
-          <div className="flex-1 flex items-center justify-center px-4 pt-16 pb-8">
-            <h1 className="text-3xl font-bold text-white text-center">
-              <span className="block">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
-              <span className="block">Renting</span>
-            </h1>
+        {/* Search Bar - Positioned below image */}
+        <div className="relative z-10 w-full px-4 md:px-8 -mt-12 md:-mt-16 mb-8 md:mb-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-lg shadow-xl p-4 md:p-6">
+              <Property24SearchBar
+                onSearch={handleSearch}
+                onFiltersChange={onFiltersChange}
+                onMoreFiltersOpen={() => setShowMoreFilters(true)}
+                filters={{
+                  searchTerm: filters.searchTerm,
+                  propertyType: filters.propertyType,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  bedrooms: filters.bedrooms,
+                  bathrooms: filters.bathrooms,
+                  propertyTypes: filters.propertyTypes || [],
+                  amenities: filters.amenities || [],
+                  availableFrom: filters.availableFrom
+                }}
+                className="w-full"
+              />
+            </div>
           </div>
         </div>
       </section>
-
-      {/* Mobile Search Bar and White Block */}
-      <div className="md:hidden -mt-12 relative z-20 px-4">
-        <div className="bg-white rounded-lg shadow-xl p-4 mb-6">
-          <Property24SearchBar
-            onSearch={handleSearch}
-            onFiltersChange={onFiltersChange}
-            onMoreFiltersOpen={() => setShowMoreFilters(true)}
-            filters={{
-              searchTerm: filters.searchTerm,
-              propertyType: filters.propertyType,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              bedrooms: filters.bedrooms,
-              bathrooms: filters.bathrooms,
-              propertyTypes: filters.propertyTypes || [],
-              amenities: filters.amenities || [],
-              availableFrom: filters.availableFrom
-            }}
-            className="w-full"
-          />
-        </div>
-      </div>
-      <div className="bg-white w-full h-8 -mt-6 md:hidden"></div>
 
       {/* Feature Highlights - Moved up */}
       <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
