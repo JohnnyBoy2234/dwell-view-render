@@ -226,7 +226,7 @@ const Index = () => {
       {/* Hero Section with Overlay Heading */}
       <section className="relative">
         {/* Hero Image with Gradient Overlay */}
-        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
+        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh] pt-4">
           <div className="absolute inset-0 w-full h-full">
             <img
               src="/hero3.jpg"
@@ -235,12 +235,12 @@ const Index = () => {
             />
           </div>
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-white/90" />
+          {/* Gradient Overlay - Darker at top */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-white/90" />
           
-          {/* Centered Heading */}
-          <div className="relative z-10 h-full flex items-center justify-center text-center px-4">
-            <h1 className="text-3xl md:text-4xl font-bold text-white hero-heading">
+          {/* Top-Aligned Heading */}
+          <div className="relative z-10 h-full flex items-start pt-12 md:pt-16 justify-center text-center px-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-white hero-heading bg-black/40 backdrop-blur-sm px-6 py-3 rounded-lg">
               <span className="block">Safe, Simple,</span>
               <span className="text-blue-300">Commission-Free</span>
               <span className="block">Renting</span>
