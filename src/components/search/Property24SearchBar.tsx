@@ -7,7 +7,6 @@ import { Property24SearchInput } from "@/components/ui/property24-search-input";
 import { ChevronDown, SlidersHorizontal, Search } from "lucide-react";
 import { PropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { cn } from "@/lib/utils";
-
 interface Property24SearchBarProps {
   filters: PropertySearchFilters;
   onFiltersChange: (filters: Partial<PropertySearchFilters>) => void;
@@ -15,7 +14,6 @@ interface Property24SearchBarProps {
   className?: string;
   onMoreFiltersOpen?: () => void;
 }
-
 export const Property24SearchBar = ({
   filters,
   onFiltersChange,
@@ -29,75 +27,113 @@ export const Property24SearchBar = ({
   const [bathroomsOpen, setBathroomsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [filtersSheetOpen, setFiltersSheetOpen] = useState(false);
-
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  const propertyTypeOptions = [
-    { value: "Any", label: "Any Property Type" },
-    { value: "House", label: "House" },
-    { value: "Apartment", label: "Apartment" },
-    { value: "Townhouse", label: "Townhouse" },
-    { value: "Studio", label: "Studio" },
-    { value: "Duplex", label: "Duplex" }
-  ];
-
-  const bedroomOptions = [
-    { value: "Any", label: "Any" },
-    { value: "1", label: "1" },
-    { value: "2", label: "2" },
-    { value: "3", label: "3" },
-    { value: "4", label: "4+" }
-  ];
-
-  const priceOptions = [
-    { value: "any", label: "Any" },
-    { value: "2000", label: "R 2,000" },
-    { value: "3000", label: "R 3,000" },
-    { value: "4000", label: "R 4,000" },
-    { value: "5000", label: "R 5,000" },
-    { value: "6000", label: "R 6,000" },
-    { value: "8000", label: "R 8,000" },
-    { value: "10000", label: "R 10,000" },
-    { value: "12000", label: "R 12,000" },
-    { value: "15000", label: "R 15,000" },
-    { value: "20000", label: "R 20,000" },
-    { value: "25000", label: "R 25,000" },
-    { value: "30000", label: "R 30,000" },
-    { value: "40000", label: "R 40,000" },
-    { value: "50000", label: "R 50,000" }
-  ];
-
+  const propertyTypeOptions = [{
+    value: "Any",
+    label: "Any Property Type"
+  }, {
+    value: "House",
+    label: "House"
+  }, {
+    value: "Apartment",
+    label: "Apartment"
+  }, {
+    value: "Townhouse",
+    label: "Townhouse"
+  }, {
+    value: "Studio",
+    label: "Studio"
+  }, {
+    value: "Duplex",
+    label: "Duplex"
+  }];
+  const bedroomOptions = [{
+    value: "Any",
+    label: "Any"
+  }, {
+    value: "1",
+    label: "1"
+  }, {
+    value: "2",
+    label: "2"
+  }, {
+    value: "3",
+    label: "3"
+  }, {
+    value: "4",
+    label: "4+"
+  }];
+  const priceOptions = [{
+    value: "any",
+    label: "Any"
+  }, {
+    value: "2000",
+    label: "R 2,000"
+  }, {
+    value: "3000",
+    label: "R 3,000"
+  }, {
+    value: "4000",
+    label: "R 4,000"
+  }, {
+    value: "5000",
+    label: "R 5,000"
+  }, {
+    value: "6000",
+    label: "R 6,000"
+  }, {
+    value: "8000",
+    label: "R 8,000"
+  }, {
+    value: "10000",
+    label: "R 10,000"
+  }, {
+    value: "12000",
+    label: "R 12,000"
+  }, {
+    value: "15000",
+    label: "R 15,000"
+  }, {
+    value: "20000",
+    label: "R 20,000"
+  }, {
+    value: "25000",
+    label: "R 25,000"
+  }, {
+    value: "30000",
+    label: "R 30,000"
+  }, {
+    value: "40000",
+    label: "R 40,000"
+  }, {
+    value: "50000",
+    label: "R 50,000"
+  }];
   const formatPrice = (value?: string | null): string => {
     if (!value) return "";
     const numberValue = parseInt(value, 10);
     if (Number.isNaN(numberValue) || numberValue === 0) return "";
     return new Intl.NumberFormat('en-ZA').format(numberValue);
   };
-
   const getPropertyTypeLabel = () => {
     if (filters.propertyType && filters.propertyType !== "Any") {
-      return (
-        <div className="flex flex-col items-start">
+      return <div className="flex flex-col items-start">
           <span className="text-xs text-slate-400">Property Type</span>
           <span className="text-sm font-normal">{filters.propertyType}</span>
-        </div>
-      );
+        </div>;
     }
     return "Property Type";
   };
-
   const getPriceLabel = () => {
     const min = formatPrice(filters.minPrice);
     const max = formatPrice(filters.maxPrice);
     const hasMinSelection = !!(filters.minPrice && filters.minPrice !== "");
     const hasMaxSelection = !!(filters.maxPrice && filters.maxPrice !== "");
-
     let priceRangeText = "Any";
-
     if (!hasMinSelection && hasMaxSelection) {
       priceRangeText = `Up to R${max}`;
     } else if (hasMinSelection && !hasMaxSelection) {
@@ -109,160 +145,110 @@ export const Property24SearchBar = ({
         priceRangeText = `R${min} - R${max}`;
       }
     }
-
     if (!hasMinSelection && !hasMaxSelection) {
       return "Price";
     }
-
-    return (
-      <div className="flex flex-col items-start text-left">
+    return <div className="flex flex-col items-start text-left">
         <span className="text-xs text-slate-400">Price</span>
         <span className="font-normal">{priceRangeText}</span>
-      </div>
-    );
+      </div>;
   };
-
   const getBedroomsLabel = () => {
     const hasSelection = filters.bedrooms !== "Any" && !!filters.bedrooms;
     if (hasSelection) {
-      return (
-        <div className="flex flex-col items-start">
+      return <div className="flex flex-col items-start">
           <span className="text-xs text-slate-400">Bedrooms</span>
           <span className="text-sm font-normal">{filters.bedrooms === "4" ? "4+" : filters.bedrooms}</span>
-        </div>
-      );
+        </div>;
     }
     return "Bedrooms";
   };
-
   const getBathroomsLabel = () => {
     const hasSelection = filters.bathrooms !== "Any" && !!filters.bathrooms;
     if (hasSelection) {
-      return (
-        <div className="flex flex-col items-start">
+      return <div className="flex flex-col items-start">
           <span className="text-xs text-slate-400">Bathrooms</span>
           <span className="text-sm font-normal">{filters.bathrooms === "4" ? "4+" : filters.bathrooms}</span>
-        </div>
-      );
+        </div>;
     }
     return "Bathrooms";
   };
-
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       onSearch();
     }
   };
-
   const handlePlaceSelect = (place: any) => {
     if (place?.formattedAddress) {
-      onFiltersChange({ searchTerm: place.formattedAddress });
-      setTimeout(() => onFiltersChange({ searchTerm: place.formattedAddress }), 50);
+      onFiltersChange({
+        searchTerm: place.formattedAddress
+      });
+      setTimeout(() => onFiltersChange({
+        searchTerm: place.formattedAddress
+      }), 50);
     }
   };
-
   const renderActiveFilters = () => {
-    const hasActiveFilters = !!(filters.searchTerm ||
-      (filters.propertyType && filters.propertyType !== "Any") ||
-      (filters.minPrice && filters.minPrice !== "") ||
-      (filters.maxPrice && filters.maxPrice !== "") ||
-      (filters.bedrooms && filters.bedrooms !== "Any"));
-
+    const hasActiveFilters = !!(filters.searchTerm || filters.propertyType && filters.propertyType !== "Any" || filters.minPrice && filters.minPrice !== "" || filters.maxPrice && filters.maxPrice !== "" || filters.bedrooms && filters.bedrooms !== "Any");
     if (!hasActiveFilters) return null;
-
-    return (
-      <div className="flex flex-wrap gap-2 mt-4">
-        {filters.searchTerm && (
-          <div className="filter-chip">
+    return <div className="flex flex-wrap gap-2 mt-4">
+        {filters.searchTerm && <div className="filter-chip">
             <span>{filters.searchTerm}</span>
-            <button
-              className="remove-button"
-              onClick={() => onFiltersChange({ searchTerm: "" })}
-              aria-label="Remove location filter"
-            >
+            <button className="remove-button" onClick={() => onFiltersChange({
+          searchTerm: ""
+        })} aria-label="Remove location filter">
               ×
             </button>
-          </div>
-        )}
-        {filters.propertyType && filters.propertyType !== "Any" && (
-          <div className="filter-chip">
+          </div>}
+        {filters.propertyType && filters.propertyType !== "Any" && <div className="filter-chip">
             <span>{filters.propertyType}</span>
-            <button
-              className="remove-button"
-              onClick={() => onFiltersChange({ propertyType: "Any" })}
-              aria-label="Remove property type filter"
-            >
+            <button className="remove-button" onClick={() => onFiltersChange({
+          propertyType: "Any"
+        })} aria-label="Remove property type filter">
               ×
             </button>
-          </div>
-        )}
-        {(filters.minPrice || filters.maxPrice) && (
-          <div className="filter-chip">
+          </div>}
+        {(filters.minPrice || filters.maxPrice) && <div className="filter-chip">
             <span>
-              {filters.minPrice && filters.maxPrice
-                ? `R${formatPrice(filters.minPrice)} - R${formatPrice(filters.maxPrice)}`
-                : filters.minPrice
-                  ? `From R${formatPrice(filters.minPrice)}`
-                  : `Up to R${formatPrice(filters.maxPrice)}`
-              }
+              {filters.minPrice && filters.maxPrice ? `R${formatPrice(filters.minPrice)} - R${formatPrice(filters.maxPrice)}` : filters.minPrice ? `From R${formatPrice(filters.minPrice)}` : `Up to R${formatPrice(filters.maxPrice)}`}
             </span>
-            <button
-              className="remove-button"
-              onClick={() => onFiltersChange({ minPrice: "", maxPrice: "" })}
-              aria-label="Remove price filter"
-            >
+            <button className="remove-button" onClick={() => onFiltersChange({
+          minPrice: "",
+          maxPrice: ""
+        })} aria-label="Remove price filter">
               ×
             </button>
-          </div>
-        )}
-        {filters.bedrooms && filters.bedrooms !== "Any" && (
-          <div className="filter-chip">
+          </div>}
+        {filters.bedrooms && filters.bedrooms !== "Any" && <div className="filter-chip">
             <span>{filters.bedrooms === "4" ? "4+" : filters.bedrooms} bed{filters.bedrooms !== "1" ? "s" : ""}</span>
-            <button
-              className="remove-button"
-              onClick={() => onFiltersChange({ bedrooms: "Any" })}
-              aria-label="Remove bedroom filter"
-            >
+            <button className="remove-button" onClick={() => onFiltersChange({
+          bedrooms: "Any"
+        })} aria-label="Remove bedroom filter">
               ×
             </button>
-          </div>
-        )}
-      </div>
-    );
+          </div>}
+      </div>;
   };
-
-  return (
-    <div className={cn("relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 w-full max-w-5xl mx-auto overflow-hidden", className)}>
-      <div className="p-6 pb-4">
+  return <div className={cn("relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 w-full max-w-5xl mx-auto overflow-hidden", className)}>
+      <div className="p-6 pb-4 my-0 mx-[7px]">
         <div onKeyDown={handleKeyPress}>
-          <Property24SearchInput
-            value={filters.searchTerm}
-            onChange={(value) => onFiltersChange({ searchTerm: value })}
-            onPlaceSelect={handlePlaceSelect}
-            placeholder="Search by city, suburb or street..."
-            className="property24-search-input w-full"
-            onClear={() => onFiltersChange({ searchTerm: "" })}
-          />
+          <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
+          searchTerm: value
+        })} onPlaceSelect={handlePlaceSelect} placeholder="Search by city, suburb or street..." className="property24-search-input w-full" onClear={() => onFiltersChange({
+          searchTerm: ""
+        })} />
         </div>
 
         {renderActiveFilters()}
       </div>
 
-      {isMobile ? (
-        <>
+      {isMobile ? <>
           <div className="px-6 pb-6 flex gap-3 items-center">
-            <Button
-              variant="outline"
-             className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white"
-              onClick={() => setFiltersSheetOpen(true)}
-            >
+            <Button variant="outline" className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white" onClick={() => setFiltersSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               <span className="truncate">All Filters</span>
             </Button>
-            <Button
-              className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg whitespace-nowrap"
-              onClick={onSearch}
-            >
+            <Button className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg whitespace-nowrap" onClick={onSearch}>
               <Search className="h-4 w-4 mr-2" />
               <span className="hidden xs:inline">Search Property</span>
               <span className="xs:hidden">Search</span>
@@ -279,16 +265,11 @@ export const Property24SearchBar = ({
                 <div>
                   <label className="text-sm font-medium mb-3 block">Property Type</label>
                   <div className="grid grid-cols-2 gap-2">
-                    {propertyTypeOptions.map(option => (
-                      <Button
-                        key={option.value}
-                        variant={filters.propertyType === option.value ? "default" : "outline"}
-                        className={`w-full py-3 ${filters.propertyType === option.value ? 'bg-ocean-blue text-white border-ocean-blue' : 'bg-white text-foreground border-ocean-blue/30 hover:bg-ocean-blue/10'}`}
-                        onClick={() => onFiltersChange({ propertyType: option.value })}
-                      >
+                    {propertyTypeOptions.map(option => <Button key={option.value} variant={filters.propertyType === option.value ? "default" : "outline"} className={`w-full py-3 ${filters.propertyType === option.value ? 'bg-ocean-blue text-white border-ocean-blue' : 'bg-white text-foreground border-ocean-blue/30 hover:bg-ocean-blue/10'}`} onClick={() => onFiltersChange({
+                  propertyType: option.value
+                })}>
                         {option.label}
-                      </Button>
-                    ))}
+                      </Button>)}
                   </div>
                 </div>
 
@@ -297,27 +278,27 @@ export const Property24SearchBar = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-xs text-muted-foreground mb-1 block">Min Price</label>
-                      <Select value={filters.minPrice || ""} onValueChange={(value) => onFiltersChange({ minPrice: value })}>
+                      <Select value={filters.minPrice || ""} onValueChange={value => onFiltersChange({
+                    minPrice: value
+                  })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
-                          {priceOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
+                          {priceOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <label className="text-xs text-muted-foreground mb-1 block">Max Price</label>
-                      <Select value={filters.maxPrice || ""} onValueChange={(value) => onFiltersChange({ maxPrice: value })}>
+                      <Select value={filters.maxPrice || ""} onValueChange={value => onFiltersChange({
+                    maxPrice: value
+                  })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent>
-                          {priceOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
+                          {priceOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
@@ -327,50 +308,50 @@ export const Property24SearchBar = ({
                 <div>
                   <label className="text-sm font-medium mb-3 block">Bedrooms</label>
                   <div className="flex gap-2">
-                    {bedroomOptions.map(option => (
-                      <Button
-                        key={option.value}
-                        variant={filters.bedrooms === option.value ? "default" : "outline"}
-                        className={`flex-1 ${filters.bedrooms === option.value ? 'bg-ocean-blue text-white' : 'hover:bg-ocean-blue/10'}`}
-                        onClick={() => onFiltersChange({ bedrooms: option.value })}
-                      >
+                    {bedroomOptions.map(option => <Button key={option.value} variant={filters.bedrooms === option.value ? "default" : "outline"} className={`flex-1 ${filters.bedrooms === option.value ? 'bg-ocean-blue text-white' : 'hover:bg-ocean-blue/10'}`} onClick={() => onFiltersChange({
+                  bedrooms: option.value
+                })}>
                         {option.label}
-                      </Button>
-                    ))}
+                      </Button>)}
                   </div>
                 </div>
 
                 <div>
                   <label className="text-sm font-medium mb-3 block">Bathrooms</label>
                   <div className="flex gap-2">
-                    {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
-                      <Button
-                        key={option.value}
-                        variant={filters.bathrooms === option.value ? "default" : "outline"}
-                        className={`flex-1 ${filters.bathrooms === option.value ? 'bg-ocean-blue text-white' : 'hover:bg-ocean-blue/10'}`}
-                        onClick={() => onFiltersChange({ bathrooms: option.value })}
-                      >
+                    {[{
+                  value: "Any",
+                  label: "Any"
+                }, {
+                  value: "1",
+                  label: "1+"
+                }, {
+                  value: "2",
+                  label: "2+"
+                }, {
+                  value: "3",
+                  label: "3+"
+                }, {
+                  value: "4",
+                  label: "4+"
+                }].map(option => <Button key={option.value} variant={filters.bathrooms === option.value ? "default" : "outline"} className={`flex-1 ${filters.bathrooms === option.value ? 'bg-ocean-blue text-white' : 'hover:bg-ocean-blue/10'}`} onClick={() => onFiltersChange({
+                  bathrooms: option.value
+                })}>
                         {option.label}
-                      </Button>
-                    ))}
+                      </Button>)}
                   </div>
                 </div>
 
-                <Button
-                  className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white mt-6"
-                  onClick={() => {
-                    setFiltersSheetOpen(false);
-                    setTimeout(() => onSearch(), 100);
-                  }}
-                >
+                <Button className="w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white mt-6" onClick={() => {
+              setFiltersSheetOpen(false);
+              setTimeout(() => onSearch(), 100);
+            }}>
                   Apply Filters & Search
                 </Button>
               </div>
             </SheetContent>
           </Sheet>
-        </>
-      ) : (
-        <div className="px-6 pb-6 flex gap-3 items-center justify-center flex-wrap">
+        </> : <div className="px-6 pb-6 flex gap-3 items-center justify-center flex-wrap my-0">
           <div className="flex gap-3 items-center flex-wrap">
             <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
               <PopoverTrigger asChild>
@@ -381,23 +362,14 @@ export const Property24SearchBar = ({
               </PopoverTrigger>
               <PopoverContent className="w-64 p-4 bg-background border-border shadow-lg z-50">
                 <div className="space-y-2">
-                  {propertyTypeOptions.map(option => (
-                    <Button
-                      key={option.value}
-                      variant={filters.propertyType === option.value ? "default" : "ghost"}
-                      className={`w-full justify-start ${
-                        filters.propertyType === option.value 
-                          ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
-                          : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
-                      }`}
-                      onClick={() => {
-                        onFiltersChange({ propertyType: option.value });
-                        setPropertyTypeOpen(false);
-                      }}
-                    >
+                  {propertyTypeOptions.map(option => <Button key={option.value} variant={filters.propertyType === option.value ? "default" : "ghost"} className={`w-full justify-start ${filters.propertyType === option.value ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'}`} onClick={() => {
+                onFiltersChange({
+                  propertyType: option.value
+                });
+                setPropertyTypeOpen(false);
+              }}>
                       {option.label}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </PopoverContent>
             </Popover>
@@ -414,27 +386,27 @@ export const Property24SearchBar = ({
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="text-sm font-medium mb-2 block text-foreground">Min Price</label>
-                      <Select value={filters.minPrice || ""} onValueChange={(value) => onFiltersChange({ minPrice: value })}>
+                      <Select value={filters.minPrice || ""} onValueChange={value => onFiltersChange({
+                    minPrice: value
+                  })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent className="bg-background border-border">
-                          {priceOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
+                          {priceOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <label className="text-sm font-medium mb-2 block text-foreground">Max Price</label>
-                      <Select value={filters.maxPrice || ""} onValueChange={(value) => onFiltersChange({ maxPrice: value })}>
+                      <Select value={filters.maxPrice || ""} onValueChange={value => onFiltersChange({
+                    maxPrice: value
+                  })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Any" />
                         </SelectTrigger>
                         <SelectContent className="bg-background border-border">
-                          {priceOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                          ))}
+                          {priceOptions.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
@@ -452,23 +424,14 @@ export const Property24SearchBar = ({
               </PopoverTrigger>
               <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
                 <div className="space-y-2">
-                  {bedroomOptions.map(option => (
-                    <Button
-                      key={option.value}
-                      variant={filters.bedrooms === option.value ? "default" : "ghost"}
-                      className={`w-full justify-start ${
-                        filters.bedrooms === option.value 
-                          ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
-                          : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
-                      }`}
-                      onClick={() => {
-                        onFiltersChange({ bedrooms: option.value });
-                        setBedroomsOpen(false);
-                      }}
-                    >
+                  {bedroomOptions.map(option => <Button key={option.value} variant={filters.bedrooms === option.value ? "default" : "ghost"} className={`w-full justify-start ${filters.bedrooms === option.value ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'}`} onClick={() => {
+                onFiltersChange({
+                  bedrooms: option.value
+                });
+                setBedroomsOpen(false);
+              }}>
                       {option.label}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </PopoverContent>
             </Popover>
@@ -482,49 +445,44 @@ export const Property24SearchBar = ({
               </PopoverTrigger>
               <PopoverContent className="w-48 p-4 bg-background border-border shadow-lg z-50">
                 <div className="space-y-2">
-                  {[{ value: "Any", label: "Any" }, { value: "1", label: "1+" }, { value: "2", label: "2+" }, { value: "3", label: "3+" }, { value: "4", label: "4+" }].map(option => (
-                    <Button
-                      key={option.value}
-                      variant={filters.bathrooms === option.value ? "default" : "ghost"}
-                      className={`w-full justify-start ${
-                        filters.bathrooms === option.value 
-                          ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' 
-                          : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'
-                      }`}
-                      onClick={() => {
-                        onFiltersChange({ bathrooms: option.value });
-                        setBathroomsOpen(false);
-                      }}
-                    >
+                  {[{
+                value: "Any",
+                label: "Any"
+              }, {
+                value: "1",
+                label: "1+"
+              }, {
+                value: "2",
+                label: "2+"
+              }, {
+                value: "3",
+                label: "3+"
+              }, {
+                value: "4",
+                label: "4+"
+              }].map(option => <Button key={option.value} variant={filters.bathrooms === option.value ? "default" : "ghost"} className={`w-full justify-start ${filters.bathrooms === option.value ? 'bg-ocean-blue text-white hover:bg-ocean-blue-dark' : 'text-foreground hover:bg-ocean-blue/10 hover:text-foreground'}`} onClick={() => {
+                onFiltersChange({
+                  bathrooms: option.value
+                });
+                setBathroomsOpen(false);
+              }}>
                       {option.label}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </PopoverContent>
             </Popover>
 
-            {onMoreFiltersOpen && (
-              <Button
-                variant="outline"
-                className="property24-filter-button flex-shrink-0"
-                onClick={onMoreFiltersOpen}
-              >
+            {onMoreFiltersOpen && <Button variant="outline" className="property24-filter-button flex-shrink-0" onClick={onMoreFiltersOpen}>
                 <SlidersHorizontal className="h-4 w-4 mr-2" />
                 More Filters
-              </Button>
-            )}
+              </Button>}
           </div>
 
-          <Button
-            className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg flex-shrink-0"
-            onClick={onSearch}
-          >
+          <Button className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg flex-shrink-0" onClick={onSearch}>
             <Search className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline whitespace-nowrap">Search Property</span>
             <span className="sm:hidden">Search</span>
           </Button>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
