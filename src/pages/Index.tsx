@@ -180,7 +180,14 @@ const Index = () => {
         z-index: 5;
         display: flex;
         align-items: center;
+        justify-content: center;
         padding: 1rem 2rem;
+      }
+      @media (min-width: 768px) {
+        .top-fade {
+          justify-content: flex-start;
+          padding-left: 2.5rem;
+        }
       }
       .hero-content {
         position: relative;
