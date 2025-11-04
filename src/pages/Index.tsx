@@ -245,7 +245,7 @@ const Index = () => {
           <div className="top-fade">
             <h1 className="text-xl md:text-2xl font-bold text-white whitespace-nowrap">
               <span>Safe, Simple, </span>
-              <span className="text-blue-300">Commission-Free </span>
+              <span className="text-ocean-blue">Commission-Free </span>
               <span>Renting</span>
             </h1>
           </div>
