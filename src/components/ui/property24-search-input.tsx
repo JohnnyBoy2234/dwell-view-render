@@ -26,7 +26,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
   value,
   onChange,
   onPlaceSelect,
-  placeholder = "Search by city, suburb or street...",
+  placeholder = "Search by city, suburb",
   className,
   onClear,
   disabled = false

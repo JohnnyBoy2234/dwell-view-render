@@ -234,7 +234,7 @@ export const Property24SearchBar = ({
         <div onKeyDown={handleKeyPress}>
           <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
           searchTerm: value
-        })} onPlaceSelect={handlePlaceSelect} placeholder="Search by city, suburb or street..." className="property24-search-input w-full" onClear={() => onFiltersChange({
+        })} onPlaceSelect={handlePlaceSelect} placeholder="Search by city, suburb" className="property24-search-input w-full" onClear={() => onFiltersChange({
           searchTerm: ""
         })} />
         </div>
