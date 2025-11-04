@@ -162,10 +162,21 @@ const Index = () => {
   // Stats removed per request
   const stats: never[] = [];
 
-  // Add styles for the hero image
+  // Add styles for the hero image and animations
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .fade-in-heading {
+        animation: fadeIn 0.8s ease-out forwards;
+      }
+      .fade-in-image {
+        animation: fadeIn 1s ease-out 0.2s forwards;
+        opacity: 0;
+      }
       @media (max-width: 768px) {
         .hero-image {
           transform: scale(1.0) !important;
@@ -196,8 +207,8 @@ const Index = () => {
     <div className="min-h-screen">
       {/* Hero Section - Heading, then Image, then Search Bar */}
       <section className="relative w-full">
-        {/* Main Heading */}
-        <div className="w-full bg-white py-8 md:py-12 px-4 md:px-8">
+        {/* Main Heading with Fade */}
+        <div className="w-full bg-white py-8 md:py-12 px-4 md:px-8 fade-in-heading">
           <div className="max-w-7xl mx-auto">
             <h1 className="text-3xl md:text-5xl font-bold text-gray-900 text-center">
               <span className="inline-block mr-2">Safe, Simple,</span>
@@ -207,8 +218,8 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Hero Image */}
-        <div className="relative w-full h-[40vh] md:h-[50vh] min-h-[300px] md:min-h-[400px]">
+        {/* Hero Image with Fade */}
+        <div className="relative w-full h-[40vh] md:h-[50vh] min-h-[300px] md:min-h-[400px] fade-in-image">
           <div className="absolute inset-0 w-full h-full">
             <img
               src="/hero3.jpg"
