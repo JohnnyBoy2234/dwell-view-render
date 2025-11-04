@@ -194,35 +194,32 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section - Simplified Design */}
-      <section className="relative w-full h-auto md:h-[70vh] min-h-[500px] flex flex-col hero-section">
-        {/* Background Image */}
-        <div className="absolute inset-0 w-full h-full overflow-hidden -z-10">
-          <div
-            className="absolute inset-0 w-full h-full bg-cover bg-center hero-image"
-            style={{
-              backgroundImage: 'url(/hero3.jpg)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-              width: '100%',
-              height: '100%',
-              position: 'absolute',
-              top: 0,
-              left: 0
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-transparent" />
-        </div>
-
-        {/* Content Overlay - Desktop */}
-        <div className="hidden md:flex flex-1 flex-col justify-center px-4 z-10 pt-24 pb-12">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white">
+      {/* Hero Section with Heading Above Image */}
+      <section className="relative w-full flex flex-col">
+        {/* Heading Section - Above Image */}
+        <div className="w-full bg-white py-12 px-4 md:px-8 z-10">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 text-center">
               <span className="inline-block mr-2">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
+              <span className="text-ocean-blue">Commission-Free</span>
               <span className="inline-block ml-2">Renting</span>
             </h1>
+          </div>
+        </div>
+
+        {/* Image Section */}
+        <div className="relative w-full h-[50vh] min-h-[400px] md:h-[60vh]">
+          <div className="absolute inset-0 w-full h-full overflow-hidden">
+            <div
+              className="w-full h-full bg-cover bg-center"
+              style={{
+                backgroundImage: 'url(/hero3.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                backgroundRepeat: 'no-repeat',
+              }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
           </div>
 
           {/* Search Bar Section - Desktop */}
