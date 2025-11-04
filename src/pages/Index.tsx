@@ -215,7 +215,7 @@ const Index = () => {
       {/* Hero Section - Updated Design */}
       <section className="relative w-full h-screen min-h-[600px] flex flex-col hero-section">
         {/* Top Fade with Heading */}
-        <div className="w-full bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-10">
+        <div className="w-full bg-gradient-to-b from-black/30 to-transparent pt-8 pb-16 z-10">
           <div className="hidden md:flex flex-1 flex-col justify-center items-start px-8 pb-16">
           </div>
         </div>
@@ -245,13 +245,13 @@ const Index = () => {
               left: 0
             }}
           />
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/30" />
         </div>
 
         {/* Content container */}
         <div className="relative z-10 flex-1 flex flex-col">
           {/* Mobile overlay to create the half-half effect */}
-          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/40 to-transparent h-[60%]" />
+          <div className="md:hidden absolute inset-0 bg-gradient-to-b from-black/20 to-transparent h-[60%]" />
           <div className="w-full px-4 md:px-8 max-w-4xl mx-auto">
             <Property24SearchBar
               onSearch={handleSearch}
