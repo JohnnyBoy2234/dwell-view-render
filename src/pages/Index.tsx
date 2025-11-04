@@ -209,10 +209,8 @@ const Index = () => {
           
           {/* Top Fade with Heading */}
           <div className="top-fade my-0">
-              <h1 className="text-2xl md:text-4xl font-bold text-white px-2 text-left">
-                <div>Safe, Simple,</div>
-                <div className="text-ocean-blue">Commission-Free</div>
-                <div>Renting</div>
+              <h1 className="text-xl md:text-3xl font-bold text-white px-2 text-left whitespace-nowrap">
+                Safe, Simple, <span className="text-ocean-blue">Commission-Free</span> Renting
               </h1>
           </div>
         </div>
@@ -315,7 +313,7 @@ const Index = () => {
         </div>
 
         <div className="text-center">
-          <Button asChild size="lg" className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue-dark hover:to-success-green-dark text-white rounded-xl px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+          <Button asChild size="lg" className="bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-xl px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
             <Link to="/properties" className="flex items-center gap-2">
               View All Properties
               <ArrowRight className="h-5 w-5" />
@@ -331,8 +329,8 @@ const Index = () => {
       <section className="py-16 md:py-24 bg-gradient-to-r from-ocean-blue to-success-green text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Rent Smarter. Rent Safer.<br />
-            <span className="text-white/90">With RentLekker.</span>
+            <span className="text-white/90">Rent Smarter. Rent Safer.</span><br />
+            <span className="text-white">With RentLekker.</span>
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join South Africa's most trusted rental platform today
