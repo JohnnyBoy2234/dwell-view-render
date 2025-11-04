@@ -2,15 +2,15 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
 // Get URL and key from environment variables with fallback to current values
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://rsfrvjaqxhoqavvscvwf.supabase.co";
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZnJ2amFxeGhvcWF2dnNjdndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMDIzOTYsImV4cCI6MjA2OTg3ODM5Nn0.3yeCVbJs6twyx62wYh9BxCUoqpqiMt-174JmdRyhJig";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://rsfrvjaqxhoqavvscvwf.supabase.co";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZnJ2amFxeGhvcWF2dnNjdndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMDIzOTYsImV4cCI6MjA2OTg3ODM5Nn0.3yeCVbJs6twyx62wYh9BxCUoqpqiMt-174JmdRyhJig";
 
 // Get site URL for auth redirects - use current domain by default
 const getSiteUrl = () => {
   if (typeof window !== 'undefined') {
     return window.location.origin;
   }
-  return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  return 'http://localhost:3000';
 };
 
 // Create the Supabase client
@@ -65,7 +65,7 @@ export const signInWithProvider = async (provider: 'google' | 'github' | 'facebo
   const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-      redirectTo: `${siteUrl}/auth/callback`,
+      redirectTo: `${getSiteUrl()}/auth/callback`,
     },
   });
   
