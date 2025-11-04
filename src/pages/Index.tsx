@@ -170,30 +170,25 @@ const Index = () => {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
+      .glass-heading {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem 2rem;
+        animation: fadeIn 0.8s ease-out forwards;
+      }
       .hero-content {
         position: relative;
         z-index: 10;
-        padding-top: 4rem;
-        padding-bottom: 4rem;
       }
       .hero-heading {
-        animation: fadeIn 0.8s ease-out forwards;
         text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      }
-      .hero-image-container {
-        position: relative;
-        margin-top: -2rem;
-        z-index: 5;
-      }
-      .hero-image-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 100%;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0) 20%, rgba(0,0,0,0) 80%, rgba(255,255,255,0.8) 100%);
-        z-index: 1;
+        color: white;
+        font-weight: 700;
+        letter-spacing: -0.5px;
       }
       @media (max-width: 768px) {
         .hero-image {
@@ -223,18 +218,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Page Heading - Right below navbar */}
-      <div className="w-full bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-            <span>Safe, Simple, </span>
-            <span className="text-ocean-blue">Commission-Free </span>
-            <span>Renting</span>
-          </h1>
-        </div>
-      </div>
-
-      {/* Hero Section with Image */}
+      {/* Hero Section with Glass Heading */}
       <section className="relative">
         <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
           <div className="absolute inset-0 w-full h-full">
@@ -246,7 +230,20 @@ const Index = () => {
           </div>
           
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/10" />
+          
+          {/* Glass Heading */}
+          <div className="relative z-10 pt-16 md:pt-24 px-4">
+            <div className="max-w-7xl mx-auto">
+              <div className="glass-heading inline-block">
+                <h1 className="text-2xl md:text-4xl font-bold hero-heading">
+                  <span>Safe, Simple, </span>
+                  <span className="text-blue-200">Commission-Free </span>
+                  <span>Renting</span>
+                </h1>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Search Bar - Fading into white */}
