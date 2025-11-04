@@ -223,10 +223,20 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section with Overlay Heading */}
+      {/* Page Heading - Right below navbar */}
+      <div className="w-full bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+            <span>Safe, Simple, </span>
+            <span className="text-ocean-blue">Commission-Free </span>
+            <span>Renting</span>
+          </h1>
+        </div>
+      </div>
+
+      {/* Hero Section with Image */}
       <section className="relative">
-        {/* Hero Image with Gradient Overlay */}
-        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh] pt-4">
+        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
           <div className="absolute inset-0 w-full h-full">
             <img
               src="/hero3.jpg"
@@ -235,17 +245,8 @@ const Index = () => {
             />
           </div>
           
-          {/* Gradient Overlay - Darker at top */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-white/90" />
-          
-          {/* Top-Aligned Heading */}
-          <div className="relative z-10 h-full flex items-start pt-12 md:pt-16 justify-center text-center px-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-white hero-heading bg-black/40 backdrop-blur-sm px-6 py-3 rounded-lg">
-              <span className="block">Safe, Simple,</span>
-              <span className="text-blue-300">Commission-Free</span>
-              <span className="block">Renting</span>
-            </h1>
-          </div>
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-transparent" />
         </div>
 
         {/* Search Bar - Fading into white */}
