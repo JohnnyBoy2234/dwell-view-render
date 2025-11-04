@@ -170,17 +170,17 @@ const Index = () => {
         from { opacity: 0; transform: translateY(10px); }
         to { opacity: 1; transform: translateY(0); }
       }
-      .glass-heading {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        padding: 1.5rem 2rem;
-        animation: fadeIn 0.8s ease-out forwards;
-        display: inline-block;
-        margin: 0;
+      .top-fade {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 30%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+        z-index: 5;
+        display: flex;
+        align-items: center;
+        padding: 1rem 2rem;
       }
       .hero-content {
         position: relative;
@@ -231,18 +231,16 @@ const Index = () => {
             />
           </div>
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/10" />
+          {/* Bottom Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
-          {/* Glass Heading - Left Aligned */}
-          <div className="relative z-10 pt-8 md:pt-12 pl-4 md:pl-8">
-            <div className="glass-heading">
-              <h1 className="text-2xl md:text-4xl font-bold hero-heading">
-                <div>Safe, Simple,</div>
-                <div className="text-ocean-blue">Commission-Free</div>
-                <div>Renting</div>
-              </h1>
-            </div>
+          {/* Top Fade with Heading */}
+          <div className="top-fade">
+            <h1 className="text-2xl md:text-4xl font-bold text-white">
+              <span>Safe, Simple, </span>
+              <span className="text-blue-300">Commission-Free </span>
+              <span>Renting</span>
+            </h1>
           </div>
         </div>
 
