@@ -177,11 +177,10 @@ const Index = () => {
         border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.18);
         box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-        padding: 1.5rem 3rem;
+        padding: 1.5rem 2rem;
         animation: fadeIn 0.8s ease-out forwards;
-        margin: 0 auto;
-        display: block;
-        width: fit-content;
+        display: inline-block;
+        margin: 0;
       }
       .hero-content {
         position: relative;
@@ -235,16 +234,14 @@ const Index = () => {
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/10" />
           
-          {/* Glass Heading */}
-          <div className="relative z-10 pt-8 md:pt-12 px-4">
-            <div className="max-w-7xl mx-auto">
-              <div className="glass-heading inline-block">
-                <h1 className="text-2xl md:text-4xl font-bold hero-heading text-center">
-                  <div>Safe, Simple,</div>
-                  <div className="text-blue-200">Commission-Free</div>
-                  <div>Renting</div>
-                </h1>
-              </div>
+          {/* Glass Heading - Left Aligned */}
+          <div className="relative z-10 pt-8 md:pt-12 pl-4 md:pl-8">
+            <div className="glass-heading">
+              <h1 className="text-2xl md:text-4xl font-bold hero-heading">
+                <div>Safe, Simple,</div>
+                <div className="text-ocean-blue">Commission-Free</div>
+                <div>Renting</div>
+              </h1>
             </div>
           </div>
         </div>
