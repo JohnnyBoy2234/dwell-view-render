@@ -179,9 +179,9 @@ const Index = () => {
         background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
         z-index: 5;
         display: flex;
-        align-items: center;
-        justify-content: center;
+        align-items: flex-start;
         padding: 1rem 2rem;
+        padding-top: 0.5rem;
       }
       @media (min-width: 768px) {
         .top-fade {
@@ -243,7 +243,7 @@ const Index = () => {
           
           {/* Top Fade with Heading */}
           <div className="top-fade">
-            <h1 className="text-xl md:text-2xl font-bold text-white whitespace-nowrap">
+            <h1 className="text-2xl md:text-4xl font-bold text-white whitespace-nowrap mt-2 md:mt-4">
               <span>Safe, Simple, </span>
               <span className="text-ocean-blue">Commission-Free </span>
               <span>Renting</span>
