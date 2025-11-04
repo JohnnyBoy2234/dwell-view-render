@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -71,10 +71,12 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }, [dateRange, selectedProperty, fetchTransactionsByDateRange]);
 
   // Filter transactions based on selected date range
-  const filteredTransactions = transactions.filter(transaction => {
-    const transactionDate = new Date(transaction.date);
-    return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
+    });
+  }, [transactions, dateRange.from, dateRange.to]);
 
   // Calculate KPIs based on filtered transactions
   const kpis = calculateKPIs(filteredTransactions);
