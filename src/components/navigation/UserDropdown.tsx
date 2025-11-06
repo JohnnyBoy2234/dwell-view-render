@@ -42,7 +42,7 @@ export function UserDropdown({
 
   const handleDashboardClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(isLandlord ? '/landlord/dashboard' : '/tenant/dashboard');
+    navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
   };
 
   const handleMessagesClick = (e: React.MouseEvent) => {
