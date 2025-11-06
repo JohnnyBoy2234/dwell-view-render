@@ -82,7 +82,11 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
     }>
       <div className="flex-1 flex flex-col min-w-0">
         {/* Enhanced Header */}
-        <header className="h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25] backdrop-blur-md">
+        <header className={`h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 ${
+          isLandlord 
+            ? 'bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25]' 
+            : 'bg-gradient-to-r from-blue-500/[0.15] via-background/95 to-blue-600/[0.15]'
+        } backdrop-blur-md`}>
           {/* Back button if needed, otherwise Sidebar trigger */}
           {shouldShowBackButton && (
             <Button 
