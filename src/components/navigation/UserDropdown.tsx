@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { NAVBAR_CONTENT, NAVBAR_STYLES } from '@/constants/navbarConstants';
+import { NAVBAR_CONTENT, NAVBAR_ROUTES, NAVBAR_STYLES } from '@/constants/navbarConstants';
 
 interface UserDropdownProps {
   user: {
@@ -42,7 +42,7 @@ export function UserDropdown({
 
   const handleDashboardClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    navigate(isLandlord ? '/landlord/dashboard' : '/tenant/dashboard');
+    navigate(isLandlord ? NAVBAR_ROUTES.LANDLORD_DASHBOARD : NAVBAR_ROUTES.TENANT_DASHBOARD);
   };
 
   const handleMessagesClick = (e: React.MouseEvent) => {

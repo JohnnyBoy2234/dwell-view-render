@@ -75,8 +75,8 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
 
   return (
     <div className="space-y-2 w-full">
-      <div className="w-full break-words overflow-hidden">
-        <div className="whitespace-pre-wrap">
+      <div className="w-full overflow-x-auto">
+        <div className="break-words whitespace-pre-wrap break-anywhere overflow-hidden">
           {Array.isArray(contentToRender) ? contentToRender : <>{contentToRender}</>}
         </div>
       </div>
