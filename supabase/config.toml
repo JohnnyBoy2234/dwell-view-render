@@ -76,7 +76,10 @@ verify_jwt = true
 [functions.paystack-webhook]
 verify_jwt = false
 
-[functions.payfast-webhook]
+[functions.callpay-initiate]
+verify_jwt = true
+
+[functions.callpay-webhook]
 verify_jwt = false
 
 [functions.payment-reminder-scheduler]

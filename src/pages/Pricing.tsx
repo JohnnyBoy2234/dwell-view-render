@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { startPayfastCheckout } from "@/services/payfastService";
+import { startCallpayCheckout } from "@/services/callpayService";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
 const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -81,29 +81,23 @@ export default function Pricing() {
                 </button>
               </div>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-4xl font-bold">
-                  R{proBilling === 'monthly' ? '199' : '135'}
-                </span>
+                <span className="text-4xl font-bold">R50</span>
                 <span className="text-muted-foreground">/ month</span>
               </div>
-              {proBilling === 'yearly' && (
-                <p className="text-xs font-bold inline-flex items-center gap-2 text-green-800 bg-green-200 border border-green-400 rounded-full px-3 py-1">Save R700</p>
-              )}
             </div>
 
             <Button 
               className="w-full mb-6"
               onClick={() => {
-                const isYearly = proBilling === 'yearly';
-                startPayfastCheckout({
-                  plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
-                  amount: isYearly ? 1600 : 199,
-                  item_name: isYearly ? 'RentLekker Pro Landlord (Yearly)' : 'RentLekker Pro Landlord (Monthly)',
-                  item_description: isYearly ? 'Annual billing' : 'Monthly billing',
+                startCallpayCheckout({
+                  plan_code: 'pro_landlord_monthly',
+                  amount: 50,
+                  item_name: 'RentLekker Pro Landlord (Monthly)',
+                  item_description: 'Monthly billing',
                 });
               }}
             >
-              {proBilling === 'yearly' ? 'Choose Annual' : 'Choose Monthly'}
+              Choose Pro
             </Button>
 
             <div className="space-y-3 flex-1">
@@ -140,27 +134,23 @@ export default function Pricing() {
                 </button>
               </div>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-4xl font-bold">R{premiumBilling === 'monthly' ? '700' : '500'}</span>
+                <span className="text-4xl font-bold">R50</span>
                 <span className="text-muted-foreground">/ month</span>
               </div>
-              {premiumBilling === 'yearly' && (
-                <p className="text-xs font-bold inline-flex items-center gap-2 text-green-800 bg-green-200 border border-green-400 rounded-full px-3 py-1">Save R2,400</p>
-              )}
             </div>
 
             <Button 
               className="w-full mb-6"
               onClick={() => {
-                const isYearly = premiumBilling === 'yearly';
-                startPayfastCheckout({
-                  plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
-                  amount: isYearly ? 6000 : 700,
-                  item_name: isYearly ? 'RentLekker Premium Landlord (Yearly)' : 'RentLekker Premium Landlord (Monthly)',
-                  item_description: isYearly ? 'Annual billing' : 'Monthly billing',
+                startCallpayCheckout({
+                  plan_code: 'premium_landlord_monthly',
+                  amount: 50,
+                  item_name: 'RentLekker Premium Landlord (Monthly)',
+                  item_description: 'Monthly billing',
                 });
               }}
             >
-              {premiumBilling === 'yearly' ? 'Choose Annual' : 'Choose Monthly'}
+              Choose Premium
             </Button>
 
             <div className="space-y-3 flex-1">
