@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startCallpayCheckout } from "@/services/callpayService";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { toast } from "@/hooks/use-toast";
 
 const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex items-start gap-2.5 text-sm">
@@ -16,6 +17,43 @@ export default function Pricing() {
   const navigate = useNavigate();
   const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('yearly');
   const [premiumBilling, setPremiumBilling] = useState<'monthly' | 'yearly'>('yearly');
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleProCheckout = async () => {
+    console.log('[Pricing] Pro checkout button clicked');
+    setLoadingPlan('pro');
+    try {
+      await startCallpayCheckout({
+        plan_code: 'pro_landlord_monthly',
+        amount: 50,
+        item_name: 'RentLekker Pro Landlord (Monthly)',
+        item_description: 'Monthly billing',
+      });
+      console.log('[Pricing] Pro checkout initiated successfully');
+    } catch (error) {
+      console.error('[Pricing] Pro checkout failed:', error);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const handlePremiumCheckout = async () => {
+    console.log('[Pricing] Premium checkout button clicked');
+    setLoadingPlan('premium');
+    try {
+      await startCallpayCheckout({
+        plan_code: 'premium_landlord_monthly',
+        amount: 50,
+        item_name: 'RentLekker Premium Landlord (Monthly)',
+        item_description: 'Monthly billing',
+      });
+      console.log('[Pricing] Premium checkout initiated successfully');
+    } catch (error) {
+      console.error('[Pricing] Premium checkout failed:', error);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background py-16 px-4">
@@ -88,16 +126,17 @@ export default function Pricing() {
 
             <Button 
               className="w-full mb-6"
-              onClick={() => {
-                startCallpayCheckout({
-                  plan_code: 'pro_landlord_monthly',
-                  amount: 50,
-                  item_name: 'RentLekker Pro Landlord (Monthly)',
-                  item_description: 'Monthly billing',
-                });
-              }}
+              onClick={handleProCheckout}
+              disabled={loadingPlan !== null}
             >
-              Choose Pro
+              {loadingPlan === 'pro' ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Choose Pro'
+              )}
             </Button>
 
             <div className="space-y-3 flex-1">
@@ -141,16 +180,17 @@ export default function Pricing() {
 
             <Button 
               className="w-full mb-6"
-              onClick={() => {
-                startCallpayCheckout({
-                  plan_code: 'premium_landlord_monthly',
-                  amount: 50,
-                  item_name: 'RentLekker Premium Landlord (Monthly)',
-                  item_description: 'Monthly billing',
-                });
-              }}
+              onClick={handlePremiumCheckout}
+              disabled={loadingPlan !== null}
             >
-              Choose Premium
+              {loadingPlan === 'premium' ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Choose Premium'
+              )}
             </Button>
 
             <div className="space-y-3 flex-1">

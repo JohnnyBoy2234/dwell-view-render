@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { startCallpayCheckout } from "@/services/callpayService";
 
 interface PlanSelectDialogProps {
@@ -22,33 +22,52 @@ const Feature: React.FC<{ children: React.ReactNode; bold?: boolean }> = ({ chil
 
 export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro, onChoosePremium }: PlanSelectDialogProps) {
   const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const choosePro = (billing: "yearly" | "monthly") => {
+  const choosePro = async (billing: "yearly" | "monthly") => {
     if (onChoosePro) {
       onOpenChange(false);
       return onChoosePro(billing);
     }
-    const isYearly = billing === "yearly";
-    startCallpayCheckout({
-      plan_code: isYearly ? "pro_landlord_yearly" : "pro_landlord_monthly",
-      amount: 50,
-      item_name: isYearly ? "RentLekker Pro Landlord (Yearly)" : "RentLekker Pro Landlord (Monthly)",
-      item_description: isYearly ? "Annual billing" : "Monthly billing",
-    });
+    console.log('[PlanSelectDialog] Pro checkout button clicked');
+    setLoadingPlan('pro');
+    try {
+      const isYearly = billing === "yearly";
+      await startCallpayCheckout({
+        plan_code: isYearly ? "pro_landlord_yearly" : "pro_landlord_monthly",
+        amount: 50,
+        item_name: isYearly ? "RentLekker Pro Landlord (Yearly)" : "RentLekker Pro Landlord (Monthly)",
+        item_description: isYearly ? "Annual billing" : "Monthly billing",
+      });
+      console.log('[PlanSelectDialog] Pro checkout initiated successfully');
+    } catch (error) {
+      console.error('[PlanSelectDialog] Pro checkout failed:', error);
+    } finally {
+      setLoadingPlan(null);
+    }
   };
 
-  const choosePremium = (billing: "yearly" | "monthly") => {
+  const choosePremium = async (billing: "yearly" | "monthly") => {
     if (onChoosePremium) {
       onOpenChange(false);
       return onChoosePremium(billing);
     }
-    const isYearly = billing === "yearly";
-    startCallpayCheckout({
-      plan_code: isYearly ? "premium_landlord_yearly" : "premium_landlord_monthly",
-      amount: 50,
-      item_name: isYearly ? "RentLekker Premium Landlord (Yearly)" : "RentLekker Premium Landlord (Monthly)",
-      item_description: isYearly ? "Annual billing" : "Monthly billing",
-    });
+    console.log('[PlanSelectDialog] Premium checkout button clicked');
+    setLoadingPlan('premium');
+    try {
+      const isYearly = billing === "yearly";
+      await startCallpayCheckout({
+        plan_code: isYearly ? "premium_landlord_yearly" : "premium_landlord_monthly",
+        amount: 50,
+        item_name: isYearly ? "RentLekker Premium Landlord (Yearly)" : "RentLekker Premium Landlord (Monthly)",
+        item_description: isYearly ? "Annual billing" : "Monthly billing",
+      });
+      console.log('[PlanSelectDialog] Premium checkout initiated successfully');
+    } catch (error) {
+      console.error('[PlanSelectDialog] Premium checkout failed:', error);
+    } finally {
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -87,7 +106,20 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
               <Feature>Automated tenant reminders</Feature>
             </div>
             <div className="mt-auto">
-              <Button onClick={() => { onOpenChange(false); choosePro('monthly'); }} className="w-full">Continue with Pro</Button>
+              <Button 
+                onClick={() => choosePro('monthly')} 
+                className="w-full"
+                disabled={loadingPlan !== null}
+              >
+                {loadingPlan === 'pro' ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Continue with Pro'
+                )}
+              </Button>
             </div>
           </div>
           {/* Premium */}
@@ -105,7 +137,20 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
               <Feature>Annual performance report</Feature>
             </div>
             <div className="mt-auto">
-              <Button onClick={() => { onOpenChange(false); choosePremium('monthly'); }} className="w-full">Continue with Premium</Button>
+              <Button 
+                onClick={() => choosePremium('monthly')} 
+                className="w-full"
+                disabled={loadingPlan !== null}
+              >
+                {loadingPlan === 'premium' ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Continue with Premium'
+                )}
+              </Button>
             </div>
           </div>
         </div>

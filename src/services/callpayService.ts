@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export type CallpayPlan = {
   plan_code: string;
@@ -22,44 +23,149 @@ declare global {
 }
 
 export async function startCallpayCheckout(plan: CallpayPlan) {
-  const { data, error } = await supabase.functions.invoke('callpay-initiate', {
-    body: plan,
-  });
-  
-  if (error) throw error;
+  try {
+    console.log('[CallPay] Starting checkout for plan:', plan);
 
-  const { payment_key, origin } = data as { payment_key: string; origin: string };
-
-  // Load CallPay scripts if not already loaded
-  if (!document.getElementById('callpay-jquery')) {
-    const jquery = document.createElement('script');
-    jquery.id = 'callpay-jquery';
-    jquery.src = 'https://code.jquery.com/jquery-1.12.4.min.js';
-    document.head.appendChild(jquery);
-  }
-
-  if (!document.getElementById('og-checkout')) {
-    const checkoutScript = document.createElement('script');
-    checkoutScript.id = 'og-checkout';
-    checkoutScript.src = 'https://payments.onegate.co.za/ext/checkout/v3/checkout.js';
-    checkoutScript.setAttribute('data-origin', origin);
-    document.head.appendChild(checkoutScript);
-  }
-
-  // Wait for scripts to load and initialize checkout
-  const initCheckout = () => {
-    if (window.eftSec?.checkout) {
-      window.eftSec.checkout.init({
-        paymentKey: payment_key,
-        paymentType: 'eft',
-        onLoad: () => {
-          console.log('CallPay checkout loaded');
-        },
+    // Check if user is authenticated
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('[CallPay] User not authenticated:', authError);
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to subscribe to a plan",
+        variant: "destructive",
       });
-    } else {
-      setTimeout(initCheckout, 100);
+      throw new Error('User must be authenticated to subscribe');
     }
-  };
 
-  setTimeout(initCheckout, 500);
+    console.log('[CallPay] User authenticated:', user.id);
+
+    // Call edge function to initiate payment
+    console.log('[CallPay] Calling callpay-initiate edge function...');
+    const { data, error } = await supabase.functions.invoke('callpay-initiate', {
+      body: plan,
+    });
+    
+    if (error) {
+      console.error('[CallPay] Edge function error:', error);
+      toast({
+        title: "Payment Initialization Failed",
+        description: error.message || "Could not start payment process. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+
+    if (!data || !data.payment_key) {
+      console.error('[CallPay] Invalid response from edge function:', data);
+      toast({
+        title: "Payment Error",
+        description: "Invalid payment response. Please contact support.",
+        variant: "destructive",
+      });
+      throw new Error('Invalid payment response');
+    }
+
+    console.log('[CallPay] Payment key received:', data.payment_key);
+    const { payment_key, origin } = data as { payment_key: string; origin: string };
+
+    // Load CallPay scripts with error handling
+    console.log('[CallPay] Loading payment scripts...');
+    await loadCallPayScripts(origin);
+
+    // Initialize checkout with timeout
+    console.log('[CallPay] Initializing checkout widget...');
+    await initializeCheckout(payment_key);
+
+    toast({
+      title: "Payment Initialized",
+      description: "Please complete your payment in the popup window",
+    });
+
+  } catch (error) {
+    console.error('[CallPay] Checkout error:', error);
+    
+    // Only show toast if we haven't already shown one
+    if (error instanceof Error && !error.message.includes('authenticated')) {
+      toast({
+        title: "Payment Error",
+        description: "Could not start payment. Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+    
+    throw error;
+  }
+}
+
+async function loadCallPayScripts(origin: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      reject(new Error('Script loading timeout'));
+    }, 10000);
+
+    // Load jQuery if not already loaded
+    if (!document.getElementById('callpay-jquery')) {
+      const jquery = document.createElement('script');
+      jquery.id = 'callpay-jquery';
+      jquery.src = 'https://code.jquery.com/jquery-1.12.4.min.js';
+      jquery.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error('Failed to load jQuery'));
+      };
+      document.head.appendChild(jquery);
+    }
+
+    // Load CallPay checkout script
+    if (!document.getElementById('og-checkout')) {
+      const checkoutScript = document.createElement('script');
+      checkoutScript.id = 'og-checkout';
+      checkoutScript.src = 'https://payments.onegate.co.za/ext/checkout/v3/checkout.js';
+      checkoutScript.setAttribute('data-origin', origin);
+      checkoutScript.onload = () => {
+        clearTimeout(timeout);
+        console.log('[CallPay] Scripts loaded successfully');
+        resolve();
+      };
+      checkoutScript.onerror = () => {
+        clearTimeout(timeout);
+        reject(new Error('Failed to load CallPay script'));
+      };
+      document.head.appendChild(checkoutScript);
+    } else {
+      clearTimeout(timeout);
+      resolve();
+    }
+  });
+}
+
+async function initializeCheckout(paymentKey: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max
+
+    const checkAndInit = () => {
+      attempts++;
+
+      if (window.eftSec?.checkout) {
+        console.log('[CallPay] Widget initialized successfully');
+        window.eftSec.checkout.init({
+          paymentKey: paymentKey,
+          paymentType: 'eft',
+          onLoad: () => {
+            console.log('[CallPay] Checkout widget loaded');
+            resolve();
+          },
+        });
+      } else if (attempts >= maxAttempts) {
+        console.error('[CallPay] Widget initialization timeout');
+        reject(new Error('Payment widget failed to load'));
+      } else {
+        setTimeout(checkAndInit, 100);
+      }
+    };
+
+    setTimeout(checkAndInit, 500);
+  });
 }
