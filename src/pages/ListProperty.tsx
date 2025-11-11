@@ -15,7 +15,7 @@ const RIcon = ({ className }: { className?: string }) => (
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import PlanSelectDialog from '@/components/pricing/PlanSelectDialog';
-import { startPayfastCheckout } from '@/services/payfastService';
+import { startCallpayCheckout } from '@/services/callpayService';
 
 // Import step components
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
@@ -341,18 +341,18 @@ export default function ListProperty() {
           }}
           onChoosePro={(billing) => {
             const isYearly = billing === 'yearly';
-            startPayfastCheckout({
+            startCallpayCheckout({
               plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
-              amount: isYearly ? 1600 : 199,
+              amount: 50,
               item_name: isYearly ? 'RentLekker Pro Landlord (Yearly)' : 'RentLekker Pro Landlord (Monthly)',
               item_description: isYearly ? 'Annual billing' : 'Monthly billing',
             });
           }}
           onChoosePremium={(billing) => {
             const isYearly = billing === 'yearly';
-            startPayfastCheckout({
+            startCallpayCheckout({
               plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
-              amount: isYearly ? 6000 : 700,
+              amount: 50,
               item_name: isYearly ? 'RentLekker Premium Landlord (Yearly)' : 'RentLekker Premium Landlord (Monthly)',
               item_description: isYearly ? 'Annual billing' : 'Monthly billing',
             });
