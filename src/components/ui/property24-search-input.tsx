@@ -22,6 +22,7 @@ interface GooglePlacesResult {
   };
 }
 
+
 export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
   value,
   onChange,
