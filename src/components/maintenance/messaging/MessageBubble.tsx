@@ -58,8 +58,9 @@ export function MessageBubble({
         className={cn(
           MESSAGE_STYLES.BUBBLE_BASE,
           isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE,
-          "text-sm max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] px-4 py-2"
+          "text-sm w-auto max-w-[90%] min-w-[120px] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] px-4 py-2 break-words overflow-visible"
         )}
+        style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
       >
         {!isOwn && message.profiles?.display_name && (
           <div className="text-xs font-medium text-ios-blue mb-1">

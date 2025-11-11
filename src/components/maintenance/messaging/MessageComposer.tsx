@@ -129,9 +129,9 @@ export function MessageComposer({
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
           maxLength={maxLength}
-          rows={1}
+          rows={2}
           className={cn(
-            "flex-1 min-h-[44px] max-h-[120px] resize-none border-0 bg-transparent",
+            "flex-1 min-h-[60px] max-h-fit resize-none border-0 bg-transparent",
             "focus-visible:ring-0 focus-visible:ring-offset-0 px-0 py-2 text-[15px]",
             "placeholder:text-muted-foreground/60"
           )}
