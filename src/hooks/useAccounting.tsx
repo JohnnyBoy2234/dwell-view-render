@@ -317,6 +317,45 @@ export function useAccounting() {
     }));
   }, []);
 
+  const calculateMonthlyDataFromTransactions = useCallback((
+    transactionList: Transaction[], 
+    from: Date, 
+    to: Date
+  ): MonthlyData[] => {
+    const monthlyMap = new Map<string, { income: number; expense: number }>();
+    
+    // Initialize months within the range
+    let currentMonth = new Date(from.getFullYear(), from.getMonth(), 1);
+    const endMonth = new Date(to.getFullYear(), to.getMonth(), 1);
+    
+    while (currentMonth <= endMonth) {
+      const key = format(currentMonth, 'MMM yyyy');
+      monthlyMap.set(key, { income: 0, expense: 0 });
+      currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+    }
+    
+    // Aggregate data from transaction list
+    transactionList.forEach(transaction => {
+      const transactionDate = new Date(transaction.date);
+      // Only include transactions within the date range
+      if (transactionDate >= from && transactionDate <= to) {
+        const month = format(transactionDate, 'MMM yyyy');
+        const existing = monthlyMap.get(month);
+        if (existing) {
+          if (transaction.type === 'income') {
+            existing.income += Number(transaction.amount);
+          } else {
+            existing.expense += Number(transaction.amount);
+          }
+        }
+      }
+    });
+    
+    return Array.from(monthlyMap.entries()).map(([month, data]) => ({
+      month,
+      ...data,
+    }));
+  }, []);
   useEffect(() => {
     if (user) {
       fetchTransactions();
@@ -370,5 +409,6 @@ export function useAccounting() {
     getMonthlyData,
     getMonthlyDataByRange,
     getCategoryData,
+      calculateMonthlyDataFromTransactions,
   };
 }

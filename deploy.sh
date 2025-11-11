@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Deployment script for SwiftRent
+# Deployment script for RentLekker
 # This script handles the dependency conflicts during deployment
 
-echo "🚀 Starting SwiftRent deployment..."
+echo "🚀 Starting RentLekker deployment..."
 
 # Install dependencies with conflict resolution
 echo "📦 Installing dependencies..."

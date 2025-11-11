@@ -191,7 +191,7 @@ export default function ListProperty() {
 
       toast({
         title: "🎉 Property Listed Successfully!",
-        description: "Your property is now live on SwiftRent and visible to potential tenants."
+        description: "Your property is now live on RentLekker and visible to potential tenants."
       });
 
               navigate('/enhancedlandlorddashboard');
@@ -344,7 +344,7 @@ export default function ListProperty() {
             startPayfastCheckout({
               plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
               amount: isYearly ? 1600 : 199,
-              item_name: isYearly ? 'SwiftRent Pro Landlord (Yearly)' : 'SwiftRent Pro Landlord (Monthly)',
+              item_name: isYearly ? 'RentLekker Pro Landlord (Yearly)' : 'RentLekker Pro Landlord (Monthly)',
               item_description: isYearly ? 'Annual billing' : 'Monthly billing',
             });
           }}
@@ -353,7 +353,7 @@ export default function ListProperty() {
             startPayfastCheckout({
               plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
               amount: isYearly ? 6000 : 700,
-              item_name: isYearly ? 'SwiftRent Premium Landlord (Yearly)' : 'SwiftRent Premium Landlord (Monthly)',
+              item_name: isYearly ? 'RentLekker Premium Landlord (Yearly)' : 'RentLekker Premium Landlord (Monthly)',
               item_description: isYearly ? 'Annual billing' : 'Monthly billing',
             });
           }}

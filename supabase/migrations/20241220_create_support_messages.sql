@@ -1,4 +1,4 @@
--- Create support_messages table for SwiftRent support queries
+-- Create support_messages table for RentLekker support queries
 CREATE TABLE IF NOT EXISTS support_messages (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,

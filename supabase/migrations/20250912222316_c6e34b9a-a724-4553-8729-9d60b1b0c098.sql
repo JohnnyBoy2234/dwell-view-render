@@ -1,4 +1,4 @@
--- Create tables for SwiftRent workflows
+-- Create tables for RentLekker workflows
 
 -- Offers table for the offer → lease workflow
 CREATE TABLE public.offers (

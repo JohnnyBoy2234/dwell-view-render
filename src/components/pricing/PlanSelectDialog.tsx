@@ -32,7 +32,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
     startPayfastCheckout({
       plan_code: isYearly ? "pro_landlord_yearly" : "pro_landlord_monthly",
       amount: isYearly ? 1600 : 199,
-      item_name: isYearly ? "SwiftRent Pro Landlord (Yearly)" : "SwiftRent Pro Landlord (Monthly)",
+      item_name: isYearly ? "RentLekker Pro Landlord (Yearly)" : "RentLekker Pro Landlord (Monthly)",
       item_description: isYearly ? "Annual billing" : "Monthly billing",
     });
   };
@@ -46,7 +46,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
     startPayfastCheckout({
       plan_code: isYearly ? "premium_landlord_yearly" : "premium_landlord_monthly",
       amount: isYearly ? 6000 : 700,
-      item_name: isYearly ? "SwiftRent Premium Landlord (Yearly)" : "SwiftRent Premium Landlord (Monthly)",
+      item_name: isYearly ? "RentLekker Premium Landlord (Yearly)" : "RentLekker Premium Landlord (Monthly)",
       item_description: isYearly ? "Annual billing" : "Monthly billing",
     });
   };
@@ -84,7 +84,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
               <Feature>Unlimited property listings</Feature>
               <Feature>In-platform messaging</Feature>
               <Feature>Digital SA lease agreements</Feature>
-              <Feature>SwiftBooks (income/expenses + tax invoices)</Feature>
+              <Feature>SwiftBooks (income/expenses + invoices)</Feature>
               <Feature>AI support</Feature>
               <Feature>Automated tenant reminders</Feature>
             </div>

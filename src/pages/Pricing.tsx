@@ -51,7 +51,7 @@ export default function Pricing() {
             </Button>
 
             <div className="space-y-3 flex-1">
-              <Feature>Single property listing on SwiftRent</Feature>
+              <Feature>Single property listing on RentLekker</Feature>
               <Feature>Exposure to verified tenants</Feature>
               <Feature>Tenant messaging via phone/email (outside platform)</Feature>
             </div>
@@ -65,7 +65,7 @@ export default function Pricing() {
             
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Pro Landlord</h3>
-              <p className="text-sm text-muted-foreground mb-4">Handle every step from listing to lease inside SwiftRent.</p>
+              <p className="text-sm text-muted-foreground mb-4">Handle every step from listing to lease inside RentLekker.</p>
               <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg mb-3">
                 <button
                   onClick={() => setProBilling('yearly')}
@@ -98,7 +98,7 @@ export default function Pricing() {
                 startPayfastCheckout({
                   plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
                   amount: isYearly ? 1600 : 199,
-                  item_name: isYearly ? 'SwiftRent Pro Landlord (Yearly)' : 'SwiftRent Pro Landlord (Monthly)',
+                  item_name: isYearly ? 'RentLekker Pro Landlord (Yearly)' : 'RentLekker Pro Landlord (Monthly)',
                   item_description: isYearly ? 'Annual billing' : 'Monthly billing',
                 });
               }}
@@ -114,7 +114,7 @@ export default function Pricing() {
               <Feature>Legally binding e-signatures</Feature>
               <Feature>Inventory tracker (upload & timestamped records)</Feature>
               <Feature>Maintenance management - tenants submit requests from their dashboard</Feature>
-              <Feature>SwiftBooks (income/expenses + tax invoices)</Feature>
+              <Feature>SwiftBooks (income/expenses + invoices)</Feature>
               <Feature>AI support</Feature>
               <Feature>Automated tenant reminders</Feature>
             </div>
@@ -155,7 +155,7 @@ export default function Pricing() {
                 startPayfastCheckout({
                   plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
                   amount: isYearly ? 6000 : 700,
-                  item_name: isYearly ? 'SwiftRent Premium Landlord (Yearly)' : 'SwiftRent Premium Landlord (Monthly)',
+                  item_name: isYearly ? 'RentLekker Premium Landlord (Yearly)' : 'RentLekker Premium Landlord (Monthly)',
                   item_description: isYearly ? 'Annual billing' : 'Monthly billing',
                 });
               }}
@@ -173,14 +173,14 @@ export default function Pricing() {
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Legally binding e-signatures</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Inventory tracker (upload & timestamped records)</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Maintenance management - tenants submit requests from their dashboard</div>
-                <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />SwiftBooks (income/expenses + tax invoices)</div>
+                <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />SwiftBooks (income/expenses + invoices)</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />AI support</div>
                 <div className="flex items-start gap-2.5 text-sm font-semibold"><Check className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />Automated tenant reminders</div>
               </div>
               {/* Premium concierge benefits */}
               <div className="space-y-2 mt-3">
                 <Feature>Full maintenance concierge service</Feature>
-                <Feature>SwiftRent intercepts and manages maintenance</Feature>
+                <Feature>RentLekker intercepts and manages maintenance</Feature>
                 <Feature>We liaise with contractors; you approve</Feature>
                 <Feature>VIP landlord support line</Feature>
                 <Feature>Annual rental performance report</Feature>

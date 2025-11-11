@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.swiftrent.app',
-  appName: 'SwiftRent',
+  appId: 'com.RentLekker.app',
+  appName: 'RentLekker',
   webDir: 'dist',
   bundledWebRuntime: false,
   plugins: {

@@ -140,7 +140,7 @@ const ExpenseSummaryPDF: React.FC<ExpenseSummaryPDFProps> = ({
             <Text style={styles.title}>Landlord Expense Summary</Text>
             <Text style={styles.subtitle}>{month}</Text>
           </View>
-          <Text style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 'bold' }}>SwiftRent</Text>
+          <Text style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 'bold' }}>RentLekker</Text>
         </View>
 
         {/* Landlord Details */}
@@ -208,7 +208,7 @@ const ExpenseSummaryPDF: React.FC<ExpenseSummaryPDFProps> = ({
 
         {/* Footer */}
         <Text style={styles.footer}>
-          SwiftRent.co.za – Safe, Simple, Commission-Free Renting
+          RentLekker.co.za – Safe, Simple, Commission-Free Renting
         </Text>
       </Page>
     </Document>
@@ -257,8 +257,8 @@ const TaxInvoicePDF: React.FC<TaxInvoicePDFProps> = ({ invoiceData, totals }) =>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 'bold' }}>SwiftRent</Text>
-          <Text style={styles.title}>TAX INVOICE</Text>
+          <Text style={{ fontSize: 12, color: '#0ea5e9', fontWeight: 'bold' }}>RentLekker</Text>
+          <Text style={styles.title}>INVOICE</Text>
         </View>
 
         {/* Invoice Details */}
@@ -339,7 +339,7 @@ const TaxInvoicePDF: React.FC<TaxInvoicePDFProps> = ({ invoiceData, totals }) =>
 
         {/* Footer */}
         <Text style={styles.footer}>
-          SwiftRent.co.za – Safe, Simple, Commission-Free Renting
+          RentLekker.co.za – Safe, Simple, Commission-Free Renting
         </Text>
       </Page>
     </Document>

@@ -17,7 +17,7 @@ interface ReportPropertyModalProps {
 const ISSUE_TYPES = [
   { id: 'inappropriate_content', label: 'Inappropriate content or imagery' },
   { id: 'misleading_info', label: 'Misleading or inaccurate information' },
-  { id: 'duplicate_listing', label: 'Duplicate listing on SwiftRent' },
+  { id: 'duplicate_listing', label: 'Duplicate listing on RentLekker' },
   { id: 'pricing_issue', label: 'Suspicious pricing or deposit requirements' },
   { id: 'scam_listing', label: 'Suspected scam or fake listing' },
   { id: 'other', label: 'Other concerns' },
@@ -38,7 +38,7 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
 
   const selectedIssue = ISSUE_TYPES.find((issue) => issueType === issue.id);
   const issueGuidance: Record<string, string> = {
-    inappropriate_content: 'Use this if the listing contains inappropriate language, photos, or violates SwiftRent community guidelines.',
+    inappropriate_content: 'Use this if the listing contains inappropriate language, photos, or violates RentLekker community guidelines.',
     misleading_info: 'Select this if the property details, amenities, or photos don’t match reality.',
     duplicate_listing: 'Use this when you’ve spotted the same property posted more than once.',
     pricing_issue: 'Choose this if the pricing, deposits, or payment requests appear suspicious.',
@@ -99,7 +99,7 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
     if (!user && !reporterEmail.trim()) {
       toast({
         title: 'Email required',
-        description: 'Add your email so SwiftRent admins can contact you if needed.',
+        description: 'Add your email so RentLekker admins can contact you if needed.',
         variant: "destructive",
       });
       return;

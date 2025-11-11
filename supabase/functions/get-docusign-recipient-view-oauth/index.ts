@@ -23,7 +23,7 @@ Deno.serve(async (req) => {
     console.log("=== DocuSign Recipient View Function Started (OAuth2) ===");
     const body = await req.json();
     console.log("Request body:", JSON.stringify(body, null, 2));
-    const { tenancyId, role, accessToken, returnUrl = "https://swiftrent.co.za/tenant-dashboard" } = body;
+    const { tenancyId, role, accessToken, returnUrl = "https://RentLekker.co.za/tenant-dashboard" } = body;
     
     if (!tenancyId || !role || !accessToken || (role !== "tenant" && role !== "landlord")) {
       return new Response(JSON.stringify({ error: "tenancyId, role ('tenant'|'landlord'), and accessToken are required" }), { 

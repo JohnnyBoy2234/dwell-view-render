@@ -8,7 +8,14 @@ import {
   ClipboardList, 
   BarChart3,
   Camera,
-  LucideIcon 
+  LucideIcon,
+  MessageCircle,
+  Bell,
+  Settings,
+  Eye,
+  Receipt,
+  Clipboard,
+  HelpCircle
 } from 'lucide-react';
 
 export interface PageConfig {
@@ -18,6 +25,78 @@ export interface PageConfig {
   showBackButton: boolean;
   backPath?: string;
 }
+
+export const TENANT_PAGE_CONFIG: Record<string, PageConfig> = {
+  '/enhancedtenantdashboard': {
+    title: 'Dashboard',
+    icon: Home,
+    showSidebar: true,
+    showBackButton: false,
+  },
+  '/enhancedtenantdashboard/messages': {
+    title: 'Messages',
+    icon: MessageCircle,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/notifications': {
+    title: 'Notifications',
+    icon: Bell,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/leases': {
+    title: 'My Lease',
+    icon: FileText,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/payments': {
+    title: 'Payments',
+    icon: Receipt,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/maintenance': {
+    title: 'Maintenance',
+    icon: Wrench,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/settings': {
+    title: 'Settings',
+    icon: Settings,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/viewings': {
+    title: 'Viewings',
+    icon: Eye,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/inventory': {
+    title: 'Inventory',
+    icon: Clipboard,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/enhancedtenantdashboard/help': {
+    title: 'Help & Support',
+    icon: HelpCircle,
+    showSidebar: true,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+};
 
 export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   '/enhancedlandlorddashboard': {
@@ -96,4 +175,14 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
   },
+};
+
+export const getPageConfig = (path: string, isLandlord: boolean): PageConfig => {
+  const config = isLandlord ? LANDLORD_PAGE_CONFIG[path] : TENANT_PAGE_CONFIG[path];
+  return config || {
+    title: 'Page Not Found',
+    icon: Home,
+    showSidebar: true,
+    showBackButton: true,
+  };
 };

@@ -1,5 +1,7 @@
 import type { Config } from "tailwindcss";
 
+const defaultTheme = require('tailwindcss/defaultTheme');
+
 export default {
 	darkMode: ["class"],
 	content: [
@@ -17,7 +19,11 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-		extend: {
+			extend: {
+			fontFamily: {
+				sans: ['Inter var', ...defaultTheme.fontFamily.sans],
+				display: ['Inter var', ...defaultTheme.fontFamily.sans],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

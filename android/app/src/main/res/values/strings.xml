@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">SwiftRent</string>
-    <string name="title_activity_main">SwiftRent</string>
-    <string name="package_name">com.swiftrent.app</string>
-    <string name="custom_url_scheme">com.swiftrent.app</string>
+    <string name="app_name">RentLekker</string>
+    <string name="title_activity_main">RentLekker</string>
+    <string name="package_name">com.RentLekker.app</string>
+    <string name="custom_url_scheme">com.RentLekker.app</string>
 </resources>

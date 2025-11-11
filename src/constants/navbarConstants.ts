@@ -18,7 +18,7 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 export const NAVBAR_CONTENT = {
-  BRAND_NAME: "SwiftRent",
+  BRAND_NAME: "RentLekker",
   LIST_PROPERTY_LABEL: "List Property",
   SIGN_IN_LABEL: "Sign In",
   DASHBOARD_LABEL: "Dashboard",
@@ -42,7 +42,7 @@ export const NAVBAR_STYLES = {
   CONTAINER: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
   HEADER: "flex justify-between items-center h-16",
   LOGO_CONTAINER: "flex items-center space-x-2",
-  LOGO_ICON: "w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center",
+  LOGO_ICON: "w-8 h-8 bg-ocean-blue rounded-lg flex items-center justify-center",
   LOGO_ICON_INNER: "h-5 w-5 text-white",
   BRAND_TEXT: "text-xl font-bold text-foreground",
   DESKTOP_NAV: "hidden md:flex items-center space-x-8",

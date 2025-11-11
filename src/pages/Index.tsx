@@ -11,249 +11,235 @@ import HowItWorks from "@/components/HowItWorks";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { Footer } from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
-import { 
-  Shield, 
-  CheckCircle, 
-  Lock, 
-  Wrench, 
-  Calendar, 
-  Users,
-  Home,
-  TrendingUp,
-  ArrowRight,
-  Star,
-  Award,
-  UserCheck,
-  MessageSquare,
-  Search,
-  MapPin,
-  Smartphone,
-  Zap,
-  LayoutDashboard,
-  Calculator,
-  ShoppingBag,
-  Layers
-} from "lucide-react";
+import { Shield, CheckCircle, Lock, Wrench, Calendar, Users, Home, TrendingUp, ArrowRight, Star, Award, UserCheck, MessageSquare, Search, MapPin, Smartphone, Zap, LayoutDashboard, Calculator, ShoppingBag, Layers } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
 
 // Simple R icon for South African Rand
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+const RIcon = ({
+  className
+}: {
+  className?: string;
+}) => <div className={`${className} flex items-center justify-center font-bold text-lg`}>
     R
-  </div>
-);
+  </div>;
 // AnimatedCounter component for stats
-const AnimatedCounter = ({ from = 0, to, duration = 1200 }: { from?: number; to: number; duration?: number }) => {
+const AnimatedCounter = ({
+  from = 0,
+  to,
+  duration = 1200
+}: {
+  from?: number;
+  to: number;
+  duration?: number;
+}) => {
   const [count, setCount] = useState(from);
   const [isVisible, setIsVisible] = useState(false);
-
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+      }
+    }, {
+      threshold: 0.1
+    });
     const element = document.getElementById(`counter-${to}`);
     if (element) observer.observe(element);
-
     return () => observer.disconnect();
   }, [to]);
-
   useEffect(() => {
     if (!isVisible) return;
-
     let startTime: number;
     const startValue = from;
     const endValue = to;
-
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
-
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       const currentCount = Math.round(startValue + (endValue - startValue) * easeOutQuart);
-
       setCount(currentCount);
-
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
-
     requestAnimationFrame(animate);
   }, [isVisible, from, to, duration]);
-
   return <span id={`counter-${to}`}>{count.toLocaleString()}</span>;
 };
-
 const Index = () => {
   const navigate = useNavigate();
-  const { user, isAdmin } = useAuth();
-  const { filters, updateFilters, executeSearch, clearFilters } = usePropertySearchFilters();
+  const {
+    user,
+    isAdmin
+  } = useAuth();
+  const {
+    filters,
+    updateFilters,
+    executeSearch,
+    clearFilters
+  } = usePropertySearchFilters();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
-
   const onFiltersChange = (patch: Partial<typeof filters>) => {
     updateFilters(patch);
   };
-
   const handleSearch = () => {
     executeSearch();
   };
 
   // Features data
-  const features = [
-    {
-      icon: RIcon,
-      title: "Commission-Free Renting",
-      description: "Renting the way it should be! Stop paying agents thousands. With SwiftRent, you keep 100% of your rental income always.",
-      gradient: "from-success-green to-success-green-glow"
-    },
-    {
-      icon: Smartphone,
-      title: "State-of-the-Art Platform",
-      description: "Cutting-edge tech built for landlords and tenants: smart dashboards, digital leases, e-signatures",
-      gradient: "from-ocean-blue to-ocean-blue-glow"
-      },
-      {
-        icon: Zap,
-        title: "Speed & Simplicity",
-        description: "List, screen, and sign in minutes. No delays, no middlemen just fast, simple renting.",
-        gradient: "from-purple-500 to-purple-600"
-      },
-      {
-        icon: LayoutDashboard,
-        title: "All-in-One Dashboard",
-        description: "Manage listings, leases, rent, maintenance and even accounting from one clean dashboard.",
-        gradient: "from-orange-500 to-orange-600"
-      },
-      {
-        icon: Calculator,
-        title: "Built-In Accounting & Tax Invoices",
-        description: "SwiftRent generates professional tax invoices, saving you time and giving you peace of mind.",
-        gradient: "from-teal-500 to-teal-600"
-      },
-    {
-      icon: Shield,
-      title: "Safety & Trust",
-      description: "Verified users. Credit-checked tenants. Legally binding contracts. Your rental, secured.",
-      gradient: "from-red-500 to-red-600"
-    },
-    {
-      icon: MessageSquare,
-      title: "Seamless On-Board Communication",
-      description: "Landlords and tenants can chat, share documents, and track updates directly inside SwiftRent no lost WhatsApps, no messy email chains. Everything in one secure place.",
-      gradient: "from-indigo-500 to-indigo-600"
-    },
-    {
-      icon: Layers,
-      title: "Unlimited Property Management",
-      description: "SwiftRent lets you manage one property or a hundred with ease scalable, simple, and hassle-free.",
-      gradient: "from-amber-400 to-amber-600"
-    }
-  ];
+  const features = [{
+    icon: RIcon,
+    title: "Commission-Free Renting",
+    description: "Renting the way it should be! Stop paying agents thousands. With RentLekker, you keep 100% of your rental income always.",
+    gradient: "from-success-green to-success-green-glow"
+  }, {
+    icon: Smartphone,
+    title: "State-of-the-Art Platform",
+    description: "Cutting-edge tech built for landlords and tenants: smart dashboards, digital leases, e-signatures",
+    gradient: "from-ocean-blue to-ocean-blue-glow"
+  }, {
+    icon: Zap,
+    title: "Speed & Simplicity",
+    description: "List, screen, and sign in minutes. No delays, no middlemen just fast, simple renting.",
+    gradient: "from-purple-500 to-purple-600"
+  }, {
+    icon: LayoutDashboard,
+    title: "All-in-One Dashboard",
+    description: "Manage listings, leases, rent, maintenance and even accounting from one clean dashboard.",
+    gradient: "from-orange-500 to-orange-600"
+  }, {
+    icon: Calculator,
+    title: "Built-In Accounting & Invoices",
+    description: "RentLekker generates professional invoices, saving you time and giving you peace of mind.",
+    gradient: "from-teal-500 to-teal-600"
+  }, {
+    icon: Shield,
+    title: "Safety & Trust",
+    description: "Verified users. Credit-checked tenants. Legally binding contracts. Your rental, secured.",
+    gradient: "from-red-500 to-red-600"
+  }, {
+    icon: MessageSquare,
+    title: "Seamless On-Board Communication",
+    description: "Landlords and tenants can chat, share documents, and track updates directly inside RentLekker no lost WhatsApps, no messy email chains. Everything in one secure place.",
+    gradient: "from-indigo-500 to-indigo-600"
+  }, {
+    icon: Layers,
+    title: "Unlimited Property Management",
+    description: "RentLekker lets you manage one property or a hundred with ease scalable, simple, and hassle-free.",
+    gradient: "from-amber-400 to-amber-600"
+  }];
 
-  // Featured properties using the existing format
-  const featuredProperties = [
-    {
-      id: "1",
-      title: "Modern 2-Bedroom Apartment in Sandton",
-      location: "Sandton, Johannesburg",
-      price: 15000,
-      beds: 2,
-      baths: 2,
-      parking: 1,
-      image: "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      type: "Apartment" as const,
-      featured: true,
-    },
-    {
-      id: "2",
-      title: "Spacious Family House with Garden",
-      location: "Rosebank, Cape Town",
-      price: 22000,
-      beds: 4,
-      baths: 3,
-      parking: 2,
-      image: "https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      type: "House" as const,
-    },
-    {
-      id: "3",
-      title: "Luxury Townhouse Near Waterfront",
-      location: "V&A Waterfront, Cape Town",
-      price: 35000,
-      beds: 3,
-      baths: 2,
-      parking: 2,
-      image: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-      type: "Townhouse" as const,
-      featured: true,
-    },
-  ];
+  // Featured properties will be loaded from the API
 
- // Stats removed per request
- const stats: never[] = [];
+  // Stats removed per request
+  const stats: never[] = [];
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-200/60 to-gray-100/40">
-      {/* Hero Section */}
-      <section 
-        className="relative min-h-[90vh] flex items-center justify-center bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(rgba(33, 79, 197, 0.8), rgba(34, 197, 94, 0.8)), url(${heroBackground})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -bottom-10 -right-10 w-96 h-96 bg-success-green/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+  // Add styles for the hero section with fades
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .top-fade {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        min-height: 40%;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%);
+        z-index: 5;
+        display: flex;
+        align-items: flex-start;
+        padding: 1.5rem 0.5rem;
+        padding-top: 0.75rem;
+      }
+      @media (min-width: 768px) {
+        .top-fade {
+          justify-content: flex-start;
+          padding-left: 2.5rem;
+        }
+      }
+      .hero-content {
+        position: relative;
+        z-index: 10;
+      }
+      .hero-heading {
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        color: white;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+      @media (max-width: 768px) {
+        .hero-image {
+          transform: scale(1.0) !important;
+          background-position: center 25% !important;
+          height: 100% !important;
+          top: 0;
+        }
+        .hero-section {
+          position: relative;
+          overflow: hidden;
+        }
+      }
+      @media (min-width: 769px) {
+        .hero-image {
+          transform: scale(1.1);
+          transform-origin: center;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+  return <div className="min-h-screen">
+      {/* Hero Section with Glass Heading */}
+      <section className="relative">
+        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
+          <div className="absolute inset-0 w-full h-full">
+            <img src="/hero3.jpg" alt="Modern apartment building" className="w-full h-full object-cover" />
+          </div>
+          
+          {/* Bottom Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
+          
+          {/* Top Fade with Heading */}
+          <div className="top-fade my-0">
+              <h1 className="text-xl md:text-3xl font-bold text-white px-2 text-left whitespace-nowrap">
+                Safe, Simple, <span className="text-ocean-blue">Commission-Free</span> Renting
+              </h1>
+          </div>
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-2 sm:pt-8">
-          {/* Hero Content */}
-          <div className="mb-8 sm:mb-12">
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-              Safe, Simple,<br />
-              <span className="bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">
-                Commission-Free
-              </span><br />
-              Renting
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Direct landlord-tenant connections with full verification and peace of mind
-            </p>
-            
-            {/* CTA Buttons removed per request */}
-          </div>
-
-          {/* Search Module wrapper removed; keep only the search bar */}
+        {/* Search Bar - Fading into white */}
+        <div className="relative z-10 w-full px-4 -mt-20 md:-mt-24 mb-12">
           <div className="max-w-4xl mx-auto">
-                <Property24SearchBar
-                  onSearch={handleSearch}
-                  onFiltersChange={onFiltersChange}
-                  onMoreFiltersOpen={() => setShowMoreFilters(true)}
-                  filters={filters}
-                />
+            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
+              <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
+              searchTerm: filters.searchTerm,
+              propertyType: filters.propertyType,
+              minPrice: filters.minPrice,
+              maxPrice: filters.maxPrice,
+              bedrooms: filters.bedrooms,
+              bathrooms: filters.bathrooms,
+              propertyTypes: filters.propertyTypes || [],
+              amenities: filters.amenities || [],
+              availableFrom: filters.availableFrom
+            }} className="w-full my-[15px]" />
+            </div>
           </div>
-
-          {/* Quick Stats removed per request */}
         </div>
-        
-        {/* Seamless fade into page background */}
-        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 sm:h-20 md:h-24 lg:h-32 bg-gradient-to-b from-transparent to-gray-200/50"></div>
       </section>
 
-      {/* Feature Highlights */}
-      <section className="pt-16 md:pt-24 pb-8 md:pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+      {/* Feature Highlights - Moved up */}
+      <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Why Choose SwiftRent?
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Why Choose RentLekker?
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
             The complete rental platform designed for South African landlords and tenants
@@ -262,15 +248,10 @@ const Index = () => {
 
          {/* Mobile: cards fading in one by one */}
         <div className="md:hidden space-y-6">
-            {features.map((feature, index) => (
-              <div 
-              key={index} 
-              className="animate-fade-in"
-              style={{ 
-                animationDelay: `${index * 300}ms`,
-                animationFillMode: 'forwards'
-              }}
-            >
+            {features.map((feature, index) => <div key={index} className="animate-fade-in" style={{
+          animationDelay: `${index * 300}ms`,
+          animationFillMode: 'forwards'
+        }}>
                <Card className="text-center bg-white/10 border border-white/20 shadow-lg transition-all duration-300 hover:shadow-xl animate-float-slow">
               <CardContent className="p-6">
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
@@ -284,14 +265,12 @@ const Index = () => {
                     </p>
                   </CardContent>
                 </Card>
-              </div>
-            ))}
+              </div>)}
         </div>
 
         {/* Desktop/Tablet: responsive grid for 7 cards */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {features.map((feature, index) => (
-            <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          {features.map((feature, index) => <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <CardContent className="p-8">
                 <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
                 <feature.icon className="h-8 w-8 text-white" />
@@ -303,8 +282,7 @@ const Index = () => {
                   {feature.description}
                 </p>
               </CardContent>
-            </Card>
-          ))}
+            </Card>)}
         </div>
       </section>
 
@@ -320,7 +298,7 @@ const Index = () => {
       {/* Featured Properties */}
       <section className="pt-4 md:pt-6 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Featured Properties
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -329,20 +307,13 @@ const Index = () => {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {featuredProperties.map((property) => (
-            <PropertyCard 
-              key={property.id} 
-              {...property}
-            />
-          ))}
+          <div className="text-center py-8 text-muted-foreground">
+            <p>Featured properties coming soon</p>
+          </div>
         </div>
 
         <div className="text-center">
-          <Button 
-            asChild 
-            size="lg"
-            className="bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue-dark hover:to-success-green-dark text-white rounded-xl px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
-          >
+          <Button asChild size="lg" className="bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-xl px-8 py-3 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
             <Link to="/properties" className="flex items-center gap-2">
               View All Properties
               <ArrowRight className="h-5 w-5" />
@@ -355,30 +326,21 @@ const Index = () => {
       <TestimonialsCarousel />
 
       {/* Final CTA Block */}
-      <section className="py-16 md:py-24 bg-gradient-to-r from-ocean-blue to-success-green text-white">
+      <section className="py-16 md:py-24 bg-ocean-blue text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
-            Rent Smarter. Rent Safer.<br />
-            <span className="text-white/90">With SwiftRent.</span>
+            <span className="text-white/90">Rent Smarter. Rent Safer.</span><br />
+            <span className="text-white">With RentLekker.</span>
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join South Africa's most trusted rental platform today
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              asChild
-              size="lg" 
-              className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300"
-            >
-              <Link to="/auth">Join as Landlord</Link>
+            <Button asChild size="lg" className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300">
+              <Link to="/landlord/dashboard">Landlord Dashboard</Link>
             </Button>
-            <Button 
-              asChild
-              size="lg" 
-              variant="outline"
-              className="bg-white/20 text-ocean-blue-dark border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Link to="/auth">Join as Tenant</Link>
+            <Button asChild size="lg" variant="outline" className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
+              <Link to="/tenant/dashboard">Tenant Dashboard</Link>
             </Button>
           </div>
         </div>
@@ -388,16 +350,11 @@ const Index = () => {
       <Footer />
 
       {/* More Filters Modal */}
-      <MoreFiltersModal
-        open={showMoreFilters}
-        onClose={() => setShowMoreFilters(false)}
-        filters={filters}
-        onFiltersChange={onFiltersChange}
-        onClearFilters={clearFilters}
-        onApplyFilters={handleSearch}
-      />
-    </div>
-  );
+      <MoreFiltersModal open={showMoreFilters} onClose={() => setShowMoreFilters(false)} filters={{
+      amenities: filters.amenities,
+      bathrooms: filters.bathrooms,
+      availableFrom: filters.availableFrom
+    }} onFiltersChange={onFiltersChange} onClearFilters={clearFilters} onApplyFilters={handleSearch} />
+    </div>;
 };
-
 export default Index;

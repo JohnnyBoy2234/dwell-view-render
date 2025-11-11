@@ -45,17 +45,17 @@ serve(async (req) => {
     const link = signed?.signedUrl;
 
     if (tenantEmail) {
-      const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@swiftrent.co';
-      const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'SwiftRent';
-      const subject = `Tax Invoice • ${property?.title || 'Your rental'}`;
+      const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@RentLekker.co';
+      const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'RentLekker';
+      const subject = `Invoice • ${property?.title || 'Your rental'}`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; padding:24px; background:#f8fafc;">
           <div style="background:#ffffff; padding:24px; border-radius:8px;">
-            <h2 style="margin:0 0 12px; color:#111827;">Tax Invoice Available</h2>
+            <h2 style="margin:0 0 12px; color:#111827;">Invoice Available</h2>
             <p style="margin:0 0 16px; color:#374151;">Hello ${tenantName},</p>
-            <p style="margin:0 0 16px; color:#374151;">Your landlord shared a new tax invoice${property?.title ? ` for <strong>${property.title}</strong>` : ''}. You can download it using the link below.</p>
+            <p style="margin:0 0 16px; color:#374151;">Your landlord shared a new invoice${property?.title ? ` for <strong>${property.title}</strong>` : ''}. You can download it using the link below.</p>
             ${link ? `<div style=\"margin:24px 0;\"><a href=\"${link}\" style=\"display:inline-block; background:#2563eb; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;\">Download Invoice</a></div>` : ''}
-            <p style="margin:16px 0 0; color:#6b7280; font-size:12px;">This email was sent by SwiftRent on behalf of your landlord.</p>
+            <p style="margin:16px 0 0; color:#6b7280; font-size:12px;">This email was sent by RentLekker on behalf of your landlord.</p>
           </div>
         </div>
       `;
@@ -80,7 +80,7 @@ serve(async (req) => {
     // In-app notification
     await admin.rpc('create_notification', {
       _user_id: tenant_id,
-      _message: `New tax invoice${property?.title ? ` for ${property.title}` : ''}`,
+      _message: `New invoice${property?.title ? ` for ${property.title}` : ''}`,
       _link_url: '/tenant/proof-of-payment',
       _type: 'invoice_shared',
       _metadata: { ...(property_id ? { property_id } : {}), filename, file_path }

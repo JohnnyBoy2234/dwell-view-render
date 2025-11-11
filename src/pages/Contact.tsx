@@ -38,8 +38,8 @@ const Contact = () => {
       icon: Mail,
       title: "Email Us",
       description: "Send us a message anytime",
-      value: "hello@swiftrent.co.za",
-      href: "mailto:hello@swiftrent.co.za"
+      value: "hello@RentLekker.co.za",
+      href: "mailto:hello@RentLekker.co.za"
     },
     {
       icon: Phone,
@@ -68,7 +68,7 @@ const Contact = () => {
     {
       icon: MessageSquare,
       title: "General Inquiries",
-      description: "Questions about SwiftRent services",
+      description: "Questions about RentLekker services",
       color: "text-primary"
     },
     {
@@ -108,7 +108,7 @@ const Contact = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <SectionHeader 
           title="Get in Touch"
-          subtitle="We're here to help you with any questions about SwiftRent. Reach out and let's make renting better together."
+          subtitle="We're here to help you with any questions about RentLekker. Reach out and let's make renting better together."
         />
 
         {/* Contact Methods */}

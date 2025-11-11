@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -34,11 +34,11 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   const navigate = useNavigate();
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
   const [selectedProperty, setSelectedProperty] = useState(defaultPropertyId || 'all');
+  const { properties = [], loading: propertiesLoading } = useUserProperties();
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
 
-  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction } = useAccounting();
-  const { properties } = useUserProperties();
+  const { transactions, loading, fetchTransactionsByDateRange, calculateKPIs, getMonthlyDataByRange, getCategoryData, createTransaction, calculateMonthlyDataFromTransactions } = useAccounting();
   const { toast } = useToast();
   const [sendingReminder, setSendingReminder] = useState(false);
   // Initialize to current month by default
@@ -71,23 +71,31 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   }, [dateRange, selectedProperty, fetchTransactionsByDateRange]);
 
   // Filter transactions based on selected date range
-  const filteredTransactions = transactions.filter(transaction => {
-    const transactionDate = new Date(transaction.date);
-    return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
-  });
+  const filteredTransactions = useMemo(() => {
+    return transactions.filter(transaction => {
+      const transactionDate = new Date(transaction.date);
+      return transactionDate >= dateRange.from && transactionDate <= dateRange.to;
+    });
+  }, [transactions, dateRange.from, dateRange.to]);
 
   // Calculate KPIs based on filtered transactions
   const kpis = calculateKPIs(filteredTransactions);
 
   useEffect(() => {
     const loadChartData = async () => {
-      const monthly = await getMonthlyDataByRange(dateRange.from, dateRange.to, selectedProperty);
-      const category = getCategoryData(filteredTransactions);
+      // Calculate monthly data from filtered transactions (client-side)
+      const monthly = calculateMonthlyDataFromTransactions(
+        filteredTransactions, 
+        dateRange.from, 
+        dateRange.to
+      );
       setMonthlyData(monthly);
-      setCategoryData(category);
+      const categoryData = await getCategoryData(filteredTransactions);
+      setCategoryData(categoryData);
     };
     loadChartData();
-  }, [transactions, selectedProperty, dateRange, getMonthlyDataByRange, getCategoryData]);
+  }, [filteredTransactions, dateRange, calculateMonthlyDataFromTransactions, getCategoryData]);
+
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-ZA', {
@@ -431,7 +439,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                     "Rates & Taxes": { label: "Rates & Taxes", color: "#f59e0b" },
                     "Insurance": { label: "Insurance", color: "#ef4444" },
                     "Bank Fees": { label: "Bank Fees", color: "#8b5cf6" },
-                    "SwiftRent Subscription": { label: "SwiftRent", color: "#ec4899" },
+                    "RentLekker Subscription": { label: "RentLekker", color: "#ec4899" },
                     "Other": { label: "Other", color: "#6366f1" },
                   }}
                   className="mx-auto w-full h-full"
@@ -452,7 +460,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                                 return '#ef4444';
                               case 'Bank Fees':
                                 return '#8b5cf6';
-                              case 'SwiftRent Subscription':
+                              case 'RentLekker Subscription':
                                 return '#ec4899';
                               case 'Other':
                                 return '#6366f1';
@@ -506,8 +514,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                       </Pie>
                       <ChartLegend
                         content={<ChartLegendContent nameKey="category" />}
-                        className="flex flex-wrap gap-2 justify-center text-xs"
-                        wrapperStyle={{ paddingTop: '20px' }}
+                        className="flex flex-wrap gap-2 justify-center text-xs text-white"
                       />
                       <Tooltip
                         contentStyle={{ 

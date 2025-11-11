@@ -61,7 +61,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const deepLink = propertyId
-    ? `https://app.swiftrent.co.za/inventory/start?propertyId=${propertyId}`
+    ? `https://app.RentLekker.co.za/inventory/start?propertyId=${propertyId}`
     : '';
 
   useEffect(() => {

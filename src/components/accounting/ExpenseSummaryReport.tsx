@@ -121,11 +121,11 @@ export function ExpenseSummaryReport() {
           <div className="flex items-center mt-2">
             <img 
               src="/favicon-32x32.png" 
-              alt="SwiftRent Logo" 
+              alt="RentLekker Logo" 
               className="h-6 w-6 mr-2" 
             />
             <span className="text-sm text-muted-foreground">
-              SwiftRent.co.za – Safe, Simple, Commission-Free Renting
+              RentLekker.co.za – Safe, Simple, Commission-Free Renting
             </span>
           </div>
         </div>

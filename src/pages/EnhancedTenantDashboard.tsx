@@ -31,7 +31,7 @@ import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
-import { SwiftRentSupport } from '@/components/support/SwiftRentSupport';
+import { RentLekkerSupport } from '@/components/support/SwiftRentSupport';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 import { VerificationGate } from '@/components/VerificationGate';
 
@@ -202,7 +202,7 @@ export default function EnhancedTenantDashboard() {
         color: 'hsl(var(--ios-blue))',
         bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/60',
         iconBg: 'bg-ocean-blue',
-        subtitle: 'SwiftRent support',
+        subtitle: 'RentLekker support',
         path: '/tenant/support'
       },
       {

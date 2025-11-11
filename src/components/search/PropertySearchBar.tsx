@@ -237,7 +237,7 @@ const getPriceLabel = (): ReactNode => {
           <EnhancedAddressAutocomplete 
             value={filters.location} 
             onChange={value => onFiltersChange({ location: value })} 
-            placeholder="Search by city, suburb or street..." 
+            placeholder="Search by city, suburb" 
             className="property24-search-input w-full" 
             onClear={() => onFiltersChange({ location: "" })}
           />

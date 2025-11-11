@@ -74,7 +74,7 @@ export default function SafeRenting() {
               Safe Renting, Guaranteed
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto">
-              Your safety is our top priority. Learn about the comprehensive security measures that protect every rental transaction on SwiftRent.
+              Your safety is our top priority. Learn about the comprehensive security measures that protect every rental transaction on RentLekker.
             </p>
             <Button 
               asChild
@@ -169,7 +169,7 @@ export default function SafeRenting() {
                         • Don't give out personal information before verification
                       </p>
                       <p>
-                        • Always use SwiftRent's secure messaging system
+                        • Always use RentLekker's secure messaging system
                       </p>
                       <p>
                         • Report suspicious activity immediately

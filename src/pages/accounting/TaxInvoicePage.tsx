@@ -12,8 +12,8 @@ export default function TaxInvoicePage() {
 
   return (
     <EnhancedDashboardLayout 
-      title="Tax Invoice" 
-      currentTab="/enhancedlandlorddashboard/tax-invoice"
+      title="SwiftBooks"
+      currentTab="/dashboard/accounting"
       onBackToProperties={handleBack}
     >
       <TaxInvoiceGenerator />

@@ -220,7 +220,7 @@ export function ContractClauses({ data, onUpdate }: ContractClausesProps) {
               <h4 className="font-medium text-amber-900">Legal Notice</h4>
               <p className="text-sm text-amber-800">
                 Custom clauses should be reviewed by a legal professional to ensure they comply with local rental laws and regulations. 
-                SwiftRent provides templates for convenience but does not provide legal advice.
+                RentLekker provides templates for convenience but does not provide legal advice.
               </p>
             </div>
           </div>
