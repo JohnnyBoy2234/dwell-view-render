@@ -3,8 +3,9 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS, PUT, DELETE",
+  "Access-Control-Allow-Headers": "authorization, apikey, x-client-info, content-type, accept, accept-language, origin, referer, x-supabase-api-version",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Max-Age": "86400",
 };
 
 async function generateAuthToken(salt: string, orgId: string, timestamp: number): Promise<string> {
@@ -17,9 +18,10 @@ async function generateAuthToken(salt: string, orgId: string, timestamp: number)
 }
 
 serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 200, headers: corsHeaders });
-  }
+if (req.method === "OPTIONS") {
+  console.log("callpay-initiate: OPTIONS preflight");
+  return new Response("ok", { status: 200, headers: corsHeaders });
+}
 
   try {
     const { plan_code, amount, item_name, item_description } = await req.json();
