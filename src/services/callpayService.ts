@@ -43,9 +43,45 @@ export async function startCallpayCheckout(plan: CallpayPlan) {
 
     // Call edge function to initiate payment
     console.log('[CallPay] Calling callpay-initiate edge function...');
-    const { data, error } = await supabase.functions.invoke('callpay-initiate', {
-      body: plan,
-    });
+    let data, error;
+    
+    try {
+      const result = await supabase.functions.invoke('callpay-initiate', {
+        body: plan,
+      });
+      data = result.data;
+      error = result.error;
+    } catch (invokeError: any) {
+      console.error('[CallPay] Invoke failed, trying direct fetch fallback:', invokeError);
+      
+      // Fallback to direct fetch
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://rsfrvjaqxhoqavvscvwf.supabase.co';
+      const functionsBase = supabaseUrl.replace('.supabase.co', '.functions.supabase.co');
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+      
+      const functionUrl = `${functionsBase}/callpay-initiate`;
+      console.log('[CallPay] Direct fetch to:', functionUrl);
+      
+      const resp = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token ?? ''}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || '',
+        },
+        body: JSON.stringify(plan),
+      });
+      
+      if (!resp.ok) {
+        const errorText = await resp.text();
+        console.error('[CallPay] Direct fetch error:', resp.status, errorText);
+        throw new Error(`Payment initialization failed: ${resp.status}`);
+      }
+      
+      data = await resp.json();
+      console.log('[CallPay] Direct fetch successful:', data);
+    }
     
     if (error) {
       console.error('[CallPay] Edge function error:', error);

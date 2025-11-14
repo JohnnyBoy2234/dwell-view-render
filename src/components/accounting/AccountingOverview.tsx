@@ -262,20 +262,20 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
                     }
                     try {
                       setSendingReminder(true);
-                      const { data: tenancy } = await supabase
+                      const { data: tenancy, error: tenancyError } = await supabase
                         .from('tenancies')
                         .select('tenant_id')
-                        .eq('property_id', selectedProperty)
-                        .eq('status', 'active')
+                        .eq('property_id', selectedProperty as any)
+                        .eq('status', 'active' as any)
                         .limit(1)
                         .maybeSingle();
-                      if (!tenancy?.tenant_id) {
+                      if (tenancyError || !tenancy || !('tenant_id' in tenancy) || !tenancy.tenant_id) {
                         toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
                         setSendingReminder(false);
                         return;
                       }
                       const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                        body: { tenant_id: tenancy.tenant_id, property_id: selectedProperty }
+                        body: { tenant_id: (tenancy as any).tenant_id, property_id: selectedProperty }
                       });
                       if (error) throw error;
                       toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });

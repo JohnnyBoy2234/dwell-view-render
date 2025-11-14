@@ -43,8 +43,8 @@ export default function StartConversation({
         const { data, error } = await supabase
           .from('conversations')
           .select('id')
-          .eq('tenant_id', user.id)
-          .eq('landlord_id', landlordId)
+          .eq('tenant_id', user.id as any)
+          .eq('landlord_id', landlordId as any)
           .limit(1);
           
         if (error) {
@@ -106,7 +106,7 @@ export default function StartConversation({
       );
 
       console.log('Conversation created:', conversation);
-      if (conversation) {
+      if (conversation && 'id' in conversation) {
         console.log('Navigating to:', `/messages?c=${conversation.id}`);
         navigate(`/messages?c=${conversation.id}`);
         toast({
@@ -147,10 +147,10 @@ export default function StartConversation({
         inquiryId
       );
 
-      if (conversation) {
+      if (conversation && 'id' in conversation) {
         // Format and send the pre-screening message
         const preScreeningMessage = formatPreScreeningMessage(formData, propertyTitle);
-        await sendMessage(conversation.id, preScreeningMessage);
+        await sendMessage(conversation.id as string, preScreeningMessage);
         
         // Navigate to messages page
         console.log('Navigating to:', `/messages?c=${conversation.id}`);
