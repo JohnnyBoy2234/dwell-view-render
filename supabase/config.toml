@@ -82,5 +82,8 @@ verify_jwt = false
 [functions.callpay-webhook]
 verify_jwt = false
 
+[functions.cors-ping]
+verify_jwt = false
+
 [functions.payment-reminder-scheduler]
 verify_jwt = false

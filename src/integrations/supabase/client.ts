@@ -6,6 +6,9 @@ const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://rsfrvjaqxhoqav
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZnJ2amFxeGhvcWF2dnNjdndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMDIzOTYsImV4cCI6MjA2OTg3ODM5Nn0.3yeCVbJs6twyx62wYh9BxCUoqpqiMt-174JmdRyhJig";
 const functionsUrl = supabaseUrl.replace('.supabase.co', '.functions.supabase.co');
 
+// Log Functions URL for debugging
+console.log('[Supabase] Functions URL:', functionsUrl);
+
 // Get site URL for auth redirects - use current domain by default
 const getSiteUrl = () => {
   if (typeof window !== 'undefined') {
