@@ -18,8 +18,9 @@ export function useAccounting() {
       let query = supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
         .order('date', { ascending: false });
+      
+      query = (query as any).eq('user_id', user.id as any);
 
       if (month) {
         const start = startOfMonth(month);
@@ -30,13 +31,13 @@ export function useAccounting() {
       }
 
       if (propertyId && propertyId !== 'all') {
-        query = query.eq('property_id', propertyId);
+        query = (query as any).eq('property_id', propertyId as any);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
-      setTransactions((data || []) as Transaction[]);
+      setTransactions((data || []) as unknown as Transaction[]);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast({
@@ -57,19 +58,20 @@ export function useAccounting() {
       let query = supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
         .gte('date', format(from, 'yyyy-MM-dd'))
         .lte('date', format(to, 'yyyy-MM-dd'))
         .order('date', { ascending: false });
+      
+      query = (query as any).eq('user_id', user.id as any);
 
       if (propertyId && propertyId !== 'all') {
-        query = query.eq('property_id', propertyId);
+        query = (query as any).eq('property_id', propertyId as any);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
-      setTransactions((data || []) as Transaction[]);
+      setTransactions((data || []) as unknown as Transaction[]);
     } catch (error) {
       console.error('Error fetching transactions:', error);
       toast({
@@ -86,18 +88,18 @@ export function useAccounting() {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('transactions')
         .insert({
           ...transactionData,
           user_id: user.id,
-        })
+        } as any)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
 
-      setTransactions(prev => [data as Transaction, ...prev]);
+      setTransactions(prev => [data as unknown as Transaction, ...prev]);
       toast({
         title: "Success",
         description: "Transaction saved successfully",
@@ -119,17 +121,17 @@ export function useAccounting() {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('transactions')
-        .update(updates)
-        .eq('id', id)
-        .eq('user_id', user.id)
+        .update(updates as any)
+        .eq('id', id as any)
+        .eq('user_id', user.id as any)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
 
-      setTransactions(prev => prev.map(t => t.id === id ? data as Transaction : t));
+      setTransactions(prev => prev.map(t => t.id === id ? data as unknown as Transaction : t));
       toast({
         title: "Success",
         description: "Transaction updated successfully",
@@ -151,11 +153,11 @@ export function useAccounting() {
     if (!user) return false;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('transactions')
         .delete()
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .eq('id', id as any)
+        .eq('user_id', user.id as any) as any);
 
       if (error) throw error;
 
@@ -202,12 +204,13 @@ export function useAccounting() {
       let query = supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
         .gte('date', format(startOfMonth(startDate), 'yyyy-MM-dd'))
         .order('date', { ascending: true });
+      
+      query = (query as any).eq('user_id', user.id as any);
 
       if (propertyId && propertyId !== 'all') {
-        query = query.eq('property_id', propertyId);
+        query = (query as any).eq('property_id', propertyId as any);
       }
 
       const { data, error } = await query;
@@ -371,14 +374,14 @@ export function useAccounting() {
         user_id: user.id,
       }));
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('transactions')
-        .insert(transactionsToInsert)
-        .select();
+        .insert(transactionsToInsert as any)
+        .select() as any);
 
       if (error) throw error;
 
-      setTransactions(prev => [...(data as Transaction[]), ...prev]);
+      setTransactions(prev => [...(data as unknown as Transaction[]), ...prev]);
       toast({
         title: "Success",
         description: `${data.length} transaction${data.length !== 1 ? 's' : ''} saved successfully`,
