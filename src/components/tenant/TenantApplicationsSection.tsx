@@ -49,11 +49,11 @@ export const TenantApplicationsSection = () => {
         .select('id, property_id, landlord_id, properties ( title )')
         .order('last_message_at', { ascending: false })
         .limit(20);
-      const mapped = (convs || []).map(c => ({
-        conversation_id: c.id,
-        property_id: c.property_id,
-        landlord_id: c.landlord_id,
-        title: c.properties?.title || 'Property'
+      const mapped = ((convs as any) || []).map((c: any) => ({
+        conversation_id: (c as any).id,
+        property_id: (c as any).property_id,
+        landlord_id: (c as any).landlord_id,
+        title: (c as any).properties?.title || 'Property'
       }));
       setLeadOptions(mapped);
     };

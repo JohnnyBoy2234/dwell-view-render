@@ -38,7 +38,7 @@ export const ApplicationRequestButton = ({
     
     try {
       // Send notification to landlord using notifications table
-      await supabase
+      await (supabase
         .from('notifications')
         .insert({
           user_id: landlordId,
@@ -49,7 +49,7 @@ export const ApplicationRequestButton = ({
             propertyId: propertyId,
             propertyTitle: propertyTitle
           }
-        });
+        } as any) as any);
 
       setHasRequested(true);
 

@@ -8,10 +8,10 @@ export function useMarkMessageRead() {
     mutationFn: async (messageIds: string[] | string) => {
       const ids = Array.isArray(messageIds) ? messageIds : [messageIds];
       if (ids.length === 0) return { success: true };
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('maintenance_messages')
-        .update({ read_at: new Date().toISOString() })
-        .in('id', ids);
+        .update({ read_at: new Date().toISOString() } as any)
+        .in('id', ids as any) as any);
       if (error) throw error;
       return { success: true };
     },
