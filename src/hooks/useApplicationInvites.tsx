@@ -60,17 +60,17 @@ export const useApplicationInvites = () => {
       const landlordIds = Array.from(new Set(list.map((i) => i.landlord_id)));
 
       // 2) Load properties
-      const { data: propsData, error: propsError } = await supabase
+      const { data: propsData, error: propsError } = await (supabase
         .from("properties")
         .select("id, title, location, images")
-        .in("id", propertyIds);
+        .in("id", propertyIds as any) as any);
       if (propsError) throw propsError;
 
       // 3) Load landlord profiles
-      const { data: profilesData, error: profilesError } = await supabase
+      const { data: profilesData, error: profilesError } = await (supabase
         .from("profiles")
         .select("user_id, display_name")
-        .in("user_id", landlordIds);
+        .in("user_id", landlordIds as any) as any);
       if (profilesError) throw profilesError;
 
       const propsById = new Map((propsData || []).map((p: any) => [p.id, p]));

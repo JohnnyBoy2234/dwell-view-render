@@ -256,13 +256,14 @@ export function useAccounting() {
       let query = supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
         .gte('date', format(from, 'yyyy-MM-dd'))
         .lte('date', format(to, 'yyyy-MM-dd'))
         .order('date', { ascending: true });
+      
+      query = (query as any).eq('user_id', user.id as any);
 
       if (propertyId && propertyId !== 'all') {
-        query = query.eq('property_id', propertyId);
+        query = (query as any).eq('property_id', propertyId as any);
       }
 
       const { data, error } = await query;
