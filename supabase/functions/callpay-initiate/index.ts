@@ -18,12 +18,16 @@ async function generateAuthToken(salt: string, orgId: string, timestamp: number)
 }
 
 serve(async (req) => {
-if (req.method === "OPTIONS") {
-  console.log("callpay-initiate: OPTIONS preflight");
-  return new Response("ok", { status: 200, headers: corsHeaders });
-}
-
   try {
+    console.log("callpay-initiate: Request received -", req.method, req.url);
+    console.log("callpay-initiate: Origin:", req.headers.get("origin"));
+
+    if (req.method === "OPTIONS") {
+      console.log("callpay-initiate: Handling OPTIONS preflight");
+      console.log("callpay-initiate: CORS headers being returned:", corsHeaders);
+      return new Response("ok", { status: 200, headers: corsHeaders });
+    }
+
     const { plan_code, amount, item_name, item_description } = await req.json();
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -118,7 +122,8 @@ if (req.method === "OPTIONS") {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (e: any) {
-    console.error("callpay-initiate error:", e);
+    console.error("callpay-initiate: Top-level error:", e);
+    console.error("callpay-initiate: Error stack:", e?.stack);
     return new Response(JSON.stringify({ error: e?.message || "Unexpected error" }), { 
       status: 500, 
       headers: { "Content-Type": "application/json", ...corsHeaders } 
