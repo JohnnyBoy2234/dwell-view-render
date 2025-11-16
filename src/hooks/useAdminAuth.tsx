@@ -23,12 +23,12 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('user_roles')
         .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .single();
+        .eq('user_id', user.id as any)
+        .eq('role', 'admin' as any)
+        .single() as any);
       
       setIsAdmin(!!data);
     } catch (error) {

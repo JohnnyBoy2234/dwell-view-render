@@ -41,12 +41,12 @@ export const useApplicationInvites = () => {
     setLoading(true);
     try {
       // 1) Load invites for this tenant
-      const { data: invitesData, error: invitesError } = await supabase
+      const { data: invitesData, error: invitesError } = await (supabase
         .from("application_invites")
         .select("*")
-        .eq("tenant_id", user.id)
-        .eq("status", "invited")
-        .order("created_at", { ascending: false });
+        .eq("tenant_id", user.id as any)
+        .eq("status", "invited" as any)
+        .order("created_at", { ascending: false }) as any);
 
       if (invitesError) throw invitesError;
       const list = (invitesData || []) as ApplicationInvite[];

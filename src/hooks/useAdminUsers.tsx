@@ -20,7 +20,7 @@ export function useAdminUsers() {
 
   const fetchAdminUsers = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('user_roles')
         .select(`
           *,
@@ -29,8 +29,8 @@ export function useAdminUsers() {
             user_id
           )
         `)
-        .eq('role', 'admin')
-        .order('created_at', { ascending: false });
+        .eq('role', 'admin' as any)
+        .order('created_at', { ascending: false }) as any);
 
       if (error) throw error;
       setAdminUsers((data as any) || []);
@@ -76,11 +76,11 @@ export function useAdminUsers() {
 
   const removeAdminUser = async (userId: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('user_roles')
         .delete()
-        .eq('user_id', userId)
-        .eq('role', 'admin');
+        .eq('user_id', userId as any)
+        .eq('role', 'admin' as any) as any);
 
       if (error) throw error;
 

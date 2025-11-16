@@ -227,7 +227,7 @@ export function useAccounting() {
       }
 
       // Aggregate data
-      (data as Transaction[])?.forEach(transaction => {
+      ((data as unknown as Transaction[]) || []).forEach(transaction => {
         const month = format(new Date(transaction.date), 'MMM yyyy');
         const existing = monthlyMap.get(month);
         if (existing) {
@@ -282,7 +282,7 @@ export function useAccounting() {
       }
 
       // Aggregate data
-      (data as Transaction[])?.forEach(transaction => {
+      ((data as unknown as Transaction[]) || []).forEach(transaction => {
         const month = format(new Date(transaction.date), 'MMM yyyy');
         const existing = monthlyMap.get(month);
         if (existing) {
