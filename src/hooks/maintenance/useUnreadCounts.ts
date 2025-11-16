@@ -11,11 +11,11 @@ export function useUnreadCounts() {
       if (!user) return { total: 0 };
 
       // Count unread maintenance messages where the user is the recipient
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('maintenance_messages')
         .select('id')
-        .eq('recipient_user_id', user.id)
-        .is('read_at', null);
+        .eq('recipient_user_id', user.id as any)
+        .is('read_at', null) as any);
 
       if (error) throw error;
 

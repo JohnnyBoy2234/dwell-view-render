@@ -139,15 +139,15 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
         ),
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase
         .from('property_reports')
-        .insert([reportData]);
+        .insert([reportData] as any) as any);
 
       if (error) throw error;
 
       // Create notification for admin
       if (user) {
-        await supabase
+        await (supabase
           .from('notifications')
           .insert([{
             user_id: user.id,
@@ -158,7 +158,7 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
               issue_type: issueType,
               reporter_email: user.email || reporterEmail.trim(),
             },
-          }]);
+          }] as any) as any);
       }
 
       toast({

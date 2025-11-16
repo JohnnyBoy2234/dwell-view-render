@@ -174,7 +174,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           console.log('📋 Loaded viewing proposals:', data.length);
           setProposalsById(prev => {
             const next = { ...prev };
-            data.forEach(p => { next[p.id] = p; });
+            data.forEach((p: any) => { next[p.id] = p; });
             return next;
           });
         }

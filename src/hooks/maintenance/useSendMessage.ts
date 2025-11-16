@@ -11,17 +11,17 @@ async function sendMessage(
   senderRole: 'tenant' | 'landlord'
 ): Promise<MaintenanceMessage> {
   // First get the maintenance request to determine recipient
-  const { data: maintenanceRequest, error: requestError } = await supabase
+  const { data: maintenanceRequest, error: requestError} = await (supabase
     .from('maintenance_requests')
     .select('tenant_id, landlord_id')
-    .eq('id', ticketId)
-    .single();
+    .eq('id', ticketId as any)
+    .single() as any);
 
   if (requestError) throw requestError;
 
   const recipientUserId = senderRole === 'tenant' 
-    ? maintenanceRequest.landlord_id 
-    : maintenanceRequest.tenant_id;
+    ? (maintenanceRequest as any).landlord_id 
+    : (maintenanceRequest as any).tenant_id;
 
   // Upload files to maintenance-images storage bucket and get URLs
   const attachmentUrls: string[] = [];
@@ -47,7 +47,7 @@ async function sendMessage(
     attachmentUrls.push(publicUrl);
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase
     .from('maintenance_messages')
     .insert({
       maintenance_request_id: ticketId,
@@ -56,22 +56,23 @@ async function sendMessage(
       recipient_user_id: recipientUserId,
       body,
       attachments: attachmentUrls, // Store URLs instead of file names
-    })
+    } as any)
     .select()
-    .single();
+    .single() as any);
 
   if (error) throw error;
 
+  const dataResult = data as any;
   return {
-    id: data.id,
-    ticketId: data.maintenance_request_id,
-    senderUserId: data.sender_user_id,
-    senderRole: (data.sender_role === 'tenant' ? 'TENANT' : 'LANDLORD') as Role,
-    recipientUserId: data.recipient_user_id,
-    body: data.body,
-    attachments: data.attachments,
-    createdAt: data.created_at,
-    readAt: data.read_at,
+    id: dataResult.id,
+    ticketId: dataResult.maintenance_request_id,
+    senderUserId: dataResult.sender_user_id,
+    senderRole: (dataResult.sender_role === 'tenant' ? 'TENANT' : 'LANDLORD') as Role,
+    recipientUserId: dataResult.recipient_user_id,
+    body: dataResult.body,
+    attachments: dataResult.attachments,
+    createdAt: dataResult.created_at,
+    readAt: dataResult.read_at,
   };
 }
 

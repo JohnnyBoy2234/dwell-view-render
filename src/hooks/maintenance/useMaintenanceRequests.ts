@@ -28,15 +28,15 @@ export function useMaintenanceRequests() {
         .order('created_at', { ascending: false });
       
       if (isLandlord) {
-        query = query.eq('landlord_id', user.id);
+        query = (query as any).eq('landlord_id', user.id as any);
       } else {
-        query = query.eq('tenant_id', user.id);
+        query = (query as any).eq('tenant_id', user.id as any);
       }
       
       const { data, error } = await query;
       if (error) throw error;
       
-      return data as MaintenanceRequest[];
+      return data as unknown as MaintenanceRequest[];
     },
     enabled: !!user,
   });
@@ -52,11 +52,11 @@ export function useCreateMaintenanceRequest() {
       if (!user) throw new Error('Not authenticated');
       
       // Get landlord_id from the property
-      const { data: property, error: propError } = await supabase
+      const { data: property, error: propError } = await (supabase
         .from('properties')
         .select('landlord_id')
-        .eq('id', request.property_id)
-        .single();
+        .eq('id', request.property_id as any)
+        .single() as any);
       
       if (propError) throw propError;
       // Normalize values to satisfy DB CHECK constraints
@@ -68,20 +68,20 @@ export function useCreateMaintenanceRequest() {
       };
       const mapPriority = (p: string) => (p === 'emergency' ? 'urgent' : p);
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('maintenance_requests')
         .insert({
           ...request,
           category: mapCategory((request as any).category),
           priority: mapPriority((request as any).priority),
           tenant_id: user.id,
-          landlord_id: property.landlord_id,
-        })
+          landlord_id: (property as any).landlord_id,
+        } as any)
         .select()
-        .single();
+        .single() as any);
       
       if (error) throw error;
-      return data as MaintenanceRequest;
+      return data as unknown as MaintenanceRequest;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
@@ -107,15 +107,15 @@ export function useUpdateMaintenanceRequest() {
   
   return useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<MaintenanceRequest> }) => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('maintenance_requests')
-        .update(updates)
-        .eq('id', id)
+        .update(updates as any)
+        .eq('id', id as any)
         .select()
-        .single();
+        .single() as any);
       
       if (error) throw error;
-      return data as MaintenanceRequest;
+      return data as unknown as MaintenanceRequest;
     },
     retry: 0,
     onSuccess: () => {
