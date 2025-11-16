@@ -49,49 +49,49 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
     const { data: convs, error } = await supabase
       .from('conversations')
       .select('id, tenant_id, last_message_at, property_id, landlord_id')
-      .eq('property_id', propertyId)
-      .eq('landlord_id', user.id)
+      .filter('property_id', 'eq', propertyId)
+      .filter('landlord_id', 'eq', user.id)
       .order('last_message_at', { ascending: false });
     if (error) {
       console.warn('Failed to fetch leads', error);
       return;
     }
-    const tenantIds = Array.from(new Set((convs || []).map(c => c.tenant_id)));
+    const tenantIds = Array.from(new Set(((convs as any) || []).map((c: any) => c.tenant_id)));
     const { data: profiles } = await supabase
       .from('profiles')
       .select('user_id, display_name')
       .in('user_id', tenantIds);
     const profileMap = new Map<string, any>();
-    (profiles || []).forEach(p => profileMap.set(p.user_id, p));
-    setLeads((convs || []).map(c => ({ ...c, tenant_profile: profileMap.get(c.tenant_id) })));
+    ((profiles as any) || []).forEach((p: any) => profileMap.set(p.user_id, p));
+    setLeads(((convs as any) || []).map((c: any) => ({ ...c, tenant_profile: profileMap.get(c.tenant_id) })));
 
     const { data: invites } = await supabase
       .from('application_invites')
       .select('*')
-      .eq('property_id', propertyId)
-      .eq('landlord_id', user.id);
+      .filter('property_id', 'eq', propertyId)
+      .filter('landlord_id', 'eq', user.id);
     const map: Record<string, any> = {};
-    (invites || []).forEach(i => { map[i.tenant_id] = i; });
+    ((invites as any) || []).forEach((i: any) => { map[i.tenant_id] = i; });
     setInvitesByTenant(map);
     // Fetch application requests for this property
     const { data: reqs } = await supabase
       .from('applications')
       .select('*')
-      .eq('property_id', propertyId)
-      .eq('landlord_id', user.id)
-      .eq('status', 'requested')
+      .filter('property_id', 'eq', propertyId)
+      .filter('landlord_id', 'eq', user.id)
+      .filter('status', 'eq', 'requested')
       .order('created_at', { ascending: false });
     const withProfiles = await Promise.all(
-      (reqs || []).map(async (app) => {
+      ((reqs as any) || []).map(async (app: any) => {
         const { data: tenantProfile } = await supabase
           .from('profiles')
           .select('display_name, user_id')
-          .eq('user_id', app.tenant_id)
+          .filter('user_id', 'eq', app.tenant_id)
           .maybeSingle();
         const { data: property } = await supabase
           .from('properties')
           .select('id, title, location, images')
-          .eq('id', app.property_id)
+          .filter('id', 'eq', app.property_id)
           .maybeSingle();
         return { ...app, tenant_profile: tenantProfile || undefined, properties: property || undefined } as ApplicationWithTenant;
       })

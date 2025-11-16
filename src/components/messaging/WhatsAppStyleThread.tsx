@@ -290,13 +290,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                 const { data, error } = await supabase
                   .from('viewing_proposals')
                   .select(`*, properties ( title, location )`)
-                  .eq('id', proposalId)
+                  .filter('id', 'eq', proposalId)
                   .single();
                 
                 if (!error && data) {
                   setProposalsById(prev => ({
                     ...prev,
-                    [proposalId]: data
+                    [proposalId]: data as any
                   }));
                 }
               } catch (error) {

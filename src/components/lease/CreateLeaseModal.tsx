@@ -57,7 +57,7 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
           tenant_id,
           tenant_profiles:profiles!tenant_id(display_name, user_id)
         `)
-        .eq('landlord_id', user.id)
+        .filter('landlord_id', 'eq', user.id)
         .not('tenant_profiles', 'is', null);
 
       const { data: applicationsData, error: applicationsError } = await supabase
@@ -66,8 +66,8 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
           tenant_id,
           tenant_profiles:profiles!tenant_id(display_name, user_id)
         `)
-        .eq('landlord_id', user.id)
-        .eq('status', 'accepted')
+        .filter('landlord_id', 'eq', user.id)
+        .filter('status', 'eq', 'accepted')
         .not('tenant_profiles', 'is', null);
 
       if (tenanciesError && applicationsError) {
@@ -105,10 +105,10 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
       const { data, error } = await supabase
         .from('properties')
         .select('id, title, location')
-        .eq('landlord_id', user.id);
+        .filter('landlord_id', 'eq', user.id);
 
       if (error) throw error;
-      setProperties(data || []);
+      setProperties((data as any) || []);
     } catch (error) {
       console.error('Error fetching properties:', error);
     }
@@ -151,8 +151,8 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
         if (useExistingTenant && selectedTenant) {
           await supabase
             .from('lease_contracts')
-            .update({ tenant_id: selectedTenant })
-            .eq('id', contractId);
+            .update({ tenant_id: selectedTenant } as any)
+            .filter('id', 'eq', contractId);
         }
 
         onOpenChange(false);

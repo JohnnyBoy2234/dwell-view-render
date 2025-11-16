@@ -54,19 +54,19 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
           properties(title, location),
           profiles!application_requests_tenant_id_fkey(display_name, avatar_url)
         `)
-        .eq('landlord_id', user.id)
-        .eq('status', 'pending')
+        .filter('landlord_id', 'eq', user.id)
+        .filter('status', 'eq', 'pending')
         .order('created_at', { ascending: false });
 
       if (propertyId) {
-        query = query.eq('property_id', propertyId);
+        query = query.filter('property_id', 'eq', propertyId);
       }
 
       const { data, error } = await query;
 
       if (error) throw error;
 
-      setRequests(data || []);
+      setRequests((data as any) || []);
     } catch (error: any) {
       console.error('Error fetching application requests:', error);
       toast({
@@ -114,8 +114,8 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
         .update({ 
           status: 'accepted',
           updated_at: new Date().toISOString()
-        })
-        .eq('id', request.id);
+        } as any)
+        .filter('id', 'eq', request.id);
 
       if (updateError) throw updateError;
 
@@ -155,8 +155,8 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
         .update({ 
           status: 'declined',
           updated_at: new Date().toISOString()
-        })
-        .eq('id', request.id);
+        } as any)
+        .filter('id', 'eq', request.id);
 
       if (updateError) throw updateError;
 
