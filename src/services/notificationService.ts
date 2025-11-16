@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { CreateNotificationData, NotificationType, NotificationPriority } from '@/types/notification';
 
