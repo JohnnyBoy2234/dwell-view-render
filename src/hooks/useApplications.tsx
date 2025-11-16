@@ -38,14 +38,14 @@ export const useApplications = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('applications')
         .select('*')
-        .eq('tenant_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('tenant_id', user.id as any)
+        .order('created_at', { ascending: false }) as any);
 
       if (error) throw error;
-      setApplications(data || []);
+      setApplications((data || []) as any);
     } catch (error) {
       console.error('Error fetching applications:', error);
     }
@@ -58,25 +58,25 @@ export const useApplications = () => {
     try {
       // First, try to remove any existing application for this property by this tenant
       // This handles duplicate key errors seamlessly
-      await supabase
+      await (supabase
         .from('applications')
         .delete()
-        .eq('tenant_id', user.id)
-        .eq('property_id', propertyId)
-        .neq('status', 'accepted');
+        .eq('tenant_id', user.id as any)
+        .eq('property_id', propertyId as any)
+        .neq('status', 'accepted' as any) as any);
 
 
       // Now insert the new application
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('applications')
         .insert({
           tenant_id: user.id,
           landlord_id: landlordId,
           property_id: propertyId,
           status: 'pending'
-        })
+        } as any)
         .select()
-        .single();
+        .single() as any);
 
       if (error) throw error;
 
@@ -97,23 +97,23 @@ export const useApplications = () => {
     setLoading(true);
     try {
       // Upsert-like behavior: remove any non-accepted existing attempts to avoid duplicates
-      await supabase
+      await (supabase
         .from('applications')
         .delete()
-        .eq('tenant_id', user.id)
-        .eq('property_id', propertyId)
-        .neq('status', 'accepted');
+        .eq('tenant_id', user.id as any)
+        .eq('property_id', propertyId as any)
+        .neq('status', 'accepted' as any) as any);
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('applications')
         .insert({
           tenant_id: user.id,
           landlord_id: landlordId,
           property_id: propertyId,
           status: 'requested'
-        })
+        } as any)
         .select()
-        .single();
+        .single() as any);
       if (error) throw error;
       await fetchApplications();
       return data;

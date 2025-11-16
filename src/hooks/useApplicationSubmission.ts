@@ -42,7 +42,7 @@ export function useApplicationSubmission(options: SubmissionOptions) {
       }
       
       // Trigger credit check
-      await triggerCreditCheck(applicationResult.data.id, user.id);
+      await triggerCreditCheck((applicationResult.data as any).id, user.id);
       
       toast(TOAST_MESSAGES.SUCCESS);
       
@@ -67,7 +67,7 @@ export function useApplicationSubmission(options: SubmissionOptions) {
   };
 
   const saveScreeningProfile = async (formData: FormData, userId: string) => {
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('screening_profiles')
       .upsert([{
         user_id: userId,
@@ -80,13 +80,13 @@ export function useApplicationSubmission(options: SubmissionOptions) {
         screening_consent_date: new Date().toISOString(),
         is_complete: true,
         updated_at: new Date().toISOString()
-      }], { onConflict: 'user_id' });
+      }] as any, { onConflict: 'user_id' }) as any);
 
     if (error) throw error;
   };
 
   const saveScreeningDetails = async (formData: FormData, userId: string) => {
-    const { error } = await supabase
+    const { error } = await (supabase
       .from('screening_details')
       .upsert([{
         user_id: userId,
@@ -103,16 +103,16 @@ export function useApplicationSubmission(options: SubmissionOptions) {
         previous_landlord_contact: formData[FORM_FIELDS.PREVIOUS_LANDLORD_CONTACT],
         consent_given: formData[FORM_FIELDS.SCREENING_CONSENT],
         updated_at: new Date().toISOString()
-      }], { onConflict: 'user_id' });
+      }] as any, { onConflict: 'user_id' }) as any);
 
     if (error) throw error;
   };
 
   const markTenantAsScreened = async (userId: string) => {
-    await supabase
+    await (supabase
       .from('profiles')
-      .update({ is_tenant_screened: true })
-      .eq('user_id', userId);
+      .update({ is_tenant_screened: true } as any)
+      .eq('user_id', userId as any) as any);
   };
 
   const createApplication = async (userId: string) => {
@@ -124,24 +124,24 @@ export function useApplicationSubmission(options: SubmissionOptions) {
       created_at: new Date().toISOString()
     };
 
-    const result = await supabase
+    const result = await (supabase
       .from('applications')
-      .insert(applicationData)
+      .insert(applicationData as any)
       .select()
-      .single();
+      .single() as any);
 
     if (result.error) throw result.error;
     return result;
   };
 
   const markInviteAsUsed = async (inviteId: string) => {
-    await supabase
+    await (supabase
       .from('application_invites')
       .update({ 
         status: 'used', 
         used_at: new Date().toISOString() 
-      })
-      .eq('id', inviteId);
+      } as any)
+      .eq('id', inviteId as any) as any);
   };
 
   const triggerCreditCheck = async (applicationId: string, tenantId: string) => {
