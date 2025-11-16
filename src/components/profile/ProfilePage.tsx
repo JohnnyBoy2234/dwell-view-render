@@ -83,15 +83,15 @@ export default function ProfilePage() {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .filter('user_id', 'eq', user.id)
         .single();
 
       if (error) throw error;
 
-      setProfile(data);
-      setDisplayName(data.display_name || '');
-      setPhone(data.phone || '');
-      setBio(data.bio || '');
+      setProfile((data as any) || null);
+      setDisplayName(((data as any)?.display_name) || '');
+      setPhone(((data as any)?.phone) || '');
+      setBio(((data as any)?.bio) || '');
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -111,8 +111,8 @@ export default function ProfilePage() {
           phone: phone,
           bio: bio,
           updated_at: new Date().toISOString()
-        })
-        .eq('user_id', user.id);
+        } as any)
+        .filter('user_id', 'eq', user.id);
 
       if (error) throw error;
 
@@ -164,8 +164,8 @@ export default function ProfilePage() {
 
       const { error } = await supabase
         .from('profiles')
-        .update(updateData)
-        .eq('user_id', user!.id);
+        .update(updateData as any)
+        .filter('user_id', 'eq', user!.id);
 
       if (error) throw error;
 

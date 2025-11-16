@@ -178,25 +178,25 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
 
         // Property prefill
         if (urlPropertyId) {
-          const { data: prop } = await supabase
+          const { data: prop, error: propError } = await supabase
             .from('properties')
             .select('title, location')
-            .eq('id', urlPropertyId)
+            .filter('id', 'eq', urlPropertyId)
             .maybeSingle();
-          if (prop) {
-            updates.propertyAddress = `${prop.title || ''}${prop.location ? ', ' + prop.location : ''}`.trim();
+          if (!propError && prop && 'title' in prop) {
+            updates.propertyAddress = `${(prop as any).title || ''}${(prop as any).location ? ', ' + (prop as any).location : ''}`.trim();
           }
         }
 
         // Tenant prefill from profiles
         if (urlTenantId) {
-          const { data: prof } = await supabase
+          const { data: prof, error: profError } = await supabase
             .from('profiles')
             .select('display_name, phone')
-            .eq('user_id', urlTenantId)
+            .filter('user_id', 'eq', urlTenantId)
             .maybeSingle();
-          if (prof?.display_name) updates.tenantName = prof.display_name;
-          if (prof?.phone) updates.tenantPhone = prof.phone;
+          if (!profError && prof && 'display_name' in prof && (prof as any).display_name) updates.tenantName = (prof as any).display_name;
+          if (!profError && prof && 'phone' in prof && (prof as any).phone) updates.tenantPhone = (prof as any).phone;
         }
 
         // Landlord prefill
@@ -238,7 +238,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
         const { data: updated } = await supabase
           .from('lease_contracts')
           .select('*')
-          .eq('id', contractIdToUse)
+          .filter('id', 'eq', contractIdToUse)
           .maybeSingle();
         if (updated) {
           setContract(updated as any);

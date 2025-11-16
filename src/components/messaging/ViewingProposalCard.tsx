@@ -179,13 +179,13 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
       const { data, error } = await supabase
         .from('application_requests')
         .select('id, status')
-        .eq('property_id', proposal.property_id)
-        .eq('tenant_id', user.id)
+        .filter('property_id', 'eq', proposal.property_id)
+        .filter('tenant_id', 'eq', user.id)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
 
-      setApplicationRequest(data);
+      setApplicationRequest((data as any) || null);
     } catch (error: any) {
       console.error('Error checking application request:', error);
     }
@@ -204,7 +204,7 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
           tenant_id: user.id,
           landlord_id: proposal.landlord_id,
           status: 'pending'
-        });
+        } as any);
 
       if (error) throw error;
 
@@ -220,7 +220,7 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
             propertyId: proposal.property_id,
             propertyTitle: proposal.properties?.title
           }
-        });
+        } as any);
 
       toast({
         title: 'Application requested',
@@ -249,15 +249,15 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
       const { data: existing, error: findError } = await supabase
         .from('application_invites')
         .select('token')
-        .eq('tenant_id', user.id)
-        .eq('property_id', proposal.property_id)
+        .filter('tenant_id', 'eq', user.id)
+        .filter('property_id', 'eq', proposal.property_id)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (findError) throw findError;
-      if (existing?.token) {
-        navigateToInvite(existing.token);
+      if (existing && 'token' in existing && (existing as any).token) {
+        navigateToInvite((existing as any).token);
         return;
       }
 
@@ -271,7 +271,7 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
           landlord_id: proposal.landlord_id,
           tenant_id: user.id,
           status: 'invited'
-        });
+        } as any);
       if (createError) throw createError;
       navigateToInvite(token);
     } catch (error: any) {

@@ -275,25 +275,23 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           supabase
             .from("profiles")
             .select("display_name, phone")
-            .eq("user_id", user.id)
+            .filter("user_id", "eq", user.id)
             .maybeSingle(),
           supabase
             .from("screening_details")
             .select("*")
-            .eq("user_id", user.id)
+            .filter("user_id", "eq", user.id)
             .maybeSingle()
         ]);
-        
-        const userProfile = userProfileResult.data;
-        const screeningDetails = screeningDetailsResult.data;
         
         // Start with basic profile data
         let formDataUpdate: Partial<FormData> = {
           screening_consent: false, // Always require explicit consent
         };
         
-        // Add profile data
-        if (userProfile) {
+        // Add profile data if no error
+        if (!userProfileResult.error && userProfileResult.data) {
+          const userProfile = userProfileResult.data as any;
           const displayNameParts = userProfile.display_name?.split(' ') || [''];
           formDataUpdate = {
             ...formDataUpdate,
@@ -303,8 +301,9 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           };
         }
         
-        // Add screening details if available
-        if (screeningDetails) {
+        // Add screening details if available and no error
+        if (!screeningDetailsResult.error && screeningDetailsResult.data) {
+          const screeningDetails = screeningDetailsResult.data as any;
           formDataUpdate = {
             ...formDataUpdate,
             first_name: screeningDetails.full_name?.split(' ')[0] || formDataUpdate.first_name || "",
@@ -328,14 +327,14 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         }));
         
         // Load existing documents from screening profile (if any)
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from("screening_profiles")
           .select("documents")
-          .eq("user_id", user.id)
+          .filter("user_id", "eq", user.id)
           .maybeSingle();
         
-        if (profile?.documents && Array.isArray(profile.documents)) {
-          const documents = profile.documents as unknown as DocumentItem[];
+        if (!profileError && profile && 'documents' in profile && Array.isArray((profile as any).documents)) {
+          const documents = (profile as any).documents as unknown as DocumentItem[];
           // Separate documents by type
           const incomeDocs = documents.filter(doc => doc.type === 'income');
           const creditDocs = documents.filter(doc => doc.type === 'experian_credit_report');
@@ -601,8 +600,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       if (inviteId) {
         await supabase
           .from("application_invites")
-          .update({ status: "used", used_at: new Date().toISOString() })
-          .eq("id", inviteId);
+          .update({ status: "used", used_at: new Date().toISOString() } as any)
+          .filter("id", "eq", inviteId);
       }
 
       // Trigger credit check

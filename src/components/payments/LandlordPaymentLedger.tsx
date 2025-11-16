@@ -55,10 +55,10 @@ export default function LandlordPaymentLedger() {
       const { data, error } = await supabase
         .from('properties')
         .select('id, title, location')
-        .eq('landlord_id', user.id);
+        .filter('landlord_id', 'eq', user.id);
 
       if (error) throw error;
-      return data || [];
+      return (data as any) || [];
     }
   });
 
