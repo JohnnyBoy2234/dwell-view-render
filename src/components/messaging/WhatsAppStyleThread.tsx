@@ -426,27 +426,27 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           )}
 
           {message.content && (
-            <div className="text-sm leading-relaxed whitespace-pre-line break-words flex items-center gap-2">
-              <span className="whitespace-pre-line break-words">
-                {message.content}
-              </span>
-              <span className={cn(
-                'flex items-center gap-1 text-[11px] whitespace-nowrap',
-                isOwn ? 'text-white/70' : 'text-ios-gray'
-              )}>
-                {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                {isOwn && (
-                  <MessageStatusIndicator 
-                    status={messageStatus}
-                    className={cn(
-                      'transition-colors duration-200',
-                      messageStatus === 'read' ? 'text-green-400' : ''
-                    )}
-                  />
-                )}
-              </span>
+            <div className="text-sm leading-relaxed whitespace-pre-line break-words">
+              {message.content}
             </div>
           )}
+
+          {/* Timestamp and status - moved below content to prevent overflow */}
+          <div className={cn(
+            'flex items-center justify-end gap-1 text-[11px] mt-1',
+            isOwn ? 'text-white/70' : 'text-ios-gray'
+          )}>
+            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            {isOwn && (
+              <MessageStatusIndicator 
+                status={messageStatus}
+                className={cn(
+                  'transition-colors duration-200',
+                  messageStatus === 'read' ? 'text-green-400' : ''
+                )}
+              />
+            )}
+          </div>
 
           {/* Application Invite CTA inside message bubble for tenants */}
           {!isOwn && !isLandlordInConversation && typeof message.content === 'string' && message.content.includes('/apply/invite/') && (
@@ -469,8 +469,6 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
               </button>
             </div>
           )}
-
-          {/* Time and ticks are now inline next to the text */}
         </div>
       </div>
     );
