@@ -22,9 +22,10 @@ async function fetchMessages(ticketId: string, cursor?: string): Promise<Message
       read_at,
       updated_at
     `)
-    .eq('maintenance_request_id', ticketId)
     .order('created_at', { ascending: false })
     .limit(20);
+
+  query = (query as any).eq('maintenance_request_id', ticketId as any);
 
   if (cursor) {
     query = query.lt('created_at', cursor);
@@ -33,7 +34,7 @@ async function fetchMessages(ticketId: string, cursor?: string): Promise<Message
   const { data, error } = await query;
   if (error) throw error;
 
-  const messages: MaintenanceMessage[] = data?.map(msg => ({
+  const messages: MaintenanceMessage[] = ((data as any) || []).map((msg: any) => ({
     id: msg.id,
     ticketId: msg.maintenance_request_id,
     senderUserId: msg.sender_user_id,
@@ -43,7 +44,7 @@ async function fetchMessages(ticketId: string, cursor?: string): Promise<Message
     attachments: msg.attachments,
     createdAt: msg.created_at,
     readAt: msg.read_at,
-  })) || [];
+  }));
 
   return {
     messages,

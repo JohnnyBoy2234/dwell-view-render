@@ -74,36 +74,40 @@ export function TaxInvoiceGenerator() {
         if (!user) return;
         
         // Get landlord profile details
-        const { data: landlordProfile } = await supabase
+        const { data: landlordProfile, error: landlordError } = await supabase
           .from('profiles')
           .select('display_name')
-          .eq('user_id', user.id)
+          .eq('user_id', user.id as any)
           .maybeSingle();
         
         // Try get an active tenancy for tenant details and property
-        const { data: tenancy } = await supabase
+        const { data: tenancy, error: tenancyError } = await supabase
           .from('tenancies')
           .select('id, tenant_id, property_id')
-          .eq('landlord_id', user.id)
-          .eq('status', 'active')
+          .eq('landlord_id', user.id as any)
+          .eq('status', 'active' as any)
           .order('start_date', { ascending: false })
           .limit(1)
           .maybeSingle();
         
         let tenantName = '';
         let propertyAddress = '';
-        if (tenancy) {
-          const [{ data: tenantProfile }, { data: property }] = await Promise.all([
-            supabase.from('profiles').select('display_name').eq('user_id', tenancy.tenant_id).maybeSingle(),
-            supabase.from('properties').select('title,location').eq('id', tenancy.property_id).maybeSingle(),
+        if (tenancy && !tenancyError && 'tenant_id' in tenancy && 'property_id' in tenancy) {
+          const [{ data: tenantProfile, error: tenantError }, { data: property, error: propertyError }] = await Promise.all([
+            supabase.from('profiles').select('display_name').eq('user_id', (tenancy as any).tenant_id as any).maybeSingle(),
+            supabase.from('properties').select('title,location').eq('id', (tenancy as any).property_id as any).maybeSingle(),
           ]);
-          tenantName = tenantProfile?.display_name || '';
-          propertyAddress = property?.title || property?.location || '';
+          if (!tenantError && tenantProfile && 'display_name' in tenantProfile) {
+            tenantName = tenantProfile.display_name || '';
+          }
+          if (!propertyError && property && 'title' in property) {
+            propertyAddress = property.title || (property as any).location || '';
+          }
         }
         
         setInvoiceData(prev => ({
           ...prev,
-          landlordName: landlordProfile?.display_name || prev.landlordName,
+          landlordName: (!landlordError && landlordProfile && 'display_name' in landlordProfile) ? landlordProfile.display_name || prev.landlordName : prev.landlordName,
           tenantName: tenantName || prev.tenantName,
           tenantAddress: propertyAddress || prev.tenantAddress, // Set tenant address to property address
           propertyAddress: propertyAddress || prev.propertyAddress,
@@ -521,13 +525,13 @@ export function TaxInvoiceGenerator() {
                     const result = await generateTaxInvoicePDF({ invoiceData: { ...invoiceData, lineItems: adjustedItems as any }, totals });
                     if (!result?.blob) return;
                     // Resolve tenant id by display name (basic heuristic); in production, prefer explicit selection
-                    const { data: prof } = await supabase
+                    const { data: prof, error: profError } = await supabase
                       .from('profiles')
                       .select('user_id')
                       .ilike('display_name', invoiceData.tenantName)
                       .limit(1)
                       .maybeSingle();
-                    const tenantId = prof?.user_id;
+                    const tenantId = (!profError && prof && 'user_id' in prof) ? prof.user_id : null;
                     if (!tenantId) {
                       toast({ variant: 'destructive', title: 'Tenant not found', description: 'Please ensure the tenant profile exists and name matches.' });
                       return;
@@ -535,7 +539,7 @@ export function TaxInvoiceGenerator() {
                     const path = `invoices/${tenantId}/${result.filename}`;
                     const upload = await supabase.storage.from('income-documents').upload(path, result.blob, { upsert: true, contentType: 'application/pdf' });
                     if (upload.error) throw upload.error;
-                    await supabase.from('documents').insert({ user_id: tenantId, document_type: 'invoice', file_path: `income-documents/${path}`, file_type: 'application/pdf', status: 'uploaded' });
+                    await supabase.from('documents').insert({ document_type: 'invoice', file_path: `income-documents/${path}`, file_type: 'application/pdf', status: 'uploaded' } as any);
                     const { error: fnErr } = await supabase.functions.invoke('send-invoice-to-tenant', { body: { tenant_id: tenantId, property_id: '', filename: result.filename, file_path: `income-documents/${path}` } });
                     if (fnErr) throw fnErr;
                     toast({ title: 'Invoice sent to tenant', description: 'Email sent and document added to Proof of Payments.' });

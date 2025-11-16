@@ -174,7 +174,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           console.log('📋 Loaded viewing proposals:', data.length);
           setProposalsById(prev => {
             const next = { ...prev };
-            data.forEach(p => { next[p.id] = p; });
+            data.forEach((p: any) => { next[p.id] = p; });
             return next;
           });
         }
@@ -290,13 +290,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                 const { data, error } = await supabase
                   .from('viewing_proposals')
                   .select(`*, properties ( title, location )`)
-                  .eq('id', proposalId)
+                  .filter('id', 'eq', proposalId)
                   .single();
                 
                 if (!error && data) {
                   setProposalsById(prev => ({
                     ...prev,
-                    [proposalId]: data
+                    [proposalId]: data as any
                   }));
                 }
               } catch (error) {
