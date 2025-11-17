@@ -82,6 +82,9 @@ verify_jwt = false
 [functions.callpay-webhook]
 verify_jwt = false
 
+[functions.callpay-test]
+verify_jwt = false
+
 [functions.cors-ping]
 verify_jwt = false
 
