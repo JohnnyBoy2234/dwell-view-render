@@ -51,8 +51,8 @@ serve(async (req) => {
     }
 
     const user = userData.user;
-    const CALLPAY_ORG_ID = Deno.env.get("CALLPAY_ORGANISATION_ID") ?? "";
-    const CALLPAY_API_SALT = Deno.env.get("CALLPAY_API_SALT") ?? "";
+    const CALLPAY_ORG_ID = (Deno.env.get("CALLPAY_ORGANISATION_ID") ?? "").trim();
+    const CALLPAY_API_SALT = (Deno.env.get("CALLPAY_API_SALT") ?? "").trim();
     const CALLPAY_MODE = Deno.env.get("CALLPAY_MODE") ?? "sandbox";
     const APP_BASE_URL = Deno.env.get("APP_BASE_URL") ?? "";
 
@@ -69,9 +69,14 @@ serve(async (req) => {
     // ENHANCED DEBUGGING LOGS
     console.log("=== CallPay Authentication Debug ===");
     console.log("Org ID:", CALLPAY_ORG_ID);
+    console.log("Org ID length:", CALLPAY_ORG_ID.length);
+    console.log("Org ID (JSON):", JSON.stringify(CALLPAY_ORG_ID));
     console.log("Timestamp:", timestamp);
-    console.log("Salt (first 5 chars):", CALLPAY_API_SALT?.substring(0, 5) + "...");
+    console.log("Salt:", CALLPAY_API_SALT);
+    console.log("Salt length:", CALLPAY_API_SALT.length);
+    console.log("Salt (JSON):", JSON.stringify(CALLPAY_API_SALT));
     console.log("String to hash:", `${CALLPAY_API_SALT}_${CALLPAY_ORG_ID}_${timestamp}`);
+    console.log("String to hash length:", `${CALLPAY_API_SALT}_${CALLPAY_ORG_ID}_${timestamp}`.length);
     console.log("Generated Auth-Token:", authToken);
     console.log("Mode:", CALLPAY_MODE);
     console.log("Base URL:", callpayBaseUrl);
