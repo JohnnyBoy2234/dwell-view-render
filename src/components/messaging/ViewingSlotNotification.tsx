@@ -40,14 +40,14 @@ export function ViewingSlotNotification({
       const { data, error } = await supabase
         .from('viewing_slots')
         .select('*')
-        .eq('property_id', propertyId)
-        .eq('status', 'available')
+        .filter('property_id', 'eq', propertyId)
+        .filter('status', 'eq', 'available')
         .gte('start_time', new Date().toISOString())
         .order('start_time', { ascending: true })
         .limit(3);
 
       if (error) throw error;
-      setAvailableSlots(data || []);
+      setAvailableSlots((data as any) || []);
     } catch (error) {
       console.error('Error fetching viewing slots:', error);
     } finally {

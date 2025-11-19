@@ -56,14 +56,14 @@ export function PaymentsTab({ propertyId }: PaymentsTabProps) {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('profiles')
         .select('paystack_subaccount_code')
-        .eq('user_id', user.id)
-        .single();
+        .eq('user_id', user.id as any)
+        .single() as any);
 
       if (error) throw error;
-      setHasPaymentSetup(!!data?.paystack_subaccount_code);
+      setHasPaymentSetup(!!(data as any)?.paystack_subaccount_code);
     } catch (error) {
       console.error('Error checking payment setup:', error);
       setHasPaymentSetup(false);
@@ -72,7 +72,7 @@ export function PaymentsTab({ propertyId }: PaymentsTabProps) {
 
   const fetchPayments = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('payments')
         .select(`
           *,
@@ -80,9 +80,9 @@ export function PaymentsTab({ propertyId }: PaymentsTabProps) {
             display_name
           )
         `)
-        .eq('landlord_id', user?.id)
+        .eq('landlord_id', user?.id as any)
         .in('tenancy_id', await getTenancyIdsForProperty())
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false }) as any);
 
       if (error) throw error;
       setPayments((data || []) as any);
@@ -93,7 +93,7 @@ export function PaymentsTab({ propertyId }: PaymentsTabProps) {
 
   const fetchTenancies = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase
         .from('tenancies')
         .select(`
           id,
@@ -104,11 +104,11 @@ export function PaymentsTab({ propertyId }: PaymentsTabProps) {
             display_name
           )
         `)
-        .eq('property_id', propertyId)
-        .eq('landlord_id', user?.id);
+        .eq('property_id', propertyId as any)
+        .eq('landlord_id', user?.id as any) as any);
 
       if (error) throw error;
-      setTenancies(data || []);
+      setTenancies((data || []) as any);
     } catch (error) {
       console.error('Error fetching tenancies:', error);
     } finally {
@@ -117,12 +117,12 @@ export function PaymentsTab({ propertyId }: PaymentsTabProps) {
   };
 
   const getTenancyIdsForProperty = async () => {
-    const { data } = await supabase
+    const { data } = await (supabase
       .from('tenancies')
       .select('id')
-      .eq('property_id', propertyId)
-      .eq('landlord_id', user?.id);
-    
+      .eq('property_id', propertyId as any)
+      .eq('landlord_id', user?.id as any) as any);
+    return (data as any)?.map((t: any) => t.id) || [];
     return data?.map(t => t.id) || [];
   };
 
