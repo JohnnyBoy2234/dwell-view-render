@@ -54,7 +54,7 @@ export default function Pricing() {
     try {
       await startCallpayCheckout({
         plan_code: 'pro_landlord_monthly',
-        amount: 50,
+        amount: 8,
         item_name: 'RentLekker Pro Landlord (Monthly)',
         item_description: 'Monthly billing',
       });
@@ -72,7 +72,7 @@ export default function Pricing() {
     try {
       await startCallpayCheckout({
         plan_code: 'premium_landlord_monthly',
-        amount: 50,
+        amount: 8,
         item_name: 'RentLekker Premium Landlord (Monthly)',
         item_description: 'Monthly billing',
       });
@@ -148,7 +148,7 @@ export default function Pricing() {
                 </button>
               </div>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-4xl font-bold">R50</span>
+                <span className="text-4xl font-bold">R8</span>
                 <span className="text-muted-foreground">/ month</span>
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function Pricing() {
                 </button>
               </div>
               <div className="flex items-baseline gap-2 mb-2">
-                <span className="text-4xl font-bold">R50</span>
+                <span className="text-4xl font-bold">R8</span>
                 <span className="text-muted-foreground">/ month</span>
               </div>
             </div>

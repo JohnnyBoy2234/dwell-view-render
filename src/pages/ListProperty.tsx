@@ -344,7 +344,7 @@ export default function ListProperty() {
             const isYearly = billing === 'yearly';
             startCallpayCheckout({
               plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
-              amount: 50,
+              amount: 8,
               item_name: isYearly ? 'RentLekker Pro Landlord (Yearly)' : 'RentLekker Pro Landlord (Monthly)',
               item_description: isYearly ? 'Annual billing' : 'Monthly billing',
             });
@@ -353,7 +353,7 @@ export default function ListProperty() {
             const isYearly = billing === 'yearly';
             startCallpayCheckout({
               plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
-              amount: 50,
+              amount: 8,
               item_name: isYearly ? 'RentLekker Premium Landlord (Yearly)' : 'RentLekker Premium Landlord (Monthly)',
               item_description: isYearly ? 'Annual billing' : 'Monthly billing',
             });

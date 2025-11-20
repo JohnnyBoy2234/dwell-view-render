@@ -35,7 +35,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
       const isYearly = billing === "yearly";
       await startCallpayCheckout({
         plan_code: isYearly ? "pro_landlord_yearly" : "pro_landlord_monthly",
-        amount: 50,
+        amount: 8,
         item_name: isYearly ? "RentLekker Pro Landlord (Yearly)" : "RentLekker Pro Landlord (Monthly)",
         item_description: isYearly ? "Annual billing" : "Monthly billing",
       });
@@ -58,7 +58,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
       const isYearly = billing === "yearly";
       await startCallpayCheckout({
         plan_code: isYearly ? "premium_landlord_yearly" : "premium_landlord_monthly",
-        amount: 50,
+        amount: 8,
         item_name: isYearly ? "RentLekker Premium Landlord (Yearly)" : "RentLekker Premium Landlord (Monthly)",
         item_description: isYearly ? "Annual billing" : "Monthly billing",
       });
@@ -94,7 +94,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
             <h4 className="font-semibold mb-1">Pro Landlord</h4>
             <div className="text-sm text-muted-foreground mb-3">Handle every step from listing to lease.</div>
             <div className="flex items-baseline gap-2 mb-3">
-              <span className="text-2xl font-bold">R50</span>
+              <span className="text-2xl font-bold">R8</span>
               <span className="text-muted-foreground">/ month</span>
             </div>
             <div className="space-y-1 mb-4">
@@ -127,7 +127,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
             <h4 className="font-semibold text-amber-900 mb-1">Premium Landlord</h4>
             <div className="text-sm text-muted-foreground mb-3">Everything in Pro, plus concierge support.</div>
             <div className="flex items-baseline gap-2 mb-3">
-              <span className="text-2xl font-bold">R50</span>
+              <span className="text-2xl font-bold">R8</span>
               <span className="text-muted-foreground">/ month</span>
             </div>
             <div className="space-y-1 mb-4">
