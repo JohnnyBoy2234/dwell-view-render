@@ -49,7 +49,7 @@ export function MessageBubble({
   return (
     <div
       className={cn(
-        "flex items-end gap-2 mb-2 animate-message-incoming",
+        "flex items-end gap-2 mb-2 w-full animate-message-incoming",
         isOwn ? "justify-end" : "justify-start"
       )}
       role="listitem"
@@ -58,7 +58,7 @@ export function MessageBubble({
         className={cn(
           MESSAGE_STYLES.BUBBLE_BASE,
           isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE,
-          "text-sm w-auto max-w-[90%] min-w-[120px] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] px-4 py-2 break-words overflow-hidden"
+          "text-sm w-auto px-4 py-2 break-words overflow-hidden"
         )}
         style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
       >
