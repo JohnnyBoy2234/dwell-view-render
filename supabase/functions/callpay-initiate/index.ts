@@ -8,6 +8,16 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
+function generateShortReference(): string {
+  const timestamp = Date.now().toString().slice(-8);
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let random = '';
+  for (let i = 0; i < 4; i++) {
+    random += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return `CP${timestamp}${random}`;
+}
+
 async function generateAuthToken(salt: string, orgId: string, timestamp: number): Promise<string> {
   const stringToHash = `${salt}_${orgId}_${timestamp}`;
   const encoder = new TextEncoder();
@@ -59,7 +69,8 @@ serve(async (req) => {
     const timestamp = Math.floor(Date.now() / 1000);
     const authToken = await generateAuthToken(CALLPAY_API_SALT, CALLPAY_ORG_ID, timestamp);
 
-    const merchantReference = `${plan_code}-${user.id}-${Date.now()}`;
+    const shortReference = generateShortReference();
+    const fullReference = `${plan_code}-${user.id}-${Date.now()}`;
     const callpayBaseUrl = CALLPAY_MODE === "live" 
       ? "https://payments.onegate.co.za" 
       : "https://payments.onegate.co.za";
@@ -82,7 +93,8 @@ serve(async (req) => {
     console.log("Base URL:", callpayBaseUrl);
     
     console.log("=== Payment Details ===");
-    console.log("Merchant Reference:", merchantReference);
+    console.log("Short Reference (for CallPay):", shortReference);
+    console.log("Full Reference (internal):", fullReference);
     console.log("Amount:", amount);
     console.log("Plan Code:", plan_code);
     console.log("Notify URL:", notifyUrl);
@@ -98,7 +110,7 @@ serve(async (req) => {
     const requestBody = {
       payment_type: "eft",
       amount: amount.toString(),
-      merchant_reference: merchantReference,
+      merchant_reference: shortReference,
       customer_reference: user.email || "",
       success_url: `${APP_BASE_URL}/payment-success?provider=callpay`,
       error_url: `${APP_BASE_URL}/pricing?error=1`,
@@ -145,12 +157,18 @@ serve(async (req) => {
     // Store pending payment info
     await admin.from("billing_payments").insert({
       provider: "callpay",
-      reference: merchantReference,
+      reference: shortReference,
       user_id: user.id,
       plan_code: plan_code,
       amount: Number(amount),
       status: "pending",
-      raw: { payment_key: paymentData.key, item_name },
+      raw: { 
+        payment_key: paymentData.key, 
+        item_name,
+        full_reference: fullReference,
+        plan_code,
+        user_id: user.id 
+      },
     });
 
     return new Response(JSON.stringify({ 
