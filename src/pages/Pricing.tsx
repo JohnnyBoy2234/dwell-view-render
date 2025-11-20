@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { startCallpayCheckout } from "@/services/callpayService";
@@ -15,9 +15,38 @@ const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 export default function Pricing() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('yearly');
   const [premiumBilling, setPremiumBilling] = useState<'monthly' | 'yearly'>('yearly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    const canceled = searchParams.get('canceled');
+    const status = searchParams.get('status');
+    const merchantRef = searchParams.get('merchant_reference');
+
+    if (error === '1' || status === 'error') {
+      toast({
+        variant: "destructive",
+        title: "Payment Failed",
+        description: merchantRef 
+          ? `Your payment could not be processed (Ref: ${merchantRef}). Please try again or contact support if the issue persists.`
+          : "Your payment could not be processed. Please try again or contact support if the issue persists.",
+      });
+      
+      // Clean up URL parameters
+      setSearchParams({});
+    } else if (canceled === '1' || status === 'cancel') {
+      toast({
+        title: "Payment Canceled",
+        description: "You canceled the payment. No charges were made to your account.",
+      });
+      
+      // Clean up URL parameters
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   const handleProCheckout = async () => {
     console.log('[Pricing] Pro checkout button clicked');
