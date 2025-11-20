@@ -30,7 +30,7 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-3 lg:p-4 space-y-1">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-3 lg:p-4 space-y-1">
         {data?.pages.map((page: any) => (
           <div key={page.cursor}>
             {page.messages?.map((msg: any) => (
