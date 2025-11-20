@@ -58,7 +58,7 @@ export function MessageBubble({
         className={cn(
           MESSAGE_STYLES.BUBBLE_BASE,
           isOwn ? MESSAGE_STYLES.OWN_MESSAGE : MESSAGE_STYLES.OTHER_MESSAGE,
-          "text-sm w-auto px-4 py-2 break-words overflow-hidden"
+          "text-sm"
         )}
         style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
       >
