@@ -1,10 +1,13 @@
-import React from 'react';
-import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, type LucideIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, Lock, type LucideIcon } from 'lucide-react';
 import { RIcon } from '@/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
+import { useSubscription } from '@/hooks/useSubscription';
+import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Sidebar,
   SidebarContent,
@@ -19,11 +22,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+type PlanType = 'free' | 'pro' | 'premium';
+
 interface SidebarItem {
   title: string;
   url: string;
   icon: LucideIcon | React.ComponentType<{ className?: string }>;
   badge?: number;
+  className?: string;
+  requiredPlan?: PlanType;
+  description?: string;
 }
 
 const tenantItems: SidebarItem[] = [
@@ -39,15 +47,69 @@ const tenantItems: SidebarItem[] = [
 ];
 
 const landlordItems: SidebarItem[] = [
-  { title: 'Landlord Dashboard', url: '/enhancedlandlorddashboard', icon: Home },
-  { title: 'Properties', url: '/enhancedlandlorddashboard/properties', icon: Building },
-  { title: 'Applications', url: '/enhancedlandlorddashboard/applications', icon: Inbox },
-  { title: 'Lease System', url: '/enhancedlandlorddashboard/leases', icon: FileText },
-  { title: 'Tenants', url: '/enhancedlandlorddashboard/tenants', icon: Users },
-  { title: 'Payments', url: '/enhancedlandlorddashboard/payments', icon: RIcon },
-  { title: 'Maintenance', url: '/enhancedlandlorddashboard/maintenance', icon: Wrench },
-  { title: 'Inspection', url: '/enhancedlandlorddashboard/inspection', icon: Clipboard },
-  { title: 'SwiftBooks', url: '/enhancedlandlorddashboard/reports', icon: BarChart3 },
+  { 
+    title: 'Landlord Dashboard', 
+    url: '/enhancedlandlorddashboard', 
+    icon: Home,
+    description: 'Your property management dashboard',
+    requiredPlan: 'free'
+  },
+  { 
+    title: 'Properties', 
+    url: '/enhancedlandlorddashboard/properties', 
+    icon: Building,
+    description: 'Manage your properties',
+    requiredPlan: 'free'
+  },
+  { 
+    title: 'Applications', 
+    url: '/enhancedlandlorddashboard/applications', 
+    icon: Inbox,
+    description: 'View and manage rental applications',
+    requiredPlan: 'pro'
+  },
+  { 
+    title: 'Lease System', 
+    url: '/enhancedlandlorddashboard/leases', 
+    icon: FileText,
+    description: 'Create and manage lease agreements',
+    requiredPlan: 'pro'
+  },
+  { 
+    title: 'Tenants', 
+    url: '/enhancedlandlorddashboard/tenants', 
+    icon: Users,
+    description: 'Manage your tenants',
+    requiredPlan: 'pro'
+  },
+  { 
+    title: 'Payments', 
+    url: '/enhancedlandlorddashboard/payments', 
+    icon: RIcon,
+    description: 'Track and manage rent payments',
+    requiredPlan: 'pro'
+  },
+  { 
+    title: 'Maintenance', 
+    url: '/enhancedlandlorddashboard/maintenance', 
+    icon: Wrench,
+    description: 'Handle maintenance requests',
+    requiredPlan: 'premium'
+  },
+  { 
+    title: 'Inspection', 
+    url: '/enhancedlandlorddashboard/inspection', 
+    icon: Clipboard,
+    description: 'Schedule and track property inspections',
+    requiredPlan: 'pro'
+  },
+  { 
+    title: 'SwiftBooks', 
+    url: '/enhancedlandlorddashboard/reports', 
+    icon: BarChart3,
+    description: 'Financial reports and accounting',
+    requiredPlan: 'premium'
+  },
 ];
 
 interface EnhancedSidebarProps {
@@ -55,12 +117,28 @@ interface EnhancedSidebarProps {
   onTabChange?: (tab: string) => void;
 }
 
+const PLAN_NAMES = {
+  free: 'Free',
+  pro: 'Pro',
+  premium: 'Premium'
+} as const;
+
+const PLAN_COLORS = {
+  free: 'bg-gray-100 text-gray-800',
+  pro: 'bg-blue-100 text-blue-800',
+  premium: 'bg-purple-100 text-purple-800'
+} as const;
+
 export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isLandlord } = useAuth();
+  const { isLandlord, user } = useAuth();
   const { unreadCount } = useUnreadMessages();
   const { data: maintenanceUnread } = useUnreadCounts();
+  const { toast } = useToast();
+  const { plan, loading: subscriptionLoading } = useSubscription();
+  const [showUpgradeTooltip, setShowUpgradeTooltip] = useState<string | null>(null);
+  
   const maintenanceTotal = maintenanceUnread
     ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0)
     : 0;
@@ -70,15 +148,23 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const items = isLandlord ? landlordItems : tenantItems;
   
   // Add unread count to messages and maintenance requests
-  const itemsWithBadges = items.map((item) => ({
-    ...item,
-    badge:
-      item.title === 'Messages'
-        ? unreadCount
-        : item.title === 'Maintenance'
-        ? maintenanceTotal
-        : undefined,
-  }));
+  const itemsWithBadges = items.map((item) => {
+    const isLocked = item.requiredPlan && 
+      (item.requiredPlan === 'pro' && (plan === 'free' || plan === 'pro')) ||
+      (item.requiredPlan === 'premium' && plan !== 'premium');
+    
+    return {
+      ...item,
+      badge:
+        item.title === 'Messages'
+          ? unreadCount
+          : item.title === 'Maintenance'
+          ? maintenanceTotal
+          : undefined,
+      isLocked,
+      className: isLocked ? 'opacity-70' : ''
+    };
+  });
 
   const currentPath = location.pathname;
   const isActive = (path: string) => {
@@ -92,12 +178,31 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
     return currentPath === path || currentPath.startsWith(path + '/');
   };
 
-  const handleItemClick = (item: SidebarItem) => {
+  const handleItemClick = (item: SidebarItem & { isLocked?: boolean }) => {
+    // Check if the feature is locked
+    if (item.isLocked) {
+      setShowUpgradeTooltip(item.title);
+      setTimeout(() => setShowUpgradeTooltip(null), 2000);
+      
+      toast({
+        title: `Upgrade to ${item.requiredPlan === 'pro' ? 'Pro' : 'Premium'}`,
+        description: `This feature requires the ${item.requiredPlan} plan.`,
+        variant: 'default',
+        action: (
+          <Button variant="outline" size="sm" onClick={() => navigate('/pricing')}>
+            View Plans
+          </Button>
+        ),
+      });
+      return;
+    }
+
     if (onTabChange) {
       onTabChange(item.url);
     } else {
       navigate(item.url);
     }
+    
     // Auto-close sidebar on mobile after navigation
     if (isMobile) {
       setOpenMobile(false);
@@ -105,7 +210,8 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   };
 
   return (
-    <Sidebar className="border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium" side="left" variant="sidebar">
+    <TooltipProvider delayDuration={300}>
+      <Sidebar className="border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium" side="left" variant="sidebar">
       <SidebarContent>
         {/* Logo */}
         <div className="p-6 border-b">
@@ -141,15 +247,27 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
                       onClick={() => handleItemClick(item)}
                       className="w-full flex items-center justify-between gap-3 px-6 py-3"
                     >
-                      <div className="flex items-center gap-3">
-                        <item.icon className="w-5 h-5 flex-shrink-0" />
-                        <span>{item.title}</span>
+                      <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-3">
+                          <item.icon className={`w-5 h-5 flex-shrink-0 ${item.isLocked ? 'text-muted-foreground' : ''}`} />
+                          <span className={item.isLocked ? 'text-muted-foreground' : ''}>
+                            {item.title}
+                            {item.requiredPlan && item.requiredPlan !== 'free' && (
+                              <span className={`ml-2 px-1.5 py-0.5 text-xs rounded-full ${PLAN_COLORS[item.requiredPlan]}`}>
+                                {PLAN_NAMES[item.requiredPlan]}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        {item.isLocked && (
+                          <Lock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                        )}
                       </div>
-                      {item.badge && item.badge > 0 && (
-                        <Badge className="bg-earth-warm text-white border-white text-xs">
+                      {item.badge !== undefined && item.badge > 0 ? (
+                        <Badge className="bg-earth-warm text-white border-white text-xs ml-auto">
                           {item.badge > 99 ? '99+' : item.badge}
                         </Badge>
-                      )}
+                      ) : null}
                     </button>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -172,6 +290,15 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
           </div>
         )}
       </SidebarContent>
-    </Sidebar>
+      </Sidebar>
+      
+      {/* Upgrade tooltip for mobile */}
+      {showUpgradeTooltip && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+          <Lock className="h-4 w-4" />
+          <span>Upgrade your plan to access {showUpgradeTooltip}</span>
+        </div>
+      )}
+    </TooltipProvider>
   );
 }
