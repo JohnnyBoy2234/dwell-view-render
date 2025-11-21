@@ -7,7 +7,7 @@ import LandlordInspection from '@/pages/LandlordInspection';
 import InventoryStart from '@/pages/InventoryStart';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
 import { RentLekkerSupport } from '@/components/support/SwiftRentSupport';
-
+import { PlanGuard } from '@/components/PlanGuard';
 import ProfilePage from '@/components/profile/ProfilePage';
 
 // Placeholder components for missing landlord pages
@@ -90,14 +90,18 @@ export default function LandlordDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="messages" element={
-        <EnhancedDashboardLayout title="Messages">
-          <Messages />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="pro" featureName="In-Platform Messaging">
+          <EnhancedDashboardLayout title="Messages">
+            <Messages />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="applications" element={
-        <EnhancedDashboardLayout title="Applications">
-          <LandlordApplications />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="pro" featureName="Tenant Applications">
+          <EnhancedDashboardLayout title="Applications">
+            <LandlordApplications />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="payments" element={
         <EnhancedDashboardLayout title="Payments">
@@ -105,29 +109,39 @@ export default function LandlordDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="reports" element={
-        <EnhancedDashboardLayout title="SwiftBooks & Analytics">
-          <LandlordReports />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics">
+          <EnhancedDashboardLayout title="SwiftBooks & Analytics">
+            <LandlordReports />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="maintenance" element={
-        <EnhancedDashboardLayout title="Maintenance Requests">
-          <LandlordMaintenance />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
+          <EnhancedDashboardLayout title="Maintenance Requests">
+            <LandlordMaintenance />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="inspection" element={
-        <EnhancedDashboardLayout title="Property Inspection">
-          <LandlordInspection />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="pro" featureName="Property Inspections">
+          <EnhancedDashboardLayout title="Property Inspection">
+            <LandlordInspection />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="inspection/start" element={
-        <EnhancedDashboardLayout title="Start Inspection">
-          <InventoryStart />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="pro" featureName="Property Inspections">
+          <EnhancedDashboardLayout title="Start Inspection">
+            <InventoryStart />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="maintenance/:ticketId" element={
-        <EnhancedDashboardLayout title="Maintenance Ticket">
-          <MaintenanceTicketDetails />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
+          <EnhancedDashboardLayout title="Maintenance Ticket">
+            <MaintenanceTicketDetails />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="profile" element={
         <EnhancedDashboardLayout title="Profile Settings">
