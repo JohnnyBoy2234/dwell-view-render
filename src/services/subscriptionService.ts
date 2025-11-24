@@ -1,9 +1,9 @@
-import { supabase } from '@/lib/supabase-helpers';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired' | 'paused';
+type PlanType = 'free' | 'pro' | 'premium';
 
 interface Subscription {
   id: string;
@@ -182,18 +182,14 @@ export class SubscriptionService {
    * Archive or clean up premium data when downgrading
    */
   private static async archivePremiumData(userId: string) {
-    // Example implementation - archive old maintenance requests
-    // In a real app, you'd implement this based on your data model
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('maintenance_requests')
         .update({ status: 'archived' })
         .eq('user_id', userId)
         .eq('is_premium_feature', true);
 
       if (error) throw error;
-
-      // Add any other premium data cleanup here
     } catch (error) {
       console.error('Error archiving premium data:', error);
       throw error;
@@ -206,7 +202,7 @@ export class SubscriptionService {
   static async checkFeatureAccess(userId: string, feature: string): Promise<boolean> {
     try {
       // Get user's subscription
-      const { data: subscription, error } = await supabase
+      const { data: subscription, error } = await (supabase as any)
         .from('billing_subscriptions')
         .select('*')
         .eq('user_id', userId)
@@ -217,12 +213,12 @@ export class SubscriptionService {
       if (error || !subscription) return false;
 
       // Check if subscription is active
-      if (!this.isSubscriptionActive(subscription)) {
+      if (!this.isSubscriptionActive(subscription as any)) {
         return false;
       }
 
       // Get the effective plan
-      const plan = this.getEffectivePlan(subscription);
+      const plan = this.getEffectivePlan(subscription as any);
 
       // Define feature access based on plan
       const featureAccess: Record<string, string[]> = {
@@ -255,26 +251,14 @@ export function useSubscriptionService() {
     const hasAccess = await SubscriptionService.checkFeatureAccess(user.id, feature);
     
     if (!hasAccess) {
-      const UpgradeButton = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
-        ({ className, ...props }, ref) => (
-          <Button
-            ref={ref}
-            className={className}
-            onClick={() => navigate('/pricing')}
-            {...props}
-          >
-            Upgrade
-          </Button>
-        )
-      );
-      UpgradeButton.displayName = 'UpgradeButton';
-
       toast({
         title: "Upgrade Required",
-        description: "This feature requires a premium subscription.",
+        description: "This feature requires a premium subscription. Click to upgrade.",
         variant: "default",
-        action: <UpgradeButton />
       });
+      
+      // Navigate after a brief delay
+      setTimeout(() => navigate('/pricing'), 2000);
     }
     
     return hasAccess;

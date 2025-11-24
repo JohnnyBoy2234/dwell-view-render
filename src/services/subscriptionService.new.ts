@@ -1,8 +1,6 @@
-import { supabase } from '@/lib/supabase-helpers';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import React from 'react';
 
 type SubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid' | 'incomplete' | 'incomplete_expired' | 'paused';
 type PlanType = 'free' | 'pro' | 'premium';
@@ -185,7 +183,7 @@ export class SubscriptionService {
    */
   private static async archivePremiumData(userId: string) {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('maintenance_requests')
         .update({ status: 'archived' })
         .eq('user_id', userId)
@@ -205,7 +203,7 @@ export class SubscriptionService {
   static async checkFeatureAccess(userId: string, feature: string): Promise<boolean> {
     try {
       // Get user's subscription
-      const { data: subscription, error } = await supabase
+      const { data: subscription, error } = await (supabase as any)
         .from('billing_subscriptions')
         .select('*')
         .eq('user_id', userId)
@@ -216,12 +214,12 @@ export class SubscriptionService {
       if (error || !subscription) return false;
 
       // Check if subscription is active
-      if (!this.isSubscriptionActive(subscription)) {
+      if (!this.isSubscriptionActive(subscription as any)) {
         return false;
       }
 
       // Get the effective plan
-      const plan = this.getEffectivePlan(subscription);
+      const plan = this.getEffectivePlan(subscription as any);
 
       // Define feature access based on plan
       const featureAccess: Record<string, string[]> = {
@@ -254,18 +252,14 @@ export function useSubscriptionService() {
     const hasAccess = await SubscriptionService.checkFeatureAccess(user.id, feature);
     
     if (!hasAccess) {
-      const UpgradeButton = () => (
-        <Button onClick={() => navigate('/pricing')}>
-          Upgrade
-        </Button>
-      );
-
       toast({
         title: "Upgrade Required",
-        description: "This feature requires a premium subscription.",
+        description: "This feature requires a premium subscription. Click to upgrade.",
         variant: "default",
-        action: <UpgradeButton />
       });
+      
+      // Navigate after a brief delay
+      setTimeout(() => navigate('/pricing'), 2000);
     }
     
     return hasAccess;

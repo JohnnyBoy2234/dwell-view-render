@@ -112,9 +112,9 @@ serve(async (req) => {
       amount: amount.toString(),
       merchant_reference: shortReference,
       customer_reference: user.email || "",
-      success_url: `${APP_BASE_URL}/payment-success?provider=callpay`,
-      error_url: `${APP_BASE_URL}/pricing?error=1`,
-      cancel_url: `${APP_BASE_URL}/pricing?canceled=1`,
+      success_url: `${APP_BASE_URL}/payment-success?provider=callpay&reference=${shortReference}`,
+      error_url: `${APP_BASE_URL}/payment-failed?reason=error&reference=${shortReference}`,
+      cancel_url: `${APP_BASE_URL}/payment-failed?reason=cancelled&reference=${shortReference}`,
       notify_url: notifyUrl,
       currency_code: "ZAR",
     };
