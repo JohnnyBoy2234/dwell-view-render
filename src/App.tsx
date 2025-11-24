@@ -30,6 +30,7 @@ import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboar
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminProperties from "./pages/admin/AdminProperties";
@@ -221,6 +222,7 @@ function AppRoutes() {
               <Route path="/kyc/test" element={<KycCapture />} />
               <Route path="/apply/:id" element={<PropertyDetail />} />
               <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
+              <Route path="/payment-failed" element={<RouteGuard><PaymentFailed /></RouteGuard>} />
               <Route path="/settings" element={<RouteGuard><EnhancedDashboardLayout title="Account Settings"><SettingsPage /></EnhancedDashboardLayout></RouteGuard>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

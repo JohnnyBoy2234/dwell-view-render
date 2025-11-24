@@ -23,30 +23,15 @@ export default function Pricing() {
   useEffect(() => {
     const error = searchParams.get('error');
     const canceled = searchParams.get('canceled');
-    const status = searchParams.get('status');
-    const merchantRef = searchParams.get('merchant_reference');
+    const reference = searchParams.get('reference');
 
-    if (error === '1' || status === 'error') {
-      toast({
-        variant: "destructive",
-        title: "Payment Failed",
-        description: merchantRef 
-          ? `Your payment could not be processed (Ref: ${merchantRef}). Please try again or contact support if the issue persists.`
-          : "Your payment could not be processed. Please try again or contact support if the issue persists.",
-      });
-      
-      // Clean up URL parameters
-      setSearchParams({});
-    } else if (canceled === '1' || status === 'cancel') {
-      toast({
-        title: "Payment Canceled",
-        description: "You canceled the payment. No charges were made to your account.",
-      });
-      
-      // Clean up URL parameters
-      setSearchParams({});
+    // Redirect to payment failed page instead of showing toast
+    if (error === '1') {
+      navigate(`/payment-failed?reason=error${reference ? `&reference=${reference}` : ''}`);
+    } else if (canceled === '1') {
+      navigate(`/payment-failed?reason=cancelled${reference ? `&reference=${reference}` : ''}`);
     }
-  }, [searchParams, setSearchParams]);
+  }, [searchParams, navigate]);
 
   const handleProCheckout = async () => {
     console.log('[Pricing] Pro checkout button clicked');
