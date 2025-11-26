@@ -43,15 +43,25 @@ export function useSubscription(): Subscription {
         const { data, error } = result;
 
         if (error || !data) {
+          console.log('[useSubscription] No active subscription found, setting to free plan');
           setPlan('free');
         } else {
           // Map plan codes to our plan types
           const planCode = (data.plan_code as string)?.toLowerCase() || '';
+          console.log('[useSubscription] Active subscription found:', {
+            plan_code: data.plan_code,
+            status: data.status,
+            user_id: data.user_id
+          });
+          
           if (planCode.includes('premium')) {
+            console.log('[useSubscription] Setting plan to: premium');
             setPlan('premium');
           } else if (planCode.includes('pro')) {
+            console.log('[useSubscription] Setting plan to: pro');
             setPlan('pro');
           } else {
+            console.log('[useSubscription] Unknown plan code, defaulting to: free');
             setPlan('free');
           }
         }
