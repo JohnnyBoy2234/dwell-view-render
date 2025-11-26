@@ -85,9 +85,11 @@ export default function LandlordDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="tenants" element={
-        <EnhancedDashboardLayout title="Tenant Management">
-          <LandlordTenants />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="pro" featureName="Tenant Management">
+          <EnhancedDashboardLayout title="Tenant Management">
+            <LandlordTenants />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="messages" element={
         <PlanGuard requiredPlan="pro" featureName="In-Platform Messaging">
@@ -104,9 +106,11 @@ export default function LandlordDashboardRoutes() {
         </PlanGuard>
       } />
       <Route path="payments" element={
-        <EnhancedDashboardLayout title="Payments">
-          <LandlordPayments />
-        </EnhancedDashboardLayout>
+        <PlanGuard requiredPlan="pro" featureName="Payment Management">
+          <EnhancedDashboardLayout title="Payments">
+            <LandlordPayments />
+          </EnhancedDashboardLayout>
+        </PlanGuard>
       } />
       <Route path="reports" element={
         <PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics">
