@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { XCircle, Home, RotateCcw, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const failureReasons: Record<string, { title: string; message: string }> = {
   insufficient_funds: {
@@ -44,13 +45,19 @@ export default function PaymentFailed() {
       navigate('/auth');
       return;
     }
+    
+    // Show toast notification on mount
+    toast.error(failureInfo.title, {
+      description: failureInfo.message,
+      duration: 5000,
+    });
   }, [user, navigate]);
 
   const handleReturnToDashboard = () => {
     if (isLandlord) {
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
     } else {
-      navigate('/tenant-dashboard');
+      navigate('/enhancedtenantdashboard');
     }
   };
 

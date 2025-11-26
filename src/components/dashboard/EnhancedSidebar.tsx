@@ -149,9 +149,13 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   
   // Add unread count to messages and maintenance requests
   const itemsWithBadges = items.map((item) => {
-    const isLocked = item.requiredPlan && 
-      (item.requiredPlan === 'pro' && (plan === 'free' || plan === 'pro')) ||
-      (item.requiredPlan === 'premium' && plan !== 'premium');
+    // Determine if feature is locked based on user's current plan
+    let isLocked = false;
+    if (item.requiredPlan === 'pro' && plan === 'free') {
+      isLocked = true;
+    } else if (item.requiredPlan === 'premium' && (plan === 'free' || plan === 'pro')) {
+      isLocked = true;
+    }
     
     return {
       ...item,

@@ -6,6 +6,7 @@ import { CheckCircle, Home, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import confetti from 'canvas-confetti';
+import { toast } from 'sonner';
 
 type VerificationStatus = 'loading' | 'success' | 'pending' | 'timeout' | 'failed';
 
@@ -67,6 +68,10 @@ export default function PaymentSuccess() {
             setPlanCode(payment.plan_code || '');
             setVerificationStatus('success');
             triggerConfetti();
+            toast.success('Payment Successful!', {
+              description: `Your ${payment.plan_code?.includes('premium') ? 'Premium' : 'Pro'} plan is now active. Welcome aboard!`,
+              duration: 5000,
+            });
             return;
           }
         } else if (payment?.status === 'failed') {
@@ -121,9 +126,9 @@ export default function PaymentSuccess() {
 
   const handleReturnToDashboard = () => {
     if (isLandlord) {
-      navigate('/dashboard');
+      navigate('/enhancedlandlorddashboard');
     } else {
-      navigate('/tenant-dashboard');
+      navigate('/enhancedtenantdashboard');
     }
   };
 
