@@ -87,11 +87,10 @@ serve(async (req) => {
     // 4. Send magic link if this is a new user
     if (!existingUser) {
       const { error: linkError } = await supabase.auth.admin.generateLink({
-        type: 'signup',
+        type: 'magiclink',
         email,
         options: {
           redirectTo: `${Deno.env.get('SITE_URL')}/auth/callback`,
-          data: { display_name: displayName }
         }
       })
 
@@ -110,10 +109,12 @@ serve(async (req) => {
     )
   } catch (error) {
     console.error('Error in create-admin-user:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Failed to create admin user';
+    const errorDetails = (error as any)?.details || null;
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Failed to create admin user',
-        details: error.details || null
+        error: errorMessage,
+        details: errorDetails
       }), 
       { 
         status: 500, 

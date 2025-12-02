@@ -90,3 +90,6 @@ verify_jwt = false
 
 [functions.payment-reminder-scheduler]
 verify_jwt = false
+
+[functions.activate-subscription]
+verify_jwt = true

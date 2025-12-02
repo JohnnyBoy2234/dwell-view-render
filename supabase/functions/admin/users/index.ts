@@ -44,7 +44,7 @@ serve(async (req) => {
         full_name: profile?.display_name || '',
         created_at: user.created_at,
         last_sign_in_at: user.last_sign_in_at,
-        is_banned: user.banned_until !== null,
+        is_banned: (user as any).banned_until !== null,
         roles: roles
       }
     })
@@ -57,8 +57,9 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
