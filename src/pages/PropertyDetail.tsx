@@ -33,6 +33,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useForm } from 'react-hook-form';
 import { useApplications } from '@/hooks/useApplications';
 import { useMessaging } from '@/hooks/useMessaging';
@@ -81,6 +82,7 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+  const { plan, loading: subscriptionLoading } = useSubscription();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [messageLoading, setMessageLoading] = useState(false);
@@ -549,16 +551,56 @@ export default function PropertyDetail() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {property.profiles && (
-                   <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center shadow-md">
-                       <User className="h-5 w-5 text-white" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-ocean-blue to-ocean-blue-dark rounded-full flex items-center justify-center shadow-md">
+                        <User className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <div className="font-semibold">{property.profiles.display_name}</div>
+                        {property.profiles.phone && (
+                          <div className="text-sm text-muted-foreground">{property.profiles.phone}</div>
+                        )}
+                      </div>
                     </div>
-                    <div>
-                      <div className="font-semibold">{property.profiles.display_name}</div>
-                      {property.profiles.phone && (
-                        <div className="text-sm text-muted-foreground">{property.profiles.phone}</div>
-                      )}
-                    </div>
+                    
+                    {plan === 'free' && user?.id !== property.landlord_id && (
+                      <div className="space-y-2">
+                        <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                          <p className="text-sm text-amber-800 flex items-start gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                            </svg>
+                            <span>This landlord is on the Free plan. Contact them directly using the information above.</span>
+                          </p>
+                        </div>
+                        
+                        {property.profiles.phone && (
+                          <Button variant="outline" className="w-full" asChild>
+                            <a href={`tel:${property.profiles.phone.replace(/\D/g, '')}`} className="flex items-center justify-center gap-2">
+                              <Phone className="h-4 w-4" />
+                              Call {property.profiles.display_name?.split(' ')[0] || 'Landlord'}
+                            </a>
+                          </Button>
+                        )}
+                        
+                        <Button variant="outline" className="w-full" asChild>
+                          <a href={`mailto:${property.landlord_id}@example.com`} className="flex items-center justify-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            Email {property.profiles.display_name?.split(' ')[0] || 'Landlord'}
+                          </a>
+                        </Button>
+                        
+                        <div className="pt-2 text-center">
+                          <p className="text-xs text-muted-foreground">
+                            Upgrade to Pro for in-app messaging and more features
+                          </p>
+                          <Button variant="link" size="sm" className="h-auto p-0 text-sm font-medium" onClick={() => navigate('/pricing')}>
+                            View Plans →
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 
@@ -569,32 +611,40 @@ export default function PropertyDetail() {
                       This is your property listing
                     </p>
                   </div>
-                  ) : user && property.landlord_id !== user.id ? (
-                    <div className="space-y-2">
-                       <GatedViewingButton
-                         propertyId={property.id}
-                         landlordId={property.landlord_id}
-                         propertyTitle={property.title}
-                       />
-                       
-                       {/* Application Button */}
-                       <TenantApplicationButton 
-                         propertyId={property.id}
-                         className="w-full"
-                       />
-                     </div>
-                  ) : (
+                ) : user && property.landlord_id !== user.id && plan !== 'free' ? (
+                  <div className="space-y-2">
                     <GatedViewingButton
                       propertyId={property.id}
                       landlordId={property.landlord_id}
                       propertyTitle={property.title}
                     />
-                  )}
+                    
+                    {/* Application Button */}
+                    <TenantApplicationButton 
+                      propertyId={property.id}
+                      className="w-full"
+                    />
+                  </div>
+                ) : !user ? (
+                  <GatedViewingButton
+                    propertyId={property.id}
+                    landlordId={property.landlord_id}
+                    propertyTitle={property.title}
+                  />
+                ) : (
+                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg text-center">
+                    <p className="text-sm text-amber-800">
+                      Upgrade to Pro to message landlords and access premium features
+                    </p>
+                    <Button variant="default" size="sm" className="mt-2" onClick={() => navigate('/pricing')}>
+                      View Plans
+                    </Button>
+                  </div>
+                )}
 
                 
               </CardContent>
             </Card>
-
 
             {/* Sign In Prompt for Non-Authenticated Users */}
             {!user && (

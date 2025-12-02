@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - region "Notifications (F8)":
+    - list
+  - region "Notifications alt+T"
+  - button [ref=e3]:
+    - img
+  - generic [ref=e5]:
+    - generic [ref=e6]:
+      - heading "RentLekker" [level=1] [ref=e7]
+      - paragraph [ref=e8]: Sign in to your account or create a new one
+    - generic [ref=e11]:
+      - tablist [ref=e12]:
+        - tab "Sign In" [active] [selected] [ref=e13] [cursor=pointer]
+        - tab "Sign Up" [ref=e14] [cursor=pointer]
+      - tabpanel "Sign In" [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - button "Google (Tenant)" [ref=e18] [cursor=pointer]:
+              - img
+              - text: Google (Tenant)
+            - button "Google (Landlord)" [ref=e19] [cursor=pointer]:
+              - img
+              - text: Google (Landlord)
+          - generic [ref=e23]: Or continue with email
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - text: Email
+              - textbox "Email" [ref=e26]:
+                - /placeholder: Enter your email
+                - text: jttrading34@gmail.com
+            - generic [ref=e27]:
+              - text: Password
+              - generic [ref=e28]:
+                - textbox "Password" [ref=e29]:
+                  - /placeholder: Enter your password
+                  - text: Koopies008@
+                - button [ref=e30] [cursor=pointer]:
+                  - img
+            - button "Sign In" [ref=e31] [cursor=pointer]
+          - button "Forgot your password?" [ref=e33] [cursor=pointer]
+```

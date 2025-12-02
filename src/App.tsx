@@ -30,6 +30,7 @@ import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboar
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminProperties from "./pages/admin/AdminProperties";
@@ -59,6 +60,7 @@ import InventoryStart from "@/pages/InventoryStart";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { VerificationGate } from "@/components/VerificationGate";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
+import { PlanGuard } from "@/components/PlanGuard";
 import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
 import CreateInspection from "@/pages/CreateInspection";
@@ -179,13 +181,19 @@ function AppRoutes() {
               <Route path="/enhancedtenantdashboard/leases" element={<EnhancedTenantDashboard />} />
               <Route path="/tenant-dashboard/*" element={<TenantDashboardRoutes />} />
               <Route path="/tenant/*" element={<TenantDashboardRoutes />} />
-              <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
+              <Route path="/enhancedlandlorddashboard/*" element={
+                <AuthenticatedRoute>
+                  <PlanGuard requiredPlan="pro" featureName="Landlord Dashboard">
+                    <EnhancedLandlordDashboard />
+                  </PlanGuard>
+                </AuthenticatedRoute>
+              } />
               {/* Direct landlord inspection routes to bypass dashboard tab handling */}
-              <Route path="/enhancedlandlorddashboard/inspection" element={<><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></>} />
-              <Route path="/enhancedlandlorddashboard/inspection/start" element={<><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></>} />
+              <Route path="/enhancedlandlorddashboard/inspection" element={<PlanGuard requiredPlan="pro" featureName="Property Inspections"><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></PlanGuard>} />
+              <Route path="/enhancedlandlorddashboard/inspection/start" element={<PlanGuard requiredPlan="pro" featureName="Property Inspections"><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></PlanGuard>} />
               <Route path="/inspections/new" element={<AuthenticatedRoute><EnhancedDashboardLayout title="New Inspection"><CreateInspection /></EnhancedDashboardLayout></AuthenticatedRoute>} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}
-              <Route path="/maintenance/:ticketId" element={<RouteGuard><MaintenanceTicketDetails /></RouteGuard>} />
+              <Route path="/maintenance/:ticketId" element={<RouteGuard><PlanGuard requiredPlan="premium" featureName="Maintenance Management"><MaintenanceTicketDetails /></PlanGuard></RouteGuard>} />
               <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
               <Route path="/add-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
               <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
@@ -193,25 +201,25 @@ function AppRoutes() {
               <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
               
               {/* Lease System Routes */}
-              <Route path="/leases" element={<AuthenticatedRoute><LeaseDashboard /></AuthenticatedRoute>} />
-              <Route path="/lease/builder" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
-              <Route path="/lease/builder/:contractId" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
-              <Route path="/lease/builder/property/:propertyId" element={<AuthenticatedRoute><LeaseBuilder /></AuthenticatedRoute>} />
-              <Route path="/lease/sign/:contractId" element={<AuthenticatedRoute><LeaseSignature /></AuthenticatedRoute>} />
+              <Route path="/leases" element={<AuthenticatedRoute><PlanGuard requiredPlan="pro" featureName="Lease Management"><LeaseDashboard /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/lease/builder" element={<AuthenticatedRoute><PlanGuard requiredPlan="pro" featureName="Lease Management"><LeaseBuilder /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/lease/builder/:contractId" element={<AuthenticatedRoute><PlanGuard requiredPlan="pro" featureName="Lease Management"><LeaseBuilder /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/lease/builder/property/:propertyId" element={<AuthenticatedRoute><PlanGuard requiredPlan="pro" featureName="Lease Management"><LeaseBuilder /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/lease/sign/:contractId" element={<AuthenticatedRoute><PlanGuard requiredPlan="pro" featureName="Lease Management"><LeaseSignature /></PlanGuard></AuthenticatedRoute>} />
               
               {/* Accounting Routes */}
-              <Route path="/dashboard/accounting" element={<AuthenticatedRoute><AccountingDashboard /></AuthenticatedRoute>} />
-              <Route path="/dashboard/accounting/new" element={<AuthenticatedRoute><AddTransactionPage /></AuthenticatedRoute>} />
-              <Route path="/dashboard/accounting/transactions" element={<AuthenticatedRoute><TransactionsPage /></AuthenticatedRoute>} />
-              <Route path="/dashboard/accounting/reports/expense-summary" element={<AuthenticatedRoute><ExpenseSummaryPage /></AuthenticatedRoute>} />
-              <Route path="/dashboard/invoices/tax" element={<AuthenticatedRoute><TaxInvoicePage /></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting" element={<AuthenticatedRoute><PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics"><AccountingDashboard /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting/new" element={<AuthenticatedRoute><PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics"><AddTransactionPage /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting/transactions" element={<AuthenticatedRoute><PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics"><TransactionsPage /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/dashboard/accounting/reports/expense-summary" element={<AuthenticatedRoute><PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics"><ExpenseSummaryPage /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/dashboard/invoices/tax" element={<AuthenticatedRoute><PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics"><TaxInvoicePage /></PlanGuard></AuthenticatedRoute>} />
               
-              <Route path="/messages" element={<AuthenticatedRoute requireVerification={false}><VerificationGate requireVerification={true}><Messages /></VerificationGate></AuthenticatedRoute>} />
+              <Route path="/messages" element={<AuthenticatedRoute requireVerification={false}><PlanGuard requiredPlan="pro" featureName="In-Platform Messaging"><VerificationGate requireVerification={true}><Messages /></VerificationGate></PlanGuard></AuthenticatedRoute>} />
               <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
-              <Route path="/applications" element={<AuthenticatedRoute><Applications /></AuthenticatedRoute>} />
-              <Route path="/apply/invite/:token" element={<RouteGuard><ApplyInvite /></RouteGuard>} />
-              <Route path="/application/:id" element={<RouteGuard><ApplicationDetail /></RouteGuard>} />
-              <Route path="/rental-application/:propertyId" element={<RouteGuard><RentalApplication /></RouteGuard>} />
+              <Route path="/applications" element={<AuthenticatedRoute><PlanGuard requiredPlan="pro" featureName="Tenant Applications"><Applications /></PlanGuard></AuthenticatedRoute>} />
+              <Route path="/apply/invite/:token" element={<RouteGuard><PlanGuard requiredPlan="pro" featureName="Tenant Applications"><ApplyInvite /></PlanGuard></RouteGuard>} />
+              <Route path="/application/:id" element={<RouteGuard><PlanGuard requiredPlan="pro" featureName="Tenant Applications"><ApplicationDetail /></PlanGuard></RouteGuard>} />
+              <Route path="/rental-application/:propertyId" element={<RouteGuard><PlanGuard requiredPlan="pro" featureName="Tenant Applications"><RentalApplication /></PlanGuard></RouteGuard>} />
               <Route path="/tenant/messages" element={<RouteGuard><TenantMessages /></RouteGuard>} />
               <Route path="/verify-id" element={<RouteGuard><VerifyId /></RouteGuard>} />
               <Route path="/mobile-capture" element={<MobileCapture />} />
@@ -220,6 +228,7 @@ function AppRoutes() {
               <Route path="/kyc/test" element={<KycCapture />} />
               <Route path="/apply/:id" element={<PropertyDetail />} />
               <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
+              <Route path="/payment-failed" element={<RouteGuard><PaymentFailed /></RouteGuard>} />
               <Route path="/settings" element={<RouteGuard><EnhancedDashboardLayout title="Account Settings"><SettingsPage /></EnhancedDashboardLayout></RouteGuard>} />
               <Route path="*" element={<NotFound />} />
             </Routes>

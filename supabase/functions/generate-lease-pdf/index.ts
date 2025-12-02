@@ -13,8 +13,8 @@ serve(async (req)=>{
   }
   try {
     const { contractId } = await req.json();
-    const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? '';
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? '';
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     // Fetch contract data
     const { data: contract, error } = await supabase.from('lease_contracts').select('*').eq('id', contractId).single();
@@ -70,8 +70,9 @@ serve(async (req)=>{
     });
   } catch (error) {
     console.error("Error generating PDF:", error);
+    const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
     return new Response(JSON.stringify({
-      error: error.message || "Failed to generate PDF"
+      error: errorMessage
     }), {
       status: 500,
       headers: {
@@ -81,7 +82,7 @@ serve(async (req)=>{
     });
   }
 });
-async function generatePDFDocument(contract, requestOrigin) {
+async function generatePDFDocument(contract: any, requestOrigin: string | undefined) {
   // --- Constants & Config --- 
   const data = contract.contract_data || {};
   const today = new Date();
@@ -117,7 +118,7 @@ async function generatePDFDocument(contract, requestOrigin) {
   const fontBody = await doc.embedFont(StandardFonts.Helvetica);
   const fontBold = await doc.embedFont(StandardFonts.HelveticaBold);
   // --- Logo Embedding --- 
-  let brandLogo = null;
+  let brandLogo: any = null;
   async function tryEmbedLogo() {
     try {
       // Prefer app-hosted favicon2.png in public root, else BRAND_LOGO_URL, else old favicon path
@@ -140,7 +141,7 @@ async function generatePDFDocument(contract, requestOrigin) {
   }
   await tryEmbedLogo();
   // --- State --- 
-  const pages = [];
+  const pages: any[] = [];
   let page = doc.addPage([
     pageWidth,
     pageHeight
@@ -148,7 +149,7 @@ async function generatePDFDocument(contract, requestOrigin) {
   let y = pageHeight - margin - headerHeight - 8;
   pages.push(page);
   // --- Drawing Helpers --- 
-  const ensureSpace = (needed)=>{
+  const ensureSpace = (needed: number)=>{
     if (y - needed < margin + 40) newPage();
   };
   const newPage = ()=>{
@@ -161,7 +162,7 @@ async function generatePDFDocument(contract, requestOrigin) {
     drawBrandHeader(page);
     y = pageHeight - margin - headerHeight - 8;
   };
-  function drawBrandHeader(p) {
+  function drawBrandHeader(p: any) {
     const bandY = pageHeight - headerHeight;
     const steps = 36;
     const start = {
@@ -201,7 +202,7 @@ async function generatePDFDocument(contract, requestOrigin) {
       });
     }
   }
-  function drawFooter(p, pageNumber) {
+  function drawFooter(p: any, pageNumber: number) {
     const text = `Page ${pageNumber}`;
     p.drawText(text, {
       x: pageWidth - margin - fontBody.widthOfTextAtSize(text, sizes.small),
@@ -226,7 +227,7 @@ async function generatePDFDocument(contract, requestOrigin) {
       color: colors.invisible
     });
   }
-  async function embedSignatureFromDataUrl(dataUrl) {
+  async function embedSignatureFromDataUrl(dataUrl: string | null) {
     try {
       if (!dataUrl) return null;
       if (dataUrl.startsWith('data:')) {
@@ -251,14 +252,14 @@ async function generatePDFDocument(contract, requestOrigin) {
     }
   }
   // --- Formatting Helpers ---
-  const toText = (v)=>v === undefined || v === null ? "" : String(v);
-  const formatMoney = (amount, currency)=>{
+  const toText = (v: any)=>v === undefined || v === null ? "" : String(v);
+  const formatMoney = (amount: any, currency: string | undefined)=>{
     if (amount === undefined || amount === null) return "";
     const n = Number(amount);
     if (Number.isNaN(n)) return "";
     return `${currency || "ZAR"} ${n.toLocaleString()}`;
   };
-  const formatDateStr = (value)=>{
+  const formatDateStr = (value: any)=>{
     if (!value) return "";
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return toText(value);
@@ -269,7 +270,7 @@ async function generatePDFDocument(contract, requestOrigin) {
     });
   };
   // --- Text Helpers --- 
-  function drawParagraph(text) {
+  function drawParagraph(text: string) {
     ensureSpace(sizes.body + lineGap);
     if (text) {
       page.drawText(text, {
@@ -282,7 +283,7 @@ async function generatePDFDocument(contract, requestOrigin) {
     }
     y -= sizes.body + lineGap;
   }
-  function drawFormRow(label, value) {
+  function drawFormRow(label: string, value: any) {
     ensureSpace(sizes.body + lineGap);
     const labelText = label ? `${label}` : "";
     const valueText = value ? String(value) : "________________________";
@@ -332,7 +333,7 @@ async function generatePDFDocument(contract, requestOrigin) {
     });
     y -= lineGap;
   }
-  function drawSectionTitle(number, text) {
+  function drawSectionTitle(number: string, text: string) {
     ensureSpace(sizes.h2 + lineGap);
     const titleText = number ? `${number}. ${text}` : text;
     page.drawText(titleText, {
@@ -344,7 +345,7 @@ async function generatePDFDocument(contract, requestOrigin) {
     });
     y -= sizes.h2 + lineGap;
   }
-  function drawNumberedText(number, text) {
+  function drawNumberedText(number: string, text: string) {
     ensureSpace(sizes.body + lineGap);
     page.drawText(`${number}. ${text}`, {
       x: margin,
@@ -787,7 +788,7 @@ async function generatePDFDocument(contract, requestOrigin) {
   drawFooter(page, pages.length);
   return await doc.save();
 }
-function generateLeaseHTML(contract) {
+function generateLeaseHTML(contract: any) {
   const data = contract.contract_data;
   const today = new Date().toLocaleDateString();
   return `
@@ -863,7 +864,7 @@ function generateLeaseHTML(contract) {
       ${data.additionalClauses && data.additionalClauses.length > 0 ? `
       <div class="section">
         <h2>ADDITIONAL TERMS AND CONDITIONS</h2>
-        ${data.additionalClauses.map((clause, index)=>`
+        ${data.additionalClauses.map((clause: any, index: number)=>`
           <div>
             <h3>${index + 1}. ${clause.title}</h3>
             <p>${clause.content}</p>
@@ -896,7 +897,7 @@ function generateLeaseHTML(contract) {
     </html>
   `;
 }
-function createSimplePDF(contract) {
+function createSimplePDF(contract: any) {
   const data = contract.contract_data;
   const today = new Date().toLocaleDateString();
   return `%PDF-1.4
@@ -1004,7 +1005,7 @@ startxref
 2404
 %%EOF`;
 }
-function getOrdinalSuffix(day) {
+function getOrdinalSuffix(day: number) {
   if (day >= 11 && day <= 13) return 'th';
   switch(day % 10){
     case 1:
@@ -1017,7 +1018,7 @@ function getOrdinalSuffix(day) {
       return 'th';
   }
 }
-async function generatePDFHash(pdfBuffer) {
+async function generatePDFHash(pdfBuffer: Uint8Array) {
   // Ensure we pass a plain ArrayBuffer to SubtleCrypto
   const start = pdfBuffer.byteOffset;
   const end = start + pdfBuffer.byteLength;
