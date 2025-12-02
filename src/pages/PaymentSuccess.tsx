@@ -34,6 +34,32 @@ export default function PaymentSuccess() {
     }
   }, [user, navigate, reference]);
 
+  const activateSubscriptionFallback = async (ref: string): Promise<boolean> => {
+    try {
+      console.log('[PaymentSuccess] Attempting fallback subscription activation...');
+      
+      const { data, error } = await supabase.functions.invoke('activate-subscription', {
+        body: { reference: ref }
+      });
+
+      if (error) {
+        console.error('[PaymentSuccess] Fallback activation error:', error);
+        return false;
+      }
+
+      if (data?.success) {
+        console.log('[PaymentSuccess] Fallback activation successful:', data);
+        return true;
+      }
+
+      console.log('[PaymentSuccess] Fallback activation returned:', data);
+      return false;
+    } catch (error) {
+      console.error('[PaymentSuccess] Fallback activation exception:', error);
+      return false;
+    }
+  };
+
   const verifyPayment = async (ref: string) => {
     let attempts = 0;
     const maxAttempts = 30; // 30 seconds max
@@ -91,7 +117,32 @@ export default function PaymentSuccess() {
       }
     }
     
-    // Timeout after 30 seconds
+    // Timeout - try fallback activation
+    console.log('[PaymentSuccess] Polling timed out, attempting fallback activation...');
+    const fallbackSuccess = await activateSubscriptionFallback(ref);
+    
+    if (fallbackSuccess) {
+      // Verify the subscription is now active
+      const { data: subscription } = await (supabase as any)
+        .from('billing_subscriptions')
+        .select('*, billing_payments!inner(plan_code)')
+        .eq('user_id', user!.id)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (subscription) {
+        setPlanCode(subscription.billing_payments?.plan_code || subscription.plan_code || '');
+        setVerificationStatus('success');
+        triggerConfetti();
+        toast.success('Payment Successful!', {
+          description: 'Your subscription is now active. Welcome aboard!',
+          duration: 5000,
+        });
+        return;
+      }
+    }
+    
+    // If fallback also fails, show timeout state
     setVerificationStatus('timeout');
   };
 
@@ -129,6 +180,22 @@ export default function PaymentSuccess() {
       navigate('/enhancedlandlorddashboard');
     } else {
       navigate('/enhancedtenantdashboard');
+    }
+  };
+
+  const handleRetryActivation = async () => {
+    if (!reference) return;
+    
+    setVerificationStatus('loading');
+    const success = await activateSubscriptionFallback(reference);
+    
+    if (success) {
+      setVerificationStatus('success');
+      triggerConfetti();
+      toast.success('Subscription activated!');
+    } else {
+      setVerificationStatus('timeout');
+      toast.error('Activation failed. Please contact support.');
     }
   };
 
@@ -172,7 +239,7 @@ export default function PaymentSuccess() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="bg-muted/50 p-4 rounded-lg text-sm text-muted-foreground">
-              Don't worry! Your payment may still be processing. Please check back in a few minutes or contact support if you need assistance.
+              Don't worry! Your payment may still be processing. You can try activating your subscription manually or check back in a few minutes.
             </div>
             
             {reference && (
@@ -183,8 +250,17 @@ export default function PaymentSuccess() {
             )}
 
             <Button 
+              onClick={handleRetryActivation}
+              className="w-full flex items-center gap-2"
+              variant="default"
+            >
+              Try Activating Now
+            </Button>
+
+            <Button 
               onClick={handleReturnToDashboard}
               className="w-full flex items-center gap-2"
+              variant="outline"
             >
               <Home className="h-4 w-4" />
               Return to Dashboard
