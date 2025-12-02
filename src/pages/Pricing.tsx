@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { startCallpayCheckout } from "@/services/callpayService";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { toast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/useSubscription";
+import { Badge } from "@/components/ui/badge";
 
 const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex items-start gap-2.5 text-sm">
@@ -19,6 +21,87 @@ export default function Pricing() {
   const [proBilling, setProBilling] = useState<'monthly' | 'yearly'>('yearly');
   const [premiumBilling, setPremiumBilling] = useState<'monthly' | 'yearly'>('yearly');
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { plan, loading: subscriptionLoading } = useSubscription();
+
+  type PaidPlan = 'pro' | 'premium';
+
+  const renderPlanBadge = (targetPlan: PaidPlan) => {
+    if (subscriptionLoading) {
+      return null;
+    }
+
+    if (targetPlan === 'pro') {
+      if (plan === 'pro') {
+        return <Badge className="bg-blue-600 text-white">Current Plan</Badge>;
+      }
+      if (plan === 'premium') {
+        return <Badge className="bg-amber-600 text-white">Included in Premium</Badge>;
+      }
+    }
+
+    if (targetPlan === 'premium' && plan === 'premium') {
+      return <Badge className="bg-amber-600 text-white">Current Plan</Badge>;
+    }
+
+    return null;
+  };
+
+  const renderPlanButton = (targetPlan: PaidPlan) => {
+    if (subscriptionLoading) {
+      return (
+        <Button className="w-full mb-6" disabled>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Checking plan...
+        </Button>
+      );
+    }
+
+    if (targetPlan === 'pro') {
+      if (plan === 'pro') {
+        return (
+          <Button className="w-full mb-6" variant="outline" disabled>
+            You're on this plan
+          </Button>
+        );
+      }
+      if (plan === 'premium') {
+        return (
+          <Button className="w-full mb-6" variant="outline" disabled>
+            Included with Premium
+          </Button>
+        );
+      }
+    }
+
+    if (targetPlan === 'premium' && plan === 'premium') {
+      return (
+        <Button className="w-full mb-6" variant="outline" disabled>
+          You're on this plan
+        </Button>
+      );
+    }
+
+    const handler = targetPlan === 'pro' ? handleProCheckout : handlePremiumCheckout;
+    const label = targetPlan === 'pro' ? 'Choose Pro' : 'Choose Premium';
+    const isProcessing = loadingPlan === targetPlan;
+
+    return (
+      <Button
+        className="w-full mb-6"
+        onClick={handler}
+        disabled={loadingPlan !== null}
+      >
+        {isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Processing...
+          </>
+        ) : (
+          label
+        )}
+      </Button>
+    );
+  };
 
   useEffect(() => {
     const error = searchParams.get('error');
@@ -34,6 +117,24 @@ export default function Pricing() {
   }, [searchParams, navigate]);
 
   const handleProCheckout = async () => {
+    if (subscriptionLoading) {
+      return;
+    }
+    if (plan === 'pro') {
+      toast({
+        title: "You're already on Pro",
+        description: "Visit your dashboard to start using Pro features.",
+      });
+      return;
+    }
+    if (plan === 'premium') {
+      toast({
+        title: "Already covered",
+        description: "Premium already includes every Pro feature.",
+      });
+      return;
+    }
+
     console.log('[Pricing] Pro checkout button clicked');
     setLoadingPlan('pro');
     try {
@@ -52,6 +153,17 @@ export default function Pricing() {
   };
 
   const handlePremiumCheckout = async () => {
+    if (subscriptionLoading) {
+      return;
+    }
+    if (plan === 'premium') {
+      toast({
+        title: "You're already on Premium",
+        description: "Thanks for being on our top plan!",
+      });
+      return;
+    }
+
     console.log('[Pricing] Premium checkout button clicked');
     setLoadingPlan('premium');
     try {
@@ -77,7 +189,16 @@ export default function Pricing() {
           subtitle="Start for free. Upgrade to get the capacity that exactly matches your needs."
         />
 
-        
+        {!subscriptionLoading && plan !== 'free' && (
+          <div className="max-w-6xl mx-auto mb-8 flex justify-center">
+            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary">
+              <Check className="h-4 w-4" />
+              <span>
+                You&apos;re currently on the {plan === 'premium' ? 'Premium' : 'Pro'} plan
+              </span>
+            </div>
+          </div>
+        )}
 
         {/* Pricing Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
@@ -116,7 +237,10 @@ export default function Pricing() {
             </div>
             
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2">Pro Landlord</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold">Pro Landlord</h3>
+                {renderPlanBadge('pro')}
+              </div>
               <p className="text-sm text-muted-foreground mb-4">Handle every step from listing to lease inside RentLekker.</p>
               <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg mb-3">
                 <button
@@ -138,20 +262,7 @@ export default function Pricing() {
               </div>
             </div>
 
-            <Button 
-              className="w-full mb-6"
-              onClick={handleProCheckout}
-              disabled={loadingPlan !== null}
-            >
-              {loadingPlan === 'pro' ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Choose Pro'
-              )}
-            </Button>
+            {renderPlanButton('pro')}
 
             <div className="space-y-3 flex-1">
               <Feature>Unlimited property listings</Feature>
@@ -170,7 +281,10 @@ export default function Pricing() {
           {/* Premium Landlord (Gold) */}
           <div className="rounded-2xl border-2 border-amber-400 bg-amber-50 p-8 flex flex-col">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold mb-2 text-amber-900">Premium Landlord</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <h3 className="text-lg font-semibold text-amber-900">Premium Landlord</h3>
+                {renderPlanBadge('premium')}
+              </div>
               <p className="text-sm text-muted-foreground mb-4">Everything in Pro, plus concierge service.</p>
               <div className="inline-flex items-center gap-1 p-1 bg-amber-200/60 rounded-lg mb-3">
                 <button
@@ -192,20 +306,7 @@ export default function Pricing() {
               </div>
             </div>
 
-            <Button 
-              className="w-full mb-6"
-              onClick={handlePremiumCheckout}
-              disabled={loadingPlan !== null}
-            >
-              {loadingPlan === 'premium' ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                'Choose Premium'
-              )}
-            </Button>
+            {renderPlanButton('premium')}
 
             <div className="space-y-3 flex-1">
               {/* All Pro features (bold) */}

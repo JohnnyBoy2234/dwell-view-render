@@ -181,7 +181,13 @@ function AppRoutes() {
               <Route path="/enhancedtenantdashboard/leases" element={<EnhancedTenantDashboard />} />
               <Route path="/tenant-dashboard/*" element={<TenantDashboardRoutes />} />
               <Route path="/tenant/*" element={<TenantDashboardRoutes />} />
-              <Route path="/enhancedlandlorddashboard/*" element={<EnhancedLandlordDashboard />} />
+              <Route path="/enhancedlandlorddashboard/*" element={
+                <AuthenticatedRoute>
+                  <PlanGuard requiredPlan="pro" featureName="Landlord Dashboard">
+                    <EnhancedLandlordDashboard />
+                  </PlanGuard>
+                </AuthenticatedRoute>
+              } />
               {/* Direct landlord inspection routes to bypass dashboard tab handling */}
               <Route path="/enhancedlandlorddashboard/inspection" element={<PlanGuard requiredPlan="pro" featureName="Property Inspections"><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></PlanGuard>} />
               <Route path="/enhancedlandlorddashboard/inspection/start" element={<PlanGuard requiredPlan="pro" featureName="Property Inspections"><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></PlanGuard>} />
