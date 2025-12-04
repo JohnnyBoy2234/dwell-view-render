@@ -78,17 +78,14 @@ serve(async (req) => {
       console.log("Payment successful, activating subscription");
 
       const now = new Date();
-      const endsAt = new Date(now);
-      endsAt.setMonth(endsAt.getMonth() + 1); // 1 month subscription
 
-      // Activate subscription
+      // Activate subscription using correct column names
       await admin.from("billing_subscriptions").upsert({
         user_id: payment.user_id,
         plan_code: payment.plan_code,
         status: "active",
         provider: "callpay",
-        created_at: now.toISOString(),
-        ends_at: endsAt.toISOString(),
+        started_at: now.toISOString(),
         updated_at: now.toISOString(),
       }, { onConflict: "user_id" });
 
