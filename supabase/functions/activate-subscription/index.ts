@@ -6,6 +6,21 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function calculateSubscriptionPeriod(planCode?: string) {
+  const normalized = (planCode ?? "").toLowerCase();
+  const days = normalized.includes("yearly") ? 365 : 30;
+  const start = new Date();
+  const end = new Date(start);
+  end.setDate(end.getDate() + days);
+
+  return {
+    current_period_start: start.toISOString(),
+    current_period_end: end.toISOString(),
+    next_payment_date: end.toISOString(),
+    last_payment_date: start.toISOString(),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -76,7 +91,7 @@ serve(async (req) => {
       });
     }
 
-    // Check if subscription already exists and is active
+    // Check if subscription already exists and is active (for logging)
     const { data: existingSub } = await admin
       .from("billing_subscriptions")
       .select("*")
@@ -85,19 +100,12 @@ serve(async (req) => {
       .maybeSingle();
 
     if (existingSub) {
-      console.log(`[activate-subscription] User already has active subscription`);
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: "Subscription already active",
-        subscription: existingSub
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      console.log(`[activate-subscription] Existing active subscription found, refreshing period window`);
     }
 
     // Activate subscription
-    const now = new Date();
+    const window = calculateSubscriptionPeriod(payment.plan_code ?? "");
+    const nowIso = new Date().toISOString();
 
     const { data: subscription, error: subError } = await admin
       .from("billing_subscriptions")
@@ -106,8 +114,16 @@ serve(async (req) => {
         plan_code: payment.plan_code,
         status: "active",
         provider: "callpay",
-        started_at: now.toISOString(),
-        updated_at: now.toISOString(),
+        started_at: window.current_period_start,
+        current_period_start: window.current_period_start,
+        current_period_end: window.current_period_end,
+        next_payment_date: window.next_payment_date,
+        last_payment_date: window.last_payment_date,
+        payment_method: "callpay",
+        cancel_at_period_end: false,
+        canceled_at: null,
+        trial_end: null,
+        updated_at: nowIso,
       }, { onConflict: "user_id" })
       .select()
       .single();

@@ -176,26 +176,50 @@ export type Database = {
       }
       billing_subscriptions: {
         Row: {
+          cancel_at_period_end: boolean | null
+          canceled_at: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          last_payment_date: string | null
+          next_payment_date: string | null
+          payment_method: string | null
           plan_code: string
           provider: string
           started_at: string
           status: string
+          trial_end: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          last_payment_date?: string | null
+          next_payment_date?: string | null
+          payment_method?: string | null
           plan_code: string
           provider: string
           started_at?: string
           status?: string
+          trial_end?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          cancel_at_period_end?: boolean | null
+          canceled_at?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          last_payment_date?: string | null
+          next_payment_date?: string | null
+          payment_method?: string | null
           plan_code?: string
           provider?: string
           started_at?: string
           status?: string
+          trial_end?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1508,6 +1532,10 @@ export type Database = {
           id_verification_status: string | null
           id_verified: boolean
           is_tenant_screened: boolean
+          plan: string
+          plan_expires_at: string | null
+          plan_last_synced: string
+          plan_status: string
           paystack_subaccount_code: string | null
           phone: string | null
           updated_at: string
@@ -1523,6 +1551,10 @@ export type Database = {
           id_verification_status?: string | null
           id_verified?: boolean
           is_tenant_screened?: boolean
+          plan?: string
+          plan_expires_at?: string | null
+          plan_last_synced?: string
+          plan_status?: string
           paystack_subaccount_code?: string | null
           phone?: string | null
           updated_at?: string
@@ -1538,6 +1570,10 @@ export type Database = {
           id_verification_status?: string | null
           id_verified?: boolean
           is_tenant_screened?: boolean
+          plan?: string
+          plan_expires_at?: string | null
+          plan_last_synced?: string
+          plan_status?: string
           paystack_subaccount_code?: string | null
           phone?: string | null
           updated_at?: string

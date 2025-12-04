@@ -9,6 +9,21 @@ const corsHeaders = {
 const ALLOWED_IPS = ["54.72.191.28", "54.194.139.201"];
 const ENFORCE_IP_CHECK = (Deno.env.get("CALLPAY_ENFORCE_IP") ?? "false").toLowerCase() === "true";
 
+function calculateSubscriptionPeriod(planCode?: string) {
+  const normalized = (planCode ?? "").toLowerCase();
+  const days = normalized.includes("yearly") ? 365 : 30;
+  const start = new Date();
+  const end = new Date(start);
+  end.setDate(end.getDate() + days);
+
+  return {
+    current_period_start: start.toISOString(),
+    current_period_end: end.toISOString(),
+    next_payment_date: end.toISOString(),
+    last_payment_date: start.toISOString(),
+  };
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -77,7 +92,8 @@ serve(async (req) => {
     if (success && status === "complete") {
       console.log("Payment successful, activating subscription");
 
-      const now = new Date();
+      const subscriptionWindow = calculateSubscriptionPeriod(payment.plan_code ?? "");
+      const nowIso = new Date().toISOString();
 
       // Activate subscription using correct column names
       await admin.from("billing_subscriptions").upsert({
@@ -85,8 +101,16 @@ serve(async (req) => {
         plan_code: payment.plan_code,
         status: "active",
         provider: "callpay",
-        started_at: now.toISOString(),
-        updated_at: now.toISOString(),
+        started_at: subscriptionWindow.current_period_start,
+        current_period_start: subscriptionWindow.current_period_start,
+        current_period_end: subscriptionWindow.current_period_end,
+        next_payment_date: subscriptionWindow.next_payment_date,
+        last_payment_date: subscriptionWindow.last_payment_date,
+        payment_method: "callpay",
+        cancel_at_period_end: false,
+        canceled_at: null,
+        trial_end: null,
+        updated_at: nowIso,
       }, { onConflict: "user_id" });
 
       // Notify user
