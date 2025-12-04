@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -15,8 +15,7 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import PlanSelectDialog from '@/components/pricing/PlanSelectDialog';
-import { startCallpayCheckout } from '@/services/callpayService';
+import { useSubscription } from '@/hooks/useSubscription';
 
 // Import step components
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
@@ -62,13 +61,13 @@ const steps = [
 
 export default function ListProperty() {
   const { user, isLandlord } = useAuth();
+  const { plan, planStatus } = useSubscription();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPlanDialog, setShowPlanDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { control, handleSubmit, watch, setValue, formState: { errors }, trigger } = useForm<ListingFormData>({
+  const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<ListingFormData>({
     defaultValues: {
       property_type: '',
       location: '',
@@ -92,7 +91,40 @@ export default function ListProperty() {
     return null;
   }
 
+  const LOCAL_STORAGE_KEY = 'listing_form_draft';
   const progress = (currentStep / steps.length) * 100;
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.currentStep) {
+          setCurrentStep(parsed.currentStep);
+        }
+        if (parsed.formData) {
+          reset(parsed.formData);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to restore draft listing', error);
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    const payload = {
+      currentStep,
+      formData: {
+        ...formData,
+        images: []
+      }
+    };
+    try {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
+    } catch (error) {
+      console.warn('Failed to persist draft listing', error);
+    }
+  }, [formData, currentStep]);
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof ListingFormData)[] = [];
@@ -195,6 +227,10 @@ export default function ListProperty() {
         description: "Your property is now live on RentLekker and visible to potential tenants."
       });
 
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
+      } catch {}
+
               navigate('/enhancedlandlorddashboard');
     } catch (error: any) {
       toast({
@@ -224,6 +260,11 @@ export default function ListProperty() {
       default:
         return null;
     }
+  };
+
+  const handlePublishClick = () => {
+    const submitFn = handleSubmit(onSubmit);
+    submitFn();
   };
 
   return (
@@ -323,7 +364,7 @@ export default function ListProperty() {
             </Button>
           ) : (
             <Button
-              onClick={() => setShowPlanDialog(true)}
+              onClick={handlePublishClick}
               disabled={isSubmitting}
               className="flex items-center gap-2"
             >
@@ -332,33 +373,20 @@ export default function ListProperty() {
             </Button>
           )}
         </div>
-        <PlanSelectDialog 
-          open={showPlanDialog} 
-          onOpenChange={setShowPlanDialog}
-          onChooseFree={() => {
-            // Proceed to actually publish for free
-            const submitFn = handleSubmit(onSubmit);
-            submitFn();
-          }}
-          onChoosePro={(billing) => {
-            const isYearly = billing === 'yearly';
-            startCallpayCheckout({
-              plan_code: isYearly ? 'pro_landlord_yearly' : 'pro_landlord_monthly',
-              amount: 8,
-              item_name: isYearly ? 'RentLekker Pro Landlord (Yearly)' : 'RentLekker Pro Landlord (Monthly)',
-              item_description: isYearly ? 'Annual billing' : 'Monthly billing',
-            });
-          }}
-          onChoosePremium={(billing) => {
-            const isYearly = billing === 'yearly';
-            startCallpayCheckout({
-              plan_code: isYearly ? 'premium_landlord_yearly' : 'premium_landlord_monthly',
-              amount: 8,
-              item_name: isYearly ? 'RentLekker Premium Landlord (Yearly)' : 'RentLekker Premium Landlord (Monthly)',
-              item_description: isYearly ? 'Annual billing' : 'Monthly billing',
-            });
-          }}
-        />
+
+        {(plan === 'free' || planStatus !== 'active') && (
+          <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="font-semibold text-primary">Upgrade for unlimited pro features</p>
+              <p className="text-sm text-muted-foreground">
+                Stay on the free plan or unlock messaging, applications, and premium support whenever you’re ready.
+              </p>
+            </div>
+            <Button variant="outline" onClick={() => navigate('/pricing')}>
+              View Plans
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
