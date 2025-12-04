@@ -1,6 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { MessageBubble } from '@/components/maintenance/messaging/MessageBubble';
 import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
@@ -66,7 +64,7 @@ function MessageStatusIndicator({ status, className }: MessageStatusIndicatorPro
 export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing, isLandlordInConversation, tenantId, propertyId }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
   const [newMessage, setNewMessage] = useState('');
@@ -101,20 +99,17 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
   // Auto-scroll to bottom when new messages arrive or when typing
   const scrollToBottom = (force = false) => {
-    if (force || isScrolledToBottom) {
-      const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        // Use requestAnimationFrame for better DOM timing
-        requestAnimationFrame(() => {
-          (scrollContainer as any).scrollTop = (scrollContainer as any).scrollHeight;
-        });
-      } else {
-        // Fallback to scrollIntoView with better positioning
-        messagesEndRef.current?.scrollIntoView({ 
-          behavior: 'smooth',
-          block: 'nearest'
-        });
-      }
+    const viewport = scrollContainerRef.current;
+    if (!viewport) return;
+
+    const atBottom =
+      viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 20;
+
+    if (force || atBottom || isScrolledToBottom) {
+      requestAnimationFrame(() => {
+        viewport.scrollTop = viewport.scrollHeight;
+        setIsScrolledToBottom(true);
+      });
     }
   };
 
@@ -188,18 +183,15 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   // Scroll to specific proposal (called from reminder header)
   const scrollToProposal = (proposalId: string) => {
     const anchor = document.getElementById(`proposal-${proposalId}`);
-    if (anchor && scrollAreaRef.current) {
-      anchor.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      // Offset for fixed header
-      setTimeout(() => {
-        try {
-          const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
-          if (scrollContainer) {
-            (scrollContainer as any).scrollTop = (scrollContainer as any).scrollTop - 80;
-          }
-        } catch {}
-      }, 200);
-    }
+    if (!anchor) return;
+
+    anchor.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+    setTimeout(() => {
+      const viewport = scrollContainerRef.current;
+      if (viewport) {
+        viewport.scrollBy({ top: -80, behavior: 'smooth' });
+      }
+    }, 200);
   };
 
   // Support external scroll-to events from header sticky bar
@@ -398,12 +390,13 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
       >
         <div
           className={cn(
-            'relative max-w-[95%] sm:max-w-[70%] rounded-3xl px-4 py-3 shadow-soft transition-transform',
+            'relative w-fit max-w-[95%] md:max-w-[70%] rounded-3xl px-4 py-3 shadow-soft transition-transform',
             'backdrop-blur-sm border border-white/20',
             isOwn
               ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white animate-message-outgoing'
               : 'bg-white/90 text-ios-gray-dark animate-message-incoming'
           )}
+          style={{ wordBreak: 'break-word' }}
         >
           {(!isOwn && message.profiles?.display_name) && (
             <div className="text-xs font-semibold text-ios-blue mb-1 tracking-tight">
@@ -426,7 +419,10 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           )}
 
           {message.content && (
-            <div className="text-sm leading-relaxed whitespace-pre-line break-words">
+            <div
+              className="text-sm leading-relaxed whitespace-pre-line break-words hyphens-auto"
+              style={{ overflowWrap: 'anywhere' }}
+            >
               {message.content}
             </div>
           )}
@@ -530,20 +526,17 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
       }}
     >
       {/* Messages Area */}
-      <ScrollArea 
-        className="flex-1 px-4" 
-        ref={scrollAreaRef}
-        onScrollCapture={(e) => {
-          const viewport = e.currentTarget.querySelector('[data-radix-scroll-area-viewport]');
-          if (viewport) {
-            // Debounce scroll position updates for better performance
-            if (scrollTimeoutRef.current) {
-              clearTimeout(scrollTimeoutRef.current);
-            }
-            scrollTimeoutRef.current = setTimeout(() => {
-              handleScrollPositionUpdate(viewport);
-            }, 50);
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4"
+        onScroll={(e) => {
+          const viewport = e.currentTarget;
+          if (scrollTimeoutRef.current) {
+            clearTimeout(scrollTimeoutRef.current);
           }
+          scrollTimeoutRef.current = setTimeout(() => {
+            handleScrollPositionUpdate(viewport);
+          }, 50);
         }}
       >
         <div
@@ -578,7 +571,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
           )}
           <div ref={messagesEndRef} />
         </div>
-      </ScrollArea>
+      </div>
 
       {/* Show scroll to bottom button when not at bottom */}
       {!isScrolledToBottom && messages.length > 0 && (
