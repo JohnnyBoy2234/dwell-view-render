@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const ALLOWED_IPS = ["54.72.191.28", "54.194.139.201"];
+const ENFORCE_IP_CHECK = (Deno.env.get("CALLPAY_ENFORCE_IP") ?? "false").toLowerCase() === "true";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -21,9 +22,12 @@ serve(async (req) => {
     
     // IP whitelist check (log warning but don't block in sandbox)
     const mode = Deno.env.get("CALLPAY_MODE") ?? "sandbox";
-    if (mode === "live" && !ALLOWED_IPS.includes(clientIP)) {
-      console.warn("Webhook from unauthorized IP:", clientIP);
-      return new Response("Unauthorized IP", { status: 403, headers: corsHeaders });
+    if (mode === "live" && !ALLOWED_IPS.includes(clientIP || "") ) {
+      if (ENFORCE_IP_CHECK) {
+        console.warn("Webhook rejected due to unauthorized IP:", clientIP);
+        return new Response("Unauthorized IP", { status: 403, headers: corsHeaders });
+      }
+      console.warn("Webhook from unverified IP (allowed due to relaxed mode):", clientIP);
     }
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
