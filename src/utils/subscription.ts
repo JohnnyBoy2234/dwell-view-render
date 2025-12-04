@@ -9,12 +9,12 @@ export const getSubscriptionStatus = async (userId: string) => {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('billing_subscriptions')
       .select('*')
       .eq('user_id', userId)
       .in('status', ['active', 'trialing'])
-      .order('current_period_end', { ascending: false })
+      .order('started_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
@@ -22,10 +22,8 @@ export const getSubscriptionStatus = async (userId: string) => {
       return { plan: 'free' as const, isValid: false };
     }
 
-    const now = new Date();
-    const periodEnd = new Date(data.current_period_end || 0);
-    const isActive = data.status === 'active' || 
-                    (data.status === 'trialing' && now < periodEnd);
+    // Check if subscription is active (status-based)
+    const isActive = data.status === 'active' || data.status === 'trialing';
 
     if (!isActive) {
       return { plan: 'free' as const, isValid: false };
@@ -45,7 +43,6 @@ export const getSubscriptionStatus = async (userId: string) => {
       plan,
       isValid: true,
       subscription: data,
-      expiresAt: periodEnd,
       isTrial: data.status === 'trialing'
     };
 
