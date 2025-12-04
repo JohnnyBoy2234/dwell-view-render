@@ -1023,7 +1023,7 @@ async function generatePDFHash(pdfBuffer: Uint8Array) {
   const start = pdfBuffer.byteOffset;
   const end = start + pdfBuffer.byteLength;
   const ab = pdfBuffer.buffer.slice(start, end);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', ab);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', ab as ArrayBuffer);
   const hashArray = Array.from(new Uint8Array(hashBuffer));
   return hashArray.map((b)=>b.toString(16).padStart(2, '0')).join('');
 }

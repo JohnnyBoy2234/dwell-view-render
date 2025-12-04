@@ -98,8 +98,6 @@ serve(async (req) => {
 
     // Activate subscription
     const now = new Date();
-    const endsAt = new Date(now);
-    endsAt.setMonth(endsAt.getMonth() + 1); // 1 month subscription
 
     const { data: subscription, error: subError } = await admin
       .from("billing_subscriptions")
@@ -108,8 +106,7 @@ serve(async (req) => {
         plan_code: payment.plan_code,
         status: "active",
         provider: "callpay",
-        created_at: now.toISOString(),
-        ends_at: endsAt.toISOString(),
+        started_at: now.toISOString(),
         updated_at: now.toISOString(),
       }, { onConflict: "user_id" })
       .select()
