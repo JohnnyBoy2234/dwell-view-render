@@ -723,7 +723,7 @@ export default function PropertyDetail() {
                     landlordId={property.landlord_id}
                     propertyTitle={property.title}
                   />
-                )}
+                ) : null}
 
                 
               </CardContent>
