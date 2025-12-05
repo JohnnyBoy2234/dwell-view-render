@@ -326,6 +326,9 @@ export default function PropertyDetail() {
   const landlordSupportsMessaging = () =>
     landlordPlan !== 'free' && landlordPlanStatus === 'active';
 
+  const landlordPlanReady = landlordPlanLoaded || !property?.landlord_id;
+  const landlordHasMessaging = landlordPlanReady && landlordSupportsMessaging();
+
   const handleContactLandlord = async () => {
     if (!user) {
       toast({
@@ -697,14 +700,18 @@ export default function PropertyDetail() {
                   </div>
                 )}
                 
-                {user && property.landlord_id === user.id ? (
+                {!landlordPlanReady ? (
+                  <div className="p-4 bg-muted/40 border rounded-lg animate-pulse text-sm text-muted-foreground">
+                    Checking landlord options...
+                  </div>
+                ) : user && property.landlord_id === user.id ? (
                   <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
                     <p className="text-sm text-blue-800">
                       <CheckCircle className="h-4 w-4 inline mr-1" />
                       This is your property listing
                     </p>
                   </div>
-                ) : user && property.landlord_id !== user.id && landlordSupportsMessaging() ? (
+                ) : user && property.landlord_id !== user.id && landlordHasMessaging ? (
                   <div className="space-y-2">
                     <GatedViewingButton
                       propertyId={property.id}
@@ -718,7 +725,7 @@ export default function PropertyDetail() {
                       className="w-full"
                     />
                   </div>
-                ) : !user && landlordSupportsMessaging() ? (
+                ) : !user && landlordHasMessaging ? (
                   <GatedViewingButton
                     propertyId={property.id}
                     landlordId={property.landlord_id}
@@ -732,7 +739,15 @@ export default function PropertyDetail() {
                     <Eye className="h-4 w-4" />
                     Request a Viewing
                   </Button>
-                ) : !user ? (
+                ) : landlordPlanReady && user && property.landlord_id !== user.id ? (
+                  <Button 
+                    className="w-full flex items-center justify-center gap-2"
+                    onClick={handleRequestViewing}
+                  >
+                    <Eye className="h-4 w-4" />
+                    Request a Viewing
+                  </Button>
+                ) : landlordPlanReady && !user ? (
                   <Button 
                     className="w-full flex items-center justify-center gap-2"
                     onClick={() => navigate('/auth')}
@@ -747,7 +762,7 @@ export default function PropertyDetail() {
             </Card>
 
             {/* Sign In Prompt for Non-Authenticated Users */}
-            {!user && landlordSupportsMessaging() && (
+            {!user && landlordHasMessaging && (
               <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-ocean-blue/5 border-earth-warm/30 shadow-elegant">
                 <CardHeader>
                   <CardTitle>Get Started</CardTitle>
