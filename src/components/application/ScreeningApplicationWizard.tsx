@@ -116,6 +116,10 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     }
   }, [user?.id, propertyId, hasLoadedAutosave]);
 
+  useEffect(() => {
+    applySavedProgress();
+  }, [applySavedProgress]);
+
   const [formData, setFormData] = useState<FormData>({
     first_name: "",
     middle_name: "",
@@ -153,6 +157,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         .from("applications")
         .insert({
           property_id: propertyId,
+          tenant_id: user.id,
+          landlord_id: landlordId,
           status: "pending",
         } as any);
       if (insertErr) throw insertErr;
@@ -356,6 +362,24 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const handleInputChange = (field: keyof FormData, value: string | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    if (!user || !hasLoadedAutosave) return;
+    const key = getAutosaveKey(user.id, propertyId);
+    const handler = setTimeout(() => {
+      try {
+        localStorage.setItem(key, JSON.stringify({
+          formData,
+          currentStep,
+          updatedAt: Date.now()
+        }));
+      } catch (error) {
+        console.warn("Failed to autosave rental application", error);
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [user?.id, propertyId, formData, currentStep, hasLoadedAutosave]);
 
   const uploadDocument = async (file: File, documentType: string) => {
     if (!user) return;
@@ -589,6 +613,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         .from("applications")
         .insert({
           property_id: propertyId,
+          tenant_id: user.id,
+          landlord_id: landlordId,
           status: "pending" as const,
         } as any)
         .select()
