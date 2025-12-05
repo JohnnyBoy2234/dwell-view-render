@@ -257,83 +257,6 @@ export default function PropertyDetail() {
   };
 
 
-  const normalizePlan = (value?: string | null): PlanType => {
-    if (!value) return 'free';
-    const val = value.toLowerCase();
-    if (val.includes('premium')) return 'premium';
-    if (val.includes('pro')) return 'pro';
-    if (val === 'premium' || val === 'pro') return val as PlanType;
-    return 'free';
-  };
-
-  const loadLandlordPlan = async (landlordId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('plan, plan_status, phone')
-        .eq('user_id', landlordId)
-        .maybeSingle();
-
-      if (error && error.code !== 'PGRST116') throw error;
-
-      if (data) {
-        const normalizedPlan = normalizePlan(data.plan);
-        const status = (data.plan_status ?? 'inactive').toLowerCase();
-        setLandlordPlan(normalizedPlan);
-        setLandlordPlanStatus(status);
-        return {
-          plan: normalizedPlan,
-          status,
-          phone: data.phone ?? null
-        };
-      } else {
-        setLandlordPlan('free');
-        setLandlordPlanStatus('inactive');
-      }
-
-      return null;
-    } catch (error) {
-      console.error('Failed to load landlord plan details:', error);
-      return null;
-    } finally {
-      setLandlordPlanLoaded(true);
-    }
-  };
-
-  useEffect(() => {
-    if (property?.landlord_id) {
-      loadLandlordPlan(property.landlord_id);
-    }
-  }, [property?.landlord_id]);
-
-  const ensureLandlordPlanInfo = async () => {
-    if (landlordPlanLoaded || !property?.landlord_id) {
-      return {
-        plan: landlordPlan,
-        status: landlordPlanStatus
-      };
-    }
-
-    const info = await loadLandlordPlan(property.landlord_id);
-    if (info) {
-      return {
-        plan: info.plan,
-        status: info.status
-      };
-    }
-
-    return {
-      plan: landlordPlan,
-      status: landlordPlanStatus
-    };
-  };
-
-  const landlordSupportsMessaging = () =>
-    landlordPlan !== 'free' && landlordPlanStatus === 'active';
-
-  const landlordPlanReady = landlordPlanLoaded || !property?.landlord_id;
-  const landlordHasMessaging = landlordPlanReady && landlordSupportsMessaging();
-
   const handleContactLandlord = async () => {
     if (!user) {
       toast({
@@ -346,16 +269,6 @@ export default function PropertyDetail() {
     }
 
     if (!property) return;
-
-    const info = await ensureLandlordPlanInfo();
-    const hasMessaging = info.plan !== 'free' && info.status === 'active';
-
-    if (!hasMessaging && property.profiles?.phone) {
-      toast({
-        title: "Contact landlord directly",
-        description: `This landlord uses the free plan. We notified them via RentLekker as well. You can also call ${property.profiles.phone}.`
-      });
-    }
 
     const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
@@ -375,16 +288,6 @@ export default function PropertyDetail() {
     }
 
     if (!property) return;
-
-    const info = await ensureLandlordPlanInfo();
-    const hasMessaging = info.plan !== 'free' && info.status === 'active';
-
-    if (!hasMessaging && property.profiles?.phone) {
-      toast({
-        title: "Viewing request sent",
-        description: `We've alerted the landlord. You can also reach them at ${property.profiles.phone}.`
-      });
-    }
 
     const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
@@ -687,18 +590,14 @@ export default function PropertyDetail() {
                   </div>
                 )}
                 
-                {!landlordPlanReady ? (
-                  <div className="p-4 bg-muted/40 border rounded-lg animate-pulse text-sm text-muted-foreground">
-                    Checking landlord options...
-                  </div>
-                ) : user && property.landlord_id === user.id ? (
+                {user && property.landlord_id === user.id ? (
                   <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
                     <p className="text-sm text-blue-800">
                       <CheckCircle className="h-4 w-4 inline mr-1" />
                       This is your property listing
                     </p>
                   </div>
-                ) : user && property.landlord_id !== user.id && landlordHasMessaging ? (
+                ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
                     <GatedViewingButton
                       propertyId={property.id}
@@ -712,36 +611,12 @@ export default function PropertyDetail() {
                       className="w-full"
                     />
                   </div>
-                ) : !user && landlordHasMessaging ? (
+                ) : !user ? (
                   <GatedViewingButton
                     propertyId={property.id}
                     landlordId={property.landlord_id}
                     propertyTitle={property.title}
                   />
-                ) : user && property.landlord_id !== user.id ? (
-                  <Button 
-                    className="w-full flex items-center justify-center gap-2"
-                    onClick={handleRequestViewing}
-                  >
-                    <Eye className="h-4 w-4" />
-                    Request a Viewing
-                  </Button>
-                ) : landlordPlanReady && user && property.landlord_id !== user.id ? (
-                  <Button 
-                    className="w-full flex items-center justify-center gap-2"
-                    onClick={handleRequestViewing}
-                  >
-                    <Eye className="h-4 w-4" />
-                    Request a Viewing
-                  </Button>
-                ) : landlordPlanReady && !user ? (
-                  <Button 
-                    className="w-full flex items-center justify-center gap-2"
-                    onClick={() => navigate('/auth')}
-                  >
-                    <Mail className="h-4 w-4" />
-                    Sign in to Request a Viewing
-                  </Button>
                 ) : null}
 
                 
@@ -749,7 +624,7 @@ export default function PropertyDetail() {
             </Card>
 
             {/* Sign In Prompt for Non-Authenticated Users */}
-            {!user && landlordHasMessaging && (
+            {!user && (
               <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-ocean-blue/5 border-earth-warm/30 shadow-elegant">
                 <CardHeader>
                   <CardTitle>Get Started</CardTitle>
