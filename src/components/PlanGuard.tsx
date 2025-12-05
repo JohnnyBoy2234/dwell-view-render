@@ -3,6 +3,7 @@ import { useSubscription, PlanType } from '@/hooks/useSubscription';
 import { UpgradePrompt } from './subscription/UpgradePrompt';
 import { Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PlanGuardProps {
   children: ReactNode;
@@ -11,6 +12,7 @@ interface PlanGuardProps {
 }
 
 export function PlanGuard({ children, requiredPlan, featureName }: PlanGuardProps) {
+  const { isLandlord } = useAuth();
   const { plan, loading, hasAccess } = useSubscription();
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const [dismissedPrompt, setDismissedPrompt] = useState(false);
@@ -29,6 +31,10 @@ export function PlanGuard({ children, requiredPlan, featureName }: PlanGuardProp
       setDismissedPrompt(true);
     }
   };
+
+  if (!isLandlord) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
