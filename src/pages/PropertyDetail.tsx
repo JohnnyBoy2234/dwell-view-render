@@ -723,6 +723,22 @@ export default function PropertyDetail() {
                     landlordId={property.landlord_id}
                     propertyTitle={property.title}
                   />
+                ) : user && property.landlord_id !== user.id ? (
+                  <Button 
+                    className="w-full flex items-center justify-center gap-2"
+                    onClick={handleRequestViewing}
+                  >
+                    <Eye className="h-4 w-4" />
+                    Request a Viewing
+                  </Button>
+                ) : !user ? (
+                  <Button 
+                    className="w-full flex items-center justify-center gap-2"
+                    onClick={() => navigate('/auth')}
+                  >
+                    <Mail className="h-4 w-4" />
+                    Sign in to Request a Viewing
+                  </Button>
                 ) : null}
 
                 
