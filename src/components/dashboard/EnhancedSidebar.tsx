@@ -142,8 +142,16 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const maintenanceTotal = maintenanceUnread
     ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0)
     : 0;
-  const { state, isMobile, setOpenMobile } = useSidebar();
-  const collapsed = state === 'collapsed';
+
+  let sidebarState: ReturnType<typeof useSidebar> | null = null;
+  try {
+    sidebarState = useSidebar();
+  } catch {
+    sidebarState = null;
+  }
+  const collapsed = sidebarState?.state === 'collapsed';
+  const isMobile = sidebarState?.isMobile ?? false;
+  const setOpenMobile = sidebarState?.setOpenMobile ?? (() => {});
 
   const items = isLandlord ? landlordItems : tenantItems;
   
