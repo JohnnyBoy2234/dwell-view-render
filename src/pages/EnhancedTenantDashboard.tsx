@@ -272,13 +272,13 @@ export default function EnhancedTenantDashboard() {
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
           <div className="flex-1">
-            <EnhancedDashboardLayout 
-              title="Tenant Dashboard" 
-              currentTab={currentTab}
-              onTabChange={handleTabChange}
-            >
-              {renderTabContent()}
-            </EnhancedDashboardLayout>
+      <EnhancedDashboardLayout 
+        title="Tenant Dashboard" 
+        currentTab={currentTab}
+        onTabChange={handleTabChange}
+      >
+        {renderTabContent()}
+      </EnhancedDashboardLayout>
           </div>
         </div>
       </SidebarProvider>

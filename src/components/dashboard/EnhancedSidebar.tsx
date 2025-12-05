@@ -8,7 +8,7 @@ import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
+import { 
   Sidebar,
   SidebarContent,
   SidebarGroup,
