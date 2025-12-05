@@ -254,6 +254,22 @@ export default function PropertyDetail() {
   };
 
 
+  const loadLandlordPlan = async (landlordId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('plan, plan_status, phone')
+        .eq('user_id', landlordId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Failed to load landlord plan details', error);
+      return null;
+    }
+  };
+
   const handleContactLandlord = async () => {
     if (!user) {
       toast({
@@ -266,6 +282,26 @@ export default function PropertyDetail() {
     }
 
     if (!property) return;
+
+    const planInfo = await loadLandlordPlan(property.landlord_id);
+    const landlordPlan = planInfo?.plan?.toLowerCase?.() ?? 'free';
+    const planStatus = planInfo?.plan_status?.toLowerCase?.() ?? 'inactive';
+
+    if (landlordPlan === 'free' || planStatus !== 'active') {
+      if (planInfo?.phone) {
+        toast({
+          title: "Contact landlord directly",
+          description: `This landlord uses the free plan. Please reach them at ${planInfo.phone}.`
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Direct contact required",
+          description: "This landlord uses the free plan. Their phone number is not available."
+        });
+      }
+      return;
+    }
 
     const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
@@ -286,10 +322,28 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
-    // Create conversation and navigate to messages with pre-typed viewing request
+    const planInfo = await loadLandlordPlan(property.landlord_id);
+    const landlordPlan = planInfo?.plan?.toLowerCase?.() ?? 'free';
+    const planStatus = planInfo?.plan_status?.toLowerCase?.() ?? 'inactive';
+
+    if (landlordPlan === 'free' || planStatus !== 'active') {
+      if (planInfo?.phone) {
+        toast({
+          title: "Contact landlord directly",
+          description: `Viewing requests are handled outside the app for free listings. Please call ${planInfo.phone}.`
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Direct contact required",
+          description: "Viewing requests are not available for this listing."
+        });
+      }
+      return;
+    }
+
     const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
-      // Navigate to messages with a pre-typed viewing request message
       const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
       navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
     }
