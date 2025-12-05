@@ -14,16 +14,17 @@ interface GatedViewingButtonProps {
   propertyId: string;
   landlordId: string;
   propertyTitle: string;
+  onViewingRequested?: () => void;
 }
 
 export function GatedViewingButton({ 
   propertyId, 
   landlordId, 
-  propertyTitle
+  propertyTitle,
+  onViewingRequested
 }: GatedViewingButtonProps) {
   const { user } = useAuth();
   const { gateStatus, loading } = useGateStatus();
-  const { toast } = useToast();
   const navigate = useNavigate();
   const [isResending, setIsResending] = useState(false);
 
@@ -208,6 +209,7 @@ export function GatedViewingButton({
           propertyId={propertyId}
           landlordId={landlordId}
           propertyTitle={propertyTitle}
+          onConversationCreated={onViewingRequested}
         />
       </div>
     );

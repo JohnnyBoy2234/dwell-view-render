@@ -15,13 +15,15 @@ interface StartConversationProps {
   landlordId: string;
   propertyTitle: string;
   inquiryId?: string;
+  onConversationCreated?: () => void;
 }
 
 export default function StartConversation({ 
   propertyId, 
   landlordId, 
   propertyTitle, 
-  inquiryId 
+  inquiryId,
+  onConversationCreated
 }: StartConversationProps) {
   const { user } = useAuth();
   const { createConversation, sendMessage } = useMessaging();
@@ -109,6 +111,7 @@ export default function StartConversation({
       if (conversation && 'id' in conversation) {
         console.log('Navigating to:', `/messages?c=${conversation.id}`);
         navigate(`/messages?c=${conversation.id}`);
+        onConversationCreated?.();
         toast({
           title: "Conversation started",
           description: `You can now message about ${propertyTitle}`
@@ -155,6 +158,7 @@ export default function StartConversation({
         // Navigate to messages page
         console.log('Navigating to:', `/messages?c=${conversation.id}`);
         navigate(`/messages?c=${conversation.id}`);
+        onConversationCreated?.();
         
         toast({
           title: "Viewing request sent!",
