@@ -268,7 +268,7 @@ export default function EnhancedTenantDashboard() {
     <VerificationGate requireVerification={true}>
       <SidebarProvider>
         <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
           <div className="flex-1">
