@@ -28,7 +28,8 @@ import {
   Ruler,
   Layers,
   Droplets,
-  ParkingMeter
+  ParkingMeter,
+  Eye
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -271,7 +272,7 @@ export default function PropertyDetail() {
         .from('profiles')
         .select('plan, plan_status, phone')
         .eq('user_id', landlordId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) {
