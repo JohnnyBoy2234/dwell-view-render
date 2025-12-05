@@ -214,9 +214,6 @@ const Index = () => {
                 <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
                   Safe, Simple, <span className="text-ocean-blue">Commission-Free</span> Renting
                 </h1>
-                <p className="text-sm md:text-base text-white/80 mt-3">
-                  End-to-end tools for landlords and tenants. List, screen, chat, sign, and manage—without agency fees.
-                </p>
               </div>
           </div>
         </div>

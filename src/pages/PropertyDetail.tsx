@@ -350,20 +350,11 @@ export default function PropertyDetail() {
     const info = await ensureLandlordPlanInfo();
     const hasMessaging = info.plan !== 'free' && info.status === 'active';
 
-    if (!hasMessaging) {
-      if (property.profiles?.phone) {
-        toast({
-          title: "Contact landlord directly",
-          description: `This landlord uses the free plan. Please reach them at ${property.profiles.phone}.`
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Direct contact required",
-          description: "This landlord uses the free plan. Their phone number is not available."
-        });
-      }
-      return;
+    if (!hasMessaging && property.profiles?.phone) {
+      toast({
+        title: "Contact landlord directly",
+        description: `This landlord uses the free plan. We notified them via RentLekker as well. You can also call ${property.profiles.phone}.`
+      });
     }
 
     const conv = await createConversation(property.id, property.landlord_id, user.id);
@@ -388,20 +379,11 @@ export default function PropertyDetail() {
     const info = await ensureLandlordPlanInfo();
     const hasMessaging = info.plan !== 'free' && info.status === 'active';
 
-    if (!hasMessaging) {
-      if (property.profiles?.phone) {
-        toast({
-          title: "Contact landlord directly",
-          description: `Viewing requests are handled outside the app for free listings. Please call ${property.profiles.phone}.`
-        });
-      } else {
-        toast({
-          variant: "destructive",
-          title: "Direct contact required",
-          description: "Viewing requests are not available for this listing."
-        });
-      }
-      return;
+    if (!hasMessaging && property.profiles?.phone) {
+      toast({
+        title: "Viewing request sent",
+        description: `We've alerted the landlord. You can also reach them at ${property.profiles.phone}.`
+      });
     }
 
     const conv = await createConversation(property.id, property.landlord_id, user.id);
