@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { RentDueCard } from '@/components/dashboard/tenant/RentDueCard';
 import { ViewingCard } from '@/components/dashboard/tenant/ViewingCard';
 import { MaintenanceCard } from '@/components/dashboard/tenant/MaintenanceCard';
@@ -265,20 +266,22 @@ export default function EnhancedTenantDashboard() {
 
   return (
     <VerificationGate requireVerification={true}>
-      <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-        <div className="hidden lg:block">
-          <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
+      <SidebarProvider>
+        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+          <div className="hidden lg:block">
+            <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
+          </div>
+          <div className="flex-1">
+            <EnhancedDashboardLayout 
+              title="Tenant Dashboard" 
+              currentTab={currentTab}
+              onTabChange={handleTabChange}
+            >
+              {renderTabContent()}
+            </EnhancedDashboardLayout>
+          </div>
         </div>
-        <div className="flex-1">
-          <EnhancedDashboardLayout 
-            title="Tenant Dashboard" 
-            currentTab={currentTab}
-            onTabChange={handleTabChange}
-          >
-            {renderTabContent()}
-          </EnhancedDashboardLayout>
-        </div>
-      </div>
+      </SidebarProvider>
     </VerificationGate>
   );
 }
