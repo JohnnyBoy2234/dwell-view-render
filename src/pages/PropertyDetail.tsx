@@ -148,9 +148,9 @@ export default function PropertyDetail() {
         .from('profiles')
         .select('display_name, phone')
         .eq('user_id', propertyData.landlord_id)
-        .single();
+        .maybeSingle();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.warn('Could not fetch landlord profile:', profileError);
       }
 
@@ -274,24 +274,29 @@ export default function PropertyDetail() {
         .eq('user_id', landlordId)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') throw error;
+
       if (data) {
         const normalizedPlan = normalizePlan(data.plan);
         const status = (data.plan_status ?? 'inactive').toLowerCase();
         setLandlordPlan(normalizedPlan);
         setLandlordPlanStatus(status);
-        setLandlordPlanLoaded(true);
         return {
           plan: normalizedPlan,
           status,
           phone: data.phone ?? null
         };
+      } else {
+        setLandlordPlan('free');
+        setLandlordPlanStatus('inactive');
       }
 
       return null;
     } catch (error) {
-      console.error('Failed to load landlord plan details', error);
+      console.error('Failed to load landlord plan details:', error);
       return null;
+    } finally {
+      setLandlordPlanLoaded(true);
     }
   };
 
