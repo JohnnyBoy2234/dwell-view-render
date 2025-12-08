@@ -8,7 +8,7 @@ import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import {
+import { 
   Sidebar,
   SidebarContent,
   SidebarGroup,
@@ -142,6 +142,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const maintenanceTotal = maintenanceUnread
     ? Object.values(maintenanceUnread).reduce((a: number, b: number) => a + b, 0)
     : 0;
+
   const { state, isMobile, setOpenMobile } = useSidebar();
   const collapsed = state === 'collapsed';
 

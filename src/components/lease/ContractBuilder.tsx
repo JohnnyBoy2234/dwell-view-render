@@ -259,7 +259,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
         }
       }
 
-      const key = getAutosaveKey(contract?.landlord_id || contracts[0]?.landlord_id, contractId, propertyId);
+      const key = getAutosaveKey(user?.id || contract?.landlord_id, contractId, propertyId);
       if (!hasLoadedAutosave && key) {
         try {
           const raw = localStorage.getItem(key);
@@ -280,11 +280,11 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
       }
     };
     loadData();
-  }, [contractId, contracts, propertyId, contract, hasLoadedAutosave]);
+  }, [contractId, contracts, propertyId, contract, hasLoadedAutosave, user?.id]);
 
   useEffect(() => {
     if (!hasLoadedAutosave) return;
-    const key = getAutosaveKey(contract?.landlord_id, contract?.id || contractId, propertyId);
+    const key = getAutosaveKey(user?.id || contract?.landlord_id, contract?.id || contractId, propertyId);
     if (!key) return;
 
     const handler = setTimeout(() => {
@@ -300,10 +300,10 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
     }, 600);
 
     return () => clearTimeout(handler);
-  }, [contractData, currentStep, contract?.id, contract?.landlord_id, contractId, propertyId, hasLoadedAutosave]);
+  }, [contractData, currentStep, contract?.id, contractId, propertyId, hasLoadedAutosave, user?.id, contract?.landlord_id]);
 
   const clearAutosave = () => {
-    const key = getAutosaveKey(contract?.landlord_id, contract?.id || contractId, propertyId);
+    const key = getAutosaveKey(user?.id || contract?.landlord_id, contract?.id || contractId, propertyId);
     if (!key) return;
     try {
       localStorage.removeItem(key);

@@ -38,7 +38,7 @@ serve(async (req) => {
       return new Response("ok", { status: 200, headers: corsHeaders });
     }
 
-    const { plan_code, amount, item_name, item_description } = await req.json();
+    const { plan_code, amount, item_name, item_description, returnUrl } = await req.json();
 
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
     const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -64,7 +64,11 @@ serve(async (req) => {
     const CALLPAY_ORG_ID = (Deno.env.get("CALLPAY_ORGANISATION_ID") ?? "").trim();
     const CALLPAY_API_SALT = (Deno.env.get("CALLPAY_API_SALT") ?? "").trim();
     const CALLPAY_MODE = Deno.env.get("CALLPAY_MODE") ?? "sandbox";
-    const APP_BASE_URL = Deno.env.get("APP_BASE_URL") ?? "";
+    const appBaseEnv = Deno.env.get("APP_BASE_URL") ?? "";
+    const appBaseUrl = (typeof returnUrl === "string" && returnUrl.trim().length > 0 ? returnUrl.trim() : appBaseEnv).replace(/\/$/, "");
+    if (!appBaseUrl) {
+      throw new Error("APP_BASE_URL environment variable is not set and no returnUrl was provided.");
+    }
 
     const timestamp = Math.floor(Date.now() / 1000);
     const authToken = await generateAuthToken(CALLPAY_API_SALT, CALLPAY_ORG_ID, timestamp);
@@ -112,9 +116,9 @@ serve(async (req) => {
       amount: amount.toString(),
       merchant_reference: shortReference,
       customer_reference: user.email || "",
-      success_url: `${APP_BASE_URL}/payment-success?provider=callpay&reference=${shortReference}`,
-      error_url: `${APP_BASE_URL}/payment-failed?reason=error&reference=${shortReference}`,
-      cancel_url: `${APP_BASE_URL}/payment-failed?reason=cancelled&reference=${shortReference}`,
+      success_url: `${appBaseUrl}/payment-success?provider=callpay&reference=${shortReference}`,
+      error_url: `${appBaseUrl}/payment-failed?reason=error&reference=${shortReference}`,
+      cancel_url: `${appBaseUrl}/payment-failed?reason=cancelled&reference=${shortReference}`,
       notify_url: notifyUrl,
       currency_code: "ZAR",
     };

@@ -28,12 +28,13 @@ import {
   Ruler,
   Layers,
   Droplets,
-  ParkingMeter
+  ParkingMeter,
+  Eye
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useSubscription } from '@/hooks/useSubscription';
+import type { PlanType } from '@/hooks/useSubscription';
 import { useForm } from 'react-hook-form';
 import { useApplications } from '@/hooks/useApplications';
 import { useMessaging } from '@/hooks/useMessaging';
@@ -82,7 +83,6 @@ export default function PropertyDetail() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { plan, loading: subscriptionLoading } = useSubscription();
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [messageLoading, setMessageLoading] = useState(false);
@@ -91,6 +91,9 @@ export default function PropertyDetail() {
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
+  const [landlordPlan, setLandlordPlan] = useState<PlanType>('free');
+  const [landlordPlanStatus, setLandlordPlanStatus] = useState<string>('inactive');
+  const [landlordPlanLoaded, setLandlordPlanLoaded] = useState(false);
   
   const { activeBooking } = useViewingBooking(property?.id || '', property?.landlord_id || '');
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<MessageFormData>();
@@ -145,9 +148,9 @@ export default function PropertyDetail() {
         .from('profiles')
         .select('display_name, phone')
         .eq('user_id', propertyData.landlord_id)
-        .single();
+        .maybeSingle();
 
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.warn('Could not fetch landlord profile:', profileError);
       }
 
@@ -286,10 +289,8 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
-    // Create conversation and navigate to messages with pre-typed viewing request
     const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
-      // Navigate to messages with a pre-typed viewing request message
       const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
       navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
     }
@@ -564,7 +565,7 @@ export default function PropertyDetail() {
                       </div>
                     </div>
                     
-                    {plan === 'free' && user?.id !== property.landlord_id && (
+                    {user?.id !== property.landlord_id && (
                       <div className="space-y-2">
                         <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                           <p className="text-sm text-amber-800 flex items-start gap-2">
@@ -584,21 +585,6 @@ export default function PropertyDetail() {
                           </Button>
                         )}
                         
-                        <Button variant="outline" className="w-full" asChild>
-                          <a href={`mailto:${property.landlord_id}@example.com`} className="flex items-center justify-center gap-2">
-                            <Mail className="h-4 w-4" />
-                            Email {property.profiles.display_name?.split(' ')[0] || 'Landlord'}
-                          </a>
-                        </Button>
-                        
-                        <div className="pt-2 text-center">
-                          <p className="text-xs text-muted-foreground">
-                            Upgrade to Pro for in-app messaging and more features
-                          </p>
-                          <Button variant="link" size="sm" className="h-auto p-0 text-sm font-medium" onClick={() => navigate('/pricing')}>
-                            View Plans →
-                          </Button>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -611,7 +597,7 @@ export default function PropertyDetail() {
                       This is your property listing
                     </p>
                   </div>
-                ) : user && property.landlord_id !== user.id && plan !== 'free' ? (
+                ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
                     <GatedViewingButton
                       propertyId={property.id}
@@ -631,16 +617,7 @@ export default function PropertyDetail() {
                     landlordId={property.landlord_id}
                     propertyTitle={property.title}
                   />
-                ) : (
-                  <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg text-center">
-                    <p className="text-sm text-amber-800">
-                      Upgrade to Pro to message landlords and access premium features
-                    </p>
-                    <Button variant="default" size="sm" className="mt-2" onClick={() => navigate('/pricing')}>
-                      View Plans
-                    </Button>
-                  </div>
-                )}
+                ) : null}
 
                 
               </CardContent>

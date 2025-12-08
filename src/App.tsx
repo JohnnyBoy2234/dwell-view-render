@@ -74,6 +74,7 @@ import TaxInvoicePage from "@/pages/accounting/TaxInvoicePage";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import SafeRenting from "./pages/SafeRenting";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
 
 const queryClient = new QueryClient();
 
@@ -92,7 +93,9 @@ function AppRoutes() {
   }, []);
 
   return (
-    <Routes>
+    <>
+      <PaymentRedirectHandler />
+      <Routes>
               {/* Admin Routes */}   
               <Route path="/admin" element={
                 <RouteGuard>
@@ -232,6 +235,7 @@ function AppRoutes() {
               <Route path="/settings" element={<RouteGuard><EnhancedDashboardLayout title="Account Settings"><SettingsPage /></EnhancedDashboardLayout></RouteGuard>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+    </>
   );
 }
 

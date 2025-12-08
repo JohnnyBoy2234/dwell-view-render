@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -208,10 +209,12 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
           {/* Top Fade with Heading */}
-          <div className="top-fade my-0">
-              <h1 className="text-xl md:text-3xl font-bold text-white px-2 text-left whitespace-nowrap">
-                Safe, Simple, <span className="text-ocean-blue">Commission-Free</span> Renting
-              </h1>
+          <div className="top-fade my-0 justify-end pr-4 md:pr-12">
+              <div className="max-w-xl text-right">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+                  Safe, Simple, <span className="text-ocean-blue">Commission-Free</span> Renting
+                </h1>
+              </div>
           </div>
         </div>
 

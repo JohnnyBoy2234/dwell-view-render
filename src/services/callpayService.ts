@@ -6,6 +6,7 @@ export type CallpayPlan = {
   amount: number;
   item_name: string;
   item_description?: string;
+  returnUrl?: string;
 };
 
 declare global {
@@ -25,6 +26,11 @@ declare global {
 export async function startCallpayCheckout(plan: CallpayPlan) {
   try {
     console.log('[CallPay] Starting checkout for plan:', plan);
+    const browserReturnUrl = typeof window !== 'undefined' ? window.location.origin : undefined;
+    const payload = {
+      ...plan,
+      returnUrl: plan.returnUrl ?? browserReturnUrl,
+    };
 
     // Check if user is authenticated
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -47,7 +53,7 @@ export async function startCallpayCheckout(plan: CallpayPlan) {
     
     try {
       const result = await supabase.functions.invoke('callpay-initiate', {
-        body: plan,
+        body: payload,
       });
       data = result.data;
       error = result.error;

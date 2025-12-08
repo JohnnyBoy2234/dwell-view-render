@@ -4,7 +4,7 @@ import { LogOut, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
-import { LANDLORD_PAGE_CONFIG } from '@/constants/dashboardPageConfig';
+import { getPageConfig } from '@/constants/dashboardPageConfig';
 
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
@@ -40,37 +40,43 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
 
-  // Get page configuration based on current tab
-  const pageConfig = LANDLORD_PAGE_CONFIG[currentTab || '/enhancedlandlorddashboard'] || LANDLORD_PAGE_CONFIG['/enhancedlandlorddashboard'];
+  const basePath = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+  const activePath = currentTab || basePath;
+
+  const pageConfig = getPageConfig(activePath, isLandlord);
   const PageIcon = pageConfig.icon;
 
-  // Determine when to show back button
-  const shouldShowBackButton = 
-    (currentTab === '/enhancedlandlorddashboard' && selectedPropertyId) || // On Management Tools with property selected
-    (currentTab !== '/enhancedlandlorddashboard'); // On any sub-page
+  const shouldShowBackButton = pageConfig.showBackButton || false;
 
-  // Handle back button click
   const handleBackClick = () => {
-    if (title === 'Generate Invoice' || currentTab?.includes('tax-invoice')) {
-      // Always navigate to management tools when on Tax Invoice page
+    if (isLandlord) {
+      if (title === 'Generate Invoice' || activePath.includes('tax-invoice')) {
+        navigate('/enhancedlandlorddashboard');
+        return;
+      }
+
+      if (activePath === '/enhancedlandlorddashboard' && selectedPropertyId) {
+        onBackToProperties?.();
+        return;
+      }
+
+      if (activePath !== '/enhancedlandlorddashboard') {
+        const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
+        onTabChange?.('/enhancedlandlorddashboard');
+        navigate(`/enhancedlandlorddashboard${params}`);
+        return;
+      }
+
       navigate('/enhancedlandlorddashboard');
-    } else if (currentTab === '/enhancedlandlorddashboard' && selectedPropertyId) {
-      // On Management Tools page -> go back to Property Selection
-      onBackToProperties?.();
-    } else if (currentTab && currentTab !== '/enhancedlandlorddashboard') {
-      // On sub-page -> go back to Management Tools
-      const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
-      // Update parent state immediately for snappy UI, then navigate
-      onTabChange?.('/enhancedlandlorddashboard');
-      navigate(`/enhancedlandlorddashboard${params}`);
     } else {
-      // Default fallback
-      navigate('/enhancedlandlorddashboard');
+      const backPath = pageConfig.backPath || basePath;
+      onTabChange?.(backPath);
+      navigate(backPath);
     }
   };
 
   const isPropertySelection = !selectedPropertyId;
-  const isLandlordDashboardRoute = (currentTab || '').startsWith('/enhancedlandlorddashboard');
+  const isLandlordDashboardRoute = activePath.startsWith('/enhancedlandlorddashboard');
 
   return (
     <div className={

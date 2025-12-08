@@ -13,7 +13,6 @@ import TenantSupport from '@/pages/tenant/TenantSupport';
 import Messages from '@/pages/Messages';
 import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
-import { PlanGuard } from '@/components/subscription/PlanGuard';
 import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
 import { FileText, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,18 +27,14 @@ export default function TenantDashboardRoutes() {
       <Route path="/" element={<EnhancedTenantDashboard />} />
       
       <Route path="/contracts" element={
-        <PlanGuard requiredPlan="pro" featureName="Contract Documents">
-          <EnhancedDashboardLayout title="Contract Documents">
-            <TenantLeaseDocuments />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Contract Documents">
+          <TenantLeaseDocuments />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/leases" element={
-        <PlanGuard requiredPlan="pro" featureName="Lease System">
-          <EnhancedDashboardLayout title="Lease System">
-            <LeaseDashboardComponent />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Lease System">
+          <LeaseDashboardComponent />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/viewings" element={
         <EnhancedDashboardLayout title="Property Viewings">
@@ -52,11 +47,9 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="/inspection" element={
-        <PlanGuard requiredPlan="pro" featureName="Property Inspections">
-          <EnhancedDashboardLayout title="Property Inspection">
-            <TenantInspection />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Property Inspection">
+          <TenantInspection />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/proof-of-payment" element={
         <EnhancedDashboardLayout title="Proof of Payment">
@@ -64,17 +57,15 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="/applications" element={
-        <PlanGuard requiredPlan="pro" featureName="Rental Applications">
-          <EnhancedDashboardLayout title="Applications">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 mb-2">
-                <FileText className="h-6 w-6 text-ocean-blue" />
-                <h2 className="text-xl font-bold">Applications</h2>
-              </div>
-              <TenantApplicationsSection />
+        <EnhancedDashboardLayout title="Applications">
+          <div className="space-y-6">
+            <div className="flex items-center gap-3 mb-2">
+              <FileText className="h-6 w-6 text-ocean-blue" />
+              <h2 className="text-xl font-bold">Applications</h2>
             </div>
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+            <TenantApplicationsSection />
+          </div>
+        </EnhancedDashboardLayout>
       } />
       <Route path="/profile" element={
         <EnhancedDashboardLayout title="Profile Settings">
@@ -82,39 +73,29 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="/maintenance" element={
-        <PlanGuard requiredPlan="premium" featureName="Maintenance Requests">
-          <EnhancedDashboardLayout title="Maintenance Requests">
-            <TenantMaintenance />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Maintenance Requests">
+          <TenantMaintenance />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/maintenance/responses" element={
-        <PlanGuard requiredPlan="premium" featureName="Maintenance Responses">
-          <EnhancedDashboardLayout title="Maintenance Responses">
-            <TenantMaintenanceResponses />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Maintenance Responses">
+          <TenantMaintenanceResponses />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/maintenance/:ticketId" element={
-        <PlanGuard requiredPlan="premium" featureName="Maintenance Tickets">
-          <EnhancedDashboardLayout title="Maintenance Ticket">
-            <MaintenanceTicketDetails />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Maintenance Ticket">
+          <MaintenanceTicketDetails />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/messages" element={
-        <PlanGuard requiredPlan="pro" featureName="Messaging">
-          <EnhancedDashboardLayout title="Messages">
-            <Messages />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Messages">
+          <Messages />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/payments" element={
-        <PlanGuard requiredPlan="pro" featureName="Payment Processing">
-          <EnhancedDashboardLayout title="Payments & Rent">
-            <TenantPayments />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+        <EnhancedDashboardLayout title="Payments & Rent">
+          <TenantPayments />
+        </EnhancedDashboardLayout>
       } />
       <Route path="/support" element={
         <EnhancedDashboardLayout title="Support & Help">
