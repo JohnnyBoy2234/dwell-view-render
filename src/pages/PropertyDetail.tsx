@@ -565,7 +565,7 @@ export default function PropertyDetail() {
                       </div>
                     </div>
                     
-                    {!landlordSupportsMessaging() && user?.id !== property.landlord_id && (
+                    {user?.id !== property.landlord_id && (
                       <div className="space-y-2">
                         <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                           <p className="text-sm text-amber-800 flex items-start gap-2">
