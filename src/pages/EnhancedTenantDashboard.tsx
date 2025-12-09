@@ -271,7 +271,7 @@ export default function EnhancedTenantDashboard() {
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-          <div className="flex-1">
+    <div className="flex-1 min-h-0 flex flex-col">
       <EnhancedDashboardLayout 
         title="Tenant Dashboard" 
         currentTab={currentTab}
@@ -279,8 +279,8 @@ export default function EnhancedTenantDashboard() {
       >
         {renderTabContent()}
       </EnhancedDashboardLayout>
-          </div>
-        </div>
+    </div>
+  </div>
       </SidebarProvider>
     </VerificationGate>
   );
