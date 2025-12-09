@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
@@ -64,6 +65,7 @@ function MessageStatusIndicator({ status, className }: MessageStatusIndicatorPro
 export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing, isLandlordInConversation, tenantId, propertyId }: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true);
@@ -449,14 +451,38 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
             <div className="mt-2">
               <button
                 className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-                onClick={() => {
+                onClick={async () => {
                   try {
                     const match = message.content.match(/\/apply\/invite\/([a-zA-Z0-9-]+)/);
                     if (match && match[1]) {
-                      window.location.href = `/apply/invite/${match[1]}`;
+                      const token = match[1];
+                      
+                      // Fetch invite details
+                      const { data: invite, error } = await supabase
+                        .from('application_invites')
+                        .select('id, property_id, landlord_id')
+                        .eq('token', token)
+                        .maybeSingle();
+                      
+                      if (error || !invite) {
+                        toast({
+                          title: "Error",
+                          description: "Could not load application invite. Please try again.",
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      
+                      // Navigate directly to rental application
+                      navigate(`/rental-application/${invite.property_id}?landlord=${invite.landlord_id}&invite=${invite.id}`);
                     }
                   } catch (e) {
                     console.error('Failed to navigate to invite from message:', e);
+                    toast({
+                      title: "Error",
+                      description: "Failed to start application. Please try again.",
+                      variant: "destructive",
+                    });
                   }
                 }}
                 aria-label="Start rental application"
