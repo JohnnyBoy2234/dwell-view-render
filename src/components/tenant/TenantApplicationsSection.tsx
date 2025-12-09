@@ -11,8 +11,13 @@ import { Input } from '@/components/ui/input';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useApplications } from '@/hooks/useApplications';
+import { useAuth } from '@/hooks/useAuth';
+import { createApplicationRequest } from '@/services/applicationRequestService';
+import { useToast } from '@/hooks/use-toast';
 
 export const TenantApplicationsSection = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
   const { invites, loading: invitesLoading } = useApplicationInvites();
   const { applications, loading: applicationsLoading } = useTenantApplications();
   const { requestApplication } = useApplications();
@@ -61,13 +66,30 @@ export const TenantApplicationsSection = () => {
   }, []);
 
   const handleRequest = async () => {
-    if (!selectedLead) return;
+    if (!selectedLead || !user) return;
     const lead = leadOptions.find(l => l.conversation_id === selectedLead);
     if (!lead) return;
     setSubmitting(true);
     try {
-      await requestApplication(lead.property_id, lead.landlord_id);
+      // Use the application_requests service directly
+      await createApplicationRequest({
+        property_id: lead.property_id,
+        tenant_id: user.id,
+        landlord_id: lead.landlord_id
+      });
+      toast({
+        title: "Application requested",
+        description: "Your request has been sent to the landlord."
+      });
       setOpenRequest(false);
+      setSelectedLead('');
+    } catch (error: any) {
+      console.error('Error requesting application:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error?.message || "Failed to request application. Please try again."
+      });
     } finally {
       setSubmitting(false);
     }

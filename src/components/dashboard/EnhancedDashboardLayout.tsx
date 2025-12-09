@@ -79,74 +79,70 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const isLandlordDashboardRoute = activePath.startsWith('/enhancedlandlorddashboard');
 
   return (
-    <div className={
-      `flex min-h-screen w-full ${
-        isLandlordDashboardRoute
-          ? 'bg-transparent'
-          : 'bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]'
-      }`
-    }>
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Enhanced Header */}
-        <header className={`h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 ${
-          isLandlord 
-            ? 'bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25]' 
-            : 'bg-gradient-to-r from-blue-500/[0.15] via-background/95 to-blue-600/[0.15]'
-        } backdrop-blur-md`}>
-          {/* Back button if needed, otherwise Sidebar trigger */}
-          {shouldShowBackButton && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleBackClick}
-              className="mr-3"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          )}
-            
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                {/* Icon with gradient background */}
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-ocean-blue to-success-green">
-                  <PageIcon className="h-5 w-5 text-white" />
-                </div>
-                
-                {/* Dynamic title */}
-                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title || pageConfig.title}</h1>
-                
-                <div className="hidden sm:block">
-                  <Badge variant="secondary" className="text-xs">
-                    {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-              {/* Notifications */}
-              <NotificationBell className="hidden sm:block" />
-              
-              {/* Custom Actions */}
-              {actions}
-              
-              {/* Sign Out Button */}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={signOut}
-              >
-                <LogOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
-            </div>
-          </header>
+    <div className={`flex flex-col min-h-screen w-full ${
+      isLandlordDashboardRoute
+        ? 'bg-transparent'
+        : 'bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]'
+    }`}>
+      {/* Enhanced Header */}
+      <header className={`h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 ${
+        isLandlord 
+          ? 'bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25]' 
+          : 'bg-gradient-to-r from-blue-500/[0.15] via-background/95 to-blue-600/[0.15]'
+      } backdrop-blur-md`}>
+        {/* Back button if needed, otherwise Sidebar trigger */}
+        {shouldShowBackButton && (
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleBackClick}
+            className="mr-3"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        )}
           
-          {/* Main Content with Error Boundary */}
-          <main className={`flex-1 ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
-            {children}
-          </main>
+        <div className="flex-1">
+          <div className="flex items-center gap-3">
+            {/* Icon with gradient background */}
+            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-ocean-blue to-success-green">
+              <PageIcon className="h-5 w-5 text-white" />
+            </div>
+            
+            {/* Dynamic title */}
+            <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title || pageConfig.title}</h1>
+            
+            <div className="hidden sm:block">
+              <Badge variant="secondary" className="text-xs">
+                {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
+              </Badge>
+            </div>
+          </div>
         </div>
-      </div>
+        
+        <div className="flex items-center gap-2 sm:gap-4 ml-auto">
+          {/* Notifications */}
+          <NotificationBell className="hidden sm:block" />
+          
+          {/* Custom Actions */}
+          {actions}
+          
+          {/* Sign Out Button */}
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={signOut}
+          >
+            <LogOut className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </Button>
+        </div>
+      </header>
+      
+      {/* Main Content with Error Boundary */}
+      <main className={`flex-1 w-full ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
+        {children}
+      </main>
+    </div>
   );
 }

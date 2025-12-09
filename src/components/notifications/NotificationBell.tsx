@@ -45,27 +45,29 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
     let targetUrl = notification.link_url || notification.action_url;
     if (!targetUrl && notification.metadata) {
       const { leaseId, requestId, applicationId, viewingId, offerId, inventoryId, propertyId, conversationId } = notification.metadata;
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+      
       switch (notification.type) {
         case 'lease':
-          targetUrl = leaseId ? `/enhancedlandlorddashboard/leases/${leaseId}` : undefined;
+          targetUrl = leaseId ? `${dashboardBase}/leases/${leaseId}` : `${dashboardBase}/leases`;
           break;
         case 'maintenance':
-          targetUrl = requestId ? `/enhancedlandlorddashboard/maintenance/${requestId}` : undefined;
+          targetUrl = requestId ? `${dashboardBase}/maintenance/${requestId}` : `${dashboardBase}/maintenance`;
           break;
         case 'application':
-          targetUrl = applicationId ? `/enhancedlandlorddashboard/applications/${applicationId}` : undefined;
+          targetUrl = applicationId ? `${dashboardBase}/applications/${applicationId}` : `${dashboardBase}/applications`;
           break;
         case 'payment':
-          targetUrl = '/enhancedlandlorddashboard/payments';
+          targetUrl = `${dashboardBase}/payments`;
           break;
         case 'viewing':
-          targetUrl = viewingId ? `/enhancedlandlorddashboard/viewings/${viewingId}` : undefined;
+          targetUrl = viewingId ? `${dashboardBase}/viewings/${viewingId}` : `${dashboardBase}/viewings`;
           break;
         case 'inventory':
-          targetUrl = inventoryId ? `/enhancedlandlorddashboard/inventory/${inventoryId}` : undefined;
+          targetUrl = inventoryId ? `${dashboardBase}/inventory/${inventoryId}` : `${dashboardBase}/inventory`;
           break;
         case 'offer':
-          targetUrl = offerId ? `/enhancedlandlorddashboard/offers/${offerId}` : undefined;
+          targetUrl = offerId ? `${dashboardBase}/offers/${offerId}` : `${dashboardBase}/offers`;
           break;
         case 'system':
           if (notification.metadata?.redirect_url) {
@@ -81,7 +83,8 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
       }
     }
     if (!targetUrl) {
-      targetUrl = isLandlord ? '/enhancedlandlorddashboard/messages' : '/tenant-dashboard/messages';
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+      targetUrl = `${dashboardBase}/messages`;
     }
     navigate(targetUrl);
     setIsOpen(false);

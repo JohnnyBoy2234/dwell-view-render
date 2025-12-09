@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import { createApplicationRequest } from '@/services/applicationRequestService';
 import { supabase } from '@/integrations/supabase/client';
 
 interface ApplicationRequestButtonProps {
@@ -24,6 +25,24 @@ export const ApplicationRequestButton = ({
   const [loading, setLoading] = useState(false);
   const [hasRequested, setHasRequested] = useState(false);
 
+  // Check if there's already a pending request for this property
+  useEffect(() => {
+    if (!user) return;
+    const checkExistingRequest = async () => {
+      const { data } = await supabase
+        .from('application_requests')
+        .select('status')
+        .eq('property_id', propertyId)
+        .eq('tenant_id', user.id)
+        .maybeSingle();
+      
+      if (data && (data.status === 'pending' || data.status === 'approved')) {
+        setHasRequested(true);
+      }
+    };
+    checkExistingRequest();
+  }, [user, propertyId]);
+
   const handleRequestApplication = async () => {
     if (!user) {
       toast({
@@ -37,19 +56,12 @@ export const ApplicationRequestButton = ({
     setLoading(true);
     
     try {
-      // Send notification to landlord using notifications table
-      await (supabase
-        .from('notifications')
-        .insert({
-          user_id: landlordId,
-          type: 'application_request',
-          message: `${user.email} has requested an application for ${propertyTitle}`,
-          metadata: {
-            tenantId: user.id,
-            propertyId: propertyId,
-            propertyTitle: propertyTitle
-          }
-        } as any) as any);
+      // Create application request using the proper service
+      await createApplicationRequest({
+        property_id: propertyId,
+        tenant_id: user.id,
+        landlord_id: landlordId
+      });
 
       setHasRequested(true);
 
@@ -58,12 +70,12 @@ export const ApplicationRequestButton = ({
         description: "Your request has been sent to the landlord. They will review and respond soon."
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error requesting application:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to request application. Please try again."
+        description: error?.message || "Failed to request application. Please try again."
       });
     } finally {
       setLoading(false);

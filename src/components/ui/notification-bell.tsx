@@ -60,30 +60,103 @@ export function NotificationBell() {
       markTenantAsRead(notification.id);
     }
 
-    // Navigate to relevant page based on notification type
-    if (notification.link_url) {
-      navigate(notification.link_url);
-    } else if (notification.action_url) {
-      navigate(notification.action_url);
-    } else if (notification.tenancyId || notification.id) {
-      // Handle lease-related notifications
+    // Navigate to relevant page based on notification type, link URL, action URL, and metadata
+    let targetUrl = notification.link_url || notification.action_url;
+
+    // If no direct URL, extract from metadata and build specific URL
+    if (!targetUrl && notification.metadata) {
+      const { leaseId, requestId, applicationId, viewingId, offerId, inventoryId, propertyId, conversationId } = notification.metadata;
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+      
+      switch (notification.type) {
+        case 'lease':
+          targetUrl = leaseId ? `${dashboardBase}/leases/${leaseId}` : `${dashboardBase}/leases`;
+          break;
+        case 'maintenance':
+          targetUrl = requestId ? `${dashboardBase}/maintenance/${requestId}` : `${dashboardBase}/maintenance`;
+          break;
+        case 'application':
+          targetUrl = applicationId ? `${dashboardBase}/applications/${applicationId}` : `${dashboardBase}/applications`;
+          break;
+        case 'payment':
+          targetUrl = `${dashboardBase}/payments`;
+          break;
+        case 'viewing':
+          targetUrl = viewingId ? `${dashboardBase}/viewings/${viewingId}` : `${dashboardBase}/viewings`;
+          break;
+        case 'inventory':
+          targetUrl = inventoryId ? `${dashboardBase}/inventory/${inventoryId}` : `${dashboardBase}/inventory`;
+          break;
+        case 'offer':
+          targetUrl = offerId ? `${dashboardBase}/offers/${offerId}` : `${dashboardBase}/offers`;
+          break;
+        case 'system':
+          if (notification.metadata?.redirect_url) {
+            targetUrl = notification.metadata.redirect_url;
+          }
+          break;
+        case 'message':
+          targetUrl = conversationId ? `/messages?c=${conversationId}` : '/messages';
+          break;
+        default:
+          if (conversationId) {
+            targetUrl = `/messages?c=${conversationId}`;
+          } else if (propertyId) {
+            targetUrl = `/properties/${propertyId}`;
+          } else {
+            targetUrl = dashboardBase;
+          }
+      }
+    }
+
+    // Fallback: Handle legacy tenancyId field
+    if (!targetUrl && (notification.tenancyId || notification.id)) {
       const leaseId = notification.tenancyId || notification.id;
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
       if (isLandlord) {
         if (notification.type === 'lease_signed_by_tenant' || notification.type === 'lease_ready') {
-          navigate(`/enhancedlandlorddashboard?tab=leases&lease=${leaseId}`);
+          targetUrl = `${dashboardBase}/leases/${leaseId}`;
         } else {
-          navigate('/enhancedlandlorddashboard');
+          targetUrl = `${dashboardBase}/leases`;
         }
       } else {
         if (notification.type === 'lease_ready' || notification.type === 'lease_update') {
-          navigate(`/enhancedtenantdashboard?tab=leases&lease=${leaseId}`);
+          targetUrl = `${dashboardBase}/leases/${leaseId}`;
         } else {
-          navigate('/enhancedtenantdashboard');
+          targetUrl = `${dashboardBase}/leases`;
         }
       }
-    } else {
-      // Default navigation based on user type
-      navigate(isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard');
+    }
+
+    // Final fallback: Default navigation based on user type
+    if (!targetUrl) {
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+      switch (notification.type) {
+        case 'message':
+          targetUrl = '/messages';
+          break;
+        case 'lease':
+          targetUrl = `${dashboardBase}/leases`;
+          break;
+        case 'maintenance':
+          targetUrl = `${dashboardBase}/maintenance`;
+          break;
+        case 'payment':
+          targetUrl = `${dashboardBase}/payments`;
+          break;
+        case 'viewing':
+          targetUrl = `${dashboardBase}/viewings`;
+          break;
+        case 'application':
+          targetUrl = `${dashboardBase}/applications`;
+          break;
+        default:
+          targetUrl = dashboardBase;
+      }
+    }
+    
+    if (targetUrl) {
+      navigate(targetUrl);
     }
     
     setOpen(false);

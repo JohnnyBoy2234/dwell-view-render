@@ -37,11 +37,13 @@ interface NotificationItem {
   timestamp: string;
   isRead: boolean;
   actionUrl?: string;
+  linkUrl?: string;
+  metadata?: any;
   priority: 'low' | 'medium' | 'high';
 }
 
 export default function Notifications() {
-  const { user } = useAuth();
+  const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { notifications, markAsRead, markAllAsRead } = useNotifications();
@@ -72,12 +74,14 @@ export default function Notifications() {
         notifications.forEach(notification => {
           combinedNotifications.push({
             id: notification.id,
-            type: 'general',
+            type: (notification.type || 'general') as 'message' | 'lease' | 'maintenance' | 'payment' | 'viewing' | 'application' | 'general',
             title: notification.title || 'Notification',
             message: notification.message || '',
             timestamp: notification.created_at,
             isRead: notification.is_read || false,
             actionUrl: notification.action_url,
+            linkUrl: notification.link_url,
+            metadata: notification.metadata,
             priority: (['urgent', 'normal'].includes(notification.priority) ? 'high' : notification.priority) as 'low' | 'medium' | 'high' || 'medium'
           });
         });
@@ -156,32 +160,79 @@ export default function Notifications() {
       }
     }
 
-    // Navigate based on notification type and action URL
-    let targetUrl = notification.actionUrl;
+    // Navigate based on notification type, action URL, link URL, and metadata
+    let targetUrl = notification.linkUrl || notification.actionUrl;
 
-    // If no action URL, determine based on notification type
+    // If no direct URL, extract from metadata and build specific URL
+    if (!targetUrl && notification.metadata) {
+      const { leaseId, requestId, applicationId, viewingId, offerId, inventoryId, propertyId, conversationId } = notification.metadata;
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+      
+      switch (notification.type) {
+        case 'lease':
+          targetUrl = leaseId ? `${dashboardBase}/leases/${leaseId}` : `${dashboardBase}/leases`;
+          break;
+        case 'maintenance':
+          targetUrl = requestId ? `${dashboardBase}/maintenance/${requestId}` : `${dashboardBase}/maintenance`;
+          break;
+        case 'application':
+          targetUrl = applicationId ? `${dashboardBase}/applications/${applicationId}` : `${dashboardBase}/applications`;
+          break;
+        case 'payment':
+          targetUrl = `${dashboardBase}/payments`;
+          break;
+        case 'viewing':
+          targetUrl = viewingId ? `${dashboardBase}/viewings/${viewingId}` : `${dashboardBase}/viewings`;
+          break;
+        case 'inventory':
+          targetUrl = inventoryId ? `${dashboardBase}/inventory/${inventoryId}` : `${dashboardBase}/inventory`;
+          break;
+        case 'offer':
+          targetUrl = offerId ? `${dashboardBase}/offers/${offerId}` : `${dashboardBase}/offers`;
+          break;
+        case 'system':
+          if (notification.metadata?.redirect_url) {
+            targetUrl = notification.metadata.redirect_url;
+          }
+          break;
+        case 'message':
+          targetUrl = conversationId ? `/messages?c=${conversationId}` : '/messages';
+          break;
+        default:
+          if (conversationId) {
+            targetUrl = `/messages?c=${conversationId}`;
+          } else if (propertyId) {
+            targetUrl = `/properties/${propertyId}`;
+          } else {
+            targetUrl = dashboardBase;
+          }
+      }
+    }
+
+    // Fallback: If still no URL, determine based on notification type
     if (!targetUrl) {
+      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
       switch (notification.type) {
         case 'message':
           targetUrl = '/messages';
           break;
         case 'lease':
-          targetUrl = '/enhancedtenantdashboard/leases';
+          targetUrl = `${dashboardBase}/leases`;
           break;
         case 'maintenance':
-          targetUrl = '/enhancedtenantdashboard/maintenance';
+          targetUrl = `${dashboardBase}/maintenance`;
           break;
         case 'payment':
-          targetUrl = '/enhancedtenantdashboard/payments';
+          targetUrl = `${dashboardBase}/payments`;
           break;
         case 'viewing':
-          targetUrl = '/enhancedtenantdashboard/viewings';
+          targetUrl = `${dashboardBase}/viewings`;
           break;
         case 'application':
-          targetUrl = '/enhancedtenantdashboard/applications';
+          targetUrl = `${dashboardBase}/applications`;
           break;
         default:
-          targetUrl = '/enhancedtenantdashboard';
+          targetUrl = dashboardBase;
       }
     }
 
