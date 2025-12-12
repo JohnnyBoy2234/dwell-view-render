@@ -360,8 +360,11 @@ export default function Messages() {
                 ) : conversations.length === 0 ? (
                   <div className="flex items-center justify-center h-full text-center p-6">
                     <div>
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                      <p className="text-muted-foreground">Loading conversations...</p>
+                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
+                      <p className="text-muted-foreground">
+                        {isLandlord ? "Messages from tenants and applicants will appear here" : "Messages from landlords will appear here"}
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -569,8 +572,11 @@ export default function Messages() {
                 </div>
               ) : conversations.length === 0 ? (
                 <div className="p-6 text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                  <p className="text-muted-foreground">Loading conversations...</p>
+                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
+                  <p className="text-muted-foreground">
+                    {isLandlord ? "Messages from tenants and applicants will appear here" : "Messages from landlords will appear here"}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-1">
