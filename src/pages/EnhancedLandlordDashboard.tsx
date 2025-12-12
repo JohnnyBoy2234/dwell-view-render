@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
 import { BackButton } from '@/components/common/BackButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
+import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -791,11 +793,13 @@ export default function EnhancedLandlordDashboard() {
     return properties.find(p => p.id === selectedPropertyId);
   };
 
+  const isBaseTab = currentTab === '/enhancedlandlorddashboard';
+
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
     
-    // If no property is selected, show property selection
-    if (!selectedPropertyId) {
+    // If no property is selected, show selection only for property-specific tabs
+    if (!selectedPropertyId && !isBaseTab) {
       return (
         <PropertySelection 
           properties={properties}
@@ -2577,23 +2581,32 @@ const renderReportsTab = () => (
     navigate(`${tab}${params}`);
   };
 
-  const headerTitle = !selectedPropertyId
-    ? 'Property Portfolio'
-    : currentTab === '/enhancedlandlorddashboard'
-      ? 'Management Tools'
-      : '';
+  const headerTitle = isBaseTab
+    ? 'Management Tools'
+    : selectedPropertyId
+      ? ''
+      : 'Property Portfolio';
 
   return (
     <VerificationGate requireVerification={true}>
-      <EnhancedDashboardLayout 
-        title={headerTitle}
-        currentTab={currentTab}
-        onTabChange={handleTabChange}
-        selectedPropertyId={selectedPropertyId}
-        onBackToProperties={handleBackToProperties}
-      >
-        {renderTabContent()}
-      </EnhancedDashboardLayout>
+      <SidebarProvider>
+        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+          <div className="hidden lg:flex lg:w-64 lg:flex-none">
+            <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col">
+            <EnhancedDashboardLayout 
+              title={headerTitle}
+              currentTab={currentTab}
+              onTabChange={handleTabChange}
+              selectedPropertyId={selectedPropertyId}
+              onBackToProperties={handleBackToProperties}
+            >
+              {renderTabContent()}
+            </EnhancedDashboardLayout>
+          </div>
+        </div>
+      </SidebarProvider>
     </VerificationGate>
   );
 }
