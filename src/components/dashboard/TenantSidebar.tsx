@@ -56,7 +56,7 @@ export function TenantSidebar() {
         {/* Logo */}
         <div className="p-6 border-b">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-success-green to-ocean-blue rounded flex items-center justify-center shadow-soft">
+            <div className="w-8 h-8 bg-ocean-blue rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
             {!collapsed && <h1 className="text-xl font-bold">RentLekker</h1>}
