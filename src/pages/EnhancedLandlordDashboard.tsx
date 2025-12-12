@@ -2271,7 +2271,7 @@ const renderReportsTab = () => (
     const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
 
     return (
-      <div className="min-h-screen bg-white pb-24 md:pb-4">
+      <div className="min-h-screen bg-white pb-24 md:pb-4" style={{ minHeight: '100dvh', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
         <div className="px-4 space-y-6 pt-3">
           {/* Quick tile: Inspection (removed per request) */}
           {/* Header removed per request */}
@@ -2590,11 +2590,11 @@ const renderReportsTab = () => (
   return (
     <VerificationGate requireVerification={true}>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-          <div className="flex-1 min-h-0 flex flex-col">
+          <div className="flex-1 min-h-0 flex flex-col" style={{ contain: 'layout style paint' }}>
             <EnhancedDashboardLayout 
               title={headerTitle}
               currentTab={currentTab}

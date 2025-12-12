@@ -219,10 +219,10 @@ export default function EnhancedTenantDashboard() {
     ];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh' }}>
         
 
-        <div className="p-4 pb-24 md:pb-4 space-y-4">
+        <div className="p-4 pb-24 md:pb-4 space-y-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
 
           {/* Feature Blocks - Management tools style grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -267,11 +267,11 @@ export default function EnhancedTenantDashboard() {
   return (
     <VerificationGate requireVerification={true}>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-    <div className="flex-1 min-h-0 flex flex-col">
+    <div className="flex-1 min-h-0 flex flex-col" style={{ contain: 'layout style paint' }}>
       <EnhancedDashboardLayout 
         title="Tenant Dashboard" 
         currentTab={currentTab}

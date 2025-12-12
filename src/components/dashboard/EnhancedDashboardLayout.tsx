@@ -83,13 +83,13 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         isLandlordDashboardRoute
           ? 'bg-transparent'
           : 'bg-ocean-blue/[0.06]'
-    }`}>
+    }`} style={{ minHeight: '100dvh' }}>
         {/* Enhanced Header */}
         <header className={`h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 ${
           isLandlord 
             ? 'bg-ocean-blue/[0.25]' 
             : 'bg-blue-500/[0.15]'
-        } backdrop-blur-md`}>
+        } backdrop-blur-md`} style={{ willChange: 'transform' }}>
           {/* Back button if needed, otherwise Sidebar trigger */}
           {shouldShowBackButton && (
             <Button 
@@ -140,7 +140,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
           </header>
           
           {/* Main Content with Error Boundary */}
-      <main className={`flex-1 w-full ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`}>
+      <main className={`flex-1 w-full ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`} style={{ contain: 'layout style paint' }}>
             {children}
           </main>
       </div>
