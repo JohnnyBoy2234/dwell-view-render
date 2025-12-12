@@ -2461,7 +2461,7 @@ const renderReportsTab = () => (
             className="cursor-pointer rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-pop motion-safe:focus-within:-translate-y-0.5 motion-safe:focus-within:shadow-pop"
             onClick={() => navigate(`/manage-property/${property.id}`)}
           >
-            <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-ocean-blue/[0.1] to-success-green/[0.1]">
+            <div className="aspect-video relative overflow-hidden rounded-t-lg bg-ocean-blue/[0.1]">
               {property.images.length > 0 ? (
                 <img
                   src={property.images[0]}

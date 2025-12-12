@@ -49,7 +49,7 @@ export function ConversationItem({ conversation, onClick }: ConversationItemProp
       <CardContent className="relative p-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3 flex-1">
-            <div className="w-10 h-10 bg-gradient-to-br from-ocean-blue to-success-green rounded-full flex items-center justify-center flex-shrink-0 shadow-soft">
+            <div className="w-10 h-10 bg-ocean-blue rounded-full flex items-center justify-center flex-shrink-0 shadow-soft">
               <User className="w-5 h-5 text-white" />
             </div>
 

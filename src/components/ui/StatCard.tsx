@@ -15,8 +15,8 @@ export function StatCard({ label, value, icon, className, subText }: StatCardPro
       className={cn(
         // container
         "rounded-2xl p-4 shadow-soft ring-1 ring-ocean-blue/10",
-        // subtle brand gradient background
-        "bg-gradient-to-br from-ocean-blue/[0.04] via-white to-success-green/[0.04]",
+        // subtle brand background
+        "bg-ocean-blue/[0.04]",
         // motion and focus
         "transition hover:-translate-y-[1px] hover:shadow-lg focus-within:ring-2 focus-within:ring-ocean-blue/30",
         className
@@ -33,7 +33,7 @@ export function StatCard({ label, value, icon, className, subText }: StatCardPro
         </div>
         {icon && (
           <div className="h-10 w-10 shrink-0 rounded-xl grid place-content-center \
-            bg-gradient-to-br from-ocean-blue/15 to-success-green/15 text-ocean-blue">
+            bg-ocean-blue text-white">
             {icon}
           </div>
         )}

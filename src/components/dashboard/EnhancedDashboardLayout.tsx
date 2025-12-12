@@ -82,13 +82,13 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
     <div className={`flex flex-col min-h-screen w-full ${
         isLandlordDashboardRoute
           ? 'bg-transparent'
-          : 'bg-gradient-to-br from-ocean-blue/[0.06] via-background to-success-green/[0.06]'
+          : 'bg-ocean-blue/[0.06]'
     }`}>
         {/* Enhanced Header */}
         <header className={`h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 ${
           isLandlord 
-            ? 'bg-gradient-to-r from-ocean-blue/[0.25] via-background/95 to-success-green/[0.25]' 
-            : 'bg-gradient-to-r from-blue-500/[0.15] via-background/95 to-blue-600/[0.15]'
+            ? 'bg-ocean-blue/[0.25]' 
+            : 'bg-blue-500/[0.15]'
         } backdrop-blur-md`}>
           {/* Back button if needed, otherwise Sidebar trigger */}
           {shouldShowBackButton && (
@@ -105,7 +105,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 {/* Icon with gradient background */}
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-ocean-blue to-success-green">
+                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-ocean-blue">
                   <PageIcon className="h-5 w-5 text-white" />
                 </div>
                 

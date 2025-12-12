@@ -47,7 +47,7 @@ export function MessagesTab() {
     <div className="space-y-5" role="region" aria-label={ARIA_LABELS.MESSAGES_SECTION}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-ocean-blue to-success-green text-white shadow-soft flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-ocean-blue text-white shadow-soft flex items-center justify-center">
             <MessageSquare className="h-5 w-5" />
           </div>
           <div>

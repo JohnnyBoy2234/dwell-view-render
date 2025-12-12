@@ -81,7 +81,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
         {/* Logo Section */}
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center shadow-soft">
+            <div className="w-9 h-9 bg-ocean-blue rounded-lg flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
             {!collapsed && (

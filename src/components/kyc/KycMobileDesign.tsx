@@ -41,7 +41,7 @@ export function KycMobileDesign({
         <div className="text-center space-y-4">
           <div className="relative">
             {/* Background Blob */}
-            <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-gradient-to-br from-ocean-blue/20 to-success-green/20 blur-2xl"></div>
+            <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-ocean-blue/20 blur-2xl"></div>
             
             {/* Shield Badge */}
             <div className={`relative mx-auto w-20 h-20 ${KYC_MOBILE_DESIGN.SHIELD_GRADIENT} rounded-2xl flex items-center justify-center shadow-lg mb-4`}>
@@ -140,7 +140,7 @@ export function KycMobileDesign({
                   </div>
                   
                   {!isCompleted && (
-                    <div className="mt-4 p-3 bg-gradient-to-r from-ocean-blue/5 to-success-green/5 rounded-lg border border-ocean-blue/20">
+                    <div className="mt-4 p-3 bg-ocean-blue/5 rounded-lg border border-ocean-blue/20">
                       <div className="flex items-center justify-center gap-2">
                         <Camera className="h-4 w-4 text-ocean-blue" />
                         <p className="text-sm text-ocean-blue font-medium">
@@ -164,7 +164,7 @@ export function KycMobileDesign({
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-ocean-blue to-success-green rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <div className="w-16 h-16 bg-ocean-blue rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <Shield className="h-8 w-8 text-white" />
                 </div>
                 <h3 className="font-bold text-xl text-ocean-blue mb-2">
