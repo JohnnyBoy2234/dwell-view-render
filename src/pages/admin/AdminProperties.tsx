@@ -97,10 +97,10 @@ export default function AdminProperties() {
     try {
       setDeletingId(propertyId);
       
-      const { error } = await supabase
-        .from('properties')
-        .delete()
-        .eq('id', propertyId);
+      // Use the admin_delete_property function which handles all related data deletion
+      const { error } = await supabase.rpc('admin_delete_property', {
+        property_id_to_delete: propertyId
+      });
 
       if (error) throw error;
 
@@ -108,13 +108,13 @@ export default function AdminProperties() {
       
       toast({
         title: "Success",
-        description: "Property deleted successfully",
+        description: "Property and all related data deleted successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting property:', error);
       toast({
         title: "Error",
-        description: "Failed to delete property. It may have associated data.",
+        description: error?.message || "Failed to delete property. Please try again.",
         variant: "destructive",
       });
     } finally {
