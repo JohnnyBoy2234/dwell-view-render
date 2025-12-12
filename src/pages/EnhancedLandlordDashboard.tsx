@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
 import { BackButton } from '@/components/common/BackButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
+import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -791,11 +793,13 @@ export default function EnhancedLandlordDashboard() {
     return properties.find(p => p.id === selectedPropertyId);
   };
 
+  const isBaseTab = currentTab === '/enhancedlandlorddashboard';
+
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
     
-    // If no property is selected, show property selection
-    if (!selectedPropertyId) {
+    // If no property is selected, show selection only for property-specific tabs
+    if (!selectedPropertyId && !isBaseTab) {
       return (
         <PropertySelection 
           properties={properties}
@@ -2457,7 +2461,7 @@ const renderReportsTab = () => (
             className="cursor-pointer rounded-2xl border border-white/20 dark:border-white/10 bg-white/60 dark:bg-slate-900/50 backdrop-blur-md ring-1 ring-black/5 shadow-soft transition-all duration-300 transform-gpu motion-safe:hover:-translate-y-0.5 motion-safe:hover:shadow-pop motion-safe:focus-within:-translate-y-0.5 motion-safe:focus-within:shadow-pop"
             onClick={() => navigate(`/manage-property/${property.id}`)}
           >
-            <div className="aspect-video relative overflow-hidden rounded-t-lg bg-gradient-to-br from-ocean-blue/[0.1] to-success-green/[0.1]">
+            <div className="aspect-video relative overflow-hidden rounded-t-lg bg-ocean-blue/[0.1]">
               {property.images.length > 0 ? (
                 <img
                   src={property.images[0]}
@@ -2577,23 +2581,32 @@ const renderReportsTab = () => (
     navigate(`${tab}${params}`);
   };
 
-  const headerTitle = !selectedPropertyId
-    ? 'Property Portfolio'
-    : currentTab === '/enhancedlandlorddashboard'
-      ? 'Management Tools'
-      : '';
+  const headerTitle = isBaseTab
+    ? 'Management Tools'
+    : selectedPropertyId
+      ? ''
+      : 'Property Portfolio';
 
   return (
     <VerificationGate requireVerification={true}>
-      <EnhancedDashboardLayout 
-        title={headerTitle}
-        currentTab={currentTab}
-        onTabChange={handleTabChange}
-        selectedPropertyId={selectedPropertyId}
-        onBackToProperties={handleBackToProperties}
-      >
-        {renderTabContent()}
-      </EnhancedDashboardLayout>
+      <SidebarProvider>
+        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+          <div className="hidden lg:flex lg:w-64 lg:flex-none">
+            <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
+          </div>
+          <div className="flex-1 min-h-0 flex flex-col">
+            <EnhancedDashboardLayout 
+              title={headerTitle}
+              currentTab={currentTab}
+              onTabChange={handleTabChange}
+              selectedPropertyId={selectedPropertyId}
+              onBackToProperties={handleBackToProperties}
+            >
+              {renderTabContent()}
+            </EnhancedDashboardLayout>
+          </div>
+        </div>
+      </SidebarProvider>
     </VerificationGate>
   );
 }

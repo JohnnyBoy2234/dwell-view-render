@@ -319,8 +319,8 @@ export default function Properties() {
     <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/30 to-ocean-blue/5">
       <div className="container mx-auto p-6">
         {/* Header */}
-        <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-ocean-blue/10 via-white to-success-green/10 border border-ocean-blue/20 shadow-soft">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-ocean-blue to-success-green bg-clip-text text-transparent mb-2">Find Your Perfect Home</h1>
+        <div className="mb-8 p-6 rounded-2xl bg-ocean-blue/10 border border-ocean-blue/20 shadow-soft">
+          <h1 className="text-4xl font-bold text-ocean-blue mb-2">Find Your Perfect Home</h1>
           <p className="text-lg text-muted-foreground">
             {searchTerm ? `Searching for properties in ${searchTerm}` : `Discover ${properties.length} available properties across South Africa`}
           </p>

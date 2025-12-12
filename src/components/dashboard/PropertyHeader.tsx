@@ -49,7 +49,7 @@ export function PropertyHeader({ property, onBack }: PropertyHeaderProps) {
 
           {/* Property Thumbnail */}
           <div className="flex-shrink-0">
-            <div className="w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-ocean-blue/10 to-success-green/10">
+            <div className="w-12 h-12 rounded-lg overflow-hidden bg-ocean-blue/10">
               {property.images && property.images.length > 0 ? (
                 <img
                   src={property.images[0]}

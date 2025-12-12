@@ -209,17 +209,19 @@ const Index = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
           {/* Top Fade with Heading */}
-          <div className="top-fade my-0 justify-end pr-4 md:pr-12">
-              <div className="max-w-xl text-right">
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-                  Safe, Simple, <span className="text-ocean-blue">Commission-Free</span> Renting
-                </h1>
-              </div>
+          <div className="top-fade my-0 justify-start pl-3 md:pl-10">
+            <div className="max-w-xl mt-4 md:mt-8 lg:mt-8">
+              <h1 className="text-3xl md:text-5xl font-bold text-white text-left leading-tight">
+                <span className="block">Safe, Simple,</span>
+                <span className="block text-sky-400">Commission-Free</span>
+                <span className="block">Renting</span>
+              </h1>
+            </div>
           </div>
         </div>
 
         {/* Search Bar - Fading into white */}
-        <div className="relative z-10 w-full px-4 -mt-20 md:-mt-24 mb-12">
+        <div className="relative z-10 w-full px-4 -mt-20 md:-mt-24 mb-4">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
               <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
@@ -239,7 +241,7 @@ const Index = () => {
       </section>
 
       {/* Feature Highlights - Moved up */}
-      <section className="bg-white py-12 md:py-16 px-4 sm:px-6 lg:px-8">
+      <section className="bg-white pt-8 md:pt-10 pb-12 md:pb-16 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Why Choose RentLekker?

@@ -63,7 +63,7 @@ export default function SafeRenting() {
   return (
       <div className="min-h-screen">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-ocean-blue via-ocean-blue-light to-success-green text-white py-20">
+        <section className="bg-ocean-blue text-white py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="flex justify-center mb-8">
               <div className="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
@@ -103,7 +103,7 @@ export default function SafeRenting() {
                 <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
                   <CardContent className="p-8">
                     <div className="flex items-start gap-4 mb-6">
-                      <div className="w-12 h-12 bg-gradient-to-br from-ocean-blue to-success-green rounded-xl flex items-center justify-center flex-shrink-0">
+                      <div className="w-12 h-12 bg-ocean-blue rounded-xl flex items-center justify-center flex-shrink-0">
                         <measure.icon className="h-6 w-6 text-white" />
                       </div>
                       <div>
@@ -183,7 +183,7 @@ export default function SafeRenting() {
         </section>
 
         {/* CTA Section */}
-        <section className="py-16 bg-gradient-to-r from-ocean-blue to-success-green text-white">
+        <section className="py-16 bg-ocean-blue text-white">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="text-3xl md:text-4xl font-bold mb-6">
               Ready to Rent Safely?

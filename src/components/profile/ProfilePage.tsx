@@ -260,7 +260,7 @@ export default function ProfilePage() {
       
       {/* Cover Image Section */}
       <Card className="relative overflow-hidden">
-        <div className="h-48 bg-gradient-to-r from-ocean-blue/20 via-background to-success-green/20 relative">
+        <div className="h-48 bg-ocean-blue/20 relative">
           <div className="absolute inset-0 bg-black/10"></div>
           <Button
             size="sm"
@@ -286,7 +286,7 @@ export default function ProfilePage() {
         {/* Profile Avatar */}
         <div className="relative -mt-16 ml-6 mb-4">
           <div className="relative w-32 h-32">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-ocean-blue to-success-green p-1">
+            <div className="w-32 h-32 rounded-full bg-ocean-blue p-1">
               <div className="w-full h-full rounded-full bg-background flex items-center justify-center overflow-hidden">
                 {profile?.avatar_url ? (
                   <img 

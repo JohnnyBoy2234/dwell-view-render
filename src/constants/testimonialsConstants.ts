@@ -43,7 +43,7 @@ export const TESTIMONIALS_CONFIG = {
 } as const;
 
 export const TESTIMONIALS_STYLES = {
-  SECTION: "py-16 md:py-24 bg-gradient-to-br from-ocean-blue/5 to-success-green/5",
+  SECTION: "py-16 md:py-24 bg-ocean-blue/5",
   CONTAINER: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
   CAROUSEL_CONTAINER: "relative max-w-4xl mx-auto",
   SLIDE_CONTAINER: "overflow-hidden",

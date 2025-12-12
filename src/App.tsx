@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
@@ -27,6 +27,7 @@ import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
+import { EnhancedSidebar } from "@/components/dashboard/EnhancedSidebar";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
@@ -75,6 +76,7 @@ import { AuthBootstrap } from "@/components/AuthBootstrap";
 import SafeRenting from "./pages/SafeRenting";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const queryClient = new QueryClient();
 
@@ -84,6 +86,41 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [pathname]);
   return null;
+}
+
+function DashboardShell({
+  children,
+  title,
+  currentTab,
+}: {
+  children: React.ReactNode;
+  title: string;
+  currentTab: string;
+}) {
+  const navigate = useNavigate();
+
+  const handleTabChange = (tab: string) => {
+    navigate(tab);
+  };
+
+  return (
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
+        <div className="hidden lg:flex lg:w-64 lg:flex-none">
+          <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
+        </div>
+        <div className="flex-1 min-h-0 flex flex-col">
+          <EnhancedDashboardLayout 
+            title={title} 
+            currentTab={currentTab} 
+            onTabChange={handleTabChange}
+          >
+            {children}
+          </EnhancedDashboardLayout>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 }
 
 function AppRoutes() {
@@ -192,8 +229,20 @@ function AppRoutes() {
                 </AuthenticatedRoute>
               } />
               {/* Direct landlord inspection routes to bypass dashboard tab handling */}
-              <Route path="/enhancedlandlorddashboard/inspection" element={<PlanGuard requiredPlan="pro" featureName="Property Inspections"><EnhancedDashboardLayout title="Property Inspection"><LandlordInspection /></EnhancedDashboardLayout></PlanGuard>} />
-              <Route path="/enhancedlandlorddashboard/inspection/start" element={<PlanGuard requiredPlan="pro" featureName="Property Inspections"><EnhancedDashboardLayout title="Start Inspection"><InventoryStart /></EnhancedDashboardLayout></PlanGuard>} />
+              <Route path="/enhancedlandlorddashboard/inspection" element={
+                <PlanGuard requiredPlan="pro" featureName="Property Inspections">
+                  <DashboardShell title="Property Inspection" currentTab="/enhancedlandlorddashboard/inspection">
+                    <LandlordInspection />
+                  </DashboardShell>
+                </PlanGuard>
+              } />
+              <Route path="/enhancedlandlorddashboard/inspection/start" element={
+                <PlanGuard requiredPlan="pro" featureName="Property Inspections">
+                  <DashboardShell title="Start Inspection" currentTab="/enhancedlandlorddashboard/inspection">
+                    <InventoryStart />
+                  </DashboardShell>
+                </PlanGuard>
+              } />
               <Route path="/inspections/new" element={<AuthenticatedRoute><EnhancedDashboardLayout title="New Inspection"><CreateInspection /></EnhancedDashboardLayout></AuthenticatedRoute>} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}
               <Route path="/maintenance/:ticketId" element={<RouteGuard><PlanGuard requiredPlan="premium" featureName="Maintenance Management"><MaintenanceTicketDetails /></PlanGuard></RouteGuard>} />

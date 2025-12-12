@@ -224,7 +224,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
             onClick={() => navigate('/')}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded flex items-center justify-center shadow-soft">
+            <div className="w-8 h-8 bg-ocean-blue rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
 <h1 className="text-xl font-bold">RentLekker</h1>
@@ -245,7 +245,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
                     className={
                       isActive(item.url) 
                         ? "bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-soft" 
-                        : "hover:bg-gradient-to-r hover:from-ocean-blue hover:to-success-green hover:text-white"
+                        : "hover:bg-ocean-blue hover:text-white"
                     }
                   >
                     <button 

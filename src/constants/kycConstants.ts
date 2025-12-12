@@ -88,12 +88,12 @@ export const KYC_FILE_LABELS = {
 // Mobile design constants
 export const KYC_MOBILE_DESIGN = {
   HERO_BACKGROUND: 'min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10 p-4 pb-24',
-  SHIELD_GRADIENT: 'bg-gradient-to-br from-ocean-blue to-success-green',
+  SHIELD_GRADIENT: 'bg-ocean-blue',
   CARD_COMPLETED: 'border-success bg-gradient-to-br from-success/20 to-success/10 shadow-lg shadow-success/20',
   CARD_PENDING: 'border-2 border-dashed border-ocean-blue/30 hover:border-ocean-blue/60 bg-white/80 backdrop-blur-sm hover:shadow-lg',
   ICON_COMPLETED: 'bg-gradient-to-br from-success to-success-green text-white',
   ICON_PENDING: 'bg-gradient-to-br from-ocean-blue to-ocean-blue-light text-white',
-  SUBMIT_BUTTON: 'w-full bg-gradient-to-r from-ocean-blue to-success-green hover:from-ocean-blue-dark hover:to-success-green-dark text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300',
+  SUBMIT_BUTTON: 'w-full bg-ocean-blue hover:bg-ocean-blue-dark text-white font-semibold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300',
 } as const;
 
 // Desktop wizard constants  

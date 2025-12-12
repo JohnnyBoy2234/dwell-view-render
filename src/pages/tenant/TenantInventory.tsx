@@ -130,7 +130,7 @@ export default function TenantInventory() {
 
       {/* Current Property Section */}
       {tenantProperty && (
-        <Card className="bg-gradient-to-r from-ocean-blue/5 to-success-green/5 border-ocean-blue/20">
+        <Card className="bg-ocean-blue/5 border-ocean-blue/20">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-ocean-blue">
               <Home className="h-5 w-5" />

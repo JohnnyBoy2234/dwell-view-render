@@ -40,7 +40,7 @@ export function DashboardSidebar() {
             className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
             onClick={() => navigate('/')}
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-ocean-blue to-success-green rounded flex items-center justify-center shadow-soft">
+            <div className="w-8 h-8 bg-ocean-blue rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
             {!collapsed && <h1 className="text-xl font-bold">RentLekker</h1>}

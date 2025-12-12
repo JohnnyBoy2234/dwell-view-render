@@ -58,7 +58,7 @@ export const FOOTER_STYLES = {
   GRID: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8",
   BRAND_SECTION: "lg:col-span-1",
   BRAND_LINK: "flex items-center space-x-2 mb-4",
-  BRAND_ICON: "w-10 h-10 bg-gradient-to-br from-ocean-blue to-success-green rounded-lg flex items-center justify-center",
+  BRAND_ICON: "w-10 h-10 bg-ocean-blue rounded-lg flex items-center justify-center",
   BRAND_ICON_INNER: "h-6 w-6 text-white",
   BRAND_TEXT: "text-2xl font-bold",
   TAGLINE: "text-white/80 mb-6 max-w-sm",

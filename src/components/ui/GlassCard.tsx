@@ -11,7 +11,7 @@ export default function GlassCard({ children, className = "", ...rest }: GlassCa
       className={[
         "group relative rounded-2xl border border-white/20 dark:border-white/10",
         // subtle glass with brand tint
-        "bg-gradient-to-br from-ocean-blue/[0.06] via-white/60 to-success-green/[0.06] dark:from-slate-900/60 dark:via-slate-900/50 dark:to-slate-900/60 backdrop-blur-md",
+        "bg-ocean-blue/[0.06] dark:from-slate-900/60 dark:via-slate-900/50 dark:to-slate-900/60 backdrop-blur-md",
         // brand ring
         "ring-1 ring-ocean-blue/10 shadow-soft",
         // pop-out on hover/focus (GPU for smoother transforms)
