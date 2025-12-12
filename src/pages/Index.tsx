@@ -202,7 +202,7 @@ const Index = () => {
       <section className="relative">
         <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
           <div className="absolute inset-0 w-full h-full">
-            <img src="/hero3.jpg" alt="Modern apartment building" className="w-full h-full object-cover" />
+            <img src="/hero3.avif" alt="Modern apartment building" className="w-full h-full object-cover" />
           </div>
           
           {/* Bottom Gradient Overlay */}
