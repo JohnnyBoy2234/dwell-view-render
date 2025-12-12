@@ -211,9 +211,9 @@ const Index = () => {
           {/* Top Fade with Heading */}
           <div className="top-fade my-0 justify-start pl-3 md:pl-10">
             <div className="max-w-xl mt-4 md:mt-8 lg:mt-8">
-              <h1 className="text-2xl md:text-4xl font-bold text-white text-left leading-tight">
+              <h1 className="text-3xl md:text-5xl font-bold text-white text-left leading-tight">
                 <span className="block">Safe, Simple,</span>
-                <span className="block text-ocean-blue">Commission-Free</span>
+                <span className="block text-sky-400">Commission-Free</span>
                 <span className="block">Renting</span>
               </h1>
             </div>
