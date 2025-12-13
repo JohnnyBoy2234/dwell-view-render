@@ -17,6 +17,8 @@ import { AISupportChat } from "@/components/support/AISupportChat";
 import Index from "./pages/Index";
 import Properties from "./pages/Properties";
 import About from "./pages/About";
+import AboutLandlord from "./pages/AboutLandlord";
+import AboutTenant from "./pages/AboutTenant";
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -202,6 +204,8 @@ function AppRoutes() {
               <Route path="/" element={<><Navbar /><Index /></>} />
               <Route path="/properties" element={<><Navbar /><Properties /></>} />
               <Route path="/about" element={<><Navbar /><About /></>} />
+              <Route path="/about/landlord" element={<><Navbar /><AboutLandlord /></>} />
+              <Route path="/about/tenant" element={<><Navbar /><AboutTenant /></>} />
               <Route path="/contact" element={<><Navbar /><Contact /></>} />
               <Route path="/blog" element={<><Navbar /><Blog /></>} />
               <Route path="/blog/:postId" element={<><Navbar /><BlogPost /></>} />

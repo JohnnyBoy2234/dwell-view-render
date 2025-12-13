@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, Users, Shield, Globe, Award, Zap } from "lucide-react";
+import { Heart, Users, Shield, Globe, Award, Zap, Building2, Home, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const About = () => {
@@ -156,6 +156,48 @@ const About = () => {
                 />
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Learn More Sections */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-center mb-12">Learn More</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-ocean-blue rounded-lg flex items-center justify-center mb-6">
+                  <Building2 className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">For Landlords</h3>
+                <p className="text-muted-foreground mb-6">
+                  Everything you need to know about renting your property on RentLekker. Learn how to list properties, connect with quality tenants, and manage everything from one dashboard.
+                </p>
+                <Link to="/about/landlord">
+                  <Button className="w-full">
+                    Learn More for Landlords
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-8">
+                <div className="w-16 h-16 bg-ocean-blue rounded-lg flex items-center justify-center mb-6">
+                  <Home className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-4">For Tenants</h3>
+                <p className="text-muted-foreground mb-6">
+                  Everything you need to know about finding and renting your perfect home on RentLekker. Learn how to search properties, apply easily, and manage your rental.
+                </p>
+                <Link to="/about/tenant">
+                  <Button className="w-full">
+                    Learn More for Tenants
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
