@@ -240,54 +240,107 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Feature Highlights - Moved up */}
-      <section className="bg-white pt-8 md:pt-10 pb-12 md:pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Why Choose RentLekker?
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            The complete rental platform designed for South African landlords and tenants
-          </p>
+      {/* For Landlords Section */}
+      <section className="bg-white py-16 md:py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Text Content */}
+            <div className="order-2 md:order-1">
+              <span className="text-ocean-blue font-semibold text-sm uppercase tracking-wide">For Landlords</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-4">
+                Advertise Your Rental Property
+              </h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                We find you tenants and help with referencing, contracts and more. RentLekker gives you the best possible chance of finding your ideal tenant, and you stay in control.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">100% Commission-Free</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">No Hidden Fees</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">Full Property Management Tools</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">Verified Tenant Screening</span>
+                </li>
+              </ul>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button asChild size="lg" className="bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-lg px-6">
+                  <Link to="/list-property">Add Listing</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="border-ocean-blue text-ocean-blue hover:bg-ocean-blue/5 rounded-lg px-6">
+                  <Link to="/about-landlord">Learn More</Link>
+                </Button>
+              </div>
+            </div>
+            {/* Image */}
+            <div className="order-1 md:order-2">
+              <img 
+                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Landlord showing property" 
+                className="w-full h-[400px] object-cover rounded-2xl shadow-xl"
+              />
+            </div>
+          </div>
         </div>
+      </section>
 
-         {/* Mobile: cards fading in one by one */}
-        <div className="md:hidden space-y-6">
-            {features.map((feature, index) => <div key={index} className="animate-fade-in" style={{
-          animationDelay: `${index * 300}ms`,
-          animationFillMode: 'forwards'
-        }}>
-               <Card className="text-center bg-white/10 border border-white/20 shadow-lg transition-all duration-300 hover:shadow-xl animate-float-slow">
-              <CardContent className="p-6">
-                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg transition-transform duration-300 hover:scale-110`}>
-                <feature.icon className="h-8 w-8 text-white" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-3">
-                      {feature.title}
-                    </h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>)}
-        </div>
-
-        {/* Desktop/Tablet: responsive grid for 7 cards */}
-        <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {features.map((feature, index) => <Card key={index} className="text-center bg-white/10 border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
-              <CardContent className="p-8">
-                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg`}>
-                <feature.icon className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </CardContent>
-            </Card>)}
+      {/* For Tenants Section */}
+      <section className="bg-muted/30 py-16 md:py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Image */}
+            <div>
+              <img 
+                src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Happy tenant in new home" 
+                className="w-full h-[400px] object-cover rounded-2xl shadow-xl"
+              />
+            </div>
+            {/* Text Content */}
+            <div>
+              <span className="text-ocean-blue font-semibold text-sm uppercase tracking-wide">For Tenants</span>
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-4">
+                Find Your Next Home
+              </h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                On RentLekker there are never any agent fees. We verify all listings so no dead adverts. Your safety and security are our priority.
+              </p>
+              <ul className="space-y-3 mb-8">
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">No Agent Fees</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">Verified Properties</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">Direct Communication with Landlords</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">Secure Digital Leases</span>
+                </li>
+              </ul>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button asChild size="lg" className="bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-lg px-6">
+                  <Link to="/properties">Find Rental</Link>
+                </Button>
+                <Button asChild size="lg" variant="outline" className="border-ocean-blue text-ocean-blue hover:bg-ocean-blue/5 rounded-lg px-6">
+                  <Link to="/about-tenant">Learn More</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

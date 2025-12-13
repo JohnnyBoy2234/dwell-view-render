@@ -55,19 +55,19 @@ export function useSubscription(): Subscription {
     }
 
     try {
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await (supabase as any)
         .from('profiles')
         .select('plan, plan_status, plan_expires_at, plan_last_synced')
         .eq('user_id', user.id)
         .maybeSingle();
 
       if (!profileError && profile) {
-        const normalizedPlan = normalizePlanCode(profile.plan);
-        const status = (profile.plan_status ?? 'inactive').toLowerCase();
+        const normalizedPlan = normalizePlanCode((profile as any).plan);
+        const status = ((profile as any).plan_status ?? 'inactive').toLowerCase();
 
         setPlanStatus(status);
-        setPlanExpiresAt(profile.plan_expires_at ?? null);
-        setPlanLastSyncedAt(profile.plan_last_synced ?? null);
+        setPlanExpiresAt((profile as any).plan_expires_at ?? null);
+        setPlanLastSyncedAt((profile as any).plan_last_synced ?? null);
 
         if (ACTIVE_STATUSES.has(status)) {
           setPlan(normalizedPlan);
