@@ -344,15 +344,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Safe Renting Section removed by request */}
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="pt-6 md:pt-8 pb-4 md:pb-6">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <HowItWorks />
-        </div>
-      </section>
-
       {/* Featured Properties */}
       <section className="pt-4 md:pt-6 pb-16 md:pb-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
@@ -393,14 +384,6 @@ const Index = () => {
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
             Join South Africa's most trusted rental platform today
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button asChild size="lg" className="bg-white text-ocean-blue-dark hover:bg-white/95 rounded-xl px-8 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-300">
-              <Link to="/landlord/dashboard">Landlord Dashboard</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="bg-white/20 text-white border-2 border-white/40 hover:bg-white/30 rounded-xl px-8 py-4 text-lg font-semibold backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300">
-              <Link to="/tenant/dashboard">Tenant Dashboard</Link>
-            </Button>
-          </div>
         </div>
       </section>
 
