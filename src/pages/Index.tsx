@@ -276,7 +276,7 @@ const Index = () => {
                   <Link to="/list-property">Add Listing</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-ocean-blue text-ocean-blue hover:bg-ocean-blue/5 rounded-lg px-6">
-                  <Link to="/about-landlord">Learn More</Link>
+                  <Link to="/about/landlord">Learn More</Link>
                 </Button>
               </div>
             </div>
@@ -336,7 +336,7 @@ const Index = () => {
                   <Link to="/properties">Find Rental</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline" className="border-ocean-blue text-ocean-blue hover:bg-ocean-blue/5 rounded-lg px-6">
-                  <Link to="/about-tenant">Learn More</Link>
+                  <Link to="/about/tenant">Learn More</Link>
                 </Button>
               </div>
             </div>
