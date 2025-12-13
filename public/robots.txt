@@ -14,4 +14,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://RentLekker.co.za/sitemap.xml
+Sitemap: https://rentlekker.com/sitemap.xml

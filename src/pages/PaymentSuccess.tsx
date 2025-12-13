@@ -267,7 +267,7 @@ export default function PaymentSuccess() {
             </Button>
 
             <div className="text-xs text-muted-foreground">
-              Need help? Email support@rentlekker.co.za
+              Need help? Email support@rentlekker.com
             </div>
           </CardContent>
         </Card>

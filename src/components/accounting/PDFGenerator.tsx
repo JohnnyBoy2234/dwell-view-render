@@ -208,7 +208,7 @@ const ExpenseSummaryPDF: React.FC<ExpenseSummaryPDFProps> = ({
 
         {/* Footer */}
         <Text style={styles.footer}>
-          RentLekker.co.za – Safe, Simple, Commission-Free Renting
+          rentlekker.com – Safe, Simple, Commission-Free Renting
         </Text>
       </Page>
     </Document>
@@ -339,7 +339,7 @@ const TaxInvoicePDF: React.FC<TaxInvoicePDFProps> = ({ invoiceData, totals }) =>
 
         {/* Footer */}
         <Text style={styles.footer}>
-          RentLekker.co.za – Safe, Simple, Commission-Free Renting
+          rentlekker.com – Safe, Simple, Commission-Free Renting
         </Text>
       </Page>
     </Document>

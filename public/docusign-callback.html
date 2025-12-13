@@ -13,14 +13,14 @@
 
         if (error) {
             // Redirect to dashboard with error
-            window.location.href = 'https://RentLekker.co.za/enhancedtenantdashboard?error=' + encodeURIComponent(error);
+            window.location.href = 'https://rentlekker.com/enhancedtenantdashboard?error=' + encodeURIComponent(error);
         } else if (code && state) {
             // Redirect to our callback page with parameters
-            const callbackUrl = 'https://RentLekker.co.za/auth/callback?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state);
+            const callbackUrl = 'https://rentlekker.com/auth/callback?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state);
             window.location.href = callbackUrl;
         } else {
             // No parameters, redirect to dashboard
-            window.location.href = 'https://RentLekker.co.za/enhancedtenantdashboard';
+            window.location.href = 'https://rentlekker.com/enhancedtenantdashboard';
         }
     </script>
     <p>Processing DocuSign authorization...</p>

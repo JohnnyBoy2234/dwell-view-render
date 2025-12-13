@@ -31,7 +31,7 @@ Deno.serve(async (req) => {
     }
 
     const clientId = Deno.env.get("DOCUSIGN_INTEGRATION_KEY");
-    const redirectUri = Deno.env.get("DOCUSIGN_REDIRECT_URI") || "https://RentLekker.co.za/auth/callback";
+    const redirectUri = Deno.env.get("DOCUSIGN_REDIRECT_URI") || "https://rentlekker.com/auth/callback";
     const authServer = Deno.env.get("DOCUSIGN_AUTH_SERVER") || "account-d.docusign.com";
 
     if (!clientId) {

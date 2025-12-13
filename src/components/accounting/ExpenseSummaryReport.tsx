@@ -125,7 +125,7 @@ export function ExpenseSummaryReport() {
               className="h-6 w-6 mr-2" 
             />
             <span className="text-sm text-muted-foreground">
-              RentLekker.co.za – Safe, Simple, Commission-Free Renting
+              rentlekker.com – Safe, Simple, Commission-Free Renting
             </span>
           </div>
         </div>

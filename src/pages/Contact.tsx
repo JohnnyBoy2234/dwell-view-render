@@ -38,8 +38,8 @@ const Contact = () => {
       icon: Mail,
       title: "Email Us",
       description: "Send us a message anytime",
-      value: "hello@RentLekker.co.za",
-      href: "mailto:hello@RentLekker.co.za"
+      value: "hello@rentlekker.com",
+      href: "mailto:hello@rentlekker.com"
     },
     {
       icon: Phone,
