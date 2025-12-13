@@ -31,7 +31,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NotificationItem {
   id: string;
-  type: 'message' | 'lease' | 'maintenance' | 'payment' | 'viewing' | 'application' | 'general';
+  type: 'message' | 'lease' | 'maintenance' | 'payment' | 'viewing' | 'application' | 'general' | 'inventory' | 'offer' | 'system';
   title: string;
   message: string;
   timestamp: string;
@@ -74,7 +74,7 @@ export default function Notifications() {
         notifications.forEach(notification => {
           combinedNotifications.push({
             id: notification.id,
-            type: (notification.type || 'general') as 'message' | 'lease' | 'maintenance' | 'payment' | 'viewing' | 'application' | 'general',
+            type: (notification.type || 'general') as 'message' | 'lease' | 'maintenance' | 'payment' | 'viewing' | 'application' | 'general' | 'inventory' | 'offer' | 'system',
             title: notification.title || 'Notification',
             message: notification.message || '',
             timestamp: notification.created_at,

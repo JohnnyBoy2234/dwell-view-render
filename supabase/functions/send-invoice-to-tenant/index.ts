@@ -66,7 +66,7 @@ serve(async (req) => {
           const resp = await fetch(link);
           if (resp.ok) {
             const bytes = new Uint8Array(await resp.arrayBuffer());
-            const base64 = encodeBase64(bytes);
+            const base64 = encodeBase64(bytes.buffer);
             attachments = [{ filename, content: base64, contentType: 'application/pdf' }];
           }
         }

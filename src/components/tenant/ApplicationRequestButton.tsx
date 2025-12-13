@@ -29,14 +29,14 @@ export const ApplicationRequestButton = ({
   useEffect(() => {
     if (!user) return;
     const checkExistingRequest = async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('application_requests')
         .select('status')
         .eq('property_id', propertyId)
         .eq('tenant_id', user.id)
         .maybeSingle();
       
-      if (data && (data.status === 'pending' || data.status === 'approved')) {
+      if (data && ((data as any).status === 'pending' || (data as any).status === 'approved')) {
         setHasRequested(true);
       }
     };

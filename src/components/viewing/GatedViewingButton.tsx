@@ -8,6 +8,7 @@ import { useGateStatus } from '@/hooks/useGateStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import StartConversation from '@/components/StartConversation';
 
 interface GatedViewingButtonProps {
@@ -43,10 +44,7 @@ export function GatedViewingButton({
 
       if (error) throw error;
 
-      toast({
-        title: "Verification email sent",
-        description: "Please check your email and click the verification link.",
-      });
+      toast.success("Verification email sent. Please check your email and click the verification link.");
 
       // Log event
       await supabase.rpc('log_event', {
@@ -57,11 +55,7 @@ export function GatedViewingButton({
         }
       });
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Failed to send verification email",
-        description: error.message,
-      });
+      toast.error(error.message || "Failed to send verification email");
     } finally {
       setIsResending(false);
     }

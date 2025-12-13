@@ -458,7 +458,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                       const token = match[1];
                       
                       // Fetch invite details
-                      const { data: invite, error } = await supabase
+                      const { data: invite, error } = await (supabase as any)
                         .from('application_invites')
                         .select('id, property_id, landlord_id')
                         .eq('token', token)
@@ -474,7 +474,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                       }
                       
                       // Navigate directly to rental application
-                      navigate(`/rental-application/${invite.property_id}?landlord=${invite.landlord_id}&invite=${invite.id}`);
+                      navigate(`/rental-application/${(invite as any).property_id}?landlord=${(invite as any).landlord_id}&invite=${(invite as any).id}`);
                     }
                   } catch (e) {
                     console.error('Failed to navigate to invite from message:', e);
