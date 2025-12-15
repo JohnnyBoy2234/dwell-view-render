@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { MultiPhotoCapture } from '@/components/mobile/MultiPhotoCapture';
 import { PhotoGallery } from '@/components/inspection/PhotoGallery';
 import { PhotoLightbox } from '@/components/inspection/PhotoLightbox';
+import { generateId } from '@/lib/uuid';
 
 interface InventoryStartPanelProps {
   propertyId?: string;
@@ -115,7 +116,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         const blob = new Blob(chunks, { type: 'audio/webm' });
         const audioUrl = URL.createObjectURL(blob);
         const newNote: Note = {
-          id: crypto.randomUUID(),
+          id: generateId(),
           audioUrl,
           createdAt: Date.now(),
           photos: [],
@@ -237,7 +238,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         for (const photo of note.photos) {
           const file = photo.file;
           const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
-          const filename = `${crypto.randomUUID()}.${ext}`;
+          const filename = `${generateId()}.${ext}`;
           const path = `${propertyId}/${recordId}/${noteId}/${filename}`;
           console.log('Uploading photo:', path, 'Size:', file.size);
           const storagePath = await uploadToInventoryBucket(path, file, file.type);
@@ -247,7 +248,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
 
         let audioPath: string | undefined;
         if (note.audioBlob && note.audioBlob.size > 0) {
-          const filename = `${crypto.randomUUID()}.webm`;
+          const filename = `${generateId()}.webm`;
           const path = `${propertyId}/${recordId}/${noteId}/${filename}`;
           console.log('Uploading voice note:', path, 'Size:', note.audioBlob.size);
           audioPath = await uploadToInventoryBucket(path, note.audioBlob, 'audio/webm');
@@ -401,7 +402,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
         toast({ title: 'Preview failed', description: 'Could not generate image preview', variant: 'destructive' });
         continue;
       }
-      newPhotos.push({ id: crypto.randomUUID(), file, previewUrl });
+      newPhotos.push({ id: generateId(), file, previewUrl });
       track('inventory_photo_attached');
     }
     if (newPhotos.length) {
@@ -416,7 +417,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   };
 
   const createEmptyNote = (): string => {
-    const id = crypto.randomUUID();
+    const id = generateId();
     const newNote: Note = { id, audioUrl: '', createdAt: Date.now(), photos: [], saved: false };
     setNotes((prev) => [newNote, ...prev]);
     setHasUnsavedChanges(true);

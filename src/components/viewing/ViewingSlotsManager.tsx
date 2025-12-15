@@ -13,6 +13,7 @@ import { Calendar as CalendarIcon, Clock, PlusCircle, User } from "lucide-react"
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
+import { generateId } from '@/lib/uuid';
 
 interface ViewingSlotsManagerProps {
   propertyId: string;
@@ -178,7 +179,7 @@ export function ViewingSlotsManager({ propertyId }: ViewingSlotsManagerProps) {
   const handleInvite = async (slot: Slot) => {
     if (!user || !slot.booked_by_tenant_id) return;
     try {
-      const token = crypto.randomUUID();
+      const token = generateId();
       const { data: invite, error } = await (supabase as any)
         .from("application_invites")
         .insert({
