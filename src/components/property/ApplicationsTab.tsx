@@ -250,7 +250,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
         {/* Basic Information */}
         <div>
           <h4 className="font-medium mb-3">Personal Information</h4>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-muted-foreground">Full Name</label>
               <p>{screeningDetails?.full_name || (screeningProfile ? `${screeningProfile.first_name} ${screeningProfile.last_name}` : 'N/A')}</p>
@@ -274,7 +274,7 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
         {screeningDetails && (
           <div>
             <h4 className="font-medium mb-3">Employment & Income</h4>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-muted-foreground">Employment Status</label>
                 <p className="capitalize">{screeningDetails.employment_status || 'N/A'}</p>
@@ -331,9 +331,9 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
             <div className="grid gap-2">
               {application.documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm truncate max-w-[200px]">{doc.file_path.split('/').pop()}</span>
+                    <span className="text-sm truncate max-w-[160px] sm:max-w-[200px]">{doc.file_path.split('/').pop()}</span>
                     <Badge variant="outline" className="text-xs">
                       {doc.document_type === 'EXPERIAN_CREDIT_REPORT' ? 'Experian Credit Report' : 
                        doc.document_type === 'id' ? 'ID Document' : 'Income Document'}

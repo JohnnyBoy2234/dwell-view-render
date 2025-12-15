@@ -5,6 +5,7 @@ import {
   Building2, 
   Users, 
   Shield, 
+  RIcon, 
   Calculator, 
   MessageSquare, 
   FileText, 
@@ -18,11 +19,6 @@ import {
   CreditCard,
   Home
 } from "lucide-react";
-
-// Simple R icon for South African Rand
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>R</div>
-);
 import { Link } from "react-router-dom";
 
 const AboutLandlord = () => {
