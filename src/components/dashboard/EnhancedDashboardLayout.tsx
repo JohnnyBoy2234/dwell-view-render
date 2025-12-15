@@ -79,7 +79,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const isLandlordDashboardRoute = activePath.startsWith('/enhancedlandlorddashboard');
 
   return (
-    <div className={`flex flex-col min-h-screen w-full ${
+    <div className={`flex flex-col min-h-screen w-full overflow-hidden ${
         isLandlordDashboardRoute
           ? 'bg-transparent'
           : 'bg-ocean-blue/[0.06]'
