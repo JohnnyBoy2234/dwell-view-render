@@ -267,11 +267,11 @@ export default function EnhancedTenantDashboard() {
   return (
     <VerificationGate requireVerification={true}>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
+        <div className="flex min-h-screen w-full overflow-hidden bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-    <div className="flex-1 min-h-0 flex flex-col" style={{ contain: 'layout style paint' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden" style={{ contain: 'layout style paint' }}>
       <EnhancedDashboardLayout 
         title="Tenant Dashboard" 
         currentTab={currentTab}
