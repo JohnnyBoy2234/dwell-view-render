@@ -270,6 +270,10 @@ const Index = () => {
                   <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
                   <span className="text-foreground">Verified Tenant Screening</span>
                 </li>
+                <li className="flex items-center gap-3">
+                  <CheckCircle className="h-5 w-5 text-success-green flex-shrink-0" />
+                  <span className="text-foreground">All Landlord and Tenant Records Securely Stored By RentLekker</span>
+                </li>
               </ul>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button asChild size="lg" className="bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-lg px-6">
