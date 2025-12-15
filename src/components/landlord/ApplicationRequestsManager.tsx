@@ -247,12 +247,12 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
                   </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     size="sm"
                     onClick={() => handleApprove(request)}
                     disabled={processingId === request.id}
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    className="w-full sm:w-auto flex-1 bg-green-600 hover:bg-green-700 text-white"
                   >
                     {processingId === request.id ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -268,7 +268,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
                     variant="outline"
                     onClick={() => handleDecline(request)}
                     disabled={processingId === request.id}
-                    className="flex-1"
+                    className="w-full sm:w-auto flex-1"
                   >
                     {processingId === request.id ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
