@@ -245,7 +245,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Text Content */}
-            <div className="order-2 md:order-1">
+            <div className="order-1 md:order-1">
               <span className="text-ocean-blue font-semibold text-sm uppercase tracking-wide">For Landlords</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-4">
                 Advertise Your Rental Property
@@ -281,10 +281,10 @@ const Index = () => {
               </div>
             </div>
             {/* Image */}
-            <div className="order-1 md:order-2">
+            <div className="order-2 md:order-2">
               <img 
-                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-                alt="Landlord showing property" 
+                src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Modern apartment building" 
                 className="w-full h-[400px] object-cover rounded-2xl shadow-xl"
               />
             </div>
@@ -297,7 +297,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Image */}
-            <div>
+            <div className="order-2 md:order-1">
               <img 
                 src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                 alt="Happy tenant in new home" 
@@ -305,7 +305,7 @@ const Index = () => {
               />
             </div>
             {/* Text Content */}
-            <div>
+            <div className="order-1 md:order-2">
               <span className="text-ocean-blue font-semibold text-sm uppercase tracking-wide">For Tenants</span>
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-2 mb-4">
                 Find Your Next Home
