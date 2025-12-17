@@ -287,7 +287,7 @@ const Index = () => {
             {/* Image */}
             <div className="order-2 md:order-2">
               <img 
-                src = "https://unsplash.com/photos/a-group-of-women-sitting-around-a-table-working-on-a-project-o-6GhmpELnw"
+                src = "/for landlord.jpg"
                 alt="image" 
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
               />
