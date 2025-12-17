@@ -55,7 +55,7 @@ export const RentalApplicationForm = ({
     if (!user || !validateForm()) return;
 
     // Reset form on successful submission
-    await submitApplication(formData, user);
+    await submitApplication(formData, user.id, user.email);
     resetForm();
   };
 
