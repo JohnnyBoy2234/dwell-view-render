@@ -104,7 +104,7 @@ export default function EnhancedTenantDashboard() {
     // Always show the dashboard overview - navigation handled by routing
     if (currentTab === '/enhancedtenantdashboard/leases') {
       return (
-        <div className="space-y-6">
+        <div className="space-y-6 w-full">
           <div className="flex items-center gap-3 mb-6">
             <FileText className="h-6 w-6 text-ocean-blue" />
             <h2 className="text-xl font-bold">Lease System</h2>
@@ -271,7 +271,7 @@ export default function EnhancedTenantDashboard() {
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden" style={{ contain: 'layout style paint' }}>
+    <div className="flex-1 min-h-0 flex flex-col overflow-hidden w-full" style={{ contain: 'layout style paint' }}>
       <EnhancedDashboardLayout 
         title="Tenant Dashboard" 
         currentTab={currentTab}

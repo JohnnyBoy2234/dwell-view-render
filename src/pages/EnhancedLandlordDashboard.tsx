@@ -831,8 +831,8 @@ export default function EnhancedLandlordDashboard() {
       case '/enhancedlandlorddashboard/swiftbooks':
         console.log('[Dashboard] Rendering swiftbooks tab');
         return (
-          <div className="min-h-screen bg-white pb-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+          <div className="min-h-screen bg-white pb-8 w-full">
+            <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
               <AccountingOverview defaultPropertyId={selectedPropertyId} />
             </div>
           </div>
@@ -878,7 +878,7 @@ export default function EnhancedLandlordDashboard() {
 
   const renderInventoryTab = () => (
     <div className="min-h-screen bg-white pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
         {inventoryLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
@@ -937,7 +937,7 @@ export default function EnhancedLandlordDashboard() {
   );
   const renderLeasesTab = () => (
     <div className="min-h-screen bg-white pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
         <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
       </div>
     </div>
@@ -959,8 +959,8 @@ export default function EnhancedLandlordDashboard() {
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
     return (
-      <div className="min-h-screen bg-white pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <div className="min-h-screen bg-white pb-8 w-full">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
           
@@ -1123,8 +1123,8 @@ export default function EnhancedLandlordDashboard() {
     const overdueCount = tenants.filter(t => t.payment_status === 'overdue').length;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 pb-8 w-full">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 w-full">
         {tenants.length === 0 ? (
           <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
             <CardContent className="p-12 text-center">
@@ -1226,7 +1226,7 @@ export default function EnhancedLandlordDashboard() {
 
   const renderPaymentsTab = () => (
     <div className="min-h-screen bg-white pb-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
         {tenants.length === 0 ? (
           <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
           <CardContent className="p-12 text-center">
@@ -1359,8 +1359,8 @@ export default function EnhancedLandlordDashboard() {
   );
 
 const renderReportsTab = () => (
-  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 pb-8">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 pb-8 w-full">
+    <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 w-full">
       {/* Back Button */}
       <BackButton 
         defaultPath="/enhancedlandlorddashboard"
@@ -2074,7 +2074,7 @@ const renderReportsTab = () => (
 
     return (
       <div className="min-h-screen bg-white pb-8">
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8">
+        <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8 w-full">
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -2594,7 +2594,7 @@ const renderReportsTab = () => (
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-          <div className="flex-1 min-h-0 flex flex-col" style={{ contain: 'layout style paint' }}>
+          <div className="flex-1 min-h-0 flex flex-col w-full" style={{ contain: 'layout style paint' }}>
             <EnhancedDashboardLayout 
               title={headerTitle}
               currentTab={currentTab}
