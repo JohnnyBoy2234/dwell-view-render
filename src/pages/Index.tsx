@@ -288,7 +288,7 @@ const Index = () => {
             <div className="order-2 md:order-2">
 
               <img 
-                src = "https://unsplash.com/photos/top-view-of-modern-young-people-discussion-business-while-working-in-the-office-EViKPRl7chY"
+                src = "https://unsplash.com/photos/group-of-young-modern-people-in-smart-casual-wear-discussing-business-while-working-in-the-creative-office-OGj0zBOHfRk"
                 alt="image" 
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
               />
