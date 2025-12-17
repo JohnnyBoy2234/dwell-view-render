@@ -797,17 +797,6 @@ export default function EnhancedLandlordDashboard() {
 
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
-    
-    // If no property is selected, show selection only for property-specific tabs
-    if (!selectedPropertyId && !isBaseTab) {
-      return (
-        <PropertySelection 
-          properties={properties}
-          onSelectProperty={handleSelectProperty}
-          loading={loading}
-        />
-      );
-    }
 
     // Property is selected, show property-specific dashboard
     const selectedProperty = getSelectedProperty();
@@ -2590,11 +2579,11 @@ const renderReportsTab = () => (
   return (
     <VerificationGate requireVerification={true}>
       <SidebarProvider>
-        <div className="flex min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
+        <div className="flex flex-col min-h-screen w-full bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-          <div className="flex-1 min-h-0 flex flex-col w-full" style={{ contain: 'layout style paint' }}>
+          <div className="flex-1 min-h-0 flex flex-col" style={{ contain: 'layout style paint' }}>
             <EnhancedDashboardLayout 
               title={headerTitle}
               currentTab={currentTab}
@@ -2602,6 +2591,13 @@ const renderReportsTab = () => (
               selectedPropertyId={selectedPropertyId}
               onBackToProperties={handleBackToProperties}
             >
+              {!selectedPropertyId && isBaseTab && (
+                <PropertySelection 
+                  properties={properties}
+                  onSelectProperty={handleSelectProperty}
+                  loading={loading}
+                />
+              )}
               {renderTabContent()}
             </EnhancedDashboardLayout>
           </div>
