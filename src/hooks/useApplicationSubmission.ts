@@ -19,23 +19,23 @@ export function useApplicationSubmission(options: SubmissionOptions) {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const submitApplication = async (formData: FormData, user: any) => {
-    if (!user) return;
+  const submitApplication = async (formData: FormData, userId: string, userEmail: string) => {
+    if (!userId) return;
 
     setSubmitting(true);
 
     try {
       // Save screening profile
-      await saveScreeningProfile(formData, user.id);
+      await saveScreeningProfile(formData, userId);
       
       // Save screening details  
-      await saveScreeningDetails(formData, user.id);
+      await saveScreeningDetails(formData, userId);
       
       // Mark tenant as screened
-      await markTenantAsScreened(user.id);
+      await markTenantAsScreened(userId);
       
       // Create application
-      const applicationResult = await createApplication(user.id);
+      const applicationResult = await createApplication(userId);
       
       // Mark invite as used if provided
       if (inviteId) {
@@ -43,7 +43,7 @@ export function useApplicationSubmission(options: SubmissionOptions) {
       }
       
       // Trigger credit check
-      await triggerCreditCheck(applicationResult.data.id, user.id);
+      await triggerCreditCheck(applicationResult.data.id, userId);
       
       toast(TOAST_MESSAGES.SUCCESS);
       
@@ -131,7 +131,10 @@ export function useApplicationSubmission(options: SubmissionOptions) {
       .select()
       .single();
 
-    if (result.error) throw result.error;
+    if (result.error) {
+      console.error("Supabase createApplication error:", result.error.message, result.error.details, result.error.hint, result.error.code);
+      throw result.error;
+    }
     return result;
   };
 
