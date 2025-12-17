@@ -47,6 +47,19 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
     if (!user) return;
 
     try {
+      // First get the landlord's profile ID
+      const { data: landlordProfile, error: profileError } = await (supabase as any)
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+      if (!landlordProfile) {
+        setRequests([]);
+        return;
+      }
+
       let query = supabase
         .from('application_requests')
         .select(`
@@ -54,7 +67,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
           properties(title, location),
           profiles!application_requests_tenant_id_fkey(display_name, avatar_url)
         `)
-        .filter('landlord_id', 'eq', user.id)
+        .filter('landlord_id', 'eq', (landlordProfile as any).id)
         .filter('status', 'eq', 'pending')
         .order('created_at', { ascending: false });
 
@@ -216,7 +229,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
   }
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Clock className="h-5 w-5" />
@@ -224,9 +237,9 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
           <Badge variant="secondary">{requests.length}</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 overflow-x-auto">
         {requests.map((request) => (
-          <Card key={request.id} className="border-2">
+          <Card key={request.id} className="border-2 min-w-0">
             <CardContent className="p-4">
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">

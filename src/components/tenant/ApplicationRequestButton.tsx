@@ -29,11 +29,20 @@ export const ApplicationRequestButton = ({
   useEffect(() => {
     if (!user) return;
     const checkExistingRequest = async () => {
+      // First get the tenant's profile ID
+      const { data: tenantProfile } = await (supabase as any)
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!tenantProfile) return;
+
       const { data } = await (supabase as any)
         .from('application_requests')
         .select('status')
         .eq('property_id', propertyId)
-        .eq('tenant_id', user.id)
+        .eq('tenant_id', (tenantProfile as any).id)
         .maybeSingle();
       
       if (data && ((data as any).status === 'pending' || (data as any).status === 'approved')) {
@@ -56,11 +65,31 @@ export const ApplicationRequestButton = ({
     setLoading(true);
     
     try {
+      // Get tenant profile ID
+      const { data: tenantProfile, error: profileError } = await (supabase as any)
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (profileError) throw profileError;
+      if (!tenantProfile) throw new Error('Profile not found');
+
+      // Get landlord profile ID
+      const { data: landlordProfileData, error: landlordError } = await (supabase as any)
+        .from('profiles')
+        .select('id')
+        .eq('user_id', landlordId)
+        .maybeSingle();
+
+      if (landlordError) throw landlordError;
+      if (!landlordProfileData) throw new Error('Landlord profile not found');
+
       // Create application request using the proper service
       await createApplicationRequest({
         property_id: propertyId,
-        tenant_id: user.id,
-        landlord_id: landlordId
+        tenant_id: (tenantProfile as any).id,
+        landlord_id: (landlordProfileData as any).id
       });
 
       setHasRequested(true);

@@ -5,7 +5,7 @@ import {
   Building2, 
   Users, 
   Shield, 
-  RIcon, 
+  BadgePercent, 
   Calculator, 
   MessageSquare, 
   FileText, 
@@ -24,7 +24,7 @@ import { Link } from "react-router-dom";
 const AboutLandlord = () => {
   const features = [
     {
-      icon: RIcon,
+      icon: BadgePercent,
       title: "Zero Commission",
       description: "Keep 100% of your rental income. No agent fees, no hidden costs, no surprises. Every rand you earn stays in your pocket.",
       color: "text-success-green"
@@ -173,7 +173,7 @@ const AboutLandlord = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-ocean-blue rounded-lg flex items-center justify-center flex-shrink-0">
-                  <RIcon className="h-6 w-6 text-white font-bold" />
+                  <BadgePercent className="h-6 w-6 text-white" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Zero Commission</h3>
