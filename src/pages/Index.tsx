@@ -287,7 +287,7 @@ const Index = () => {
             {/* Image */}
             <div className="order-2 md:order-2">
               <img 
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                 alt="Woman in modern home" 
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
               />
@@ -303,7 +303,7 @@ const Index = () => {
             {/* Image */}
             <div className="order-2 md:order-1">
               <img 
-                src="https://images.unsplash.com/photo-1606788075761-9a50e3dfa13e?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="https://images.unsplash.com/photo-1581579438747-1dc8d17bbce4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
                 alt="Happy family in their home" 
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
               />
