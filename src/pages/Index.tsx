@@ -21,12 +21,12 @@ const formatPublishedDate = (dateString: string) => {
 };
 
 const dummyBlogPost = {
-  id: "commission-free-renting",
-  title: "Why Go Commission-Free? The Future of Renting in SA",
-  excerpt: "Discover how RentLekker is revolutionizing the rental market in South Africa by eliminating commissions, making renting fair, transparent, and human again.",
-  publishedAt: "2023-10-26T10:00:00Z",
-  readTime: 7,
-  category: "Renting Insights",
+  id: "safe-transparent-new-way",
+  title: "Safe, Simple, and Transparent - The New Way to Rent in South Africa",
+  excerpt: "Renting shouldn\'t feel risky or confusing. Discover how RentLekker combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.",
+  publishedAt: "2024-12-19",
+  readTime: 4,
+  category: "Safety & Trust",
   featured: true,
 };
 
