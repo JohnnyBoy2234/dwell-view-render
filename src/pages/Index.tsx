@@ -293,11 +293,12 @@ const Index = () => {
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
               />
             </div>
-            
+
           </div>
         </div>
       </section>
 
+      
       {/* For Tenants Section */}
       <section className="bg-muted/30 py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
