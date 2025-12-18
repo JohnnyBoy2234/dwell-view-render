@@ -200,7 +200,7 @@ const Index = () => {
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
-        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
+        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh] flex items-center justify-center flex-col">
           <div className="absolute inset-0 w-full h-full bg-ocean-blue" />
           
           {/* Bottom Gradient Overlay */}
@@ -216,7 +216,6 @@ const Index = () => {
               </h1>
             </div>
           </div>
-        </div>
 
         {/* Search Bar - Fading into white */}
         <div className="relative z-10 w-full px-4 -mt-10 md:-mt-12 mb-4">
@@ -235,6 +234,7 @@ const Index = () => {
             }} className="w-full my-[15px]" />
             </div>
           </div>
+        </div>
         </div>
       </section>
 
