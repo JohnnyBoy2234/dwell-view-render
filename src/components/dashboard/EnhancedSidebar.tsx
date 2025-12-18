@@ -105,7 +105,7 @@ const landlordItems: SidebarItem[] = [
   },
   { 
     title: 'SwiftBooks', 
-    url: '/enhancedlandlorddashboard/reports', 
+    url: '/enhancedlandlorddashboard/swiftbooks', 
     icon: BarChart3,
     description: 'Financial reports and accounting',
     requiredPlan: 'premium'
