@@ -293,6 +293,7 @@ const Index = () => {
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
               />
             </div>
+            
           </div>
         </div>
       </section>
