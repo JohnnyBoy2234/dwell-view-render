@@ -43,7 +43,8 @@ const PropertyCard = ({
 
   const formattedPrice = `${PROPERTY_CARD_CURRENCY.SYMBOL}${price.toLocaleString()}${PROPERTY_CARD_CURRENCY.SEPARATOR}`;
   const altText = `${type} in ${location}`;
-  const locationText = `${type} in ${location}`;
+  const displayLocation = location.split(',')[0];
+  const locationText = `${type} in ${displayLocation}`;
 
   return (
     <Card 
