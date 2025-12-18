@@ -254,6 +254,7 @@ const Index = () => {
               <img src="/hero3.avif" alt="Modern apartment building" className="w-full h-96 object-cover rounded-xl shadow-lg" />
             </div>
           </div>
+        </div>
       </section>
 
       {/* For Landlords Section */}
