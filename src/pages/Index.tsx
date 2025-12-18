@@ -295,8 +295,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-      
 
+      {/*just a divider */}      
 
       {/* For Tenants Section */}
       <section className="bg-muted/30 py-16 md:py-20 px-4 sm:px-6 lg:px-8">
