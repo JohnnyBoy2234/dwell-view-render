@@ -9,7 +9,7 @@ const corsHeaders = {
 serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response(null, { headers: corsHeaders })
   }
 
   try {
@@ -19,7 +19,55 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get all users
+    // Handle DELETE request for user deletion
+    if (req.method === 'DELETE') {
+      const { userId } = await req.json()
+      
+      if (!userId) {
+        return new Response(
+          JSON.stringify({ error: 'userId is required' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        )
+      }
+
+      console.log('Deleting user:', userId)
+
+      // Delete from user_roles first (foreign key constraint)
+      const { error: rolesError } = await supabaseAdmin
+        .from('user_roles')
+        .delete()
+        .eq('user_id', userId)
+      
+      if (rolesError) {
+        console.error('Error deleting user roles:', rolesError)
+      }
+
+      // Delete from profiles
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .delete()
+        .eq('user_id', userId)
+      
+      if (profileError) {
+        console.error('Error deleting profile:', profileError)
+      }
+
+      // Delete the user from auth
+      const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+      
+      if (authError) {
+        throw authError
+      }
+
+      console.log('User deleted successfully:', userId)
+
+      return new Response(
+        JSON.stringify({ success: true, message: 'User deleted successfully' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      )
+    }
+
+    // Handle GET request - list all users
     const { data: { users }, error } = await supabaseAdmin.auth.admin.listUsers()
     if (error) throw error
 
@@ -57,6 +105,7 @@ serve(async (req) => {
       }
     )
   } catch (error) {
+    console.error('Error in admin/users function:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return new Response(
       JSON.stringify({ error: errorMessage }),

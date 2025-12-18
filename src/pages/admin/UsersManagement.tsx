@@ -66,17 +66,13 @@ export function UsersManagement() {
     }
 
     try {
-      // Delete user from auth
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
+      // Call the edge function to delete the user
+      const { data, error } = await supabase.functions.invoke('admin/users', {
+        method: 'DELETE',
+        body: { userId }
+      });
 
-      // Delete user data from profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('user_id', userId);
-
-      if (profileError) throw profileError;
+      if (error) throw error;
 
       // Remove user from the list
       setUsers(users.filter(user => user.id !== userId));

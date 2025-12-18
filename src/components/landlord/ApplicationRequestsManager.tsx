@@ -237,7 +237,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
           <Badge variant="secondary">{requests.length}</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 overflow-x-auto">
+      <CardContent className="space-y-4">
         {requests.map((request) => (
           <Card key={request.id} className="border-2 min-w-0">
             <CardContent className="p-4">
