@@ -429,7 +429,7 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
               </div>
             )}
             
-            {applicationRequest?.status === 'accepted' && (
+            {applicationRequest?.status === 'approved' && (
               <Button 
                 size="sm" 
                 onClick={handleStartApplication} 
@@ -440,7 +440,7 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
               </Button>
             )}
             
-            {applicationRequest?.status === 'declined' && (
+            {applicationRequest?.status === 'rejected' && (
               <div className="flex items-center gap-2 text-red-700 text-sm bg-red-50 border border-red-200 rounded p-2">
                 <XCircle className="h-4 w-4" />
                 <span>Application request declined</span>

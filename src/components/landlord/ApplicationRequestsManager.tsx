@@ -125,7 +125,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
       const { error: updateError } = await supabase
         .from('application_requests')
         .update({ 
-          status: 'accepted',
+          status: 'approved',
           updated_at: new Date().toISOString()
         } as any)
         .filter('id', 'eq', request.id);
@@ -166,7 +166,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
       const { error: updateError } = await supabase
         .from('application_requests')
         .update({ 
-          status: 'declined',
+          status: 'rejected',
           updated_at: new Date().toISOString()
         } as any)
         .filter('id', 'eq', request.id);
