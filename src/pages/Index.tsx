@@ -10,10 +10,26 @@ import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { useAuth } from "@/hooks/useAuth";
 import HowItWorks from "@/components/HowItWorks";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
+import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import { Shield, CheckCircle, Lock, Wrench, Calendar, Users, Home, TrendingUp, ArrowRight, Star, Award, UserCheck, MessageSquare, Search, MapPin, Smartphone, Zap, LayoutDashboard, Calculator, ShoppingBag, Layers } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
+
+const formatPublishedDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const dummyBlogPost = {
+  id: "commission-free-renting",
+  title: "Why Go Commission-Free? The Future of Renting in SA",
+  excerpt: "Discover how RentLekker is revolutionizing the rental market in South Africa by eliminating commissions, making renting fair, transparent, and human again.",
+  publishedAt: "2023-10-26T10:00:00Z",
+  readTime: 7,
+  category: "Renting Insights",
+  featured: true,
+};
 
 // Simple R icon for South African Rand
 const RIcon = ({
@@ -200,7 +216,7 @@ const Index = () => {
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
-        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
+        <div className="relative w-full h-auto">
           <div className="absolute inset-0 w-full h-full bg-ocean-blue" />
           
           {/* Bottom Gradient Overlay */}
@@ -215,27 +231,29 @@ const Index = () => {
                 <span className="block">Renting</span>
               </h1>
             </div>
-          </div>
-        </div>
-
-        {/* Search Bar - Fading into white */}
-        <div className="relative z-10 w-full px-4 -mt-10 md:-mt-12 mb-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
-              <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
-              searchTerm: filters.searchTerm,
-              propertyType: filters.propertyType,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              bedrooms: filters.bedrooms,
-              bathrooms: filters.bathrooms,
-              propertyTypes: filters.propertyTypes || [],
-              amenities: filters.amenities || [],
-              availableFrom: filters.availableFrom
-            }} className="w-full my-[15px]" />
+            {/* Search Bar */}
+            <div className="relative z-10 w-full px-4 pt-10">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
+                  <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
+                  searchTerm: filters.searchTerm,
+                  propertyType: filters.propertyType,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  bedrooms: filters.bedrooms,
+                  bathrooms: filters.bathrooms,
+                  propertyTypes: filters.propertyTypes || [],
+                  amenities: filters.amenities || [],
+                  availableFrom: filters.availableFrom
+                }} className="w-full my-[15px]" />
+                </div>
+              </div>
+            </div>
+            {/* Hero Image */}
+            <div className="mt-10 mx-auto w-full max-w-7xl px-4">
+              <img src="/hero3.avif" alt="Modern apartment building" className="w-full h-96 object-cover rounded-xl shadow-lg" />
             </div>
           </div>
-        </div>
       </section>
 
       {/* For Landlords Section */}
@@ -379,6 +397,18 @@ const Index = () => {
 
       {/* Testimonials */}
       <TestimonialsCarousel />
+
+      {/* Blog Post Section */}
+      <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            From Our Blog
+          </h2>
+          <div className="max-w-md mx-auto">
+            <BlogPostCard {...dummyBlogPost} />
+          </div>
+        </div>
+      </section>
 
       {/* Final CTA Block */}
       <section className="py-16 md:py-24 bg-ocean-blue text-white">
