@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -200,41 +199,41 @@ const Index = () => {
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
-        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh] flex items-center justify-center flex-col">
+        <div className="relative w-full h-full flex items-center justify-center">
           <div className="absolute inset-0 w-full h-full bg-ocean-blue" />
           
           {/* Bottom Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
-          {/* Top Fade with Heading */}
-          <div className="top-fade my-0 justify-center">
-            <div className="max-w-xl mt-4 md:mt-8 lg:mt-8 mx-auto">
-              <h1 className="text-3xl md:text-5xl font-bold text-white text-center leading-tight">
+          <div className="relative z-10 flex flex-col items-center justify-center w-full py-20">
+            {/* Top Fade with Heading */}
+            <div className="max-w-xl text-center">
+              <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-6">
                 <span className="block">Safe, Simple,</span>
                 <span className="block text-sky-400">Commission-Free</span>
                 <span className="block">Renting</span>
               </h1>
             </div>
-          </div>
 
-        {/* Search Bar - Fading into white */}
-        <div className="relative z-10 w-full px-4 -mt-10 md:-mt-12 mb-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
-              <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
-              searchTerm: filters.searchTerm,
-              propertyType: filters.propertyType,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              bedrooms: filters.bedrooms,
-              bathrooms: filters.bathrooms,
-              propertyTypes: filters.propertyTypes || [],
-              amenities: filters.amenities || [],
-              availableFrom: filters.availableFrom
-            }} className="w-full my-[15px]" />
+            {/* Search Bar */}
+            <div className="relative z-10 w-full px-4">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
+                  <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
+                  searchTerm: filters.searchTerm,
+                  propertyType: filters.propertyType,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  bedrooms: filters.bedrooms,
+                  bathrooms: filters.bathrooms,
+                  propertyTypes: filters.propertyTypes || [],
+                  amenities: filters.amenities || [],
+                  availableFrom: filters.availableFrom
+                }} className="w-full my-[15px]" />
+                </div>
+              </div>
             </div>
           </div>
-        </div>
         </div>
       </section>
 
