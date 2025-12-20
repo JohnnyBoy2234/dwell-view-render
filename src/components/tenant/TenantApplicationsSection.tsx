@@ -71,10 +71,21 @@ export const TenantApplicationsSection = () => {
     if (!lead) return;
     setSubmitting(true);
     try {
-      // Use the application_requests service directly
+      // Fetch tenant profile ID first (required for foreign key constraint)
+      const { data: tenantProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id' as any, user.id as any)
+        .maybeSingle();
+
+      if (profileError || !tenantProfile) {
+        throw new Error('Tenant profile not found. Please complete your profile first.');
+      }
+
+      // Use the application_requests service with the profile ID
       await createApplicationRequest({
         property_id: lead.property_id,
-        tenant_id: user.id,
+        tenant_id: (tenantProfile as { id: string }).id,
         landlord_id: lead.landlord_id
       });
       toast({

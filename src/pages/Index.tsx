@@ -205,18 +205,22 @@ const Index = () => {
           {/* Bottom Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
-          <div className="relative z-10 flex flex-col items-center justify-center w-full py-20">
+          <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
             {/* Top Fade with Heading */}
             <div className="max-w-xl text-center">
+<<<<<<< HEAD
               <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-6">
                 <span className="block">Renting made easy</span>
+=======
+              <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
+>>>>>>> 61f80c50580bd6928797be2543549a94c633fdd8
                 <span className="block">Safe, Simple,</span>
                 <span className="block">Commission-free.</span>
               </h1>
             </div>
 
-            {/* Search Bar */}
-            <div className="relative z-10 w-full px-4">
+            {/* Search Bar - moved lower on mobile with mt-4 */}
+            <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
               <div className="max-w-4xl mx-auto">
                 <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
                   <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
@@ -235,6 +239,9 @@ const Index = () => {
             </div>
           </div>
         </div>
+        
+        {/* Fade transition to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white z-20" />
       </section>
 
       {/* For Landlords Section */}

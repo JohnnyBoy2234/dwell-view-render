@@ -557,6 +557,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       // Upsert screening profile with documents
       const { error: profileError } = await supabase.from("screening_profiles").upsert([
         {
+          user_id: user.id,
           first_name: formData.first_name,
           middle_name: formData.middle_name,
           last_name: formData.last_name,
@@ -576,6 +577,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         .from("screening_details")
         .upsert([
           {
+            user_id: user.id,
             full_name: `${formData.first_name} ${formData.last_name}`.trim(),
             id_number: formData.id_number,
             phone: formData.phone,
