@@ -208,12 +208,8 @@ const Index = () => {
           <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
             {/* Top Fade with Heading */}
             <div className="max-w-xl text-center">
-<<<<<<< HEAD
               <h1 className="text-3xl md:text-5xl font-bold text-white leading-tight mb-6">
                 <span className="block">Renting made easy</span>
-=======
-              <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
->>>>>>> 61f80c50580bd6928797be2543549a94c633fdd8
                 <span className="block">Safe, Simple,</span>
                 <span className="block">Commission-free.</span>
               </h1>
@@ -408,5 +404,5 @@ const Index = () => {
       availableFrom: filters.availableFrom
     }} onFiltersChange={onFiltersChange} onClearFilters={clearFilters} onApplyFilters={handleSearch} />
     </div>;
-};
+  };
 export default Index;
