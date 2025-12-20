@@ -236,10 +236,7 @@ const Index = () => {
               availableFrom: filters.availableFrom
             }} className="w-full my-[15px]" />
             </div>
-            {/* Hero Image */}
-            <div className="mt-10 mx-auto w-full max-w-7xl px-4">
-              <img src="/hero3.avif" alt="Modern apartment building" className="w-full h-96 object-cover rounded-xl shadow-lg" />
-            </div>
+           
           </div>
         </div>
         {/* Hero image below search bar */}
