@@ -233,6 +233,10 @@ const Index = () => {
                 </div>
               </div>
             </div>
+            {/* Hero Image */}
+            <div className="mt-10 mx-auto w-full max-w-7xl px-4">
+              <img src="/hero3.avif" alt="Modern apartment building" className="w-full h-96 object-cover rounded-xl shadow-lg" />
+            </div>
           </div>
         </div>
       </section>
