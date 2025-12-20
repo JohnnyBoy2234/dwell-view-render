@@ -235,21 +235,26 @@ const Index = () => {
             </div>
           </div>
         </div>
-        {/* Hero image below search bar */}
-<div className="w-full px-4 mt-6 md:mt-8">
+{/* Bottom Gradient Overlay */}
+<div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
+
+{/* Mid fade from blue to white aligned around search bar */}
+<div className="absolute inset-x-0 top-1/2 bottom-0 bg-gradient-to-b from-transparent to-white" />
+
+  {/* Hero image below search bar */}
+<div className="w-full px-4 mt-3 md:mt-5">
   <div className="max-w-5xl mx-auto">
     <picture>
       <source srcSet="/hero3.avif" type="image/avif" />
       <img
         src="/hero3.jpg"
         alt="Modern rental living space"
-        className="w-full h-[200px] sm:h-[260px] md:h-[340px] object-cover rounded-2xl shadow-2xl"
+        className="w-full h-[220px] sm:h-[280px] md:h-[360px] object-cover rounded-2xl shadow-2xl"
         loading="eager"
       />
     </picture>
   </div>
-</div>
-        
+</div>  
         {/* Fade transition to next section */}
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white z-20" />
       </section>
