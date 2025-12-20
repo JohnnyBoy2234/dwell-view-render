@@ -209,9 +209,9 @@ const Index = () => {
             {/* Top Fade with Heading */}
             <div className="max-w-xl text-center">
               <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
-                <span className="block">Safe, Simple,</span>
-                <span className="block text-sky-400">Commission-Free</span>
-                <span className="block">Renting</span>
+                <span className="block">Renting Made Easy</span>
+                <span className="block text-sky-400">Safe, Simple</span>
+                <span className="block">Commision-free</span>
               </h1>
             </div>
 
@@ -235,6 +235,20 @@ const Index = () => {
             </div>
           </div>
         </div>
+        {/* Hero image below search bar */}
+<div className="w-full px-4 mt-6 md:mt-8">
+  <div className="max-w-5xl mx-auto">
+    <picture>
+      <source srcSet="/hero3.avif" type="image/avif" />
+      <img
+        src="/hero3.jpg"
+        alt="Modern rental living space"
+        className="w-full h-[200px] sm:h-[260px] md:h-[340px] object-cover rounded-2xl shadow-2xl"
+        loading="eager"
+      />
+    </picture>
+  </div>
+</div>
         
         {/* Fade transition to next section */}
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white z-20" />
