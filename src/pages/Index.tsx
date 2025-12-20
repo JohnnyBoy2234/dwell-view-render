@@ -254,6 +254,7 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
 
       {/* For Landlords Section */}
       <section className="bg-white py-16 md:py-20 px-4 sm:px-6 lg:px-8">
