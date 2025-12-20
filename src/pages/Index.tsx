@@ -210,7 +210,7 @@ const Index = () => {
             <div className="max-w-xl text-center">
               <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
                 <span className="block">Renting Made Easy</span>
-                <span className="block text-sky-400">Safe, Simple</span>
+                <span className="block">Safe, Simple</span>
                 <span className="block">Commision-free</span>
               </h1>
             </div>
@@ -235,8 +235,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-{/* Bottom Gradient Overlay */}
-<div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
 
 {/* Mid fade from blue to white aligned around search bar */}
 <div className="absolute inset-x-0 top-1/2 bottom-0 bg-gradient-to-b from-transparent to-white" />
