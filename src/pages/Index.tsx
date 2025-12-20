@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -200,61 +199,46 @@ const Index = () => {
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
-        <div className="relative w-full h-[60vh] min-h-[500px] md:h-[70vh]">
-          <div className="absolute inset-0 w-full h-full">
-            <img src="/hero3.avif" alt="Modern apartment building" className="w-full h-full object-cover" />
-          </div>
+        <div className="relative w-full h-full flex items-center justify-center">
+          <div className="absolute inset-0 w-full h-full bg-ocean-blue" />
           
           {/* Bottom Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
-          {/* Top Fade with Heading */}
-          <div className="top-fade my-0 justify-start pl-3 md:pl-10">
-            <div className="max-w-xl mt-4 md:mt-8 lg:mt-8">
-              <h1 className="text-3xl md:text-5xl font-bold text-white text-left leading-tight">
+          <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
+            {/* Top Fade with Heading */}
+            <div className="max-w-xl text-center">
+              <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
                 <span className="block">Safe, Simple,</span>
                 <span className="block text-sky-400">Commission-Free</span>
                 <span className="block">Renting</span>
               </h1>
             </div>
-          </div>
-        </div>
 
-        {/* Search Bar - Fading into white */}
-        <div className="relative z-10 w-full px-4 -mt-20 md:-mt-24 mb-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
-              <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
-              searchTerm: filters.searchTerm,
-              propertyType: filters.propertyType,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              bedrooms: filters.bedrooms,
-              bathrooms: filters.bathrooms,
-              propertyTypes: filters.propertyTypes || [],
-              amenities: filters.amenities || [],
-              availableFrom: filters.availableFrom
-            }} className="w-full my-[15px]" />
+            {/* Search Bar - moved lower on mobile with mt-4 */}
+            <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
+              <div className="max-w-4xl mx-auto">
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
+                  <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
+                  searchTerm: filters.searchTerm,
+                  propertyType: filters.propertyType,
+                  minPrice: filters.minPrice,
+                  maxPrice: filters.maxPrice,
+                  bedrooms: filters.bedrooms,
+                  bathrooms: filters.bathrooms,
+                  propertyTypes: filters.propertyTypes || [],
+                  amenities: filters.amenities || [],
+                  availableFrom: filters.availableFrom
+                }} className="w-full my-[15px]" />
+                </div>
+              </div>
             </div>
-           
           </div>
         </div>
-        {/* Hero image below search bar */}
-        <div className="w-full px-4 mt-6 md:mt-8">
-          <div className="max-w-5xl mx-auto">
-            <picture>
-              <source srcSet="/hero3.avif" type="image/avif" />
-              <img
-                src="/hero3.jpg"
-                alt="Modern rental living space"
-                className="w-full h-[200px] sm:h-[260px] md:h-[340px] object-cover rounded-2xl shadow-2xl"
-                loading="eager"
-              />
-            </picture>
-          </div>
-        </div>
+        
+        {/* Fade transition to next section */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white z-20" />
       </section>
-      
 
       {/* For Landlords Section */}
       <section className="bg-white py-16 md:py-20 px-4 sm:px-6 lg:px-8">
@@ -302,6 +286,7 @@ const Index = () => {
             </div>
             {/* Image */}
             <div className="order-2 md:order-2">
+
               <img 
                 src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                 alt="Business people discussing at office table" 
@@ -312,8 +297,8 @@ const Index = () => {
           </div>
         </div>
       </section>
-
       
+
       {/* For Tenants Section */}
       <section className="bg-muted/30 py-16 md:py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
