@@ -37,50 +37,6 @@ const RIcon = ({
 }) => <div className={`${className} flex items-center justify-center font-bold text-lg`}>
     R
   </div>;
-// AnimatedCounter component for stats
-const AnimatedCounter = ({
-  from = 0,
-  to,
-  duration = 1200
-}: {
-  from?: number;
-  to: number;
-  duration?: number;
-}) => {
-  const [count, setCount] = useState(from);
-  const [isVisible, setIsVisible] = useState(false);
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setIsVisible(true);
-      }
-    }, {
-      threshold: 0.1
-    });
-    const element = document.getElementById(`counter-${to}`);
-    if (element) observer.observe(element);
-    return () => observer.disconnect();
-  }, [to]);
-  useEffect(() => {
-    if (!isVisible) return;
-    let startTime: number;
-    const startValue = from;
-    const endValue = to;
-    const animate = (currentTime: number) => {
-      if (!startTime) startTime = currentTime;
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-      const currentCount = Math.round(startValue + (endValue - startValue) * easeOutQuart);
-      setCount(currentCount);
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
-    };
-    requestAnimationFrame(animate);
-  }, [isVisible, from, to, duration]);
-  return <span id={`counter-${to}`}>{count.toLocaleString()}</span>;
-};
 const Index = () => {
   const navigate = useNavigate();
   const {
@@ -146,8 +102,6 @@ const Index = () => {
 
   // Featured properties will be loaded from the API
 
-  // Stats removed per request
-  const stats: never[] = [];
 
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
