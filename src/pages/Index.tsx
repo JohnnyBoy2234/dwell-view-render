@@ -149,68 +149,6 @@ const Index = () => {
   // Stats removed per request
   const stats: never[] = [];
 
-  // Add styles for the hero section with fades
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-      .top-fade {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: auto;
-        min-height: 40%;
-        background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0) 100%);
-        z-index: 5;
-        display: flex;
-        align-items: flex-start;
-        padding: 1.5rem 0.5rem;
-        padding-top: 0.75rem;
-      }
-      @media (min-width: 768px) {
-        .top-fade {
-          justify-content: flex-start;
-          padding-left: 2.5rem;
-        }
-      }
-      .hero-content {
-        position: relative;
-        z-index: 10;
-      }
-      .hero-heading {
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        color: white;
-        font-weight: 700;
-        letter-spacing: -0.5px;
-      }
-      @media (max-width: 768px) {
-        .hero-image {
-          transform: scale(1.0) !important;
-          background-position: center 25% !important;
-          height: 100% !important;
-          top: 0;
-        }
-        .hero-section {
-          position: relative;
-          overflow: hidden;
-        }
-      }
-      @media (min-width: 769px) {
-        .hero-image {
-          transform: scale(1.1);
-          transform-origin: center;
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
