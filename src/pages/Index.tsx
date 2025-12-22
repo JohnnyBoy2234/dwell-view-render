@@ -1,23 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
-import { useAuth } from "@/hooks/useAuth";
-import HowItWorks from "@/components/HowItWorks";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
-import PropertyCard from "@/components/PropertyCard";
-import { Shield, CheckCircle, Lock, Wrench, Calendar, Users, Home, TrendingUp, ArrowRight, Star, Award, UserCheck, MessageSquare, Search, MapPin, Smartphone, Zap, LayoutDashboard, Calculator, ShoppingBag, Layers } from "lucide-react";
-
-const formatPublishedDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-};
+import { Shield, CheckCircle, ArrowRight, MessageSquare, Smartphone, Zap, LayoutDashboard, Calculator, Layers } from "lucide-react";
 
 const dummyBlogPost = {
   id: "safe-transparent-new-way",
@@ -38,11 +30,6 @@ const RIcon = ({
     R
   </div>;
 const Index = () => {
-  const navigate = useNavigate();
-  const {
-    user,
-    isAdmin
-  } = useAuth();
   const {
     filters,
     updateFilters,
@@ -334,5 +321,6 @@ const Index = () => {
       availableFrom: filters.availableFrom
     }} onFiltersChange={onFiltersChange} onClearFilters={clearFilters} onApplyFilters={handleSearch} />
     </div>;
+    
 };
 export default Index;
