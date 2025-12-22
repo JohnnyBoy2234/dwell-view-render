@@ -248,7 +248,6 @@ const Index = () => {
                 }} className="w-full my-[15px]" />
                 </div>
               </div>
-              
             </div>
           </div>
         </div>
