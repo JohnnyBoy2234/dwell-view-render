@@ -13,7 +13,6 @@ import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import { Shield, CheckCircle, Lock, Wrench, Calendar, Users, Home, TrendingUp, ArrowRight, Star, Award, UserCheck, MessageSquare, Search, MapPin, Smartphone, Zap, LayoutDashboard, Calculator, ShoppingBag, Layers } from "lucide-react";
-import heroBackground from "@/assets/hero-background-new.jpg";
 
 const formatPublishedDate = (dateString: string) => {
   const date = new Date(dateString);
