@@ -9,10 +9,26 @@ import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { useAuth } from "@/hooks/useAuth";
 import HowItWorks from "@/components/HowItWorks";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
+import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
 import PropertyCard from "@/components/PropertyCard";
 import { Shield, CheckCircle, Lock, Wrench, Calendar, Users, Home, TrendingUp, ArrowRight, Star, Award, UserCheck, MessageSquare, Search, MapPin, Smartphone, Zap, LayoutDashboard, Calculator, ShoppingBag, Layers } from "lucide-react";
 import heroBackground from "@/assets/hero-background-new.jpg";
+
+const formatPublishedDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
+const dummyBlogPost = {
+  id: "safe-transparent-new-way",
+  title: "Safe, Simple, and Transparent - The New Way to Rent in South Africa",
+  excerpt: "Renting shouldn\'t feel risky or confusing. Discover how RentLekker combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.",
+  publishedAt: "2024-12-19",
+  readTime: 4,
+  category: "Safety & Trust",
+  featured: true,
+};
 
 // Simple R icon for South African Rand
 const RIcon = ({
@@ -236,25 +252,20 @@ const Index = () => {
           </div>
         </div>
 
-{/* Mid fade from blue to white aligned around search bar */}
-<div className="absolute inset-x-0 top-1/2 bottom-0 bg-gradient-to-b from-transparent to-white" />
 
-  {/* Hero image below search bar */}
-<div className="w-full px-4 mt-3 md:mt-5">
-  <div className="max-w-5xl mx-auto">
-    <picture>
-      <source srcSet="/hero3.avif" type="image/avif" />
-      <img
-        src="/hero3.jpg"
-        alt="Modern rental living space"
-        className="w-full h-[220px] sm:h-[280px] md:h-[360px] object-cover rounded-2xl shadow-2xl"
-        loading="eager"
-      />
-    </picture>
-  </div>
-</div>  
-        {/* Fade transition to next section */}
-        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-b from-transparent to-white z-20" />
+        <div className="w-full px-4 py-10">
+          <div className="max-w-5xl mx-auto">
+            <picture>
+              <source srcSet="/hero3.avif" type="image/avif" />
+              <img
+                src="/hero3.jpg"
+                alt="Modern rental living space"
+                className="w-full h-[220px] sm:h-[280px] md:h-[360px] object-cover rounded-2xl shadow-2xl"
+                loading="eager"
+              />
+            </picture>
+          </div>
+        </div>
       </section>
 
       {/* For Landlords Section */}
@@ -398,6 +409,18 @@ const Index = () => {
       {/* Testimonials */}
       <TestimonialsCarousel />
 
+      {/* Blog of the Week Section */}
+      <section className="py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-background">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
+            Blog of the Week
+          </h2>
+          <div className="max-w-md mx-auto">
+            <BlogPostCard {...dummyBlogPost} />
+          </div>
+        </div>
+      </section>
+
       {/* Final CTA Block */}
       <section className="py-16 md:py-24 bg-ocean-blue text-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -410,6 +433,7 @@ const Index = () => {
           </p>
         </div>
       </section>
+
 
       {/* Footer */}
       <Footer />
