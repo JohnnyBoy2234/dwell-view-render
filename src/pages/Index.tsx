@@ -254,8 +254,8 @@ const Index = () => {
         </div>
 
 
-        <div className="w-full px-4 py-10">
-          <div className="max-w-5xl mx-auto">
+        <div className="w-full px-4 py-10 relative bg-gradient-to-b from-ocean-blue to-white">
+          <div className="max-w-5xl mx-auto z-10 relative">
             <picture>
               <source srcSet="/hero3.avif" type="image/avif" />
               <img
