@@ -334,6 +334,5 @@ const Index = () => {
       availableFrom: filters.availableFrom
     }} onFiltersChange={onFiltersChange} onClearFilters={clearFilters} onApplyFilters={handleSearch} />
     </div>;
-    
 };
 export default Index;
