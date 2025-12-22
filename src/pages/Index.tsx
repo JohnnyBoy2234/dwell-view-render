@@ -218,8 +218,6 @@ const Index = () => {
         <div className="relative w-full h-full flex items-center justify-center">
           <div className="absolute inset-0 w-full h-full bg-ocean-blue" />
           
-          {/* Bottom Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
           
           <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
             {/* Top Fade with Heading */}
