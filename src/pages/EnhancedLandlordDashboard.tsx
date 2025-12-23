@@ -9,7 +9,6 @@ import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboar
 import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ApplicationsWithViewings } from "@/components/landlord/ApplicationsWithViewings";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';

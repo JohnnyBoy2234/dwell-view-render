@@ -458,27 +458,27 @@ All colors MUST be HSL.
 
 /* Property24-style Search Bar Styles */
 .property24-search-input {
-  height: 56px;
-  font-size: 16px;
+  height: 44px;
+  font-size: 15px;
   font-weight: 400;
-  border: 2px solid hsl(var(--border));
-  border-radius: 16px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 10px;
   background: white;
   color: hsl(var(--foreground));
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.5;
 }
 
 .property24-search-input-focused {
   border-color: hsl(var(--ocean-blue));
-  box-shadow: 0 0 0 4px hsl(var(--ocean-blue) / 0.12), 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--ocean-blue) / 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .property24-search-input-typing {
   border-color: hsl(var(--ocean-blue));
-  box-shadow: 0 0 0 4px hsl(var(--ocean-blue) / 0.12), 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--ocean-blue) / 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .property24-search-input::placeholder {
@@ -488,31 +488,31 @@ All colors MUST be HSL.
 }
 
 .property24-search-input:hover {
-  border-color: hsl(var(--ocean-blue) / 0.4);
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.08);
+  border-color: hsl(var(--ocean-blue) / 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .property24-search-input:focus {
   outline: none;
   border-color: hsl(var(--ocean-blue));
-  box-shadow: 0 0 0 4px hsl(var(--ocean-blue) / 0.12), 0 4px 16px -2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 0 3px hsl(var(--ocean-blue) / 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .property24-filter-button {
-  height: 48px;
-  padding: 0 16px;
+  height: 44px;
+  padding: 0 14px;
   font-size: 14px;
   font-weight: 500;
-  border: 2px solid hsl(var(--border));
-  border-radius: 12px;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 10px;
   background: white;
   color: hsl(var(--foreground));
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  min-width: 120px;
+  gap: 6px;
+  min-width: 100px;
 }
 
 .property24-filter-button:hover {

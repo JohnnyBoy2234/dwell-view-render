@@ -94,23 +94,25 @@ const Index = () => {
       {/* Hero Section with Glass Heading */}
       <section className="relative">
         <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 w-full h-full bg-ocean-blue" />
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-ocean-blue via-ocean-blue/90 to-ocean-blue/70" />
           
           
           <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
             {/* Top Fade with Heading */}
-            <div className="max-w-xl text-center">
-              <h1 className="text-2xl md:text-5xl font-bold text-white leading-tight mb-4 md:mb-6">
-                <span className="block">Renting Made Easy</span>
-                <span className="block">Safe, Simple</span>
-                <span className="block">Commision-free</span>
+            <div className="max-w-xl text-center px-4">
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-3 md:mb-4 font-sans">
+                <span className="block">Renting done right.</span>
               </h1>
+              <p className="text-white text-base md:text-lg font-sans leading-relaxed">
+                Simple, secure, and commission-free property rental
+              </p>
+              
             </div>
 
             {/* Search Bar - moved lower on mobile with mt-4 */}
             <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
               <div className="max-w-4xl mx-auto">
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white px-0 py-0">
+                <div className="px-0 py-0 bg-ocean-blue/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-ocean-blue/90">
                   <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
                   searchTerm: filters.searchTerm,
                   propertyType: filters.propertyType,
@@ -129,17 +131,20 @@ const Index = () => {
         </div>
 
 
-        <div className="w-full px-4 pt-0 pb-10 relative bg-gradient-to-b from-ocean-blue via-transparent to-white">
+        <div className="w-full px-4 pt-0 pb-10 relative bg-gradient-to-b from-ocean-blue/70 to-ocean-blue/50">
           <div className="max-w-5xl mx-auto z-10 relative">
-            <picture>
-              <source srcSet="/hero3.avif" type="image/avif" />
-              <img
-                src="/hero3.jpg"
-                alt="Modern rental living space"
-                className="w-full h-[220px] sm:h-[280px] md:h-[360px] object-cover rounded-2xl shadow-2xl"
-                loading="eager"
-              />
-            </picture>
+            <div className="flex flex-row gap-4 sm:gap-6 md:gap-8 overflow-hidden">
+              <picture className="flex-1 min-w-0">
+                <source srcSet="/hero3.avif" type="image/avif" />
+                <img
+                  src="/hero3.jpg"
+                  alt="Modern rental living space"
+                  className="w-full h-[200px] sm:h-[240px] md:h-[280px] object-cover rounded-2xl shadow-2xl"
+                  loading="eager"
+                />
+              </picture>
+             
+            </div>
           </div>
         </div>
       </section>

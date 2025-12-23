@@ -230,7 +230,7 @@ export const Property24SearchBar = ({
       </div>;
   };
   return <div className={cn("relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 w-full max-w-5xl mx-auto overflow-hidden", className)}>
-      <div className="p-6 pb-4 my-0 mx-[7px]">
+      <div className="p-3 pb-2 my-0">
         <div onKeyDown={handleKeyPress}>
           <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
           searchTerm: value
@@ -243,12 +243,12 @@ export const Property24SearchBar = ({
       </div>
 
       {isMobile ? <>
-          <div className="px-6 pb-6 flex gap-3 items-center">
+          <div className="px-3 pb-3 flex gap-2 items-center">
             <Button variant="outline" className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white" onClick={() => setFiltersSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               <span className="truncate">All Filters</span>
             </Button>
-            <Button className="h-12 px-4 sm:px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg whitespace-nowrap" onClick={onSearch}>
+            <Button className="h-11 px-4 sm:px-5 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-lg shadow-sm whitespace-nowrap" onClick={onSearch}>
               <Search className="h-4 w-4 mr-2" />
               <span className="hidden xs:inline">Search Property</span>
               <span className="xs:hidden">Search</span>
@@ -351,7 +351,7 @@ export const Property24SearchBar = ({
               </div>
             </SheetContent>
           </Sheet>
-        </> : <div className="px-6 pb-6 flex gap-3 items-center justify-center flex-wrap my-0">
+        </> : <div className="px-3 pb-3 flex gap-2 items-center justify-center flex-wrap my-0">
           <div className="flex gap-3 items-center flex-wrap">
             <Popover open={propertyTypeOpen} onOpenChange={setPropertyTypeOpen}>
               <PopoverTrigger asChild>
@@ -478,7 +478,7 @@ export const Property24SearchBar = ({
               </Button>}
           </div>
 
-          <Button className="h-12 px-6 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-xl shadow-lg flex-shrink-0" onClick={onSearch}>
+          <Button className="h-11 px-5 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-lg shadow-sm flex-shrink-0" onClick={onSearch}>
             <Search className="h-4 w-4 mr-2" />
             <span className="hidden sm:inline whitespace-nowrap">Search Property</span>
             <span className="sm:hidden">Search</span>
