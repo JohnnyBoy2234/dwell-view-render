@@ -229,7 +229,7 @@ export const Property24SearchBar = ({
           </div>}
       </div>;
   };
-  return <div className={cn("relative bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl border border-white/30 w-full max-w-5xl mx-auto overflow-hidden", className)}>
+  return <div className="relative w-full max-w-5xl mx-auto overflow-hidden">
       <div className="p-3 pb-2 my-0">
         <div onKeyDown={handleKeyPress}>
           <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
