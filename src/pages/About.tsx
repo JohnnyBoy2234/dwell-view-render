@@ -5,12 +5,6 @@ import { Link } from "react-router-dom";
 
 const About = () => {
 
-  const stats = [
-    { number: "50,000+", label: "Properties Listed" },
-    { number: "100,000+", label: "Happy Users" },
-    { number: "95%", label: "Success Rate" },
-    { number: "R2.5B+", label: "Property Value" }
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -20,7 +14,7 @@ const About = () => {
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">We're Transforming Renting in South Africa</h1>
           <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
-            RentLekker is more than a rental platform — it's a movement. We're revolutionizing the South African rental market by connecting landlords and tenants directly, eliminating unnecessary fees, and creating genuine, trustworthy connections.
+            RentLekker is more than a rental platform it's a movement. We're revolutionizing the South African rental market by connecting landlords and tenants directly, eliminating unnecessary fees, and creating genuine, trustworthy connections.
           </p>
         </div>
 
@@ -33,7 +27,7 @@ const About = () => {
                 At RentLekker, we believe finding the perfect rental home shouldn't be complicated, risky, or expensive. Our mission is simple: to make renting fair, transparent, and human again.
               </p>
               <p className="text-lg text-muted-foreground mb-6">
-                By eliminating middlemen and outdated processes, we're not just helping landlords save money — we're building trust, fostering real relationships, and creating a rental ecosystem where both landlords and tenants thrive.
+                By eliminating middlemen and outdated processes, we're not just helping landlords save money we're building trust, fostering real relationships, and creating a rental ecosystem where both landlords and tenants thrive.
               </p>
               <div className="flex items-center space-x-4">
                 <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -59,7 +53,7 @@ const About = () => {
         <section className="mb-16 text-center">
           <h2 className="text-3xl font-bold mb-6">A Vision for the Future</h2>
           <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-8">
-            RentLekker is not only about saving money today — it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
+            RentLekker is not only about saving money today it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
           </p>
         </section>
 
@@ -105,21 +99,6 @@ const About = () => {
           </div>
         </section>
 
-        {/* Stats */}
-        <section className="mb-16 bg-gradient-to-r from-primary to-accent text-white rounded-lg p-12">
-          <h2 className="text-3xl font-bold text-center mb-8">Our Impact</h2>
-          <p className="text-center text-white/90 mb-12 text-lg">
-            Every listing is a step toward transforming how South Africans rent, one home at a time.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {stats.map((stat, index) => (
-              <div key={index}>
-                <div className="text-4xl font-bold mb-2">{stat.number}</div>
-                <div className="text-white/90">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* South African Focus */}
         <section className="mb-16">
@@ -131,7 +110,7 @@ const About = () => {
                   <h2 className="text-3xl font-bold">Proudly South African</h2>
                 </div>
                 <p className="text-lg text-muted-foreground mb-6">
-                  We're not just another tech startup — we're rooted here. From Cape Town to Johannesburg, Durban to Pretoria, we know the unique challenges of the South African rental market, and we're committed to being part of the solution.
+                  We're not just another tech startup we're rooted here. From Cape Town to Johannesburg, Durban to Pretoria, we know the unique challenges of the South African rental market, and we're committed to being part of the solution.
                 </p>
                 <ul className="space-y-3 text-muted-foreground">
                   <li className="flex items-center">
