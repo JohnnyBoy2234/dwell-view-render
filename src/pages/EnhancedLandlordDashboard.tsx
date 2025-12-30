@@ -30,6 +30,7 @@ import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';
 import { ApplicationRequestsManager } from '@/components/landlord/ApplicationRequestsManager';
+import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithViewings';
 
 interface PropertyWithTenant {
   id: string;
