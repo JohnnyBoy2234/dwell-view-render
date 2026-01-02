@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,6 +45,7 @@ import { useViewingBooking } from "@/hooks/useViewingBooking";
 import { format } from "date-fns";
 import StartConversation from '@/components/StartConversation';
 import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
+import { SharePropertyMenu } from '@/components/property/SharePropertyMenu';
 
 interface Property {
   id: string;
@@ -363,8 +365,36 @@ export default function PropertyDetail() {
     );
   }
 
+  const propertyUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const ogImage = property.images?.[0] || 'https://rentlekker.com/apple-touch-icon.png';
+  const ogTitle = `R${property.price.toLocaleString()}/month - ${property.property_type} in ${property.location}`;
+  const ogDescription = property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property available for rent in ${property.location}`;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
+      {/* Dynamic Meta Tags for Social Sharing */}
+      <Helmet>
+        <title>{ogTitle} | RentLekker</title>
+        <meta name="description" content={ogDescription} />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={propertyUrl} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDescription} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="RentLekker" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={propertyUrl} />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDescription} />
+        <meta name="twitter:image" content={ogImage} />
+      </Helmet>
+
       <div className="container mx-auto p-4 md:p-6 max-w-6xl pb-24 md:pb-6">
 
         {/* Navigation */}
@@ -374,10 +404,14 @@ export default function PropertyDetail() {
             Back to Properties
           </Button>
           <div className="flex-1" />
-          <Button variant="outline" size="sm" onClick={handleShare}>
-            <Share2 className="h-4 w-4 mr-2" />
-            Share
-          </Button>
+          <SharePropertyMenu
+            propertyUrl={propertyUrl}
+            propertyTitle={property.property_type}
+            propertyDescription={property.description || ''}
+            propertyImage={ogImage}
+            propertyPrice={property.price}
+            propertyLocation={property.location}
+          />
         </div>
 
         {/* Property Header */}
