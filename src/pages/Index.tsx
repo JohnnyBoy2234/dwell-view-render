@@ -112,7 +112,7 @@ const Index = () => {
             {/* Search Bar - moved lower on mobile with mt-4 */}
             <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
               <div className="max-w-4xl mx-auto">
-                <div className="px-0 py-0 bg-ocean-blue/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-ocean-blue/90">
+                <div className="px-0 py-0 bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-ocean-blue/90">
                   <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
                   searchTerm: filters.searchTerm,
                   propertyType: filters.propertyType,
