@@ -103,7 +103,7 @@ const Index = () => {
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-3 md:mb-4 font-sans">
                 <span className="block">Renting done right.</span>
               </h1>
-              <p className="text-white text-base md:text-lg font-sans leading-relaxed">
+              <p className="text-white text-base md:text-lg font-sans leading-relaxed lg:mb-8">
                 Simple, secure, and commission-free property rental
               </p>
               
