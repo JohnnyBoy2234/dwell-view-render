@@ -224,12 +224,11 @@ export const Property24SearchBar = ({
             <button className="remove-button" onClick={() => onFiltersChange({
           bedrooms: "Any"
         })} aria-label="Remove bedroom filter">
-              ×
             </button>
           </div>}
       </div>;
   };
-  return <div className="relative w-full max-w-5xl mx-auto overflow-hidden">
+  return <div className="relative w-full max-w-5xl mx-auto">
       <div className="p-3 pb-2 my-0">
         <div onKeyDown={handleKeyPress} className="flex gap-2 items-center">
           <div className="flex-1 overflow">
