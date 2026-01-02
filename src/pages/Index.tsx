@@ -87,7 +87,6 @@ const Index = () => {
     gradient: "from-amber-400 to-amber-600"
   }];
 
-  // Featured properties will be loaded from the API
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
@@ -127,7 +126,6 @@ const Index = () => {
             </div>
           </div>
         </div>
-
 
         <div className="w-full px-4 pt-0 pb-10 relative bg-gradient-to-b from-ocean-blue/70 to-ocean-blue/50">
           <div className="max-w-5xl mx-auto z-10 relative">
