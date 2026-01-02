@@ -229,9 +229,9 @@ export const Property24SearchBar = ({
       </div>;
   };
   return <div className="relative w-full max-w-5xl mx-auto">
-      <div className="p-3 pb-2 my-0">
+      <div className="p-3 pb-2 my-0 z-50">
         <div onKeyDown={handleKeyPress} className="flex gap-2 items-center">
-          <div className="flex-1 overflow">
+          <div className="flex-1">
             <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
             searchTerm: value
           })} onPlaceSelect={handlePlaceSelect} placeholder="Search by city, suburb" className="property24-search-input w-full" onClear={() => onFiltersChange({
