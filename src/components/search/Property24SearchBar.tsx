@@ -231,27 +231,32 @@ export const Property24SearchBar = ({
   };
   return <div className="relative w-full max-w-5xl mx-auto overflow-hidden">
       <div className="p-3 pb-2 my-0">
-        <div onKeyDown={handleKeyPress}>
-          <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
-          searchTerm: value
-        })} onPlaceSelect={handlePlaceSelect} placeholder="Search by city, suburb" className="property24-search-input w-full" onClear={() => onFiltersChange({
-          searchTerm: ""
-        })} />
+        <div onKeyDown={handleKeyPress} className="flex gap-2 items-center">
+          <div className="flex-1">
+            <Property24SearchInput value={filters.searchTerm} onChange={value => onFiltersChange({
+            searchTerm: value
+          })} onPlaceSelect={handlePlaceSelect} placeholder="Search by city, suburb" className="property24-search-input w-full" onClear={() => onFiltersChange({
+            searchTerm: ""
+          })} />
+          </div>
+          {isMobile && (
+            <Button 
+              className="h-10 w-10 p-0 bg-ocean-blue hover:bg-ocean-blue-dark text-white rounded-lg shrink-0"
+              onClick={onSearch}
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+          )}
         </div>
 
         {renderActiveFilters()}
       </div>
 
       {isMobile ? <>
-          <div className="px-3 pb-3 flex gap-2 items-center">
-            <Button variant="outline" className="flex-1 property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white" onClick={() => setFiltersSheetOpen(true)}>
+          <div className="px-3 pb-3">
+            <Button variant="outline" className="w-full property24-filter-button text-ocean-blue hover:bg-ocean-blue hover:text-white" onClick={() => setFiltersSheetOpen(true)}>
               <SlidersHorizontal className="h-4 w-4 mr-2" />
               <span className="truncate">All Filters</span>
-            </Button>
-            <Button className="h-11 px-4 sm:px-5 bg-ocean-blue hover:bg-ocean-blue-dark text-white font-medium rounded-lg shadow-sm whitespace-nowrap" onClick={onSearch}>
-              <Search className="h-4 w-4 mr-2" />
-              <span className="hidden xs:inline">Search Property</span>
-              <span className="xs:hidden">Search</span>
             </Button>
           </div>
 
