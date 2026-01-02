@@ -88,7 +88,6 @@ const Index = () => {
   }];
 
   // Featured properties will be loaded from the API
-
   return <div className="min-h-screen">
       {/* Hero Section with Glass Heading */}
       <section className="relative">
