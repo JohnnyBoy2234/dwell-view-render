@@ -227,7 +227,7 @@ export default function TenantPropertyViewings() {
               <p className="text-muted-foreground mb-4">
                 Browse available properties to schedule your next viewing
               </p>
-              <Button onClick={() => window.location.href = '/properties'}>
+              <Button onClick={() => navigate('/properties')}>
                 Browse Properties
               </Button>
             </CardContent>
