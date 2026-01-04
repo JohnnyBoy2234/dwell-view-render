@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useKyc } from '@/hooks/useKyc';
 import { EmailVerificationGate } from '@/components/kyc/EmailVerificationGate';
@@ -11,6 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react';
 
 export default function VerifyId() {
+  const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { kycProfile, loading: kycLoading, resubmit } = useKyc();
   const [emailVerified, setEmailVerified] = useState(false);
@@ -109,7 +110,7 @@ export default function VerifyId() {
                 </div>
 
                 <Button 
-                  onClick={() => window.location.href = '/'}
+                  onClick={() => navigate('/')}
                   className="w-full"
                 >
                   Continue to Home Page

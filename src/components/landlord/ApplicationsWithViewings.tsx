@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,6 +21,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
   propertyId,
   propertyTitle
 }) => {
+  const navigate = useNavigate();
   const { applications, updateApplicationStatus, loading } = useLandlordApplications(propertyId);
   const { viewings } = useViewings(propertyId);
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithTenant | null>(null);
@@ -248,7 +250,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                             size="sm"
                             onClick={() => {
                               const url = `/lease/builder?tenantId=${encodeURIComponent(application.tenant_id)}&propertyId=${encodeURIComponent(application.property_id)}`;
-                              window.location.href = url;
+                              navigate(url);
                             }}
                           >
                             Generate Lease
