@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -36,10 +37,11 @@ interface ViewingProposalCardProps {
 export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversation }: ViewingProposalCardProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const navigateToInvite = (token: string) => {
     try {
-      window.location.href = `/apply/invite/${token}`;
+      navigate(`/apply/invite/${token}`);
     } catch (e) {
       console.error('Failed to navigate to invite:', e);
     }

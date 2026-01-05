@@ -420,7 +420,7 @@ export default function ProfilePage() {
             </div>
 
             {kycProfile?.status !== 'approved' && (
-              <Button variant="outline" className="w-full" onClick={() => window.location.href = '/verify-id'}>
+              <Button variant="outline" className="w-full" onClick={() => navigate('/verify-id')}>
                 <Upload className="h-4 w-4 mr-2" />
                 {!kycProfile ? 'Start Verification' : 'Continue Verification'}
               </Button>

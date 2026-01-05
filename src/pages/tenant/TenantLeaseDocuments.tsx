@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FileText, Eye, Calendar, MapPin, PenTool, Download } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 
 export default function TenantLeaseDocuments() {
+  const navigate = useNavigate();
   const { tenantProperty, loading } = useTenantDashboard();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -251,7 +253,7 @@ export default function TenantLeaseDocuments() {
                     )}
                     <Button
                       size="sm"
-                      onClick={() => window.location.href = `/RentLekker-lease/${lease.id}`}
+                      onClick={() => navigate(`/RentLekker-lease/${lease.id}`)}
                       className="bg-ocean-blue hover:bg-ocean-blue-dark"
                     >
                       <PenTool className="h-4 w-4 mr-2" />
