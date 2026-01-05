@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
+import { LoadingLogo } from '@/components/ui/LoadingLogo';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
@@ -204,7 +205,7 @@ export default function Properties() {
     console.log('[Properties] Rendering loading state...');
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+        <LoadingLogo size="lg" />
       </div>
     );
   }
