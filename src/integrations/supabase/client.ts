@@ -34,33 +34,21 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 
 // Set up auth state change handler
 if (typeof window !== 'undefined') {
-  // Handle redirects after sign in
+  // Handle redirects after sign in - only redirect if explicitly requested
   supabase.auth.onAuthStateChange(async (event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      // Set the redirect URL in the session - default to home page
-      const redirectTo = sessionStorage.getItem('redirectTo') || '/';
-      sessionStorage.removeItem('redirectTo');
-      
-      // If we have a redirect URL, navigate there
-      if (redirectTo && window.location.pathname !== redirectTo) {
-        window.location.href = redirectTo;
+      // Only redirect if redirectTo was explicitly set (e.g., after OAuth login)
+      const redirectTo = sessionStorage.getItem('redirectTo');
+      if (redirectTo) {
+        sessionStorage.removeItem('redirectTo');
+        // Only redirect if we're not already on that page
+        if (window.location.pathname !== redirectTo) {
+          window.location.replace(redirectTo);
+        }
       }
+      // If no redirectTo is set, stay on current page (don't force redirect to "/")
     }
   });
-
-  // Set the redirect URL for auth flows
-  const currentUrl = new URL(window.location.href);
-  if (currentUrl.pathname === '/auth/callback') {
-    const { data, error } = await supabase.auth.getSession();
-    if (data?.session) {
-      // User is signed in, redirect to intended URL or home page
-      const redirectTo = sessionStorage.getItem('redirectTo') || '/';
-      sessionStorage.removeItem('redirectTo');
-      window.location.href = redirectTo;
-    } else if (error) {
-      console.error('Error getting session:', error);
-    }
-  }
 }
 
 // Helper function to handle auth redirects
