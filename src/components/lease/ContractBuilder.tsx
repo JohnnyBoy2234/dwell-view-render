@@ -489,19 +489,11 @@ return (
 
     {/* Current Step Content */}
     <div className="px-4 py-6 lg:px-6">
-      <div className="max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              {getStepIcon(steps[currentStep], currentStep)}
-              <span>{steps[currentStep].title}</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {getStepComponent()}
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="w-full">
+        <CardContent className="p-6">
+          {getStepComponent()}
+        </CardContent>
+      </Card>
     </div>
 
     {/* Navigation - Fixed bottom on mobile */}
