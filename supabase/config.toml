@@ -93,3 +93,6 @@ verify_jwt = false
 
 [functions.activate-subscription]
 verify_jwt = true
+
+[functions.og-property]
+verify_jwt = false

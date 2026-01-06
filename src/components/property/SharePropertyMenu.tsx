@@ -16,6 +16,7 @@ interface SharePropertyMenuProps {
   propertyImage?: string;
   propertyPrice: number;
   propertyLocation: string;
+  propertyId?: string;
 }
 
 export function SharePropertyMenu({
@@ -25,21 +26,27 @@ export function SharePropertyMenu({
   propertyImage,
   propertyPrice,
   propertyLocation,
+  propertyId,
 }: SharePropertyMenuProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+
+  // Use OG-friendly URL for social media sharing (crawlers will hit the edge function)
+  const ogFriendlyUrl = propertyId 
+    ? `https://rsfrvjaqxhoqavvscvwf.supabase.co/functions/v1/og-property/property/${propertyId}`
+    : propertyUrl;
 
   const shareText = `🏠 R${propertyPrice.toLocaleString()}/month - ${propertyTitle} in ${propertyLocation}\n\n${propertyDescription?.slice(0, 100)}${propertyDescription?.length > 100 ? '...' : ''}`;
   const shortShareText = `R${propertyPrice.toLocaleString()}/month - ${propertyTitle} in ${propertyLocation}`;
 
   const shareToFacebook = () => {
-    // Use Facebook Share Dialog for better sharing experience
-    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(propertyUrl)}&quote=${encodeURIComponent(shortShareText)}`;
+    // Use OG-friendly URL so Facebook crawler gets proper meta tags
+    const fbShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogFriendlyUrl)}&quote=${encodeURIComponent(shortShareText)}`;
     window.open(fbShareUrl, 'facebook-share', 'width=600,height=400,scrollbars=yes');
   };
 
   const shareToTwitter = () => {
-    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shortShareText)}&url=${encodeURIComponent(propertyUrl)}`;
+    const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shortShareText)}&url=${encodeURIComponent(ogFriendlyUrl)}`;
     window.open(twitterUrl, 'twitter-share', 'width=600,height=400,scrollbars=yes');
   };
 
