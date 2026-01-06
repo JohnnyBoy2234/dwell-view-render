@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ContractBuilder } from '@/components/lease/ContractBuilder';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export function LeaseBuilder() {
   const { contractId, propertyId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,7 +28,15 @@ export function LeaseBuilder() {
       <ContractBuilder
         contractId={contractId}
         propertyId={propertyId}
-        onComplete={(id) => navigate(`/lease/${id}`)}
+        onComplete={(id) => {
+          // Show completion toast
+          toast({
+            title: "Contract Completed",
+            description: "Lease contract has been created and sent for tenant signature.",
+          });
+          // Navigate to leases tab
+          navigate('/enhancedlandlorddashboard/leases');
+        }}
         onCancel={() => navigate(-1)}
       />
     </div>
