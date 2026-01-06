@@ -59,14 +59,15 @@ export function MobileBottomBar() {
   };
 
   const rightNavItems = [
-    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: true },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: true },
+    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: false },
+    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: false },
     { path: getDeskRoute(), icon: Building, label: 'Properties' }
   ];
 
   const renderNavItem = (item: any) => {
-    // Skip auth-required items if user is not logged in
-    if (item.authRequired && !user) return null;
+    // For auth-required items, show them but redirect to auth if not logged in
+    const needsAuth = item.authRequired && !user;
+    const actualPath = needsAuth ? '/auth' : item.path;
     
     const IconComponent = item.icon;
     const isActive = location.pathname === item.path || 
@@ -81,7 +82,7 @@ export function MobileBottomBar() {
     return (
       <Link
         key={item.path}
-        to={item.path}
+        to={actualPath}
         className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
           isActive
             ? 'text-white bg-black/20'

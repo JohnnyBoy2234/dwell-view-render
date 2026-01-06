@@ -179,11 +179,8 @@ export default function EnhancedLandlordDashboard() {
     if (authLoading) {
       return;
     }
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    if (!isLandlord) {
+    // Allow unauthenticated users to view dashboard, redirect only if they try to access protected features
+    if (user && !isLandlord) {
       navigate('/enhancedtenantdashboard');
       return;
     }
@@ -194,13 +191,16 @@ export default function EnhancedLandlordDashboard() {
       setCurrentTab(path);
     }
 
-    fetchProperties();
-    fetchTenants(selectedPropertyId || undefined);
-    fetchMaintenanceRequests(selectedPropertyId || undefined);
-    fetchLandlordSettings();
-    fetchAdditionalCosts();
-    fetchInvoiceScheduleSettings();
-    fetchGlobalApplicationLeads(selectedPropertyId || undefined);
+    // Only fetch data if user is authenticated
+    if (user) {
+      fetchProperties();
+      fetchTenants(selectedPropertyId || undefined);
+      fetchMaintenanceRequests(selectedPropertyId || undefined);
+      fetchLandlordSettings();
+      fetchAdditionalCosts();
+      fetchInvoiceScheduleSettings();
+      fetchGlobalApplicationLeads(selectedPropertyId || undefined);
+    }
   }, [authLoading, user, isLandlord, navigate, location.pathname, selectedPropertyId]);
 
   // Add a separate useEffect to handle URL changes and sync currentTab
@@ -1023,7 +1023,13 @@ export default function EnhancedLandlordDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}
+                                onClick={() => {
+                                  if (!user) {
+                                    navigate('/auth');
+                                  } else {
+                                    navigate(`/messages?c=${lead.conversation_id}`);
+                                  }
+                                }}
                                 className="w-full sm:w-auto"
                               >
                                 <MessageCircle className="h-4 w-4 mr-2" />
@@ -1195,7 +1201,13 @@ export default function EnhancedLandlordDashboard() {
                           variant="outline" 
                           size="sm" 
                           className="w-full sm:w-auto"
-                          onClick={() => navigate('/messages')}
+                          onClick={() => {
+                            if (!user) {
+                              navigate('/auth');
+                            } else {
+                              navigate('/messages');
+                            }
+                          }}
                         >
                           <MessageCircle className="h-4 w-4 mr-2" />
                           Message
@@ -1330,7 +1342,13 @@ export default function EnhancedLandlordDashboard() {
                         size="sm" 
                         variant="outline"
                         className="w-full sm:w-auto"
-                        onClick={() => navigate('/messages')}
+                        onClick={() => {
+                          if (!user) {
+                            navigate('/auth');
+                          } else {
+                            navigate('/messages');
+                          }
+                        }}
                       >
                         <Bell className="h-4 w-4 mr-2" />
                         Remind
@@ -2341,7 +2359,13 @@ const renderReportsTab = () => (
           {/* App-style Feature Grid (match Properties page card styles) */}
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/applications')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/applications');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Inbox className="w-5 h-5 text-white" />
@@ -2351,7 +2375,13 @@ const renderReportsTab = () => (
                 </Card>
               </div>
 
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/maintenance')} role="button" tabIndex={0} className="relative">
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/maintenance');
+                      }
+                    }} role="button" tabIndex={0} className="relative">
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Wrench className="w-5 h-5 text-white" />
@@ -2366,7 +2396,13 @@ const renderReportsTab = () => (
                 )}
               </div>
 
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/payments')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/payments');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <RIcon className="w-7 h-7 text-white" />
@@ -2378,7 +2414,13 @@ const renderReportsTab = () => (
 
 
               {/* SwiftBooks */}
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/swiftbooks')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/swiftbooks');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <BarChart3 className="w-5 h-5 text-white" />
@@ -2388,7 +2430,13 @@ const renderReportsTab = () => (
                 </Card>
               </div>
 
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/leases')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/leases');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <FileText className="w-5 h-5 text-white" />
@@ -2398,7 +2446,13 @@ const renderReportsTab = () => (
                 </Card>
               </div>
 
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/inventory')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/inventory');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Camera className="w-5 h-5 text-white" />
@@ -2408,7 +2462,13 @@ const renderReportsTab = () => (
                 </Card>
               </div>
 
-              <div onClick={() => handleTabChange('/enhancedlandlorddashboard/inspection')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        handleTabChange('/enhancedlandlorddashboard/inspection');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Clipboard className="w-5 h-5 text-white" />
@@ -2419,7 +2479,13 @@ const renderReportsTab = () => (
               </div>
 
               {/* Support */}
-              <div onClick={() => navigate('/enhancedlandlorddashboard/support')} role="button" tabIndex={0}>
+              <div onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        navigate('/enhancedlandlorddashboard/support');
+                      }
+                    }} role="button" tabIndex={0}>
                 <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
                   <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
                     <Home className="w-5 h-5 text-white" />
@@ -2443,7 +2509,13 @@ const renderReportsTab = () => (
           <Home className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold mb-2">No Properties Yet</h3>
           <p className="text-muted-foreground mb-4">Start building your rental portfolio</p>
-          <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')}>
+          <Button onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        navigate('/enhancedlandlorddashboard/add-property');
+                      }
+                    }}>
             <Plus className="h-4 w-4 mr-2" />
             Add Your First Property
           </Button>
@@ -2557,7 +2629,13 @@ const renderReportsTab = () => (
                 {tenant.payment_status}
               </Badge>
               <div className="flex gap-1">
-                <Button size="sm" variant="ghost" onClick={() => navigate('/messages')}>
+                <Button size="sm" variant="ghost" onClick={() => {
+                  if (!user) {
+                    navigate('/auth');
+                  } else {
+                    navigate('/messages');
+                  }
+                }}>
                   Message
                 </Button>
                 <Button size="sm" variant="ghost" onClick={() => navigate(`/tenant-profile/${tenant.id}`)}>

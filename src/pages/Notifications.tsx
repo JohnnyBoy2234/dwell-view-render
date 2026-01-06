@@ -53,12 +53,14 @@ export default function Notifications() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
+    // Allow unauthenticated users to view notifications, but show empty state if not authenticated
+    if (user) {
+      // Load notifications only if user is authenticated
+      fetchAllNotifications();
+    } else {
+      // Show empty state for unauthenticated users
+      setLoading(false);
     }
-
-    fetchAllNotifications();
   }, [user, navigate, messageUnread, notifications]);
 
   const fetchAllNotifications = async () => {

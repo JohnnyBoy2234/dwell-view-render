@@ -56,11 +56,8 @@ export default function EnhancedTenantDashboard() {
   useEffect(() => {
     // Visible in production console to verify current deployed build
     // eslint-disable-next-line no-console
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-    if (isLandlord) {
+    // Allow unauthenticated users to view dashboard, redirect only if they try to access protected features
+    if (user && isLandlord) {
       navigate('/enhancedlandlorddashboard');
       return;
     }
@@ -232,7 +229,13 @@ export default function EnhancedTenantDashboard() {
                 <div key={block.title}>
                   <Card
                     className="cursor-pointer rounded-2xl bg-white shadow-md border border-gray-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-                  onClick={() => navigate(block.path)}
+                    onClick={() => {
+                      if (!user) {
+                        navigate('/auth');
+                      } else {
+                        navigate(block.path);
+                      }
+                    }}
                   >
                    <CardContent className="p-4 h-[150px] md:h-[172px]">
                    <div className="flex flex-col items-center text-center h-full justify-center">
