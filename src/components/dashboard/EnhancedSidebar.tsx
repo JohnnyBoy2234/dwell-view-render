@@ -257,11 +257,6 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
                           <item.icon className={`w-5 h-5 flex-shrink-0 ${item.isLocked ? 'text-muted-foreground' : ''}`} />
                           <span className={item.isLocked ? 'text-muted-foreground' : ''}>
                             {item.title}
-                            {item.requiredPlan && item.requiredPlan !== 'free' && (
-                              <span className={`ml-2 px-1.5 py-0.5 text-xs rounded-full ${PLAN_COLORS[item.requiredPlan]}`}>
-                                {PLAN_NAMES[item.requiredPlan]}
-                              </span>
-                            )}
                           </span>
                         </div>
                         {item.isLocked && (

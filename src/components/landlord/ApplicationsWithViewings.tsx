@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Calendar, CheckCircle, Clock, User, Mail, Phone, Building, MapPin } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, User, Mail, Phone, Building, MapPin, FileText, Download } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { downloadFileFromUrl } from '@/lib/download';
+import { useToast } from '@/hooks/use-toast';
 import { useViewings } from '@/hooks/useViewings';
 import { useLandlordApplications, type ApplicationWithTenant } from '@/hooks/useLandlordApplications';
 import ViewingWorkflow from '@/components/viewing/ViewingWorkflow';
@@ -22,9 +25,30 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
   propertyTitle
 }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const { applications, updateApplicationStatus, loading } = useLandlordApplications(propertyId);
   const { viewings } = useViewings(propertyId);
   const [selectedApplication, setSelectedApplication] = useState<ApplicationWithTenant | null>(null);
+
+  const handleDownloadDocument = async (documentId: string, fileName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('get-document-download-url', {
+        body: { documentId }
+      });
+      
+      if (error) throw error;
+      if (data?.signedUrl) {
+        await downloadFileFromUrl(data.signedUrl, fileName);
+      }
+    } catch (error) {
+      console.error('Error downloading document:', error);
+      toast({
+        title: 'Download failed',
+        description: 'Could not download the document. Please try again.',
+        variant: 'destructive'
+      });
+    }
+  };
 
   const getApplicationStatus = (application: ApplicationWithTenant) => {
     const hasCompletedViewing = viewings.some(v => 
@@ -221,13 +245,54 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                                   <h4 className="font-semibold mb-2">Reason for Moving</h4>
                                   <p className="text-sm">{selectedApplication.screening_details?.reason_for_moving}</p>
                                 </div>
+
+                                {/* Documents Section */}
+                                {selectedApplication?.documents && selectedApplication.documents.length > 0 && (
+                                  <div>
+                                    <h4 className="font-semibold mb-2">Submitted Documents</h4>
+                                    <div className="space-y-2">
+                                      {selectedApplication.documents.map((doc: any) => {
+                                        const fileName = doc.file_path?.split('/').pop() || 'Document';
+                                        const docTypeLabel = doc.document_type === 'EXPERIAN_CREDIT_REPORT' 
+                                          ? 'Credit Report' 
+                                          : doc.document_type === 'id' 
+                                            ? 'ID Document' 
+                                            : 'Income Document';
+                                        
+                                        return (
+                                          <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                            <div className="flex items-center gap-2">
+                                              <FileText className="h-4 w-4 text-muted-foreground" />
+                                              <span className="text-sm truncate max-w-[200px]">{fileName}</span>
+                                              <Badge variant="outline" className="text-xs">
+                                                {docTypeLabel}
+                                              </Badge>
+                                            </div>
+                                            <Button 
+                                              variant="outline" 
+                                              size="sm"
+                                              onClick={() => handleDownloadDocument(doc.id, fileName)}
+                                            >
+                                              <Download className="h-4 w-4 mr-1" />
+                                              Download
+                                            </Button>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             )}
                           </DialogContent>
                         </Dialog>
 
-                        {hasCompletedViewing && application.status === 'pending' && (
+                        {/* Accept/Decline buttons for pending applications */}
+                        {application.status === 'pending' && (
                           <>
+                            {!hasCompletedViewing && (
+                              <span className="text-xs text-yellow-600">Note: Viewing not completed</span>
+                            )}
                             <Button 
                               size="sm"
                               onClick={() => handleAcceptApplication(application.id)}
