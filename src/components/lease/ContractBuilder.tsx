@@ -413,16 +413,17 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   const completedSteps = steps.filter(step => step.isCompleted).length;
   const progress = (completedSteps / steps.length) * 100;
 
-  useEffect(() => {
-    updateStepCompletion();
-  }, [contractData]);
+useEffect(() => {
+  updateStepCompletion();
+}, [contractData]);
 
-  return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="space-y-4">
+return (
+  <div className="min-h-screen bg-background">
+    {/* Header - Fixed on mobile */}
+    <div className="sticky top-0 z-10 bg-background border-b">
+      <div className="px-4 py-4 space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Contract Builder</h1>
+          <h1 className="text-xl font-semibold">Contract Builder</h1>
           <Badge variant="secondary">
             Step {currentStep + 1} of {steps.length}
           </Badge>
@@ -434,93 +435,119 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
           {completedSteps} of {steps.length} steps completed
         </div>
       </div>
+    </div>
 
-      {/* Steps Navigation */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between space-x-4 overflow-x-auto">
-            {steps.map((step, index) => (
-              <div
-                key={step.id}
-                className={`flex items-center space-x-2 min-w-0 cursor-pointer transition-colors ${
-                  index === currentStep 
-                    ? 'text-primary' 
-                    : step.isCompleted 
-                    ? 'text-green-600' 
-                    : 'text-muted-foreground'
-                }`}
-                onClick={() => setCurrentStep(index)}
-              >
-                <div className="flex-shrink-0">
-                  {step.isCompleted ? (
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                  ) : index === currentStep ? (
-                    <AlertCircle className="h-5 w-5 text-primary" />
-                  ) : (
-                    <Circle className="h-5 w-5" />
-                  )}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium truncate">{step.title}</div>
-                  <div className="text-xs text-muted-foreground truncate">
-                    {step.description}
-                  </div>
+    {/* Steps Navigation - Horizontal scroll on mobile */}
+    <div className="bg-background border-b">
+      <div className="px-4 py-4">
+        <div className="flex items-center space-x-4 overflow-x-auto pb-2 lg:overflow-x-visible lg:justify-center lg:flex-wrap">
+          {steps.map((step, index) => (
+            <div
+              key={step.id}
+              className={`flex items-center space-x-2 min-w-0 cursor-pointer transition-colors flex-shrink-0 px-2 py-1 rounded-lg ${
+                index === currentStep 
+                  ? 'text-primary bg-primary/10' 
+                  : step.isCompleted 
+                  ? 'text-green-600' 
+                  : 'text-muted-foreground'
+              }`}
+              onClick={() => {
+                setCurrentStep(index);
+                // Scroll to step on mobile
+                if (window.innerWidth < 1024) {
+                  setTimeout(() => {
+                    document.getElementById(`step-${index}`)?.scrollIntoView({ 
+                      behavior: 'smooth', 
+                      block: 'nearest',
+                      inline: 'center' 
+                    });
+                  }, 100);
+                }
+              }}
+              id={`step-${index}`}
+            >
+              <div className="flex-shrink-0">
+                {step.isCompleted ? (
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                ) : index === currentStep ? (
+                  <AlertCircle className="h-5 w-5 text-primary" />
+                ) : (
+                  <Circle className="h-5 w-5" />
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{step.title}</div>
+                <div className="text-xs text-muted-foreground truncate hidden sm:block">
+                  {step.description}
                 </div>
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Current Step Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            {getStepIcon(steps[currentStep], currentStep)}
-            <span>{steps[currentStep].title}</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {getStepComponent()}
-        </CardContent>
-      </Card>
-
-      {/* Navigation */}
-      <div className="flex items-center justify-between">
-        <Button
-          variant="outline"
-          onClick={currentStep === 0 ? onCancel : prevStep}
-          disabled={saving}
-        >
-          {currentStep === 0 ? 'Cancel' : 'Previous'}
-        </Button>
-
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="outline"
-            onClick={() => saveContract(false)}
-            disabled={saving}
-          >
-            {saving ? 'Saving...' : 'Save Draft'}
-          </Button>
-          
-          {currentStep < steps.length - 1 ? (
-            <Button
-              onClick={nextStep}
-              disabled={!validateStep(currentStep) || saving}
-            >
-              Next Step
-            </Button>
-          ) : (
-            <Button
-              onClick={handleComplete}
-              disabled={!steps.every(step => step.isCompleted) || saving}
-            >
-              Complete Contract
-            </Button>
-          )}
+            </div>
+          ))}
         </div>
       </div>
     </div>
-  );
+
+    {/* Current Step Content */}
+    <div className="px-4 py-6 lg:px-6">
+      <div className="max-w-4xl mx-auto">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              {getStepIcon(steps[currentStep], currentStep)}
+              <span>{steps[currentStep].title}</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {getStepComponent()}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+
+    {/* Navigation - Fixed bottom on mobile */}
+    <div className="sticky bottom-0 z-10 bg-background border-t">
+      <div className="px-4 py-4 lg:px-6">
+        <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={currentStep === 0 ? onCancel : prevStep}
+            disabled={saving}
+            className="flex-shrink-0"
+          >
+            {currentStep === 0 ? 'Cancel' : 'Previous'}
+          </Button>
+
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => saveContract(false)}
+              disabled={saving}
+              className="hidden sm:flex flex-shrink-0"
+            >
+              {saving ? 'Saving...' : 'Save Draft'}
+            </Button>
+            
+            {currentStep < steps.length - 1 ? (
+              <Button
+                onClick={nextStep}
+                disabled={!validateStep(currentStep) || saving}
+                className="flex-shrink-0"
+              >
+                Next Step
+              </Button>
+            ) : (
+              <Button
+                onClick={handleComplete}
+                disabled={!steps.every(step => step.isCompleted) || saving}
+                className="flex-shrink-0"
+              >
+                Complete Contract
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 }
