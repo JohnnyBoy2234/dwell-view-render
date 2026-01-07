@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 
 interface Photo {
   id: string;
@@ -29,10 +30,11 @@ export function PhotoGallery({ photos, onDelete, onView, readOnly = false }: Pho
             className="relative aspect-square rounded-lg overflow-hidden bg-muted group cursor-pointer hover:ring-2 hover:ring-ocean-blue transition-all"
             onClick={() => onView?.(index)}
           >
-            <img
+            <ImageWithSkeleton
               src={photo.previewUrl}
               alt={`Photo ${index + 1}`}
               className="w-full h-full object-cover"
+              aspectRatio="square"
             />
             
             {/* Photo number badge */}

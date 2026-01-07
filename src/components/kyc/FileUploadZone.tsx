@@ -4,6 +4,7 @@ import { Upload, X, Check, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 
 interface FileUploadZoneProps {
   onFileSelect: (file: File) => void;
@@ -97,7 +98,7 @@ export function FileUploadZone({
         
         {previewUrl && (
           <div className="mb-4">
-            <img 
+            <ImageWithSkeleton 
               src={previewUrl} 
               alt="Preview" 
               className="mx-auto max-h-48 rounded-lg object-cover"
