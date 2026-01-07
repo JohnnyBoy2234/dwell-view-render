@@ -17,7 +17,8 @@ import {
   Clock,
   Check,
   CheckCheck,
-  Bell
+  Bell,
+  CalendarPlus
 } from 'lucide-react';
 import { ConnectionHealthIndicator } from '@/components/messaging/ConnectionHealthIndicator';
 import { TypingIndicator } from '@/components/messaging/TypingIndicator';
@@ -474,6 +475,19 @@ export default function Messages() {
                     </div>
                   </div>
                 </div>
+                
+                {/* Create Viewing Button - Mobile */}
+                {isLandlord && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setShowViewingModal(true)}
+                    className="flex-shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 text-xs px-2.5 py-1.5 h-auto"
+                  >
+                    <CalendarPlus className="h-3.5 w-3.5 mr-1" />
+                    <span className="hidden xs:inline">Create</span> Viewing
+                  </Button>
+                )}
               </div>
             {/* Viewing Reminder Header - Only show for confirmed viewings */}
             {confirmedViewing && (
@@ -673,6 +687,19 @@ export default function Messages() {
                   </div>
                 </div>
               </div>
+              
+              {/* Create Viewing Button - Desktop */}
+              {isLandlordInConversation && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setShowViewingModal(true)}
+                  className="flex-shrink-0"
+                >
+                  <CalendarPlus className="h-4 w-4 mr-2" />
+                  Create Viewing
+                </Button>
+              )}
             </div>
 
             {/* Viewing Reminder Header - Desktop */}
