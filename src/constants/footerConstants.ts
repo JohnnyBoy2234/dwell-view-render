@@ -43,7 +43,7 @@ export const SOCIAL_LINKS: SocialLink[] = [
 export const FOOTER_CONTENT = {
   BRAND_NAME: "RentLekker",
   TAGLINE: "Safe, Simple, Commission-Free Renting. Direct landlord-tenant connections with full verification and peace of mind.",
-  COPYRIGHT: "© 2024 RentLekker.co.za. All rights reserved.",
+  COPYRIGHT: "© 2025 RentLekker.com All rights reserved.",
   MADE_WITH: "Made with ❤️ in South Africa",
   SECTIONS: {
     COMPANY: "Company",
