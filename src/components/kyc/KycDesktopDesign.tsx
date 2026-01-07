@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { ArrowLeft, ArrowRight, CheckCircle, QrCode } from 'lucide-react';
 import { FileUploadZone } from './FileUploadZone';
 import { QRCaptureModal } from './QRCaptureModal';
@@ -121,7 +122,7 @@ export function KycDesktopDesign({
               <div className="space-y-2">
                 <h3 className="font-medium">{KYC_LABELS.FRONT_OF_ID}</h3>
                 {idFrontPreview ? (
-                  <img 
+                  <ImageWithSkeleton 
                     src={idFrontPreview} 
                     alt={KYC_LABELS.FRONT_OF_ID} 
                     className="w-full h-48 object-cover rounded-lg border"
@@ -136,7 +137,7 @@ export function KycDesktopDesign({
               <div className="space-y-2">
                 <h3 className="font-medium">{KYC_LABELS.SELFIE_WITH_ID}</h3>
                 {selfiePreview ? (
-                  <img 
+                  <ImageWithSkeleton 
                     src={selfiePreview} 
                     alt={KYC_LABELS.SELFIE_WITH_ID} 
                     className="w-full h-48 object-cover rounded-lg border"

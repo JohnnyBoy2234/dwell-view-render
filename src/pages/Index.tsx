@@ -9,6 +9,7 @@ import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
+import { ImageWithSkeleton } from "@/components/ui/ImageWithSkeleton";
 import { Shield, CheckCircle, ArrowRight, MessageSquare, Smartphone, Zap, LayoutDashboard, Calculator, Layers } from "lucide-react";
 
 const dummyBlogPost = {
@@ -130,15 +131,14 @@ const Index = () => {
         <div className="w-full px-4 pt-0 pb-10 relative bg-gradient-to-b from-ocean-blue/70 to-ocean-blue/50">
           <div className="max-w-5xl mx-auto z-10 relative">
             <div className="flex flex-row gap-4 sm:gap-6 md:gap-8 overflow-hidden">
-              <picture className="flex-1 min-w-0">
-                <source srcSet="/hero3.avif" type="image/avif" />
-                <img
+              <div className="flex-1 min-w-0">
+                <ImageWithSkeleton
                   src="/hero3.jpg"
                   alt="Modern rental living space"
                   className="w-full h-[200px] sm:h-[240px] md:h-[280px] object-cover rounded-2xl shadow-2xl"
-                  loading="eager"
+                  skeletonClassName="rounded-2xl"
                 />
-              </picture>
+              </div>
              
             </div>
           </div>
@@ -192,10 +192,11 @@ const Index = () => {
             {/* Image */}
             <div className="order-2 md:order-2">
 
-              <img 
+              <ImageWithSkeleton 
                 src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
                 alt="Business people discussing at office table" 
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
+                skeletonClassName="rounded-2xl"
               />
             </div>
 
@@ -210,10 +211,11 @@ const Index = () => {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Image */}
             <div className="order-2 md:order-1">
-              <img 
-                src = "https://images.unsplash.com/photo-1606788075819-9574a6edfab3?q=80&w=1168&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+              <ImageWithSkeleton 
+                src="https://images.unsplash.com/photo-1606788075819-9574a6edfab3?q=80&w=1168&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                 alt="Happy family in their home" 
                 className="w-full h-[280px] md:h-[320px] object-cover rounded-2xl shadow-xl"
+                skeletonClassName="rounded-2xl"
               />
             </div>
             {/* Text Content */}

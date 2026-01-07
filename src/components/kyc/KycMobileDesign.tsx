@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { Shield, CheckCircle, Camera } from 'lucide-react';
 import { useKyc } from '@/hooks/useKyc';
 import { 
@@ -183,7 +184,7 @@ export function KycMobileDesign({
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">{KYC_LABELS.FRONT_OF_ID}</h4>
-                      <img 
+                      <ImageWithSkeleton 
                         src={idFrontPreview || (kycProfile?.id_front_path ? `/api/kyc/preview/${kycProfile.id_front_path}` : '')} 
                         alt={KYC_LABELS.FRONT_OF_ID} 
                         className="w-full h-20 object-cover rounded border"
@@ -192,7 +193,7 @@ export function KycMobileDesign({
 
                     <div className="space-y-2">
                       <h4 className="font-medium text-sm">{KYC_LABELS.SELFIE_WITH_ID}</h4>
-                      <img 
+                      <ImageWithSkeleton 
                         src={selfiePreview || (kycProfile?.selfie_path ? `/api/kyc/preview/${kycProfile.selfie_path}` : '')} 
                         alt={KYC_LABELS.SELFIE_WITH_ID} 
                         className="w-full h-20 object-cover rounded border"

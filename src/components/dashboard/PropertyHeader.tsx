@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { ChevronLeft, Home, MapPin } from 'lucide-react';
 
 interface Property {
@@ -51,10 +52,11 @@ export function PropertyHeader({ property, onBack }: PropertyHeaderProps) {
           <div className="flex-shrink-0">
             <div className="w-12 h-12 rounded-lg overflow-hidden bg-ocean-blue/10">
               {property.images && property.images.length > 0 ? (
-                <img
+                <ImageWithSkeleton
                   src={property.images[0]}
                   alt={property.title}
                   className="w-full h-full object-cover"
+                  aspectRatio="square"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

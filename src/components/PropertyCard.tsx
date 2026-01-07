@@ -4,7 +4,8 @@ import { MapPin } from "lucide-react";
 import { PropertyFeatures } from '@/components/property/PropertyFeatures';
 import { usePropertyNavigation } from '@/hooks/usePropertyNavigation';
 import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
-import { 
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import {
   PROPERTY_CARD_STYLES, 
   PROPERTY_CARD_LABELS, 
   PROPERTY_CARD_CURRENCY 
@@ -56,11 +57,11 @@ const PropertyCard = ({
       aria-label={`View details for ${locationText}, ${formattedPrice}`}
     >
       <div className={PROPERTY_CARD_STYLES.IMAGE_CONTAINER}>
-        <img
+        <ImageWithSkeleton
           src={image}
           alt={altText}
           className={PROPERTY_CARD_STYLES.IMAGE}
-          loading="lazy"
+          aspectRatio="4/3"
         />
         {featured && (
           <Badge className={PROPERTY_CARD_STYLES.FEATURED_BADGE}>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface MaintenanceImageGalleryProps {
@@ -54,12 +55,10 @@ export function MaintenanceImageGallery({ images, ticketTitle }: MaintenanceImag
                 <span className="text-xs text-muted-foreground">Image unavailable</span>
               </div>
             ) : (
-              <img
+              <ImageWithSkeleton
                 src={imageUrl}
                 alt={`Maintenance image ${index + 1}`}
                 className="w-full h-24 object-cover transition-transform group-hover:scale-105"
-                onError={() => handleImageError(index)}
-                loading="lazy"
               />
             )}
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />

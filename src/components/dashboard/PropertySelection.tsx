@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { Home, Plus, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RIcon } from '@/components/icons/RIcon';
@@ -119,11 +120,11 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
             {/* Property Image */}
             <div className={`${PROPERTY_CARD_STYLES.IMAGE_CONTAINER} aspect-video`}>
               {property.images && property.images.length > 0 ? (
-                <img
+                <ImageWithSkeleton
                   src={property.images[0]}
                   alt={`${property.title} in ${getSuburbAndCity(property.location)}`}
                   className={`${PROPERTY_CARD_STYLES.IMAGE} h-full`}
-                  loading="lazy"
+                  aspectRatio="16/9"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted/30">
