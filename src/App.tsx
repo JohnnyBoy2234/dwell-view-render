@@ -68,6 +68,7 @@ import { LeaseSignature } from "@/pages/LeaseSignature";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
 import CreateInspection from "@/pages/CreateInspection";
 import SettingsPage from "@/pages/SettingsPage";
+import { LandlordSupport } from "@/pages/landlord/LandlordSupport";
 // Accounting imports
 import AccountingDashboard from "@/pages/accounting/AccountingDashboard";
 import AddTransactionPage from "@/pages/accounting/AddTransactionPage";
@@ -246,6 +247,15 @@ function AppRoutes() {
                     <InventoryStart />
                   </DashboardShell>
                 </PlanGuard>
+              } />
+              <Route path="/enhancedlandlorddashboard/support" element={
+                <AuthenticatedRoute>
+                  <PlanGuard requiredPlan="pro" featureName="Support">
+                    <DashboardShell title="Support" currentTab="/enhancedlandlorddashboard/support">
+                      <LandlordSupport />
+                    </DashboardShell>
+                  </PlanGuard>
+                </AuthenticatedRoute>
               } />
               <Route path="/inspections/new" element={<AuthenticatedRoute><EnhancedDashboardLayout title="New Inspection"><CreateInspection /></EnhancedDashboardLayout></AuthenticatedRoute>} />
               {/* Standalone maintenance ticket route for cross-dashboard access */}
