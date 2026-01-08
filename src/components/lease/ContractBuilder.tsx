@@ -116,7 +116,7 @@ const getAutosaveKey = (userId?: string, contractId?: string, propertyId?: strin
 };
 
 export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }: ContractBuilderProps) {
-  const { contracts, createContract, updateContract, generatePDF } = useLeaseContracts();
+  const { contracts, createContract, updateContract, generatePDF, sendContractToTenant } = useLeaseContracts();
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [contract, setContract] = useState<LeaseContract | null>(null);
@@ -162,6 +162,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   });
   const [steps, setSteps] = useState(builderSteps);
   const [saving, setSaving] = useState(false);
+  const [completing, setCompleting] = useState(false);
   const [hasLoadedAutosave, setHasLoadedAutosave] = useState(false);
   const [prefillAttempted, setPrefillAttempted] = useState(false);
 
@@ -369,10 +370,46 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   };
 
   const handleComplete = async () => {
-    await saveContract(false);
-    clearAutosave();
-    if (onComplete && contract?.id) {
-      onComplete(contract.id);
+    // Validate tenant email
+    if (!contractData.tenantEmail) {
+      return;
+    }
+
+    setCompleting(true);
+    try {
+      // Save contract first
+      await saveContract(false);
+
+      // Ensure we have a contract ID
+      let contractIdToUse = contract?.id;
+      if (!contractIdToUse) {
+        const createdId = await createContract(contractData, propertyId);
+        if (!createdId) {
+          throw new Error('Failed to create contract');
+        }
+        contractIdToUse = createdId;
+      }
+
+      // Generate PDF if not already done
+      if (!contract?.pdf_url) {
+        await handleGeneratePdfFlow();
+      }
+
+      // Send to tenant
+      const sent = await sendContractToTenant(contractIdToUse, contractData.tenantEmail);
+      if (!sent) {
+        throw new Error('Failed to send contract to tenant');
+      }
+
+      // Clear autosave and complete
+      clearAutosave();
+      if (onComplete) {
+        onComplete(contractIdToUse);
+      }
+    } catch (error) {
+      console.error('Failed to complete contract:', error);
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -489,6 +526,14 @@ return (
 
     {/* Current Step Content */}
     <div className="px-4 py-6 lg:px-6">
+      {/* Warning for missing tenant email on review step */}
+      {currentStep === steps.length - 1 && !contractData.tenantEmail && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4 max-w-4xl mx-auto">
+          <p className="text-sm text-amber-800">
+            <strong>Tenant email required:</strong> Please go back to the "Parties Information" step and enter the tenant's email address to send the contract for signing.
+          </p>
+        </div>
+      )}
       <Card className="w-full">
         <CardContent className="p-6">
           {getStepComponent()}
@@ -530,10 +575,10 @@ return (
             ) : (
               <Button
                 onClick={handleComplete}
-                disabled={!steps.every(step => step.isCompleted) || saving}
+                disabled={!steps.every(step => step.isCompleted) || saving || completing || !contractData.tenantEmail}
                 className="flex-shrink-0"
               >
-                Complete Contract
+                {completing ? 'Sending to Tenant...' : 'Complete & Send to Tenant'}
               </Button>
             )}
           </div>

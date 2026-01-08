@@ -116,13 +116,18 @@ export function ContractParties({ data, onUpdate }: ContractPartiesProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="tenantEmail">Email Address</Label>
+              <Label htmlFor="tenantEmail" className="flex items-center gap-1">
+                Email Address <span className="text-destructive">*</span>
+                <span className="text-xs text-muted-foreground ml-1">(Required to send contract)</span>
+              </Label>
               <Input
                 id="tenantEmail"
                 type="email"
                 value={data.tenantEmail || ''}
                 onChange={(e) => onUpdate({ tenantEmail: e.target.value })}
                 placeholder="jane@example.com"
+                required
+                className={!data.tenantEmail ? 'border-amber-300 focus:border-amber-500' : ''}
               />
             </div>
           </div>
