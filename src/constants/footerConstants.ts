@@ -6,6 +6,10 @@ export interface FooterLink {
   href: string;
 }
 
+
+
+
+
 export interface SocialLink {
   icon: LucideIcon;
   href: string;
