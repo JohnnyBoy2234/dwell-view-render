@@ -41,7 +41,7 @@ const About = () => {
             </div>
             <div className="relative">
               <img 
-                src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
+                src="./about 2.jpg" 
                 alt="Modern South African neighborhood" 
                 className="rounded-lg shadow-lg w-full"
               />
@@ -105,6 +105,13 @@ const About = () => {
           <div className="bg-secondary/30 rounded-lg p-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
+                <img 
+                  src="./about 1.jpg" 
+                  alt="South African flag and landscape" 
+                  className="rounded-lg shadow-lg w-full h-96 object-cover"
+                />
+              </div>
+              <div>
                 <div className="flex items-center space-x-3 mb-6">
                   <Globe className="h-8 w-8 text-primary" />
                   <h2 className="text-3xl font-bold">Proudly South African</h2>
@@ -126,13 +133,6 @@ const About = () => {
                     Understanding of local rental laws and customs
                   </li>
                 </ul>
-              </div>
-              <div>
-                <img 
-                  src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" 
-                  alt="South African flag and landscape" 
-                  className="rounded-lg shadow-lg w-full"
-                />
               </div>
             </div>
           </div>
