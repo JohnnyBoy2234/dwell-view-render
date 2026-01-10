@@ -27,6 +27,7 @@ export function TransactionWizard() {
       currentStep: 'expenses',
       income: incomeData
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleIncomeSkip = () => {
@@ -34,6 +35,7 @@ export function TransactionWizard() {
       ...prev,
       currentStep: 'expenses'
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleExpensesComplete = (expenseData: WizardExpenseData[]) => {
@@ -42,6 +44,7 @@ export function TransactionWizard() {
       currentStep: 'summary',
       expenses: expenseData
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleExpensesSkip = () => {
@@ -49,6 +52,7 @@ export function TransactionWizard() {
       ...prev,
       currentStep: 'summary'
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToIncome = () => {
@@ -56,6 +60,7 @@ export function TransactionWizard() {
       ...prev,
       currentStep: 'income'
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToExpenses = () => {
@@ -63,6 +68,7 @@ export function TransactionWizard() {
       ...prev,
       currentStep: 'expenses'
     }));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleFinalSubmit = async () => {

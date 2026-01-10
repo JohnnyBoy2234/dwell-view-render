@@ -118,12 +118,14 @@ export function KycWizard({ onComplete }: KycWizardProps) {
   const handleNext = () => {
     if (canProceedToNext() && currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePrevious = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

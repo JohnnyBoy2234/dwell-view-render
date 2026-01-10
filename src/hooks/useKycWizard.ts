@@ -108,12 +108,14 @@ export function useKycWizard({ onComplete }: KycWizardConfig): KycWizardState & 
   const handleNext = useCallback(() => {
     if (canProceedToNext() && currentStep < KYC_STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [canProceedToNext, currentStep]);
 
   const handlePrevious = useCallback(() => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentStep]);
 
