@@ -532,9 +532,13 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       return;
     }
     setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const goBack = () => setCurrentStep((s) => Math.max(s - 1, 0));
+  const goBack = () => {
+    setCurrentStep((s) => Math.max(s - 1, 0));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSubmit = async () => {
     if (!user) return;
