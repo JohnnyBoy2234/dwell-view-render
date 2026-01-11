@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { FileText, Upload, X } from "lucide-react";
+import { SuccessDialog } from "@/components/ui/SuccessDialog";
 
 export interface ScreeningApplicationWizardProps {
   propertyId: string;
@@ -77,6 +78,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const [incomeDocuments, setIncomeDocuments] = useState<DocumentItem[]>([]);
   const [creditDocuments, setCreditDocuments] = useState<DocumentItem[]>([]);
   const [hasLoadedAutosave, setHasLoadedAutosave] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
 
   const clearAutosave = useCallback(() => {
     if (!user) return;
@@ -532,9 +534,13 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       return;
     }
     setCurrentStep((s) => Math.min(s + 1, steps.length - 1));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const goBack = () => setCurrentStep((s) => Math.max(s - 1, 0));
+  const goBack = () => {
+    setCurrentStep((s) => Math.max(s - 1, 0));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleSubmit = async () => {
     if (!user) return;
@@ -644,14 +650,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         }
       }
 
-      toast({
-        title: "Application submitted",
-        description: "We will run a credit check and update your status shortly.",
-      });
-
       clearAutosave();
-      if (onSubmissionComplete) onSubmissionComplete();
-      else navigate("/enhancedtenantdashboard");
+      setShowSuccessDialog(true);
     } catch (error: any) {
       console.error("Submit application error", error);
       toast({
@@ -1153,6 +1153,29 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           )}
         </div>
       </CardContent>
+
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        icon="check"
+        title="Application Submitted!"
+        subtitle="Your rental application has been successfully submitted."
+        progress={{ current: 1, total: 3, label: "Application Progress" }}
+        nextSteps={[
+          { title: "Credit check in progress", description: "We're verifying your credit score automatically" },
+          { title: "Landlord review", description: "The landlord will review your complete application" },
+          { title: "Decision notification", description: "You'll receive an email with the outcome" }
+        ]}
+        primaryAction={{
+          label: "Go to Dashboard",
+          onClick: () => {
+            setShowSuccessDialog(false);
+            if (onSubmissionComplete) onSubmissionComplete();
+            else navigate("/enhancedtenantdashboard");
+          }
+        }}
+        showConfetti={true}
+      />
     </Card>
   );
 }

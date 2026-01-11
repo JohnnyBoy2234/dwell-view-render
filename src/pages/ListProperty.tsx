@@ -16,6 +16,7 @@ const RIcon = ({ className }: { className?: string }) => (
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
+import { SuccessDialog } from '@/components/ui/SuccessDialog';
 
 // Import step components
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
@@ -64,6 +65,7 @@ export default function ListProperty() {
   const { plan, planStatus } = useSubscription();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -148,12 +150,14 @@ export default function ListProperty() {
     
     if (isValid && currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -222,16 +226,11 @@ export default function ListProperty() {
 
       if (error) throw error;
 
-      toast({
-        title: "🎉 Property Listed Successfully!",
-        description: "Your property is now live on RentLekker and visible to potential tenants."
-      });
-
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
       } catch {}
 
-              navigate('/enhancedlandlorddashboard');
+      setShowSuccessDialog(true);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -387,6 +386,38 @@ export default function ListProperty() {
             </Button>
           </div>
         )}
+
+        {/* Success Dialog */}
+        <SuccessDialog
+          open={showSuccessDialog}
+          onClose={() => {
+            setShowSuccessDialog(false);
+            navigate('/enhancedlandlorddashboard');
+          }}
+          icon="home"
+          title="Property Listed Successfully!"
+          subtitle="Your property is now live on RentLekker and visible to potential tenants."
+          nextSteps={[
+            { title: "Wait for enquiries", description: "Tenants can now view and enquire about your property" },
+            { title: "Manage viewings", description: "Schedule property viewings with interested tenants" },
+            { title: "Review applications", description: "Accept your ideal tenant when they apply" }
+          ]}
+          primaryAction={{
+            label: "View My Properties",
+            onClick: () => {
+              setShowSuccessDialog(false);
+              navigate('/enhancedlandlorddashboard');
+            }
+          }}
+          secondaryAction={{
+            label: "List Another Property",
+            onClick: () => {
+              setShowSuccessDialog(false);
+              window.location.reload();
+            }
+          }}
+          showConfetti={true}
+        />
       </div>
     </div>
   );

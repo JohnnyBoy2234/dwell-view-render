@@ -359,6 +359,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
       await saveContract();
       if (currentStep < steps.length - 1) {
         setCurrentStep(currentStep + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   };
@@ -366,6 +367,7 @@ export function ContractBuilder({ contractId, propertyId, onComplete, onCancel }
   const prevStep = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
