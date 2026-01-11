@@ -11,6 +11,7 @@ import { useESignature } from '@/hooks/useESignature';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import type { LeaseContract } from '@/types/lease';
+import { SuccessDialog } from '@/components/ui/SuccessDialog';
 
 export function LeaseSignature() {
   const { contractId } = useParams<{ contractId: string }>();
@@ -23,6 +24,7 @@ export function LeaseSignature() {
   const [consentAcknowledged, setConsentAcknowledged] = useState(false);
   const [signatureData, setSignatureData] = useState<string | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -99,9 +101,18 @@ export function LeaseSignature() {
 
     const success = await captureSignature(contract.id, signatureData, consentAcknowledged);
     if (success) {
-      toast.success('Contract signed successfully!');
-      navigate('/leases');
+      setShowSuccessDialog(true);
     }
+  };
+
+  const handleSuccessDialogClose = () => {
+    setShowSuccessDialog(false);
+    navigate('/leases');
+  };
+
+  const isBothPartiesSigned = () => {
+    if (!contract) return false;
+    return !!contract.landlord_signed_at && !!contract.tenant_signed_at;
   };
 
   const canUserSign = () => {
@@ -338,6 +349,33 @@ export function LeaseSignature() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={handleSuccessDialogClose}
+        icon={isLandlord ? "star" : "file"}
+        title={isLandlord ? "Lease Complete!" : "You've Signed the Lease!"}
+        subtitle={isLandlord ? "Both parties have signed the contract." : "Your signature has been recorded."}
+        progress={isLandlord 
+          ? { current: 2, total: 2, label: "Signing Progress" }
+          : { current: 1, total: 2, label: "Awaiting landlord signature" }
+        }
+        nextSteps={isLandlord ? [
+          { title: "Download contract", description: "Get the fully signed PDF for your records" },
+          { title: "Collect deposit", description: "Process the security deposit payment" },
+          { title: "Prepare for move-in", description: "Schedule key handover with your tenant" }
+        ] : [
+          { title: "Landlord signature pending", description: "The landlord will sign the contract next" },
+          { title: "Final contract", description: "You'll receive the fully signed PDF via email" },
+          { title: "Move-in preparation", description: "Get ready for your new home!" }
+        ]}
+        primaryAction={{
+          label: "View My Leases",
+          onClick: handleSuccessDialogClose
+        }}
+        showConfetti={isLandlord}
+      />
     </div>
   );
 }

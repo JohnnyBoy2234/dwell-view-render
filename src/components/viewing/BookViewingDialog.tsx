@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Check, Calendar, Clock, Edit, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useViewingBooking } from "@/hooks/useViewingBooking";
+import { SuccessDialog } from "@/components/ui/SuccessDialog";
 
 interface BookViewingDialogProps {
   propertyId: string;
@@ -19,6 +20,8 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
   const [selectedSlotId, setSelectedSlotId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [booking, setBooking] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [bookedSlotDetails, setBookedSlotDetails] = useState<{ date: string; time: string } | null>(null);
   
   const {
     loading,
@@ -36,6 +39,8 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
   const handleConfirmBooking = async () => {
     if (!user || !selectedSlotId) return;
     
+    const selectedSlot = availableSlots.find(slot => slot.id === selectedSlotId);
+    
     setBooking(true);
     try {
       if (isUpdating && activeBooking) {
@@ -47,9 +52,14 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
         }
       } else {
         const success = await bookSlot(selectedSlotId);
-        if (success) {
+        if (success && selectedSlot) {
+          setBookedSlotDetails({
+            date: format(new Date(selectedSlot.start_time), "EEEE, MMMM d"),
+            time: format(new Date(selectedSlot.start_time), "h:mm a")
+          });
           setSelectedSlotId(null);
           onOpenChange(false);
+          setShowSuccessDialog(true);
         }
       }
     } finally {
@@ -79,6 +89,7 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
   const selectedSlot = availableSlots.find(slot => slot.id === selectedSlotId);
 
   return (
+  <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -266,5 +277,25 @@ export function BookViewingDialog({ propertyId, landlordId, open, onOpenChange }
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Success Dialog */}
+    <SuccessDialog
+      open={showSuccessDialog}
+      onClose={() => setShowSuccessDialog(false)}
+      icon="calendar"
+      title="Viewing Booked!"
+      subtitle={bookedSlotDetails ? `${bookedSlotDetails.date} at ${bookedSlotDetails.time}` : undefined}
+      nextSteps={[
+        { title: "Add to your calendar", description: "Don't forget your scheduled viewing appointment" },
+        { title: "Prepare your questions", description: "Make a list of things you want to ask about the property" },
+        { title: "After the viewing", description: "If interested, you can apply directly for this property" }
+      ]}
+      primaryAction={{
+        label: "Got It",
+        onClick: () => setShowSuccessDialog(false)
+      }}
+      showConfetti={false}
+    />
+  </>
   );
 }

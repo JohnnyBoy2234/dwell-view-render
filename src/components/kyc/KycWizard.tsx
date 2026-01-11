@@ -9,6 +9,7 @@ import { CheckCircle, ArrowLeft, ArrowRight, Shield, Upload, Camera, FileText, A
 import { FileUploadZone } from './FileUploadZone';
 import { useKyc } from '@/hooks/useKyc';
 import { useToast } from '@/hooks/use-toast';
+import { SuccessDialog } from '@/components/ui/SuccessDialog';
 
 const STEPS = [
   { id: 'intro', title: 'Introduction', icon: Shield },
@@ -33,6 +34,7 @@ export function KycWizard({ onComplete }: KycWizardProps) {
   const [selfiePreview, setSelfiePreview] = useState<string>('');
   const [showQRModal, setShowQRModal] = useState(false);
   const [qrModalType, setQRModalType] = useState<'id_front' | 'selfie'>('id_front');
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   
   const { kycProfile, uploadFile, submitForReview, uploading, submitting, refresh } = useKyc();
   const { toast } = useToast();
@@ -132,14 +134,15 @@ export function KycWizard({ onComplete }: KycWizardProps) {
   const handleSubmit = async () => {
     try {
       await submitForReview();
-      toast({
-        title: "Successfully submitted!",
-        description: "Your identity verification has been submitted for review.",
-      });
-      onComplete();
+      setShowSuccessDialog(true);
     } catch (error) {
       console.error('Submission error:', error);
     }
+  };
+
+  const handleSuccessDialogClose = () => {
+    setShowSuccessDialog(false);
+    onComplete();
   };
 
   const renderStepContent = () => {
@@ -436,6 +439,25 @@ export function KycWizard({ onComplete }: KycWizardProps) {
           onOpenChange={setShowQRModal}
           type={qrModalType}
           onUploadSuccess={refresh}
+        />
+
+        {/* Success Dialog */}
+        <SuccessDialog
+          open={showSuccessDialog}
+          onClose={handleSuccessDialogClose}
+          icon="user"
+          title="Identity Verification Submitted!"
+          subtitle="Your documents have been submitted for review."
+          nextSteps={[
+            { title: "Document review", description: "Our team will verify your documents within 24-48 hours" },
+            { title: "Verification complete", description: "You'll be notified once your identity is verified" },
+            { title: "Apply with confidence", description: "Verified tenants get priority consideration from landlords" }
+          ]}
+          primaryAction={{
+            label: "Continue",
+            onClick: handleSuccessDialogClose
+          }}
+          showConfetti={false}
         />
       </div>
     </div>
