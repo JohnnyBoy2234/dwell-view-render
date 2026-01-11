@@ -11,6 +11,7 @@ import { Upload, Camera, X } from 'lucide-react';
 import type { Priority, Category } from '@/types/maintenance';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { SuccessDialog } from '@/components/ui/SuccessDialog';
 
 interface CreateMaintenanceTicketProps {
   propertyId: string;
@@ -21,6 +22,7 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
   const { createTicket } = useMaintenanceTickets(propertyId);
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   
   const [formData, setFormData] = useState({
     title: '',
@@ -100,8 +102,6 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
         images: imageUrls
       });
 
-      toast.success('Maintenance request submitted successfully!');
-      
       // Reset form
       setFormData({
         title: '',
@@ -111,7 +111,7 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
         images: []
       });
       
-      onTicketCreated?.();
+      setShowSuccessDialog(true);
       
     } catch (error) {
       console.error('Error creating maintenance ticket:', error);
@@ -307,6 +307,31 @@ export function CreateMaintenanceTicket({ propertyId, onTicketCreated }: CreateM
           </div>
         </form>
       </CardContent>
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={() => {
+          setShowSuccessDialog(false);
+          onTicketCreated?.();
+        }}
+        icon="wrench"
+        title="Maintenance Request Submitted!"
+        subtitle="Your request has been logged and sent to your landlord."
+        nextSteps={[
+          { title: "Landlord notified", description: "Your landlord has received your maintenance request" },
+          { title: "Service provider assignment", description: "A contractor will be assigned to resolve the issue" },
+          { title: "Track progress", description: "Monitor updates in your maintenance dashboard" }
+        ]}
+        primaryAction={{
+          label: "View My Requests",
+          onClick: () => {
+            setShowSuccessDialog(false);
+            onTicketCreated?.();
+          }
+        }}
+        showConfetti={false}
+      />
     </Card>
   );
 }
