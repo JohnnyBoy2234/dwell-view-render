@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { CreateNotificationData, NotificationType, NotificationPriority } from '@/types/notification';
+import { NotificationUrls } from '@/utils/notificationRoutes';
 
 export class NotificationService {
   /**
@@ -181,7 +182,7 @@ export class NotificationService {
       'Lease Signed!',
       `${tenantName} has signed the lease for ${propertyAddress}. The lease is now complete.`,
       'high',
-      `/enhancedlandlorddashboard/leases/${leaseId}`,
+      NotificationUrls.lease(leaseId),
       { leaseId, tenantName, propertyAddress }
     );
   }
@@ -195,7 +196,7 @@ export class NotificationService {
       'Lease Ready for Signature',
       `${landlordName} has prepared a lease for ${propertyAddress}. Please review and sign.`,
       'high',
-      `/enhancedtenantdashboard/leases/${leaseId}`,
+      NotificationUrls.lease(leaseId),
       { leaseId, landlordName, propertyAddress }
     );
   }
@@ -209,7 +210,7 @@ export class NotificationService {
       'New Maintenance Request',
       `${tenantName} has submitted a maintenance request for ${propertyAddress}.`,
       'normal',
-      `/enhancedlandlorddashboard/maintenance/${requestId}`,
+      NotificationUrls.maintenance(requestId),
       { requestId, tenantName, propertyAddress }
     );
   }
@@ -223,7 +224,7 @@ export class NotificationService {
       'Maintenance Request Updated',
       `Your maintenance request for ${propertyAddress} has been ${status.toLowerCase()}.`,
       'normal',
-      `/enhancedtenantdashboard/maintenance/${requestId}`,
+      NotificationUrls.maintenance(requestId),
       { requestId, status, propertyAddress }
     );
   }
@@ -237,7 +238,7 @@ export class NotificationService {
       'New Rental Application',
       `${applicantName} has applied for ${propertyAddress}.`,
       'normal',
-      `/enhancedlandlorddashboard/applications/${applicationId}`,
+      NotificationUrls.application(applicationId),
       { applicationId, applicantName, propertyAddress }
     );
   }
@@ -251,7 +252,7 @@ export class NotificationService {
       'Application Status Update',
       `Your application for ${propertyAddress} has been ${status.toLowerCase()}.`,
       'high',
-      `/enhancedtenantdashboard/applications/${applicationId}`,
+      NotificationUrls.application(applicationId),
       { applicationId, status, propertyAddress }
     );
   }
@@ -265,7 +266,7 @@ export class NotificationService {
       'New Viewing Request',
       `${tenantName} has requested to view ${propertyAddress}.`,
       'normal',
-      `/enhancedlandlorddashboard/viewings/${viewingId}`,
+      NotificationUrls.viewing(viewingId, true),
       { viewingId, tenantName, propertyAddress }
     );
   }
@@ -279,7 +280,7 @@ export class NotificationService {
       'Viewing Confirmed',
       `Your viewing for ${propertyAddress} has been confirmed for ${viewingDate}.`,
       'normal',
-      `/enhancedtenantdashboard/viewings/${viewingId}`,
+      NotificationUrls.viewing(viewingId, false),
       { viewingId, propertyAddress, viewingDate }
     );
   }
@@ -293,7 +294,7 @@ export class NotificationService {
       'Payment Received',
       `Payment of R${amount.toLocaleString()} received from ${tenantName} for ${propertyAddress}.`,
       'normal',
-      '/enhancedlandlorddashboard/payments',
+      NotificationUrls.payment(true),
       { amount, tenantName, propertyAddress }
     );
   }
@@ -307,7 +308,7 @@ export class NotificationService {
       'Rent Payment Reminder',
       `Rent payment of R${amount.toLocaleString()} for ${propertyAddress} is due on ${dueDate}.`,
       'high',
-      '/enhancedtenantdashboard/payments',
+      NotificationUrls.payment(false),
       { amount, propertyAddress, dueDate }
     );
   }
@@ -321,7 +322,7 @@ export class NotificationService {
       'ID Verification Approved',
       'Your identity verification has been approved. You can now request property viewings.',
       'normal',
-      '/enhancedtenantdashboard'
+      NotificationUrls.dashboard(false)
     );
   }
 
@@ -331,7 +332,7 @@ export class NotificationService {
       'ID Verification Requires Attention',
       `Your identity verification needs to be resubmitted. ${reason || 'Please check the requirements and try again.'}`,
       'high',
-      '/verify-id'
+      NotificationUrls.verifyId()
     );
   }
 
@@ -344,7 +345,7 @@ export class NotificationService {
       'Property Inventory Completed',
       `${tenantName} has completed the inventory for ${propertyAddress}.`,
       'normal',
-      `/enhancedlandlorddashboard/inventory/${inventoryId}`,
+      NotificationUrls.inventory(inventoryId, true),
       { inventoryId, tenantName, propertyAddress }
     );
   }
@@ -355,7 +356,7 @@ export class NotificationService {
       'Inventory Approved',
       `Your property inventory for ${propertyAddress} has been approved by the landlord.`,
       'normal',
-      `/enhancedtenantdashboard/inventory/${inventoryId}`,
+      NotificationUrls.inventory(inventoryId, false),
       { inventoryId, propertyAddress }
     );
   }
@@ -369,7 +370,7 @@ export class NotificationService {
       'New Rental Offer Received',
       `${landlordName} has sent you an offer for ${propertyAddress}.`,
       'high',
-      `/enhancedtenantdashboard/offers/${offerId}`,
+      NotificationUrls.application(offerId),
       { offerId, landlordName, propertyAddress }
     );
   }
@@ -380,7 +381,7 @@ export class NotificationService {
       'Offer Accepted',
       `${tenantName} has accepted your offer for ${propertyAddress}.`,
       'high',
-      `/enhancedlandlorddashboard/offers/${offerId}`,
+      NotificationUrls.application(offerId),
       { offerId, tenantName, propertyAddress }
     );
   }
@@ -391,7 +392,7 @@ export class NotificationService {
       'Offer Declined',
       `${tenantName} has declined your offer for ${propertyAddress}.`,
       'normal',
-      `/enhancedlandlorddashboard/offers/${offerId}`,
+      NotificationUrls.application(offerId),
       { offerId, tenantName, propertyAddress }
     );
   }
