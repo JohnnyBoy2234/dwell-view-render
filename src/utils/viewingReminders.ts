@@ -1,6 +1,7 @@
 // @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
 import { NotificationService } from '@/services/notificationService';
+import { NotificationUrls } from '@/utils/notificationRoutes';
 
 export interface UpcomingViewingLike {
   id: string;
@@ -44,7 +45,7 @@ export async function ensureTwoHourViewingRemindersForTenant(
       'Viewing in 2 hours',
       `Reminder: your viewing is scheduled for ${friendly}.`,
       'high',
-      '/tenant/viewings',
+      NotificationUrls.viewingList(false),
       { viewingId: v.id, reminder: '2hr_pre' }
     );
     markSent(userId, v.id);
@@ -74,7 +75,7 @@ export async function ensureTwoHourViewingRemindersForLandlord(userId: string) {
       'Viewing in 2 hours',
       `Reminder: you have a viewing scheduled for ${friendly}.`,
       'high',
-      '/enhancedlandlorddashboard/viewings',
+      NotificationUrls.viewingList(true),
       { viewingId: v.id, reminder: '2hr_pre' }
     );
     markSent(userId, v.id);

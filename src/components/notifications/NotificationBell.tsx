@@ -9,6 +9,7 @@ import { Notification } from '@/types/notification';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { getNotificationTargetUrl } from '@/utils/notificationRoutes';
 
 interface NotificationBellProps {
   className?: string;
@@ -42,50 +43,9 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
     if (!notification.is_read) {
       await markAsRead(notification.id);
     }
-    let targetUrl = notification.link_url || notification.action_url;
-    if (!targetUrl && notification.metadata) {
-      const { leaseId, requestId, applicationId, viewingId, offerId, inventoryId, propertyId, conversationId } = notification.metadata;
-      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
-      
-      switch (notification.type) {
-        case 'lease':
-          targetUrl = leaseId ? `${dashboardBase}/leases/${leaseId}` : `${dashboardBase}/leases`;
-          break;
-        case 'maintenance':
-          targetUrl = requestId ? `${dashboardBase}/maintenance/${requestId}` : `${dashboardBase}/maintenance`;
-          break;
-        case 'application':
-          targetUrl = applicationId ? `${dashboardBase}/applications/${applicationId}` : `${dashboardBase}/applications`;
-          break;
-        case 'payment':
-          targetUrl = `${dashboardBase}/payments`;
-          break;
-        case 'viewing':
-          targetUrl = viewingId ? `${dashboardBase}/viewings/${viewingId}` : `${dashboardBase}/viewings`;
-          break;
-        case 'inventory':
-          targetUrl = inventoryId ? `${dashboardBase}/inventory/${inventoryId}` : `${dashboardBase}/inventory`;
-          break;
-        case 'offer':
-          targetUrl = offerId ? `${dashboardBase}/offers/${offerId}` : `${dashboardBase}/offers`;
-          break;
-        case 'system':
-          if (notification.metadata?.redirect_url) {
-            targetUrl = notification.metadata.redirect_url;
-          }
-          break;
-        default:
-          if (conversationId) {
-            targetUrl = `/messages?c=${conversationId}`;
-          } else if (propertyId) {
-            targetUrl = `/properties/${propertyId}`;
-          }
-      }
-    }
-    if (!targetUrl) {
-      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
-      targetUrl = `${dashboardBase}/messages`;
-    }
+    
+    // Use centralized routing utility
+    const targetUrl = getNotificationTargetUrl(notification, isLandlord);
     navigate(targetUrl);
     setIsOpen(false);
   };

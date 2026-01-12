@@ -1,4 +1,5 @@
 import { NotificationService } from '@/services/notificationService';
+import { NotificationUrls } from '@/utils/notificationRoutes';
 
 /**
  * Helper functions to create notifications for common events
@@ -13,7 +14,7 @@ export const createLeaseNotifications = {
       'Lease Generated',
       `A new lease has been generated for ${propertyAddress}.`,
       'normal',
-      `/enhancedlandlorddashboard/leases/${leaseId}`
+      NotificationUrls.lease(leaseId)
     );
 
     // Notify tenant
@@ -22,7 +23,7 @@ export const createLeaseNotifications = {
       'Lease Ready for Review',
       `A lease has been prepared for ${propertyAddress}. Please review and sign.`,
       'high',
-      `/enhancedtenantdashboard/leases/${leaseId}`
+      NotificationUrls.lease(leaseId)
     );
   },
 
@@ -64,7 +65,7 @@ export const createApplicationNotifications = {
       'Application Request Approved',
       `Your request to apply for ${propertyTitle} has been approved. You can now start your application.`,
       'high',
-      `/enhancedtenantdashboard`
+      NotificationUrls.dashboard(false)
     );
   },
 

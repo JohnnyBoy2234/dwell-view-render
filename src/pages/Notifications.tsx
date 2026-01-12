@@ -19,6 +19,7 @@ import {
   Info,
   Clock
 } from 'lucide-react';
+import { getNotificationTargetUrl } from '@/utils/notificationRoutes';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -162,86 +163,9 @@ export default function Notifications() {
       }
     }
 
-    // Navigate based on notification type, action URL, link URL, and metadata
-    let targetUrl = notification.linkUrl || notification.actionUrl;
-
-    // If no direct URL, extract from metadata and build specific URL
-    if (!targetUrl && notification.metadata) {
-      const { leaseId, requestId, applicationId, viewingId, offerId, inventoryId, propertyId, conversationId } = notification.metadata;
-      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
-      
-      switch (notification.type) {
-        case 'lease':
-          targetUrl = leaseId ? `${dashboardBase}/leases/${leaseId}` : `${dashboardBase}/leases`;
-          break;
-        case 'maintenance':
-          targetUrl = requestId ? `${dashboardBase}/maintenance/${requestId}` : `${dashboardBase}/maintenance`;
-          break;
-        case 'application':
-          targetUrl = applicationId ? `${dashboardBase}/applications/${applicationId}` : `${dashboardBase}/applications`;
-          break;
-        case 'payment':
-          targetUrl = `${dashboardBase}/payments`;
-          break;
-        case 'viewing':
-          targetUrl = viewingId ? `${dashboardBase}/viewings/${viewingId}` : `${dashboardBase}/viewings`;
-          break;
-        case 'inventory':
-          targetUrl = inventoryId ? `${dashboardBase}/inventory/${inventoryId}` : `${dashboardBase}/inventory`;
-          break;
-        case 'offer':
-          targetUrl = offerId ? `${dashboardBase}/offers/${offerId}` : `${dashboardBase}/offers`;
-          break;
-        case 'system':
-          if (notification.metadata?.redirect_url) {
-            targetUrl = notification.metadata.redirect_url;
-          }
-          break;
-        case 'message':
-          targetUrl = conversationId ? `/messages?c=${conversationId}` : '/messages';
-          break;
-        default:
-          if (conversationId) {
-            targetUrl = `/messages?c=${conversationId}`;
-          } else if (propertyId) {
-            targetUrl = `/properties/${propertyId}`;
-          } else {
-            targetUrl = dashboardBase;
-          }
-      }
-    }
-
-    // Fallback: If still no URL, determine based on notification type
-    if (!targetUrl) {
-      const dashboardBase = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
-      switch (notification.type) {
-        case 'message':
-          targetUrl = '/messages';
-          break;
-        case 'lease':
-          targetUrl = `${dashboardBase}/leases`;
-          break;
-        case 'maintenance':
-          targetUrl = `${dashboardBase}/maintenance`;
-          break;
-        case 'payment':
-          targetUrl = `${dashboardBase}/payments`;
-          break;
-        case 'viewing':
-          targetUrl = `${dashboardBase}/viewings`;
-          break;
-        case 'application':
-          targetUrl = `${dashboardBase}/applications`;
-          break;
-        default:
-          targetUrl = dashboardBase;
-      }
-    }
-
-    // Navigate to the target URL
-    if (targetUrl) {
-      navigate(targetUrl);
-    }
+    // Use centralized routing utility
+    const targetUrl = getNotificationTargetUrl(notification, isLandlord);
+    navigate(targetUrl);
   };
 
   const handleMarkAllAsRead = async () => {
