@@ -2282,6 +2282,81 @@ const renderReportsTab = () => (
       );
     }
 
+    // If no property is selected, show property selection only
+    if (!selectedPropertyId) {
+      return (
+        <div className="min-h-screen bg-white pb-24 md:pb-4" style={{ minHeight: '100dvh', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
+          <div className="px-4 space-y-6 pt-3">
+            {/* Payment Reminder Banner */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
+                    <Bell className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="font-semibold text-black">Send Payment Reminder</div>
+                    <div className="text-sm text-black/70">Notify a tenant instantly via app and email</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <Select value={reminderPropertyId} onValueChange={setReminderPropertyId}>
+                    <SelectTrigger className="w-[220px]">
+                      <SelectValue placeholder="Select property" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {properties.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    disabled={sendingReminder}
+                    onClick={async () => {
+                      if (!reminderPropertyId) {
+                        toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+                        return;
+                      }
+                      try {
+                        setSendingReminder(true);
+                        const { data: tenancy } = await supabase
+                          .from('tenancies')
+                          .select('tenant_id')
+                          .eq('landlord_id', user?.id)
+                          .eq('property_id', reminderPropertyId)
+                          .eq('status', 'active')
+                          .limit(1)
+                          .maybeSingle();
+                        if (!tenancy?.tenant_id) {
+                          toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
+                          setSendingReminder(false);
+                          return;
+                        }
+                        const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                          body: { tenant_id: tenancy.tenant_id, property_id: reminderPropertyId }
+                        });
+                        if (error) throw error;
+                        toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
+                      } catch (e: any) {
+                        toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                      } finally {
+                        setSendingReminder(false);
+                      }
+                    }}
+                    className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+                  >
+                    {sendingReminder ? 'Sending…' : 'Send Reminder'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Property is selected - show management tools for this property
+    const selectedProperty = getSelectedProperty();
     const totalRevenue = tenants.reduce((sum, t) => sum + t.monthly_rent, 0);
     const occupancyRate = properties.length > 0 ? Math.round((tenants.length / properties.length) * 100) : 0;
     const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
@@ -2289,74 +2364,25 @@ const renderReportsTab = () => (
     return (
       <div className="min-h-screen bg-white pb-24 md:pb-4" style={{ minHeight: '100dvh', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
         <div className="px-4 space-y-6 pt-3">
-          {/* Quick tile: Inspection (removed per request) */}
-          {/* Header removed per request */}
-          
-          {/* Payment Reminder Banner */}
-          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
-                  <Bell className="w-4 h-4" />
+          {/* Property Info Header */}
+          {selectedProperty && (
+            <Card className="bg-gradient-to-r from-ocean-blue/5 to-ocean-blue/10 border-ocean-blue/20">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-semibold text-lg">{selectedProperty.title}</h3>
+                    <p className="text-sm text-muted-foreground">{selectedProperty.location}</p>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleBackToProperties}>
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Properties
+                  </Button>
                 </div>
-                <div>
-                  <div className="font-semibold text-black">Send Payment Reminder</div>
-                  <div className="text-sm text-black/70">Notify a tenant instantly via app and email</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Select value={reminderPropertyId} onValueChange={setReminderPropertyId}>
-                  <SelectTrigger className="w-[220px]">
-                    <SelectValue placeholder="Select property" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {properties.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  disabled={sendingReminder}
-                  onClick={async () => {
-                    if (!reminderPropertyId) {
-                      toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-                      return;
-                    }
-                    try {
-                      setSendingReminder(true);
-                      const { data: tenancy } = await supabase
-                        .from('tenancies')
-                        .select('tenant_id')
-                        .eq('landlord_id', user?.id)
-                        .eq('property_id', reminderPropertyId)
-                        .eq('status', 'active')
-                        .limit(1)
-                        .maybeSingle();
-                      if (!tenancy?.tenant_id) {
-                        toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
-                        setSendingReminder(false);
-                        return;
-                      }
-                      const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                        body: { tenant_id: tenancy.tenant_id, property_id: reminderPropertyId }
-                      });
-                      if (error) throw error;
-                      toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
-                    } catch (e: any) {
-                      toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-                    } finally {
-                      setSendingReminder(false);
-                    }
-                  }}
-                  className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
-                >
-                  {sendingReminder ? 'Sending…' : 'Send Reminder'}
-                </Button>
-              </div>
-            </div>
-          </div>
+              </CardContent>
+            </Card>
+          )}
 
-          {/* App-style Feature Grid (match Properties page card styles) */}
+          {/* App-style Feature Grid - Management Tools */}
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               <div onClick={() => {
@@ -2411,7 +2437,6 @@ const renderReportsTab = () => (
                   <p className="text-xs text-muted-foreground">Track</p>
                 </Card>
               </div>
-
 
               {/* SwiftBooks */}
               <div onClick={() => {
