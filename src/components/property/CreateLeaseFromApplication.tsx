@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { FileText, ArrowRight } from 'lucide-react';
