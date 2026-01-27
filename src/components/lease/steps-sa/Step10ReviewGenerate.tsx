@@ -3,24 +3,32 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { LeaseWizardData, StepValidationResult } from '@/types/lease';
 import { formatZAR, formatDate } from '@/utils/leaseTemplateEngine';
-import { FileText, Send, CheckCircle2 } from 'lucide-react';
+import { FileText, Send, CheckCircle2, Eye } from 'lucide-react';
 
 interface Step10Props {
   data: LeaseWizardData;
   onUpdate: (updates: Partial<LeaseWizardData>) => void;
-  onGenerate: () => void;
+  onPreviewAndSign: () => void;
   onSendToTenant: () => void;
   isGenerating: boolean;
   isSending: boolean;
+  landlordHasSigned?: boolean;
 }
 
-export function Step10ReviewGenerate({ data, onGenerate, onSendToTenant, isGenerating, isSending }: Step10Props) {
+export function Step10ReviewGenerate({ 
+  data, 
+  onPreviewAndSign, 
+  onSendToTenant, 
+  isGenerating, 
+  isSending,
+  landlordHasSigned = false
+}: Step10Props) {
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Review & Generate</h2>
+        <h2 className="text-xl font-semibold">Review & Sign</h2>
         <p className="text-sm text-muted-foreground">
-          Review your lease details before generating the final document.
+          Review your lease details and sign the document. After you sign, you can send it to the tenant.
         </p>
       </div>
 
@@ -59,15 +67,26 @@ export function Step10ReviewGenerate({ data, onGenerate, onSendToTenant, isGener
         </Card>
       </div>
 
+      {/* Status Indicator */}
+      {landlordHasSigned && (
+        <div className="flex items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-lg">
+          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <span className="text-green-800 font-medium">You have signed this lease</span>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <Button onClick={onGenerate} disabled={isGenerating} className="flex-1">
-          <FileText className="h-4 w-4 mr-2" />
-          {isGenerating ? 'Generating...' : 'Generate PDF'}
+        <Button onClick={onPreviewAndSign} disabled={isGenerating} className="flex-1">
+          <Eye className="h-4 w-4 mr-2" />
+          {landlordHasSigned ? 'View Signed Lease' : 'Preview & Sign Lease'}
         </Button>
-        <Button onClick={onSendToTenant} disabled={isSending} variant="secondary" className="flex-1">
-          <Send className="h-4 w-4 mr-2" />
-          {isSending ? 'Sending...' : 'Send to Tenant'}
-        </Button>
+        
+        {landlordHasSigned && (
+          <Button onClick={onSendToTenant} disabled={isSending} variant="secondary" className="flex-1">
+            <Send className="h-4 w-4 mr-2" />
+            {isSending ? 'Sending...' : 'Send to Tenant'}
+          </Button>
+        )}
       </div>
     </div>
   );

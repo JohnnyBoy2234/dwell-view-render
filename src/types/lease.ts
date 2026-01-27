@@ -123,18 +123,32 @@ export interface AuditEntry {
   details: Record<string, any>;
 }
 
-// Signature data for e-signing
+// Signature data for e-signing (supports both camelCase and snake_case)
 export interface SignatureData {
-  signatureImageUrl: string;
-  signatureHash: string;
-  signedAt: string;
-  ipAddress: string;
-  userAgent: string;
+  signature_image_url?: string;
+  signatureImageUrl?: string;
+  signature_hash?: string;
+  signatureHash?: string;
+  signed_at?: string;
+  signedAt?: string;
+  ip_address?: string;
+  ipAddress?: string;
+  user_agent?: string;
+  userAgent?: string;
   geolocation?: {
     latitude: number;
     longitude: number;
   };
-  consentAcknowledged: boolean;
+  consent_acknowledged?: boolean;
+  consentAcknowledged?: boolean;
+}
+
+// E-signature session for managing signing flow
+export interface ESignatureSession {
+  contract_id: string;
+  signer_role: 'landlord' | 'tenant';
+  status: 'pending' | 'signed' | 'expired';
+  expires_at: string;
 }
 
 // Main lease contract entity

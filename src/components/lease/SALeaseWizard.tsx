@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { DEFAULT_WIZARD_DATA, WIZARD_STEPS, type LeaseWizardData } from '@/types/lease';
+import { LeasePreviewModal } from './LeasePreviewModal';
+import { SuccessDialog } from '@/components/ui/SuccessDialog';
 import {
   Step01LeaseBasics, validateStep01,
   Step02Parties, validateStep02,
@@ -27,6 +29,12 @@ interface SALeaseWizardProps {
   onCancel?: () => void;
 }
 
+interface SignatureInfo {
+  imageUrl: string;
+  name: string;
+  signedAt: string;
+}
+
 const validators = [validateStep01, validateStep02, validateStep03, validateStep04, validateStep05, validateStep06, validateStep07, validateStep08, validateStep09, validateStep10];
 
 export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: SALeaseWizardProps) {
@@ -36,7 +44,14 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
   const [savedContractId, setSavedContractId] = useState<string | null>(contractId || null);
+  
+  // Lease preview modal state
+  const [showLeasePreview, setShowLeasePreview] = useState(false);
+  const [landlordSignature, setLandlordSignature] = useState<SignatureInfo | undefined>();
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [successType, setSuccessType] = useState<'signed' | 'sent'>('signed');
 
   // Load existing contract data
   useEffect(() => {
@@ -63,6 +78,16 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
       if (error) throw error;
       if (contract?.contract_data) {
         setData({ ...DEFAULT_WIZARD_DATA, ...contract.contract_data });
+        
+        // Load landlord signature if exists
+        if (contract.landlord_signed_at && contract.landlord_signature_data) {
+          const sigData = contract.landlord_signature_data as any;
+          setLandlordSignature({
+            imageUrl: sigData.signature_image_url || sigData.signatureImageUrl,
+            name: contract.contract_data.landlordFullName || 'Landlord',
+            signedAt: new Date(contract.landlord_signed_at).toLocaleString(),
+          });
+        }
       }
     } catch (err) {
       console.error('Error loading contract:', err);
@@ -114,32 +139,87 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
     if (currentStep > 1) setCurrentStep(prev => prev - 1);
   };
 
-  const handleGenerate = async () => {
-    if (!savedContractId) { toast.error('Please save the contract first'); return; }
-    setIsGenerating(true);
+  const handlePreviewAndSign = () => {
+    setShowLeasePreview(true);
+  };
+
+  const handleLandlordSign = async (signatureDataUrl: string) => {
+    if (!savedContractId) {
+      toast.error('Please save the contract first');
+      return;
+    }
+    
+    setIsSigning(true);
     try {
-      const { error } = await supabase.functions.invoke('generate-lease-pdf', { body: { contractId: savedContractId } });
+      // Get IP address
+      let ipAddress = 'unknown';
+      try {
+        const ipResponse = await fetch('https://api.ipify.org?format=json');
+        const ipData = await ipResponse.json();
+        ipAddress = ipData.ip;
+      } catch {}
+      
+      const signatureData = {
+        signature_image_url: signatureDataUrl,
+        signed_at: new Date().toISOString(),
+        ip_address: ipAddress,
+        user_agent: navigator.userAgent,
+        consent_acknowledged: true,
+      };
+      
+      const { error } = await supabase
+        .from('lease_contracts')
+        .update({
+          landlord_signed_at: new Date().toISOString(),
+          landlord_signature_data: signatureData as any,
+          status: 'pending_tenant',
+        })
+        .eq('id', savedContractId);
+      
       if (error) throw error;
-      toast.success('PDF generated successfully');
+      
+      setLandlordSignature({
+        imageUrl: signatureDataUrl,
+        name: data.landlordFullName,
+        signedAt: new Date().toLocaleString(),
+      });
+      
+      setShowLeasePreview(false);
+      setSuccessType('signed');
+      setShowSuccessDialog(true);
     } catch (err) {
-      toast.error('Failed to generate PDF');
+      console.error('Error signing:', err);
+      toast.error('Failed to sign contract');
     } finally {
-      setIsGenerating(false);
+      setIsSigning(false);
     }
   };
 
   const handleSendToTenant = async () => {
-    if (!savedContractId || !data.tenantEmail) { toast.error('Tenant email required'); return; }
+    if (!savedContractId || !data.tenantEmail) { 
+      toast.error('Tenant email required'); 
+      return; 
+    }
     setIsSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-contract-to-tenant', { body: { contractId: savedContractId, tenantEmail: data.tenantEmail } });
+      const { error } = await supabase.functions.invoke('send-contract-to-tenant', { 
+        body: { contractId: savedContractId, tenantEmail: data.tenantEmail } 
+      });
       if (error) throw error;
-      toast.success('Contract sent to tenant');
-      onComplete?.(savedContractId);
+      
+      setSuccessType('sent');
+      setShowSuccessDialog(true);
     } catch (err) {
       toast.error('Failed to send contract');
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessDialog(false);
+    if (successType === 'sent') {
+      onComplete?.(savedContractId!);
     }
   };
 
@@ -158,7 +238,16 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
       case 7: return <Step07Maintenance {...props} />;
       case 8: return <Step08ConditionReport {...props} />;
       case 9: return <Step09Exclusions {...props} />;
-      case 10: return <Step10ReviewGenerate {...props} onGenerate={handleGenerate} onSendToTenant={handleSendToTenant} isGenerating={isGenerating} isSending={isSending} />;
+      case 10: return (
+        <Step10ReviewGenerate 
+          {...props} 
+          onPreviewAndSign={handlePreviewAndSign}
+          onSendToTenant={handleSendToTenant} 
+          isGenerating={isGenerating} 
+          isSending={isSending}
+          landlordHasSigned={!!landlordSignature}
+        />
+      );
       default: return null;
     }
   };
@@ -191,6 +280,42 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
           </Button>
         )}
       </div>
+
+      {/* Lease Preview Modal */}
+      <LeasePreviewModal
+        open={showLeasePreview}
+        onOpenChange={setShowLeasePreview}
+        wizardData={data}
+        mode="landlord"
+        landlordSignature={landlordSignature}
+        onSign={handleLandlordSign}
+        onSendToTenant={handleSendToTenant}
+        isSigning={isSigning}
+        isSending={isSending}
+      />
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={handleSuccessClose}
+        icon={successType === 'signed' ? 'check' : 'send'}
+        title={successType === 'signed' ? 'Lease Signed!' : 'Lease Sent!'}
+        subtitle={successType === 'signed' 
+          ? 'You have successfully signed the lease agreement.'
+          : `The lease has been sent to ${data.tenantEmail}`
+        }
+        nextSteps={successType === 'signed' ? [
+          { title: 'Send to tenant', description: 'The tenant will receive the lease to review and sign' },
+        ] : [
+          { title: 'Tenant reviews', description: 'The tenant will review the lease agreement' },
+          { title: 'Tenant signs', description: 'Once signed, you\'ll receive the completed lease' },
+        ]}
+        primaryAction={{
+          label: successType === 'signed' ? 'Continue' : 'Done',
+          onClick: handleSuccessClose
+        }}
+        showConfetti={successType === 'sent'}
+      />
     </div>
   );
 }
