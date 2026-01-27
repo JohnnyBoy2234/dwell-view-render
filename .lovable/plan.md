@@ -1,487 +1,283 @@
 
+## Plan: Lease Preview Popup with In-Document Signing Flow
 
-# South African Residential Lease Generator - Complete Rebuild Plan
+### Problem Summary
+1. **Text overflow issue**: The lease text currently "runs off the page" - needs proper text wrapping and scroll handling
+2. **Current flow is PDF-first**: Users generate a PDF before signing, which isn't ideal
+3. **Disconnected signing experience**: Signatures are captured on a separate page, not on the actual lease document
 
-## Overview
-
-This plan replaces the existing lease/contract builder system with a new legally-compliant South African residential lease generator. The new system uses a master lease template with variable placeholders (`{{VARIABLE_NAME}}`) and conditional blocks (`[[IF CONDITION]]...[[ENDIF]]`) to generate non-editable, legally consistent lease documents.
-
----
-
-## What Gets Deleted (Old System)
-
-The following files will be **completely removed** and replaced:
-
-### Components (6 files)
-- `src/components/lease/ContractBuilder.tsx` (592 lines)
-- `src/components/lease/steps/ContractBasicInfo.tsx`
-- `src/components/lease/steps/ContractParties.tsx`
-- `src/components/lease/steps/ContractBankDetails.tsx`
-- `src/components/lease/steps/ContractTerms.tsx`
-- `src/components/lease/steps/ContractClauses.tsx`
-- `src/components/lease/steps/ContractReview.tsx`
-
-### Edge Function
-- `supabase/functions/generate-lease-pdf/index.ts` (1029 lines) - will be completely rewritten
-
-### Types
-- `src/types/lease.ts` - will be completely rewritten with new structure
-
----
-
-## New System Architecture
-
-### 10-Step Wizard Flow
+### New Flow Overview
 
 ```text
-+-------+    +--------+    +----------+    +---------+    +-----+
-| Step1 | -> | Step2  | -> |  Step3   | -> | Step4   | -> |Step5|
-| Lease |    | Parties|    | Property |    | Deposit |    | CPA |
-| Basics|    |        |    | Details  |    | & Fees  |    |     |
-+-------+    +--------+    +----------+    +---------+    +-----+
-    |            |              |              |              |
-    v            v              v              v              v
-+-------+    +--------+    +----------+    +---------+    +-------+
-| Step6 | -> | Step7  | -> |  Step8   | -> | Step9   | -> |Step10 |
-|Features| -> |Maintain| -> |Condition | -> |Exclusion| -> |Review |
-|Toggles|    |Allocate|    |  Report  |    |   s     |    |Generate|
-+-------+    +--------+    +----------+    +---------+    +-------+
+LANDLORD JOURNEY:
+┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
+│  Complete   │ -> │  Click "Preview  │ -> │ Read full lease │ -> │ Sign at the  │
+│  10 Steps   │    │  & Sign Lease"   │    │ in popup modal  │    │ bottom       │
+└─────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
+                                                    │
+                                                    v
+                                           ┌─────────────────┐
+                                           │ Send to Tenant  │
+                                           └─────────────────┘
+
+TENANT JOURNEY:
+┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
+│  Receives   │ -> │  Clicks "View    │ -> │ Reads full lease│ -> │ Signs at the │
+│  Email/Link │    │  Lease"          │    │ in popup modal  │    │ bottom       │
+└─────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
+                                                    │
+                                                    v
+                                           ┌─────────────────────────┐
+                                           │ Both signed -> PDF with │
+                                           │ signatures is generated │
+                                           └─────────────────────────┘
 ```
 
 ---
 
-## New Data Types
+### What Changes
 
-### Primary Types (`src/types/lease.ts`)
+| Current Flow | New Flow |
+|--------------|----------|
+| Generate PDF first | View lease as HTML popup first |
+| Sign on separate page | Sign directly in the popup |
+| PDF without visible signatures | PDF includes signature images |
+| Landlord and tenant use different pages | Same popup component for both |
 
-```typescript
-// Lease type options
-type LeaseType = 'fixed' | 'month_to_month';
+---
 
-// Who maintains which feature
-type MaintenanceResponsibility = 'tenant' | 'landlord';
+### Technical Implementation
 
-// Condition report answer
-type ConditionAnswer = 'yes' | 'no' | 'na';
+#### Step 1: Create LeasePreviewModal Component
 
-// Main wizard data structure - all variables for the template
-interface LeaseWizardData {
-  // STEP 1: Lease Basics
-  leaseType: LeaseType;
-  leaseStartDate: string;
-  leaseEndDate?: string; // Only if fixed-term
-  rentAmount: number;
-  rentDueDay: number; // 1-7
-  escalationPercent?: number;
+**New File:** `src/components/lease/LeasePreviewModal.tsx`
 
-  // STEP 2: Parties
-  landlordFullName: string;
-  landlordIdNumber: string;
-  landlordAddress: string;
-  landlordEmail: string;
-  landlordPhone?: string;
-  
-  tenantFullName: string;
-  tenantIdNumber: string;
-  tenantAddress: string;
-  tenantEmail: string;
-  tenantPhone?: string;
-  tenantIsJuristic: boolean;
+A full-screen modal that:
+- Renders the processed lease template as formatted HTML
+- Fixes text overflow with proper CSS (word-wrap, overflow handling)
+- Includes scroll area for the full legal text
+- Shows signature section at the bottom with canvas
+- Has consent checkbox before signing
+- Supports both landlord and tenant modes
 
-  // STEP 3: Property Details
-  propertyAddress: string;
-  isSectionalTitle: boolean;
-  bodyCorpRulesApply: boolean;
+Key Features:
+- `max-w-5xl` width for readable legal text
+- `max-h-[90vh]` with `ScrollArea` for long documents
+- `whitespace-pre-wrap` and `break-words` for proper text handling
+- Signature canvas integrated at the bottom of the lease content
+- Clear "This is not yet legally binding" indicator until signed
 
-  // STEP 4: Deposit & Fees
-  depositAmount: number;
-  depositInterestApplies: boolean;
-  lateFeeAmount: number;
+#### Step 2: Create Lease HTML Renderer
 
-  // STEP 5: CPA (Auto-calculated)
-  tenantIsIndividual: boolean;
-  landlordActingInBusiness: boolean;
-  cpaApplies: boolean; // Computed field
+**New File:** `src/utils/leaseHtmlRenderer.ts`
 
-  // STEP 6: Property Features (Clause Toggles)
-  hasPool: boolean;
-  hasGarden: boolean;
-  petsAllowed: boolean;
-  smokingAllowed: boolean;
-  hasAlarmSecurity: boolean;
+Utility to convert the processed template text into clean, readable HTML:
+- Convert section headers to styled headings
+- Convert tables to proper HTML tables
+- Apply proper typography and spacing
+- Handle the template's `===` and `---` separators as visual dividers
+- Style conditionally-included sections properly
 
-  // STEP 7: Maintenance Allocation
-  poolMaintenanceBy?: MaintenanceResponsibility;
-  gardenMaintenanceBy?: MaintenanceResponsibility;
-  alarmMaintenanceBy?: MaintenanceResponsibility;
+#### Step 3: Update Step 10 (Review & Generate)
 
-  // STEP 8: Condition Report (Annexure A)
-  conditionReport: ConditionReportAnswers;
+**Modify:** `src/components/lease/steps-sa/Step10ReviewGenerate.tsx`
 
-  // STEP 9: Exclusions
-  excludedItemsList: string;
+Change the buttons from:
+- "Generate PDF" and "Send to Tenant"
 
-  // Bank Details (for schedule)
-  landlordBankName: string;
-  landlordBranchCode: string;
-  landlordAccountNumber: string;
-  landlordReference?: string;
+To:
+- "Preview & Sign Lease" (opens the new popup)
+- Keep "Download PDF" as secondary (only after signing)
 
-  // Occupants
-  occupantsList?: string;
-}
+Flow:
+1. Landlord clicks "Preview & Sign Lease"
+2. Full lease opens in popup modal
+3. Landlord reads and scrolls through
+4. At bottom: consent checkbox + signature pad
+5. After signing, shows "Send to Tenant" button
+6. Tenant email prompt, then sends
 
-interface ConditionReportAnswers {
-  s1_electrical: ConditionAnswer;
-  s2_illegalElectrical: ConditionAnswer;
-  s3_geyser: ConditionAnswer;
-  s4_drainage: ConditionAnswer;
-  s5_leakingTaps: ConditionAnswer;
-  s6_missingKeys: ConditionAnswer;
-  s7_remoteControls: ConditionAnswer;
-  s8_alarmSecurity: ConditionAnswer;
-  s9_pool: ConditionAnswer;
-  s10_poolRepairs: ConditionAnswer;
-  s11_braaiFireplace: ConditionAnswer;
-  s12_blindsCurtains: ConditionAnswer;
-  s13_dampProblems: ConditionAnswer;
-  s14_roofLeaks: ConditionAnswer;
-  s15_crackedWindows: ConditionAnswer;
-  s16_bathsBasins: ConditionAnswer;
-  s17_floorTiles: ConditionAnswer;
-  s18_structuralDefects: ConditionAnswer;
-  s19_carpets: ConditionAnswer;
-  s20_builtInCupboards: ConditionAnswer;
-  s21_doorHandles: ConditionAnswer;
-  s22_boundaryFence: ConditionAnswer;
-  s23_buildingRestrictions: ConditionAnswer;
-  s24_buildingPlans: ConditionAnswer;
-  s25_approvedPlans: ConditionAnswer;
-  s26_otherDefects: ConditionAnswer;
-  s27_yearsResided: string;
-  s28_existingLease: ConditionAnswer;
-  s29_limitedKnowledge: ConditionAnswer;
-  comments: string; // For any "YES" answers
-}
+#### Step 4: Update SALeaseWizard
 
-// Contract status stays similar
-type LeaseStatus = 'draft' | 'pending_tenant' | 'pending_landlord' | 'signed' | 'expired' | 'terminated';
+**Modify:** `src/components/lease/SALeaseWizard.tsx`
 
-interface LeaseContract {
-  id: string;
-  propertyId?: string;
-  landlordId: string;
-  tenantId?: string;
-  title: string;
-  wizardData: LeaseWizardData;
-  status: LeaseStatus;
-  version: number;
-  pdfUrl?: string;
-  annexurePdfUrl?: string;
-  pdfHash?: string;
-  landlordSignedAt?: string;
-  tenantSignedAt?: string;
-  auditTrail: AuditEntry[];
-  createdAt: string;
-  updatedAt: string;
-}
+Add state for:
+- `showLeasePreview: boolean`
+- `landlordHasSigned: boolean`
+
+Update flow to:
+1. Step 10 triggers preview modal
+2. Modal handles signing
+3. After landlord signs, enable "Send to Tenant"
+4. Save signature data to contract
+
+#### Step 5: Create Tenant View Lease Page
+
+**Modify:** `src/pages/LeaseSignature.tsx`
+
+Replace the current separate page approach with:
+1. When tenant opens link, immediately show `LeasePreviewModal`
+2. Tenant reads the full lease in the popup
+3. Tenant signs at the bottom
+4. After both signed, trigger PDF generation with signatures
+
+#### Step 6: Update PDF Generation Edge Function
+
+**Modify:** `supabase/functions/generate-lease-pdf/index.ts`
+
+Add signature embedding:
+- Accept landlord and tenant signature image URLs
+- Embed signature images into the PDF at the signature sections
+- Only generate final PDF after both parties have signed
+- Include timestamp of each signature on the document
+
+---
+
+### Component Structure
+
+```
+LeasePreviewModal
+├── DialogContent (max-w-5xl, max-h-[90vh])
+│   ├── DialogHeader
+│   │   ├── Title: "Lease Agreement"
+│   │   └── Subtitle: Property address + status
+│   │
+│   ├── ScrollArea (flex-1, full lease content)
+│   │   ├── Rendered Lease HTML (with proper styling)
+│   │   ├── Annexure A (Condition Report)
+│   │   └── Signature Section
+│   │       ├── Landlord Signature (show if signed, or pad if current user)
+│   │       └── Tenant Signature (show if signed, or pad if current user)
+│   │
+│   └── Footer (sticky)
+│       ├── Consent checkbox
+│       ├── Sign button
+│       └── Download PDF (if fully signed)
 ```
 
 ---
 
-## New Components Structure
-
-### Main Wizard Component
-**File:** `src/components/lease/SALeaseWizard.tsx`
-
-Features:
-- 10-step progress indicator (mobile-first)
-- Auto-save on each step
-- Validation before proceeding
-- Scroll-to-top on step change
-- Plain-language questions with legal tooltips
-
-### Step Components (10 new files)
-
-| Step | File | Variables Collected |
-|------|------|---------------------|
-| 1 | `Step01LeaseBasics.tsx` | `leaseType`, `leaseStartDate`, `leaseEndDate`, `rentAmount`, `rentDueDay`, `escalationPercent` |
-| 2 | `Step02Parties.tsx` | `landlordFullName`, `landlordIdNumber`, `tenantFullName`, `tenantIdNumber`, `tenantIsJuristic` |
-| 3 | `Step03PropertyDetails.tsx` | `propertyAddress`, `isSectionalTitle`, `bodyCorpRulesApply` |
-| 4 | `Step04DepositFees.tsx` | `depositAmount`, `depositInterestApplies`, `lateFeeAmount` |
-| 5 | `Step05CPA.tsx` | `tenantIsIndividual`, `landlordActingInBusiness` (auto-computes `cpaApplies`) |
-| 6 | `Step06PropertyFeatures.tsx` | `hasPool`, `hasGarden`, `petsAllowed`, `smokingAllowed`, `hasAlarmSecurity` |
-| 7 | `Step07Maintenance.tsx` | `poolMaintenanceBy`, `gardenMaintenanceBy` (only shown if feature exists) |
-| 8 | `Step08ConditionReport.tsx` | All 29 condition statements (YES/NO/N/A) |
-| 9 | `Step09Exclusions.tsx` | `excludedItemsList` |
-| 10 | `Step10ReviewGenerate.tsx` | Read-only preview, generate buttons |
-
----
-
-## Template Engine
-
-### New Utility: `src/utils/leaseTemplateEngine.ts`
-
-```typescript
-/**
- * Processes the master lease template by:
- * 1. Replacing {{VARIABLE_NAME}} placeholders with actual values
- * 2. Evaluating [[IF CONDITION]]...[[ENDIF]] blocks
- * 3. Removing false conditional blocks entirely
- */
-export function processLeaseTemplate(
-  template: string,
-  data: LeaseWizardData
-): string;
-
-/**
- * Maps wizard data to template variables
- */
-export function buildTemplateVariables(
-  data: LeaseWizardData
-): Record<string, string>;
-
-/**
- * Evaluates conditions based on wizard data
- * Supports: CPA_APPLIES, TENANT_IS_JURISTIC, IS_SECTIONAL_TITLE,
- * HAS_POOL, HAS_GARDEN, PETS_ALLOWED, SMOKING_ALLOWED, HAS_ALARM_SECURITY
- */
-export function evaluateCondition(
-  condition: string,
-  data: LeaseWizardData
-): boolean;
-```
-
-### Master Templates Storage
-
-**Store templates as constants:**
-- `src/templates/masterLeaseTemplate.ts` - Full legal text with placeholders
-- `src/templates/conditionReportTemplate.ts` - Annexure A template
-
----
-
-## PDF Generation (Edge Function Rewrite)
-
-### File: `supabase/functions/generate-lease-pdf/index.ts`
-
-Complete rewrite with:
-
-1. **Template Processing**
-   - Load master template
-   - Process all `{{VARIABLE}}` placeholders
-   - Evaluate all `[[IF]]...[[ENDIF]]` conditionals
-   - Remove empty conditional blocks
-
-2. **Two PDFs Generated**
-   - Main Lease Agreement PDF
-   - Annexure A: Condition Report PDF
-
-3. **Compliance Features**
-   - Timestamp on every page
-   - Version number in footer
-   - Document hash for integrity
-   - Audit trail entry
-
-4. **Non-Editable Output**
-   - Locked PDF (read-only)
-   - No form fields
-   - Watermark option for drafts
-
----
-
-## Variable Mapping Reference
-
-| Template Variable | Wizard Field | Step |
-|-------------------|--------------|------|
-| `{{LEASE_TYPE}}` | `leaseType` | 1 |
-| `{{LEASE_START_DATE}}` | `leaseStartDate` | 1 |
-| `{{LEASE_END_DATE}}` | `leaseEndDate` | 1 |
-| `{{RENT_AMOUNT}}` | `rentAmount` (formatted as R X,XXX.XX) | 1 |
-| `{{RENT_DUE_DAY}}` | `rentDueDay` | 1 |
-| `{{ESCALATION_PERCENT}}` | `escalationPercent` | 1 |
-| `{{LANDLORD_FULL_NAME}}` | `landlordFullName` | 2 |
-| `{{TENANT_FULL_NAME}}` | `tenantFullName` | 2 |
-| `{{PROPERTY_ADDRESS}}` | `propertyAddress` | 3 |
-| `{{DEPOSIT_AMOUNT}}` | `depositAmount` | 4 |
-| `{{LATE_FEE_AMOUNT}}` | `lateFeeAmount` | 4 |
-| `{{EXCLUDED_ITEMS_LIST}}` | `excludedItemsList` | 9 |
-| `{{CLAUSE_32_COMMENTS}}` | `conditionReport.comments` | 8 |
-
----
-
-## Condition Mapping Reference
-
-| Template Condition | Wizard Field | Logic |
-|--------------------|--------------|-------|
-| `CPA_APPLIES` | `cpaApplies` | `tenantIsIndividual && landlordActingInBusiness` |
-| `TENANT_IS_JURISTIC` | `tenantIsJuristic` | Direct boolean |
-| `IS_SECTIONAL_TITLE` | `isSectionalTitle` | Direct boolean |
-| `HAS_POOL` | `hasPool` | Direct boolean |
-| `HAS_GARDEN` | `hasGarden` | Direct boolean |
-| `PETS_ALLOWED` | `petsAllowed` | Direct boolean |
-| `SMOKING_ALLOWED` | `smokingAllowed` | Direct boolean |
-| `HAS_ALARM_SECURITY` | `hasAlarmSecurity` | Direct boolean |
-
----
-
-## Database Changes
-
-### Migration: Update `lease_contracts` table
-
-```sql
--- Update contract_data column structure
--- Old: LeaseContractData (free-form)
--- New: LeaseWizardData (structured wizard answers)
-
--- Add annexure PDF URL
-ALTER TABLE lease_contracts 
-ADD COLUMN IF NOT EXISTS annexure_pdf_url TEXT;
-
--- Add template version tracking
-ALTER TABLE lease_contracts 
-ADD COLUMN IF NOT EXISTS template_version INTEGER DEFAULT 1;
-```
-
----
-
-## Files to Create (New)
+### Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/components/lease/SALeaseWizard.tsx` | Main 10-step wizard |
-| `src/components/lease/steps-sa/Step01LeaseBasics.tsx` | Lease type, dates, rent |
-| `src/components/lease/steps-sa/Step02Parties.tsx` | Landlord & tenant details |
-| `src/components/lease/steps-sa/Step03PropertyDetails.tsx` | Property address, sectional title |
-| `src/components/lease/steps-sa/Step04DepositFees.tsx` | Deposit, late fees |
-| `src/components/lease/steps-sa/Step05CPA.tsx` | Consumer Protection Act |
-| `src/components/lease/steps-sa/Step06PropertyFeatures.tsx` | Pool, garden, pets toggles |
-| `src/components/lease/steps-sa/Step07Maintenance.tsx` | Who maintains what |
-| `src/components/lease/steps-sa/Step08ConditionReport.tsx` | 29 condition statements |
-| `src/components/lease/steps-sa/Step09Exclusions.tsx` | Excluded items |
-| `src/components/lease/steps-sa/Step10ReviewGenerate.tsx` | Preview & generate |
-| `src/templates/masterLeaseTemplate.ts` | Legal template text |
-| `src/templates/conditionReportTemplate.ts` | Annexure A template |
-| `src/utils/leaseTemplateEngine.ts` | Variable/condition processor |
-| `src/types/lease.ts` | New types (full rewrite) |
+| `src/components/lease/LeasePreviewModal.tsx` | Main popup component with lease display + signing |
+| `src/utils/leaseHtmlRenderer.ts` | Convert template text to styled HTML |
 
 ---
 
-## Files to Delete (Old)
-
-| File | Reason |
-|------|--------|
-| `src/components/lease/steps/ContractBasicInfo.tsx` | Replaced by SA steps |
-| `src/components/lease/steps/ContractParties.tsx` | Replaced by SA steps |
-| `src/components/lease/steps/ContractBankDetails.tsx` | Replaced by SA steps |
-| `src/components/lease/steps/ContractTerms.tsx` | Replaced by SA steps |
-| `src/components/lease/steps/ContractClauses.tsx` | Replaced by SA steps |
-| `src/components/lease/steps/ContractReview.tsx` | Replaced by SA steps |
-| `src/components/lease/ContractBuilder.tsx` | Replaced by SALeaseWizard |
-
----
-
-## Files to Update
+### Files to Modify
 
 | File | Changes |
 |------|---------|
-| `src/pages/LeaseBuilder.tsx` | Import SALeaseWizard instead of ContractBuilder |
-| `src/hooks/useLeaseContracts.ts` | Update types, add annexure PDF handling |
-| `src/components/property/CreateLeaseFromApplication.tsx` | Update data structure |
-| `supabase/functions/generate-lease-pdf/index.ts` | Complete rewrite |
-| `supabase/functions/send-contract-to-tenant/index.ts` | Add annexure PDF attachment |
+| `src/components/lease/steps-sa/Step10ReviewGenerate.tsx` | Replace buttons, add preview modal trigger |
+| `src/components/lease/SALeaseWizard.tsx` | Add preview state and modal |
+| `src/pages/LeaseSignature.tsx` | Use LeasePreviewModal instead of current layout |
+| `src/hooks/useLeaseContracts.ts` | Add method to save signature data |
+| `supabase/functions/generate-lease-pdf/index.ts` | Embed signature images in final PDF |
 
 ---
 
-## UI/UX Design Principles
+### CSS Fixes for Text Overflow
 
-1. **Mobile-First Layout**
-   - Single column on mobile
-   - Touch-friendly inputs
-   - Large tap targets
+The lease preview will use these CSS properties to prevent text running off:
 
-2. **Plain Language Questions**
-   - No legal jargon in questions
-   - Tooltips explain legal implications
-   - Examples provided where helpful
+```css
+.lease-content {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  line-height: 1.6;
+  font-size: 14px;
+}
 
-3. **Progress Indicator**
-   - Shows "Step X of 10"
-   - Percentage complete bar
-   - Step titles visible
+.lease-section-header {
+  font-weight: bold;
+  margin-top: 24px;
+  margin-bottom: 12px;
+  page-break-after: avoid;
+}
 
-4. **Validation Feedback**
-   - Inline errors (red text under fields)
-   - Required fields marked with *
-   - Cannot proceed until valid
-
-5. **Auto-Save**
-   - Save to localStorage on field change
-   - Save to database on step completion
-   - Resume from last step
-
----
-
-## Implementation Order
-
-1. **Phase 1: Types & Templates**
-   - Create new `src/types/lease.ts`
-   - Create `src/templates/masterLeaseTemplate.ts`
-   - Create `src/templates/conditionReportTemplate.ts`
-   - Create `src/utils/leaseTemplateEngine.ts`
-
-2. **Phase 2: Wizard Steps (1-5)**
-   - Step01LeaseBasics
-   - Step02Parties
-   - Step03PropertyDetails
-   - Step04DepositFees
-   - Step05CPA
-
-3. **Phase 3: Wizard Steps (6-10)**
-   - Step06PropertyFeatures
-   - Step07Maintenance
-   - Step08ConditionReport
-   - Step09Exclusions
-   - Step10ReviewGenerate
-
-4. **Phase 4: Main Wizard**
-   - Create SALeaseWizard.tsx
-   - Update LeaseBuilder.tsx to use it
-
-5. **Phase 5: PDF Generation**
-   - Rewrite generate-lease-pdf edge function
-   - Test with sample data
-
-6. **Phase 6: Cleanup**
-   - Delete old step files
-   - Delete old ContractBuilder
-   - Update all imports
-   - Database migration
-
----
-
-## Technical Notes
-
-### Why We Cannot Edit Legal Text
-
-The master template contains legally-reviewed clauses. By using only placeholders and conditionals:
-- Legal consistency is maintained
-- Landlords cannot accidentally create invalid contracts
-- Reduces liability for the platform
-- Standardizes dispute resolution
-
-### CPA Logic
-
-```typescript
-// Consumer Protection Act applies when:
-// 1. Tenant is an individual (not juristic person), AND
-// 2. Landlord is acting in course of business
-
-const cpaApplies = tenantIsIndividual && landlordActingInBusiness;
+.lease-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
 ```
 
-### Condition Report Dynamic Fields
+---
 
-Only show questions relevant to the property:
-- Pool questions (9, 10): Only if `hasPool = true`
-- Alarm questions (8): Only if `hasAlarmSecurity = true`
+### User Experience Details
+
+**For Landlord:**
+1. Complete 10 wizard steps
+2. Click "Preview & Sign Lease"
+3. Large popup shows full lease
+4. Scroll through reading the document
+5. At bottom: checkbox + signature pad
+6. Sign, then prompted to send to tenant
+7. Success dialog shows "Lease sent to tenant for signature"
+
+**For Tenant:**
+1. Receives email with link
+2. Clicks "View Lease"
+3. Same large popup shows full lease (with landlord signature visible)
+4. Scroll through reading
+5. At bottom: checkbox + signature pad (landlord sig shown above)
+6. Sign
+7. Success dialog: "Lease complete! Both parties signed"
+8. PDF automatically generated with both signatures embedded
+
+---
+
+### Signing Section Layout
+
+```
+┌──────────────────────────────────────────────────┐
+│ SIGNATURES                                       │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│ LANDLORD                                         │
+│ ┌──────────────────────────────────────────────┐ │
+│ │  [Signature Image or Canvas]                 │ │
+│ └──────────────────────────────────────────────┘ │
+│ Name: John Smith                                 │
+│ Signed: 27 January 2026 at 14:30                │
+│                                                  │
+│ ─────────────────────────────────────────────── │
+│                                                  │
+│ TENANT                                           │
+│ ┌──────────────────────────────────────────────┐ │
+│ │  [Signature Image or Canvas]                 │ │
+│ └──────────────────────────────────────────────┘ │
+│ Name: Jane Doe                                   │
+│ Signed: 27 January 2026 at 15:45                │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+---
+
+### Implementation Order
+
+1. **Create LeaseHtmlRenderer utility** - Parse template text into styled HTML
+2. **Create LeasePreviewModal** - Full popup with scroll, lease content, signatures
+3. **Update Step10** - Add "Preview & Sign" button, integrate modal
+4. **Update SALeaseWizard** - Add state and handlers for signing flow
+5. **Update LeaseSignature page** - Use same modal for tenant viewing
+6. **Update PDF generation** - Embed signature images in final document
+
+---
+
+### PDF Only After Both Sign
+
+The key change is:
+- **Before**: PDF generated first, then signed separately
+- **After**: Lease displayed as HTML, signatures captured, PDF generated only when both parties have signed
+
+This means:
+- Draft leases are HTML-only (in the popup)
+- Final signed leases become PDFs with embedded signatures
+- The PDF becomes the legal record with both signatures visible
 
