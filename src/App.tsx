@@ -224,7 +224,7 @@ function AppRoutes() {
 
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />
-              <Route path="/agency/onboarding" element={<AuthenticatedRoute><AgencyOnboarding /></AuthenticatedRoute>} />
+              <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/callback" element={<DocuSignCallback />} />
               <Route path="/docusign-callback" element={<DocuSignCallback />} />

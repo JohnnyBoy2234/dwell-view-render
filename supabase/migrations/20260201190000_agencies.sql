@@ -113,6 +113,19 @@ CREATE POLICY "Agency members can view agency membership"
     )
   );
 
+CREATE POLICY "Agency creator can create initial admin membership"
+  ON public.agency_members FOR INSERT
+  WITH CHECK (
+    agency_members.user_id = auth.uid()
+    AND agency_members.role = 'agency_admin'
+    AND EXISTS (
+      SELECT 1
+      FROM public.agencies a
+      WHERE a.id = agency_members.agency_id
+        AND a.created_by = auth.uid()
+    )
+  );
+
 CREATE POLICY "Only agency admins can manage members"
   ON public.agency_members FOR INSERT
   WITH CHECK (public.is_admin() OR public.is_agency_admin(agency_members.agency_id));

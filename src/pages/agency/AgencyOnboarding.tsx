@@ -30,34 +30,82 @@ export default function AgencyOnboarding() {
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
 
+  const [accountEmail, setAccountEmail] = useState('');
+  const [accountPassword, setAccountPassword] = useState('');
+  const [accountConfirmPassword, setAccountConfirmPassword] = useState('');
+
   const [agency, setAgency] = useState<AgencyRow | null>(null);
 
   const [agencyName, setAgencyName] = useState('');
   const [docFile, setDocFile] = useState<File | null>(null);
 
-  const steps = useMemo(
-    () => [
-      { id: 1, title: 'Agency Details', description: 'Tell us about your agency' },
-      { id: 2, title: 'Upload Document', description: 'Upload your agency document' },
-      { id: 3, title: 'Submit', description: 'Submit for approval' },
-    ],
-    []
-  );
+  const hasAccountStep = !user;
+  const totalSteps = hasAccountStep ? 4 : 3;
+  const progress = (step / totalSteps) * 100;
 
-  const progress = (step / steps.length) * 100;
+  const stepMeta = useMemo(() => {
+    if (hasAccountStep) {
+      if (step === 1) return { title: 'Create Account', description: 'Create your agency admin account' };
+      if (step === 2) return { title: 'Agency Details', description: 'Tell us about your agency' };
+      if (step === 3) return { title: 'Upload Document', description: 'Upload your agency document' };
+      return { title: 'Submit', description: 'Submit for approval' };
+    }
+
+    if (step === 1) return { title: 'Agency Details', description: 'Tell us about your agency' };
+    if (step === 2) return { title: 'Upload Document', description: 'Upload your agency document' };
+    return { title: 'Submit', description: 'Submit for approval' };
+  }, [hasAccountStep, step]);
 
   useEffect(() => {
     if (loading) return;
 
-    if (!user) {
-      redirectAfterAuth('/agency/onboarding');
-      navigate('/auth');
+    if (user) {
+      fetchExistingAgency();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, loading]);
+
+  const createAccount = async () => {
+    if (!accountEmail.trim()) {
+      toast({ variant: 'destructive', title: 'Email required', description: 'Please enter your email.' });
+      return;
+    }
+    if (!accountPassword) {
+      toast({ variant: 'destructive', title: 'Password required', description: 'Please enter a password.' });
+      return;
+    }
+    if (accountPassword !== accountConfirmPassword) {
+      toast({ variant: 'destructive', title: "Passwords don't match", description: 'Please confirm your password.' });
       return;
     }
 
-    fetchExistingAgency();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, loading]);
+    setBusy(true);
+    try {
+      redirectAfterAuth('/agency/onboarding');
+
+      const { error } = await supabase.auth.signUp({
+        email: accountEmail.trim(),
+        password: accountPassword,
+        options: {
+          data: { role: 'tenant' },
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Account created',
+        description: 'Please verify your email if required, then sign in to continue the agency onboarding.',
+      });
+
+      navigate('/auth');
+    } catch (err: any) {
+      toast({ variant: 'destructive', title: 'Account creation failed', description: err.message });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const fetchExistingAgency = async () => {
     if (!user) return;
@@ -141,16 +189,34 @@ export default function AgencyOnboarding() {
   };
 
   const onNext = async () => {
-    if (step === 1) {
+    // When logged out, step 1 is account creation.
+    if (hasAccountStep && step === 1) {
+      await createAccount();
+      return;
+    }
+
+    // Must be signed in for the agency/doc steps.
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Sign-in required',
+        description: 'Please sign in to continue the agency onboarding.',
+      });
+      return;
+    }
+
+    const agencyStep = hasAccountStep ? step - 1 : step;
+
+    if (agencyStep === 1) {
       if (!agencyName.trim()) {
         toast({ variant: 'destructive', title: 'Agency name required', description: 'Please enter your agency name.' });
         return;
       }
-      setStep(2);
+      setStep(step + 1);
       return;
     }
 
-    if (step === 2) {
+    if (agencyStep === 2) {
       if (!docFile) {
         toast({ variant: 'destructive', title: 'Document required', description: 'Please upload your agency document.' });
         return;
@@ -167,7 +233,7 @@ export default function AgencyOnboarding() {
 
         await uploadAgencyDocument(draft.id, docFile);
 
-        setStep(3);
+        setStep(step + 1);
       } catch (err: any) {
         toast({ variant: 'destructive', title: 'Upload failed', description: err.message });
       } finally {
@@ -176,7 +242,7 @@ export default function AgencyOnboarding() {
       return;
     }
 
-    if (step === 3) {
+    if (agencyStep === 3) {
       // nothing
       return;
     }
@@ -232,7 +298,7 @@ export default function AgencyOnboarding() {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <span className="text-sm font-medium text-muted-foreground">
-              Step {step} of {steps.length}
+              Step {step} of {totalSteps}
             </span>
           </div>
           <Progress value={progress} className="h-2" />
@@ -259,16 +325,57 @@ export default function AgencyOnboarding() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              {step === 1 && <Building2 className="h-5 w-5" />}
-              {step === 2 && <FileUp className="h-5 w-5" />}
-              {step === 3 && <CheckCircle2 className="h-5 w-5" />}
-              {steps[step - 1]?.title}
+              {(!user && step === 1) && <Building2 className="h-5 w-5" />}
+              {((user && step === 1) || (!user && step === 2)) && <Building2 className="h-5 w-5" />}
+              {((user && step === 2) || (!user && step === 3)) && <FileUp className="h-5 w-5" />}
+              {((user && step === 3) || (!user && step === 4)) && <CheckCircle2 className="h-5 w-5" />}
+              {stepMeta.title}
             </CardTitle>
-            <CardDescription>{steps[step - 1]?.description}</CardDescription>
+            <CardDescription>{stepMeta.description}</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {step === 1 && (
+            {!user && step === 1 && (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="agency-admin-email">Email</Label>
+                  <Input
+                    id="agency-admin-email"
+                    type="email"
+                    value={accountEmail}
+                    onChange={(e) => setAccountEmail(e.target.value)}
+                    placeholder="you@agency.com"
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="agency-admin-password">Password</Label>
+                  <Input
+                    id="agency-admin-password"
+                    type="password"
+                    value={accountPassword}
+                    onChange={(e) => setAccountPassword(e.target.value)}
+                    placeholder="Create a password"
+                    disabled={busy}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="agency-admin-confirm-password">Confirm Password</Label>
+                  <Input
+                    id="agency-admin-confirm-password"
+                    type="password"
+                    value={accountConfirmPassword}
+                    onChange={(e) => setAccountConfirmPassword(e.target.value)}
+                    placeholder="Confirm password"
+                    disabled={busy}
+                  />
+                </div>
+              </div>
+            )}
+
+            {((user && step === 1) || (!user && step === 2)) && (
               <div className="space-y-2">
                 <Label htmlFor="agency-name">Agency Name</Label>
                 <Input
@@ -281,7 +388,7 @@ export default function AgencyOnboarding() {
               </div>
             )}
 
-            {step === 2 && (
+            {((user && step === 2) || (!user && step === 3)) && (
               <div className="space-y-2">
                 <Label htmlFor="agency-doc">Agency Document</Label>
                 <Input
@@ -296,7 +403,7 @@ export default function AgencyOnboarding() {
               </div>
             )}
 
-            {step === 3 && (
+            {((user && step === 3) || (!user && step === 4)) && (
               <div className="space-y-4">
                 <Alert>
                   <AlertDescription>
@@ -322,7 +429,7 @@ export default function AgencyOnboarding() {
                 Previous
               </Button>
 
-              {step < 3 ? (
+              {step < totalSteps ? (
                 <Button onClick={onNext} disabled={busy}>
                   Continue
                   <ArrowRight className="h-4 w-4 ml-2" />
