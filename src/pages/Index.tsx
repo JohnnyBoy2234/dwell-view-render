@@ -104,12 +104,14 @@ const Index = () => {
           <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
             {/* Top Fade with Heading */}
             <div className="max-w-xl text-center px-4">
+              <div className="inline-block rounded-2xl bg-black/40 backdrop-blur-sm px-6 py-5 md:px-8 md:py-6">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-3 md:mb-4 font-sans">
                 <span className="block">Renting done right.</span>
               </h1>
               <p className="text-white text-base md:text-lg font-sans leading-relaxed lg:mb-8">
                 Simple, secure, and commission-free property rental
               </p>
+              </div>
               
             </div>
 
