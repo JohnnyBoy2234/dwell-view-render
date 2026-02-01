@@ -36,11 +36,13 @@ import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailed from "./pages/PaymentFailed";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import UsersManagement from "./pages/admin/UsersManagement";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminProperties from "./pages/admin/AdminProperties";
-import PropertyReports from "./pages/admin/PropertyReports";
 import DocumentReview from "./pages/admin/DocumentReview";
-import UsersManagement from "./pages/admin/UsersManagement";
+import KycManagement from "./pages/admin/KycManagement";
+import AgencyManagement from "./pages/admin/AgencyManagement";
+import PropertyReports from "./pages/admin/PropertyReports";
 import ApplyInvite from "./pages/ApplyInvite";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import RentalApplication from "./pages/RentalApplication";
@@ -57,7 +59,6 @@ import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes"
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 import VerifyId from "@/pages/VerifyId";
-import KycManagement from "@/pages/admin/KycManagement";
 import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
 import InventoryStart from "@/pages/InventoryStart";
@@ -191,6 +192,13 @@ function AppRoutes() {
                 <RouteGuard>
                   <AdminLayout>
                     <KycManagement />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/agencies" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <AgencyManagement />
                   </AdminLayout>
                 </RouteGuard>
               } />
