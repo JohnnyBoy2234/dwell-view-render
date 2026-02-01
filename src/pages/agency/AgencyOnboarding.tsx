@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -42,6 +43,22 @@ export default function AgencyOnboarding() {
   const hasAccountStep = !user;
   const totalSteps = hasAccountStep ? 4 : 3;
   const progress = (step / totalSteps) * 100;
+
+  const status = (agency?.status || 'draft') as AgencyStatus;
+  const statusLabel =
+    status === 'draft'
+      ? 'Draft'
+      : status === 'submitted'
+        ? 'Submitted'
+        : status === 'approved'
+          ? 'Approved'
+          : 'Declined';
+  const statusVariant =
+    status === 'approved'
+      ? 'default'
+      : status === 'declined'
+        ? 'destructive'
+        : 'secondary';
 
   const stepMeta = useMemo(() => {
     if (hasAccountStep) {
@@ -293,16 +310,26 @@ export default function AgencyOnboarding() {
             <h1 className="text-3xl font-bold text-primary">Agency Sign Up</h1>
             <p className="text-muted-foreground">Submit your agency for approval</p>
           </div>
+          <div className="ml-auto">
+            <Badge variant={statusVariant as any}>{statusLabel}</Badge>
+          </div>
         </div>
 
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm font-medium text-muted-foreground">
-              Step {step} of {totalSteps}
-            </span>
-          </div>
-          <Progress value={progress} className="h-2" />
-        </div>
+        {agency?.status === 'draft' && (
+          <Alert className="mb-6">
+            <AlertDescription>
+              Status: <b>Draft</b>. Complete the steps below and submit for verification.
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {agency?.status === 'submitted' && (
+          <Alert className="mb-6">
+            <AlertDescription>
+              Status: <b>Submitted</b>. Your documents are under review.
+            </AlertDescription>
+          </Alert>
+        )}
 
         {agency?.status === 'declined' && (
           <Alert variant="destructive" className="mb-6">
