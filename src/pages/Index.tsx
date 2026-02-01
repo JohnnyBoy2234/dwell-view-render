@@ -99,7 +99,6 @@ const Index = () => {
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-ocean-blue/70 via-ocean-blue/70 to-ocean-blue/60" />
           
           
           <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
