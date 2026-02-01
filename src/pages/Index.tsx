@@ -92,7 +92,14 @@ const Index = () => {
       {/* Hero Section with Glass Heading */}
       <section className="relative">
         <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-ocean-blue via-ocean-blue/90 to-ocean-blue/70" />
+          <div className="absolute inset-0 w-full h-full">
+            <img
+              src="/hero3.jpg"
+              alt="Modern rental living space"
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-ocean-blue/70 via-ocean-blue/70 to-ocean-blue/60" />
           
           
           <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
@@ -124,22 +131,6 @@ const Index = () => {
                 }} className="w-full my-[15px]" />
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full px-4 pt-0 pb-10 relative bg-gradient-to-b from-ocean-blue/70 to-ocean-blue/50">
-          <div className="max-w-5xl mx-auto z-10 relative">
-            <div className="flex flex-row gap-4 sm:gap-6 md:gap-8 overflow-hidden">
-              <div className="flex-1 min-w-0">
-                <ImageWithSkeleton
-                  src="/hero3.jpg"
-                  alt="Modern rental living space"
-                  className="w-full h-[200px] sm:h-[240px] md:h-[280px] object-cover rounded-2xl shadow-2xl"
-                  skeletonClassName="rounded-2xl"
-                />
-              </div>
-             
             </div>
           </div>
         </div>
