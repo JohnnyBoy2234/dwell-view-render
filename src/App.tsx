@@ -25,6 +25,7 @@ import BlogPost from "./pages/BlogPost";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
+import AgencyOnboarding from "./pages/agency/AgencyOnboarding";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
@@ -215,6 +216,7 @@ function AppRoutes() {
 
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />
+              <Route path="/agency/onboarding" element={<AuthenticatedRoute><AgencyOnboarding /></AuthenticatedRoute>} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/callback" element={<DocuSignCallback />} />
               <Route path="/docusign-callback" element={<DocuSignCallback />} />
