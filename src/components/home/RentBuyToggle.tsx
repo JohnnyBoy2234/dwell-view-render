@@ -8,14 +8,19 @@ interface RentBuyToggleProps {
 
 export function RentBuyToggle({ value, onChange, className }: RentBuyToggleProps) {
   return (
-    <div className={cn("flex gap-2 justify-center mb-4", className)}>
+    <div className={cn("relative flex bg-gray-900/80 backdrop-blur-sm rounded-full p-1 w-fit mx-auto mb-4", className)}>
+      {/* Sliding active indicator */}
+      <div
+        className={cn(
+          "absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-full shadow-lg transition-transform duration-300 ease-out",
+          value === "rent" ? "translate-x-1" : "translate-x-[calc(100%-8px)]"
+        )}
+      />
       <button
         onClick={() => onChange("rent")}
         className={cn(
-          "px-6 py-2 rounded-full font-semibold text-sm transition-all duration-200",
-          value === "rent"
-            ? "bg-ocean-blue text-white shadow-lg"
-            : "bg-white/80 text-muted-foreground hover:bg-white hover:text-foreground border border-border"
+          "relative z-10 px-8 py-2.5 rounded-full font-bold text-sm transition-all duration-200",
+          value === "rent" ? "text-gray-900" : "text-gray-400 hover:text-gray-200"
         )}
       >
         Rent
@@ -23,10 +28,8 @@ export function RentBuyToggle({ value, onChange, className }: RentBuyToggleProps
       <button
         onClick={() => onChange("sale")}
         className={cn(
-          "px-6 py-2 rounded-full font-semibold text-sm transition-all duration-200",
-          value === "sale"
-            ? "bg-ocean-blue text-white shadow-lg"
-            : "bg-white/80 text-muted-foreground hover:bg-white hover:text-foreground border border-border"
+          "relative z-10 px-8 py-2.5 rounded-full font-bold text-sm transition-all duration-200",
+          value === "sale" ? "text-gray-900" : "text-gray-400 hover:text-gray-200"
         )}
       >
         Buy

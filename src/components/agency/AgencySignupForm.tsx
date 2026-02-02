@@ -126,6 +126,7 @@ export function AgencySignupForm({ onSuccess }: AgencySignupFormProps) {
       }
 
       // Create agency draft
+      console.log('[AgencySignupForm] Creating agency draft for user:', userId);
       const { data: agencyData, error: agencyError } = await supabase
         .from("agencies")
         .insert({
@@ -136,22 +137,36 @@ export function AgencySignupForm({ onSuccess }: AgencySignupFormProps) {
         .select("id")
         .single();
 
-      if (agencyError) throw agencyError;
+      if (agencyError) {
+        console.error('[AgencySignupForm] Agency insert error:', agencyError);
+        throw agencyError;
+      }
+      console.log('[AgencySignupForm] Agency created:', agencyData);
 
       // Create agency membership
-      await supabase.from("agency_members").insert({
+      console.log('[AgencySignupForm] Creating agency membership for agency:', agencyData.id, 'user:', userId);
+      const { error: memberError } = await supabase.from("agency_members").insert({
         agency_id: agencyData.id,
         user_id: userId,
         role: "agency_admin",
       });
+      if (memberError) {
+        console.error('[AgencySignupForm] Agency membership insert error:', memberError);
+        throw memberError;
+      }
 
       // Update profile with additional info
-      await supabase.from("profiles").upsert({
+      console.log('[AgencySignupForm] Updating profile for user:', userId);
+      const { error: profileError } = await supabase.from("profiles").upsert({
         user_id: userId,
         display_name: formData.fullName.trim(),
         phone: formData.mobile.trim(),
         email: formData.email.trim(),
       });
+      if (profileError) {
+        console.error('[AgencySignupForm] Profile upsert error:', profileError);
+        throw profileError;
+      }
 
       toast({
         title: "Agency registered!",
@@ -163,10 +178,11 @@ export function AgencySignupForm({ onSuccess }: AgencySignupFormProps) {
       // Redirect to document upload step
       navigate("/agency/onboarding");
     } catch (error: any) {
+      console.error('[AgencySignupForm] Registration failed:', error);
       toast({
         variant: "destructive",
         title: "Registration failed",
-        description: error.message,
+        description: error?.message || JSON.stringify(error),
       });
     } finally {
       setBusy(false);
