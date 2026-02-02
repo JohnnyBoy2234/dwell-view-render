@@ -96,3 +96,6 @@ verify_jwt = true
 
 [functions.og-property]
 verify_jwt = false
+
+[functions.create-agency-agent]
+verify_jwt = false

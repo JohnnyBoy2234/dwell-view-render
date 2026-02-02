@@ -10,7 +10,8 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Home", icon: Home },
   { path: "/safe-renting", label: "Safe Renting", icon: Shield },
-  { path: "/properties", label: "Find Rental", icon: Search },
+  { path: "/properties?type=rent", label: "Rent", icon: Search },
+  { path: "/properties?type=sale", label: "Buy", icon: Home },
   { path: "/pricing", label: "Pricing", icon: BadgeDollarSign },
   { path: "/blog", label: "Blog", icon: Send },
   { path: "/about", label: "About", icon: Send },
