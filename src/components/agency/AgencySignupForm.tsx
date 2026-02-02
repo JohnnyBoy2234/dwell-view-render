@@ -100,6 +100,19 @@ export function AgencySignupForm({ onSuccess }: AgencySignupFormProps) {
         });
 
         if (authError) throw authError;
+
+        // If email confirmation is enabled, Supabase will not return a session.
+        // In that case the user is NOT authenticated yet (auth.uid() is null),
+        // so any insert into RLS-protected tables like `agencies` will fail.
+        if (!authData.session) {
+          toast({
+            title: "Check your email",
+            description: "Please verify your email, then sign in to continue the agency onboarding.",
+          });
+          navigate("/auth");
+          return;
+        }
+
         userId = authData.user?.id;
 
         if (!userId) {
