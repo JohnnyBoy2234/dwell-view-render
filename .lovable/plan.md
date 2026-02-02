@@ -1,283 +1,370 @@
 
-## Plan: Lease Preview Popup with In-Document Signing Flow
 
-### Problem Summary
-1. **Text overflow issue**: The lease text currently "runs off the page" - needs proper text wrapping and scroll handling
-2. **Current flow is PDF-first**: Users generate a PDF before signing, which isn't ideal
-3. **Disconnected signing experience**: Signatures are captured on a separate page, not on the actual lease document
+# Plan: Agency Signup Redesign, Rent/Buy Navigation, and Agency Agent Management
 
-### New Flow Overview
+## Overview
 
-```text
-LANDLORD JOURNEY:
-┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
-│  Complete   │ -> │  Click "Preview  │ -> │ Read full lease │ -> │ Sign at the  │
-│  10 Steps   │    │  & Sign Lease"   │    │ in popup modal  │    │ bottom       │
-└─────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
-                                                    │
-                                                    v
-                                           ┌─────────────────┐
-                                           │ Send to Tenant  │
-                                           └─────────────────┘
+This plan covers four major feature areas:
+1. **Agency Signup Page Redesign** - Modern, professional design inspired by RE/MAX and Seeff
+2. **Rent/Buy Navigation & Search** - Add "Rent" and "Buy" buttons with filtered property search
+3. **Agency Dashboard with Agent Management** - Create sub-accounts for agents
+4. **Sales Listings** - Allow agencies to list properties for sale with agent assignment
 
-TENANT JOURNEY:
-┌─────────────┐    ┌──────────────────┐    ┌─────────────────┐    ┌──────────────┐
-│  Receives   │ -> │  Clicks "View    │ -> │ Reads full lease│ -> │ Signs at the │
-│  Email/Link │    │  Lease"          │    │ in popup modal  │    │ bottom       │
-└─────────────┘    └──────────────────┘    └─────────────────┘    └──────────────┘
-                                                    │
-                                                    v
-                                           ┌─────────────────────────┐
-                                           │ Both signed -> PDF with │
-                                           │ signatures is generated │
-                                           └─────────────────────────┘
+---
+
+## Part 1: Agency Signup Page Redesign
+
+### Current State
+The current agency onboarding page (`src/pages/agency/AgencyOnboarding.tsx`) is a simple multi-step form in a single card layout. It lacks visual appeal and branding.
+
+### Inspiration Analysis
+- **RE/MAX**: Hero section with inspiring headline, form card on right, dark blue diagonal background, simple form fields
+- **Seeff**: Full-width hero image with team photo, "Start your new story" headline, value proposition cards below
+
+### New Design Approach
+
+**Layout Structure:**
+```
++----------------------------------------------------------+
+| Hero Section (Full-width gradient background)            |
+|  +------------------+  +---------------------------+     |
+|  | Left: Headline   |  | Right: Simple Form Card   |     |
+|  | "Grow Your       |  | Name & Surname            |     |
+|  |  Business with   |  | Mobile Number             |     |
+|  |  RentLekker"     |  | Email                     |     |
+|  |                  |  | Agency Name               |     |
+|  | Key benefits:    |  | Province (select)         |     |
+|  | - Commission-free|  | [Get Started Button]      |     |
+|  | - Full support   |  |                           |     |
+|  | - Easy onboarding|  +---------------------------+     |
+|  +------------------+                                    |
++----------------------------------------------------------+
+| Value Proposition Section (3 cards)                      |
++----------------------------------------------------------+
+| Footer CTA                                               |
++----------------------------------------------------------+
 ```
 
----
+### Files to Modify/Create
 
-### What Changes
+| File | Action |
+|------|--------|
+| `src/pages/agency/AgencyOnboarding.tsx` | Complete redesign |
+| `src/components/agency/AgencySignupForm.tsx` | **Create** - Extract form logic |
+| `src/components/agency/AgencyValueProps.tsx` | **Create** - Value proposition cards |
 
-| Current Flow | New Flow |
-|--------------|----------|
-| Generate PDF first | View lease as HTML popup first |
-| Sign on separate page | Sign directly in the popup |
-| PDF without visible signatures | PDF includes signature images |
-| Landlord and tenant use different pages | Same popup component for both |
-
----
-
-### Technical Implementation
-
-#### Step 1: Create LeasePreviewModal Component
-
-**New File:** `src/components/lease/LeasePreviewModal.tsx`
-
-A full-screen modal that:
-- Renders the processed lease template as formatted HTML
-- Fixes text overflow with proper CSS (word-wrap, overflow handling)
-- Includes scroll area for the full legal text
-- Shows signature section at the bottom with canvas
-- Has consent checkbox before signing
-- Supports both landlord and tenant modes
-
-Key Features:
-- `max-w-5xl` width for readable legal text
-- `max-h-[90vh]` with `ScrollArea` for long documents
-- `whitespace-pre-wrap` and `break-words` for proper text handling
-- Signature canvas integrated at the bottom of the lease content
-- Clear "This is not yet legally binding" indicator until signed
-
-#### Step 2: Create Lease HTML Renderer
-
-**New File:** `src/utils/leaseHtmlRenderer.ts`
-
-Utility to convert the processed template text into clean, readable HTML:
-- Convert section headers to styled headings
-- Convert tables to proper HTML tables
-- Apply proper typography and spacing
-- Handle the template's `===` and `---` separators as visual dividers
-- Style conditionally-included sections properly
-
-#### Step 3: Update Step 10 (Review & Generate)
-
-**Modify:** `src/components/lease/steps-sa/Step10ReviewGenerate.tsx`
-
-Change the buttons from:
-- "Generate PDF" and "Send to Tenant"
-
-To:
-- "Preview & Sign Lease" (opens the new popup)
-- Keep "Download PDF" as secondary (only after signing)
-
-Flow:
-1. Landlord clicks "Preview & Sign Lease"
-2. Full lease opens in popup modal
-3. Landlord reads and scrolls through
-4. At bottom: consent checkbox + signature pad
-5. After signing, shows "Send to Tenant" button
-6. Tenant email prompt, then sends
-
-#### Step 4: Update SALeaseWizard
-
-**Modify:** `src/components/lease/SALeaseWizard.tsx`
-
-Add state for:
-- `showLeasePreview: boolean`
-- `landlordHasSigned: boolean`
-
-Update flow to:
-1. Step 10 triggers preview modal
-2. Modal handles signing
-3. After landlord signs, enable "Send to Tenant"
-4. Save signature data to contract
-
-#### Step 5: Create Tenant View Lease Page
-
-**Modify:** `src/pages/LeaseSignature.tsx`
-
-Replace the current separate page approach with:
-1. When tenant opens link, immediately show `LeasePreviewModal`
-2. Tenant reads the full lease in the popup
-3. Tenant signs at the bottom
-4. After both signed, trigger PDF generation with signatures
-
-#### Step 6: Update PDF Generation Edge Function
-
-**Modify:** `supabase/functions/generate-lease-pdf/index.ts`
-
-Add signature embedding:
-- Accept landlord and tenant signature image URLs
-- Embed signature images into the PDF at the signature sections
-- Only generate final PDF after both parties have signed
-- Include timestamp of each signature on the document
+### Key Changes
+- Full-width hero with dark blue gradient background (matching brand)
+- Form card floats on the right side
+- Simplify initial form: Name, Phone, Email, Agency Name, Province
+- "Get Started" button creates draft and redirects to document upload step
+- Add testimonials/stats section below hero
+- Mobile: Stack form below headline
 
 ---
 
-### Component Structure
+## Part 2: Rent/Buy Navigation & Property Search
 
+### Current State
+- Navbar has "Find Rental" link pointing to `/properties`
+- Homepage search bar searches all properties
+- No distinction between rental and sale properties
+- Database `properties` table lacks `listing_type` column
+
+### New Navigation Structure
+
+**Navbar Changes:**
 ```
-LeasePreviewModal
-├── DialogContent (max-w-5xl, max-h-[90vh])
-│   ├── DialogHeader
-│   │   ├── Title: "Lease Agreement"
-│   │   └── Subtitle: Property address + status
-│   │
-│   ├── ScrollArea (flex-1, full lease content)
-│   │   ├── Rendered Lease HTML (with proper styling)
-│   │   ├── Annexure A (Condition Report)
-│   │   └── Signature Section
-│   │       ├── Landlord Signature (show if signed, or pad if current user)
-│   │       └── Tenant Signature (show if signed, or pad if current user)
-│   │
-│   └── Footer (sticky)
-│       ├── Consent checkbox
-│       ├── Sign button
-│       └── Download PDF (if fully signed)
+Current: Home | Safe Renting | Find Rental | Pricing | Blog | About | Contact
+New:     Home | Safe Renting | Rent | Buy | Pricing | Blog | About | Contact
 ```
 
+### Homepage Search Enhancement
+
+**Add toggle buttons above search bar:**
+```
++--------------------------------------------------+
+|           [  Rent  ] [  Buy  ]                   |
+|  +--------------------------------------------+  |
+|  | Search by city, suburb...           [Search]  |
+|  +--------------------------------------------+  |
++--------------------------------------------------+
+```
+
+### Database Changes
+
+**Add `listing_type` column to properties:**
+```sql
+ALTER TABLE properties ADD COLUMN listing_type TEXT NOT NULL DEFAULT 'rent' 
+  CHECK (listing_type IN ('rent', 'sale'));
+CREATE INDEX idx_properties_listing_type ON properties(listing_type);
+```
+
+### Filter Logic Updates
+
+| File | Changes |
+|------|---------|
+| `src/constants/navbarConstants.ts` | Change "Find Rental" to "Rent", add "Buy" item |
+| `src/hooks/usePropertySearchFilters.tsx` | Add `listingType` filter |
+| `src/pages/Properties.tsx` | Filter by `listing_type` from URL params |
+| `src/pages/Index.tsx` | Add Rent/Buy toggle above search |
+| `src/components/search/Property24SearchBar.tsx` | Accept `listingType` prop |
+
+### URL Structure
+- `/properties?type=rent` - Show only rentals
+- `/properties?type=sale` - Show only sales
+- `/properties` - Default to rent (for backwards compatibility)
+
 ---
+
+## Part 3: Agency Dashboard & Agent Management
+
+### New Pages & Components
+
+**Agency Dashboard Route:** `/agency/dashboard`
+
+**Dashboard Layout:**
+```
++----------------------------------------------------------+
+| Agency: [Agency Name]                    [Status Badge]  |
++----------------------------------------------------------+
+| Quick Actions:                                           |
+| [+ Add Agent] [+ List Property for Sale] [+ List Rental] |
++----------------------------------------------------------+
+| Tabs: Agents | Properties | Settings                     |
++----------------------------------------------------------+
+| Agents Tab:                                              |
+| +--------------------------------------------------+     |
+| | Agent Avatar | Name | Email | Phone | Properties |     |
+| | [Edit] [Deactivate]                              |     |
+| +--------------------------------------------------+     |
++----------------------------------------------------------+
+```
 
 ### Files to Create
 
 | File | Purpose |
 |------|---------|
-| `src/components/lease/LeasePreviewModal.tsx` | Main popup component with lease display + signing |
-| `src/utils/leaseHtmlRenderer.ts` | Convert template text to styled HTML |
+| `src/pages/agency/AgencyDashboard.tsx` | Main agency dashboard |
+| `src/components/agency/AgentsList.tsx` | List of agents with CRUD |
+| `src/components/agency/AddAgentModal.tsx` | Create agent sub-account |
+| `src/components/agency/AgencyPropertiesList.tsx` | Agency property management |
+| `src/pages/agency/ListPropertyForSale.tsx` | Sale listing wizard |
+
+### Add Agent Flow
+
+**Modal Fields:**
+- Full Name (display_name)
+- Email (creates auth account)
+- Mobile Number
+- Profile Photo (optional)
+- Assigned Areas (optional)
+
+**Backend Flow:**
+1. Create auth user via Supabase Admin API (edge function)
+2. Insert into `profiles` table
+3. Insert into `agency_members` (role: 'agent')
+4. Insert into `agent_profiles` with display info
+
+### Edge Function Required
+
+**File:** `supabase/functions/create-agent-account/index.ts`
+
+Creates agent sub-accounts:
+```typescript
+// 1. Create auth user with email/password
+// 2. Create profile
+// 3. Add to agency_members with 'agent' role
+// 4. Create agent_profile entry
+```
 
 ---
 
-### Files to Modify
+## Part 4: Sales Listings with Agent Assignment
 
+### Database Changes
+
+**Update properties table:**
+```sql
+ALTER TABLE properties ADD COLUMN agent_id UUID REFERENCES auth.users(id);
+ALTER TABLE properties ADD COLUMN agency_id UUID REFERENCES agencies(id);
+```
+
+### New Sale Listing Wizard
+
+Similar to `ListProperty.tsx` but with:
+- `listing_type` = 'sale'
+- Agent selection dropdown (shows agency's agents)
+- Sale price instead of monthly rent
+- ERF size, rates, levies fields
+
+### Property Detail Display
+
+When viewing a property for sale with an assigned agent:
+```
++--------------------------------------------------+
+| Property Details...                              |
++--------------------------------------------------+
+| Contact Agent:                                   |
+| +----------------------------------------------+ |
+| | [Avatar] Agent Name                          | |
+| | [Agency Logo] Agency Name                    | |
+| | Phone: +27 xxx xxx xxxx                      | |
+| | Email: agent@agency.com                      | |
+| | [Call] [Email] [WhatsApp]                    | |
+| +----------------------------------------------+ |
++--------------------------------------------------+
+```
+
+### Files to Create/Modify
+
+| File | Action |
+|------|---------|
+| `src/pages/agency/ListPropertyForSale.tsx` | **Create** - Sale listing wizard |
+| `src/components/property/AgentContactCard.tsx` | **Create** - Agent info display |
+| `src/pages/PropertyDetail.tsx` | **Modify** - Show agent card if assigned |
+| `src/components/listing/AgentSelectStep.tsx` | **Create** - Agent selection UI |
+
+---
+
+## Implementation Order
+
+### Phase 1: Database Foundation
+1. Create migration to add `listing_type` column to properties
+2. Create migration to add `agent_id` and `agency_id` columns
+3. Update RLS policies for agency property management
+
+### Phase 2: Navigation & Search
+1. Update `navbarConstants.ts` - Change "Find Rental" to "Rent", add "Buy"
+2. Update `usePropertySearchFilters.tsx` - Add `listingType` filter
+3. Update `Index.tsx` - Add Rent/Buy toggle buttons
+4. Update `Properties.tsx` - Filter by listing type
+5. Update search bar component
+
+### Phase 3: Agency Signup Redesign
+1. Create `AgencySignupForm.tsx` component
+2. Create `AgencyValueProps.tsx` component
+3. Redesign `AgencyOnboarding.tsx` with new layout
+
+### Phase 4: Agency Dashboard
+1. Create `AgencyDashboard.tsx` page
+2. Create `AgentsList.tsx` component
+3. Create `AddAgentModal.tsx` component
+4. Create edge function for agent creation
+5. Add routes for agency dashboard
+
+### Phase 5: Sales Listings
+1. Create `ListPropertyForSale.tsx` wizard
+2. Create `AgentSelectStep.tsx` component
+3. Create `AgentContactCard.tsx` component
+4. Update `PropertyDetail.tsx` to show agent info
+
+---
+
+## Technical Details
+
+### Migration: Add listing_type and agency fields
+
+```sql
+-- Add listing type to properties
+ALTER TABLE properties 
+ADD COLUMN listing_type TEXT NOT NULL DEFAULT 'rent' 
+CHECK (listing_type IN ('rent', 'sale'));
+
+-- Add agent/agency references
+ALTER TABLE properties 
+ADD COLUMN agent_id UUID REFERENCES auth.users(id),
+ADD COLUMN agency_id UUID REFERENCES agencies(id);
+
+-- Indexes
+CREATE INDEX idx_properties_listing_type ON properties(listing_type);
+CREATE INDEX idx_properties_agent_id ON properties(agent_id);
+CREATE INDEX idx_properties_agency_id ON properties(agency_id);
+
+-- RLS: Agency admins can manage their agency's properties
+CREATE POLICY "Agency admins can manage agency properties"
+ON properties FOR ALL
+USING (
+  agency_id IS NOT NULL 
+  AND public.is_agency_admin(agency_id)
+);
+```
+
+### Route Updates
+
+```typescript
+// Add to App.tsx or router config
+<Route path="/agency/dashboard" element={<AgencyDashboard />} />
+<Route path="/agency/list-for-sale" element={<ListPropertyForSale />} />
+```
+
+### Navbar Constants Update
+
+```typescript
+export const NAV_ITEMS: NavItem[] = [
+  { path: "/", label: "Home", icon: Home },
+  { path: "/safe-renting", label: "Safe Renting", icon: Shield },
+  { path: "/properties?type=rent", label: "Rent", icon: Search },
+  { path: "/properties?type=sale", label: "Buy", icon: Search },
+  { path: "/pricing", label: "Pricing", icon: BadgeDollarSign },
+  { path: "/blog", label: "Blog", icon: Send },
+  { path: "/about", label: "About", icon: Send },
+  { path: "/contact", label: "Contact", icon: Send }
+];
+```
+
+---
+
+## Files Summary
+
+### Files to Create (13 files)
+| File | Purpose |
+|------|---------|
+| `src/components/agency/AgencySignupForm.tsx` | Registration form component |
+| `src/components/agency/AgencyValueProps.tsx` | Value proposition cards |
+| `src/pages/agency/AgencyDashboard.tsx` | Agency admin dashboard |
+| `src/components/agency/AgentsList.tsx` | Agents table with actions |
+| `src/components/agency/AddAgentModal.tsx` | Create agent modal |
+| `src/components/agency/AgencyPropertiesList.tsx` | Agency properties view |
+| `src/pages/agency/ListPropertyForSale.tsx` | Sale listing wizard |
+| `src/components/listing/AgentSelectStep.tsx` | Agent selection step |
+| `src/components/property/AgentContactCard.tsx` | Agent contact display |
+| `supabase/functions/create-agent-account/index.ts` | Agent creation edge function |
+| `supabase/migrations/XXXXXX_add_listing_type.sql` | Database migration |
+| `src/components/home/RentBuyToggle.tsx` | Rent/Buy toggle component |
+
+### Files to Modify (8 files)
 | File | Changes |
 |------|---------|
-| `src/components/lease/steps-sa/Step10ReviewGenerate.tsx` | Replace buttons, add preview modal trigger |
-| `src/components/lease/SALeaseWizard.tsx` | Add preview state and modal |
-| `src/pages/LeaseSignature.tsx` | Use LeasePreviewModal instead of current layout |
-| `src/hooks/useLeaseContracts.ts` | Add method to save signature data |
-| `supabase/functions/generate-lease-pdf/index.ts` | Embed signature images in final PDF |
+| `src/pages/agency/AgencyOnboarding.tsx` | Complete redesign |
+| `src/constants/navbarConstants.ts` | Update nav items |
+| `src/hooks/usePropertySearchFilters.tsx` | Add listingType filter |
+| `src/pages/Properties.tsx` | Filter by listing type |
+| `src/pages/Index.tsx` | Add Rent/Buy toggle |
+| `src/components/search/Property24SearchBar.tsx` | Accept listingType |
+| `src/pages/PropertyDetail.tsx` | Show agent contact |
+| `src/pages/ListProperty.tsx` | Add listing_type default |
 
 ---
 
-### CSS Fixes for Text Overflow
+## User Experience Summary
 
-The lease preview will use these CSS properties to prevent text running off:
+### For Property Seekers
+- Clear "Rent" and "Buy" navigation options
+- Homepage toggle to switch between rental and sale search
+- Properties page filters by listing type automatically
+- Contact agent directly for sale properties
 
-```css
-.lease-content {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
-  max-width: 100%;
-  line-height: 1.6;
-  font-size: 14px;
-}
+### For Agencies
+- Beautiful, professional signup page
+- Dashboard to manage agents and properties
+- One-click agent sub-account creation
+- Assign agents to sale listings
+- Agent info displays on property pages
 
-.lease-section-header {
-  font-weight: bold;
-  margin-top: 24px;
-  margin-bottom: 12px;
-  page-break-after: avoid;
-}
-
-.lease-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
-}
-```
-
----
-
-### User Experience Details
-
-**For Landlord:**
-1. Complete 10 wizard steps
-2. Click "Preview & Sign Lease"
-3. Large popup shows full lease
-4. Scroll through reading the document
-5. At bottom: checkbox + signature pad
-6. Sign, then prompted to send to tenant
-7. Success dialog shows "Lease sent to tenant for signature"
-
-**For Tenant:**
-1. Receives email with link
-2. Clicks "View Lease"
-3. Same large popup shows full lease (with landlord signature visible)
-4. Scroll through reading
-5. At bottom: checkbox + signature pad (landlord sig shown above)
-6. Sign
-7. Success dialog: "Lease complete! Both parties signed"
-8. PDF automatically generated with both signatures embedded
-
----
-
-### Signing Section Layout
-
-```
-┌──────────────────────────────────────────────────┐
-│ SIGNATURES                                       │
-├──────────────────────────────────────────────────┤
-│                                                  │
-│ LANDLORD                                         │
-│ ┌──────────────────────────────────────────────┐ │
-│ │  [Signature Image or Canvas]                 │ │
-│ └──────────────────────────────────────────────┘ │
-│ Name: John Smith                                 │
-│ Signed: 27 January 2026 at 14:30                │
-│                                                  │
-│ ─────────────────────────────────────────────── │
-│                                                  │
-│ TENANT                                           │
-│ ┌──────────────────────────────────────────────┐ │
-│ │  [Signature Image or Canvas]                 │ │
-│ └──────────────────────────────────────────────┘ │
-│ Name: Jane Doe                                   │
-│ Signed: 27 January 2026 at 15:45                │
-│                                                  │
-└──────────────────────────────────────────────────┘
-```
-
----
-
-### Implementation Order
-
-1. **Create LeaseHtmlRenderer utility** - Parse template text into styled HTML
-2. **Create LeasePreviewModal** - Full popup with scroll, lease content, signatures
-3. **Update Step10** - Add "Preview & Sign" button, integrate modal
-4. **Update SALeaseWizard** - Add state and handlers for signing flow
-5. **Update LeaseSignature page** - Use same modal for tenant viewing
-6. **Update PDF generation** - Embed signature images in final document
-
----
-
-### PDF Only After Both Sign
-
-The key change is:
-- **Before**: PDF generated first, then signed separately
-- **After**: Lease displayed as HTML, signatures captured, PDF generated only when both parties have signed
-
-This means:
-- Draft leases are HTML-only (in the popup)
-- Final signed leases become PDFs with embedded signatures
-- The PDF becomes the legal record with both signatures visible
+### For Agents
+- Receive login credentials from agency admin
+- Listed on property pages with contact info
+- Can be assigned to multiple properties
+- Profile managed by agency admin
 
