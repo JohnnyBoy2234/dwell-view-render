@@ -19,18 +19,11 @@ const Navbar = () => {
   const location = useLocation();
 
   const isHome = location.pathname === '/';
-  const navClassName = isHome
-    ? "bg-transparent border-transparent absolute top-0 left-0 right-0 z-30 md:bg-background/95 md:backdrop-blur-md md:border-b md:border-border md:sticky md:top-0"
-    : NAVBAR_STYLES.NAV;
-  const logoIconClassName = isHome
-    ? `${NAVBAR_STYLES.LOGO_ICON} md:bg-ocean-blue bg-black/40`
-    : NAVBAR_STYLES.LOGO_ICON;
-  const logoIconInnerClassName = isHome
-    ? `${NAVBAR_STYLES.LOGO_ICON_INNER} drop-shadow-sm`
-    : NAVBAR_STYLES.LOGO_ICON_INNER;
-  const brandTextClassName = isHome
-    ? `${NAVBAR_STYLES.BRAND_TEXT} md:text-foreground text-white drop-shadow-sm`
-    : NAVBAR_STYLES.BRAND_TEXT;
+
+  const navClassName = `${NAVBAR_STYLES.NAV} sticky top-0 z-30`;
+  const logoIconClassName = NAVBAR_STYLES.LOGO_ICON;
+  const logoIconInnerClassName = NAVBAR_STYLES.LOGO_ICON_INNER;
+  const brandTextClassName = NAVBAR_STYLES.BRAND_TEXT;
 
   return (
     <nav className={navClassName}>
@@ -66,7 +59,7 @@ const Navbar = () => {
               <Button
                 asChild
                 size="sm"
-                className={isHome ? "bg-white/15 text-white hover:bg-white/25" : "bg-ocean-blue text-white hover:bg-ocean-blue-dark"}
+                className="bg-ocean-blue text-white hover:bg-ocean-blue-dark"
               >
                 <Link to={NAVBAR_ROUTES.AUTH}>{NAVBAR_CONTENT.SIGN_IN_LABEL}</Link>
               </Button>
