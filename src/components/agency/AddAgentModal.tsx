@@ -72,7 +72,23 @@ export function AddAgentModal({ open, onClose, agencyId, onSuccess }: AddAgentMo
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        const anyErr = error as any;
+        const contextBody = anyErr?.context?.body;
+
+        if (typeof contextBody === 'string') {
+          try {
+            const parsed = JSON.parse(contextBody);
+            if (parsed?.error) {
+              throw new Error(parsed.error);
+            }
+          } catch {
+            // ignore
+          }
+        }
+
+        throw error;
+      }
       if (data?.error) throw new Error(data.error);
 
       toast({

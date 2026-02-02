@@ -102,7 +102,7 @@ const Index = () => {
           </div>
           
           
-          <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
+          <div className="relative z-10 flex flex-col items-center justify-center w-full pt-24 pb-10 md:py-20">
             {/* Top Fade with Heading */}
             <div className="max-w-xl text-center px-4">
               <div className="inline-block rounded-2xl bg-black/40 backdrop-blur-sm px-6 py-5 md:px-8 md:py-6">
@@ -119,7 +119,7 @@ const Index = () => {
             {/* Search Bar - moved lower on mobile with mt-4 */}
             <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
               <div className="max-w-4xl mx-auto">
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center mb-4 md:mt-6">
                   <RentBuyToggle 
                     value={filters.listingType} 
                     onChange={(value) => updateFilters({ listingType: value })} 
