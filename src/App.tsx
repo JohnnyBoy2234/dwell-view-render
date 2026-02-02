@@ -26,6 +26,8 @@ import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
 import AgencyOnboarding from "./pages/agency/AgencyOnboarding";
+import AgencyDashboard from "./pages/agency/AgencyDashboard";
+import ListPropertyForSale from "./pages/agency/ListPropertyForSale";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
@@ -225,6 +227,8 @@ function AppRoutes() {
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />
               <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
+              <Route path="/agency/dashboard" element={<RouteGuard><AgencyDashboard /></RouteGuard>} />
+              <Route path="/agency/list-for-sale" element={<RouteGuard><ListPropertyForSale /></RouteGuard>} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/callback" element={<DocuSignCallback />} />
               <Route path="/docusign-callback" element={<DocuSignCallback />} />

@@ -50,7 +50,8 @@ export default function Properties() {
   
   // Get search parameters from URL
   const searchTerm = searchParams.get('search') || searchParams.get('location') || '';
-  const propertyType = searchParams.get('propertyType') || searchParams.get('type') || 'Any';
+  const propertyType = searchParams.get('propertyType') || 'Any';
+  const listingType = searchParams.get('type') || 'rent';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
   const bedrooms = searchParams.get('bedrooms') || 'Any';
@@ -61,12 +62,13 @@ export default function Properties() {
     console.log('[Properties] URL Search Params:', {
       searchTerm,
       propertyType,
+      listingType,
       minPrice,
       maxPrice,
       bedrooms,
       bathrooms
     });
-  }, [searchTerm, propertyType, minPrice, maxPrice, bedrooms, bathrooms]);
+  }, [searchTerm, propertyType, listingType, minPrice, maxPrice, bedrooms, bathrooms]);
   
   // Filter properties based on search criteria
   const filteredProperties = properties.filter(property => {
@@ -321,7 +323,9 @@ export default function Properties() {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="mb-8 p-6 rounded-2xl bg-ocean-blue/10 border border-ocean-blue/20 shadow-soft">
-          <h1 className="text-4xl font-bold text-ocean-blue mb-2">Find Your Perfect Home</h1>
+          <h1 className="text-4xl font-bold text-ocean-blue mb-2">
+            {listingType === 'sale' ? 'Properties for Sale' : 'Properties for Rent'}
+          </h1>
           <p className="text-lg text-muted-foreground">
             {searchTerm ? `Searching for properties in ${searchTerm}` : `Discover ${properties.length} available properties across South Africa`}
           </p>

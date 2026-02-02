@@ -1,17 +1,18 @@
 // @ts-nocheck
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, ArrowRight, Building2, FileUp, CheckCircle2, AlertCircle } from 'lucide-react';
+import { AgencySignupForm } from '@/components/agency/AgencySignupForm';
+import { AgencyValueProps } from '@/components/agency/AgencyValueProps';
+import { ArrowLeft, Building2, FileUp, CheckCircle2, AlertCircle, Upload } from 'lucide-react';
 
 type AgencyStatus = 'draft' | 'submitted' | 'approved' | 'declined';
 
@@ -24,105 +25,20 @@ type AgencyRow = {
 };
 
 export default function AgencyOnboarding() {
-  const { user, loading, redirectAfterAuth } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [step, setStep] = useState(1);
-  const [busy, setBusy] = useState(false);
-
-  const [accountEmail, setAccountEmail] = useState('');
-  const [accountPassword, setAccountPassword] = useState('');
-  const [accountConfirmPassword, setAccountConfirmPassword] = useState('');
-
   const [agency, setAgency] = useState<AgencyRow | null>(null);
-
-  const [agencyName, setAgencyName] = useState('');
   const [docFile, setDocFile] = useState<File | null>(null);
-
-  const hasAccountStep = !user;
-  const totalSteps = hasAccountStep ? 4 : 3;
-  const progress = (step / totalSteps) * 100;
-
-  const status = (agency?.status || 'draft') as AgencyStatus;
-  const statusLabel =
-    status === 'draft'
-      ? 'Draft'
-      : status === 'submitted'
-        ? 'Submitted'
-        : status === 'approved'
-          ? 'Approved'
-          : 'Declined';
-  const statusVariant =
-    status === 'approved'
-      ? 'default'
-      : status === 'declined'
-        ? 'destructive'
-        : 'secondary';
-
-  const stepMeta = useMemo(() => {
-    if (hasAccountStep) {
-      if (step === 1) return { title: 'Create Account', description: 'Create your agency admin account' };
-      if (step === 2) return { title: 'Agency Details', description: 'Tell us about your agency' };
-      if (step === 3) return { title: 'Upload Document', description: 'Upload your agency document' };
-      return { title: 'Submit', description: 'Submit for approval' };
-    }
-
-    if (step === 1) return { title: 'Agency Details', description: 'Tell us about your agency' };
-    if (step === 2) return { title: 'Upload Document', description: 'Upload your agency document' };
-    return { title: 'Submit', description: 'Submit for approval' };
-  }, [hasAccountStep, step]);
+  const [busy, setBusy] = useState(false);
+  const [showDocUpload, setShowDocUpload] = useState(false);
 
   useEffect(() => {
-    if (loading) return;
-
-    if (user) {
+    if (!loading && user) {
       fetchExistingAgency();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, loading]);
-
-  const createAccount = async () => {
-    if (!accountEmail.trim()) {
-      toast({ variant: 'destructive', title: 'Email required', description: 'Please enter your email.' });
-      return;
-    }
-    if (!accountPassword) {
-      toast({ variant: 'destructive', title: 'Password required', description: 'Please enter a password.' });
-      return;
-    }
-    if (accountPassword !== accountConfirmPassword) {
-      toast({ variant: 'destructive', title: "Passwords don't match", description: 'Please confirm your password.' });
-      return;
-    }
-
-    setBusy(true);
-    try {
-      redirectAfterAuth('/agency/onboarding');
-
-      const { error } = await supabase.auth.signUp({
-        email: accountEmail.trim(),
-        password: accountPassword,
-        options: {
-          data: { role: 'tenant' },
-          emailRedirectTo: `${window.location.origin}/auth`,
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: 'Account created',
-        description: 'Please verify your email if required, then sign in to continue the agency onboarding.',
-      });
-
-      navigate('/auth');
-    } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Account creation failed', description: err.message });
-    } finally {
-      setBusy(false);
-    }
-  };
 
   const fetchExistingAgency = async () => {
     if (!user) return;
@@ -140,143 +56,61 @@ export default function AgencyOnboarding() {
 
       if (data) {
         setAgency(data as any);
-        setAgencyName(data.name || '');
-
-        if (data.status === 'submitted') {
-          setStep(3);
-        }
+        setShowDocUpload(true);
       }
     } catch (err: any) {
       toast({
         variant: 'destructive',
-        title: 'Failed to load agency onboarding',
+        title: 'Failed to load agency',
         description: err.message,
       });
     }
   };
 
-  const ensureAgencyDraft = async () => {
-    if (!user) throw new Error('Not signed in');
-
-    if (agency?.id) return agency;
-
-    const { data, error } = await supabase
-      .from('agencies')
-      .insert({
-        name: agencyName,
-        created_by: user.id,
-        status: 'draft',
-      })
-      .select('id,name,status,created_by,decline_reason')
-      .single();
-
-    if (error) throw error;
-
-    // Ensure agency admin membership
-    await supabase.from('agency_members').insert({
-      agency_id: data.id,
-      user_id: user.id,
-      role: 'agency_admin',
-    });
-
-    setAgency(data as any);
-    return data as any;
-  };
-
-  const uploadAgencyDocument = async (agencyId: string, file: File) => {
-    if (!user) throw new Error('Not signed in');
-
-    const ext = file.name.split('.').pop();
-    const fileName = `${crypto.randomUUID()}.${ext}`;
-    const path = `agency/${agencyId}/${fileName}`;
-
-    const { error: uploadError } = await supabase.storage
-      .from('agency-uploads')
-      .upload(path, file, { upsert: false });
-
-    if (uploadError) throw uploadError;
-
-    const { error: docErr } = await supabase.from('agency_documents').insert({
-      agency_id: agencyId,
-      doc_type: 'agency_document',
-      file_path: path,
-    });
-
-    if (docErr) throw docErr;
-  };
-
-  const onNext = async () => {
-    // When logged out, step 1 is account creation.
-    if (hasAccountStep && step === 1) {
-      await createAccount();
-      return;
-    }
-
-    // Must be signed in for the agency/doc steps.
-    if (!user) {
-      toast({
-        variant: 'destructive',
-        title: 'Sign-in required',
-        description: 'Please sign in to continue the agency onboarding.',
-      });
-      return;
-    }
-
-    const agencyStep = hasAccountStep ? step - 1 : step;
-
-    if (agencyStep === 1) {
-      if (!agencyName.trim()) {
-        toast({ variant: 'destructive', title: 'Agency name required', description: 'Please enter your agency name.' });
-        return;
-      }
-      setStep(step + 1);
-      return;
-    }
-
-    if (agencyStep === 2) {
-      if (!docFile) {
-        toast({ variant: 'destructive', title: 'Document required', description: 'Please upload your agency document.' });
-        return;
-      }
-
-      setBusy(true);
-      try {
-        const draft = await ensureAgencyDraft();
-
-        // Update name if changed
-        if (draft.name !== agencyName) {
-          await supabase.from('agencies').update({ name: agencyName }).eq('id', draft.id);
-        }
-
-        await uploadAgencyDocument(draft.id, docFile);
-
-        setStep(step + 1);
-      } catch (err: any) {
-        toast({ variant: 'destructive', title: 'Upload failed', description: err.message });
-      } finally {
-        setBusy(false);
-      }
-      return;
-    }
-
-    if (agencyStep === 3) {
-      // nothing
-      return;
-    }
-  };
-
-  const onBack = () => {
-    if (step > 1) setStep(step - 1);
-    else navigate('/auth');
-  };
-
-  const onSubmitForApproval = async () => {
-    if (!agency?.id) {
-      toast({ variant: 'destructive', title: 'Missing agency', description: 'Please complete the earlier steps first.' });
-      return;
-    }
+  const uploadAgencyDocument = async () => {
+    if (!agency?.id || !docFile || !user) return;
 
     setBusy(true);
+    try {
+      const ext = docFile.name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const path = `agency/${agency.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('agency-uploads')
+        .upload(path, docFile, { upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      const { error: docErr } = await supabase.from('agency_documents').insert({
+        agency_id: agency.id,
+        doc_type: 'agency_document',
+        file_path: path,
+      });
+
+      if (docErr) throw docErr;
+
+      toast({
+        title: 'Document uploaded',
+        description: 'Your document has been uploaded successfully.',
+      });
+
+      // Auto-submit for approval
+      await submitForApproval();
+    } catch (err: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Upload failed',
+        description: err.message,
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const submitForApproval = async () => {
+    if (!agency?.id) return;
+
     try {
       const { error } = await supabase
         .from('agencies')
@@ -289,187 +123,201 @@ export default function AgencyOnboarding() {
 
       toast({
         title: 'Submitted for approval',
-        description: 'Your agency signup has been submitted. You will be able to create agents after approval.',
+        description: 'Your agency is now under review. You will be notified once approved.',
       });
     } catch (err: any) {
-      toast({ variant: 'destructive', title: 'Submission failed', description: err.message });
-    } finally {
-      setBusy(false);
+      toast({
+        variant: 'destructive',
+        title: 'Submission failed',
+        description: err.message,
+      });
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto p-6 max-w-3xl">
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" onClick={onBack} disabled={busy}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-primary">Agency Sign Up</h1>
-            <p className="text-muted-foreground">Submit your agency for approval</p>
+  // If user is logged in and has an agency, show document upload
+  if (user && showDocUpload && agency) {
+    const status = agency.status;
+
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+        <div className="container mx-auto p-6 max-w-2xl">
+          <div className="flex items-center gap-4 mb-8">
+            <Button variant="outline" onClick={() => navigate('/')}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">Agency Registration</h1>
+              <p className="text-muted-foreground">{agency.name}</p>
+            </div>
+            <div className="ml-auto">
+              <Badge 
+                variant={status === 'approved' ? 'default' : status === 'declined' ? 'destructive' : 'secondary'}
+              >
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+              </Badge>
+            </div>
           </div>
-          <div className="ml-auto">
-            <Badge variant={statusVariant as any}>{statusLabel}</Badge>
-          </div>
-        </div>
 
-        {agency?.status === 'draft' && (
-          <Alert className="mb-6">
-            <AlertDescription>
-              Status: <b>Draft</b>. Complete the steps below and submit for verification.
-            </AlertDescription>
-          </Alert>
-        )}
+          {status === 'approved' && (
+            <Alert className="mb-6 border-success-green bg-success-green/10">
+              <CheckCircle2 className="h-4 w-4 text-success-green" />
+              <AlertDescription className="text-success-green-dark">
+                Your agency is approved! You can now manage agents in your dashboard.
+              </AlertDescription>
+              <Button 
+                className="mt-4 bg-success-green hover:bg-success-green-dark"
+                onClick={() => navigate('/agency/dashboard')}
+              >
+                Go to Dashboard
+              </Button>
+            </Alert>
+          )}
 
-        {agency?.status === 'submitted' && (
-          <Alert className="mb-6">
-            <AlertDescription>
-              Status: <b>Submitted</b>. Your documents are under review.
-            </AlertDescription>
-          </Alert>
-        )}
+          {status === 'submitted' && (
+            <Alert className="mb-6">
+              <AlertDescription>
+                Your agency is under review. You will be notified once approved.
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {agency?.status === 'declined' && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Your agency was declined.{agency.decline_reason ? ` Reason: ${agency.decline_reason}` : ''}
-            </AlertDescription>
-          </Alert>
-        )}
+          {status === 'declined' && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Your agency was declined.{agency.decline_reason ? ` Reason: ${agency.decline_reason}` : ''} 
+                Please contact support for assistance.
+              </AlertDescription>
+            </Alert>
+          )}
 
-        {agency?.status === 'approved' && (
-          <Alert className="mb-6">
-            <CheckCircle2 className="h-4 w-4" />
-            <AlertDescription>
-              Your agency is approved. You can now manage agents in your agency dashboard.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {(!user && step === 1) && <Building2 className="h-5 w-5" />}
-              {((user && step === 1) || (!user && step === 2)) && <Building2 className="h-5 w-5" />}
-              {((user && step === 2) || (!user && step === 3)) && <FileUp className="h-5 w-5" />}
-              {((user && step === 3) || (!user && step === 4)) && <CheckCircle2 className="h-5 w-5" />}
-              {stepMeta.title}
-            </CardTitle>
-            <CardDescription>{stepMeta.description}</CardDescription>
-          </CardHeader>
-
-          <CardContent className="space-y-6">
-            {!user && step === 1 && (
-              <div className="space-y-4">
+          {status === 'draft' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileUp className="h-5 w-5" />
+                  Upload Agency Document
+                </CardTitle>
+                <CardDescription>
+                  Upload your FFC certificate or agency registration document for verification.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="agency-admin-email">Email</Label>
+                  <Label htmlFor="agency-doc">Agency Document</Label>
                   <Input
-                    id="agency-admin-email"
-                    type="email"
-                    value={accountEmail}
-                    onChange={(e) => setAccountEmail(e.target.value)}
-                    placeholder="you@agency.com"
+                    id="agency-doc"
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setDocFile(e.target.files?.[0] ?? null)}
                     disabled={busy}
                   />
+                  <p className="text-sm text-muted-foreground">
+                    Accepted formats: PDF, JPG, PNG
+                  </p>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="agency-admin-password">Password</Label>
-                  <Input
-                    id="agency-admin-password"
-                    type="password"
-                    value={accountPassword}
-                    onChange={(e) => setAccountPassword(e.target.value)}
-                    placeholder="Create a password"
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="agency-admin-confirm-password">Confirm Password</Label>
-                  <Input
-                    id="agency-admin-confirm-password"
-                    type="password"
-                    value={accountConfirmPassword}
-                    onChange={(e) => setAccountConfirmPassword(e.target.value)}
-                    placeholder="Confirm password"
-                    disabled={busy}
-                  />
-                </div>
-              </div>
-            )}
-
-            {((user && step === 1) || (!user && step === 2)) && (
-              <div className="space-y-2">
-                <Label htmlFor="agency-name">Agency Name</Label>
-                <Input
-                  id="agency-name"
-                  value={agencyName}
-                  onChange={(e) => setAgencyName(e.target.value)}
-                  placeholder="Your agency name"
-                  disabled={busy || agency?.status === 'submitted' || agency?.status === 'approved'}
-                />
-              </div>
-            )}
-
-            {((user && step === 2) || (!user && step === 3)) && (
-              <div className="space-y-2">
-                <Label htmlFor="agency-doc">Agency Document</Label>
-                <Input
-                  id="agency-doc"
-                  type="file"
-                  onChange={(e) => setDocFile(e.target.files?.[0] ?? null)}
-                  disabled={busy || agency?.status === 'submitted' || agency?.status === 'approved'}
-                />
-                <p className="text-sm text-muted-foreground">
-                  Upload the required document for verification.
-                </p>
-              </div>
-            )}
-
-            {((user && step === 3) || (!user && step === 4)) && (
-              <div className="space-y-4">
-                <Alert>
-                  <AlertDescription>
-                    {agency?.status === 'submitted'
-                      ? 'Submitted. Please wait for platform approval.'
-                      : 'Ready to submit your agency for approval.'}
-                  </AlertDescription>
-                </Alert>
 
                 <Button
-                  onClick={onSubmitForApproval}
+                  onClick={uploadAgencyDocument}
+                  disabled={!docFile || busy}
                   className="w-full"
-                  disabled={busy || agency?.status === 'submitted' || agency?.status === 'approved'}
                 >
-                  {busy ? 'Submitting...' : 'Submit for Approval'}
+                  {busy ? 'Uploading...' : 'Upload & Submit for Approval'}
                 </Button>
-              </div>
-            )}
-
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={onBack} disabled={busy}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Previous
-              </Button>
-
-              {step < totalSteps ? (
-                <Button onClick={onNext} disabled={busy}>
-                  Continue
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </Button>
-              ) : (
-                <Button variant="outline" onClick={() => navigate('/')} disabled={busy}>
-                  Done
-                </Button>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
+    );
+  }
+
+  // Landing page for new agencies
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-ocean-blue via-ocean-blue-dark to-[hsl(210,60%,20%)] overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Headline & Benefits */}
+            <div className="text-white">
+              <Badge className="bg-white/20 text-white border-white/30 mb-4">
+                For Real Estate Agencies
+              </Badge>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                Grow Your Agency with{' '}
+                <span className="text-success-green">RentLekker</span>
+              </h1>
+              <p className="text-xl text-white/90 mb-8">
+                Join South Africa's fastest-growing rental platform. List properties, manage agents, and connect with verified tenants — all in one place.
+              </p>
+              
+              <ul className="space-y-4 mb-8">
+                {[
+                  'Access thousands of verified tenants',
+                  'Powerful agent management tools',
+                  'Digital leases & e-signatures',
+                  'Priority listing placement',
+                ].map((benefit, index) => (
+                  <li key={index} className="flex items-center gap-3">
+                    <CheckCircle2 className="h-5 w-5 text-success-green flex-shrink-0" />
+                    <span className="text-white/90">{benefit}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Right: Signup Form Card */}
+            <div className="lg:pl-8">
+              <Card className="shadow-2xl border-0">
+                <CardHeader className="text-center pb-4">
+                  <div className="w-12 h-12 rounded-full bg-ocean-blue/10 flex items-center justify-center mx-auto mb-4">
+                    <Building2 className="h-6 w-6 text-ocean-blue" />
+                  </div>
+                  <CardTitle className="text-2xl">Register Your Agency</CardTitle>
+                  <CardDescription>
+                    Fill in your details to get started
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <AgencySignupForm 
+                    onSuccess={() => {
+                      fetchExistingAgency();
+                      setShowDocUpload(true);
+                    }} 
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Props Section */}
+      <AgencyValueProps />
+
+      {/* Final CTA */}
+      <section className="py-16 bg-muted/30">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Ready to Transform Your Agency?
+          </h2>
+          <p className="text-lg text-muted-foreground mb-8">
+            Join hundreds of agencies already growing their business on RentLekker.
+          </p>
+          <Button
+            size="lg"
+            className="bg-ocean-blue hover:bg-ocean-blue-dark text-white px-8"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            Get Started Now
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }

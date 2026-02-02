@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
+import { RentBuyToggle } from "@/components/home/RentBuyToggle";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
@@ -119,6 +120,11 @@ const Index = () => {
             <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
               <div className="max-w-4xl mx-auto">
                 <div className="px-0 py-0 bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white/90">
+                  {/* Rent/Buy Toggle */}
+                  <RentBuyToggle 
+                    value={filters.listingType} 
+                    onChange={(value) => updateFilters({ listingType: value })} 
+                  />
                   <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
                   searchTerm: filters.searchTerm,
                   propertyType: filters.propertyType,
@@ -126,6 +132,7 @@ const Index = () => {
                   maxPrice: filters.maxPrice,
                   bedrooms: filters.bedrooms,
                   bathrooms: filters.bathrooms,
+                  listingType: filters.listingType,
                   propertyTypes: filters.propertyTypes || [],
                   amenities: filters.amenities || [],
                   availableFrom: filters.availableFrom
