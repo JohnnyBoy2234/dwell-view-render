@@ -23,6 +23,7 @@ interface Property {
   location: string;
   price: number;
   property_type: string;
+  listing_type?: string;
   bedrooms: number;
   bathrooms: number;
   parking_spaces: number;
@@ -72,6 +73,14 @@ export default function Properties() {
   
   // Filter properties based on search criteria
   const filteredProperties = properties.filter(property => {
+    // Listing type filter (rent vs sale)
+    if (listingType === 'sale' && (property as any).listing_type && (property as any).listing_type !== 'sale') {
+      return false;
+    }
+    if (listingType !== 'sale' && (property as any).listing_type && (property as any).listing_type !== 'rent') {
+      return false;
+    }
+
     // Location search
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase().trim();
@@ -163,7 +172,7 @@ export default function Properties() {
   useEffect(() => {
     console.log('[Properties] Component mounted, fetching properties...');
     fetchProperties();
-  }, [currentPage]);
+  }, [currentPage, listingType]);
 
   const fetchProperties = async () => {
     try {
@@ -178,6 +187,7 @@ export default function Properties() {
         .from('properties')
         .select('*', { count: 'exact' })
         .eq('status', 'available')
+        .eq('listing_type', listingType === 'sale' ? 'sale' : 'rent')
         .order('featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(from, to);
