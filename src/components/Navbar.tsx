@@ -23,10 +23,13 @@ const Navbar = () => {
     ? "bg-transparent border-transparent absolute top-0 left-0 right-0 z-30 md:bg-background/95 md:backdrop-blur-md md:border-b md:border-border md:sticky md:top-0"
     : NAVBAR_STYLES.NAV;
   const logoIconClassName = isHome
-    ? `${NAVBAR_STYLES.LOGO_ICON} md:bg-ocean-blue bg-white/20`
+    ? `${NAVBAR_STYLES.LOGO_ICON} md:bg-ocean-blue bg-black/40`
     : NAVBAR_STYLES.LOGO_ICON;
+  const logoIconInnerClassName = isHome
+    ? `${NAVBAR_STYLES.LOGO_ICON_INNER} drop-shadow-sm`
+    : NAVBAR_STYLES.LOGO_ICON_INNER;
   const brandTextClassName = isHome
-    ? `${NAVBAR_STYLES.BRAND_TEXT} md:text-foreground text-white`
+    ? `${NAVBAR_STYLES.BRAND_TEXT} md:text-foreground text-white drop-shadow-sm`
     : NAVBAR_STYLES.BRAND_TEXT;
 
   return (
@@ -36,7 +39,7 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className={NAVBAR_STYLES.LOGO_CONTAINER}>
             <div className={logoIconClassName}>
-              <Home className={NAVBAR_STYLES.LOGO_ICON_INNER} />
+              <Home className={logoIconInnerClassName} />
             </div>
             <span className={brandTextClassName}>
               {NAVBAR_CONTENT.BRAND_NAME}
