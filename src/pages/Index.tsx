@@ -6,7 +6,6 @@ import { Link } from "react-router-dom";
 import { Property24SearchBar } from "@/components/search/Property24SearchBar";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
-import { RentBuyToggle } from "@/components/home/RentBuyToggle";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
@@ -93,38 +92,24 @@ const Index = () => {
       {/* Hero Section with Glass Heading */}
       <section className="relative">
         <div className="relative w-full h-full flex items-center justify-center">
-          <div className="absolute inset-0 w-full h-full">
-            <img
-              src="/hero3.jpg"
-              alt="Modern rental living space"
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-ocean-blue via-ocean-blue/90 to-ocean-blue/70" />
           
           
-          <div className="relative z-10 flex flex-col items-center justify-center w-full pt-24 pb-10 md:py-20">
+          <div className="relative z-10 flex flex-col items-center justify-center w-full py-10 md:py-20">
             {/* Top Fade with Heading */}
             <div className="max-w-xl text-center px-4">
-              <div className="inline-block rounded-2xl bg-black/40 backdrop-blur-sm px-6 py-5 md:px-8 md:py-6">
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-3 md:mb-4 font-sans">
                 <span className="block">Renting done right.</span>
               </h1>
               <p className="text-white text-base md:text-lg font-sans leading-relaxed lg:mb-8">
                 Simple, secure, and commission-free property rental
               </p>
-              </div>
               
             </div>
 
             {/* Search Bar - moved lower on mobile with mt-4 */}
             <div className="relative z-10 w-full px-4 mt-4 md:mt-0">
               <div className="max-w-4xl mx-auto">
-                <div className="flex justify-center mb-4 md:mt-6">
-                  <RentBuyToggle 
-                    value={filters.listingType} 
-                    onChange={(value) => updateFilters({ listingType: value })} 
-                  />
-                </div>
                 <div className="px-0 py-0 bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl p-6 transition-all duration-300 hover:shadow-2xl hover:bg-white/90">
                   <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
                   searchTerm: filters.searchTerm,
@@ -133,13 +118,28 @@ const Index = () => {
                   maxPrice: filters.maxPrice,
                   bedrooms: filters.bedrooms,
                   bathrooms: filters.bathrooms,
-                  listingType: filters.listingType,
                   propertyTypes: filters.propertyTypes || [],
                   amenities: filters.amenities || [],
                   availableFrom: filters.availableFrom
                 }} className="w-full my-[15px]" />
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full px-4 pt-0 pb-10 relative bg-gradient-to-b from-ocean-blue/70 to-ocean-blue/50">
+          <div className="max-w-5xl mx-auto z-10 relative">
+            <div className="flex flex-row gap-4 sm:gap-6 md:gap-8 overflow-hidden">
+              <div className="flex-1 min-w-0">
+                <ImageWithSkeleton
+                  src="/hero3.jpg"
+                  alt="Modern rental living space"
+                  className="w-full h-[200px] sm:h-[240px] md:h-[280px] object-cover rounded-2xl shadow-2xl"
+                  skeletonClassName="rounded-2xl"
+                />
+              </div>
+             
             </div>
           </div>
         </div>

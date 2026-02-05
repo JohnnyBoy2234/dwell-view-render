@@ -10,7 +10,6 @@ export interface PropertySearchFilters {
   maxPrice: string;
   bedrooms: string;
   bathrooms: string;
-  listingType: "rent" | "sale";
   
   // Advanced modal filters
   propertyTypes: string[];
@@ -25,7 +24,6 @@ const defaultFilters: PropertySearchFilters = {
   maxPrice: '',
   bedrooms: 'Any',
   bathrooms: 'Any',
-  listingType: 'rent',
   propertyTypes: [],
   amenities: [],
   availableFrom: null,
@@ -37,15 +35,13 @@ export function usePropertySearchFilters() {
 
   // Initialize filters from URL parameters
   const [filters, setFilters] = useState<PropertySearchFilters>(() => {
-    const typeParam = searchParams.get('type');
     return {
       searchTerm: searchParams.get('search') || searchParams.get('location') || '',
-      propertyType: searchParams.get('propertyType') || 'Any',
+      propertyType: searchParams.get('propertyType') || searchParams.get('type') || 'Any',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
       bedrooms: searchParams.get('bedrooms') || 'Any',
       bathrooms: searchParams.get('bathrooms') || 'Any',
-      listingType: (typeParam === 'sale' ? 'sale' : 'rent') as "rent" | "sale",
       propertyTypes: searchParams.get('propertyTypes')?.split(',').filter(Boolean) || [],
       amenities: searchParams.get('amenities')?.split(',').filter(Boolean) || [],
       availableFrom: searchParams.get('availableFrom') ? new Date(searchParams.get('availableFrom')!) : null,
@@ -65,9 +61,6 @@ export function usePropertySearchFilters() {
   // Perform search and navigate to properties page
   const executeSearch = () => {
     const params = new URLSearchParams();
-    
-    // Always include listing type
-    params.set('type', filters.listingType);
     
     // Only add non-empty/non-default values to URL
     if (filters.searchTerm.trim()) {

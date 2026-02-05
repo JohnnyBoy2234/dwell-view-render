@@ -25,9 +25,6 @@ import BlogPost from "./pages/BlogPost";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
-import AgencyOnboarding from "./pages/agency/AgencyOnboarding";
-import AgencyDashboard from "./pages/agency/AgencyDashboard";
-import ListPropertyForSale from "./pages/agency/ListPropertyForSale";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
@@ -38,13 +35,11 @@ import NotFound from "./pages/NotFound";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PaymentFailed from "./pages/PaymentFailed";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import UsersManagement from "./pages/admin/UsersManagement";
 import AdminManagement from "./pages/admin/AdminManagement";
 import AdminProperties from "./pages/admin/AdminProperties";
-import DocumentReview from "./pages/admin/DocumentReview";
-import KycManagement from "./pages/admin/KycManagement";
-import AgencyManagement from "./pages/admin/AgencyManagement";
 import PropertyReports from "./pages/admin/PropertyReports";
+import DocumentReview from "./pages/admin/DocumentReview";
+import UsersManagement from "./pages/admin/UsersManagement";
 import ApplyInvite from "./pages/ApplyInvite";
 import ApplicationDetail from "./pages/ApplicationDetail";
 import RentalApplication from "./pages/RentalApplication";
@@ -61,6 +56,7 @@ import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes"
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 import VerifyId from "@/pages/VerifyId";
+import KycManagement from "@/pages/admin/KycManagement";
 import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
 import InventoryStart from "@/pages/InventoryStart";
@@ -197,13 +193,6 @@ function AppRoutes() {
                   </AdminLayout>
                 </RouteGuard>
               } />
-              <Route path="/admin/agencies" element={
-                <RouteGuard>
-                  <AdminLayout>
-                    <AgencyManagement />
-                  </AdminLayout>
-                </RouteGuard>
-              } />
               <Route path="/admin/reports" element={
                 <RouteGuard>
                   <AdminLayout>
@@ -226,9 +215,6 @@ function AppRoutes() {
 
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />
-              <Route path="/agency/onboarding" element={<AgencyOnboarding />} />
-              <Route path="/agency/dashboard" element={<RouteGuard><AgencyDashboard /></RouteGuard>} />
-              <Route path="/agency/list-for-sale" element={<RouteGuard><ListPropertyForSale /></RouteGuard>} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/auth/callback" element={<DocuSignCallback />} />
               <Route path="/docusign-callback" element={<DocuSignCallback />} />

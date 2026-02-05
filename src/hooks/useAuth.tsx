@@ -9,16 +9,15 @@ interface AuthContextType {
   loading: boolean; // true until auth AND roles are resolved
   authLoading: boolean;
   rolesLoading: boolean;
-  signUp: (email: string, password: string, role?: 'tenant' | 'landlord' | 'agent') => Promise<{ error: any; isNewUser?: boolean }>;
+  signUp: (email: string, password: string, role?: 'tenant' | 'landlord') => Promise<{ error: any; isNewUser?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: (role?: 'tenant' | 'landlord' | 'agent') => Promise<{ error: any }>;
-  signInWithApple: (role?: 'tenant' | 'landlord' | 'agent') => Promise<{ error: any }>;
-  signInWithProvider: (provider: 'google' | 'apple' | 'facebook', role?: 'tenant' | 'landlord' | 'agent') => Promise<{ error: any }>;
+  signInWithGoogle: (role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
+  signInWithApple: (role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
+  signInWithProvider: (provider: 'google' | 'apple' | 'facebook', role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
   resetPassword: (email: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
   isLandlord: boolean;
   isAdmin: boolean;
-  isAgent: boolean;
   redirectAfterAuth: (path: string) => void;
 }
 
@@ -31,7 +30,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [rolesLoading, setRolesLoading] = useState(true);
   const [isLandlord, setIsLandlord] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAgent, setIsAgent] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -48,7 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           setIsLandlord(false);
           setIsAdmin(false);
-          setIsAgent(false);
           setRolesLoading(false);
         }
       }
@@ -80,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const parsed = JSON.parse(cached);
           if (typeof parsed.isLandlord === 'boolean') setIsLandlord(parsed.isLandlord);
           if (typeof parsed.isAdmin === 'boolean') setIsAdmin(parsed.isAdmin);
-          if (typeof parsed.isAgent === 'boolean') setIsAgent(parsed.isAgent);
         } catch {}
       }
 
@@ -95,7 +91,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Set defaults and continue - don't retry
         setIsLandlord(false);
         setIsAdmin(false);
-        setIsAgent(false);
         setRolesLoading(false);
         return;
       }
@@ -103,25 +98,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userRoles = roles?.map(r => r.role) || [];
       setIsLandlord(userRoles.includes('landlord'));
       setIsAdmin(userRoles.includes('admin'));
-      setIsAgent(userRoles.includes('agent'));
 
       // Cache roles
       localStorage.setItem(`sr_roles_${userId}` , JSON.stringify({ 
         isLandlord: userRoles.includes('landlord'), 
-        isAdmin: userRoles.includes('admin'),
-        isAgent: userRoles.includes('agent')
+        isAdmin: userRoles.includes('admin')
       }));
     } catch (error) {
       console.warn('Role check failed, using defaults:', error);
       setIsLandlord(false);
       setIsAdmin(false);
-      setIsAgent(false);
     } finally {
       setRolesLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string, role: 'tenant' | 'landlord' | 'agent' = 'tenant') => {
+  const signUp = async (email: string, password: string, role: 'tenant' | 'landlord' = 'tenant') => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -182,7 +174,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error: null };
   };
 
-  const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' | 'agent' = 'tenant') => {
+  const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' = 'tenant') => {
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
@@ -197,8 +189,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
-  const signInWithGoogle = async (role: 'tenant' | 'landlord' | 'agent' = 'tenant') => signInWithProvider('google', role);
-  const signInWithApple = async (role: 'tenant' | 'landlord' | 'agent' = 'tenant') => signInWithProvider('apple', role);
+  const signInWithGoogle = async (role: 'tenant' | 'landlord' = 'tenant') => signInWithProvider('google', role);
+  const signInWithApple = async (role: 'tenant' | 'landlord' = 'tenant') => signInWithProvider('apple', role);
 
   const resetPassword = async (email: string) => {
     // Use the current domain for password reset to ensure proper routing
@@ -209,6 +201,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { error };
   };
 
+
+  const redirectAfterAuth = (path: string) => {
+    if (path) {
+      sessionStorage.setItem('returnTo', path);
+    } else {
+      sessionStorage.removeItem('returnTo');
+    }
+  };
+
   const signOut = async () => {
     try {
       // Clear local state first to prevent auto sign-in
@@ -216,7 +217,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(null);
       setIsLandlord(false);
       setIsAdmin(false);
-      setIsAgent(false);
       setAuthLoading(false);
       setRolesLoading(false);
       
@@ -244,14 +244,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const redirectAfterAuth = (path: string) => {
-    if (path) {
-      sessionStorage.setItem('returnTo', path);
-    } else {
-      sessionStorage.removeItem('returnTo');
-    }
-  };
-
   const value = {
     user,
     session,
@@ -267,7 +259,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     isLandlord,
     isAdmin,
-    isAgent,
     redirectAfterAuth
   };
 

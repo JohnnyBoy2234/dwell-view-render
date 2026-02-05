@@ -63,7 +63,7 @@ const validatePassword = (password: string): { isValid: boolean; errors: string[
 };
 
 export default function Auth() {
-  const { user, signUp, signIn, signInWithGoogle, resetPassword, loading, isLandlord, redirectAfterAuth } = useAuth();
+  const { user, signUp, signIn, signInWithGoogle, resetPassword, loading, isLandlord } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -300,7 +300,7 @@ export default function Auth() {
           setResetEmailSent(true);
           toast({
             title: "Reset Email Sent!",
-            description: "If an account with that email exists, we have sent you a password reset link. Please check your email and spam folder.",
+            description: "If an account with that email exists, we have sent a password reset link. Please check your email and spam folder.",
             duration: 7000,
           });
         } else {
@@ -314,7 +314,7 @@ export default function Auth() {
         setResetEmailSent(true);
         toast({
           title: "Reset Email Sent!",
-          description: "If an account with that email exists, we have sent you a password reset link. Please check your email and spam folder.",
+          description: "If an account with that email exists, we have sent a password reset link. Please check your email and spam folder.",
           duration: 7000,
         });
       }
@@ -590,19 +590,6 @@ export default function Auth() {
               
               <TabsContent value="signup" className="space-y-4">
                 <div className="space-y-4">
-
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="w-full"
-                    onClick={() => {
-                      redirectAfterAuth('/agency/onboarding');
-                      navigate('/agency/onboarding');
-                    }}
-                  >
-                    Agency Sign Up
-                  </Button>
-
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <Button 
                       type="button" 

@@ -23,7 +23,6 @@ interface Property {
   location: string;
   price: number;
   property_type: string;
-  listing_type?: string;
   bedrooms: number;
   bathrooms: number;
   parking_spaces: number;
@@ -51,39 +50,86 @@ export default function Properties() {
   
   // Get search parameters from URL
   const searchTerm = searchParams.get('search') || searchParams.get('location') || '';
-  const propertyType = searchParams.get('propertyType') || 'Any';
-  const listingType = searchParams.get('type') || 'rent';
+  const propertyType = searchParams.get('propertyType') || searchParams.get('type') || 'Any';
   const minPrice = searchParams.get('minPrice') || '';
   const maxPrice = searchParams.get('maxPrice') || '';
   const bedrooms = searchParams.get('bedrooms') || 'Any';
   const bathrooms = searchParams.get('bathrooms') || 'Any';
-
-  // Reset pagination when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, propertyType, listingType, minPrice, maxPrice, bedrooms, bathrooms]);
-
+  
   // Debug logging
   useEffect(() => {
     console.log('[Properties] URL Search Params:', {
       searchTerm,
       propertyType,
-      listingType,
       minPrice,
       maxPrice,
       bedrooms,
       bathrooms
     });
-  }, [searchTerm, propertyType, listingType, minPrice, maxPrice, bedrooms, bathrooms]);
+  }, [searchTerm, propertyType, minPrice, maxPrice, bedrooms, bathrooms]);
   
   // Filter properties based on search criteria
   const filteredProperties = properties.filter(property => {
-    // Listing type filter (rent vs sale)
-    if (listingType === 'sale' && (property as any).listing_type && (property as any).listing_type !== 'sale') {
-      return false;
-    }
-    if (listingType !== 'sale' && (property as any).listing_type && (property as any).listing_type !== 'rent') {
-      return false;
+    // Location search
+    if (searchTerm) {
+      const searchTermLower = searchTerm.toLowerCase().trim();
+      const propertyLocationLower = property.location.toLowerCase();
+      
+      console.log('[Properties] Filtering property:', {
+        propertyLocation: property.location,
+        searchTerm: searchTerm,
+        searchTermLower,
+        propertyLocationLower
+      });
+      
+      // Split search terms and location into words
+      const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 1);
+      const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 1);
+      
+      console.log('[Properties] Words comparison:', {
+        searchWords,
+        locationWords
+      });
+      
+      // Check if ALL search words are present in the location
+      const allSearchWordsFound = searchWords.every(searchWord => {
+        const found = locationWords.some(locationWord => 
+          locationWord.includes(searchWord) || searchWord.includes(locationWord)
+        );
+        console.log(`[Properties] Search word "${searchWord}" found: ${found}`);
+        return found;
+      });
+      
+      if (!allSearchWordsFound) {
+        console.log('[Properties] Property filtered out - not all search words found');
+        return false;
+      }
+      
+      // Additional validation for short search terms
+      const searchTermLength = searchTermLower.length;
+      if (searchTermLength < 4) {
+        const hasSignificantMatch = locationWords.some(locationWord => 
+          locationWord.length >= searchTermLength + 2 && locationWord.includes(searchTermLower)
+        );
+        if (!hasSignificantMatch) {
+          console.log('[Properties] Property filtered out - short search term validation failed');
+          return false;
+        }
+      }
+      
+      // City validation
+      const commonCities = ['cape town', 'johannesburg', 'pretoria', 'durban', 'port elizabeth', 'bloemfontein', 'kimberley', 'east london', 'nelspruit', 'polokwane'];
+      const isSearchingForCity = commonCities.some(city => searchTermLower.includes(city));
+      
+      if (isSearchingForCity) {
+        const cityInLocation = commonCities.some(city => propertyLocationLower.includes(city));
+        if (!cityInLocation) {
+          console.log('[Properties] Property filtered out - city validation failed');
+          return false;
+        }
+      }
+      
+      console.log('[Properties] Property passed location filter');
     }
 
     // Property type filter
@@ -115,7 +161,7 @@ export default function Properties() {
   useEffect(() => {
     console.log('[Properties] Component mounted, fetching properties...');
     fetchProperties();
-  }, [currentPage, listingType, searchTerm, propertyType, minPrice, maxPrice, bedrooms, bathrooms]);
+  }, [currentPage]);
 
   const fetchProperties = async () => {
     try {
@@ -126,17 +172,10 @@ export default function Properties() {
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
       
-      let query = supabase
+      const { data, error, count } = await supabase
         .from('properties')
         .select('*', { count: 'exact' })
         .eq('status', 'available')
-        .eq('listing_type', listingType === 'sale' ? 'sale' : 'rent');
-
-      if (searchTerm?.trim()) {
-        query = query.ilike('location', `%${searchTerm.trim()}%`);
-      }
-
-      const { data, error, count } = await query
         .order('featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(from, to);
@@ -282,9 +321,7 @@ export default function Properties() {
       <div className="container mx-auto p-6">
         {/* Header */}
         <div className="mb-8 p-6 rounded-2xl bg-ocean-blue/10 border border-ocean-blue/20 shadow-soft">
-          <h1 className="text-4xl font-bold text-ocean-blue mb-2">
-            {listingType === 'sale' ? 'Properties for Sale' : 'Properties for Rent'}
-          </h1>
+          <h1 className="text-4xl font-bold text-ocean-blue mb-2">Find Your Perfect Home</h1>
           <p className="text-lg text-muted-foreground">
             {searchTerm ? `Searching for properties in ${searchTerm}` : `Discover ${properties.length} available properties across South Africa`}
           </p>
