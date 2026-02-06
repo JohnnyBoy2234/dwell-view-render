@@ -49,12 +49,19 @@ export const EMPLOYMENT_STATUS_OPTIONS = [
   { value: 'retired', label: 'Retired' }
 ] as const;
 
-// Application statuses
+// Application statuses (for applications table)
 export const APPLICATION_STATUS = {
   INVITED: 'invited',
   SUBMITTED: 'submitted',
   APPROVED: 'approved',
   DECLINED: 'declined'
+} as const;
+
+// Application request statuses (for application_requests table - matches DB constraint)
+export const APPLICATION_REQUEST_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
 } as const;
 
 // Toast messages

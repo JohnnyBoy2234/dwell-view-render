@@ -212,14 +212,14 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
 
   if (requests.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="h-5 w-5" />
-            Application Requests
+      <Card className="overflow-hidden w-full">
+        <CardHeader className="px-3 sm:px-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Clock className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+            <span className="truncate">Application Requests</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-3 sm:px-6">
           <p className="text-sm text-muted-foreground text-center py-4">
             No pending application requests
           </p>
@@ -229,43 +229,41 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
   }
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="h-5 w-5" />
-          Application Requests
-          <Badge variant="secondary">{requests.length}</Badge>
+    <Card className="overflow-hidden w-full">
+      <CardHeader className="px-3 sm:px-6">
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Clock className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+          <span className="truncate">Application Requests</span>
+          <Badge variant="secondary" className="ml-auto flex-shrink-0">{requests.length}</Badge>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 px-3 sm:px-6">
         {requests.map((request) => (
-          <Card key={request.id} className="border-2 min-w-0">
-            <CardContent className="p-4">
+          <Card key={request.id} className="border shadow-sm overflow-hidden">
+            <CardContent className="p-3 sm:p-4">
               <div className="space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <p className="font-semibold line-clamp-1">
-                        {request.profiles?.display_name || 'Unknown Tenant'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Home className="h-4 w-4 flex-shrink-0" />
-                      <p className="line-clamp-1">{request.properties?.title || 'Unknown Property'}</p>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Requested {new Date(request.created_at).toLocaleDateString()}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <p className="font-semibold text-sm sm:text-base truncate">
+                      {request.profiles?.display_name || 'Unknown Tenant'}
                     </p>
                   </div>
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                    <Home className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                    <p className="truncate">{request.properties?.title || 'Unknown Property'}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Requested {new Date(request.created_at).toLocaleDateString()}
+                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex flex-col gap-2 pt-2">
                   <Button
                     size="sm"
                     onClick={() => handleApprove(request)}
                     disabled={processingId === request.id}
-                    className="w-full sm:w-auto flex-1 bg-green-600 hover:bg-green-700 text-white"
+                    className="w-full bg-green-600 hover:bg-green-700 text-white h-10"
                   >
                     {processingId === request.id ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -281,7 +279,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
                     variant="outline"
                     onClick={() => handleDecline(request)}
                     disabled={processingId === request.id}
-                    className="w-full sm:w-auto flex-1"
+                    className="w-full h-10"
                   >
                     {processingId === request.id ? (
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>

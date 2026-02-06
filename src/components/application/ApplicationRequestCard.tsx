@@ -28,15 +28,11 @@ export function ApplicationRequestCard({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Check if there's an approved/accepted request for this property
+  // Check if there's an approved request for this property
   const approvedRequest = requests?.find(
-    req => {
-      const isStatusMatch = req.status === 'accepted' || 
-                          req.status === ('approved' as ApplicationRequestStatus);
-      return req.property_id === propertyId && 
-             isStatusMatch &&
-             req.tenant_id === user?.id;
-    }
+    req => req.property_id === propertyId && 
+           req.status === 'approved' &&
+           req.tenant_id === user?.id
   );
 
   const handleRequestApplication = async () => {
@@ -48,20 +44,18 @@ export function ApplicationRequestCard({
     try {
       setIsSubmitting(true);
       
-      // Check if there's already a pending, submitted, or accepted request
+      // Check if there's already a pending or approved request
       const existingRequest = requests?.find(
         req => req.property_id === propertyId && 
                req.tenant_id === user.id && 
-               (req.status === 'pending' || req.status === 'submitted' || req.status === 'accepted')
+               (req.status === 'pending' || req.status === 'approved')
       );
 
       if (existingRequest) {
         if (existingRequest.status === 'pending') {
           toast.info('You already have a pending application request for this property');
-        } else if (existingRequest.status === 'accepted') {
-          toast.info('Your application for this property has been accepted');
-        } else {
-          toast.info('Your application for this property has already been submitted');
+        } else if (existingRequest.status === 'approved') {
+          toast.info('Your application for this property has been approved');
         }
         return;
       }
@@ -142,7 +136,7 @@ export function ApplicationRequestCard({
           ) : approvedRequest ? (
             <span className="flex items-center text-green-600">
               <Check className="mr-2 h-4 w-4" />
-              {approvedRequest.status === 'accepted' ? 'Application Accepted' : 'Application Requested'}
+              Application Approved
             </span>
           ) : (
             <span className="flex items-center">

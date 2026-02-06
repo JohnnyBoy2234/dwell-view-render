@@ -1,6 +1,6 @@
 import { Database } from '@/integrations/supabase/types';
 
-export type ApplicationRequestStatus = 'invited' | 'submitted' | 'pending_credit_check' | 'pending' | 'accepted' | 'declined';
+export type ApplicationRequestStatus = 'pending' | 'approved' | 'rejected';
 
 export interface ApplicationRequest {
   id: string;
