@@ -118,6 +118,38 @@ export function useTenantDashboard() {
             tenancyId: tenancyData.id,
           });
         }
+      } else {
+        // Fallback: Check for signed lease contracts if no active tenancy
+        const { data: leaseData, error: leaseError } = await supabase
+          .from('lease_contracts')
+          .select('property_id, contract_data')
+          .eq('tenant_id', user.id)
+          .eq('status', 'signed')
+          .not('property_id', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        
+        if (!leaseError && leaseData?.property_id) {
+          const { data: prop } = await supabase
+            .from('properties')
+            .select('id,title,location,images')
+            .eq('id', leaseData.property_id)
+            .maybeSingle();
+          
+          if (prop) {
+            const contractData = leaseData.contract_data as any;
+            setTenantProperty({
+              id: prop.id,
+              title: prop.title,
+              location: prop.location,
+              images: prop.images || [],
+              monthlyRent: contractData?.rentAmount || 0,
+              leaseEndDate: contractData?.leaseEndDate || '',
+              securityDeposit: contractData?.depositAmount || 0,
+            });
+          }
+        }
       }
 
       // Fetch recent maintenance requests

@@ -83,30 +83,32 @@ export default function TenantMaintenance() {
           .select('property_id')
           .eq('tenant_id', user.id)
           .eq('status', 'active')
-          .single();
+          .maybeSingle();
           
         if (tenancyData) {
           propertyId = tenancyData.property_id;
         } else {
-          // If still no property, create a generic maintenance request
-          // This allows tenants to submit requests even without active tenancy
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('user_id')
-            .eq('user_id', user.id)
-            .single();
-            
-          if (!userData) {
+          // Fallback: Check for signed lease contracts
+          const { data: leaseData } = await supabase
+            .from('lease_contracts')
+            .select('property_id')
+            .eq('tenant_id', user.id)
+            .eq('status', 'signed')
+            .not('property_id', 'is', null)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          
+          if (leaseData?.property_id) {
+            propertyId = leaseData.property_id;
+          } else {
             toast({
-              title: "Error",
-              description: "Unable to verify your account. Please contact support.",
+              title: "No Property Assigned",
+              description: "You don't have an active lease. Please contact your landlord.",
               variant: "destructive",
             });
             return;
           }
-          
-          // Use a placeholder property ID or create without property_id
-          propertyId = 'no-property-assigned';
         }
       }
 

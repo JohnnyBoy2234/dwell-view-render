@@ -89,7 +89,7 @@ export function LeaseSignature() {
   };
 
   const handleTenantSign = async (signatureDataUrl: string) => {
-    if (!contractId) return;
+    if (!contractId || !user) return;
     
     setIsSigning(true);
     try {
@@ -132,8 +132,29 @@ export function LeaseSignature() {
       setShowPreview(false);
       setShowSuccessDialog(true);
       
-      // Generate PDF if both signed
-      if (bothSigned) {
+      // Create tenancy record and generate PDF if both signed
+      if (bothSigned && contract?.property_id) {
+        try {
+          // Create tenancy record to link tenant to property
+          const leaseStart = wizardData.leaseStartDate || new Date().toISOString().split('T')[0];
+          const leaseEnd = wizardData.leaseEndDate || 
+            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          
+          await supabase.from('tenancies').insert({
+            property_id: contract.property_id,
+            tenant_id: user.id,
+            landlord_id: contract.landlord_id,
+            start_date: leaseStart,
+            end_date: leaseEnd,
+            monthly_rent: wizardData.rentAmount || 0,
+            security_deposit: wizardData.depositAmount || 0,
+            status: 'active',
+          });
+        } catch (tenancyErr) {
+          console.error('Tenancy creation error:', tenancyErr);
+          // Don't fail the signing if tenancy creation fails
+        }
+        
         try {
           await supabase.functions.invoke('generate-lease-pdf', {
             body: { contractId }
