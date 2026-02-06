@@ -1,208 +1,236 @@
 
-# Fix Plan: Lease Display in Management Tools & Tenant Property Assignment
+
+# Fix Plan: Application Request Error & Mobile UI Issues
 
 ## Problem Summary
 
-### Issue 1: Leases Not Showing in Property Management Tools
-When landlords create leases for a property, those leases don't appear in the lease tile under the property's management tools. This happens because:
-- The `LeaseBuilder.tsx` page reads `propertyId` from URL path parameters using `useParams()`
-- However, the "Create Lease" button in `ApplicationsWithViewings.tsx` passes `propertyId` as a **query parameter** (`?propertyId=...`)
-- Result: `propertyId` is `undefined` when saving the lease, so the `property_id` column is never set
+### Issue 1: Error When Confirming Application Requests
+**Root Cause**: The type definitions in `src/types/application.ts` use status values (`invited`, `submitted`, `pending_credit_check`, `pending`, `accepted`, `declined`) that don't match the database constraint.
 
-### Issue 2: "No Property Assigned" Error for Tenant Maintenance
-After a tenant signs a lease, they get an error when trying to create a maintenance request because:
-- The `useTenantDashboard` hook looks for active tenancy records in the `tenancies` table
-- When a lease is signed, no tenancy record is created
-- Without a tenancy record, the system can't determine which property the tenant is associated with
+According to the database, the `application_requests` table only allows these status values:
+- `pending`
+- `approved`
+- `rejected`
+
+The code uses `accepted` and `declined` which violate the database check constraint `application_requests_status_check`.
+
+**Key Files with Wrong Status Values**:
+| File | Issue |
+|------|-------|
+| `src/types/application.ts` | Defines `accepted` and `declined` instead of `approved` and `rejected` |
+| `src/components/application/ApplicationRequestCard.tsx` | Checks for `accepted` status |
+| `src/constants/applicationConstants.ts` | Uses `DECLINED` instead of `REJECTED` |
+| `src/hooks/useApplicationRequests.ts` | Uses the wrong type |
+
+**Note**: `ApplicationRequestsManager.tsx` is **correct** - it uses `approved` and `rejected`.
+
+### Issue 2: Mobile UI Problems
+The `ApplicationRequestsManager.tsx` component has some mobile layout issues:
+- Card content can overflow on small screens
+- Text truncation needs improvement
+- Button layout could be better optimized for touch targets
 
 ---
 
 ## Solution Overview
 
 ```text
-PROBLEM 1 FIX:
-┌─────────────────┐     ┌─────────────────────┐
-│ Create Lease    │ --> │ LeaseBuilder reads  │ --> Lease saved
-│ (uses ?param)   │     │ both :param AND     │     WITH property_id
-│                 │     │ ?param              │
-└─────────────────┘     └─────────────────────┘
+Fix 1: Status Value Alignment
+┌─────────────────────────────────────┐
+│ Types & Constants                    │
+│ ─────────────────                    │
+│ OLD: 'accepted' / 'declined'        │
+│ NEW: 'approved' / 'rejected'         │
+└─────────────────────────────────────┘
 
-PROBLEM 2 FIX:
-┌─────────────────┐     ┌─────────────────────┐     ┌─────────────────┐
-│ Both parties    │ --> │ Create tenancy      │ --> │ Tenant can      │
-│ sign lease      │     │ record              │     │ access property │
-└─────────────────┘     └─────────────────────┘     └─────────────────┘
+Fix 2: Mobile UI Improvements
+┌─────────────────────────────────────┐
+│ ApplicationRequestsManager.tsx       │
+│ ─────────────────────────────────── │
+│ • Better responsive card layout     │
+│ • Improved text handling            │
+│ • Touch-friendly button spacing     │
+│ • Proper overflow handling          │
+└─────────────────────────────────────┘
 ```
 
 ---
 
 ## Technical Changes
 
-### Fix 1: LeaseBuilder Should Read Query Params
+### Fix 1: Update Type Definitions
 
-**File:** `src/pages/LeaseBuilder.tsx`
+**File:** `src/types/application.ts`
 
-Currently the page only reads URL path params:
+Change the status type from:
 ```typescript
-const { contractId, propertyId } = useParams();
+export type ApplicationRequestStatus = 'invited' | 'submitted' | 'pending_credit_check' | 'pending' | 'accepted' | 'declined';
 ```
 
-Change to also read from query params (which is how `ApplicationsWithViewings.tsx` passes it):
+To:
 ```typescript
-const { contractId, propertyId: pathPropertyId } = useParams();
-const [searchParams] = useSearchParams();
-const propertyId = pathPropertyId || searchParams.get('propertyId');
+export type ApplicationRequestStatus = 'pending' | 'approved' | 'rejected';
 ```
+
+This matches the database constraint exactly.
 
 ---
 
-### Fix 2: Create Tenancy When Lease is Fully Signed
+### Fix 2: Update ApplicationRequestCard.tsx
 
-When both landlord and tenant have signed the lease, the system needs to create a tenancy record to link the tenant to the property.
+**File:** `src/components/application/ApplicationRequestCard.tsx`
 
-**File:** `src/pages/LeaseSignature.tsx`
-
-After both parties have signed (inside `handleTenantSign`), add logic to:
-1. Create a tenancy record in the `tenancies` table
-2. Set the tenant's property assignment
+Replace all instances of `accepted` with `approved` and check for the correct status:
 
 ```typescript
-// After both parties have signed, create tenancy record
-if (bothSigned) {
-  // Create tenancy record
-  await supabase.from('tenancies').insert({
-    property_id: contract.property_id,
-    tenant_id: user.id,
-    landlord_id: contract.landlord_id,
-    start_date: wizardData.leaseStartDate,
-    end_date: wizardData.leaseEndDate || new Date(Date.now() + 365*24*60*60*1000).toISOString().split('T')[0],
-    monthly_rent: wizardData.rentAmount,
-    security_deposit: wizardData.depositAmount,
-    status: 'active',
-    lease_document_url: contract.pdf_url
-  });
-}
+// OLD
+const isStatusMatch = req.status === 'accepted' || 
+                      req.status === ('approved' as ApplicationRequestStatus);
+
+// NEW
+const isStatusMatch = req.status === 'approved';
 ```
 
----
-
-### Fix 3: Update SALeaseWizard to Create Tenancy on Completion
-
-When the tenant signs via the SALeaseWizard (if landlord signature was already captured), create the tenancy there as well.
-
-**File:** `src/components/lease/SALeaseWizard.tsx`
-
-Same logic applies - after tenant signature completes the lease, create a tenancy record.
+Also update:
+- Status checks from `accepted` to `approved`
+- Any UI text mentioning "accepted" to "approved"
 
 ---
 
-### Fix 4: Add Fallback in useTenantDashboard
+### Fix 3: Update Constants
 
-The `useTenantDashboard` hook should also check `lease_contracts` as a fallback if no tenancy exists.
+**File:** `src/constants/applicationConstants.ts`
 
-**File:** `src/hooks/useTenantDashboard.tsx`
-
-Add a secondary query to check for signed leases if no active tenancy is found:
+Change from:
 ```typescript
-// If no tenancy found, check for signed lease contracts
-if (!tenancyData) {
-  const { data: leaseData } = await supabase
-    .from('lease_contracts')
-    .select('property_id, contract_data, properties(id, title, location, images)')
-    .eq('tenant_id', user.id)
-    .eq('status', 'signed')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-    
-  if (leaseData?.properties) {
-    // Set tenant property from lease contract
-  }
-}
+export const APPLICATION_STATUS = {
+  INVITED: 'invited',
+  SUBMITTED: 'submitted',
+  APPROVED: 'approved',
+  DECLINED: 'declined'
+} as const;
 ```
 
+To:
+```typescript
+export const APPLICATION_REQUEST_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected'
+} as const;
+```
+
+Note: Keep the original `APPLICATION_STATUS` if it's used for the separate `applications` table which may have different constraints.
+
 ---
 
-### Fix 5: Update TenantMaintenance.tsx Fallback Logic
+### Fix 4: Mobile UI Improvements
 
-Currently falls back to a placeholder `'no-property-assigned'` which causes issues. Instead:
+**File:** `src/components/landlord/ApplicationRequestsManager.tsx`
 
-**File:** `src/pages/tenant/TenantMaintenance.tsx`
+**Changes for better mobile layout:**
 
-Improve the fallback to check `lease_contracts` before giving up:
+1. **Card Container** - Add horizontal overflow protection:
 ```typescript
-// Check for signed lease if no active tenancy
-if (!propertyId) {
-  const { data: leaseData } = await supabase
-    .from('lease_contracts')
-    .select('property_id')
-    .eq('tenant_id', user.id)
-    .eq('status', 'signed')
-    .not('property_id', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-    
-  if (leaseData?.property_id) {
-    propertyId = leaseData.property_id;
-  }
-}
+<Card className="overflow-hidden w-full">
+```
+
+2. **CardContent** - Improve padding and spacing for mobile:
+```typescript
+<CardContent className="space-y-4 px-3 sm:px-6">
+```
+
+3. **Inner Card** - Better border and overflow handling:
+```typescript
+<Card key={request.id} className="border shadow-sm overflow-hidden">
+  <CardContent className="p-3 sm:p-4">
+```
+
+4. **Request Info Layout** - Stack vertically on mobile, add proper truncation:
+```typescript
+<div className="space-y-3">
+  <div className="min-w-0">
+    <div className="flex items-center gap-2 mb-1">
+      <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+      <p className="font-semibold text-sm sm:text-base truncate">
+        {request.profiles?.display_name || 'Unknown Tenant'}
+      </p>
+    </div>
+    <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+      <Home className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+      <p className="truncate">{request.properties?.title || 'Unknown Property'}</p>
+    </div>
+    <p className="text-xs text-muted-foreground mt-1">
+      Requested {new Date(request.created_at).toLocaleDateString()}
+    </p>
+  </div>
+```
+
+5. **Button Layout** - Full-width stacked buttons on mobile:
+```typescript
+<div className="flex flex-col gap-2 pt-2">
+  <Button
+    size="sm"
+    onClick={() => handleApprove(request)}
+    disabled={processingId === request.id}
+    className="w-full bg-green-600 hover:bg-green-700 text-white h-10"
+  >
+    {/* ... */}
+  </Button>
+  <Button
+    size="sm"
+    variant="outline"
+    onClick={() => handleDecline(request)}
+    disabled={processingId === request.id}
+    className="w-full h-10"
+  >
+    {/* ... */}
+  </Button>
+</div>
+```
+
+6. **Header** - Responsive title:
+```typescript
+<CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+  <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
+  <span className="truncate">Application Requests</span>
+  <Badge variant="secondary" className="ml-auto flex-shrink-0">{requests.length}</Badge>
+</CardTitle>
 ```
 
 ---
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `src/pages/LeaseBuilder.tsx` | Read `propertyId` from both URL params AND query params |
-| `src/pages/LeaseSignature.tsx` | Create tenancy record when both parties have signed |
-| `src/components/lease/SALeaseWizard.tsx` | Ensure property_id is saved, create tenancy on completion |
-| `src/hooks/useTenantDashboard.tsx` | Add fallback to check `lease_contracts` for signed leases |
-| `src/pages/tenant/TenantMaintenance.tsx` | Improve property lookup fallback |
-
----
-
-## Data Flow After Fix
-
-```text
-1. Landlord creates lease from application
-   └─> LeaseBuilder reads propertyId from query param
-       └─> Lease saved WITH property_id ✓
-
-2. Landlord signs lease
-   └─> Status: pending_tenant
-
-3. Tenant signs lease
-   └─> Status: signed
-   └─> Tenancy record created ✓
-       └─> property_id linked
-       └─> tenant_id linked
-       └─> landlord_id linked
-       └─> Rent amount, dates, deposit stored
-
-4. Tenant opens maintenance
-   └─> useTenantDashboard finds tenancy
-   └─> tenantProperty is populated ✓
-   └─> Maintenance request created with correct property_id ✓
-```
-
----
-
-## Edge Cases Handled
-
-1. **Old leases without property_id**: The fallback query in `useTenantDashboard` handles this by also checking lease contracts
-2. **Query params vs path params**: LeaseBuilder checks both, so either navigation method works
-3. **Month-to-month leases**: Uses a default end date 1 year from start if no end date specified
-4. **Missing lease data**: Graceful fallbacks with sensible defaults for rent and dates
+| File | Changes |
+|------|---------|
+| `src/types/application.ts` | Update `ApplicationRequestStatus` to only allow `pending`, `approved`, `rejected` |
+| `src/components/application/ApplicationRequestCard.tsx` | Replace `accepted` → `approved`, improve status checks |
+| `src/constants/applicationConstants.ts` | Add `APPLICATION_REQUEST_STATUS` with correct values |
+| `src/components/landlord/ApplicationRequestsManager.tsx` | Mobile UI improvements: responsive padding, stacked buttons, better truncation |
 
 ---
 
 ## Testing Recommendations
 
 After implementation:
-1. Create a new lease from an approved application
-2. Verify the lease appears in the property's management tools
-3. Complete the signing flow as both landlord and tenant
-4. Try to create a maintenance request as the tenant
-5. Verify the maintenance request is linked to the correct property
+
+1. **Landlord Approve/Decline Flow**:
+   - Log in as a landlord
+   - Navigate to Application Requests section
+   - Click "Approve" on a pending request
+   - Verify no error appears and status updates correctly
+   - Click "Decline" on another request
+   - Verify no error and status updates to "rejected"
+
+2. **Mobile Testing**:
+   - View Application Requests on mobile viewport (375px width)
+   - Verify cards don't overflow horizontally
+   - Verify buttons are full-width and easy to tap
+   - Verify tenant names and property titles are properly truncated
+
+3. **Tenant Side**:
+   - Log in as a tenant
+   - View an approved application request
+   - Verify "Start Application" button appears correctly
+
