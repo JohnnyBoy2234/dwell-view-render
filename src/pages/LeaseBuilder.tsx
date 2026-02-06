@@ -1,14 +1,18 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { SALeaseWizard } from '@/components/lease/SALeaseWizard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 export function LeaseBuilder() {
-  const { contractId, propertyId } = useParams();
+  const { contractId, propertyId: pathPropertyId } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Support both path params and query params for propertyId
+  const propertyId = pathPropertyId || searchParams.get('propertyId') || undefined;
 
   return (
     <div className="min-h-screen bg-background">
