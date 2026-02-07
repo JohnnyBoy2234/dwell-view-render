@@ -52,6 +52,11 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
   const [landlordSignature, setLandlordSignature] = useState<SignatureInfo | undefined>();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [successType, setSuccessType] = useState<'signed' | 'sent'>('signed');
+  
+  // Auto-save state
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const autoSaveTimerRef = React.useRef<NodeJS.Timeout | null>(null);
+  const initialDataRef = React.useRef<string>(JSON.stringify(DEFAULT_WIZARD_DATA));
 
   // Load existing contract data
   useEffect(() => {
@@ -66,6 +71,44 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
       }));
     }
   }, [contractId, user]);
+
+  // Auto-save effect - triggers 2 seconds after data changes
+  useEffect(() => {
+    if (!user) return;
+    
+    const currentData = JSON.stringify(data);
+    // Skip if data hasn't meaningfully changed
+    if (currentData === initialDataRef.current) return;
+    
+    // Clear existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+    
+    setAutoSaveStatus('saving');
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        await saveProgressInternal();
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus('idle'), 2000);
+      } catch {
+        setAutoSaveStatus('idle');
+      }
+    }, 2000); // 2 second debounce
+    
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [data, user]);
+
+  // Update initial data ref when contract loads
+  useEffect(() => {
+    if (!isLoading && data !== DEFAULT_WIZARD_DATA) {
+      initialDataRef.current = JSON.stringify(data);
+    }
+  }, [isLoading]);
 
   const loadContract = async (id: string) => {
     setIsLoading(true);
@@ -101,7 +144,8 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
     setData(prev => ({ ...prev, ...updates }));
   };
 
-  const saveProgress = async () => {
+  // Internal save function used by auto-save
+  const saveProgressInternal = async () => {
     if (!user) return;
     try {
       if (savedContractId) {
@@ -119,8 +163,11 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
       }
     } catch (err) {
       console.error('Error saving:', err);
+      throw err;
     }
   };
+
+  const saveProgress = saveProgressInternal;
 
   const handleNext = async () => {
     const result = validators[currentStep - 1](data);
@@ -260,7 +307,15 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
       <div className="space-y-2">
         <div className="flex justify-between text-sm">
           <span className="font-medium">Step {currentStep} of 10: {stepConfig?.title}</span>
-          <span className="text-muted-foreground">{Math.round(progress)}%</span>
+          <div className="flex items-center gap-2">
+            {autoSaveStatus === 'saving' && (
+              <span className="text-xs text-muted-foreground animate-pulse">Saving...</span>
+            )}
+            {autoSaveStatus === 'saved' && (
+              <span className="text-xs text-success-green">✓ Saved</span>
+            )}
+            <span className="text-muted-foreground">{Math.round(progress)}%</span>
+          </div>
         </div>
         <Progress value={progress} className="h-2" />
       </div>

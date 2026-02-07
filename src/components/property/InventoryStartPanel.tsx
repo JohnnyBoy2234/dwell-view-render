@@ -42,6 +42,8 @@ function useAnalytics() {
   return { track };
 }
 
+const STORAGE_KEY_PREFIX = 'inventory_notes_';
+
 export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const { toast } = useToast();
   const { track } = useAnalytics();
@@ -59,12 +61,60 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxNoteId, setLightboxNoteId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const handleSaveRef = useRef<() => Promise<void>>();
 
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const deepLink = propertyId
     ? `https://app.rentlekker.com/inventory/start?propertyId=${propertyId}`
     : '';
+
+  // Warn user before leaving with unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved inventory notes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Auto-save after 30 seconds of inactivity with unsaved changes
+  useEffect(() => {
+    if (!hasUnsavedChanges || saving || !propertyId || !user) {
+      return;
+    }
+    
+    // Clear any existing timer
+    if (autoSaveTimerRef.current) {
+      clearTimeout(autoSaveTimerRef.current);
+    }
+    
+    setAutoSaveStatus('idle');
+    autoSaveTimerRef.current = setTimeout(async () => {
+      if (handleSaveRef.current && hasUnsavedChanges) {
+        setAutoSaveStatus('saving');
+        try {
+          await handleSaveRef.current();
+          setAutoSaveStatus('saved');
+          setTimeout(() => setAutoSaveStatus('idle'), 2000);
+        } catch {
+          setAutoSaveStatus('idle');
+        }
+      }
+    }, 30000); // 30 seconds
+    
+    return () => {
+      if (autoSaveTimerRef.current) {
+        clearTimeout(autoSaveTimerRef.current);
+      }
+    };
+  }, [hasUnsavedChanges, saving, notes, propertyId, user]);
 
   useEffect(() => {
     track('inventory_instructions_viewed');
@@ -314,6 +364,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
     }
   };
 
+  // Keep ref updated for auto-save to use
+  handleSaveRef.current = handleSave;
+
   const stopRecording = () => {
     mediaRecorder?.stop();
     mediaRecorder?.stream.getTracks().forEach((t) => t.stop());
@@ -553,7 +606,15 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-2">Voice Notes</h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-semibold">Voice Notes</h3>
+          {autoSaveStatus === 'saving' && (
+            <span className="text-xs text-muted-foreground animate-pulse">Auto-saving...</span>
+          )}
+          {autoSaveStatus === 'saved' && (
+            <span className="text-xs text-success-green">✓ Auto-saved</span>
+          )}
+        </div>
         <div className="flex items-center gap-2 flex-wrap">
         <Button
           onClick={recording ? stopRecording : startRecording}
@@ -592,7 +653,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
                   {!note.audioUrl && <span className="text-muted-foreground italic">Photo-only note</span>}
                   {note.saved && <span className="text-xs text-success-green font-medium">✓ Saved</span>}
                   {note.savingInProgress && <span className="text-xs text-primary font-medium">💾 Saving...</span>}
-                  {!note.saved && !note.savingInProgress && <span className="text-xs text-orange-500 font-medium">• Unsaved</span>}
+                  {!note.saved && !note.savingInProgress && <span className="text-xs text-earth-warm font-medium">• Unsaved</span>}
                 </div>
                 <Button
                   variant="ghost"
