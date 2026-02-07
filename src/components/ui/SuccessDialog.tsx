@@ -133,7 +133,7 @@ export function SuccessDialog({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="sm:max-w-md mx-4 p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-md w-[calc(100%-2rem)] max-h-[calc(100vh-2rem)] p-0 overflow-hidden rounded-xl">
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-primary/5 via-primary/10 to-primary/5 p-6 text-center">
           {/* Animated Icon */}
