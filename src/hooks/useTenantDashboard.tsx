@@ -124,7 +124,7 @@ export function useTenantDashboard() {
           .from('lease_contracts')
           .select('property_id, contract_data')
           .eq('tenant_id', user.id)
-          .eq('status', 'signed')
+          .in('status', ['signed', 'pending_tenant'])
           .not('property_id', 'is', null)
           .order('created_at', { ascending: false })
           .limit(1)

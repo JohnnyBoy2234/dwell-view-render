@@ -59,8 +59,7 @@ export const updateApplicationRequestStatus = async (
     .from('application_requests')
     .update({ 
       status,
-      updated_at: new Date().toISOString(),
-      updated_by: userId
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .select('*')

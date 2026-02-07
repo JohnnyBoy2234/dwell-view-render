@@ -88,12 +88,12 @@ export default function TenantMaintenance() {
         if (tenancyData) {
           propertyId = tenancyData.property_id;
         } else {
-          // Fallback: Check for signed lease contracts
+          // Fallback: Check for signed or pending lease contracts
           const { data: leaseData } = await supabase
             .from('lease_contracts')
             .select('property_id')
             .eq('tenant_id', user.id)
-            .eq('status', 'signed')
+            .in('status', ['signed', 'pending_tenant'])
             .not('property_id', 'is', null)
             .order('created_at', { ascending: false })
             .limit(1)
