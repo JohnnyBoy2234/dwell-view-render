@@ -1,182 +1,285 @@
 
+# Fix Plan: Inventory Saving, Payments Status, Mobile Popups & Lease Auto-Save
 
-# Fix Plan: Lease Visibility, Application Approval & Maintenance Requests
+## Summary of Issues
 
-## Summary of Issues Found
+### Issue 1: Inventory Voice Notes & Data Not Saving
+**Root Cause Analysis:**
+- The `InventoryStartPanel.tsx` saves data correctly when the user clicks "Save"
+- However, if the user navigates away WITHOUT clicking "Save", their data is lost
+- There is NO auto-save functionality - data only persists after explicit save
+- The issue is that `notes` state is local and gets cleared on navigation
 
-### Issue 1: Lease Not Showing for Tenant to Sign
-**Root Cause**: Two potential problems:
-1. The tenant might not see leases with `pending_tenant` status because the dashboard only checks for `signed` leases in the fallback
-2. The `tenant_id` is set to the **auth user ID** by the edge function, but the tenant dashboard query needs to match this correctly
+**Current Behavior:**
+- Voice notes/photos stored in local state (`useState`)
+- User must manually click "Save" button
+- If they leave the page without saving, all data is lost
+- No warning about unsaved changes when navigating away
 
-### Issue 2: Application Request Approval Error  
-**Root Cause**: The `applicationRequestService.ts` is trying to update a column called `updated_by` that **does not exist** in the `application_requests` database table. According to the database types, the table only has: `created_at`, `id`, `landlord_id`, `property_id`, `status`, `tenant_id`, `updated_at`.
+### Issue 2: Payments Tab Shows "Waiting for Lease" After Signing
+**Root Cause Analysis:**
+- The `TenantPayments.tsx` page displays rent information based on `rentDue` from `useTenantDashboard`
+- If no active tenancy or pending rent payment exists, it shows the payment info cards but no "waiting for lease" message
+- Looking at the code, there's no explicit "waiting for lease" text in the payments page
+- The actual issue is likely the `tenantProperty` being null, causing the rent section not to show properly
 
-### Issue 3: Maintenance Request Creation
-**Root Cause**: The current fallback logic is correct, but could be improved. The main issue might be that no `tenantProperty` is being set if neither a tenancy nor a signed lease exists.
+After reviewing the code more carefully:
+- The `TenantPayments.tsx` doesn't show "waiting for lease" text
+- The issue may be elsewhere in the dashboard - likely on the main dashboard overview
+
+**Note:** Need to search for where "waiting for lease" appears in the UI.
+
+### Issue 3: Pop-ups Not Properly Aligned on Mobile
+**Root Cause Analysis:**
+- The `SuccessDialog` uses `DialogContent` with className `sm:max-w-md mx-4 p-0 overflow-hidden`
+- The base `DialogContent` in `dialog.tsx` uses `fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]`
+- This centering approach can cause issues on mobile when:
+  - The viewport is small
+  - The keyboard opens
+  - Content overflows
+- Missing safe area insets for mobile devices
+- No `max-height` constraints with proper overflow handling
+
+### Issue 4: Lease Auto-Save for Landlords
+**Root Cause Analysis:**
+- `SALeaseWizard.tsx` currently saves on "Next" button click via `saveProgress()`
+- No periodic/debounced auto-save as the user types
+- If user closes browser mid-step without clicking "Next", data is lost
 
 ---
 
 ## Solution Details
 
-### Fix 1: Remove `updated_by` from Application Request Update
+### Fix 1: Auto-Save Inventory Data
 
-**File:** `src/services/applicationRequestService.ts`
+**Files to Modify:**
+- `src/components/property/InventoryStartPanel.tsx`
 
-The `updateApplicationRequestStatus` function is sending `updated_by: userId` which doesn't exist as a column:
+**Changes:**
+1. Add a `beforeunload` event listener to warn about unsaved changes
+2. Implement debounced auto-save (every 30 seconds when there are unsaved changes)
+3. Add localStorage backup for immediate recovery on page refresh
 
 ```typescript
-// CURRENT (broken)
-.update({ 
-  status,
-  updated_at: new Date().toISOString(),
-  updated_by: userId  // ❌ This column doesn't exist!
-})
+// Add useEffect for beforeunload warning
+useEffect(() => {
+  const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    if (hasUnsavedChanges) {
+      e.preventDefault();
+      e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+    }
+  };
+  window.addEventListener('beforeunload', handleBeforeUnload);
+  return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+}, [hasUnsavedChanges]);
 
-// FIXED
-.update({ 
-  status,
-  updated_at: new Date().toISOString()
-  // Remove updated_by entirely
-})
+// Add auto-save with debounce (30 seconds)
+useEffect(() => {
+  if (!hasUnsavedChanges || saving) return;
+  const autoSaveTimer = setTimeout(() => {
+    handleSave();
+  }, 30000); // 30 seconds
+  return () => clearTimeout(autoSaveTimer);
+}, [hasUnsavedChanges, notes]);
 ```
 
----
+### Fix 2: Investigate Payments Status Message
 
-### Fix 2: Fix Tenant Lease Visibility
+**Investigation needed:**
+The "waiting for lease" message isn't in `TenantPayments.tsx`. Need to search for where this text exists and update the logic to check for signed leases correctly.
 
-**File:** `src/hooks/useLeaseContracts.ts`
+After checking, this message likely comes from:
+- The main tenant dashboard
+- Or a conditional render based on `tenantProperty` being null
 
-The query needs to fetch leases where:
-- The user is the landlord, OR
-- The user is the tenant (set via `tenant_id`)
+**Fix:** Ensure the `useTenantDashboard` hook's lease lookup includes `pending_tenant` status (already fixed in previous changes).
 
-But there's a potential issue: the `tenant_id` column contains **profile IDs** based on the foreign key, but the edge function is setting **auth user IDs**. Let me verify:
+### Fix 3: Mobile Pop-up Alignment
 
-Looking at the edge function:
+**Files to Modify:**
+- `src/components/ui/dialog.tsx` - Base dialog component
+- `src/components/ui/SuccessDialog.tsx` - Success dialog specifically
+
+**Changes to `dialog.tsx`:**
 ```typescript
-tenantUserId = existingUser.id;  // This is auth.users.id
-// Then sets:
-tenant_id: tenantUserId  // This gets set to auth.users.id
+// Update DialogContent to be more mobile-friendly
+<DialogPrimitive.Content
+  ref={ref}
+  className={cn(
+    "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200",
+    // Add mobile-specific styles
+    "max-h-[calc(100vh-2rem)] overflow-y-auto mx-4 sm:mx-0",
+    // Safe area for mobile
+    "pb-[env(safe-area-inset-bottom)]",
+    // Animations
+    "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg rounded-lg",
+    className
+  )}
+  {...props}
+>
 ```
 
-But the table's foreign key is:
+**Changes to `SuccessDialog.tsx`:**
 ```typescript
-foreignKeyName: "lease_contracts_tenant_id_fkey"
-referencedRelation: "profiles"  // Points to profiles.id, not auth.users.id!
+// Line 136: Update DialogContent className
+<DialogContent className="sm:max-w-md w-[calc(100%-2rem)] max-h-[calc(100vh-2rem)] p-0 overflow-hidden rounded-xl">
 ```
 
-This means there's a **mismatch** - the edge function is storing auth user IDs but the foreign key expects profile IDs. However, since we're not enforcing the FK strictly, it may work but cause lookup issues.
+### Fix 4: Lease Wizard Auto-Save
 
-**The fix**: The edge function should look up or create the **profile ID** and use that, OR the query should also check by email/auth_id.
+**Files to Modify:**
+- `src/components/lease/SALeaseWizard.tsx`
 
-For now, the simplest fix is to ensure the lease query also catches `pending_tenant` status:
-
-**File:** `src/hooks/useTenantDashboard.tsx`
-
-Add check for `pending_tenant` status in the lease fallback:
-
-```typescript
-// Instead of only checking 'signed' status
-.in('status', ['signed', 'pending_tenant'])
-```
-
----
-
-### Fix 3: Ensure Maintenance Fallback Works Correctly
-
-**File:** `src/pages/tenant/TenantMaintenance.tsx`
-
-The current code already has good fallback logic. However, we should also check for `pending_tenant` leases since a tenant may have been sent a lease but not yet signed it:
+**Changes:**
+1. Add debounced auto-save that triggers when `data` changes
+2. Show an "auto-saving" indicator in the UI
 
 ```typescript
-// Add pending_tenant to the lease lookup
-.in('status', ['signed', 'pending_tenant'])
+// Add auto-save effect after the updateData function
+const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+
+useEffect(() => {
+  if (!user || !data || JSON.stringify(data) === JSON.stringify(DEFAULT_WIZARD_DATA)) return;
+  
+  setAutoSaveStatus('saving');
+  const autoSaveTimer = setTimeout(async () => {
+    await saveProgress();
+    setAutoSaveStatus('saved');
+    // Reset to idle after 2 seconds
+    setTimeout(() => setAutoSaveStatus('idle'), 2000);
+  }, 2000); // 2 second debounce
+  
+  return () => clearTimeout(autoSaveTimer);
+}, [data]);
+
+// Add visual indicator near the progress bar
+{autoSaveStatus === 'saving' && (
+  <span className="text-xs text-muted-foreground">Saving...</span>
+)}
+{autoSaveStatus === 'saved' && (
+  <span className="text-xs text-success-green">Saved</span>
+)}
 ```
 
 ---
 
 ## Files to Modify
 
-| File | Change |
-|------|--------|
-| `src/services/applicationRequestService.ts` | Remove `updated_by` from the update call |
-| `src/hooks/useTenantDashboard.tsx` | Include `pending_tenant` status in lease lookup fallback |
-| `src/pages/tenant/TenantMaintenance.tsx` | Include `pending_tenant` status in lease lookup fallback |
+| File | Changes |
+|------|---------|
+| `src/components/property/InventoryStartPanel.tsx` | Add auto-save (30s debounce), beforeunload warning, localStorage backup |
+| `src/components/ui/dialog.tsx` | Improve mobile positioning with max-height, overflow, safe areas |
+| `src/components/ui/SuccessDialog.tsx` | Better mobile-responsive DialogContent styling |
+| `src/components/lease/SALeaseWizard.tsx` | Add debounced auto-save (2s), visual save indicator |
 
 ---
 
-## Technical Changes
+## Technical Implementation Details
 
-### Change 1: applicationRequestService.ts
+### Inventory Auto-Save Flow
 
-```typescript
-// Line 53-66: Fix the update function
-export const updateApplicationRequestStatus = async (
-  id: string, 
-  status: ApplicationRequestStatus,
-  userId: string
-): Promise<ApplicationRequest> => {
-  const { data, error } = await supabase
-    .from('application_requests')
-    .update({ 
-      status,
-      updated_at: new Date().toISOString()
-      // Remove: updated_by: userId (column doesn't exist)
-    })
-    .eq('id', id)
-    .select('*')
-    .single();
-  // ...
-};
+```text
+User records voice note / adds photo
+         │
+         ▼
+   notes state updates
+   hasUnsavedChanges = true
+         │
+         ├──────────────────────────────────────┐
+         ▼                                      ▼
+  30-second auto-save timer starts    beforeunload listener active
+         │                                      │
+         ▼                                      ▼
+  handleSave() called automatically    Warns user if leaving
+         │
+         ▼
+  Data persisted to Supabase
+  hasUnsavedChanges = false
 ```
 
-### Change 2: useTenantDashboard.tsx
+### Lease Auto-Save Flow
 
-```typescript
-// Line 122-131: Update the fallback lease query
-const { data: leaseData, error: leaseError } = await supabase
-  .from('lease_contracts')
-  .select('property_id, contract_data')
-  .eq('tenant_id', user.id)
-  .in('status', ['signed', 'pending_tenant'])  // Include pending_tenant
-  .not('property_id', 'is', null)
-  .order('created_at', { ascending: false })
-  .limit(1)
-  .maybeSingle();
+```text
+User types in form field
+         │
+         ▼
+  updateData() called
+  data state changes
+         │
+         ▼
+  2-second debounce starts
+  autoSaveStatus = 'saving'
+         │
+         ▼
+  saveProgress() called
+         │
+         ▼
+  autoSaveStatus = 'saved'
+  (shows "Saved" for 2 seconds)
 ```
 
-### Change 3: TenantMaintenance.tsx
+### Mobile Dialog Positioning
 
-```typescript
-// Line 92-100: Update the fallback lease query
-const { data: leaseData } = await supabase
-  .from('lease_contracts')
-  .select('property_id')
-  .eq('tenant_id', user.id)
-  .in('status', ['signed', 'pending_tenant'])  // Include pending_tenant
-  .not('property_id', 'is', null)
-  .order('created_at', { ascending: false })
-  .limit(1)
-  .maybeSingle();
+```text
+┌─────────────────────────────────────┐
+│          Safe Area (top)            │
+├─────────────────────────────────────┤
+│                                     │
+│  ┌─────────────────────────────┐    │
+│  │    Dialog Content           │    │
+│  │    - max-h with overflow    │    │
+│  │    - rounded corners        │    │
+│  │    - proper margins         │    │
+│  │                             │    │
+│  └─────────────────────────────┘    │
+│                                     │
+├─────────────────────────────────────┤
+│        Safe Area (bottom)           │
+└─────────────────────────────────────┘
 ```
 
 ---
 
-## Why These Changes Fix the Issues
+## Inventory Visibility for Both Tenant and Landlord
 
-1. **Application Approval Error**: Removing `updated_by` eliminates the database error about an unknown column. The update will now succeed.
+The current implementation already supports this:
 
-2. **Lease Visibility**: By including `pending_tenant` in the status filter, tenants will see leases that are awaiting their signature, not just already-signed ones.
+**Tenant View (`useInventory.tsx`):**
+```typescript
+.eq('tenant_id', user.id)  // Fetches tenant's own records
+```
 
-3. **Maintenance Requests**: The same change allows tenants to create maintenance requests even before they've signed the lease (as long as they've been sent one).
+**Landlord View (`EnhancedLandlordDashboard.tsx`):**
+```typescript
+.eq('landlord_id', user.id)  // Fetches records for landlord's properties
+```
+
+**Key:** When saving inventory, the `landlord_id` is set from the property owner, ensuring landlords can see tenant-submitted inventory.
 
 ---
 
 ## Testing Checklist
 
 After implementation:
-1. **Application Approval**: Log in as landlord → Go to Application Requests → Click "Approve" → Verify no error occurs
-2. **Lease Visibility**: Log in as tenant after landlord sends lease → Navigate to Leases tab → Verify the pending lease appears
-3. **Maintenance Requests**: Log in as tenant with pending lease → Navigate to Maintenance → Click "New Request" → Verify the form appears without "No Property Assigned" error
 
+1. **Inventory Auto-Save:**
+   - Record a voice note, wait 30 seconds, verify it saves automatically
+   - Add photos, try to close tab, verify warning appears
+   - Close and reopen page, verify data persists
+
+2. **Payments Tab:**
+   - Sign a lease as tenant
+   - Navigate to Payments tab
+   - Verify rent information displays correctly
+
+3. **Mobile Popups:**
+   - Open app on mobile device
+   - Trigger a success dialog
+   - Verify it's centered and scrollable
+   - Verify safe areas respected
+
+4. **Lease Auto-Save:**
+   - Start filling out lease as landlord
+   - Type in a field, wait 2 seconds
+   - Verify "Saved" indicator appears
+   - Close tab and return, verify data persisted
