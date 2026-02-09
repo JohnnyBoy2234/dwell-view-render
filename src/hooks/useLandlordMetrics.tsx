@@ -10,6 +10,7 @@ interface LandlordMetrics {
   totalRentDue: number;
   availableProperties: number;
   occupiedProperties: number;
+  unlistedProperties: number;
   monthlyRevenue: number;
 }
 
@@ -23,6 +24,7 @@ export function useLandlordMetrics() {
     totalRentDue: 0,
     availableProperties: 0,
     occupiedProperties: 0,
+    unlistedProperties: 0,
     monthlyRevenue: 0,
   });
 
@@ -42,7 +44,8 @@ export function useLandlordMetrics() {
 
       const totalProperties = propertiesData?.length || 0;
       const availableProperties = propertiesData?.filter(p => p.status === 'available').length || 0;
-      const occupiedProperties = totalProperties - availableProperties;
+      const unlistedProperties = propertiesData?.filter(p => p.status === 'unlisted').length || 0;
+      const occupiedProperties = propertiesData?.filter(p => p.status === 'occupied' || p.status === 'rented').length || 0;
 
       // Fetch active tenants count
       const { data: tenantsData, error: tenantsError } = await supabase
@@ -83,6 +86,7 @@ export function useLandlordMetrics() {
         totalRentDue,
         availableProperties,
         occupiedProperties,
+        unlistedProperties,
         monthlyRevenue,
       });
 

@@ -168,7 +168,8 @@ export function PropertyManagementSection({ property }: PropertyManagementSectio
             <div>
               <p className="font-medium text-ios-gray-dark">Current Status</p>
               <Badge className="bg-success-green/10 text-success-green border-0 rounded-ios mt-1">
-                {property.status === 'available' ? 'Active Listing' : property.status}
+                {property.status === 'available' ? 'Active Listing' : 
+                 property.status === 'unlisted' ? 'Private (Not Listed)' : property.status}
               </Badge>
             </div>
           </div>
@@ -178,7 +179,7 @@ export function PropertyManagementSection({ property }: PropertyManagementSectio
               className="flex-1 bg-ios-blue hover:bg-ios-blue-dark text-white rounded-ios"
               disabled={property.status === 'available'}
             >
-              Activate Listing
+              {property.status === 'unlisted' ? 'List Publicly' : 'Activate Listing'}
             </Button>
             <Button
               size="sm"
@@ -186,7 +187,7 @@ export function PropertyManagementSection({ property }: PropertyManagementSectio
               className="flex-1 border-ios-gray/20 hover:bg-ios-gray/5 rounded-ios"
               disabled={property.status !== 'available'}
             >
-              Pause Listing
+              {property.status === 'available' ? 'Unlist' : 'Pause Listing'}
             </Button>
           </div>
         </CardContent>

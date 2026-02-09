@@ -12,7 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, UserPlus, Globe } from "lucide-react";
+import { InviteTenantDialog } from '@/components/landlord/InviteTenantDialog';
+import { ListPropertyButton } from '@/components/landlord/ListPropertyButton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
@@ -2372,11 +2374,19 @@ const renderReportsTab = () => (
                   <div>
                     <h3 className="font-semibold text-lg">{selectedProperty.title}</h3>
                     <p className="text-sm text-muted-foreground">{selectedProperty.location}</p>
+                    {selectedProperty.status === 'unlisted' && (
+                      <Badge variant="secondary" className="mt-1">Private — Not Listed</Badge>
+                    )}
                   </div>
-                  <Button variant="outline" size="sm" onClick={handleBackToProperties}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Properties
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    {selectedProperty.status === 'unlisted' && (
+                      <ListPropertyButton propertyId={selectedProperty.id} onStatusChange={fetchProperties} />
+                    )}
+                    <Button variant="outline" size="sm" onClick={handleBackToProperties}>
+                      <ArrowLeft className="w-4 h-4 mr-2" />
+                      Back
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -2519,6 +2529,23 @@ const renderReportsTab = () => (
                   <p className="text-xs text-muted-foreground">Help & Resources</p>
                 </Card>
               </div>
+
+              {/* Invite Tenant */}
+              {selectedProperty && (
+                <InviteTenantDialog 
+                  propertyId={selectedProperty.id} 
+                  propertyTitle={selectedProperty.title}
+                  trigger={
+                    <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)] cursor-pointer`}>
+                      <div className="w-10 h-10 bg-gradient-to-br from-success-green to-success-green-glow rounded-ios mx-auto mb-2 flex items-center justify-center">
+                        <UserPlus className="w-5 h-5 text-white" />
+                      </div>
+                      <p className="text-xs font-medium">Invite Tenant</p>
+                      <p className="text-xs text-muted-foreground">Share Link</p>
+                    </Card>
+                  }
+                />
+              )}
 
             </div>
           </div>
