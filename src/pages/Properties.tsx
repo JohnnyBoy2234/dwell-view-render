@@ -17,6 +17,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
+
 interface Property {
   id: string;
   title: string;
