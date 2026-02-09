@@ -21,6 +21,8 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
         return 'bg-gradient-to-r from-ocean-blue/10 to-ocean-blue/20 text-ocean-blue border-ocean-blue/30 shadow-sm';
       case 'occupied':
         return 'bg-gradient-to-r from-earth-warm/10 to-earth-warm/20 text-earth-warm border-earth-warm/30 shadow-sm';
+      case 'unlisted':
+        return 'bg-gradient-to-r from-muted/20 to-muted/30 text-muted-foreground border-muted/40 shadow-sm';
       default:
         return 'bg-gradient-to-r from-muted/10 to-muted/20 text-muted-foreground border-muted/30 shadow-sm';
     }
@@ -55,7 +57,8 @@ export function PropertyCard({ property, inquiriesCount, applicationsCount, acti
           <Badge className={getStatusColor(property.status)}>
             {property.status === 'available' ? 'For Rent' : 
              property.status === 'rented' ? 'Leased' : 
-             property.status === 'occupied' ? 'Occupied' : property.status}
+             property.status === 'occupied' ? 'Occupied' : 
+             property.status === 'unlisted' ? 'Private' : property.status}
           </Badge>
         </div>
       </CardHeader>

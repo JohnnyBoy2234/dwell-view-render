@@ -33,8 +33,23 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
         return 'bg-blue-500';
       case 'maintenance':
         return 'bg-yellow-500';
+      case 'unlisted':
+        return 'bg-gray-400';
       default:
         return 'bg-gray-500';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'available':
+        return 'Listed';
+      case 'occupied':
+        return 'Occupied';
+      case 'unlisted':
+        return 'Private';
+      default:
+        return status;
     }
   };
 

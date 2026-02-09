@@ -24,8 +24,8 @@ export interface ApplicationRequest {
   };
 }
 
-export type ApplicationRequestInsert = Database['public']['Tables']['application_requests']['Insert'];
-export type ApplicationRequestUpdate = Database['public']['Tables']['application_requests']['Update'];
+export type ApplicationRequestInsert = any;
+export type ApplicationRequestUpdate = any;
 
 export interface ApplicationRequestWithDetails extends ApplicationRequest {
   property: {
