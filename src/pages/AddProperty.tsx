@@ -63,7 +63,6 @@ export default function AddProperty() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const [listingMode, setListingMode] = useState<'manage' | 'list'>('manage');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -189,8 +188,7 @@ export default function AddProperty() {
           landlord_id: user.id,
           images: imageUrls,
           amenities: selectedAmenities,
-          status: listingMode === 'list' ? 'available' : 'unlisted',
-          price: data.price,
+          price: data.price, // Use exact price value
           bedrooms: Number(data.bedrooms),
           bathrooms: Number(data.bathrooms),
           parking_spaces: Number(data.parking_spaces),
@@ -201,9 +199,7 @@ export default function AddProperty() {
 
       toast({
         title: "Property added successfully!",
-        description: listingMode === 'list' 
-          ? "Your property is now listed publicly on RentLekker." 
-          : "Property added for management. Invite your tenant or list it publicly later."
+        description: "Your property is now listed on RentLekker."
       });
 
       clearAutosave();
@@ -237,7 +233,7 @@ export default function AddProperty() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-primary">Add New Property</h1>
-            <p className="text-muted-foreground">Add your property to manage or list for rent</p>
+            <p className="text-muted-foreground">List your property for rent</p>
           </div>
         </div>
 
@@ -454,55 +450,13 @@ export default function AddProperty() {
             </CardContent>
           </Card>
 
-          {/* Listing Mode */}
-          <Card>
-            <CardHeader>
-              <CardTitle>What would you like to do?</CardTitle>
-              <CardDescription>Choose whether to manage privately or list publicly</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setListingMode('manage')}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    listingMode === 'manage' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-muted-foreground/30'
-                  }`}
-                >
-                  <h4 className="font-semibold mb-1">Manage Only</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Add your property privately. Use all management tools and invite your tenant via a link. Not visible to the public.
-                  </p>
-                </div>
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setListingMode('list')}
-                  className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                    listingMode === 'list' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-muted hover:border-muted-foreground/30'
-                  }`}
-                >
-                  <h4 className="font-semibold mb-1">List Publicly</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Make your property visible to all tenants on the platform. You can still use all management tools.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Submit */}
           <div className="flex justify-end gap-4">
             <Button type="button" variant="outline" onClick={() => navigate('/enhancedlandlorddashboard')}>
               Cancel
             </Button>
             <Button type="submit" disabled={uploading}>
-              {uploading ? 'Adding Property...' : listingMode === 'list' ? 'Add & List Property' : 'Add Property'}
+              {uploading ? 'Adding Property...' : 'Add Property'}
             </Button>
           </div>
         </form>

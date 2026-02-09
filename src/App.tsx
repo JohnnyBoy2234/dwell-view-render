@@ -61,7 +61,6 @@ import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
 import InventoryStart from "@/pages/InventoryStart";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
-import TenantJoin from "@/pages/TenantJoin";
 import { VerificationGate } from "@/components/VerificationGate";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { PlanGuard } from "@/components/PlanGuard";
@@ -221,7 +220,6 @@ function AppRoutes() {
               <Route path="/docusign-callback" element={<DocuSignCallback />} />
               <Route path="/docusign-redirect" element={<DocuSignRedirect />} />
               <Route path="/inventory/start" element={<InventoryStart />} />
-              <Route path="/join/:token" element={<TenantJoin />} />
               
               {/* Enhanced Dashboard Routes */}
               <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
