@@ -25,6 +25,8 @@ import BlogPost from "./pages/BlogPost";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import ListProperty from "./pages/ListProperty";
+import ListPropertyRent from "./pages/ListPropertyRent";
+import ListPropertySale from "./pages/ListPropertySale";
 import PropertyDetail from "./pages/PropertyDetail";
 import PropertyManagement from "./pages/PropertyManagement";
 import Messages from "./pages/Messages";
@@ -77,6 +79,8 @@ import ExpenseSummaryPage from "@/pages/accounting/ExpenseSummaryPage";
 import TaxInvoicePage from "@/pages/accounting/TaxInvoicePage";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import SafeRenting from "./pages/SafeRenting";
+import RentalsPage from "./pages/RentalsPage";
+import SalesPage from "./pages/SalesPage";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -204,6 +208,8 @@ function AppRoutes() {
               {/* Routes with Navbar */}
               <Route path="/" element={<><Navbar /><Index /></>} />
               <Route path="/properties" element={<><Navbar /><Properties /></>} />
+              <Route path="/rentals" element={<><Navbar /><RentalsPage /></>} />
+              <Route path="/sales" element={<><Navbar /><SalesPage /></>} />
               <Route path="/about" element={<><Navbar /><About /></>} />
               <Route path="/about/landlord" element={<><Navbar /><AboutLandlord /></>} />
               <Route path="/about/tenant" element={<><Navbar /><AboutTenant /></>} />
@@ -263,6 +269,8 @@ function AppRoutes() {
               <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
               <Route path="/add-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
               <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
+              <Route path="/list-property/rent" element={<AuthenticatedRoute><ListPropertyRent /></AuthenticatedRoute>} />
+              <Route path="/list-property/sale" element={<AuthenticatedRoute><ListPropertySale /></AuthenticatedRoute>} />
               <Route path="/property/:id" element={<PropertyDetail />} />
               <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
               

@@ -19,6 +19,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';
 
 // Import step components
+import ListingTypeStep from '@/components/listing/ListingTypeStep';
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
 import LocationStep from '@/components/listing/LocationStep';
 import DetailsStep from '@/components/listing/DetailsStep';
@@ -27,6 +28,9 @@ import PhotosStep from '@/components/listing/PhotosStep';
 import ReviewStep from '@/components/listing/ReviewStep';
 
 export interface ListingFormData {
+  // Listing Type
+  listing_type: 'rent' | 'sale';
+  
   // Property Type
   property_type: string;
   
@@ -43,24 +47,38 @@ export interface ListingFormData {
   pets_allowed: boolean;
   amenities: string[];
   
-  // Pricing & Availability
+  // Pricing & Availability (rental)
   price: number;
   available_from?: string;
+  
+  // Sale-specific fields
+  sale_price?: number;
+  price_negotiable?: boolean;
+  levy_amount?: number;
+  rates_taxes?: number;
+  erf_size?: number;
+  transfer_duty_estimate?: number;
+  occupation_date?: string;
   
   // Photos
   images: File[];
 }
 
 const steps = [
-  { id: 1, title: 'Property Type', icon: Home, description: 'What are you listing?' },
-  { id: 2, title: 'Location', icon: MapPin, description: 'Where is your property?' },
-  { id: 3, title: 'Details', icon: Settings, description: 'Property specifications' },
-  { id: 4, title: 'Pricing', icon: RIcon, description: 'Set your price' },
-  { id: 5, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
-  { id: 6, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
+  { id: 1, title: 'Listing Type', icon: Home, description: 'Rent or sell?' },
+  { id: 2, title: 'Property Type', icon: Home, description: 'What are you listing?' },
+  { id: 3, title: 'Location', icon: MapPin, description: 'Where is your property?' },
+  { id: 4, title: 'Details', icon: Settings, description: 'Property specifications' },
+  { id: 5, title: 'Pricing', icon: RIcon, description: 'Set your price' },
+  { id: 6, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
+  { id: 7, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];
 
-export default function ListProperty() {
+interface ListPropertyProps {
+  listingType?: 'rent' | 'sale';
+}
+
+export default function ListProperty({ listingType }: ListPropertyProps = {}) {
   const { user, isLandlord } = useAuth();
   const { plan, planStatus } = useSubscription();
   const [currentStep, setCurrentStep] = useState(1);
@@ -71,6 +89,7 @@ export default function ListProperty() {
 
   const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<ListingFormData>({
     defaultValues: {
+      listing_type: listingType || undefined,
       property_type: '',
       location: '',
       description: '',
@@ -81,10 +100,14 @@ export default function ListProperty() {
       pets_allowed: false,
       amenities: [],
       price: undefined,
+      price_negotiable: false,
       images: []
     },
     mode: 'onChange'
   });
+
+  const effectiveCurrentStep = listingType ? currentStep - 1 : currentStep;
+  const effectiveSteps = listingType ? steps.slice(1) : steps;
 
   const formData = watch();
 
@@ -94,7 +117,7 @@ export default function ListProperty() {
   }
 
   const LOCAL_STORAGE_KEY = 'listing_form_draft';
-  const progress = (currentStep / steps.length) * 100;
+  const progress = (effectiveCurrentStep / effectiveSteps.length) * 100;
 
   useEffect(() => {
     try {
@@ -133,29 +156,36 @@ export default function ListProperty() {
     
     switch (currentStep) {
       case 1:
-        fieldsToValidate = ['property_type'];
+        fieldsToValidate = ['listing_type'];
         break;
       case 2:
-        fieldsToValidate = ['location', 'description'];
+        fieldsToValidate = ['property_type'];
         break;
       case 3:
-        fieldsToValidate = ['bedrooms', 'bathrooms'];
+        fieldsToValidate = ['location', 'description'];
         break;
       case 4:
-        fieldsToValidate = ['price'];
+        fieldsToValidate = ['bedrooms', 'bathrooms'];
+        break;
+      case 5:
+        if (formData.listing_type === 'sale') {
+          fieldsToValidate = ['sale_price'];
+        } else {
+          fieldsToValidate = ['price'];
+        }
         break;
     }
 
     const isValid = await trigger(fieldsToValidate);
     
-    if (isValid && currentStep < steps.length) {
+    if (isValid && effectiveCurrentStep < effectiveSteps.length) {
       setCurrentStep(currentStep + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const prevStep = () => {
-    if (currentStep > 1) {
+    if (effectiveCurrentStep > 1) {
       setCurrentStep(currentStep - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
@@ -196,7 +226,7 @@ export default function ListProperty() {
         const { error: roleError } = await supabase.rpc('promote_to_landlord');
         if (roleError) {
           console.error('Error promoting to landlord:', roleError);
-          // Continue anyway - the RLS policy allows users without roles to create properties
+          // Continue anyway - RLS policy allows users without roles to create properties
         }
       }
 
@@ -204,25 +234,38 @@ export default function ListProperty() {
       const imageUrls = data.images.length > 0 ? await uploadImages(data.images) : [];
 
       // Insert property - keep price as the exact number without any conversion that could cause precision loss
+      const insertData: any = {
+        title: `${data.property_type} in ${data.location}`, // Generate title from property type and location
+        description: data.description,
+        location: data.location,
+        property_type: data.property_type,
+        price: data.listing_type === 'sale' ? (data.sale_price || 0) : data.price,
+        bedrooms: Number(data.bedrooms) || 1,
+        bathrooms: Number(data.bathrooms) || 1,
+        parking_spaces: Number(data.parking_spaces) || 0,
+        size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
+        furnished: data.furnished,
+        pets_allowed: data.pets_allowed,
+        available_from: data.listing_type === 'rent' ? (data.available_from || null) : null,
+        landlord_id: user.id,
+        images: imageUrls,
+        amenities: data.amenities,
+      };
+
+      // Add sale-specific fields
+      if (data.listing_type === 'sale') {
+        insertData.sale_price = data.sale_price ? Number(data.sale_price) : null;
+        insertData.price_negotiable = data.price_negotiable || false;
+        insertData.levy_amount = data.levy_amount ? Number(data.levy_amount) : null;
+        insertData.rates_taxes = data.rates_taxes ? Number(data.rates_taxes) : null;
+        insertData.erf_size = data.erf_size ? Number(data.erf_size) : null;
+        insertData.transfer_duty_estimate = data.transfer_duty_estimate ? Number(data.transfer_duty_estimate) : null;
+        insertData.occupation_date = data.occupation_date || null;
+      }
+
       const { error } = await supabase
         .from('properties')
-        .insert({
-          title: `${data.property_type} in ${data.location}`, // Generate title from property type and location
-          description: data.description,
-          location: data.location,
-          property_type: data.property_type,
-          price: data.price, // Use the exact price value without Number() conversion
-          bedrooms: Number(data.bedrooms) || 1,
-          bathrooms: Number(data.bathrooms) || 1,
-          parking_spaces: Number(data.parking_spaces) || 0,
-          size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
-          furnished: data.furnished,
-          pets_allowed: data.pets_allowed,
-          available_from: data.available_from || null,
-          landlord_id: user.id,
-          images: imageUrls,
-          amenities: data.amenities,
-        });
+        .insert(insertData);
 
       if (error) throw error;
 
@@ -242,28 +285,30 @@ export default function ListProperty() {
     }
   };
 
+  const handlePublishClick = () => {
+    const submitFn = handleSubmit(onSubmit);
+    submitFn();
+  };
+
   const renderStepContent = () => {
-    switch (currentStep) {
+    switch (effectiveCurrentStep) {
       case 1:
-        return <PropertyTypeStep control={control} errors={errors} />;
+        return listingType ? <PropertyTypeStep control={control} errors={errors} /> : <ListingTypeStep control={control} errors={errors} />;
       case 2:
-        return <LocationStep control={control} errors={errors} />;
+        return listingType ? <LocationStep control={control} errors={errors} /> : <PropertyTypeStep control={control} errors={errors} />;
       case 3:
-        return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
+        return listingType ? <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} /> : <LocationStep control={control} errors={errors} />;
       case 4:
-        return <PricingStep control={control} errors={errors} setValue={setValue} />;
+        return listingType ? <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} /> : <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 5:
-        return <PhotosStep setValue={setValue} formData={formData} />;
+        return listingType ? <PhotosStep setValue={setValue} formData={formData} /> : <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} />;
       case 6:
+        return listingType ? <ReviewStep formData={formData} /> : <PhotosStep setValue={setValue} formData={formData} />;
+      case 7:
         return <ReviewStep formData={formData} />;
       default:
         return null;
     }
-  };
-
-  const handlePublishClick = () => {
-    const submitFn = handleSubmit(onSubmit);
-    submitFn();
   };
 
   return (
@@ -285,17 +330,18 @@ export default function ListProperty() {
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <span className="text-sm font-medium text-muted-foreground">
-              Step {currentStep} of {steps.length}
+              Step {effectiveCurrentStep} of {effectiveSteps.length}
             </span>
           </div>
           <Progress value={progress} className="h-2" />
           
           {/* Step indicators */}
           <div className="flex justify-between mt-4">
-            {steps.map((step) => {
+            {effectiveSteps.map((step, index) => {
               const IconComponent = step.icon;
-              const isActive = currentStep === step.id;
-              const isCompleted = currentStep > step.id;
+              const stepId = listingType ? index + 2 : step.id;
+              const isActive = currentStep === stepId;
+              const isCompleted = currentStep > stepId;
               
               return (
                 <div
