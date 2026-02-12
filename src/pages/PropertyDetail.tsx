@@ -68,6 +68,14 @@ interface Property {
   featured: boolean;
   created_at: string;
   landlord_id: string;
+  listing_type: string;
+  sale_price: number | null;
+  price_negotiable: boolean;
+  levy_amount: number | null;
+  rates_taxes: number | null;
+  erf_size: number | null;
+  transfer_duty_estimate: number | null;
+  occupation_date: string | null;
   profiles: {
     display_name: string;
     phone: string | null;
@@ -368,8 +376,11 @@ export default function PropertyDetail() {
 
   const propertyUrl = typeof window !== 'undefined' ? window.location.href : '';
   const ogImage = property.images?.[0] || 'https://rentlekker.com/apple-touch-icon.png';
-  const ogTitle = `R${property.price.toLocaleString()}/month - ${property.property_type} in ${property.location}`;
-  const ogDescription = property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property available for rent in ${property.location}`;
+  const isSaleProperty = property.listing_type === 'sale';
+  const ogTitle = isSaleProperty
+    ? `R${(property.sale_price || property.price).toLocaleString()} - ${property.property_type} for Sale in ${property.location}`
+    : `R${property.price.toLocaleString()}/month - ${property.property_type} in ${property.location}`;
+  const ogDescription = property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property ${isSaleProperty ? 'for sale' : 'available for rent'} in ${property.location}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
@@ -421,8 +432,19 @@ export default function PropertyDetail() {
           <div className="flex items-center gap-2 mb-2">
             {property.featured && <Badge variant="secondary">Featured</Badge>}
             <Badge>{property.status}</Badge>
+            {property.listing_type === 'sale' && (
+              <Badge className="bg-primary text-primary-foreground">For Sale</Badge>
+            )}
+            {property.listing_type === 'sale' && property.price_negotiable && (
+              <Badge variant="outline">Negotiable</Badge>
+            )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">R{property.price.toLocaleString()}/month</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            {property.listing_type === 'sale' 
+              ? `R${(property.sale_price || property.price).toLocaleString()}`
+              : `R${property.price.toLocaleString()}/month`
+            }
+          </h1>
           <div className="flex items-center text-muted-foreground mb-4">
             <MapPin className="h-4 w-4 mr-1" />
             {property.property_type} in {property.location}
@@ -554,6 +576,43 @@ export default function PropertyDetail() {
                           </div>
                         </div>
                       )}
+
+                      {/* Sale-specific details */}
+                      {property.listing_type === 'sale' && (
+                        <div className="space-y-3 pt-4 border-t">
+                          <h4 className="font-semibold mb-2">Sale Details</h4>
+                          {property.levy_amount && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Levy</span>
+                              <span className="font-medium">R{property.levy_amount.toLocaleString()}/month</span>
+                            </div>
+                          )}
+                          {property.rates_taxes && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Rates & Taxes</span>
+                              <span className="font-medium">R{property.rates_taxes.toLocaleString()}/month</span>
+                            </div>
+                          )}
+                          {property.erf_size && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">ERF Size</span>
+                              <span className="font-medium">{property.erf_size.toLocaleString()} m²</span>
+                            </div>
+                          )}
+                          {property.transfer_duty_estimate && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Transfer Duty Est.</span>
+                              <span className="font-medium">R{property.transfer_duty_estimate.toLocaleString()}</span>
+                            </div>
+                          )}
+                          {property.occupation_date && (
+                            <div className="flex justify-between">
+                              <span className="text-muted-foreground">Occupation Date</span>
+                              <span className="font-medium">{new Date(property.occupation_date).toLocaleDateString()}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -613,17 +672,27 @@ export default function PropertyDetail() {
                   </div>
                 ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
-                    <GatedViewingButton
-                      propertyId={property.id}
-                      landlordId={property.landlord_id}
-                      propertyTitle={property.title}
-                    />
+                    {property.listing_type === 'sale' ? (
+                      <Button 
+                        className="w-full" 
+                        onClick={handleContactLandlord}
+                      >
+                        Make an Offer
+                      </Button>
+                    ) : (
+                      <GatedViewingButton
+                        propertyId={property.id}
+                        landlordId={property.landlord_id}
+                        propertyTitle={property.title}
+                      />
+                    )}
                     
-                    {/* Application Button */}
-                    <TenantApplicationButton 
-                      propertyId={property.id}
-                      className="w-full"
-                    />
+                    {property.listing_type === 'rent' && (
+                      <TenantApplicationButton 
+                        propertyId={property.id}
+                        className="w-full"
+                      />
+                    )}
                   </div>
                 ) : !user ? (
                   <GatedViewingButton
@@ -739,18 +808,29 @@ export default function PropertyDetail() {
       {property && (
         <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
-            <button
-              onClick={handleRequestViewing}
-              className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
-            >
-              Request Viewing
-            </button>
-            <button
-              onClick={handleContactLandlord}
-              className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
-            >
-              Message
-            </button>
+            {property.listing_type === 'sale' ? (
+              <button
+                onClick={handleContactLandlord}
+                className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
+              >
+                Make an Offer
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={handleRequestViewing}
+                  className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
+                >
+                  Request Viewing
+                </button>
+                <button
+                  onClick={handleContactLandlord}
+                  className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
+                >
+                  Message
+                </button>
+              </>
+            )}
             <button
               onClick={handleShare}
               className="rounded-xl bg-brand.green text-white px-3 py-2 text-sm hover:bg-brand.green/90 focus:outline-none focus:ring-2 focus:ring-brand.green/40"
