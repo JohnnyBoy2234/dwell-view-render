@@ -24,13 +24,8 @@ export interface ApplicationRequest {
   };
 }
 
-export type ApplicationRequestInsert = {
-  property_id: string;
-  tenant_id: string;
-  landlord_id: string;
-  status?: ApplicationRequestStatus;
-};
-export type ApplicationRequestUpdate = Partial<ApplicationRequestInsert> & { id?: string };
+export type ApplicationRequestInsert = Database['public']['Tables']['application_requests']['Insert'];
+export type ApplicationRequestUpdate = Database['public']['Tables']['application_requests']['Update'];
 
 export interface ApplicationRequestWithDetails extends ApplicationRequest {
   property: {

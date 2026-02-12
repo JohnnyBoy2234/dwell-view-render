@@ -22,9 +22,6 @@ interface PropertyCardProps {
   image: string;
   type: string;
   featured?: boolean;
-  listingType?: 'rent' | 'sale';
-  salePrice?: number | null;
-  priceNegotiable?: boolean;
 }
 
 /**
@@ -42,17 +39,10 @@ const PropertyCard = ({
   image,
   type,
   featured = false,
-  listingType = 'rent',
-  salePrice,
-  priceNegotiable,
 }: PropertyCardProps) => {
   const { navigateToProperty, handleKeyDown } = usePropertyNavigation(id);
 
-  const isSale = listingType === 'sale';
-  const displayPrice = isSale && salePrice ? salePrice : price;
-  const formattedPrice = isSale 
-    ? `${PROPERTY_CARD_CURRENCY.SYMBOL}${displayPrice.toLocaleString()}`
-    : `${PROPERTY_CARD_CURRENCY.SYMBOL}${displayPrice.toLocaleString()}${PROPERTY_CARD_CURRENCY.SEPARATOR}`;
+  const formattedPrice = `${PROPERTY_CARD_CURRENCY.SYMBOL}${price.toLocaleString()}${PROPERTY_CARD_CURRENCY.SEPARATOR}`;
   const altText = `${type} in ${location}`;
   const displayLocation = location.split(',')[1] + ' ' + location.split(',')[2];
   const locationText = `${type} in ${displayLocation}`;
@@ -76,11 +66,6 @@ const PropertyCard = ({
         {featured && (
           <Badge className={PROPERTY_CARD_STYLES.FEATURED_BADGE}>
             {PROPERTY_CARD_LABELS.FEATURED}
-          </Badge>
-        )}
-        {isSale && (
-          <Badge className="absolute top-2 left-2 bg-primary text-primary-foreground">
-            For Sale
           </Badge>
         )}
       </div>

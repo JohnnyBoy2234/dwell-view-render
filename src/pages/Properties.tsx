@@ -34,9 +34,6 @@ interface Property {
   status: string;
   featured: boolean;
   created_at: string;
-  listing_type: string;
-  sale_price: number | null;
-  price_negotiable: boolean;
 }
 
 const ITEMS_PER_PAGE = 30;
@@ -58,7 +55,6 @@ export default function Properties() {
   const maxPrice = searchParams.get('maxPrice') || '';
   const bedrooms = searchParams.get('bedrooms') || 'Any';
   const bathrooms = searchParams.get('bathrooms') || 'Any';
-  const listingType = searchParams.get('listingType') || 'all';
   
   // Debug logging
   useEffect(() => {
@@ -74,12 +70,6 @@ export default function Properties() {
   
   // Filter properties based on search criteria
   const filteredProperties = properties.filter(property => {
-    // Listing type filter (rent/buy)
-    if (listingType !== 'all') {
-      const filterType = listingType === 'buy' ? 'sale' : 'rent';
-      if ((property as any).listing_type !== filterType) return false;
-    }
-
     // Location search
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase().trim();
@@ -335,31 +325,6 @@ export default function Properties() {
           <p className="text-lg text-muted-foreground">
             {searchTerm ? `Searching for properties in ${searchTerm}` : `Discover ${properties.length} available properties across South Africa`}
           </p>
-          
-          {/* Rent / Buy Toggle */}
-          <div className="flex gap-2 mt-4">
-            {['all', 'rent', 'buy'].map((type) => (
-              <button
-                key={type}
-                onClick={() => {
-                  const newParams = new URLSearchParams(searchParams);
-                  if (type === 'all') {
-                    newParams.delete('listingType');
-                  } else {
-                    newParams.set('listingType', type);
-                  }
-                  setSearchParams(newParams);
-                }}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  listingType === type
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-background border border-border text-foreground hover:bg-accent'
-                }`}
-              >
-                {type === 'all' ? 'All' : type === 'rent' ? 'Rent' : 'Buy'}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* Active Filters Display */}

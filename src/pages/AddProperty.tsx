@@ -28,14 +28,6 @@ interface PropertyFormData {
   furnished: boolean;
   pets_allowed: boolean;
   available_from?: string;
-  listing_type: 'rent' | 'sale';
-  sale_price?: number;
-  price_negotiable?: boolean;
-  levy_amount?: number;
-  rates_taxes?: number;
-  erf_size?: number;
-  transfer_duty_estimate?: number;
-  occupation_date?: string;
 }
 
 const propertyTypes = [
@@ -77,13 +69,9 @@ export default function AddProperty() {
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<PropertyFormData>({
     defaultValues: {
       furnished: false,
-      pets_allowed: false,
-      listing_type: 'rent',
-      price_negotiable: false,
+      pets_allowed: false
     }
   });
-
-  const listingType = watch('listing_type');
 
   useEffect(() => {
     if (!user) return;
@@ -192,39 +180,20 @@ export default function AddProperty() {
       // Upload images first
       const imageUrls = images.length > 0 ? await uploadImages() : [];
 
-      // Insert property
-      const insertData: any = {
-        title: data.title,
-        description: data.description,
-        location: data.location,
-        property_type: data.property_type,
-        listing_type: data.listing_type,
-        price: data.listing_type === 'sale' ? (data.sale_price || 0) : data.price,
-        landlord_id: user.id,
-        images: imageUrls,
-        amenities: selectedAmenities,
-        bedrooms: Number(data.bedrooms),
-        bathrooms: Number(data.bathrooms),
-        parking_spaces: Number(data.parking_spaces),
-        size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
-        furnished: data.furnished,
-        pets_allowed: data.pets_allowed,
-        available_from: data.listing_type === 'rent' ? (data.available_from || null) : null,
-      };
-
-      if (data.listing_type === 'sale') {
-        insertData.sale_price = data.sale_price ? Number(data.sale_price) : null;
-        insertData.price_negotiable = data.price_negotiable || false;
-        insertData.levy_amount = data.levy_amount ? Number(data.levy_amount) : null;
-        insertData.rates_taxes = data.rates_taxes ? Number(data.rates_taxes) : null;
-        insertData.erf_size = data.erf_size ? Number(data.erf_size) : null;
-        insertData.transfer_duty_estimate = data.transfer_duty_estimate ? Number(data.transfer_duty_estimate) : null;
-        insertData.occupation_date = data.occupation_date || null;
-      }
-
+      // Insert property - use exact values to prevent precision loss
       const { error } = await supabase
         .from('properties')
-        .insert(insertData);
+        .insert({
+          ...data,
+          landlord_id: user.id,
+          images: imageUrls,
+          amenities: selectedAmenities,
+          price: data.price, // Use exact price value
+          bedrooms: Number(data.bedrooms),
+          bathrooms: Number(data.bathrooms),
+          parking_spaces: Number(data.parking_spaces),
+          size_sqm: data.size_sqm ? Number(data.size_sqm) : null
+        });
 
       if (error) throw error;
 
@@ -264,41 +233,11 @@ export default function AddProperty() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-primary">Add New Property</h1>
-            <p className="text-muted-foreground">Add your property for rent or sale</p>
+            <p className="text-muted-foreground">List your property for rent</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          {/* Listing Type */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Listing Type</CardTitle>
-              <CardDescription>Are you renting or selling?</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all ${
-                    listingType === 'rent' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => setValue('listing_type', 'rent')}
-                >
-                  <h3 className="font-semibold">Rental Property</h3>
-                  <p className="text-sm text-muted-foreground">List for monthly rent</p>
-                </div>
-                <div
-                  className={`cursor-pointer rounded-lg border-2 p-4 text-center transition-all ${
-                    listingType === 'sale' ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'
-                  }`}
-                  onClick={() => setValue('listing_type', 'sale')}
-                >
-                  <h3 className="font-semibold">Property for Sale</h3>
-                  <p className="text-sm text-muted-foreground">List for sale</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Basic Information */}
           <Card>
             <CardHeader>
@@ -361,24 +300,13 @@ export default function AddProperty() {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">
-                    {listingType === 'sale' ? 'Sale Price (R) *' : 'Monthly Rent (R) *'}
-                  </Label>
-                  {listingType === 'sale' ? (
-                    <Input
-                      type="number"
-                      {...register('sale_price', { required: 'Sale price is required', min: 1 })}
-                      placeholder="1500000"
-                    />
-                  ) : (
-                    <Input
-                      type="number"
-                      {...register('price', { required: 'Price is required', min: 1 })}
-                      placeholder="12000"
-                    />
-                  )}
+                  <Label htmlFor="price">Monthly Rent (R) *</Label>
+                  <Input
+                    type="number"
+                    {...register('price', { required: 'Price is required', min: 1 })}
+                    placeholder="12000"
+                  />
                   {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
-                  {errors.sale_price && <p className="text-sm text-destructive">{errors.sale_price.message}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -419,53 +347,14 @@ export default function AddProperty() {
                   />
                 </div>
 
-                {listingType === 'rent' && (
-                  <div className="space-y-2">
-                    <Label htmlFor="available_from">Available From</Label>
-                    <Input
-                      type="date"
-                      {...register('available_from')}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Sale-specific fields */}
-              {listingType === 'sale' && (
-                <div className="space-y-4 pt-4 border-t">
-                  <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">Sale Details</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label>Levy (R/month)</Label>
-                      <Input type="number" {...register('levy_amount')} placeholder="2500" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Rates & Taxes (R/month)</Label>
-                      <Input type="number" {...register('rates_taxes')} placeholder="1200" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>ERF Size (m²)</Label>
-                      <Input type="number" {...register('erf_size')} placeholder="500" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Transfer Duty Est. (R)</Label>
-                      <Input type="number" {...register('transfer_duty_estimate')} placeholder="50000" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Occupation Date</Label>
-                      <Input type="date" {...register('occupation_date')} />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="price_negotiable"
-                      checked={watch('price_negotiable')}
-                      onCheckedChange={(checked) => setValue('price_negotiable', !!checked)}
-                    />
-                    <Label htmlFor="price_negotiable">Price Negotiable</Label>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="available_from">Available From</Label>
+                  <Input
+                    type="date"
+                    {...register('available_from')}
+                  />
                 </div>
-              )}
+              </div>
 
               <div className="flex flex-col space-y-3">
                 <div className="flex items-center space-x-2">
