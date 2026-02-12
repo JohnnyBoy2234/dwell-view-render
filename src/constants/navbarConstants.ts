@@ -11,6 +11,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Home", icon: Home },
   { path: "/safe-renting", label: "Safe Renting", icon: Shield },
   { path: "/properties", label: "Find Rental", icon: Search },
+  { path: "/sales", label: "Find Sale", icon: Search },
   { path: "/pricing", label: "Pricing", icon: BadgeDollarSign },
   { path: "/blog", label: "Blog", icon: Send },
   { path: "/about", label: "About", icon: Send },
