@@ -74,7 +74,11 @@ const steps = [
   { id: 7, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];
 
-export default function ListProperty() {
+interface ListPropertyProps {
+  listingType?: 'rent' | 'sale';
+}
+
+export default function ListProperty({ listingType }: ListPropertyProps = {}) {
   const { user, isLandlord } = useAuth();
   const { plan, planStatus } = useSubscription();
   const [currentStep, setCurrentStep] = useState(1);
@@ -85,7 +89,7 @@ export default function ListProperty() {
 
   const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<ListingFormData>({
     defaultValues: {
-      listing_type: undefined,
+      listing_type: listingType || undefined,
       property_type: '',
       location: '',
       description: '',
@@ -101,6 +105,9 @@ export default function ListProperty() {
     },
     mode: 'onChange'
   });
+
+  const effectiveCurrentStep = listingType ? currentStep - 1 : currentStep;
+  const effectiveSteps = listingType ? steps.slice(1) : steps;
 
   const formData = watch();
 
