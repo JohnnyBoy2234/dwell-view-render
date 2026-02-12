@@ -14,6 +14,9 @@ interface Property {
   images: string[];
   property_type: string;
   featured: boolean;
+  listing_type?: string;
+  sale_price?: number | null;
+  price_negotiable?: boolean;
 }
 
 interface ResponsivePropertyGridProps {
@@ -68,7 +71,11 @@ export const ResponsivePropertyGrid: React.FC<ResponsivePropertyGridProps> = ({
         <div key={property.id} className="animate-fade-in h-full">
           <PropertyCard
             id={property.id}
-            title={`R${property.price.toLocaleString()}/month`}
+            title={
+              property.listing_type === 'sale' && property.sale_price
+                ? `R${property.sale_price.toLocaleString()}`
+                : `R${property.price.toLocaleString()}/month`
+            }
             location={property.location}
             price={property.price}
             beds={property.bedrooms}
@@ -77,6 +84,9 @@ export const ResponsivePropertyGrid: React.FC<ResponsivePropertyGridProps> = ({
             image={property.images?.[0] || `https://images.unsplash.com/photo-1488972685288-c3fd157d7c7a?w=500&h=300&fit=crop`}
             type={property.property_type}
             featured={property.featured}
+            listingType={(property.listing_type as 'rent' | 'sale') || 'rent'}
+            salePrice={property.sale_price}
+            priceNegotiable={property.price_negotiable}
           />
         </div>
       ))}
