@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { UserDropdown } from './UserDropdown';
 import { NAVBAR_CONTENT, NAVBAR_ROUTES, NAVBAR_STYLES } from '@/constants/navbarConstants';
-import ListPropertyDropdown from '@/components/listing/ListPropertyDropdown';
 
 interface NavActionsProps {
   loading: boolean;
@@ -38,7 +37,14 @@ export function NavActions({
     return (
       <div className={NAVBAR_STYLES.DESKTOP_ACTIONS}>
         {isLandlord && (
-          <ListPropertyDropdown />
+          <Button 
+            asChild 
+            className={NAVBAR_STYLES.LIST_PROPERTY_BUTTON}
+          >
+            <Link to={NAVBAR_ROUTES.LIST_PROPERTY}>
+              {NAVBAR_CONTENT.LIST_PROPERTY_LABEL}
+            </Link>
+          </Button>
         )}
         
         <NotificationBell />

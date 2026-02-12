@@ -26,6 +26,7 @@ import { downloadFileFromUrl } from '@/lib/download';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import TenantBadgeInline from './TenantBadgeInline';
+import { SuccessDialog } from '@/components/ui/SuccessDialog';
 
 interface ApplicationsTabProps {
   propertyId: string;
@@ -43,6 +44,8 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
   const [leads, setLeads] = useState<any[]>([]);
   const [invitesByTenant, setInvitesByTenant] = useState<Record<string, any>>({});
   const [requests, setRequests] = useState<ApplicationWithTenant[]>([]);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [approvedTenantName, setApprovedTenantName] = useState('');
 
   const fetchLeads = async () => {
     if (!user || !propertyId) return;
@@ -200,7 +203,18 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
         ? `${application.screening_profile.first_name} ${application.screening_profile.last_name}`
         : application.tenant_profile?.display_name || 'Tenant';
       
-      onStartLease(application.tenant_id, tenantName);
+      setApprovedTenantName(tenantName);
+      setShowSuccessDialog(true);
+    }
+  };
+
+  const handleSuccessDialogAction = (createLease: boolean) => {
+    setShowSuccessDialog(false);
+    if (createLease && selectedApplication) {
+      const tenantName = selectedApplication.screening_profile 
+        ? `${selectedApplication.screening_profile.first_name} ${selectedApplication.screening_profile.last_name}`
+        : selectedApplication.tenant_profile?.display_name || 'Tenant';
+      onStartLease(selectedApplication.tenant_id, tenantName);
     }
   };
 
@@ -620,6 +634,38 @@ export function ApplicationsTab({ propertyId, propertyTitle, propertyLocation, o
           )}
         </CardContent>
       </Card>
+
+      {/* Success Dialog */}
+      <SuccessDialog
+        open={showSuccessDialog}
+        onClose={() => setShowSuccessDialog(false)}
+        icon="check"
+        title="Application Approved!"
+        subtitle={`You've approved ${approvedTenantName}'s application.`}
+        nextSteps={[
+          { title: "Create lease contract", description: "Set up the rental agreement with terms and conditions" },
+          { title: "Send for signature", description: "Both parties will sign electronically" },
+          { title: "Collect deposit", description: "Secure the tenancy with a deposit payment" }
+        ]}
+        primaryAction={{
+          label: "Create Lease Now",
+          onClick: () => {
+            const app = applications.find(a => 
+              (a.screening_profile?.first_name + ' ' + a.screening_profile?.last_name === approvedTenantName) ||
+              a.tenant_profile?.display_name === approvedTenantName
+            );
+            if (app) {
+              setShowSuccessDialog(false);
+              onStartLease(app.tenant_id, approvedTenantName);
+            }
+          }
+        }}
+        secondaryAction={{
+          label: "Do This Later",
+          onClick: () => setShowSuccessDialog(false)
+        }}
+        showConfetti={true}
+      />
     </div>
   );
 }

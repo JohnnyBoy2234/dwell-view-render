@@ -25,7 +25,6 @@ import LocationStep from '@/components/listing/LocationStep';
 import DetailsStep from '@/components/listing/DetailsStep';
 import PricingStep from '@/components/listing/PricingStep';
 import PhotosStep from '@/components/listing/PhotosStep';
-import ContactStep from '@/components/listing/ContactStep';
 import ReviewStep from '@/components/listing/ReviewStep';
 
 export interface ListingFormData {
@@ -61,13 +60,6 @@ export interface ListingFormData {
   transfer_duty_estimate?: number;
   occupation_date?: string;
   
-  // Contact Information (for sales)
-  contact_name?: string;
-  contact_phone?: string;
-  contact_email?: string;
-  preferred_contact_time?: string;
-  additional_notes?: string;
-  
   // Photos
   images: File[];
 }
@@ -78,9 +70,8 @@ const steps = [
   { id: 3, title: 'Location', icon: MapPin, description: 'Where is your property?' },
   { id: 4, title: 'Details', icon: Settings, description: 'Property specifications' },
   { id: 5, title: 'Pricing', icon: RIcon, description: 'Set your price' },
-  { id: 6, title: 'Contact', icon: RIcon, description: 'How can buyers reach you?' },
-  { id: 7, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
-  { id: 8, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
+  { id: 6, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
+  { id: 7, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];
 
 interface ListPropertyProps {
@@ -181,13 +172,6 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
           fieldsToValidate = ['sale_price'];
         } else {
           fieldsToValidate = ['price'];
-        }
-        break;
-      case 6:
-        if (formData.listing_type === 'sale') {
-          fieldsToValidate = ['contact_name', 'contact_phone', 'contact_email', 'preferred_contact_time'];
-        } else {
-          fieldsToValidate = [];
         }
         break;
     }
@@ -317,12 +301,10 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
       case 4:
         return listingType ? <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} /> : <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 5:
-        return listingType ? <ContactStep control={control} errors={errors} setValue={setValue} watch={watch} /> : <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} />;
+        return listingType ? <PhotosStep setValue={setValue} formData={formData} /> : <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} />;
       case 6:
-        return listingType ? <PhotosStep setValue={setValue} formData={formData} /> : <ContactStep control={control} errors={errors} setValue={setValue} watch={watch} />;
-      case 7:
         return listingType ? <ReviewStep formData={formData} /> : <PhotosStep setValue={setValue} formData={formData} />;
-      case 8:
+      case 7:
         return <ReviewStep formData={formData} />;
       default:
         return null;
