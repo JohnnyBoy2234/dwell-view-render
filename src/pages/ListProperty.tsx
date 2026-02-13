@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, Phone } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -26,6 +26,7 @@ import DetailsStep from '@/components/listing/DetailsStep';
 import PricingStep from '@/components/listing/PricingStep';
 import PhotosStep from '@/components/listing/PhotosStep';
 import ReviewStep from '@/components/listing/ReviewStep';
+import ContactStep from '@/components/listing/ContactStep';
 
 export interface ListingFormData {
   // Listing Type
@@ -60,11 +61,32 @@ export interface ListingFormData {
   transfer_duty_estimate?: number;
   occupation_date?: string;
   
+  // Contact (sale listings)
+  contact_phone?: string;
+  contact_email?: string;
+  
+  // Photos
+  images: File[];
+  amenities: string[];
+  
+  // Pricing & Availability (rental)
+  price: number;
+  available_from?: string;
+  
+  // Sale-specific fields
+  sale_price?: number;
+  price_negotiable?: boolean;
+  levy_amount?: number;
+  rates_taxes?: number;
+  erf_size?: number;
+  transfer_duty_estimate?: number;
+  occupation_date?: string;
+  
   // Photos
   images: File[];
 }
 
-const steps = [
+const rentalSteps = [
   { id: 1, title: 'Listing Type', icon: Home, description: 'Rent or sell?' },
   { id: 2, title: 'Property Type', icon: Home, description: 'What are you listing?' },
   { id: 3, title: 'Location', icon: MapPin, description: 'Where is your property?' },
@@ -72,6 +94,17 @@ const steps = [
   { id: 5, title: 'Pricing', icon: RIcon, description: 'Set your price' },
   { id: 6, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
   { id: 7, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
+];
+
+const saleSteps = [
+  { id: 1, title: 'Listing Type', icon: Home, description: 'Rent or sell?' },
+  { id: 2, title: 'Property Type', icon: Home, description: 'What are you listing?' },
+  { id: 3, title: 'Location', icon: MapPin, description: 'Where is your property?' },
+  { id: 4, title: 'Details', icon: Settings, description: 'Property specifications' },
+  { id: 5, title: 'Pricing', icon: RIcon, description: 'Set your price' },
+  { id: 6, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
+  { id: 7, title: 'Contact', icon: Phone, description: 'Your contact details' },
+  { id: 8, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];
 
 interface ListPropertyProps {
@@ -106,6 +139,8 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
     mode: 'onChange'
   });
 
+  const isSale = formData.listing_type === 'sale' || listingType === 'sale';
+  const steps = isSale ? saleSteps : rentalSteps;
   const effectiveCurrentStep = listingType ? currentStep - 1 : currentStep;
   const effectiveSteps = listingType ? steps.slice(1) : steps;
 
@@ -172,6 +207,11 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
           fieldsToValidate = ['sale_price'];
         } else {
           fieldsToValidate = ['price'];
+        }
+        break;
+      case 7:
+        if (isSale) {
+          fieldsToValidate = ['contact_phone', 'contact_email'];
         }
         break;
     }
@@ -250,6 +290,7 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
         landlord_id: user.id,
         images: imageUrls,
         amenities: data.amenities,
+        listing_type: data.listing_type || (listingType || 'rent'),
       };
 
       // Add sale-specific fields
@@ -261,6 +302,8 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
         insertData.erf_size = data.erf_size ? Number(data.erf_size) : null;
         insertData.transfer_duty_estimate = data.transfer_duty_estimate ? Number(data.transfer_duty_estimate) : null;
         insertData.occupation_date = data.occupation_date || null;
+        insertData.contact_phone = data.contact_phone || null;
+        insertData.contact_email = data.contact_email || null;
       }
 
       const { error } = await supabase
@@ -291,23 +334,40 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
   };
 
   const renderStepContent = () => {
-    switch (effectiveCurrentStep) {
-      case 1:
-        return listingType ? <PropertyTypeStep control={control} errors={errors} /> : <ListingTypeStep control={control} errors={errors} />;
-      case 2:
-        return listingType ? <LocationStep control={control} errors={errors} /> : <PropertyTypeStep control={control} errors={errors} />;
-      case 3:
-        return listingType ? <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} /> : <LocationStep control={control} errors={errors} />;
-      case 4:
-        return listingType ? <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} /> : <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
-      case 5:
-        return listingType ? <PhotosStep setValue={setValue} formData={formData} /> : <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} />;
-      case 6:
-        return listingType ? <ReviewStep formData={formData} /> : <PhotosStep setValue={setValue} formData={formData} />;
+    // When listingType is passed as prop, step 1 (ListingType) is skipped
+    // effectiveCurrentStep maps to the visible step number
+    if (listingType) {
+      // Steps without ListingType: PropertyType(1), Location(2), Details(3), Pricing(4), Photos(5), [Contact(6) if sale], Review(last)
+      switch (effectiveCurrentStep) {
+        case 1: return <PropertyTypeStep control={control} errors={errors} />;
+        case 2: return <LocationStep control={control} errors={errors} />;
+        case 3: return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
+        case 4: return <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} />;
+        case 5: return <PhotosStep setValue={setValue} formData={formData} />;
+        case 6:
+          if (isSale) return <ContactStep control={control} errors={errors} />;
+          return <ReviewStep formData={formData} />;
+        case 7:
+          if (isSale) return <ReviewStep formData={formData} />;
+          return null;
+        default: return null;
+      }
+    }
+    // Full flow with ListingType step
+    switch (currentStep) {
+      case 1: return <ListingTypeStep control={control} errors={errors} />;
+      case 2: return <PropertyTypeStep control={control} errors={errors} />;
+      case 3: return <LocationStep control={control} errors={errors} />;
+      case 4: return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
+      case 5: return <PricingStep control={control} errors={errors} setValue={setValue} listingType={formData.listing_type} />;
+      case 6: return <PhotosStep setValue={setValue} formData={formData} />;
       case 7:
+        if (isSale) return <ContactStep control={control} errors={errors} />;
         return <ReviewStep formData={formData} />;
-      default:
+      case 8:
+        if (isSale) return <ReviewStep formData={formData} />;
         return null;
+      default: return null;
     }
   };
 

@@ -68,6 +68,10 @@ interface Property {
   featured: boolean;
   created_at: string;
   landlord_id: string;
+  listing_type?: string;
+  contact_phone?: string | null;
+  contact_email?: string | null;
+  sale_price?: number | null;
   profiles: {
     display_name: string;
     phone: string | null;
@@ -422,7 +426,10 @@ export default function PropertyDetail() {
             {property.featured && <Badge variant="secondary">Featured</Badge>}
             <Badge>{property.status}</Badge>
           </div>
-          <h1 className="text-3xl font-bold mb-2">R{property.price.toLocaleString()}/month</h1>
+          <h1 className="text-3xl font-bold mb-2">
+            R{property.price.toLocaleString()}
+            {property.listing_type !== 'sale' && '/month'}
+          </h1>
           <div className="flex items-center text-muted-foreground mb-4">
             <MapPin className="h-4 w-4 mr-1" />
             {property.property_type} in {property.location}
@@ -584,7 +591,11 @@ export default function PropertyDetail() {
             <Card className="bg-gradient-to-br from-ocean-blue/5 via-card to-earth-warm/5 border-ocean-blue/30 shadow-elegant">
               <CardHeader>
                 <CardTitle>Contact</CardTitle>
-                <CardDescription>Message the landlord or book a viewing</CardDescription>
+                <CardDescription>
+                  {property.listing_type === 'sale' 
+                    ? 'Get in touch with the seller' 
+                    : 'Message the landlord or book a viewing'}
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {property.profiles && (
@@ -600,40 +611,59 @@ export default function PropertyDetail() {
                         )}
                       </div>
                     </div>
-                    
                   </div>
                 )}
-                
-                {user && property.landlord_id === user.id ? (
-                  <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <CheckCircle className="h-4 w-4 inline mr-1" />
-                      This is your property listing
-                    </p>
-                  </div>
-                ) : user && property.landlord_id !== user.id ? (
-                  <div className="space-y-2">
-                    <GatedViewingButton
-                      propertyId={property.id}
-                      landlordId={property.landlord_id}
-                      propertyTitle={property.title}
-                    />
-                    
-                    {/* Application Button */}
-                    <TenantApplicationButton 
-                      propertyId={property.id}
-                      className="w-full"
-                    />
-                  </div>
-                ) : !user ? (
-                  <GatedViewingButton
-                    propertyId={property.id}
-                    landlordId={property.landlord_id}
-                    propertyTitle={property.title}
-                  />
-                ) : null}
 
-                
+                {/* Sale listing: show contact info directly */}
+                {property.listing_type === 'sale' && (property.contact_phone || property.contact_email) && (
+                  <div className="space-y-3 border-t pt-4">
+                    <p className="text-sm font-medium text-muted-foreground">Seller Contact Details</p>
+                    {property.contact_phone && (
+                      <a href={`tel:${property.contact_phone}`} className="flex items-center gap-2 text-sm hover:text-primary transition-colors">
+                        <Phone className="h-4 w-4" />
+                        {property.contact_phone}
+                      </a>
+                    )}
+                    {property.contact_email && (
+                      <a href={`mailto:${property.contact_email}`} className="flex items-center gap-2 text-sm hover:text-primary transition-colors">
+                        <Mail className="h-4 w-4" />
+                        {property.contact_email}
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Rental listing: show messaging/viewing buttons */}
+                {property.listing_type !== 'sale' && (
+                  <>
+                    {user && property.landlord_id === user.id ? (
+                      <div className="bg-primary/5 border border-primary/20 p-3 rounded-lg">
+                        <p className="text-sm text-primary">
+                          <CheckCircle className="h-4 w-4 inline mr-1" />
+                          This is your property listing
+                        </p>
+                      </div>
+                    ) : user && property.landlord_id !== user.id ? (
+                      <div className="space-y-2">
+                        <GatedViewingButton
+                          propertyId={property.id}
+                          landlordId={property.landlord_id}
+                          propertyTitle={property.title}
+                        />
+                        <TenantApplicationButton 
+                          propertyId={property.id}
+                          className="w-full"
+                        />
+                      </div>
+                    ) : !user ? (
+                      <GatedViewingButton
+                        propertyId={property.id}
+                        landlordId={property.landlord_id}
+                        propertyTitle={property.title}
+                      />
+                    ) : null}
+                  </>
+                )}
               </CardContent>
             </Card>
 
@@ -739,21 +769,38 @@ export default function PropertyDetail() {
       {property && (
         <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
-            <button
-              onClick={handleRequestViewing}
-              className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
-            >
-              Request Viewing
-            </button>
-            <button
-              onClick={handleContactLandlord}
-              className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
-            >
-              Message
-            </button>
+            {property.listing_type === 'sale' ? (
+              <>
+                {property.contact_phone && (
+                  <a href={`tel:${property.contact_phone}`} className="rounded-xl bg-primary text-primary-foreground px-3 py-2 text-sm flex items-center gap-1">
+                    <Phone className="h-4 w-4" /> Call Seller
+                  </a>
+                )}
+                {property.contact_email && (
+                  <a href={`mailto:${property.contact_email}`} className="rounded-xl bg-secondary text-secondary-foreground border px-3 py-2 text-sm flex items-center gap-1">
+                    <Mail className="h-4 w-4" /> Email Seller
+                  </a>
+                )}
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={handleRequestViewing}
+                  className="rounded-xl bg-primary text-primary-foreground px-3 py-2 text-sm"
+                >
+                  Request Viewing
+                </button>
+                <button
+                  onClick={handleContactLandlord}
+                  className="rounded-xl bg-secondary text-secondary-foreground border px-3 py-2 text-sm"
+                >
+                  Message
+                </button>
+              </>
+            )}
             <button
               onClick={handleShare}
-              className="rounded-xl bg-brand.green text-white px-3 py-2 text-sm hover:bg-brand.green/90 focus:outline-none focus:ring-2 focus:ring-brand.green/40"
+              className="rounded-xl bg-accent text-accent-foreground px-3 py-2 text-sm"
             >
               Share
             </button>
