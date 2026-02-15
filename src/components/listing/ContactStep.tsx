@@ -198,3 +198,5 @@ export function ContactStep({ control, errors }: ContactStepProps) {
     </div>
   );
 }
+
+export default ContactStep;
