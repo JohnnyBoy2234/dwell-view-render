@@ -2,7 +2,12 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera } from 'lucide-react';
-import { RIcon } from '@/components/icons/RIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { ListingFormData } from '@/pages/ListProperty';
 
 interface ReviewStepProps {

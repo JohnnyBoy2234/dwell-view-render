@@ -17,7 +17,13 @@ import { Button } from '@/components/ui/button';
 import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard, HelpCircle } from "lucide-react";
 import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
-import { RIcon } from '@/components/icons/RIcon';
+
+// Custom R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import GlassCard from '@/components/ui/GlassCard';
 import { StatCard } from '@/components/ui/StatCard';
 import { SectionHeader } from '@/components/ui/SectionHeader';

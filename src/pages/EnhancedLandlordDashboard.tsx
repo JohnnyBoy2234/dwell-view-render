@@ -14,7 +14,12 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RIcon } from '@/components/icons/RIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';

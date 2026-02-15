@@ -24,17 +24,8 @@ export interface ApplicationRequest {
   };
 }
 
-// These types are defined manually since application_requests may not be in the generated schema
-export type ApplicationRequestInsert = {
-  id?: string;
-  property_id: string;
-  tenant_id: string;
-  landlord_id: string;
-  status?: ApplicationRequestStatus;
-  created_at?: string;
-  updated_at?: string;
-};
-export type ApplicationRequestUpdate = Partial<ApplicationRequestInsert>;
+export type ApplicationRequestInsert = Database['public']['Tables']['application_requests']['Insert'];
+export type ApplicationRequestUpdate = Database['public']['Tables']['application_requests']['Update'];
 
 export interface ApplicationRequestWithDetails extends ApplicationRequest {
   property: {

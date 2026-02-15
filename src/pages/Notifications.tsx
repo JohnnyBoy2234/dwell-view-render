@@ -20,7 +20,12 @@ import {
   Clock
 } from 'lucide-react';
 import { getNotificationTargetUrl } from '@/utils/notificationRoutes';
-import { RIcon } from '@/components/icons/RIcon';
+// Simple R icon for South African Rand
+const RIcon = ({ className }: { className?: string }) => (
+  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>
+);
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';

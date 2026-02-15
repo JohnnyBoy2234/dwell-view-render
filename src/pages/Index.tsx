@@ -11,8 +11,6 @@ import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
 import { ImageWithSkeleton } from "@/components/ui/ImageWithSkeleton";
 import { Shield, CheckCircle, ArrowRight, MessageSquare, Smartphone, Zap, LayoutDashboard, Calculator, Layers } from "lucide-react";
-import ListPropertyDropdown from '@/components/listing/ListPropertyDropdown';
-import { RIcon } from '@/components/icons/RIcon';
 
 const dummyBlogPost = {
   id: "safe-transparent-new-way",
@@ -24,6 +22,14 @@ const dummyBlogPost = {
   featured: true,
 };
 
+// Simple R icon for South African Rand
+const RIcon = ({
+  className
+}: {
+  className?: string;
+}) => <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+    R
+  </div>;
 const Index = () => {
   const {
     filters,
@@ -175,7 +181,9 @@ const Index = () => {
                 </li>
               </ul>
               <div className="flex flex-col sm:flex-row gap-4">
-                <ListPropertyDropdown />
+                <Button asChild size="lg" className="bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-lg px-6">
+                  <Link to="/list-property">Add Listing</Link>
+                </Button>
                 <Button asChild size="lg" variant="outline" className="border-ocean-blue text-ocean-blue hover:bg-ocean-blue/5 rounded-lg px-6">
                   <Link to="/about/landlord">Learn More</Link>
                 </Button>
