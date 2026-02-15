@@ -1,11 +1,6 @@
 import { useState } from 'react';
 import { CreditCard, Download, Calendar, Clock, CheckCircle } from 'lucide-react';
-// Simple R icon for South African Rand
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
-    R
-  </div>
-);
+import { RIcon } from '@/components/icons/RIcon';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
