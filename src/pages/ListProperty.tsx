@@ -142,7 +142,7 @@ export default function ListProperty({ listingType }: ListPropertyProps = {}) {
   const isSale = formData.listing_type === 'sale' || listingType === 'sale';
   const steps = isSale ? saleSteps : rentalSteps;
   const effectiveCurrentStep = listingType ? currentStep - 1 : currentStep;
-  const effectiveSteps = listingType ? steps.slice(1) : steps;
+  const effectiveSteps = listingType ? rentalSteps.slice(1) : rentalSteps;
 
   const formData = watch();
 
