@@ -12,6 +12,7 @@ import { Footer } from "@/components/Footer";
 import { ImageWithSkeleton } from "@/components/ui/ImageWithSkeleton";
 import { Shield, CheckCircle, ArrowRight, MessageSquare, Smartphone, Zap, LayoutDashboard, Calculator, Layers } from "lucide-react";
 import ListPropertyDropdown from '@/components/listing/ListPropertyDropdown';
+import { RIcon } from '@/components/icons/RIcon';
 
 const dummyBlogPost = {
   id: "safe-transparent-new-way",
@@ -23,14 +24,6 @@ const dummyBlogPost = {
   featured: true,
 };
 
-// Simple R icon for South African Rand
-const RIcon = ({
-  className
-}: {
-  className?: string;
-}) => <div className={`${className} flex items-center justify-center font-bold text-lg`}>
-    R
-  </div>;
 const Index = () => {
   const {
     filters,

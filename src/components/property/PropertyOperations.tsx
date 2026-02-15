@@ -13,12 +13,7 @@ import {
   ArrowRight,
   Calendar
 } from 'lucide-react';
-// Simple R icon for South African Rand
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
-    R
-  </div>
-);
+import { RIcon } from '@/components/icons/RIcon';
 import { useNavigate } from 'react-router-dom';
 import { Property } from '@/types/dashboard';
 
