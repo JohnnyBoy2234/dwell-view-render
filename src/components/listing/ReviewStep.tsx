@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera } from 'lucide-react';
+import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -9,12 +9,14 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { ListingFormData } from '@/pages/ListProperty';
+import { SaleListingFormData } from '@/pages/ListSale';
 
 interface ReviewStepProps {
-  formData: ListingFormData;
+  formData: ListingFormData | SaleListingFormData;
+  isSale?: boolean;
 }
 
-export default function ReviewStep({ formData }: ReviewStepProps) {
+export default function ReviewStep({ formData, isSale }: ReviewStepProps) {
   const {
     property_type,
     location,
@@ -30,6 +32,10 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
     available_from,
     images
   } = formData;
+
+  // Extract contact fields only for sale listings
+  const contactFields = isSale ? formData as SaleListingFormData : null;
+  const { contact_name, contact_phone, contact_email, preferred_contact_method } = contactFields || {};
 
   return (
     <div className="space-y-6">
@@ -91,7 +97,7 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
             </div>
             
             <div className="text-2xl font-bold text-primary">
-              R{price?.toLocaleString()} / month
+              R{price?.toLocaleString()}{isSale ? '' : ' / month'}
             </div>
           </div>
         </CardContent>
@@ -151,7 +157,7 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Monthly Rent:</span>
+              <span className="text-muted-foreground">{isSale ? 'Sale Price:' : 'Monthly Rent:'}</span>
               <span className="font-bold text-lg text-primary">R{price?.toLocaleString()}</span>
             </div>
             <div className="flex justify-between">
@@ -173,6 +179,44 @@ export default function ReviewStep({ formData }: ReviewStepProps) {
           <p className="text-muted-foreground leading-relaxed">{description}</p>
         </CardContent>
       </Card>
+
+      {/* Contact Information - Only for sales */}
+      {isSale && contact_name && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Contact Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Contact Name:</span>
+              <span className="font-medium">{contact_name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Phone className="h-4 w-4" />
+                Phone:
+              </span>
+              <span className="font-medium">{contact_phone}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Mail className="h-4 w-4" />
+                Email:
+              </span>
+              <span className="font-medium">{contact_email}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Preferred Contact:</span>
+              <span className="font-medium capitalize">
+                {preferred_contact_method === 'both' ? 'Phone or Email' : preferred_contact_method}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Amenities */}
       {amenities && amenities.length > 0 && (

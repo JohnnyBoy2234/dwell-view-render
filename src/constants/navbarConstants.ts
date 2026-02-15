@@ -11,6 +11,7 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/", label: "Home", icon: Home },
   { path: "/safe-renting", label: "Safe Renting", icon: Shield },
   { path: "/properties", label: "Find Rental", icon: Search },
+  { path: "/sale-listings", label: "Find Sale", icon: Search },
   { path: "/pricing", label: "Pricing", icon: BadgeDollarSign },
   { path: "/blog", label: "Blog", icon: Send },
   { path: "/about", label: "About", icon: Send },
@@ -30,11 +31,14 @@ export const NAVBAR_CONTENT = {
 export const NAVBAR_ROUTES = {
   HOME: "/",
   LIST_PROPERTY: "/list-property",
+  LIST_RENTAL: "/list-rental",
+  LIST_SALE: "/list-sale",
   AUTH: "/auth",
   MESSAGES: "/messages",
   LANDLORD_DASHBOARD: "/enhancedlandlorddashboard",
   TENANT_DASHBOARD: "/tenant-dashboard",
   ADMIN_DASHBOARD: "/admin/dashboard",
+  SALE_LISTINGS: "/sale-listings",
 } as const;
 
 export const NAVBAR_STYLES = {
