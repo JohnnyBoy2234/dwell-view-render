@@ -22,7 +22,7 @@ import { SuccessDialog } from '@/components/ui/SuccessDialog';
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
 import LocationStep from '@/components/listing/LocationStep';
 import DetailsStep from '@/components/listing/DetailsStep';
-import PricingStep from '@/components/listing/PricingStep';
+import SalesPricingStep from '@/components/listing/SalesPricingStep';
 import PhotosStep from '@/components/listing/PhotosStep';
 import ReviewStep from '@/components/listing/ReviewStep';
 import ContactStep from '@/components/listing/ContactStep';
@@ -271,7 +271,7 @@ export default function ListSale() {
       case 3:
         return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 4:
-        return <PricingStep control={control} errors={errors} setValue={setValue} />;
+        return <SalesPricingStep control={control} errors={errors} setValue={setValue} />;
       case 5:
         return <PhotosStep setValue={setValue} formData={formData} />;
       case 6:
