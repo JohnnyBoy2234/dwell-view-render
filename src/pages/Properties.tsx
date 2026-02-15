@@ -34,6 +34,7 @@ interface Property {
   status: string;
   featured: boolean;
   created_at: string;
+  listing_type?: string;
 }
 
 const ITEMS_PER_PAGE = 30;
@@ -70,6 +71,11 @@ export default function Properties() {
   
   // Filter properties based on search criteria
   const filteredProperties = properties.filter(property => {
+    // Only show rental listings (exclude sale listings)
+    if (property.listing_type === 'sale') {
+      return false;
+    }
+
     // Location search
     if (searchTerm) {
       const searchTermLower = searchTerm.toLowerCase().trim();
@@ -400,6 +406,7 @@ export default function Properties() {
           loading={loading}
           onClearFilters={handleClearFilters}
           onShowAllProperties={() => navigate('/properties')}
+          isSale={false}
         />
 
         {/* Pagination */}
