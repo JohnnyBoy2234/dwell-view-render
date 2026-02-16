@@ -31,7 +31,8 @@ import {
   Layers,
   Droplets,
   ParkingMeter,
-  Eye
+  Eye,
+  MessageCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
