@@ -1,10 +1,14 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Mail, User } from "lucide-react";
+import { MapPin, Phone, Mail, User, MessageCircle } from "lucide-react";
 import { PropertyFeatures } from '@/components/property/PropertyFeatures';
 import { usePropertyNavigation } from '@/hooks/usePropertyNavigation';
 import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import {
   PROPERTY_CARD_STYLES, 
   PROPERTY_CARD_LABELS, 
@@ -51,6 +55,47 @@ const PropertyCard = ({
   preferred_contact_method,
 }: PropertyCardProps) => {
   const { navigateToProperty, handleKeyDown } = usePropertyNavigation(id);
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleContactLandlord = async () => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to contact the landlord",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      // Create a new conversation with the landlord using RPC
+      const { data: conversationData, error: conversationError } = await supabase.rpc('create_conversation', {
+        p_property_id: id,
+        p_tenant_id: user.id,
+        p_started_by_tenant: true
+      });
+
+      if (conversationError) {
+        throw conversationError;
+      }
+
+      // Navigate to messages
+      navigate('/messages');
+      
+      toast({
+        title: "Conversation Started",
+        description: `You can now message the landlord about this property`,
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to start conversation. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const formattedPrice = `${PROPERTY_CARD_CURRENCY.SYMBOL}${price.toLocaleString()}${isSale ? '' : PROPERTY_CARD_CURRENCY.SEPARATOR}`;
   const altText = `${type} in ${location}`;
@@ -113,10 +158,17 @@ const PropertyCard = ({
           
           {/* Contact Information for Sale Listings */}
           {isSale && contact_name && (
-            <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div 
+              className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleContactLandlord();
+              }}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <User className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">Contact Seller</span>
+                <span className="text-sm font-medium text-blue-900">Contact Landlord</span>
+                <MessageCircle className="h-4 w-4 text-blue-600 ml-auto" />
               </div>
               <div className="space-y-1 text-xs text-blue-700">
                 <div className="font-medium">{contact_name}</div>
