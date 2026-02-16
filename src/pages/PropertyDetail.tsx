@@ -68,6 +68,11 @@ interface Property {
   featured: boolean;
   created_at: string;
   landlord_id: string;
+  listing_type?: string;
+  contact_name?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  preferred_contact_method?: string;
   profiles: {
     display_name: string;
     phone: string | null;
@@ -368,8 +373,9 @@ export default function PropertyDetail() {
 
   const propertyUrl = typeof window !== 'undefined' ? window.location.href : '';
   const ogImage = property.images?.[0] || 'https://rentlekker.com/apple-touch-icon.png';
-  const ogTitle = `R${property.price.toLocaleString()}/month - ${property.property_type} in ${property.location}`;
-  const ogDescription = property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property available for rent in ${property.location}`;
+  const isSale = property.listing_type === 'sale';
+  const ogTitle = `R${property.price.toLocaleString()}${isSale ? '' : '/month'} - ${property.property_type} in ${property.location}`;
+  const ogDescription = property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property available for ${isSale ? 'sale' : 'rent'} in ${property.location}`;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
@@ -422,7 +428,7 @@ export default function PropertyDetail() {
             {property.featured && <Badge variant="secondary">Featured</Badge>}
             <Badge>{property.status}</Badge>
           </div>
-          <h1 className="text-3xl font-bold mb-2">R{property.price.toLocaleString()}/month</h1>
+          <h1 className="text-3xl font-bold mb-2">R{property.price.toLocaleString()}{isSale ? '' : '/month'}</h1>
           <div className="flex items-center text-muted-foreground mb-4">
             <MapPin className="h-4 w-4 mr-1" />
             {property.property_type} in {property.location}
@@ -613,17 +619,54 @@ export default function PropertyDetail() {
                   </div>
                 ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
-                    <GatedViewingButton
-                      propertyId={property.id}
-                      landlordId={property.landlord_id}
-                      propertyTitle={property.title}
-                    />
-                    
-                    {/* Application Button */}
-                    <TenantApplicationButton 
-                      propertyId={property.id}
-                      className="w-full"
-                    />
+                    {property.listing_type === 'sale' ? (
+                      /* Contact Section for Sale Properties */
+                      <div className="space-y-2">
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-2 mb-3">
+                            <User className="h-5 w-5 text-blue-600" />
+                            <span className="text-lg font-medium text-blue-900">Contact Landlord</span>
+                          </div>
+                          <div className="space-y-2 text-sm text-blue-700">
+                            <div className="font-medium">{property.contact_name}</div>
+                            {property.contact_phone && (
+                              <div className="flex items-center gap-2">
+                                <Phone className="h-4 w-4" />
+                                <span>{property.contact_phone}</span>
+                              </div>
+                            )}
+                            {property.contact_email && (
+                              <div className="flex items-center gap-2">
+                                <Mail className="h-4 w-4" />
+                                <span>{property.contact_email}</span>
+                              </div>
+                            )}
+                          </div>
+                          <Button 
+                            onClick={handleContactLandlord}
+                            className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
+                          >
+                            <MessageCircle className="h-4 w-4 mr-2" />
+                            Send Message
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* Original Viewing Button for Rental Properties */
+                      <>
+                        <GatedViewingButton
+                          propertyId={property.id}
+                          landlordId={property.landlord_id}
+                          propertyTitle={property.title}
+                        />
+                        
+                        {/* Application Button */}
+                        <TenantApplicationButton 
+                          propertyId={property.id}
+                          className="w-full"
+                        />
+                      </>
+                    )}
                   </div>
                 ) : !user ? (
                   <GatedViewingButton
@@ -739,12 +782,22 @@ export default function PropertyDetail() {
       {property && (
         <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
           <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
-            <button
-              onClick={handleRequestViewing}
-              className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
-            >
-              Request Viewing
-            </button>
+            {isSale ? (
+              <button
+                onClick={handleContactLandlord}
+                className="rounded-xl bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600/40"
+              >
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Contact Landlord
+              </button>
+            ) : (
+              <button
+                onClick={handleRequestViewing}
+                className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
+              >
+                Request Viewing
+              </button>
+            )}
             <button
               onClick={handleContactLandlord}
               className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
