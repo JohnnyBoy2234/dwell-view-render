@@ -17,16 +17,7 @@ import {
   Building
 } from 'lucide-react';
 
-interface SaleProperty {
-  id: string;
-  title: string;
-  price: number;
-  location: string;
-  property_type: string;
-  status: string;
-  buyer_name?: string;
-  sale_date?: string;
-}
+import { Property } from '@/types/dashboard';
 
 interface DeedOfSaleData {
   seller_name: string;
@@ -49,7 +40,7 @@ interface ComplianceDocument {
 }
 
 interface SalePropertyOverviewProps {
-  property: SaleProperty;
+  property: Property;
 }
 
 export const SalePropertyOverview: React.FC<SalePropertyOverviewProps> = ({ property }) => {
@@ -216,7 +207,7 @@ export const SalePropertyOverview: React.FC<SalePropertyOverviewProps> = ({ prop
 };
 
 interface SaleComplianceProps {
-  property: SaleProperty;
+  property: Property;
 }
 
 export const SaleCompliance: React.FC<SaleComplianceProps> = ({ property }) => {

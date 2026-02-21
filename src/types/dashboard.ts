@@ -11,6 +11,9 @@ export interface Property {
   featured: boolean;
   images?: string[];
   landlord_id: string;
+  listing_type?: string;
+  buyer_name?: string;
+  sale_date?: string;
 }
 
 export interface Tenancy {
