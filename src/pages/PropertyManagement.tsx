@@ -193,106 +193,154 @@ export default function PropertyManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white">
-      {/* iOS-style Header */}
-      <div className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-ios-gray/10">
-        <div className="px-4 py-3">
+    <div className="min-h-screen bg-white pb-24 md:pb-4" style={{ minHeight: '100dvh', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
+        {/* Property Details Header */}
+        <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/enhancedlandlorddashboard')}
-            className="p-2 hover:bg-ios-gray/10 rounded-ios"
-          >
-           <ArrowLeft className="h-5 w-5 text-ios-blue" />
-          </Button>
-          <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ios-blue-light rounded-ios flex items-center justify-center">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="font-semibold text-ios-gray-dark">R{property.price.toLocaleString()}{property.listing_type === 'sale' ? '' : '/month'}</h1>
-                  <p className="text-sm text-ios-gray">{property.property_type} • {property.location}</p>
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-lg flex items-center justify-center">
+                <Home className="w-6 h-6 text-white" />
               </div>
-          </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">{property.title}</h2>
+                <p className="text-sm text-gray-600">{property.location}</p>
+              </div>
             </div>
-            <Badge className={`${getStatusColor(property.status)} rounded-ios font-medium px-3 py-1`}>
-              {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-            </Badge>
+            <Button 
+              onClick={() => navigate('/enhancedlandlorddashboard')}
+              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+            >
+              Back to Dashboard
+            </Button>
           </div>
-        </div>
         </div>
 
-        {/* Navigation Pills */}
-      <div className="px-4 py-4">
-        <div className="flex gap-2 overflow-x-auto scrollbar-hide">
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleTabChange(item.id)}
-                className={`
-                  flex items-center gap-2 px-4 py-3 rounded-ios-card transition-all duration-200 min-w-fit
-                  ${isActive 
-                    ? `bg-gradient-to-r from-${item.color} to-${item.color}-light text-white shadow-ios-sm` 
-                    : 'bg-white/60 text-ios-gray hover:bg-white/80 border border-ios-gray/10'
-                  }
-                `}
+        {/* Management Tools Grid */}
+        {property.listing_type === 'sale' ? (
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Sale Property Management</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                onClick={() => handleTabChange('deed_of_sale')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
               >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium text-sm">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Deed of Sale</h4>
+                    <p className="text-sm text-gray-600">Generate and manage sale documents</p>
+                  </div>
+                </div>
+              </div>
+              <div 
+                onClick={() => handleTabChange('compliance')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                    <Shield className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Legal & Compliance</h4>
+                    <p className="text-sm text-gray-600">Upload documents and certificates</p>
+                  </div>
+                </div>
+              </div>
             </div>
+          </div>
+        ) : (
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Rental Property Management</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div 
+                onClick={() => handleTabChange('management')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <Settings className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Management</h4>
+                    <p className="text-sm text-gray-600">Property settings and configuration</p>
+                  </div>
+                </div>
+              </div>
+              <div 
+                onClick={() => handleTabChange('tenants')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                    <Users className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Tenants</h4>
+                    <p className="text-sm text-gray-600">Manage tenant relationships</p>
+                  </div>
+                </div>
+              </div>
+              <div 
+                onClick={() => handleTabChange('operations')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                    <Wrench className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Operations</h4>
+                    <p className="text-sm text-gray-600">Maintenance and operations</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-           {/* Content Area */}
-      <div className="px-4 pb-8 space-y-6">
-        {activeTab === 'overview' && (
-          property.listing_type === 'sale' ? (
+        {/* Tab Content Area */}
+        <div className="mt-6">
+          {activeTab === 'overview' && (
+            property.listing_type === 'sale' ? (
+              <SalePropertyOverview property={property} />
+            ) : (
+              <PropertyOverview 
+                property={property} 
+                maintenanceRequests={maintenanceRequests}
+              />
+            )
+          )}
+          
+          {activeTab === 'deed_of_sale' && property.listing_type === 'sale' && (
             <SalePropertyOverview property={property} />
-          ) : (
-            <PropertyOverview 
-              property={property} 
+          )}
+          
+          {activeTab === 'compliance' && property.listing_type === 'sale' && (
+            <SaleCompliance property={property} />
+          )}
+          
+          {activeTab === 'management' && property.listing_type !== 'sale' && (
+            <PropertyManagementSection 
+              property={property}
+            />
+          )}
+          
+          {activeTab === 'tenants' && property.listing_type !== 'sale' && (
+            <TenantRelations 
+              property={property}
+            />
+          )}
+          
+          {activeTab === 'operations' && property.listing_type !== 'sale' && (
+            <PropertyOperations 
+              property={property}
               maintenanceRequests={maintenanceRequests}
             />
-          )
-        )}
-        
-        {activeTab === 'deed_of_sale' && property.listing_type === 'sale' && (
-          <div className="text-center text-gray-500 py-8">
-            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-            <h3 className="text-lg font-medium text-gray-700 mb-2">Deed of Sale Generator</h3>
-            <p className="text-sm text-gray-500">This feature is coming soon. Please use the Overview tab to generate deeds.</p>
-          </div>
-        )}
-        
-        {activeTab === 'compliance' && property.listing_type === 'sale' && (
-          <SaleCompliance property={property} />
-        )}
-        
-        {activeTab === 'management' && property.listing_type !== 'sale' && (
-          <PropertyManagementSection 
-            property={property}
-          />
-        )}
-        
-        {activeTab === 'tenants' && property.listing_type !== 'sale' && (
-          <TenantRelations 
-            property={property}
-          />
-        )}
-        
-        {activeTab === 'operations' && property.listing_type !== 'sale' && (
-          <PropertyOperations 
-            property={property}
-            maintenanceRequests={maintenanceRequests}
-          />
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
