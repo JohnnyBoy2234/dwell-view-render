@@ -2382,6 +2382,43 @@ const renderReportsTab = () => (
             </Card>
           )}
 
+          {/* Property-Specific Management Tools */}
+          {selectedProperty?.listing_type === 'sale' && (
+            <div>
+              <h3 className="text-lg font-semibold mb-4 text-gray-900">Sale Property Management</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div 
+                  onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=deed_of_sale`)}
+                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
+                      <FileText className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Deed of Sale</h4>
+                      <p className="text-sm text-gray-600">Generate and manage sale documents</p>
+                    </div>
+                  </div>
+                </div>
+                <div 
+                  onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=compliance`)}
+                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Legal & Compliance</h4>
+                      <p className="text-sm text-gray-600">Upload documents and certificates</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* App-style Feature Grid - Management Tools */}
           <div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
