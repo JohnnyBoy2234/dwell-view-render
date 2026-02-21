@@ -6,12 +6,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings } from 'lucide-react';
+import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield } from 'lucide-react';
 import { Property } from '@/types/dashboard';
 import { PropertyOverview } from '@/components/property/PropertyOverview';
 import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
 import { TenantRelations } from '@/components/property/TenantRelations';
 import { PropertyOperations } from '@/components/property/PropertyOperations';
+import { SalePropertyOverview, SaleCompliance } from '@/components/property/SalePropertyManagement';
 
 interface MaintenanceRequest {
   id: string;
@@ -25,7 +26,7 @@ interface MaintenanceRequest {
   notes?: string;
 }
 
-type TabType = 'overview' | 'management' | 'tenants' | 'operations';
+type TabType = 'overview' | 'management' | 'tenants' | 'operations' | 'deed_of_sale' | 'compliance';
 
 export default function PropertyManagement() {
   const { id } = useParams<{ id: string }>();
@@ -113,7 +114,26 @@ export default function PropertyManagement() {
     }
   };
 
-  const navigationItems = [
+  const navigationItems = property?.listing_type === 'sale' ? [
+    {
+      id: 'overview' as TabType,
+      label: 'Overview',
+      icon: BarChart3,
+      color: 'ios-blue'
+    },
+    {
+      id: 'deed_of_sale' as TabType,
+      label: 'Deed of Sale',
+      icon: FileText,
+      color: 'ios-green'
+    },
+    {
+      id: 'compliance' as TabType,
+      label: 'Legal & Compliance',
+      icon: Shield,
+      color: 'ios-purple'
+    }
+  ] : [
     {
       id: 'overview' as TabType,
       label: 'Overview',
@@ -187,7 +207,7 @@ export default function PropertyManagement() {
                   <Home className="h-5 w-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="font-semibold text-ios-gray-dark">R{property.price.toLocaleString()}/month</h1>
+                  <h1 className="font-semibold text-ios-gray-dark">R{property.price.toLocaleString()}{property.listing_type === 'sale' ? '' : '/month'}</h1>
                   <p className="text-sm text-ios-gray">{property.property_type} • {property.location}</p>
               </div>
           </div>
@@ -228,30 +248,46 @@ export default function PropertyManagement() {
            {/* Content Area */}
       <div className="px-4 pb-8 space-y-6">
         {activeTab === 'overview' && (
-          <PropertyOverview 
-            property={property} 
-            maintenanceRequests={maintenanceRequests}
-          />
+          property.listing_type === 'sale' ? (
+            <SalePropertyOverview property={property} />
+          ) : (
+            <PropertyOverview 
+              property={property} 
+              maintenanceRequests={maintenanceRequests}
+            />
+          )
         )}
         
-        {activeTab === 'management' && (
+        {activeTab === 'deed_of_sale' && property.listing_type === 'sale' && (
+          <div className="text-center text-gray-500 py-8">
+            <FileText className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+            <h3 className="text-lg font-medium text-gray-700 mb-2">Deed of Sale Generator</h3>
+            <p className="text-sm text-gray-500">This feature is coming soon. Please use the Overview tab to generate deeds.</p>
+          </div>
+        )}
+        
+        {activeTab === 'compliance' && property.listing_type === 'sale' && (
+          <SaleCompliance property={property} />
+        )}
+        
+        {activeTab === 'management' && property.listing_type !== 'sale' && (
           <PropertyManagementSection 
             property={property}
           />
         )}
         
-        {activeTab === 'tenants' && (
+        {activeTab === 'tenants' && property.listing_type !== 'sale' && (
           <TenantRelations 
             property={property}
           />
         )}
         
-        {activeTab === 'operations' && (
+        {activeTab === 'operations' && property.listing_type !== 'sale' && (
           <PropertyOperations 
             property={property}
             maintenanceRequests={maintenanceRequests}
           />
-              )}
+        )}
       </div>
     </div>
   );
