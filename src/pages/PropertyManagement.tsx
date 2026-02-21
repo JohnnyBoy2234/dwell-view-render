@@ -69,6 +69,7 @@ export default function PropertyManagement() {
         .single();
 
       if (error) throw error;
+      console.log('Fetched property data:', data);
       setProperty(data);
     } catch (error) {
       console.error('Error fetching property:', error);
@@ -159,6 +160,9 @@ export default function PropertyManagement() {
       color: 'ios-orange'
     }
   ];
+
+  console.log('Property listing type:', property?.listing_type);
+  console.log('Navigation items:', navigationItems);
 
   if (loading) {
     return (
