@@ -82,7 +82,6 @@ import SafeRenting from "./pages/SafeRenting";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import PropertyTransferDashboard from "./pages/PropertyTransferDashboard";
 
 const queryClient = new QueryClient();
 
@@ -269,7 +268,6 @@ function AppRoutes() {
               <Route path="/list-property" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
               <Route path="/list-rental" element={<AuthenticatedRoute><ListProperty /></AuthenticatedRoute>} />
               <Route path="/list-sale" element={<AuthenticatedRoute><ListSale /></AuthenticatedRoute>} />
-              <Route path="/property-transfer" element={<AuthenticatedRoute><PropertyTransferDashboard /></AuthenticatedRoute>} />
               <Route path="/property/:id" element={<PropertyDetail />} />
               <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
               
