@@ -37,9 +37,10 @@ export default function PropertyManagement() {
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<TabType>(() => 
-    (searchParams.get('tab') as TabType) || 'overview'
-  );
+  const [activeTab, setActiveTab] = useState<TabType>(() => {
+    const tabFromUrl = searchParams.get('tab');
+    return (tabFromUrl as TabType) || 'overview';
+  });
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
 
   const handleTabChange = (value: TabType) => {

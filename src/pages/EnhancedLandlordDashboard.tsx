@@ -2587,7 +2587,7 @@ const renderReportsTab = () => (
                 
                 <div className="flex items-center justify-between pt-2">
                   <span className="text-sm font-bold text-ocean-blue">
-                    R{property.price.toLocaleString()}/month
+                    R{property.price.toLocaleString()}{property.listing_type === 'sale' ? '' : '/month'}
                   </span>
                   <div className="flex gap-1">
                     <Button size="sm" variant="ghost" onClick={(e) => {
@@ -2602,12 +2602,29 @@ const renderReportsTab = () => (
                     }}>
                       Message
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/manage-property/${property.id}`);
-                    }}>
-                      <Eye className="h-3 w-3" />
-                    </Button>
+                    {property.listing_type === 'sale' ? (
+                      <>
+                        <Button size="sm" variant="ghost" onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/manage-property/${property.id}?tab=deed_of_sale`);
+                        }}>
+                          <FileText className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/manage-property/${property.id}?tab=compliance`);
+                        }}>
+                          <Shield className="h-3 w-3" />
+                        </Button>
+                      </>
+                    ) : (
+                      <Button size="sm" variant="ghost" onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/manage-property/${property.id}`);
+                      }}>
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                    )}
                   </div>
                 </div>
               </div>
