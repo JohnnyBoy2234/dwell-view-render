@@ -67,8 +67,8 @@ const Index = () => {
         
         <div className="relative z-10 flex flex-col items-center justify-center w-full py-16 md:py-24 lg:py-32">
           <div className="absolute top-10 left-4 md:left-10 animate-fade-in" style={{ animationDelay: '0.2s', transform: `translate(${mousePosition.x * 0.3}px, ${mousePosition.y * 0.3}px)` }}>
-            <div className="glass-card px-4 py-2 rounded-full">
-              <div className="flex items-center gap-2 text-white text-sm font-medium">
+            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-white/20">
+              <div className="flex items-center gap-2 text-ocean-blue text-sm font-medium">
                 <TrendingUp className="h-4 w-4" />
                 <span>100% Commission-Free</span>
               </div>
@@ -76,8 +76,8 @@ const Index = () => {
           </div>
           
           <div className="absolute top-10 right-4 md:right-10 animate-fade-in" style={{ animationDelay: '0.4s', transform: `translate(${mousePosition.x * 0.2}px, ${mousePosition.y * 0.2}px)` }}>
-            <div className="glass-card px-4 py-2 rounded-full">
-              <div className="flex items-center gap-2 text-white text-sm font-medium">
+            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-white/20">
+              <div className="flex items-center gap-2 text-ocean-blue text-sm font-medium">
                 <Users className="h-4 w-4" />
                 <span>Verified Properties</span>
               </div>
@@ -85,8 +85,8 @@ const Index = () => {
           </div>
           
           <div className="absolute bottom-20 left-4 md:left-10 animate-fade-in" style={{ animationDelay: '0.6s', transform: `translate(${mousePosition.x * 0.25}px, ${mousePosition.y * 0.25}px)` }}>
-            <div className="glass-card px-4 py-2 rounded-full">
-              <div className="flex items-center gap-2 text-white text-sm font-medium">
+            <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg border border-white/20">
+              <div className="flex items-center gap-2 text-ocean-blue text-sm font-medium">
                 <Lock className="h-4 w-4" />
                 <span>Secure Platform</span>
               </div>
@@ -94,35 +94,35 @@ const Index = () => {
           </div>
           
           <div className="max-w-4xl mx-auto text-center px-4 animate-fade-in">
-            <div className="glass-card p-8 md:p-12 rounded-3xl mb-8">
+            <div className="bg-white/95 backdrop-blur-sm p-8 md:p-12 rounded-3xl mb-8 shadow-xl border border-white/20">
               <div className="flex items-center justify-center gap-2 mb-6">
-                <Sparkles className="h-5 w-5 text-white/80" />
-                <Badge className="bg-white/20 text-white border-white/30 hover:bg-white/30 transition-colors">
+                <Sparkles className="h-5 w-5 text-ocean-blue" />
+                <Badge className="bg-ocean-blue/10 text-ocean-blue border-ocean-blue/20 hover:bg-ocean-blue/20 transition-colors">
                   South Africa's Trusted Rental Platform
                 </Badge>
-                <Sparkles className="h-5 w-5 text-white/80" />
+                <Sparkles className="h-5 w-5 text-ocean-blue" />
               </div>
               
-              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white leading-tight mb-6 font-sans">
-                <span className="block bg-gradient-to-r from-white via-white/95 to-white/90 bg-clip-text text-transparent">
+              <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-foreground leading-tight mb-6 font-sans">
+                <span className="block bg-gradient-to-r from-ocean-blue to-ocean-blue/80 bg-clip-text text-transparent">
                   Renting done right.
                 </span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-white/90 font-sans leading-relaxed mb-8 max-w-3xl mx-auto">
+              <p className="text-xl md:text-2xl text-muted-foreground font-sans leading-relaxed mb-8 max-w-3xl mx-auto">
                 Simple, secure, and commission-free property rental
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
-                <div className="flex items-center gap-2 text-white/80 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <CheckCircle className="h-4 w-4 text-success-green" />
                   <span>No Agent Fees</span>
                 </div>
-                <div className="flex items-center gap-2 text-white/80 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <CheckCircle className="h-4 w-4 text-success-green" />
                   <span>Verified Listings</span>
                 </div>
-                <div className="flex items-center gap-2 text-white/80 text-sm">
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
                   <CheckCircle className="h-4 w-4 text-success-green" />
                   <span>Digital Leases</span>
                 </div>
@@ -132,7 +132,7 @@ const Index = () => {
 
           <div className="relative z-20 w-full px-4 animate-fade-in" style={{ animationDelay: '0.3s' }}>
             <div className="max-w-5xl mx-auto">
-              <div className="glass-card p-2 md:p-3 rounded-2xl transition-all duration-500 hover:shadow-2xl">
+              <div className="bg-white/95 backdrop-blur-sm p-2 md:p-3 rounded-2xl transition-all duration-500 hover:shadow-2xl border border-white/20">
                 <Property24SearchBar onSearch={handleSearch} onFiltersChange={onFiltersChange} onMoreFiltersOpen={() => setShowMoreFilters(true)} filters={{
                   searchTerm: filters.searchTerm,
                   propertyType: filters.propertyType,
