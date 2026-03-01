@@ -34,7 +34,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email_confirmed_at);
+        
+        // If user is not verified, sign them out
+        if (session?.user && !session.user.email_confirmed_at) {
+          console.log('User not verified, signing out');
+          await supabase.auth.signOut();
+          setUser(null);
+          setSession(null);
+          setAuthLoading(false);
+          setIsLandlord(false);
+          setIsAdmin(false);
+          setRolesLoading(false);
+          return;
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         setAuthLoading(false);
@@ -53,6 +68,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session?.user?.email_confirmed_at);
+      
+      // If user is not verified, clear session
+      if (session?.user && !session.user.email_confirmed_at) {
+        console.log('Initial session not verified, clearing');
+        supabase.auth.signOut();
+        setUser(null);
+        setSession(null);
+        setAuthLoading(false);
+        setRolesLoading(false);
+        return;
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       setAuthLoading(false);
@@ -127,7 +155,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { error, isNewUser: false };
     }
 
-    if (data.user) {
+    if (data.user && !data.user.email_confirmed_at) {
+      // User created but email not verified - this is expected
       try {
         // Create user role record
         await supabase.from('user_roles').insert({
@@ -146,9 +175,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error creating user role/profile:', roleError);
         // Don't fail signup if role creation fails, but log the error
       }
+      
+      return { error: null, isNewUser: true };
     }
     
-    return { error: null, isNewUser: true };
+    // If email is already confirmed (unlikely with new signup)
+    return { error: null, isNewUser: false };
   };
 
   const signIn = async (email: string, password: string) => {

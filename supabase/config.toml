@@ -51,6 +51,7 @@ enable_signup = true
 [auth.email]
 enable_signup = true
 double_confirm_changes = true
+enable_confirmations = true
 
 [functions.kyc-admin-approve-minimal]
 verify_jwt = false
