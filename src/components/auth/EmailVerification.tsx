@@ -26,6 +26,7 @@ export default function EmailVerification({
   const [isResending, setIsResending] = useState(false);
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes
   const [canResend, setCanResend] = useState(false);
+  const [showManualVerify, setShowManualVerify] = useState(false);
   const { toast } = useToast();
 
   // Countdown timer
@@ -81,6 +82,44 @@ export default function EmailVerification({
         variant: "destructive",
         title: "Verification Failed",
         description: error.message || "Invalid verification code. Please try again.",
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const handleManualVerify = async () => {
+    setIsVerifying(true);
+    
+    try {
+      // For testing: manually verify the email without a code
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error("User not found");
+      }
+
+      // Update user profile to mark email as verified
+      const { error } = await supabase
+        .from('profiles')
+        .update({ email_verified: true } as any)
+        .eq('user_id', user.id as any);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Email Manually Verified!",
+        description: "Your email has been manually verified for testing.",
+      });
+
+      onVerified();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Manual Verification Failed",
+        description: error.message || "Could not verify email manually.",
       });
     } finally {
       setIsVerifying(false);
@@ -188,6 +227,30 @@ export default function EmailVerification({
               </Button>
             )}
 
+            <div className="border-t pt-4">
+              <p className="text-xs text-muted-foreground mb-2">
+                Not receiving emails? Try manual verification:
+              </p>
+              <Button
+                variant="secondary"
+                onClick={handleManualVerify}
+                disabled={isVerifying}
+                className="w-full text-sm"
+              >
+                {isVerifying ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2" />
+                    Verifying...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    Manually Verify (Testing)
+                  </>
+                )}
+              </Button>
+            </div>
+
             <Button
               variant="ghost"
               onClick={onBack}
@@ -201,7 +264,7 @@ export default function EmailVerification({
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Didn't receive the email?</strong> Check your spam folder or try resending the code.
+              <strong>Didn't receive the email?</strong> Check your spam folder or use the manual verification button for testing.
             </AlertDescription>
           </Alert>
         </CardContent>

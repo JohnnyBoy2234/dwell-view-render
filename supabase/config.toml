@@ -53,6 +53,14 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 
+# Email provider settings (using Ethereal for testing)
+[auth.email.smtp]
+host = "smtp.ethereal.email"
+port = 587
+user = "ethereal.email@ethereal.email"
+pass = "ethereal_password"
+admin_email = "admin@example.com"
+
 [functions.kyc-admin-approve-minimal]
 verify_jwt = false
 
