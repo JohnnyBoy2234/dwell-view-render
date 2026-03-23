@@ -11,6 +11,7 @@ type ArcGalleryHeroProps = {
   cardSizeMd?: number;
   cardSizeSm?: number;
   className?: string;
+  children?: React.ReactNode;
 };
 
 export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
@@ -24,6 +25,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   cardSizeMd = 100,
   cardSizeSm = 80,
   className = '',
+  children,
 }) => {
   const [dimensions, setDimensions] = useState({
     radius: radiusLg,
@@ -51,7 +53,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   const step = (endAngle - startAngle) / (count - 1);
 
   return (
-    <section className={`relative overflow-hidden bg-white text-gray-900 min-h-screen flex flex-col ${className}`}>
+    <section className={`relative bg-white text-gray-900 min-h-screen flex flex-col pt-20 sm:pt-0 ${className}`}>
       {/* Subtle background texture */}
       <div className="absolute inset-0 pointer-events-none" style={{
         backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(37,99,235,0.04) 1px, transparent 1px)',
@@ -59,7 +61,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
       }} />
       {/* Background ring container */}
       <div
-        className="relative mx-auto"
+        className="relative mx-auto overflow-hidden"
         style={{
           width: '100%',
           height: dimensions.radius * 1.2,
@@ -111,9 +113,9 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
       </div>
 
       {/* Hero content below arc */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-6 -mt-40 md:-mt-52 lg:-mt-64">
+      <div className="relative z-10 flex-1 flex flex-col items-center -mt-16 md:-mt-52 lg:-mt-64">
         <div
-          className="text-center max-w-3xl px-6 opacity-0 animate-arc-content-in"
+          className="text-center max-w-3xl w-full px-6 sm:px-8 opacity-0 animate-arc-content-in"
           style={{ animationDelay: '900ms', animationFillMode: 'forwards' }}
         >
           <div className="inline-flex items-center gap-2 bg-ocean-blue/8 border border-ocean-blue/20 rounded-full px-4 py-1.5 mb-6">
@@ -131,28 +133,15 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
             </span>{' '}
             in South Africa
           </h1>
-          <p className="mt-5 text-lg sm:text-xl text-gray-500 max-w-xl mx-auto leading-relaxed">
+          <p className="mt-4 mb-0 text-lg sm:text-xl text-gray-500 max-w-xl mx-auto leading-relaxed">
             Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <a
-              href="/properties"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-full font-semibold text-white text-sm tracking-wide shadow-lg hover:shadow-xl transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0"
-              style={{
-                background: 'hsl(214 100% 59%)',
-                boxShadow: '0 4px 20px rgba(37,99,235,0.35)',
-              }}
-            >
-              Browse Properties
-            </a>
-            <a
-              href="/list-property"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-full font-semibold text-gray-700 text-sm tracking-wide border border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300 transition-all duration-200"
-            >
-              List Your Property
-            </a>
-          </div>
         </div>
+        {children && (
+          <div className="mt-4 w-full max-w-5xl pb-10 relative z-50 px-3 sm:px-4">
+            {children}
+          </div>
+        )}
       </div>
 
       <style>{`

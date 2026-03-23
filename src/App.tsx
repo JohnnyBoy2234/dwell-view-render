@@ -9,7 +9,7 @@ import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-ro
 import { AuthProvider } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
 import { PropertiesRouteGuard } from "@/components/RoleGuard";
-import Navbar from "./components/Navbar";
+import { MiniNavbar } from "./components/ui/mini-navbar";
 import { MobileBottomBar } from "./components/MobileBottomBar";
 import { MobileServices } from "@/services/mobileServices";
 import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
@@ -204,17 +204,17 @@ function AppRoutes() {
               } />
 
               {/* Routes with Navbar */}
-              <Route path="/" element={<><Navbar /><Index /></>} />
-              <Route path="/properties" element={<><Navbar /><Properties /></>} />
-              <Route path="/sale-listings" element={<><Navbar /><SaleListings /></>} />
-              <Route path="/about" element={<><Navbar /><About /></>} />
-              <Route path="/about/landlord" element={<><Navbar /><AboutLandlord /></>} />
-              <Route path="/about/tenant" element={<><Navbar /><AboutTenant /></>} />
-              <Route path="/contact" element={<><Navbar /><Contact /></>} />
-              <Route path="/blog" element={<><Navbar /><Blog /></>} />
-              <Route path="/blog/:postId" element={<><Navbar /><BlogPost /></>} />
-              <Route path="/safe-renting" element={<><Navbar /><SafeRenting /></>} />
-              <Route path="/pricing" element={<><Navbar /><Pricing /></>} />
+              <Route path="/" element={<Index />} />
+              <Route path="/properties" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
+              <Route path="/sale-listings" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><SaleListings /></div></>} />
+              <Route path="/about" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><About /></div></>} />
+              <Route path="/about/landlord" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><AboutLandlord /></div></>} />
+              <Route path="/about/tenant" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><AboutTenant /></div></>} />
+              <Route path="/contact" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Contact /></div></>} />
+              <Route path="/blog" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Blog /></div></>} />
+              <Route path="/blog/:postId" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><BlogPost /></div></>} />
+              <Route path="/safe-renting" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><SafeRenting /></div></>} />
+              <Route path="/pricing" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Pricing /></div></>} />
 
               {/* Routes without Navbar */}
               <Route path="/auth" element={<Auth />} />

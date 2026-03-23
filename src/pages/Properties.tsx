@@ -76,66 +76,13 @@ export default function Properties() {
       return false;
     }
 
-    // Location search
+    // Location search — property location must contain the search term
     if (searchTerm) {
-      const searchTermLower = searchTerm.toLowerCase().trim();
-      const propertyLocationLower = property.location.toLowerCase();
-      
-      console.log('[Properties] Filtering property:', {
-        propertyLocation: property.location,
-        searchTerm: searchTerm,
-        searchTermLower,
-        propertyLocationLower
-      });
-      
-      // Split search terms and location into words
-      const searchWords = searchTermLower.split(/[\s,]+/).filter(word => word.length > 1);
-      const locationWords = propertyLocationLower.split(/[\s,]+/).filter(word => word.length > 1);
-      
-      console.log('[Properties] Words comparison:', {
-        searchWords,
-        locationWords
-      });
-      
-      // Check if ALL search words are present in the location
-      const allSearchWordsFound = searchWords.every(searchWord => {
-        const found = locationWords.some(locationWord => 
-          locationWord.includes(searchWord) || searchWord.includes(locationWord)
-        );
-        console.log(`[Properties] Search word "${searchWord}" found: ${found}`);
-        return found;
-      });
-      
-      if (!allSearchWordsFound) {
-        console.log('[Properties] Property filtered out - not all search words found');
+      const needle = searchTerm.toLowerCase().trim();
+      const haystack = property.location.toLowerCase();
+      if (!haystack.includes(needle)) {
         return false;
       }
-      
-      // Additional validation for short search terms
-      const searchTermLength = searchTermLower.length;
-      if (searchTermLength < 4) {
-        const hasSignificantMatch = locationWords.some(locationWord => 
-          locationWord.length >= searchTermLength + 2 && locationWord.includes(searchTermLower)
-        );
-        if (!hasSignificantMatch) {
-          console.log('[Properties] Property filtered out - short search term validation failed');
-          return false;
-        }
-      }
-      
-      // City validation
-      const commonCities = ['cape town', 'johannesburg', 'pretoria', 'durban', 'port elizabeth', 'bloemfontein', 'kimberley', 'east london', 'nelspruit', 'polokwane'];
-      const isSearchingForCity = commonCities.some(city => searchTermLower.includes(city));
-      
-      if (isSearchingForCity) {
-        const cityInLocation = commonCities.some(city => propertyLocationLower.includes(city));
-        if (!cityInLocation) {
-          console.log('[Properties] Property filtered out - city validation failed');
-          return false;
-        }
-      }
-      
-      console.log('[Properties] Property passed location filter');
     }
 
     // Property type filter
@@ -323,13 +270,24 @@ export default function Properties() {
   console.log('[Properties] Search term:', searchTerm);
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-earth-light/30 to-ocean-blue/5">
-      <div className="container mx-auto p-6">
+    <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
+      <div className="container mx-auto px-4 sm:px-6 pb-6">
         {/* Header */}
-        <div className="mb-8 p-6 rounded-2xl bg-ocean-blue/10 border border-ocean-blue/20 shadow-soft">
-          <h1 className="text-4xl font-bold text-ocean-blue mb-2">Find Your Perfect Home</h1>
-          <p className="text-lg text-muted-foreground">
-            {searchTerm ? `Searching for properties in ${searchTerm}` : `Discover ${properties.length} available properties across South Africa`}
+        <div
+          className="mb-8 px-7 py-6 rounded-2xl border"
+          style={{
+            background: "linear-gradient(135deg, hsl(214 100% 48%) 0%, hsl(214 100% 38%) 100%)",
+            borderColor: "hsl(214 100% 40%)",
+            boxShadow: "0 8px 32px rgba(37,99,235,0.18)",
+          }}
+        >
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-1.5 tracking-tight">
+            Find Your Perfect Home
+          </h1>
+          <p className="text-white/75 text-base">
+            {searchTerm
+              ? `Searching for properties in ${searchTerm}`
+              : `Discover ${properties.length} available properties across South Africa`}
           </p>
         </div>
 

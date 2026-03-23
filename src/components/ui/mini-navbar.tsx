@@ -3,21 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
-const AnimatedNavLink = ({
-  to,
-  children,
-}: {
-  to: string;
-  children: React.ReactNode;
-}) => (
+/** Clean nav link with sliding underline on hover */
+const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
   <Link
     to={to}
-    className="group relative inline-flex overflow-hidden h-5 items-center text-sm"
+    className="relative text-sm text-gray-300 hover:text-white transition-colors duration-200 py-0.5 group"
   >
-    <div className="flex flex-col transition-transform duration-300 ease-out group-hover:-translate-y-1/2">
-      <span className="text-gray-300">{children}</span>
-      <span className="text-white">{children}</span>
-    </div>
+    {children}
+    <span className="absolute bottom-0 left-0 w-0 h-px bg-white/60 transition-all duration-300 group-hover:w-full" />
   </Link>
 );
 
@@ -43,13 +36,9 @@ export function MiniNavbar() {
   const navLinks = [
     { label: 'Properties', to: '/properties' },
     { label: 'Landlords', to: '/about/landlord' },
-    { label: 'Tenants', to: '/about/tenant' },
-    { label: 'Pricing', to: '/pricing' },
+    { label: 'Tenants',   to: '/about/tenant' },
+    { label: 'Pricing',   to: '/pricing' },
   ];
-
-  const handleDashboard = () => {
-    navigate('/dashboard');
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -59,48 +48,46 @@ export function MiniNavbar() {
   return (
     <header
       className={`fixed top-5 left-1/2 z-50 flex flex-col items-center
-                  -translate-x-1/2 pl-5 pr-5 py-3
+                  -translate-x-1/2 px-5 py-2.5
                   backdrop-blur-md border border-white/10
-                  bg-[rgba(10,10,20,0.62)]
+                  bg-[rgba(10,10,20,0.65)]
                   w-[calc(100%-2rem)] sm:w-auto
                   transition-[border-radius] duration-0 ${shapeClass}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.24), 0 1px 0 rgba(255,255,255,0.06) inset' }}
+      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.07)' }}
     >
       {/* ── Desktop row ── */}
-      <div className="flex items-center justify-between w-full gap-x-8">
+      <div className="flex items-center gap-8 w-full">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-ocean-blue flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-ocean-blue flex items-center justify-center shrink-0">
             <Home className="w-4 h-4 text-white" />
           </div>
-          <span className="text-white font-bold text-sm tracking-tight hidden sm:block">
+          <span className="text-white font-bold text-sm tracking-tight hidden sm:block whitespace-nowrap">
             RentLekker
           </span>
         </Link>
 
-        {/* Desktop nav links */}
-        <nav className="hidden sm:flex items-center gap-6">
+        {/* Desktop nav — centered via flex-1 + justify-center */}
+        <nav className="hidden sm:flex flex-1 items-center justify-center gap-7">
           {navLinks.map((link) => (
-            <AnimatedNavLink key={link.to} to={link.to}>
-              {link.label}
-            </AnimatedNavLink>
+            <NavLink key={link.to} to={link.to}>{link.label}</NavLink>
           ))}
         </nav>
 
         {/* Desktop auth buttons */}
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2 shrink-0">
           {!loading && (
             user ? (
               <>
                 <button
-                  onClick={handleDashboard}
-                  className="px-4 py-1.5 text-sm border border-white/15 bg-white/8 text-gray-300 rounded-full hover:border-white/30 hover:text-white transition-colors duration-200"
+                  onClick={() => navigate('/dashboard')}
+                  className="px-4 py-1.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-1.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:from-white hover:to-gray-200 transition-all duration-200"
+                  className="px-4 py-1.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap"
                 >
                   Sign Out
                 </button>
@@ -109,19 +96,16 @@ export function MiniNavbar() {
               <>
                 <Link
                   to="/auth"
-                  className="px-4 py-1.5 text-sm border border-white/15 bg-white/8 text-gray-300 rounded-full hover:border-white/30 hover:text-white transition-colors duration-200"
+                  className="px-4 py-1.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
                 >
                   Log In
                 </Link>
-                <div className="relative group">
-                  <div className="absolute inset-0 -m-1.5 rounded-full bg-white/20 opacity-0 blur-lg group-hover:opacity-40 transition-all duration-300 pointer-events-none" />
-                  <Link
-                    to="/auth"
-                    className="relative z-10 px-4 py-1.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:from-white hover:to-gray-200 transition-all duration-200 block"
-                  >
-                    Sign Up
-                  </Link>
-                </div>
+                <Link
+                  to="/auth"
+                  className="px-4 py-1.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap block"
+                >
+                  Sign Up
+                </Link>
               </>
             )
           )}
@@ -129,7 +113,7 @@ export function MiniNavbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="sm:hidden flex items-center justify-center w-8 h-8 text-gray-300 focus:outline-none"
+          className="sm:hidden ml-auto flex items-center justify-center w-8 h-8 text-gray-300 focus:outline-none"
           onClick={() => setIsOpen((v) => !v)}
           aria-label={isOpen ? 'Close menu' : 'Open menu'}
         >
@@ -147,58 +131,62 @@ export function MiniNavbar() {
 
       {/* ── Mobile dropdown ── */}
       <div
-        className={`sm:hidden flex flex-col items-center w-full transition-all duration-300 ease-in-out overflow-hidden
-                    ${isOpen ? 'max-h-[400px] opacity-100 pt-4' : 'max-h-0 opacity-0 pt-0 pointer-events-none'}`}
+        className={`sm:hidden w-full transition-all duration-300 ease-in-out overflow-hidden
+                    ${isOpen ? 'max-h-[480px] opacity-100 pt-4 pb-2' : 'max-h-0 opacity-0 pt-0 pb-0 pointer-events-none'}`}
       >
-        <nav className="flex flex-col items-center gap-4 w-full">
+        {/* Thin separator */}
+        <div className="h-px bg-white/10 mb-4" />
+
+        {/* Nav links — 2-column grid */}
+        <nav className="grid grid-cols-2 gap-1 w-full mb-4">
           {navLinks.map((link) => (
             <Link
               key={link.to}
               to={link.to}
-              className="text-gray-300 hover:text-white transition-colors text-center w-full text-sm"
+              className="flex items-center justify-center px-4 py-3 rounded-xl text-sm text-gray-300 hover:text-white hover:bg-white/8 transition-colors font-medium"
               onClick={() => setIsOpen(false)}
             >
               {link.label}
             </Link>
           ))}
         </nav>
-        <div className="flex flex-col items-center gap-3 mt-5 w-full pb-1">
-          {!loading && (
-            user ? (
-              <>
-                <button
-                  onClick={handleDashboard}
-                  className="w-full py-2 text-sm border border-white/15 bg-white/8 text-gray-300 rounded-full hover:text-white transition-colors"
-                >
-                  Dashboard
-                </button>
-                <button
-                  onClick={handleSignOut}
-                  className="w-full py-2 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full"
-                >
-                  Sign Out
-                </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/auth"
-                  className="w-full py-2 text-sm text-center border border-white/15 bg-white/8 text-gray-300 rounded-full hover:text-white transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Log In
-                </Link>
-                <Link
-                  to="/auth"
-                  className="w-full py-2 text-sm font-semibold text-center text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Sign Up
-                </Link>
-              </>
-            )
-          )}
-        </div>
+
+        {/* Auth — side by side */}
+        {!loading && (
+          user ? (
+            <div className="flex gap-2">
+              <button
+                onClick={() => { navigate('/dashboard'); setIsOpen(false); }}
+                className="flex-1 py-2.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:text-white transition-colors"
+              >
+                Dashboard
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="flex-1 py-2.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full"
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Link
+                to="/auth"
+                className="flex-1 py-2.5 text-sm text-center border border-white/15 bg-white/5 text-gray-300 rounded-full hover:text-white transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Log In
+              </Link>
+              <Link
+                to="/auth"
+                className="flex-1 py-2.5 text-sm font-semibold text-center text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full"
+                onClick={() => setIsOpen(false)}
+              >
+                Sign Up
+              </Link>
+            </div>
+          )
+        )}
       </div>
     </header>
   );
