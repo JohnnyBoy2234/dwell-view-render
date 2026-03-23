@@ -8,10 +8,10 @@ interface PropertyHeroProps {
 
 export function PropertyHero({ children }: PropertyHeroProps) {
   return (
-    <section className="relative flex flex-col min-h-screen overflow-hidden">
+    <section className="relative flex flex-col min-h-[75vh] sm:min-h-screen overflow-hidden">
       {/* ── Background image + layered gradients ── */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover sm:bg-cover bg-[center_35%] sm:bg-center"
         style={{
           backgroundImage:
             'url(https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920&auto=format&fit=crop)',
@@ -67,7 +67,21 @@ export function PropertyHero({ children }: PropertyHeroProps) {
         {/* Search widget slot */}
         {children && (
           <div className="w-full max-w-4xl">
-            {children}
+            {/* Mobile: frosted glass wrapper so search reads against the image */}
+            <div
+              className="sm:hidden rounded-2xl p-3 mb-0"
+              style={{
+                background: 'rgba(255,255,255,0.10)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255,255,255,0.20)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.20)',
+              }}
+            >
+              {children}
+            </div>
+            {/* Desktop: no wrapper */}
+            <div className="hidden sm:block">{children}</div>
           </div>
         )}
 
