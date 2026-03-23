@@ -130,31 +130,22 @@ const Index = () => {
 
       {/* ── HERO (search embedded inside) ── */}
       <PropertyHero>
-        <div
-          className="mx-auto w-full rounded-2xl px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-md"
-          style={{
-            background: "rgba(10,10,20,0.55)",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 8px 40px rgba(0,0,0,0.25)",
+        <PropertySearchWidget
+          filters={{
+            searchTerm: filters.searchTerm,
+            propertyType: filters.propertyType,
+            minPrice: filters.minPrice,
+            maxPrice: filters.maxPrice,
+            bedrooms: filters.bedrooms,
+            bathrooms: filters.bathrooms,
+            propertyTypes: filters.propertyTypes || [],
+            amenities: filters.amenities || [],
+            availableFrom: filters.availableFrom,
           }}
-        >
-          <PropertySearchWidget
-            filters={{
-              searchTerm: filters.searchTerm,
-              propertyType: filters.propertyType,
-              minPrice: filters.minPrice,
-              maxPrice: filters.maxPrice,
-              bedrooms: filters.bedrooms,
-              bathrooms: filters.bathrooms,
-              propertyTypes: filters.propertyTypes || [],
-              amenities: filters.amenities || [],
-              availableFrom: filters.availableFrom,
-            }}
-            onFiltersChange={onFiltersChange}
-            onSearch={handleSearch}
-            onMoreFiltersOpen={() => setShowMoreFilters(true)}
-          />
-        </div>
+          onFiltersChange={onFiltersChange}
+          onSearch={handleSearch}
+          onMoreFiltersOpen={() => setShowMoreFilters(true)}
+        />
       </PropertyHero>
 
       {/* ── MARQUEE FEATURES BELT ── */}
