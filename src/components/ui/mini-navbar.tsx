@@ -15,7 +15,13 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 );
 
 export function MiniNavbar() {
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
+
+  const dashboardPath = isAdmin
+    ? '/admin/dashboard'
+    : isLandlord
+    ? '/enhancedlandlorddashboard'
+    : '/tenant-dashboard';
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [shapeClass, setShapeClass] = useState('rounded-full');
@@ -80,7 +86,7 @@ export function MiniNavbar() {
             user ? (
               <>
                 <button
-                  onClick={() => navigate('/dashboard')}
+                  onClick={() => navigate(dashboardPath)}
                   className="px-4 py-1.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
                 >
                   Dashboard
@@ -156,7 +162,7 @@ export function MiniNavbar() {
           user ? (
             <div className="flex gap-2">
               <button
-                onClick={() => { navigate('/dashboard'); setIsOpen(false); }}
+                onClick={() => { navigate(dashboardPath); setIsOpen(false); }}
                 className="flex-1 py-2.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:text-white transition-colors"
               >
                 Dashboard
