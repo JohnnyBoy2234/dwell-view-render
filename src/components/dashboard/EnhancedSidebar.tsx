@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { CSSProperties } from 'react';
 import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, Lock, type LucideIcon } from 'lucide-react';
 import { RIcon } from '@/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -216,85 +217,91 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
 
   return (
     <TooltipProvider delayDuration={300}>
-      <Sidebar className="border-r bg-gradient-to-b from-white to-earth-light/50 shadow-medium" side="left" variant="sidebar">
-      <SidebarContent>
-        {/* Logo */}
-        <div className="p-6 border-b">
-          <button 
-            onClick={() => navigate('/')}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          >
-            <div className="w-8 h-8 bg-ocean-blue rounded flex items-center justify-center shadow-soft">
-              <Home className="w-5 h-5 text-white" />
-            </div>
-<h1 className="text-xl font-bold">RentLekker</h1>
-          </button>
-        </div>
+      <Sidebar
+        side="left"
+        variant="sidebar"
+        className="border-r-0"
+        style={{
+          '--sidebar-background': 'hsl(214, 65%, 12%)',
+          '--sidebar-foreground': 'rgba(255,255,255,0.85)',
+          '--sidebar-border': 'rgba(255,255,255,0.06)',
+        } as React.CSSProperties}
+      >
+        <SidebarContent>
+          {/* Logo */}
+          <div className="px-5 py-5 border-b border-white/8">
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'hsl(214, 100%, 59%)' }}>
+                <Home className="w-4 h-4 text-white" />
+              </div>
+              <span className="text-white font-bold text-base tracking-tight">RentLekker</span>
+            </button>
+          </div>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="px-6 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-            {isLandlord ? 'Landlord Panel' : 'Tenant Panel'}
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {itemsWithBadges.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton 
-                    asChild
-                    isActive={isActive(item.url)}
-                    className={
-                      isActive(item.url) 
-                        ? "bg-gradient-to-r from-ocean-blue to-ocean-blue-light hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-soft" 
-                        : "hover:bg-ocean-blue hover:text-white"
-                    }
-                  >
-                    <button 
-                      onClick={() => handleItemClick(item)}
-                      className="w-full flex items-center justify-between gap-3 px-6 py-3"
-                    >
-                      <div className="flex items-center justify-between w-full">
-                        <div className="flex items-center gap-3">
-                          <item.icon className={`w-5 h-5 flex-shrink-0 ${item.isLocked ? 'text-muted-foreground' : ''}`} />
-                          <span className={item.isLocked ? 'text-muted-foreground' : ''}>
+          <SidebarGroup>
+            <SidebarGroupLabel className="px-5 pt-5 pb-2 text-[10px] font-bold uppercase tracking-widest text-white/35">
+              {isLandlord ? 'Landlord Panel' : 'Tenant Panel'}
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="px-3 space-y-0.5">
+                {itemsWithBadges.map((item) => {
+                  const active = isActive(item.url);
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        className={active
+                          ? 'rounded-xl text-white'
+                          : 'rounded-xl text-white/60 hover:text-white hover:bg-white/8'
+                        }
+                        style={active ? { background: 'hsl(214, 100%, 50%)' } : undefined}
+                      >
+                        <button
+                          onClick={() => handleItemClick(item)}
+                          className="w-full flex items-center gap-3 px-3 py-2.5"
+                        >
+                          <item.icon className={`w-4 h-4 flex-shrink-0 ${active ? 'text-white' : item.isLocked ? 'text-white/30' : 'text-white/55'}`} />
+                          <span className={`flex-1 text-left text-sm font-medium ${item.isLocked ? 'text-white/30' : ''}`}>
                             {item.title}
                           </span>
-                        </div>
-                        {item.isLocked && (
-                          <Lock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                        )}
-                      </div>
-                      {item.badge !== undefined && item.badge > 0 ? (
-                        <Badge className="bg-earth-warm text-white border-white text-xs ml-auto">
-                          {item.badge > 99 ? '99+' : item.badge}
-                        </Badge>
-                      ) : null}
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+                          {item.isLocked && <Lock className="h-3 w-3 text-white/25 flex-shrink-0" />}
+                          {item.badge !== undefined && item.badge > 0 && (
+                            <span className="text-[10px] font-bold bg-red-500 text-white rounded-full px-1.5 py-0.5 leading-none">
+                              {item.badge > 99 ? '99+' : item.badge}
+                            </span>
+                          )}
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
 
-        {/* Add Property Button - Only for landlords */}
-        {isLandlord && (
-          <div className="p-6 mt-auto">
-            <Button 
-              onClick={() => navigate('/list-property')} 
-              className="w-full bg-gradient-to-r from-success-green to-success-green-glow hover:from-success-green-dark hover:to-success-green shadow-soft"
-              size="sm"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              {!collapsed && "Add Property"}
-            </Button>
-          </div>
-        )}
-      </SidebarContent>
+          {/* Add Property Button */}
+          {isLandlord && (
+            <div className="px-4 pb-5 mt-auto pt-4">
+              <button
+                onClick={() => navigate('/list-property')}
+                className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+                style={{ background: 'hsl(142, 72%, 38%)' }}
+              >
+                <Plus className="h-4 w-4" />
+                {!collapsed && 'Add Property'}
+              </button>
+            </div>
+          )}
+        </SidebarContent>
       </Sidebar>
-      
-      {/* Upgrade tooltip for mobile */}
+
+      {/* Upgrade tooltip */}
       {showUpgradeTooltip && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-sm px-4 py-2 rounded-xl shadow-lg z-50 flex items-center gap-2">
           <Lock className="h-4 w-4" />
           <span>Upgrade your plan to access {showUpgradeTooltip}</span>
         </div>

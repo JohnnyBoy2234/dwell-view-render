@@ -79,70 +79,60 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const isLandlordDashboardRoute = activePath.startsWith('/enhancedlandlorddashboard');
 
   return (
-    <div className={`flex flex-col min-h-screen w-full overflow-hidden ${
-        isLandlordDashboardRoute
-          ? 'bg-transparent'
-          : 'bg-ocean-blue/[0.06]'
-    }`} style={{ minHeight: '100dvh' }}>
-        {/* Enhanced Header */}
-        <header className={`h-16 flex items-center border-b sticky top-0 z-40 px-3 sm:px-4 lg:px-6 ${
-          isLandlord 
-            ? 'bg-ocean-blue/[0.25]' 
-            : 'bg-blue-500/[0.15]'
-        } backdrop-blur-md`} style={{ willChange: 'transform' }}>
-          {/* Back button if needed, otherwise Sidebar trigger */}
-          {shouldShowBackButton && (
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={handleBackClick}
-              className="mr-3"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-          )}
-            
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                {/* Icon with gradient background */}
-                <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-ocean-blue">
-                  <PageIcon className="h-5 w-5 text-white" />
-                </div>
-                
-                {/* Dynamic title */}
-                <h1 className="text-xl lg:text-2xl font-bold text-foreground">{title || pageConfig.title}</h1>
-                
-                <div className="hidden sm:block">
-                  <Badge variant="secondary" className="text-xs">
-                    {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
-                  </Badge>
-                </div>
-              </div>
+    <div
+      className="flex flex-col min-h-screen w-full overflow-hidden"
+      style={{ minHeight: '100dvh', background: 'hsl(214, 60%, 97%)' }}
+    >
+      {/* Header — dark glass, matching home page navbar */}
+      <header
+        className="h-16 flex items-center border-b border-white/10 sticky top-0 z-40 px-3 sm:px-4 lg:px-6 backdrop-blur-md shrink-0"
+        style={{
+          background: 'rgba(10,10,20,0.78)',
+          boxShadow: '0 2px 24px rgba(37,99,235,0.14), inset 0 1px 0 rgba(255,255,255,0.06)',
+          willChange: 'transform',
+        }}
+      >
+        {shouldShowBackButton && (
+          <button
+            onClick={handleBackClick}
+            className="mr-3 w-8 h-8 rounded-full bg-white/8 flex items-center justify-center hover:bg-white/15 transition-colors text-gray-300 hover:text-white"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
+        )}
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0" style={{ background: 'hsl(214, 100%, 59%)' }}>
+              <PageIcon className="h-4 w-4 text-white" />
             </div>
-            
-            <div className="flex items-center gap-2 sm:gap-4 ml-auto">
-              {/* Notifications */}
-              <NotificationBell className="hidden sm:block" />
-              
-              {/* Custom Actions */}
-              {actions}
-              
-              {/* Sign Out Button */}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={signOut}
-              >
-                <LogOut className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
-            </div>
-          </header>
-          
-          {/* Main Content with Error Boundary */}
-      <main className={`flex-1 w-full ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-4 lg:p-6'} overflow-x-hidden`} style={{ contain: 'layout style paint' }}>
-            {children}
-          </main>
-      </div>
+            <h1 className="text-base sm:text-lg font-bold text-white truncate">{title || pageConfig.title}</h1>
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/15 text-gray-300 bg-white/5">
+              {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
+          <NotificationBell className="hidden sm:flex text-gray-300" />
+          {actions}
+          <button
+            onClick={signOut}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-white/15 bg-white/5 text-gray-300 hover:border-white/35 hover:text-white transition-all duration-200"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Sign Out</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main
+        className={`flex-1 w-full overflow-x-hidden ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-5 lg:p-7'}`}
+        style={{ contain: 'layout style paint' }}
+      >
+        {children}
+      </main>
+    </div>
   );
 }

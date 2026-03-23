@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Building, Users, FileText, Banknote, TrendingUp, Home } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { StatCard } from '@/components/dashboard/shared/StatCard';
 
 interface LandlordMetrics {
   totalProperties: number;
@@ -17,106 +17,24 @@ interface MetricsGridProps {
   loading: boolean;
 }
 
-const MetricCard = ({ 
-  title, 
-  value, 
-  icon: Icon, 
-  gradient, 
-  textColor,
-  loading 
-}: { 
-  title: string;
-  value: string | number;
-  icon: any;
-  gradient: string;
-  textColor: string;
-  loading: boolean;
-}) => (
-  <Card className={`hover-scale shadow-medium border-ocean-blue/20 ${gradient} animate-fade-in`}>
-    <CardHeader className="pb-2">
-      <CardTitle className="flex items-center justify-between text-sm font-medium">
-        <span className="text-muted-foreground">{title}</span>
-        <Icon className={`h-5 w-5 ${textColor}`} />
-      </CardTitle>
-    </CardHeader>
-    <CardContent>
-      {loading ? (
-        <div className="h-8 bg-muted animate-pulse rounded" />
-      ) : (
-        <div className={`text-2xl font-bold ${textColor}`}>
-          {typeof value === 'number' && (title.includes('Rent') || title.includes('Revenue')) 
-            ? `R${value.toLocaleString()}` 
-            : value}
-        </div>
-      )}
-    </CardContent>
-  </Card>
-);
-
 export function MetricsGrid({ metrics, loading }: MetricsGridProps) {
-  const metricCards = [
-    {
-      title: 'Total Properties',
-      value: metrics.totalProperties,
-      icon: Building,
-      gradient: 'bg-gradient-to-br from-white to-ocean-blue/20',
-      textColor: 'text-ocean-blue',
-    },
-    {
-      title: 'Active Tenants',
-      value: metrics.totalTenants,
-      icon: Users,
-      gradient: 'bg-gradient-to-br from-white to-success-green/20',
-      textColor: 'text-success-green',
-    },
-    {
-      title: 'Pending Applications',
-      value: metrics.pendingApplications,
-      icon: FileText,
-      gradient: 'bg-gradient-to-br from-white to-earth-warm/20',
-      textColor: 'text-earth-warm',
-    },
-    {
-      title: 'Total Rent Due',
-      value: metrics.totalRentDue,
-      icon: Banknote,
-      gradient: 'bg-gradient-to-br from-white to-destructive/20',
-      textColor: 'text-destructive',
-    }
-  ];
+  const format = (n: number) => `R${n.toLocaleString()}`;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {metricCards.map((metric) => (
-        <MetricCard key={metric.title} {...metric} loading={loading} />
-      ))}
-      
-      {/* Additional metrics row for larger screens */}
-      <div className="hidden lg:grid lg:grid-cols-3 lg:col-span-4 gap-4 mt-4">
-        <MetricCard 
-          title="Available Properties"
-          value={metrics.availableProperties}
-          icon={Home}
-          gradient="bg-gradient-to-br from-white to-ocean-blue/10"
-          textColor="text-ocean-blue"
-          loading={loading}
-        />
-        <MetricCard 
-          title="Occupied Properties"
-          value={metrics.occupiedProperties}
-          icon={Building}
-          gradient="bg-gradient-to-br from-white to-success-green/10"
-          textColor="text-success-green"
-          loading={loading}
-        />
-        <MetricCard 
-          title="Monthly Revenue"
-          value={metrics.monthlyRevenue}
-          icon={TrendingUp}
-          gradient="bg-gradient-to-br from-white to-earth-warm/10"
-          textColor="text-earth-warm"
-          loading={loading}
-        />
+    <div className="space-y-3 mb-6">
+      {/* Primary row — always 2 cols on mobile, 4 on lg */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard title="Total Properties"      value={metrics.totalProperties}    icon={Building}  accentColor="hsl(214,100%,52%)" loading={loading} />
+        <StatCard title="Active Tenants"         value={metrics.totalTenants}        icon={Users}     accentColor="hsl(142,72%,38%)"  loading={loading} />
+        <StatCard title="Pending Applications"   value={metrics.pendingApplications} icon={FileText}  accentColor="hsl(38,95%,52%)"   loading={loading} />
+        <StatCard title="Total Rent Due"         value={format(metrics.totalRentDue)} icon={Banknote} accentColor="hsl(0,75%,54%)"    loading={loading} />
+      </div>
+
+      {/* Secondary row — 3 cols, hidden on small screens */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatCard title="Available Properties" value={metrics.availableProperties} icon={Home}       accentColor="hsl(214,100%,52%)" loading={loading} />
+        <StatCard title="Occupied Properties"  value={metrics.occupiedProperties}  icon={Building}   accentColor="hsl(142,72%,38%)"  loading={loading} />
+        <StatCard title="Monthly Revenue"      value={format(metrics.monthlyRevenue)} icon={TrendingUp} accentColor="hsl(38,95%,52%)" loading={loading} />
       </div>
     </div>
   );
