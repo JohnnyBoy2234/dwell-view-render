@@ -6,7 +6,7 @@ import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
-import { ArcGalleryHero } from "@/components/ui/arc-gallery-hero-component";
+import { PropertyHero } from "@/components/ui/property-hero";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import { Marquee } from "@/components/ui/marquee";
 import {
@@ -43,20 +43,6 @@ const dummyBlogPost = {
   featured: true,
 };
 
-const propertyImages = [
-  "https://images.unsplash.com/photo-1568605114967-8130f3a36994?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1583608205776-bfd35f0d9f83?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1502005229762-cf1b2da7c5d6?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1616137466211-f939a420be84?q=80&w=400&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1560185127-6c85feab5b1b?q=80&w=400&auto=format&fit=crop",
-];
 
 
 const marqueeFeatures = [
@@ -143,12 +129,13 @@ const Index = () => {
       <MiniNavbar />
 
       {/* ── HERO (search embedded inside) ── */}
-      <ArcGalleryHero images={propertyImages}>
+      <PropertyHero>
         <div
-          className="mx-auto w-full rounded-2xl px-3 sm:px-5 py-4 sm:py-5"
+          className="mx-auto w-full rounded-2xl px-3 sm:px-4 py-3 sm:py-4 backdrop-blur-md"
           style={{
-            background: "linear-gradient(135deg, hsl(214 100% 43%) 0%, hsl(214 100% 37%) 100%)",
-            boxShadow: "0 8px 40px rgba(37,99,235,0.30), 0 2px 8px rgba(0,0,0,0.08)",
+            background: "rgba(10,10,20,0.55)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 8px 40px rgba(0,0,0,0.25)",
           }}
         >
           <PropertySearchWidget
@@ -168,7 +155,7 @@ const Index = () => {
             onMoreFiltersOpen={() => setShowMoreFilters(true)}
           />
         </div>
-      </ArcGalleryHero>
+      </PropertyHero>
 
       {/* ── MARQUEE FEATURES BELT ── */}
       <section
