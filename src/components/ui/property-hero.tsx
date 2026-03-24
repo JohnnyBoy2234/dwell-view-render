@@ -1,6 +1,4 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface PropertyHeroProps {
   children?: React.ReactNode;
@@ -37,29 +35,15 @@ export function PropertyHero({ children }: PropertyHeroProps) {
       {/* ── Main content ── */}
       <div className="relative z-20 flex flex-col flex-1 items-center justify-center px-5 sm:px-8 pt-28 pb-14 sm:pb-20">
 
-        {/* Badge */}
-        <div
-          className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 mb-7 backdrop-blur-sm"
-          style={{
-            background: 'rgba(255,255,255,0.10)',
-            border: '1px solid rgba(255,255,255,0.22)',
-          }}
-        >
-          <span className="w-2 h-2 rounded-full bg-[hsl(142,72%,50%)] animate-pulse shrink-0" />
-          <span className="text-sm font-semibold text-white/90 tracking-wide">
-            Commission-Free Rentals
-          </span>
-        </div>
-
         {/* Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-[82px] font-bold text-white text-center leading-[1.05] tracking-tight max-w-4xl mb-5">
+        <h1 className="text-4xl sm:text-6xl lg:text-[82px] font-bold text-center leading-[1.05] tracking-tight max-w-4xl mb-5" style={{ color: '#ffffff', textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
           Find Your Perfect{' '}
-          <span style={{ color: 'hsl(214,100%,75%)' }}>Home</span>{' '}
+          <span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}
           in South Africa
         </h1>
 
         {/* Sub-headline */}
-        <p className="text-base sm:text-xl text-white/65 text-center max-w-2xl leading-relaxed mb-10">
+        <p className="text-base sm:text-xl text-center max-w-2xl leading-relaxed mb-10" style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
           Verified listings. Direct landlords. Zero agent fees.
           RentLekker makes renting simple, safe, and transparent.
         </p>
@@ -67,15 +51,15 @@ export function PropertyHero({ children }: PropertyHeroProps) {
         {/* Search widget slot */}
         {children && (
           <div className="w-full max-w-4xl">
-            {/* Mobile: frosted glass wrapper so search reads against the image */}
+            {/* Mobile: dark frosted wrapper for visibility against hero image */}
             <div
-              className="sm:hidden rounded-2xl p-3 mb-0"
+              className="sm:hidden rounded-2xl p-3"
               style={{
-                background: 'rgba(255,255,255,0.10)',
-                backdropFilter: 'blur(12px)',
-                WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255,255,255,0.20)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.20)',
+                background: 'rgba(0,0,0,0.45)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.35)',
               }}
             >
               {children}
@@ -85,14 +69,6 @@ export function PropertyHero({ children }: PropertyHeroProps) {
           </div>
         )}
 
-        {/* Secondary CTA link */}
-        <Link
-          to="/list-property"
-          className="mt-7 inline-flex items-center gap-2 text-sm font-semibold text-white/55 hover:text-white/90 transition-colors duration-200 group"
-        >
-          List your property — it's free
-          <ArrowRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
-        </Link>
       </div>
 
       {/* ── Scroll cue ── */}
