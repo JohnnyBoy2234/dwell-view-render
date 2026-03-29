@@ -25,10 +25,10 @@ export function StatCard({ label, value, icon, className, subText }: StatCardPro
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-sm font-medium text-brand.gray700">{label}</div>
-          <div className="mt-1 text-xl font-semibold text-brand.gray900">{value}</div>
+          <div className="text-sm font-medium text-muted-foreground">{label}</div>
+          <div className="mt-1 text-xl font-semibold text-foreground">{value}</div>
           {subText && (
-            <div className="mt-1 text-xs text-brand.gray500">{subText}</div>
+            <div className="mt-1 text-xs text-muted-foreground">{subText}</div>
           )}
         </div>
         {icon && (

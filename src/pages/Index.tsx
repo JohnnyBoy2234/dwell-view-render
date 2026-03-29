@@ -119,6 +119,7 @@ const Index = () => {
   const { filters, updateFilters, executeSearch, clearFilters } =
     usePropertySearchFilters();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [mode, setMode] = useState<'rent' | 'buy'>('rent');
 
   const onFiltersChange = (patch: Partial<typeof filters>) => updateFilters(patch);
   const handleSearch = () => executeSearch();
@@ -126,10 +127,10 @@ const Index = () => {
   return (
     <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
       {/* ── NAVBAR (floats over hero) ── */}
-      <MiniNavbar />
+      <MiniNavbar mode={mode} />
 
       {/* ── HERO (search embedded inside) ── */}
-      <PropertyHero>
+      <PropertyHero mode={mode} onModeChange={setMode}>
         <PropertySearchWidget
           filters={{
             searchTerm: filters.searchTerm,
