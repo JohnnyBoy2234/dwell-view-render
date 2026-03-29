@@ -36,6 +36,19 @@ const FEATURE_BLOCKS = [
   { title: 'Settings',         icon: User,      path: '/tenant/profile' },
 ] as const;
 
+// Per-feature color palette — each tile gets its own tinted icon bg
+const FEATURE_ICON_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
+  'Viewings':         { bg: 'bg-blue-100',    icon: 'text-blue-600',    border: 'group-hover:border-blue-200'    },
+  'Maintenance':      { bg: 'bg-orange-100',  icon: 'text-orange-500',  border: 'group-hover:border-orange-200'  },
+  'Inventory':        { bg: 'bg-teal-100',    icon: 'text-teal-600',    border: 'group-hover:border-teal-200'    },
+  'Inspection':       { bg: 'bg-violet-100',  icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
+  'Proof of Payment': { bg: 'bg-emerald-100', icon: 'text-emerald-600', border: 'group-hover:border-emerald-200' },
+  'Lease Contracts':  { bg: 'bg-indigo-100',  icon: 'text-indigo-600',  border: 'group-hover:border-indigo-200'  },
+  'Applications':     { bg: 'bg-pink-100',    icon: 'text-pink-600',    border: 'group-hover:border-pink-200'    },
+  'Support':          { bg: 'bg-amber-100',   icon: 'text-amber-600',   border: 'group-hover:border-amber-200'   },
+  'Settings':         { bg: 'bg-slate-100',   icon: 'text-slate-500',   border: 'group-hover:border-slate-200'   },
+};
+
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
@@ -122,7 +135,7 @@ export default function EnhancedTenantDashboard() {
       >
         {/* ── Property hero ──────────────────────────────────── */}
         {tenantProperty ? (
-          <Card className="overflow-hidden">
+          <Card className="overflow-hidden animate-in fade-in slide-in-from-top-4 duration-400">
             {tenantProperty.images?.[0] && (
               <ImageWithSkeleton
                 src={tenantProperty.images[0]}
@@ -174,7 +187,7 @@ export default function EnhancedTenantDashboard() {
         {rentDue && (
           <Card
             className={cn(
-              'border',
+              'border animate-in fade-in slide-in-from-left-4 duration-300',
               rentDue.status === 'overdue' && 'border-destructive/40 bg-destructive/5',
               rentDue.status === 'pending' && 'border-amber-500/40 bg-amber-500/5',
             )}
@@ -230,14 +243,14 @@ export default function EnhancedTenantDashboard() {
             {maintenanceCount > 0 && (
               <button
                 onClick={() => navigate('/tenant/maintenance')}
-                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in zoom-in-95 duration-300"
               >
-                <Card className="p-3 group-hover:border-primary/30 transition-colors">
+                <Card className="p-3 border-orange-100 group-hover:border-orange-300 group-hover:bg-orange-50/60 transition-all duration-200 group-active:scale-95">
                   <div className="flex items-center gap-2 mb-1">
                     <Settings className="h-4 w-4 text-orange-500" />
                     <span className="text-xs font-medium text-muted-foreground">Maintenance</span>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{maintenanceCount}</p>
+                  <p className="text-2xl font-bold text-orange-600">{maintenanceCount}</p>
                   <p className="text-xs text-muted-foreground">
                     open request{maintenanceCount !== 1 ? 's' : ''}
                   </p>
@@ -247,14 +260,14 @@ export default function EnhancedTenantDashboard() {
             {viewingsCount > 0 && (
               <button
                 onClick={() => navigate('/tenant/viewings')}
-                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in zoom-in-95 duration-300 delay-75"
               >
-                <Card className="p-3 group-hover:border-primary/30 transition-colors">
+                <Card className="p-3 border-blue-100 group-hover:border-blue-300 group-hover:bg-blue-50/60 transition-all duration-200 group-active:scale-95">
                   <div className="flex items-center gap-2 mb-1">
                     <Eye className="h-4 w-4 text-blue-500" />
                     <span className="text-xs font-medium text-muted-foreground">Viewings</span>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{viewingsCount}</p>
+                  <p className="text-2xl font-bold text-blue-600">{viewingsCount}</p>
                   <p className="text-xs text-muted-foreground">upcoming</p>
                 </Card>
               </button>
@@ -273,28 +286,32 @@ export default function EnhancedTenantDashboard() {
 
         {/* ── Feature grid ───────────────────────────────────── */}
         <div className="grid grid-cols-3 gap-2.5">
-          {FEATURE_BLOCKS.map((block) => {
+          {FEATURE_BLOCKS.map((block, i) => {
             const count =
               block.countKey === 'maintenance'
                 ? maintenanceCount
                 : block.countKey === 'viewings'
                 ? viewingsCount
                 : 0;
+            const colors = FEATURE_ICON_COLORS[block.title] ?? {
+              bg: 'bg-muted', icon: 'text-muted-foreground', border: 'group-hover:border-primary/30',
+            };
 
             return (
               <button
                 key={block.title}
                 onClick={() => (!user ? navigate('/auth') : navigate(block.path))}
-                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in slide-in-from-bottom-3 duration-300"
+                style={{ animationDelay: `${i * 45}ms`, animationFillMode: 'backwards' }}
               >
-                <Card className="h-full transition-all duration-150 group-hover:shadow-md group-hover:border-primary/30 group-active:scale-95">
+                <Card className={cn('h-full transition-all duration-200 group-hover:shadow-md group-active:scale-95', colors.border)}>
                   <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
                     <div className="relative mt-1">
-                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                        <block.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110', colors.bg)}>
+                        <block.icon className={cn('w-5 h-5 transition-colors', colors.icon)} />
                       </div>
                       {count > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none">
+                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
                           {count > 99 ? '99+' : count}
                         </span>
                       )}

@@ -8,7 +8,10 @@
       "Bash(rm src/components/MobileSidebar.tsx)",
       "Bash(rm src/components/navigation/NavItems.tsx)",
       "Bash(rm src/components/navigation/NavActions.tsx)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(claude update:*)",
+      "Bash(claude plugin:*)",
+      "Bash(grep -n \"from ''''@/lib/utils''''\\\\|from \"\"@/lib/utils\"\"\\\\|import.*cn\" src/pages/EnhancedLandlordDashboard.tsx)"
     ]
   }
 }

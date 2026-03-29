@@ -12,6 +12,7 @@ import { InspectionDetailModal } from '@/components/inspection/InspectionDetailM
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 import { useProperties } from '@/hooks/useProperties';
+import { cn } from '@/lib/utils';
 
 // Move the inspectionChecklist to the top level
 const inspectionChecklist = {
@@ -246,34 +247,36 @@ export default function LandlordInspection() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Property Inspections</h1>
-        <button 
+        <h1 className="text-2xl font-bold text-foreground">Property Inspections</h1>
+        <Button
           onClick={() => navigate('/inspections/new')}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
+          size="sm"
+          className="flex items-center gap-2"
         >
           <Plus className="h-4 w-4" />
           New Inspection
-        </button>
+        </Button>
       </div>
-      
+
       {selectedPropertyId && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Tabs */}
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+        <div className="bg-card rounded-xl shadow-sm border overflow-hidden">
+          {/* Tabs — horizontally scrollable on mobile */}
+          <div className="border-b">
+            <nav className="flex overflow-x-auto -mb-px [scrollbar-width:none] [-webkit-overflow-scrolling:touch]">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 py-3 text-sm font-medium flex items-center gap-2 ${
+                  className={cn(
+                    'px-4 py-3 text-sm font-medium flex items-center gap-1.5 shrink-0 transition-colors whitespace-nowrap',
                     activeTab === tab.id
-                      ? 'border-b-2 border-blue-500 text-blue-600'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
+                      ? 'border-b-2 border-primary text-primary'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
                 >
-                  <span className="text-lg">{tab.icon}</span>
+                  <span className="text-base">{tab.icon}</span>
                   {tab.label}
                 </button>
               ))}
@@ -284,34 +287,33 @@ export default function LandlordInspection() {
           <div className="p-6">
             <div className="space-y-4">
               {currentChecklist.map((item) => (
-                <div key={item.id} className="flex items-start">
-                  <div className="flex items-center h-5">
+                <div key={item.id} className="flex items-start gap-3">
+                  <div className="flex items-center h-5 mt-0.5">
                     <input
                       id={item.id}
                       name={item.id}
                       type="checkbox"
                       checked={item.checked}
                       onChange={() => toggleChecklistItem(activeTab as keyof typeof inspectionChecklist, item.id)}
-                      className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                     />
                   </div>
-                  <div className="ml-3 text-sm">
-                    <label 
-                      htmlFor={item.id} 
-                      className={`font-medium ${
-                        item.checked ? 'text-gray-500 line-through' : 'text-gray-700'
-                      }`}
-                    >
-                      {item.label}
-                    </label>
-                  </div>
+                  <label
+                    htmlFor={item.id}
+                    className={cn(
+                      'text-sm font-medium cursor-pointer transition-colors',
+                      item.checked ? 'text-muted-foreground line-through' : 'text-foreground'
+                    )}
+                  >
+                    {item.label}
+                  </label>
                 </div>
               ))}
             </div>
             
             {/* Notes Section */}
             <div className="mt-8">
-              <label htmlFor={`notes-${activeTab}`} className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor={`notes-${activeTab}`} className="block text-sm font-medium text-foreground mb-2">
                 Additional Notes for {tabs.find(tab => tab.id === activeTab)?.label || 'this section'}
               </label>
               <textarea
@@ -319,99 +321,78 @@ export default function LandlordInspection() {
                 name={`notes-${activeTab}`}
                 rows={3}
                 value={tabNotes[activeTab] || ''}
-                onChange={(e) => setTabNotes(prev => ({
-                  ...prev,
-                  [activeTab]: e.target.value
-                }))}
-                className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border border-gray-300 rounded-md p-2"
+                onChange={(e) => setTabNotes(prev => ({ ...prev, [activeTab]: e.target.value }))}
+                className="block w-full text-sm border border-input rounded-md p-2.5 bg-background text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-colors resize-none"
                 placeholder={`Add notes about ${tabs.find(tab => tab.id === activeTab)?.label?.toLowerCase() || 'this section'}...`}
               />
             </div>
-            
+
             {/* Photo Upload */}
             <div className="mt-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Add Photos
               </label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                <div className="space-y-1 text-center w-full">
-                  <svg
-                    className="mx-auto h-12 w-12 text-gray-400"
-                    stroke="currentColor"
-                    fill="none"
-                    viewBox="0 0 48 48"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                      strokeWidth={2}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <div className="flex text-sm text-gray-600 justify-center">
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed border-border rounded-lg hover:border-primary/40 transition-colors">
+                <div className="space-y-2 text-center w-full">
+                  <div className="mx-auto h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                    <Image className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                  <div className="flex text-sm text-muted-foreground justify-center gap-1">
                     <label
                       htmlFor="file-upload"
-                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none"
+                      className="relative cursor-pointer font-medium text-primary hover:text-primary/80 transition-colors focus-within:outline-none"
                     >
                       <span>Upload photos</span>
-                      <input 
-                        id="file-upload" 
-                        name="file-upload" 
-                        type="file" 
-                        className="sr-only" 
-                        multiple 
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        multiple
                         accept="image/*"
                         onChange={handleFileChange}
                       />
                     </label>
-                    <p className="pl-1">or drag and drop</p>
+                    <p>or drag and drop</p>
                   </div>
-                  <p className="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                  
+                  <p className="text-xs text-muted-foreground">PNG, JPG, GIF up to 10MB</p>
+
                   {selectedFiles.length > 0 && (
-                    <div className="mt-4 space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">Selected Files:</h4>
+                    <div className="mt-4 space-y-2 text-left">
+                      <h4 className="text-sm font-medium text-foreground">Selected Files:</h4>
                       <ul className="space-y-1">
                         {selectedFiles.map((file, index) => (
-                          <li key={index} className="flex items-center justify-between text-sm text-gray-600">
-                            <span className="truncate max-w-xs">{file.name}</span>
-                            <button 
-                              type="button" 
+                          <li key={index} className="flex items-center justify-between text-sm text-muted-foreground">
+                            <span className="truncate max-w-[200px] sm:max-w-xs">{file.name}</span>
+                            <button
+                              type="button"
                               onClick={() => removeFile(index)}
-                              className="text-red-500 hover:text-red-700"
+                              className="text-destructive hover:text-destructive/80 transition-colors ml-2 shrink-0"
                             >
                               Remove
                             </button>
                           </li>
                         ))}
                       </ul>
-                      <button
+                      <Button
                         type="button"
                         onClick={handleFileUpload}
                         disabled={isUploading}
-                        className={`mt-2 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                          isUploading 
-                            ? 'bg-blue-400' 
-                            : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
-                        }`}
+                        className="mt-2 w-full"
                       >
                         {isUploading ? 'Uploading...' : `Upload ${selectedFiles.length} File(s)`}
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
               </div>
             </div>
-            
+
             {/* Save Button */}
             <div className="mt-8 flex justify-end">
-              <button
-                type="button"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              <Button type="button">
                 Save Inspection
-              </button>
+              </Button>
             </div>
         </div>
       </div>

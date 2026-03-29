@@ -32,6 +32,19 @@ import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';
 import { ApplicationRequestsManager } from '@/components/landlord/ApplicationRequestsManager';
 import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithViewings';
+import { cn } from '@/lib/utils';
+
+// Per-tool color palette — each tile gets its own tinted icon bg
+const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
+  'Applications': { bg: 'bg-indigo-100',  icon: 'text-indigo-600',  border: 'group-hover:border-indigo-200'  },
+  'Maintenance':  { bg: 'bg-orange-100',  icon: 'text-orange-500',  border: 'group-hover:border-orange-200'  },
+  'Payments':     { bg: 'bg-emerald-100', icon: 'text-emerald-600', border: 'group-hover:border-emerald-200' },
+  'SwiftBooks':   { bg: 'bg-violet-100',  icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
+  'Leases':       { bg: 'bg-blue-100',    icon: 'text-blue-600',    border: 'group-hover:border-blue-200'    },
+  'Inventory':    { bg: 'bg-teal-100',    icon: 'text-teal-600',    border: 'group-hover:border-teal-200'    },
+  'Inspection':   { bg: 'bg-amber-100',   icon: 'text-amber-600',   border: 'group-hover:border-amber-200'   },
+  'Support':      { bg: 'bg-slate-100',   icon: 'text-slate-500',   border: 'group-hover:border-slate-200'   },
+};
 
 interface PropertyWithTenant {
   id: string;
@@ -2384,12 +2397,17 @@ const renderReportsTab = () => (
       >
         {/* Property header */}
         {selectedProperty && (
-          <Card>
+          <Card className="animate-in fade-in slide-in-from-top-4 duration-300 border-primary/20 bg-primary/5">
             <CardContent className="p-4">
               <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-semibold text-foreground truncate">{selectedProperty.title}</p>
-                  <p className="text-sm text-muted-foreground truncate">{selectedProperty.location}</p>
+                <div className="min-w-0 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Home className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground truncate">{selectedProperty.title}</p>
+                    <p className="text-xs text-muted-foreground truncate">{selectedProperty.location}</p>
+                  </div>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleBackToProperties} className="shrink-0">
                   <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
@@ -2438,9 +2456,21 @@ const renderReportsTab = () => (
           </div>
         )}
 
+        {/* ── Section divider ────────────────────────────────── */}
+        <div className="flex items-center gap-3 py-1">
+          <div className="flex-1 h-px bg-border" />
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+            Quick Access
+          </span>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+
         {/* Management tools grid */}
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-          {tools.map((tool) => {
+          {tools.map((tool, i) => {
+            const colors = LANDLORD_TOOL_COLORS[tool.title] ?? {
+              bg: 'bg-muted', icon: 'text-muted-foreground', border: 'group-hover:border-primary/30',
+            };
             const handleClick = () => {
               if (!user) { navigate('/auth'); return; }
               if (tool.tab) handleTabChange(tool.tab);
@@ -2450,16 +2480,17 @@ const renderReportsTab = () => (
               <button
                 key={tool.title}
                 onClick={handleClick}
-                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in slide-in-from-bottom-3 duration-300"
+                style={{ animationDelay: `${i * 45}ms`, animationFillMode: 'backwards' }}
               >
-                <Card className="h-full transition-all duration-150 group-hover:shadow-md group-hover:border-primary/30 group-active:scale-95">
+                <Card className={cn('h-full transition-all duration-200 group-hover:shadow-md group-active:scale-95', colors.border)}>
                   <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
                     <div className="relative mt-1">
-                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
-                        <tool.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110', colors.bg)}>
+                        <tool.icon className={cn('w-5 h-5 transition-colors', colors.icon)} />
                       </div>
                       {tool.count !== undefined && tool.count > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none">
+                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
                           {tool.count > 99 ? '99+' : tool.count}
                         </span>
                       )}
