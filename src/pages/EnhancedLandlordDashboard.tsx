@@ -2264,301 +2264,212 @@ const renderReportsTab = () => (
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-ios-gray-light to-white">
-          <div className="animate-pulse space-y-4 p-4">
-            <div className="h-20 bg-gray-300 rounded-ios"></div>
-            <div className="grid grid-cols-2 gap-4">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-gray-300 rounded-ios"></div>
-              ))}
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-20 bg-gray-300 rounded-ios"></div>
-              ))}
-            </div>
+        <div className="p-4 space-y-4">
+          <Skeleton className="h-16 w-full rounded-xl" />
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-20 rounded-xl" />
+            <Skeleton className="h-20 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-xl" />
+            ))}
           </div>
         </div>
       );
     }
 
-    // If no property is selected, show property selection only
+    // ── No property selected — show reminder + PropertySelection (rendered above) ──
     if (!selectedPropertyId) {
       return (
-        <div className="min-h-screen bg-white pb-24 md:pb-4" style={{ minHeight: '100dvh', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
-          <div className="px-4 space-y-6 pt-3">
-            {/* Payment Reminder Banner */}
-            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-ocean-blue/10 text-ocean-blue flex items-center justify-center">
-                    <Bell className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="font-semibold text-black">Send Payment Reminder</div>
-                    <div className="text-sm text-black/70">Notify a tenant instantly via app and email</div>
-                  </div>
+        <div
+          className="p-4 space-y-4"
+          style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
+        >
+          {/* Payment reminder */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3 mb-3">
+                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Bell className="w-4 h-4 text-primary" />
                 </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <Select value={reminderPropertyId} onValueChange={setReminderPropertyId}>
-                    <SelectTrigger className="w-[220px]">
-                      <SelectValue placeholder="Select property" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {properties.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Button
-                    disabled={sendingReminder}
-                    onClick={async () => {
-                      if (!reminderPropertyId) {
-                        toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-                        return;
-                      }
-                      try {
-                        setSendingReminder(true);
-                        const { data: tenancy } = await supabase
-                          .from('tenancies')
-                          .select('tenant_id')
-                          .eq('landlord_id', user?.id)
-                          .eq('property_id', reminderPropertyId)
-                          .eq('status', 'active')
-                          .limit(1)
-                          .maybeSingle();
-                        if (!tenancy?.tenant_id) {
-                          toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
-                          setSendingReminder(false);
-                          return;
-                        }
-                        const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                          body: { tenant_id: tenancy.tenant_id, property_id: reminderPropertyId }
-                        });
-                        if (error) throw error;
-                        toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
-                      } catch (e: any) {
-                        toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-                      } finally {
-                        setSendingReminder(false);
-                      }
-                    }}
-                    className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
-                  >
-                    {sendingReminder ? 'Sending…' : 'Send Reminder'}
-                  </Button>
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground text-sm">Send Payment Reminder</p>
+                  <p className="text-xs text-muted-foreground">Notify a tenant instantly via app and email</p>
                 </div>
               </div>
-            </div>
-          </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Select value={reminderPropertyId} onValueChange={setReminderPropertyId}>
+                  <SelectTrigger className="flex-1 min-w-0">
+                    <SelectValue placeholder="Select property…" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {properties.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  disabled={sendingReminder || !reminderPropertyId}
+                  onClick={async () => {
+                    if (!reminderPropertyId) {
+                      toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
+                      return;
+                    }
+                    try {
+                      setSendingReminder(true);
+                      const { data: tenancy } = await supabase
+                        .from('tenancies')
+                        .select('tenant_id')
+                        .eq('landlord_id', user?.id)
+                        .eq('property_id', reminderPropertyId)
+                        .eq('status', 'active')
+                        .limit(1)
+                        .maybeSingle();
+                      if (!tenancy?.tenant_id) {
+                        toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
+                        return;
+                      }
+                      const { error } = await supabase.functions.invoke('send-payment-reminder', {
+                        body: { tenant_id: tenancy.tenant_id, property_id: reminderPropertyId }
+                      });
+                      if (error) throw error;
+                      toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
+                    } catch (e: any) {
+                      toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
+                    } finally {
+                      setSendingReminder(false);
+                    }
+                  }}
+                  className="shrink-0"
+                >
+                  {sendingReminder ? 'Sending…' : 'Send Reminder'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       );
     }
 
-    // Property is selected - show management tools for this property
+    // ── Property selected — show management tools ──────────────────────────────
     const selectedProperty = getSelectedProperty();
-    const totalRevenue = tenants.reduce((sum, t) => sum + t.monthly_rent, 0);
-    const occupancyRate = properties.length > 0 ? Math.round((tenants.length / properties.length) * 100) : 0;
-    const activeMaintenanceRequests = maintenanceRequests.filter(req => req.status !== 'completed').length;
+    const activeMaintenanceRequests = maintenanceRequests.filter(r => r.status !== 'completed').length;
+
+    type ToolItem = {
+      title: string;
+      subtitle: string;
+      icon: React.ComponentType<{ className?: string }>;
+      tab?: string;
+      path?: string;
+      count?: number;
+    };
+
+    const tools: ToolItem[] = [
+      { title: 'Applications', subtitle: `${applications.length} total`,    icon: Inbox,      tab: '/enhancedlandlorddashboard/applications' },
+      { title: 'Maintenance',  subtitle: `${activeMaintenanceRequests} open`, icon: Wrench,   tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
+      { title: 'Payments',     subtitle: 'Track rent',                        icon: Receipt,  tab: '/enhancedlandlorddashboard/payments' },
+      { title: 'SwiftBooks',   subtitle: 'Analytics',                         icon: BarChart3,tab: '/enhancedlandlorddashboard/swiftbooks' },
+      { title: 'Leases',       subtitle: 'Contracts',                         icon: FileText, tab: '/enhancedlandlorddashboard/leases' },
+      { title: 'Inventory',    subtitle: 'Photos & notes',                    icon: Camera,   tab: '/enhancedlandlorddashboard/inventory' },
+      { title: 'Inspection',   subtitle: 'View & start',                      icon: Clipboard,tab: '/enhancedlandlorddashboard/inspection' },
+      { title: 'Support',      subtitle: 'Help & resources',                  icon: HelpCircle, path: '/landlord/support' },
+    ];
 
     return (
-      <div className="min-h-screen bg-white pb-24 md:pb-4" style={{ minHeight: '100dvh', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
-        <div className="px-4 space-y-6 pt-3">
-          {/* Property Info Header */}
-          {selectedProperty && (
-            <Card className="bg-gradient-to-r from-ocean-blue/5 to-ocean-blue/10 border-ocean-blue/20">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
+      <div
+        className="p-4 space-y-4"
+        style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
+      >
+        {/* Property header */}
+        {selectedProperty && (
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="font-semibold text-foreground truncate">{selectedProperty.title}</p>
+                  <p className="text-sm text-muted-foreground truncate">{selectedProperty.location}</p>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleBackToProperties} className="shrink-0">
+                  <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
+                  Properties
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Sale-specific quick actions */}
+        {selectedProperty?.listing_type === 'sale' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <button
+              onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=deed_of_sale`)}
+              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+            >
+              <Card className="h-full group-hover:border-primary/30 group-active:scale-[0.98] transition-all">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5 text-emerald-600" />
+                  </div>
                   <div>
-                    <h3 className="font-semibold text-lg">{selectedProperty.title}</h3>
-                    <p className="text-sm text-muted-foreground">{selectedProperty.location}</p>
+                    <p className="font-medium text-sm text-foreground">Deed of Sale</p>
+                    <p className="text-xs text-muted-foreground">Generate sale documents</p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={handleBackToProperties}>
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Properties
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Property-Specific Management Tools */}
-          {selectedProperty?.listing_type === 'sale' && (
-            <div>
-              <h3 className="text-lg font-semibold mb-4 text-gray-900">Sale Property Management</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div 
-                  onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=deed_of_sale`)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center">
-                      <FileText className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Deed of Sale</h4>
-                      <p className="text-sm text-gray-600">Generate and manage sale documents</p>
-                    </div>
+                </CardContent>
+              </Card>
+            </button>
+            <button
+              onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=compliance`)}
+              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+            >
+              <Card className="h-full group-hover:border-primary/30 group-active:scale-[0.98] transition-all">
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <Shield className="w-5 h-5 text-purple-600" />
                   </div>
-                </div>
-                <div 
-                  onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=compliance`)}
-                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Legal & Compliance</h4>
-                      <p className="text-sm text-gray-600">Upload documents and certificates</p>
-                    </div>
+                  <div>
+                    <p className="font-medium text-sm text-foreground">Legal & Compliance</p>
+                    <p className="text-xs text-muted-foreground">Upload certificates</p>
                   </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* App-style Feature Grid - Management Tools */}
-          <div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/applications');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-indigo rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <Inbox className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Applications</p>
-                  <p className="text-xs text-muted-foreground">{applications.length}</p>
-                </Card>
-              </div>
-
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/maintenance');
-                      }
-                    }} role="button" tabIndex={0} className="relative">
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-orange to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <Wrench className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Maintenance</p>
-                  <p className="text-xs text-muted-foreground">{activeMaintenanceRequests}</p>
-                </Card>
-                {activeMaintenanceRequests > 0 && (
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-ios-red rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">{activeMaintenanceRequests}</span>
-                  </div>
-                )}
-              </div>
-
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/payments');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-teal to-ios-green rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <RIcon className="w-7 h-7 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Payments</p>
-                  <p className="text-xs text-muted-foreground">Track</p>
-                </Card>
-              </div>
-
-              {/* SwiftBooks */}
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/swiftbooks');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-indigo to-ios-purple rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <BarChart3 className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">SwiftBooks</p>
-                  <p className="text-xs text-muted-foreground">Analytics</p>
-                </Card>
-              </div>
-
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/leases');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-pink to-ios-red rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Leases</p>
-                  <p className="text-xs text-muted-foreground">Manage</p>
-                </Card>
-              </div>
-
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/inventory');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-blue-light to-ios-teal rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <Camera className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Inventory</p>
-                  <p className="text-xs text-muted-foreground">Photos & Notes</p>
-                </Card>
-              </div>
-
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        handleTabChange('/enhancedlandlorddashboard/inspection');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-purple to-ios-pink rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <Clipboard className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Inspection</p>
-                  <p className="text-xs text-muted-foreground">View & Start</p>
-                </Card>
-              </div>
-
-              {/* Support */}
-              <div onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        navigate('/enhancedlandlorddashboard/support');
-                      }
-                    }} role="button" tabIndex={0}>
-                <Card className={`${PROPERTY_CARD_STYLES.CARD} p-4 text-center transform transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_10px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`}>
-                  <div className="w-10 h-10 bg-gradient-to-br from-ios-blue to-ocean-blue rounded-ios mx-auto mb-2 flex items-center justify-center">
-                    <Home className="w-5 h-5 text-white" />
-                  </div>
-                  <p className="text-xs font-medium">Support</p>
-                  <p className="text-xs text-muted-foreground">Help & Resources</p>
-                </Card>
-              </div>
-
-            </div>
+                </CardContent>
+              </Card>
+            </button>
           </div>
+        )}
+
+        {/* Management tools grid */}
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {tools.map((tool) => {
+            const handleClick = () => {
+              if (!user) { navigate('/auth'); return; }
+              if (tool.tab) handleTabChange(tool.tab);
+              else if (tool.path) navigate(tool.path);
+            };
+            return (
+              <button
+                key={tool.title}
+                onClick={handleClick}
+                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+              >
+                <Card className="h-full transition-all duration-150 group-hover:shadow-md group-hover:border-primary/30 group-active:scale-95">
+                  <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
+                    <div className="relative mt-1">
+                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <tool.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                      {tool.count !== undefined && tool.count > 0 && (
+                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none">
+                          {tool.count > 99 ? '99+' : tool.count}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] font-medium text-foreground leading-tight">{tool.title}</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">{tool.subtitle}</span>
+                  </CardContent>
+                </Card>
+              </button>
+            );
+          })}
         </div>
       </div>
     );

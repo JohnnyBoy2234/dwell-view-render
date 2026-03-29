@@ -4,79 +4,63 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { RentDueCard } from '@/components/dashboard/tenant/RentDueCard';
-import { ViewingCard } from '@/components/dashboard/tenant/ViewingCard';
-import { MaintenanceCard } from '@/components/dashboard/tenant/MaintenanceCard';
-import { PropertyPanel } from '@/components/dashboard/tenant/PropertyPanel';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MessageCircle, Bell, Home, Activity, FileText, Eye, Settings, Building, User, Receipt, Clipboard, HelpCircle } from "lucide-react";
-import { QuickLeaseActions } from "@/components/lease/QuickLeaseActions";
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import {
+  FileText, Eye, Settings, Building, User,
+  Receipt, Clipboard, HelpCircle, MapPin,
+  Calendar, AlertCircle, Clock,
+} from 'lucide-react';
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
-
-// Custom R icon for South African Rand
-const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
-    R
-  </div>
-);
-import GlassCard from '@/components/ui/GlassCard';
-import { StatCard } from '@/components/ui/StatCard';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-
-import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
-import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
-import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
-import TenantInventory from '@/pages/tenant/TenantInventory';
-import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
-import { RentLekkerSupport } from '@/components/support/SwiftRentSupport';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 import { VerificationGate } from '@/components/VerificationGate';
+import { cn } from '@/lib/utils';
+
+// Hoisted outside component — stable reference, no re-creation on render
+const FEATURE_BLOCKS = [
+  { title: 'Viewings',         icon: Eye,       path: '/tenant/viewings',                  countKey: 'viewings'     as const },
+  { title: 'Maintenance',      icon: Settings,  path: '/tenant/maintenance',               countKey: 'maintenance'  as const },
+  { title: 'Inventory',        icon: FileText,  path: '/tenant/inventory' },
+  { title: 'Inspection',       icon: Clipboard, path: '/tenant/inspection' },
+  { title: 'Proof of Payment', icon: Receipt,   path: '/tenant/proof-of-payment' },
+  { title: 'Lease Contracts',  icon: FileText,  path: '/enhancedtenantdashboard/leases' },
+  { title: 'Applications',     icon: Building,  path: '/tenant/applications' },
+  { title: 'Support',          icon: HelpCircle,path: '/tenant/support' },
+  { title: 'Settings',         icon: User,      path: '/tenant/profile' },
+] as const;
 
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { unreadCount } = useUnreadMessages();
-  
+
   const [currentTab, setCurrentTab] = useState('/enhancedtenantdashboard');
-  const {
-    loading,
-    rentDue,
-    tenantProperty,
-    recentMaintenance,
-    upcomingViewings,
-    refetch
-  } = useTenantDashboard();
+  const { loading, rentDue, tenantProperty, recentMaintenance, upcomingViewings } =
+    useTenantDashboard();
 
   useEffect(() => {
-    // Visible in production console to verify current deployed build
-    // eslint-disable-next-line no-console
-    // Allow unauthenticated users to view dashboard, redirect only if they try to access protected features
     if (user && isLandlord) {
       navigate('/enhancedlandlorddashboard');
       return;
     }
-    
-    // Sync currentTab with the current URL path
     const path = location.pathname;
     if (path !== '/enhancedtenantdashboard' && path.startsWith('/enhancedtenantdashboard')) {
       setCurrentTab(path);
     }
   }, [user, isLandlord, navigate, location.pathname]);
-  
-  // Fire local reminder checks when dashboard mounts and when upcoming viewings load
+
   useEffect(() => {
     if (!user) return;
-    // Tenant reminders use upcomingViewings from hook
     ensureTwoHourViewingRemindersForTenant(user.id, upcomingViewings || []);
-    // Landlord reminders pull from viewings table
     ensureTwoHourViewingRemindersForLandlord(user.id);
-    // Re-run every 5 minutes while on dashboard
     const interval = setInterval(() => {
       ensureTwoHourViewingRemindersForTenant(user.id, upcomingViewings || []);
       ensureTwoHourViewingRemindersForLandlord(user.id);
@@ -85,29 +69,22 @@ export default function EnhancedTenantDashboard() {
   }, [user, upcomingViewings]);
 
   const handleMakePayment = () => {
-    if (rentDue) {
-      // Navigate to payment page or open payment modal
-      navigate(`/payment/${rentDue.tenancyId}`);
-    }
+    if (rentDue) navigate(`/payment/${rentDue.tenancyId}`);
   };
 
   const handleTabChange = (tab: string) => {
     setCurrentTab(tab);
-    // Update the URL when changing tabs - navigate to absolute paths
     navigate(tab);
   };
 
   const renderTabContent = () => {
-    // Always show the dashboard overview - navigation handled by routing
     if (currentTab === '/enhancedtenantdashboard/leases') {
       return (
-        <div className="space-y-6 w-full">
-          <div className="flex items-center gap-3 mb-6">
-            <FileText className="h-6 w-6 text-ocean-blue" />
-            <h2 className="text-xl font-bold">Lease System</h2>
-            <Badge variant="secondary" className="ml-2">
-              Contract Management
-            </Badge>
+        <div className="space-y-6 p-4 sm:p-6">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">Lease System</h2>
+            <Badge variant="secondary">Contract Management</Badge>
           </div>
           <LeaseDashboardComponent />
         </div>
@@ -119,149 +96,217 @@ export default function EnhancedTenantDashboard() {
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light">
-          <div className="p-4 space-y-4">
-            {[...Array(7)].map((_, i) => (
-              <div key={i} className="bg-white/80 backdrop-blur-sm animate-pulse h-24 rounded-ios-card shadow-ios-sm border border-white/40"></div>
+        <div className="p-4 space-y-4">
+          <Skeleton className="h-40 w-full rounded-2xl" />
+          <Skeleton className="h-24 w-full rounded-2xl" />
+          <div className="grid grid-cols-2 gap-3">
+            <Skeleton className="h-20 rounded-xl" />
+            <Skeleton className="h-20 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-3 gap-2.5">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <Skeleton key={i} className="h-20 rounded-xl" />
             ))}
           </div>
         </div>
       );
     }
 
-    const featureBlocks = [
-      {
-        title: 'Property Viewings',
-        icon: Eye,
-        color: 'hsl(var(--ios-blue))',
-        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
-        iconBg: 'bg-blue-500',
-        count: upcomingViewings?.length || 0,
-        subtitle: upcomingViewings?.length ? `${upcomingViewings.length} upcoming` : 'No viewings',
-        path: '/tenant/viewings'
-      },
-      {
-        title: 'Inventory',
-        icon: FileText,
-        color: 'hsl(var(--ios-green))',
-        bgColor: 'bg-gradient-to-br from-green-50 to-green-100/50',
-        iconBg: 'bg-green-500',
-        subtitle: 'Property condition',
-        path: '/tenant/inventory'
-      },
-      {
-        title: 'Inspection',
-        icon: Clipboard,
-        color: 'hsl(var(--ios-blue))',
-        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/50',
-        iconBg: 'bg-blue-500',
-        subtitle: 'Photos & voice notes',
-        path: '/tenant/inspection'
-      },
-      {
-        title: 'Maintenance',
-        icon: Settings,
-        color: 'hsl(var(--ios-orange))',
-        bgColor: 'bg-gradient-to-br from-orange-50 to-orange-100/50',
-        iconBg: 'bg-orange-500',
-        count: recentMaintenance?.length || 0,
-        subtitle: recentMaintenance?.length ? `${recentMaintenance.length} requests` : 'No issues',
-        path: '/tenant/maintenance'
-      },
-      {
-        title: 'Proof of Payment',
-        icon: RIcon,
-        color: 'hsl(var(--ios-purple))',
-        bgColor: 'bg-gradient-to-br from-purple-50 to-purple-100/50',
-        iconBg: 'bg-purple-500',
-        subtitle: 'Upload documents',
-        path: '/tenant/proof-of-payment'
-      },
-      {
-        title: 'Lease Contracts',
-        icon: FileText,
-        color: 'hsl(var(--ios-indigo))',
-        bgColor: 'bg-gradient-to-br from-indigo-50 to-indigo-100/50',
-        iconBg: 'bg-indigo-500',
-        subtitle: 'Lease documents',
-        path: '/enhancedtenantdashboard/leases'
-      },
-      {
-        title: 'Applications',
-        icon: Building,
-        color: 'hsl(var(--ios-teal))',
-        bgColor: 'bg-gradient-to-br from-teal-50 to-teal-100/50',
-        iconBg: 'bg-teal-500',
-        subtitle: 'Application status',
-        path: '/tenant/applications'
-      },
-      {
-        title: 'Support',
-        icon: Home,
-        color: 'hsl(var(--ios-blue))',
-        bgColor: 'bg-gradient-to-br from-blue-50 to-blue-100/60',
-        iconBg: 'bg-ocean-blue',
-        subtitle: 'RentLekker support',
-        path: '/tenant/support'
-      },
-      {
-        title: 'Settings',
-        icon: User,
-        color: 'hsl(var(--ios-pink))',
-        bgColor: 'bg-gradient-to-br from-pink-50 to-pink-100/50',
-        iconBg: 'bg-pink-500',
-        subtitle: 'Account settings',
-        path: '/tenant/profile'
-      }
-    ];
+    const maintenanceCount = recentMaintenance?.length ?? 0;
+    const viewingsCount = upcomingViewings?.length ?? 0;
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh' }}>
-        
+      <div
+        className="p-4 space-y-4"
+        style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
+      >
+        {/* ── Property hero ──────────────────────────────────── */}
+        {tenantProperty ? (
+          <Card className="overflow-hidden">
+            {tenantProperty.images?.[0] && (
+              <ImageWithSkeleton
+                src={tenantProperty.images[0]}
+                alt={tenantProperty.title}
+                className="w-full h-32 object-cover"
+                aspectRatio="16/9"
+              />
+            )}
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="font-semibold text-foreground text-base leading-tight truncate">
+                    {tenantProperty.title}
+                  </h2>
+                  <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{tenantProperty.location}</span>
+                  </div>
+                </div>
+                <Badge variant="secondary" className="shrink-0 text-xs">Active Lease</Badge>
+              </div>
+              {tenantProperty.leaseEndDate && (
+                <div className="flex items-center gap-1.5 mt-2.5 text-xs text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5 shrink-0" />
+                  <span>
+                    Lease ends{' '}
+                    {new Date(tenantProperty.leaseEndDate).toLocaleDateString('en-ZA', {
+                      day: 'numeric', month: 'long', year: 'numeric',
+                    })}
+                  </span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="p-6 text-center">
+            <Building className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm font-medium text-foreground">No active lease</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Browse properties to find your next home
+            </p>
+            <Button size="sm" className="mt-3" onClick={() => navigate('/properties')}>
+              Browse Properties
+            </Button>
+          </Card>
+        )}
 
-        <div className="p-4 pb-24 md:pb-4 space-y-4" style={{ paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
+        {/* ── Rent due ───────────────────────────────────────── */}
+        {rentDue && (
+          <Card
+            className={cn(
+              'border',
+              rentDue.status === 'overdue' && 'border-destructive/40 bg-destructive/5',
+              rentDue.status === 'pending' && 'border-amber-500/40 bg-amber-500/5',
+            )}
+          >
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {rentDue.status === 'overdue' ? (
+                      <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+                    ) : (
+                      <Clock className="h-4 w-4 text-amber-500 shrink-0" />
+                    )}
+                    <span className="text-sm font-medium text-foreground">
+                      {rentDue.status === 'overdue' ? 'Rent Overdue' : 'Rent Due'}
+                    </span>
+                    <Badge
+                      variant={rentDue.status === 'overdue' ? 'destructive' : 'outline'}
+                      className={cn(
+                        'text-[10px]',
+                        rentDue.status === 'pending' && 'border-amber-500 text-amber-600',
+                      )}
+                    >
+                      {rentDue.status === 'overdue' ? 'Overdue' : 'Pending'}
+                    </Badge>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">
+                    R {rentDue.amount.toLocaleString('en-ZA')}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Due{' '}
+                    {new Date(rentDue.dueDate).toLocaleDateString('en-ZA', {
+                      day: 'numeric', month: 'long', year: 'numeric',
+                    })}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant={rentDue.status === 'overdue' ? 'destructive' : 'default'}
+                  onClick={handleMakePayment}
+                  className="shrink-0"
+                >
+                  Pay Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Feature Blocks - Management tools style grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {featureBlocks.map((block) => {
-              const IconComponent = block.icon;
-              return (
-                <div key={block.title}>
-                  <Card
-                    className="cursor-pointer rounded-2xl bg-white shadow-md border border-gray-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-                    onClick={() => {
-                      if (!user) {
-                        navigate('/auth');
-                      } else {
-                        navigate(block.path);
-                      }
-                    }}
-                  >
-                   <CardContent className="p-4 h-[150px] md:h-[172px]">
-                   <div className="flex flex-col items-center text-center h-full justify-center">
-                        <div className="relative">
-                        <div className={`w-10 h-10 ${block.iconBg} rounded-full shadow-md flex items-center justify-center`}>
-                        <IconComponent className="w-5 h-5 text-white" />
-                        </div>
-                      {block.count !== undefined && block.count > 0 && (
-                         <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full text-[10px] font-medium bg-red-500 text-white shadow-sm">
-                            {block.count}
-                          </span>
+        {/* ── Quick stats (only when there's data) ───────────── */}
+        {(maintenanceCount > 0 || viewingsCount > 0) && (
+          <div className={cn('grid gap-3', maintenanceCount > 0 && viewingsCount > 0 ? 'grid-cols-2' : 'grid-cols-1')}>
+            {maintenanceCount > 0 && (
+              <button
+                onClick={() => navigate('/tenant/maintenance')}
+                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+              >
+                <Card className="p-3 group-hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Settings className="h-4 w-4 text-orange-500" />
+                    <span className="text-xs font-medium text-muted-foreground">Maintenance</span>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">{maintenanceCount}</p>
+                  <p className="text-xs text-muted-foreground">
+                    open request{maintenanceCount !== 1 ? 's' : ''}
+                  </p>
+                </Card>
+              </button>
+            )}
+            {viewingsCount > 0 && (
+              <button
+                onClick={() => navigate('/tenant/viewings')}
+                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+              >
+                <Card className="p-3 group-hover:border-primary/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Eye className="h-4 w-4 text-blue-500" />
+                    <span className="text-xs font-medium text-muted-foreground">Viewings</span>
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">{viewingsCount}</p>
+                  <p className="text-xs text-muted-foreground">upcoming</p>
+                </Card>
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* ── Section divider ────────────────────────────────── */}
+        <div className="flex items-center gap-3 py-1">
+          <Separator className="flex-1" />
+          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+            Quick Access
+          </span>
+          <Separator className="flex-1" />
+        </div>
+
+        {/* ── Feature grid ───────────────────────────────────── */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {FEATURE_BLOCKS.map((block) => {
+            const count =
+              block.countKey === 'maintenance'
+                ? maintenanceCount
+                : block.countKey === 'viewings'
+                ? viewingsCount
+                : 0;
+
+            return (
+              <button
+                key={block.title}
+                onClick={() => (!user ? navigate('/auth') : navigate(block.path))}
+                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
+              >
+                <Card className="h-full transition-all duration-150 group-hover:shadow-md group-hover:border-primary/30 group-active:scale-95">
+                  <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
+                    <div className="relative mt-1">
+                      <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:bg-primary/10 transition-colors">
+                        <block.icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                      {count > 0 && (
+                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none">
+                          {count > 99 ? '99+' : count}
+                        </span>
                       )}
                     </div>
-                    <h3 className="mt-2 text-[13px] font-semibold text-gray-900 leading-tight">{block.title}</h3>
-                    <p className="text-[11px] text-gray-500 leading-tight">{block.subtitle}</p>
-                  </div>
+                    <span className="text-[11px] font-medium text-foreground leading-tight">
+                      {block.title}
+                    </span>
                   </CardContent>
-                  </Card>
-                </div>
-              );
-            })}
-          </div>
-
-          
-
-          {/* Support is now part of the grid */}
+                </Card>
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -270,20 +315,23 @@ export default function EnhancedTenantDashboard() {
   return (
     <VerificationGate requireVerification={true}>
       <SidebarProvider>
-        <div className="flex min-h-screen w-full overflow-hidden bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light" style={{ minHeight: '100dvh', contain: 'layout style' }}>
+        <div
+          className="flex min-h-screen w-full overflow-hidden bg-background"
+          style={{ minHeight: '100dvh' }}
+        >
           <div className="hidden lg:flex lg:w-64 lg:flex-none">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-    <div className="flex-1 min-h-0 flex flex-col overflow-hidden w-full" style={{ contain: 'layout style paint' }}>
-      <EnhancedDashboardLayout 
-        title="Tenant Dashboard" 
-        currentTab={currentTab}
-        onTabChange={handleTabChange}
-      >
-        {renderTabContent()}
-      </EnhancedDashboardLayout>
-    </div>
-  </div>
+          <div className="flex-1 min-h-0 flex flex-col overflow-hidden w-full">
+            <EnhancedDashboardLayout
+              title="Dashboard"
+              currentTab={currentTab}
+              onTabChange={handleTabChange}
+            >
+              {renderTabContent()}
+            </EnhancedDashboardLayout>
+          </div>
+        </div>
       </SidebarProvider>
     </VerificationGate>
   );
