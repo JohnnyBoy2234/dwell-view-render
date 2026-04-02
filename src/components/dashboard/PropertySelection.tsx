@@ -6,6 +6,7 @@ import { Home, Plus, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RIcon } from '@/components/icons/RIcon';
 import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
+import { cn } from '@/lib/utils';
 
 interface Property {
   id: string;
@@ -96,22 +97,27 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       {/* Header */}
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-normal text-black">
-          Select a Property
-        </h2>
-        <p className="text-black/80">Choose a property to view its dashboard and manage its details</p>
+      <div className="animate-in fade-in slide-in-from-top-2 duration-400" style={{ animationFillMode: 'both' }}>
+        <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Portfolio</p>
+        <h2 className="text-2xl font-bold text-foreground">Select a Property</h2>
+        <p className="text-sm text-muted-foreground mt-1">Choose a property to manage its tenants, payments, and maintenance</p>
       </div>
 
       {/* Property Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {properties.map((property) => (
-          <Card 
+        {properties.map((property, idx) => (
+          <Card
             key={property.id}
-            className={PROPERTY_CARD_STYLES.CARD}
+            className={cn(PROPERTY_CARD_STYLES.CARD, 'animate-in fade-in slide-in-from-bottom-3')}
+            style={{
+              animationDelay: `${idx * 70}ms`,
+              animationFillMode: 'both',
+              animationDuration: '420ms',
+              animationTimingFunction: 'cubic-bezier(.22,.61,.36,1)',
+            }}
             role="button"
             tabIndex={0}
             onClick={() => onSelectProperty(property.id)}
@@ -131,13 +137,30 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                   <Home className="h-10 w-10 text-muted-foreground/50" />
                 </div>
               )}
+              {/* Status badge overlaid on image */}
+              <div className="absolute top-2.5 right-2.5">
+                <span className={cn(
+                  'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm',
+                  property.status === 'available'
+                    ? 'bg-emerald-500/90 text-white'
+                    : property.status === 'occupied' || property.status === 'rented'
+                    ? 'bg-blue-500/90 text-white'
+                    : 'bg-gray-500/80 text-white',
+                )}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-white/80 shrink-0" />
+                  {property.status === 'available' ? 'For Rent'
+                    : property.status === 'rented' ? 'Leased'
+                    : property.status === 'occupied' ? 'Occupied'
+                    : property.status}
+                </span>
+              </div>
             </div>
 
             {/* Property Details */}
             <CardContent className={PROPERTY_CARD_STYLES.CONTENT}>
               <div className={PROPERTY_CARD_STYLES.CONTENT_INNER}>
                 {/* Price */}
-                <h3 className={PROPERTY_CARD_STYLES.PRICE}>
+                <h3 className={cn(PROPERTY_CARD_STYLES.PRICE, 'text-foreground')}>
                   R{property.price?.toLocaleString?.()}/month
                 </h3>
 
@@ -150,9 +173,9 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                 </div>
 
                 {/* CTA */}
-                <div className="mt-3 pt-3 border-t">
-                  <Button 
-                    variant="default" 
+                <div className="mt-3 pt-3 border-t border-black/5">
+                  <Button
+                    variant="default"
                     size="sm"
                     onClick={(e) => {
                       e.stopPropagation();
@@ -160,7 +183,7 @@ export function PropertySelection({ properties, onSelectProperty, loading }: Pro
                     }}
                     className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white"
                   >
-                    Management Tools
+                    Open Dashboard
                   </Button>
                 </div>
               </div>

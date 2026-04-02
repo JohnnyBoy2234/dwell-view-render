@@ -33,6 +33,8 @@ import { PropertySelection } from '@/components/dashboard/PropertySelection';
 import { ApplicationRequestsManager } from '@/components/landlord/ApplicationRequestsManager';
 import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithViewings';
 import { cn } from '@/lib/utils';
+import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
+import { ToolGrid } from '@/components/dashboard/landlord/ToolGrid';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -2456,6 +2458,22 @@ const renderReportsTab = () => (
           </div>
         )}
 
+        {/* ── Metrics overview ───────────────────────────────── */}
+        <MetricsGrid
+          metrics={{
+            totalProperties: properties.length,
+            totalTenants: tenants.length,
+            pendingApplications: applications.filter(a => a.status === 'pending').length,
+            totalRentDue: tenants
+              .filter(t => t.payment_status !== 'paid')
+              .reduce((sum, t) => sum + (t.monthly_rent || 0), 0),
+            availableProperties: properties.filter(p => p.status === 'available').length,
+            occupiedProperties: properties.filter(p => p.status !== 'available').length,
+            monthlyRevenue: tenants.reduce((sum, t) => sum + (t.monthly_rent || 0), 0),
+          }}
+          loading={loading}
+        />
+
         {/* ── Section divider ────────────────────────────────── */}
         <div className="flex items-center gap-3 py-1">
           <div className="flex-1 h-px bg-border" />
@@ -2466,43 +2484,14 @@ const renderReportsTab = () => (
         </div>
 
         {/* Management tools grid */}
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-          {tools.map((tool, i) => {
-            const colors = LANDLORD_TOOL_COLORS[tool.title] ?? {
-              bg: 'bg-muted', icon: 'text-muted-foreground', border: 'group-hover:border-primary/30',
-            };
-            const handleClick = () => {
-              if (!user) { navigate('/auth'); return; }
-              if (tool.tab) handleTabChange(tool.tab);
-              else if (tool.path) navigate(tool.path);
-            };
-            return (
-              <button
-                key={tool.title}
-                onClick={handleClick}
-                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in slide-in-from-bottom-3 duration-300"
-                style={{ animationDelay: `${i * 45}ms`, animationFillMode: 'backwards' }}
-              >
-                <Card className={cn('h-full transition-all duration-200 group-hover:shadow-md group-active:scale-95', colors.border)}>
-                  <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
-                    <div className="relative mt-1">
-                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110', colors.bg)}>
-                        <tool.icon className={cn('w-5 h-5 transition-colors', colors.icon)} />
-                      </div>
-                      {tool.count !== undefined && tool.count > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
-                          {tool.count > 99 ? '99+' : tool.count}
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[11px] font-medium text-foreground leading-tight">{tool.title}</span>
-                    <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">{tool.subtitle}</span>
-                  </CardContent>
-                </Card>
-              </button>
-            );
-          })}
-        </div>
+        <ToolGrid
+          tools={tools}
+          onToolClick={(tool) => {
+            if (!user) { navigate('/auth'); return; }
+            if (tool.tab) handleTabChange(tool.tab);
+            else if (tool.path) navigate(tool.path);
+          }}
+        />
       </div>
     );
   };
