@@ -1,19 +1,8 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Mail, User, MessageCircle } from "lucide-react";
-import { PropertyFeatures } from '@/components/property/PropertyFeatures';
+import { Bed, Bath, Car, Star } from "lucide-react";
 import { usePropertyNavigation } from '@/hooks/usePropertyNavigation';
-import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import {
-  PROPERTY_CARD_STYLES, 
-  PROPERTY_CARD_LABELS, 
-  PROPERTY_CARD_CURRENCY 
-} from '@/constants/propertyCardConstants';
+import { PROPERTY_CARD_CURRENCY } from '@/constants/propertyCardConstants';
+import { cn } from '@/lib/utils';
 
 interface PropertyCardProps {
   id: string;
@@ -27,19 +16,15 @@ interface PropertyCardProps {
   type: string;
   featured?: boolean;
   isSale?: boolean;
+  // kept for API compat — not shown on card, handled on detail page
   contact_name?: string;
   contact_phone?: string;
   contact_email?: string;
   preferred_contact_method?: string;
 }
 
-/**
- * Property card component for displaying property listings
- * Shows property image, price, location, and key features
- */
 const PropertyCard = ({
   id,
-  title,
   location,
   price,
   beds,
@@ -49,151 +34,81 @@ const PropertyCard = ({
   type,
   featured = false,
   isSale = false,
-  contact_name,
-  contact_phone,
-  contact_email,
-  preferred_contact_method,
 }: PropertyCardProps) => {
   const { navigateToProperty, handleKeyDown } = usePropertyNavigation(id);
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const handleContactLandlord = async () => {
-    if (!user) {
-      toast({
-        title: "Login Required",
-        description: "Please login to contact the landlord",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      // Create a new conversation with the landlord using RPC
-      const { data: conversationData, error: conversationError } = await supabase.rpc('create_conversation', {
-        p_property_id: id,
-        p_tenant_id: user.id,
-        p_started_by_tenant: true
-      });
-
-      if (conversationError) {
-        throw conversationError;
-      }
-
-      // Navigate to messages
-      navigate('/messages');
-      
-      toast({
-        title: "Conversation Started",
-        description: `You can now message the landlord about this property`,
-      });
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to start conversation. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
 
   const formattedPrice = `${PROPERTY_CARD_CURRENCY.SYMBOL}${price.toLocaleString()}${isSale ? '' : PROPERTY_CARD_CURRENCY.SEPARATOR}`;
-  const altText = `${type} in ${location}`;
-  const displayLocation = location.split(',')[1] + ' ' + location.split(',')[2];
-  const locationText = `${type} in ${displayLocation}`;
+
+  // Suburb + city only — drop street/number prefix
+  const locationParts = location.split(',').map(p => p.trim()).filter(Boolean);
+  const displayLocation = locationParts.length >= 2
+    ? `${locationParts[locationParts.length - 2]}, ${locationParts[locationParts.length - 1]}`
+    : location;
 
   return (
-    <Card 
-      className={PROPERTY_CARD_STYLES.CARD}
+    <article
       role="button"
       tabIndex={0}
       onClick={navigateToProperty}
       onKeyDown={handleKeyDown}
-      aria-label={`View details for ${locationText}, ${formattedPrice}`}
+      aria-label={`${type} in ${displayLocation} — ${formattedPrice}`}
+      className={cn(
+        'group cursor-pointer rounded-xl overflow-hidden',
+        'bg-white border border-black/[0.06]',
+        'transition-all duration-200 ease-out',
+        'hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(0,0,0,0.10)]',
+        'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'active:translate-y-0 active:shadow-none',
+      )}
     >
-      <div className={PROPERTY_CARD_STYLES.IMAGE_CONTAINER}>
+      {/* ── Image ──────────────────────────────────── */}
+      <div className="relative aspect-video overflow-hidden bg-muted">
         <ImageWithSkeleton
           src={image}
-          alt={altText}
-          className={PROPERTY_CARD_STYLES.IMAGE}
-          aspectRatio="4/3"
+          alt={`${type} in ${displayLocation}`}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          aspectRatio="16/9"
         />
+
         {featured && (
-          <Badge className={PROPERTY_CARD_STYLES.FEATURED_BADGE}>
-            {PROPERTY_CARD_LABELS.FEATURED}
-          </Badge>
+          <span className="absolute top-2 left-2 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide bg-amber-400 text-amber-900 leading-none">
+            <Star className="w-2.5 h-2.5 fill-current shrink-0" aria-hidden />
+            Featured
+          </span>
         )}
       </div>
 
-      <CardContent className={PROPERTY_CARD_STYLES.CONTENT}>
-        <div className={PROPERTY_CARD_STYLES.CONTENT_INNER}>
-          <div className={PROPERTY_CARD_STYLES.HEADER}>
-            <Badge 
-              variant="secondary" 
-              className={PROPERTY_CARD_STYLES.TYPE_BADGE}
-            >
-              {type}
-            </Badge>
-          </div>
-          
-          <h3 className={PROPERTY_CARD_STYLES.PRICE}>
-            {formattedPrice}
-          </h3>
-          
-          <div className={PROPERTY_CARD_STYLES.LOCATION_CONTAINER}>
-            <MapPin 
-              className={PROPERTY_CARD_STYLES.LOCATION_ICON}
-              aria-hidden="true"
-            />
-            <span className={PROPERTY_CARD_STYLES.LOCATION_TEXT}>
-              {locationText}
-            </span>
-          </div>
+      {/* ── Info ───────────────────────────────────── */}
+      <div className="px-3 pt-2.5 pb-3 space-y-1">
+        {/* Price — dominant, tabular so digits don't shift */}
+        <p className="text-[15px] font-bold tracking-tight tabular-nums text-foreground leading-none">
+          {formattedPrice}
+        </p>
 
-          <PropertyFeatures 
-            beds={beds} 
-            baths={baths} 
-            parking={parking} 
-          />
-          
-          {/* Contact Information for Sale Listings */}
-          {isSale && contact_name && (
-            <div 
-              className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleContactLandlord();
-              }}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <User className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">Contact Landlord</span>
-                <MessageCircle className="h-4 w-4 text-blue-600 ml-auto" />
-              </div>
-              <div className="space-y-1 text-xs text-blue-700">
-                <div className="font-medium">{contact_name}</div>
-                {preferred_contact_method === 'phone' || preferred_contact_method === 'both' ? (
-                  <div className="flex items-center gap-1">
-                    <Phone className="h-3 w-3" />
-                    <span>{contact_phone}</span>
-                  </div>
-                ) : null}
-                {preferred_contact_method === 'email' || preferred_contact_method === 'both' ? (
-                  <div className="flex items-center gap-1">
-                    <Mail className="h-3 w-3" />
-                    <span>{contact_email}</span>
-                  </div>
-                ) : null}
-              </div>
-            </div>
+        {/* Type · Location */}
+        <p className="text-xs text-muted-foreground truncate leading-tight">
+          {type} &middot; {displayLocation}
+        </p>
+
+        {/* Features */}
+        <div className="flex items-center gap-2.5 pt-0.5 text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-0.5">
+            <Bed className="w-3 h-3 shrink-0" aria-hidden />
+            {beds}
+          </span>
+          <span className="flex items-center gap-0.5">
+            <Bath className="w-3 h-3 shrink-0" aria-hidden />
+            {baths}
+          </span>
+          {parking > 0 && (
+            <span className="flex items-center gap-0.5">
+              <Car className="w-3 h-3 shrink-0" aria-hidden />
+              {parking}
+            </span>
           )}
-          
-          <div className="mt-2">
-            <ReportPropertyModal propertyId={id} />
-          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 };
 

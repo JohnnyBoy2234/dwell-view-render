@@ -5,8 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Pagination,
   PaginationContent,
@@ -15,7 +20,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
+import { X } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -39,6 +45,16 @@ interface Property {
 
 const ITEMS_PER_PAGE = 30;
 
+const PROPERTY_TYPES = ['Apartment', 'House', 'Studio', 'Townhouse', 'Flat', 'Cottage'];
+const BED_OPTIONS = ['1', '2', '3', '4'];
+const MAX_PRICE_OPTIONS = [
+  { label: 'R5,000', value: '5000' },
+  { label: 'R8,000', value: '8000' },
+  { label: 'R12,000', value: '12000' },
+  { label: 'R18,000', value: '18000' },
+  { label: 'R25,000', value: '25000' },
+];
+
 export default function Properties() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,83 +64,60 @@ export default function Properties() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const { toast } = useToast();
-  
-  // Get search parameters from URL
-  const searchTerm = searchParams.get('search') || searchParams.get('location') || '';
-  const propertyType = searchParams.get('propertyType') || searchParams.get('type') || 'Any';
-  const minPrice = searchParams.get('minPrice') || '';
-  const maxPrice = searchParams.get('maxPrice') || '';
-  const bedrooms = searchParams.get('bedrooms') || 'Any';
-  const bathrooms = searchParams.get('bathrooms') || 'Any';
-  
-  // Debug logging
-  useEffect(() => {
-    console.log('[Properties] URL Search Params:', {
-      searchTerm,
-      propertyType,
-      minPrice,
-      maxPrice,
-      bedrooms,
-      bathrooms
-    });
-  }, [searchTerm, propertyType, minPrice, maxPrice, bedrooms, bathrooms]);
-  
-  // Filter properties based on search criteria
-  const filteredProperties = properties.filter(property => {
-    // Only show rental listings (exclude sale listings)
-    if (property.listing_type === 'sale') {
-      return false;
-    }
 
-    // Location search — property location must contain the search term
+  // Read filters from URL
+  const searchTerm   = searchParams.get('search') || searchParams.get('location') || '';
+  const propertyType = searchParams.get('propertyType') || searchParams.get('type') || 'Any';
+  const minPrice     = searchParams.get('minPrice') || '';
+  const maxPrice     = searchParams.get('maxPrice') || '';
+  const bedrooms     = searchParams.get('bedrooms') || 'Any';
+  const bathrooms    = searchParams.get('bathrooms') || 'Any';
+
+  // Update a single filter in the URL
+  const updateFilter = (key: string, value: string) => {
+    const next = new URLSearchParams(searchParams.toString());
+    if (value === 'Any' || value === '' || value === 'any') {
+      next.delete(key);
+    } else {
+      next.set(key, value);
+    }
+    setCurrentPage(1);
+    setSearchParams(next);
+  };
+
+  const handleClearFilters = () => {
+    setCurrentPage(1);
+    navigate('/properties');
+  };
+
+  const hasActiveFilters =
+    searchTerm || propertyType !== 'Any' || minPrice || maxPrice || bedrooms !== 'Any' || bathrooms !== 'Any';
+
+  // Client-side filter after fetch
+  const filteredProperties = properties.filter(p => {
+    if (p.listing_type === 'sale') return false;
     if (searchTerm) {
       const needle = searchTerm.toLowerCase().trim();
-      const haystack = property.location.toLowerCase();
-      if (!haystack.includes(needle)) {
-        return false;
-      }
+      if (!p.location.toLowerCase().includes(needle)) return false;
     }
-
-    // Property type filter
-    if (propertyType !== 'Any' && property.property_type !== propertyType) {
-      return false;
-    }
-
-    // Price range filter
-    if (minPrice && property.price < parseInt(minPrice)) {
-      return false;
-    }
-    if (maxPrice && property.price > parseInt(maxPrice)) {
-      return false;
-    }
-
-    // Bedrooms filter
-    if (bedrooms !== 'Any' && property.bedrooms !== parseInt(bedrooms)) {
-      return false;
-    }
-
-    // Bathrooms filter
-    if (bathrooms !== 'Any' && property.bathrooms !== parseInt(bathrooms)) {
-      return false;
-    }
-
+    if (propertyType !== 'Any' && p.property_type !== propertyType) return false;
+    if (minPrice && p.price < parseInt(minPrice)) return false;
+    if (maxPrice && p.price > parseInt(maxPrice)) return false;
+    if (bedrooms !== 'Any' && p.bedrooms !== parseInt(bedrooms)) return false;
+    if (bathrooms !== 'Any' && p.bathrooms !== parseInt(bathrooms)) return false;
     return true;
   });
 
   useEffect(() => {
-    console.log('[Properties] Component mounted, fetching properties...');
     fetchProperties();
   }, [currentPage]);
 
   const fetchProperties = async () => {
     try {
-      console.log('[Properties] Starting to fetch properties...');
       setLoading(true);
       setError(null);
-      
       const from = (currentPage - 1) * ITEMS_PER_PAGE;
       const to = from + ITEMS_PER_PAGE - 1;
-      
       const { data, error, count } = await supabase
         .from('properties')
         .select('*', { count: 'exact' })
@@ -132,30 +125,18 @@ export default function Properties() {
         .order('featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(from, to);
-
-      if (error) {
-        console.error('[Properties] Supabase error:', error);
-        throw error;
-      }
-      
-      console.log('[Properties] Properties fetched successfully:', data?.length || 0, 'properties');
+      if (error) throw error;
       setProperties(data || []);
       setTotalCount(count || 0);
-    } catch (error: any) {
-      console.error('[Properties] Error fetching properties:', error);
-      setError(error.message);
-      toast({
-        variant: "destructive",
-        title: "Error loading properties",
-        description: error.message
-      });
+    } catch (err: any) {
+      setError(err.message);
+      toast({ variant: 'destructive', title: 'Error loading properties', description: err.message });
     } finally {
       setLoading(false);
     }
   };
 
   if (loading) {
-    console.log('[Properties] Rendering loading state...');
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingLogo size="lg" />
@@ -164,28 +145,21 @@ export default function Properties() {
   }
 
   if (error) {
-    console.log('[Properties] Rendering error state...');
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-destructive mb-4">Error Loading Properties</h2>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <button 
+        <div className="text-center max-w-sm">
+          <p className="text-sm font-semibold text-destructive mb-2">Failed to load properties</p>
+          <p className="text-xs text-muted-foreground mb-4">{error}</p>
+          <button
             onClick={fetchProperties}
-            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+            className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            Try Again
+            Try again
           </button>
         </div>
       </div>
     );
   }
-
-  const handleClearFilters = () => {
-    // Navigate back to properties page without search parameters
-    setCurrentPage(1);
-    navigate('/properties');
-  };
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
@@ -197,7 +171,6 @@ export default function Properties() {
   const renderPaginationItems = () => {
     const items = [];
     const maxVisible = 5;
-    
     if (totalPages <= maxVisible) {
       for (let i = 1; i <= totalPages; i++) {
         items.push(
@@ -205,7 +178,7 @@ export default function Properties() {
             <PaginationLink
               onClick={() => handlePageChange(i)}
               isActive={currentPage === i}
-              className="cursor-pointer hover:bg-ocean-blue/10"
+              className="cursor-pointer hover:bg-primary/10"
             >
               {i}
             </PaginationLink>
@@ -215,151 +188,104 @@ export default function Properties() {
     } else {
       items.push(
         <PaginationItem key={1}>
-          <PaginationLink
-            onClick={() => handlePageChange(1)}
-            isActive={currentPage === 1}
-            className="cursor-pointer hover:bg-ocean-blue/10"
-          >
-            1
-          </PaginationLink>
+          <PaginationLink onClick={() => handlePageChange(1)} isActive={currentPage === 1} className="cursor-pointer hover:bg-primary/10">1</PaginationLink>
         </PaginationItem>
       );
-
-      if (currentPage > 3) {
-        items.push(<PaginationEllipsis key="ellipsis-1" />);
-      }
-
+      if (currentPage > 3) items.push(<PaginationEllipsis key="e1" />);
       const start = Math.max(2, currentPage - 1);
       const end = Math.min(totalPages - 1, currentPage + 1);
-
       for (let i = start; i <= end; i++) {
         items.push(
           <PaginationItem key={i}>
-            <PaginationLink
-              onClick={() => handlePageChange(i)}
-              isActive={currentPage === i}
-              className="cursor-pointer hover:bg-ocean-blue/10"
-            >
-              {i}
-            </PaginationLink>
+            <PaginationLink onClick={() => handlePageChange(i)} isActive={currentPage === i} className="cursor-pointer hover:bg-primary/10">{i}</PaginationLink>
           </PaginationItem>
         );
       }
-
-      if (currentPage < totalPages - 2) {
-        items.push(<PaginationEllipsis key="ellipsis-2" />);
-      }
-
+      if (currentPage < totalPages - 2) items.push(<PaginationEllipsis key="e2" />);
       items.push(
         <PaginationItem key={totalPages}>
-          <PaginationLink
-            onClick={() => handlePageChange(totalPages)}
-            isActive={currentPage === totalPages}
-            className="cursor-pointer hover:bg-ocean-blue/10"
-          >
-            {totalPages}
-          </PaginationLink>
+          <PaginationLink onClick={() => handlePageChange(totalPages)} isActive={currentPage === totalPages} className="cursor-pointer hover:bg-primary/10">{totalPages}</PaginationLink>
         </PaginationItem>
       );
     }
-
     return items;
   };
 
-  console.log('[Properties] Rendering properties page with', filteredProperties.length, 'filtered properties');
-  console.log('[Properties] Search term:', searchTerm);
-  
   return (
-    <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
-      <div className="container mx-auto px-4 sm:px-6 pb-6">
-        {/* Header */}
-        <div
-          className="mb-8 px-7 py-6 rounded-2xl border"
-          style={{
-            background: "linear-gradient(135deg, hsl(214 100% 48%) 0%, hsl(214 100% 38%) 100%)",
-            borderColor: "hsl(214 100% 40%)",
-            boxShadow: "0 8px 32px rgba(37,99,235,0.18)",
-          }}
-        >
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-1.5 tracking-tight">
-            Find Your Perfect Home
-          </h1>
-          <p className="text-white/75 text-base">
-            {searchTerm
-              ? `Searching for properties in ${searchTerm}`
-              : `Discover ${properties.length} available properties across South Africa`}
-          </p>
+    <div className="min-h-screen" style={{ background: 'hsl(214 60% 97%)' }}>
+      <div className="container mx-auto px-4 sm:px-6 pb-12">
+
+        {/* ── Page heading ──────────────────────────────────── */}
+        <div className="flex items-baseline justify-between mb-5 animate-in fade-in duration-300">
+          <div>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">Properties</h1>
+            {searchTerm && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                in <span className="font-medium text-foreground">{searchTerm}</span>
+              </p>
+            )}
+          </div>
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''}
+          </span>
         </div>
 
-        {/* Active Filters Display */}
-        {(searchTerm || propertyType !== "Any" || minPrice || maxPrice || bedrooms !== "Any" || bathrooms !== "Any") && (
-          <div className="mb-6 p-4 bg-white/80 rounded-xl border border-ocean-blue/20">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-semibold text-ocean-blue">Active Filters</h3>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleClearFilters}
-                className="text-ocean-blue hover:bg-ocean-blue/10"
-              >
-                <X className="h-4 w-4 mr-1" />
-                Clear All Filters
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {searchTerm && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Location: {searchTerm}
-                </div>
-              )}
-              {propertyType !== "Any" && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Type: {propertyType}
-                </div>
-              )}
-              {minPrice && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Min: R{parseInt(minPrice).toLocaleString()}
-                </div>
-              )}
-              {maxPrice && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  Max: R{parseInt(maxPrice).toLocaleString()}
-                </div>
-              )}
-              {bedrooms !== "Any" && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  {bedrooms} Bedroom{bedrooms !== "1" ? "s" : ""}
-                </div>
-              )}
-              {bathrooms !== "Any" && (
-                <div className="px-3 py-1 bg-ocean-blue/10 text-ocean-blue rounded-full text-sm border border-ocean-blue/20">
-                  {bathrooms} Bathroom{bathrooms !== "1" ? "s" : ""}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+        {/* ── Filter bar ────────────────────────────────────── */}
+        <div className="flex flex-wrap items-center gap-2 pb-4 mb-5 border-b border-black/[0.07]">
 
-        {/* Results */}
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-muted-foreground">
-            {filteredProperties.length} properties found
-            {searchTerm && ` in ${searchTerm}`}
-          </p>
-          {filteredProperties.length !== properties.length && (
-            <Button 
-              variant="outline" 
+          {/* Property type */}
+          <Select value={propertyType} onValueChange={v => updateFilter('propertyType', v)}>
+            <SelectTrigger className="h-8 text-xs rounded-lg w-auto min-w-[108px] bg-white border-black/[0.08] focus:ring-primary/40">
+              <SelectValue placeholder="Any type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Any">Any type</SelectItem>
+              {PROPERTY_TYPES.map(t => (
+                <SelectItem key={t} value={t}>{t}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Bedrooms */}
+          <Select value={bedrooms} onValueChange={v => updateFilter('bedrooms', v)}>
+            <SelectTrigger className="h-8 text-xs rounded-lg w-auto min-w-[90px] bg-white border-black/[0.08] focus:ring-primary/40">
+              <SelectValue placeholder="Beds" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Any">Any beds</SelectItem>
+              {BED_OPTIONS.map(b => (
+                <SelectItem key={b} value={b}>{b} bed{b !== '1' ? 's' : ''}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Max price */}
+          <Select value={maxPrice || 'any'} onValueChange={v => updateFilter('maxPrice', v)}>
+            <SelectTrigger className="h-8 text-xs rounded-lg w-auto min-w-[108px] bg-white border-black/[0.08] focus:ring-primary/40">
+              <SelectValue placeholder="Max price" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="any">Any price</SelectItem>
+              {MAX_PRICE_OPTIONS.map(o => (
+                <SelectItem key={o.value} value={o.value}>Up to {o.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Clear — only when filters are active */}
+          {hasActiveFilters && (
+            <button
               onClick={handleClearFilters}
-              className="text-ocean-blue border-ocean-blue/30 hover:bg-ocean-blue/10"
+              className="inline-flex items-center gap-1 h-8 px-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground border border-black/[0.08] bg-white hover:border-black/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              Show All Properties
-            </Button>
+              <X className="w-3 h-3" />
+              Clear
+            </button>
           )}
         </div>
 
-        {/* Property Grid - Enhanced Responsive */}
-        <ResponsivePropertyGrid 
+        {/* ── Property grid ─────────────────────────────────── */}
+        <ResponsivePropertyGrid
           properties={filteredProperties}
           loading={loading}
           onClearFilters={handleClearFilters}
@@ -367,30 +293,29 @@ export default function Properties() {
           isSale={false}
         />
 
-        {/* Pagination */}
+        {/* ── Pagination ────────────────────────────────────── */}
         {totalPages > 1 && (
-          <div className="mt-8 mb-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <Pagination>
-              <PaginationContent className="gap-2">
+              <PaginationContent className="gap-1">
                 <PaginationItem>
                   <PaginationPrevious
                     onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
-                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-ocean-blue/10'}
+                    className={currentPage === 1 ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:bg-primary/10'}
                   />
                 </PaginationItem>
-                
                 {renderPaginationItems()}
-                
                 <PaginationItem>
                   <PaginationNext
                     onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
-                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer hover:bg-ocean-blue/10'}
+                    className={currentPage === totalPages ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:bg-primary/10'}
                   />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
         )}
+
       </div>
     </div>
   );

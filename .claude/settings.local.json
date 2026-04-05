@@ -11,7 +11,9 @@
       "Bash(npm run:*)",
       "Bash(claude update:*)",
       "Bash(claude plugin:*)",
-      "Bash(grep -n \"from ''''@/lib/utils''''\\\\|from \"\"@/lib/utils\"\"\\\\|import.*cn\" src/pages/EnhancedLandlordDashboard.tsx)"
+      "Bash(grep -n \"from ''''@/lib/utils''''\\\\|from \"\"@/lib/utils\"\"\\\\|import.*cn\" src/pages/EnhancedLandlordDashboard.tsx)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_console_messages"
     ]
   }
 }

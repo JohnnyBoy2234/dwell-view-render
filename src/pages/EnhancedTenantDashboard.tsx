@@ -237,44 +237,6 @@ export default function EnhancedTenantDashboard() {
           </Card>
         )}
 
-        {/* ── Quick stats (only when there's data) ───────────── */}
-        {(maintenanceCount > 0 || viewingsCount > 0) && (
-          <div className={cn('grid gap-3', maintenanceCount > 0 && viewingsCount > 0 ? 'grid-cols-2' : 'grid-cols-1')}>
-            {maintenanceCount > 0 && (
-              <button
-                onClick={() => navigate('/tenant/maintenance')}
-                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in zoom-in-95 duration-300"
-              >
-                <Card className="p-3 border-orange-100 group-hover:border-orange-300 group-hover:bg-orange-50/60 transition-all duration-200 group-active:scale-95">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Settings className="h-4 w-4 text-orange-500" />
-                    <span className="text-xs font-medium text-muted-foreground">Maintenance</span>
-                  </div>
-                  <p className="text-2xl font-bold text-orange-600">{maintenanceCount}</p>
-                  <p className="text-xs text-muted-foreground">
-                    open request{maintenanceCount !== 1 ? 's' : ''}
-                  </p>
-                </Card>
-              </button>
-            )}
-            {viewingsCount > 0 && (
-              <button
-                onClick={() => navigate('/tenant/viewings')}
-                className="text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in zoom-in-95 duration-300 delay-75"
-              >
-                <Card className="p-3 border-blue-100 group-hover:border-blue-300 group-hover:bg-blue-50/60 transition-all duration-200 group-active:scale-95">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Eye className="h-4 w-4 text-blue-500" />
-                    <span className="text-xs font-medium text-muted-foreground">Viewings</span>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-600">{viewingsCount}</p>
-                  <p className="text-xs text-muted-foreground">upcoming</p>
-                </Card>
-              </button>
-            )}
-          </div>
-        )}
-
         {/* ── Section divider ────────────────────────────────── */}
         <div className="flex items-center gap-3 py-1">
           <Separator className="flex-1" />

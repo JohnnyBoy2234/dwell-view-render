@@ -2458,22 +2458,6 @@ const renderReportsTab = () => (
           </div>
         )}
 
-        {/* ── Metrics overview ───────────────────────────────── */}
-        <MetricsGrid
-          metrics={{
-            totalProperties: properties.length,
-            totalTenants: tenants.length,
-            pendingApplications: applications.filter(a => a.status === 'pending').length,
-            totalRentDue: tenants
-              .filter(t => t.payment_status !== 'paid')
-              .reduce((sum, t) => sum + (t.monthly_rent || 0), 0),
-            availableProperties: properties.filter(p => p.status === 'available').length,
-            occupiedProperties: properties.filter(p => p.status !== 'available').length,
-            monthlyRevenue: tenants.reduce((sum, t) => sum + (t.monthly_rent || 0), 0),
-          }}
-          loading={loading}
-        />
-
         {/* ── Section divider ────────────────────────────────── */}
         <div className="flex items-center gap-3 py-1">
           <div className="flex-1 h-px bg-border" />
