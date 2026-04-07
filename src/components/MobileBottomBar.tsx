@@ -1,13 +1,19 @@
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { Home, Search, Heart, Send, User, Plus, Bell, Building } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { useEffect, useRef } from 'react';
+import { Home, Search, Bell, Building, Plus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useTenantNotifications } from '@/hooks/useTenantNotifications';
 import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';
+import { cn } from '@/lib/utils';
+
+interface NavItem {
+  path: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  badge?: number;
+}
 
 export function MobileBottomBar() {
   const location = useLocation();
@@ -16,15 +22,17 @@ export function MobileBottomBar() {
   const { unreadCount: notificationUnread } = useNotifications();
   const { unreadCount: tenantUnread } = useTenantNotifications();
   const { unreadCount: landlordUnread } = useLandlordNotifications();
-  
-  
+  const pillRef = useRef<HTMLDivElement>(null);
+
   const [searchParams] = useSearchParams();
-  
-  // Hide bottom bar when in a specific conversation or on signing pages
+
   const isInConversation = location.pathname === '/messages' && searchParams.get('c');
-  const isSigningPage = /\/leases\/.+\/sign/.test(location.pathname) || /\/contracts\/.+\/sign/.test(location.pathname) || location.pathname.includes('/sign') || location.pathname.startsWith('/RentLekker-lease/');
-  
-  // Ensure pages have enough bottom padding when the bar is visible
+  const isSigningPage =
+    /\/leases\/.+\/sign/.test(location.pathname) ||
+    /\/contracts\/.+\/sign/.test(location.pathname) ||
+    location.pathname.includes('/sign') ||
+    location.pathname.startsWith('/RentLekker-lease/');
+
   useEffect(() => {
     if (isInConversation || isSigningPage) {
       document.body.classList.remove('has-mobile-bottom-bar');
@@ -35,104 +43,133 @@ export function MobileBottomBar() {
       document.body.classList.remove('has-mobile-bottom-bar');
     };
   }, [isInConversation, isSigningPage]);
-  
-  const leftNavItems = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/properties', icon: Search, label: 'Find' }
-  ];
 
-  // Calculate total notification count
   const totalNotifications = notificationUnread + (isLandlord ? landlordUnread : tenantUnread);
-  
-  console.log('🔔 MobileBottomBar counts:', {
-    notificationUnread,
-    tenantUnread,
-    landlordUnread,
-    isLandlord,
-    totalNotifications
-  });
-  
-  // Determine desk route based on authentication and role
+
   const getDeskRoute = () => {
     if (!user) return '/auth';
     return isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
   };
 
-  const rightNavItems = [
-    { path: '/messages', icon: Send, label: 'Chat', showBadge: true, badgeCount: messageUnread || 0, authRequired: false },
-    { path: '/notifications', icon: Bell, label: 'Alerts', showBadge: true, badgeCount: totalNotifications, authRequired: false },
-    { path: getDeskRoute(), icon: Building, label: 'Properties' }
+  const navItems: NavItem[] = [
+    { path: '/', icon: Home, label: 'Home' },
+    { path: '/properties', icon: Search, label: 'Find' },
+    ...(isLandlord ? [{ path: '/list-property', icon: Plus, label: 'List' }] : []),
+    { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
+    { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
+    { path: getDeskRoute(), icon: Building, label: isLandlord ? 'Manage' : 'My Home' },
   ];
 
-  const renderNavItem = (item: any) => {
-    // For auth-required items, show them but redirect to auth if not logged in
-    const needsAuth = item.authRequired && !user;
-    const actualPath = needsAuth ? '/auth' : item.path;
-    
-    const IconComponent = item.icon;
-    const isActive = location.pathname === item.path || 
-      (item.path === '/messages' && location.pathname.startsWith('/messages')) ||
-      (item.path === '/notifications' && location.pathname.startsWith('/notifications')) ||
-      (item.path === '/auth' && (location.pathname.startsWith('/auth') || 
-        location.pathname.startsWith('/enhancedlandlorddashboard') || 
-        location.pathname.startsWith('/enhancedtenantdashboard') ||
-        location.pathname.startsWith('/dashboard') ||
-        location.pathname.startsWith('/tenant-dashboard')));
-
-    return (
-      <Link
-        key={item.path}
-        to={actualPath}
-        className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
-          isActive
-            ? 'text-white bg-black/20'
-            : 'text-white/80 hover:text-white'
-        }`}
-      >
-        <div className="relative">
-          <IconComponent className={`h-5 w-5 ${isActive ? 'text-white' : ''}`} />
-            {item.showBadge && item.badgeCount > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-2 -right-2 h-4 w-4 p-0 text-xs flex items-center justify-center bg-red-500 text-white"
-              >
-                {item.badgeCount}
-              </Badge>
-            )}
-        </div>
-        <span className="text-xs text-center">{item.label}</span>
-      </Link>
-    );
+  const isItemActive = (item: NavItem, index: number) => {
+    const p = location.pathname;
+    if (item.path === '/') return p === '/';
+    if (item.path === getDeskRoute()) {
+      return (
+        p.startsWith('/enhancedlandlorddashboard') ||
+        p.startsWith('/enhancedtenantdashboard') ||
+        p.startsWith('/dashboard') ||
+        p.startsWith('/tenant-dashboard') ||
+        p.startsWith('/auth')
+      );
+    }
+    if (item.path === '/messages') return p.startsWith('/messages');
+    if (item.path === '/notifications') return p.startsWith('/notifications');
+    return p === item.path || p.startsWith(item.path + '/');
   };
 
-  if (isInConversation || isSigningPage) {
-    return null;
-  }
+  const activeIndex = navItems.findIndex(isItemActive);
+  const pillWidth = 100 / navItems.length;
+
+  if (isInConversation || isSigningPage) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#4169e1] backdrop-blur-md border-t border-white/20 z-40 md:hidden">
-      <div className="flex items-center justify-between px-2 py-2">
-        {/* All navigation items with consistent spacing */}
-        {leftNavItems.map(renderNavItem)}
-        
-        {isLandlord && (
-          <Link
-            to="/list-property"
-            className={`flex flex-col items-center gap-1 px-2 py-2 rounded-lg transition-colors relative min-w-0 flex-1 ${
-              location.pathname === '/list-property'
-                ? 'text-white bg-black/20'
-                : 'text-white/80 hover:text-white'
-            }`}
-          >
-            <div className="relative">
-              <Plus className={`h-5 w-5 ${location.pathname === '/list-property' ? 'text-white' : ''}`} />
-            </div>
-            <span className="text-xs text-center">List</span>
-          </Link>
-        )}
+    <nav
+      className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+    >
+      <div
+        className="mx-2.5 mb-2.5 overflow-hidden rounded-2xl border border-white/10"
+        style={{
+          background: 'rgba(8, 10, 20, 0.82)',
+          backdropFilter: 'blur(28px) saturate(180%)',
+          WebkitBackdropFilter: 'blur(28px) saturate(180%)',
+          boxShadow:
+            'inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 40px rgba(0,0,0,0.5), 0 2px 12px rgba(0,0,0,0.3)',
+        }}
+      >
+        <div className="relative flex items-stretch h-[60px]">
+          {/* Sliding pill indicator */}
+          {activeIndex >= 0 && (
+            <div
+              ref={pillRef}
+              className="absolute top-1.5 bottom-1.5 rounded-xl pointer-events-none"
+              style={{
+                left: `${activeIndex * pillWidth}%`,
+                width: `${pillWidth}%`,
+                background: 'rgba(255,255,255,0.10)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                transition: 'left 0.38s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                willChange: 'left',
+              }}
+            />
+          )}
 
-        {rightNavItems.map(renderNavItem)}
+          {/* Nav items */}
+          {navItems.map((item, index) => {
+            const IconComponent = item.icon;
+            const active = isItemActive(item, index);
+            const hasBadge = (item.badge ?? 0) > 0;
+
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={cn(
+                  'relative flex flex-col items-center justify-center gap-[3px] flex-1 py-1.5 select-none',
+                  'transition-opacity duration-150',
+                  active ? 'opacity-100' : 'opacity-50 hover:opacity-75 active:opacity-90'
+                )}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+              >
+                {/* Icon + badge */}
+                <div className="relative flex items-center justify-center">
+                  <IconComponent
+                    className={cn(
+                      'h-[22px] w-[22px] transition-all duration-200',
+                      active ? 'text-white scale-110' : 'text-white/80'
+                    )}
+                  />
+                  {hasBadge && (
+                    <span
+                      className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-[3px] rounded-full text-[9px] font-bold bg-red-500 text-white flex items-center justify-center leading-none animate-badge-pop"
+                      style={{ boxShadow: '0 0 0 1.5px rgba(8,10,20,0.82)' }}
+                    >
+                      {(item.badge ?? 0) > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
+                </div>
+
+                {/* Label */}
+                <span
+                  className={cn(
+                    'text-[10px] font-semibold tracking-tight transition-all duration-200',
+                    active ? 'text-white' : 'text-white/50'
+                  )}
+                >
+                  {item.label}
+                </span>
+
+                {/* Active dot */}
+                {active && (
+                  <span
+                    className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[3px] w-[3px] rounded-full bg-white animate-badge-pop"
+                  />
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }

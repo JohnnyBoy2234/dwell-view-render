@@ -1,31 +1,20 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { LoadingLogo } from '@/components/ui/LoadingLogo';
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { 
-  MessageCircle, 
-  Send, 
-  ArrowLeft, 
+import {
+  MessageSquare,
+  ArrowLeft,
   Home,
-  Clock,
-  Check,
-  CheckCheck,
-  Bell,
-  CalendarPlus
+  CalendarPlus,
+  Wifi,
+  WifiOff,
 } from 'lucide-react';
 import { ConnectionHealthIndicator } from '@/components/messaging/ConnectionHealthIndicator';
-import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { ViewingSlotNotification } from '@/components/messaging/ViewingSlotNotification';
-import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
 import { BookViewingDialog } from '@/components/viewing/BookViewingDialog';
 import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
@@ -33,11 +22,163 @@ import { ViewingReminderHeader } from '@/components/messaging/ViewingReminderHea
 import { useConfirmedViewing } from '@/hooks/useConfirmedViewing';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
-import TenantBadgeDisplay from '@/components/payments/TenantBadgeDisplay';
-import { useTenantBadges } from '@/hooks/useTenantBadges';
+import { cn } from '@/lib/utils';
+
+// ─── Avatar gradient palette (deterministic from name) ───────────────────────
+
+const AVATAR_GRADIENTS = [
+  ['#3B82F6', '#1D4ED8'],   // blue
+  ['#10B981', '#059669'],   // emerald
+  ['#8B5CF6', '#6D28D9'],   // violet
+  ['#F97316', '#EA580C'],   // orange
+  ['#EC4899', '#BE185D'],   // rose
+  ['#14B8A6', '#0F766E'],   // teal
+  ['#6366F1', '#4338CA'],   // indigo
+  ['#F59E0B', '#B45309'],   // amber
+];
+
+function getAvatarColors(name: string): [string, string] {
+  if (!name) return AVATAR_GRADIENTS[0] as [string, string];
+  const hash = name.split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return AVATAR_GRADIENTS[hash % AVATAR_GRADIENTS.length] as [string, string];
+}
+
+// ─── Conversation avatar ──────────────────────────────────────────────────────
+
+function ConversationAvatar({
+  name,
+  size = 44,
+  isOnline = false,
+}: {
+  name: string;
+  size?: number;
+  isOnline?: boolean;
+}) {
+  const [from, to] = getAvatarColors(name);
+  const initial = (name || '?').charAt(0).toUpperCase();
+  return (
+    <div className="relative shrink-0" style={{ width: size, height: size }}>
+      <div
+        className="w-full h-full rounded-full flex items-center justify-center text-white font-semibold shadow-ios-xs"
+        style={{
+          background: `linear-gradient(135deg, ${from}, ${to})`,
+          fontSize: size * 0.4,
+        }}
+      >
+        {initial}
+      </div>
+      {isOnline && (
+        <span
+          className="absolute bottom-0 right-0 rounded-full border-[2px] border-background bg-emerald-500"
+          style={{ width: size * 0.28, height: size * 0.28 }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function getShortPropertyInfo(conversation: any): string {
+  const fullTitle = conversation.properties?.title || '';
+  if (fullTitle.length <= 22) return fullTitle;
+  const areaCityMatch = fullTitle.match(/([^,]+),\s*([^,]+)(?:,|$)/);
+  if (areaCityMatch) return areaCityMatch[1].trim();
+  const words = fullTitle.split(' ');
+  const skipWords = ['House', 'Apartment', 'Unit', 'in', 'at', 'the'];
+  for (const w of words) {
+    if (!skipWords.includes(w)) return w;
+  }
+  return fullTitle.length > 22 ? fullTitle.substring(0, 22) + '…' : fullTitle;
+}
+
+// ─── Conversation list item ────────────────────────────────────────────────────
+
+function ConversationItem({
+  conversation,
+  otherUser,
+  isOnline,
+  isActive,
+  unreadCount,
+  onClick,
+  animIndex,
+}: {
+  conversation: any;
+  otherUser: { id: string; name: string; role: string };
+  isOnline: boolean;
+  isActive: boolean;
+  unreadCount: number;
+  onClick: () => void;
+  animIndex: number;
+}) {
+  const propertyInfo = getShortPropertyInfo(conversation);
+  const timeAgo = conversation.last_message_at
+    ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
+    : null;
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        'w-full text-left px-3 py-3 flex items-center gap-3 transition-all duration-200',
+        'animate-conversation-entry rounded-xl mx-1',
+        'active:scale-[0.98] select-none',
+        isActive
+          ? 'bg-ocean-blue/8 border border-ocean-blue/15 shadow-ios-xs'
+          : 'hover:bg-black/4 border border-transparent'
+      )}
+      style={{ animationDelay: `${Math.min(animIndex * 45, 400)}ms`, animationFillMode: 'backwards' }}
+    >
+      <ConversationAvatar name={otherUser.name} size={46} isOnline={isOnline} />
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline justify-between gap-2 mb-0.5">
+          <span
+            className={cn(
+              'text-[14px] leading-tight truncate',
+              unreadCount > 0 ? 'font-bold text-foreground' : 'font-semibold text-foreground/90'
+            )}
+          >
+            {otherUser.name}
+          </span>
+          {timeAgo && (
+            <span
+              className={cn(
+                'text-[11px] shrink-0 tabular-nums',
+                unreadCount > 0 ? 'text-ocean-blue font-semibold' : 'text-muted-foreground'
+              )}
+            >
+              {timeAgo}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 min-w-0">
+            <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-black/6 text-muted-foreground font-medium shrink-0">
+              {otherUser.role}
+            </span>
+            {propertyInfo && (
+              <span className="text-[12px] text-muted-foreground truncate flex items-center gap-0.5">
+                <Home className="h-3 w-3 shrink-0 opacity-50" />
+                <span className="truncate">{propertyInfo}</span>
+              </span>
+            )}
+          </div>
+          {unreadCount > 0 && (
+            <span className="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-ocean-blue text-white flex items-center justify-center animate-badge-pop">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </div>
+      </div>
+    </button>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function Messages() {
-  // Initialize auth context; do not early-return before hooks are declared
   const auth = useAuth();
   const isMobile = useIsMobile();
   const navigate = useNavigate();
@@ -52,13 +193,7 @@ export default function Messages() {
   const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const enableViewingUI = true;
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const inputFormRef = useRef<HTMLFormElement>(null);
-  const inputFieldRef = useRef<HTMLInputElement>(null);
-  const [inputHeight, setInputHeight] = useState<number>(64);
-  const [isTyping, setIsTyping] = useState<boolean>(false);
   const [scrollToProposalFn, setScrollToProposalFn] = useState<((id: string) => void) | null>(null);
 
   const {
@@ -74,124 +209,78 @@ export default function Messages() {
     sendTypingIndicator,
     fetchMessages: refetchMessages,
     fetchConversations,
-    markMessagesAsRead: markConversationMessagesAsRead
+    markMessagesAsRead: markConversationMessagesAsRead,
   } = useWhatsAppMessaging();
-  
-  const { confirmedViewing } = useConfirmedViewing(activeConversation);
 
-  // Add mount tracking
+  const { confirmedViewing } = useConfirmedViewing(activeConversation);
   const isMountedRef = useRef(true);
 
-  const selectedConversation = activeConversation ? conversations.find(c => c.id === activeConversation) : undefined;
+  const selectedConversation = activeConversation
+    ? conversations.find(c => c.id === activeConversation)
+    : undefined;
+
   const isLandlordInConversation = user && selectedConversation
     ? user.id === selectedConversation.landlord_id
     : isLandlord;
 
-  // Component mount tracking
   useEffect(() => {
     isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
+    return () => { isMountedRef.current = false; };
   }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  // Auto-scroll to bottom when messages change or when opening a chat
-  useEffect(() => {
-    if (messages.length > 0) {
-      scrollToBottom();
-    }
-  }, [messages, selectedConversation]);
-
-  // Measure input height and update bottom padding for mobile keyboard safety
-  useEffect(() => {
-    const measure = () => {
-      if (inputFormRef.current) {
-        setInputHeight(inputFormRef.current.offsetHeight || 64);
-      }
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
-
-  // Pre-fill message only for truly first-time contact (no conversation history)
+  // Pre-fill message for truly first-time contact
   useEffect(() => {
     if (selectedConversation && !isLandlord && !hasPrefilledMessage && !sentAutoMessage) {
-      // Only show pre-typed message if conversation has no message history at all
       if (selectedConversation.last_message_at === null && messages.length === 0) {
         const propertyTitle = selectedConversation.properties?.title || 'this property';
-        const autoMessage = `Hello, I am interested in ${propertyTitle}. I would like to schedule a viewing. Please let me know what times you have available.`;
-        setNewMessage(autoMessage);
+        setNewMessage(
+          `Hello, I am interested in ${propertyTitle}. I would like to schedule a viewing. Please let me know what times you have available.`
+        );
         setHasPrefilledMessage(true);
       }
     }
-    
-    // Clear pre-typed message if user manually switches conversations
     if (selectedConversation && hasPrefilledMessage && newMessage && messages.length > 0) {
       setHasPrefilledMessage(false);
     }
   }, [selectedConversation, messages, isLandlord, hasPrefilledMessage, newMessage, sentAutoMessage]);
 
-  // Reset sentAutoMessage when switching conversations
-  useEffect(() => {
-    setSentAutoMessage(false);
-  }, [activeConversation]);
+  useEffect(() => { setSentAutoMessage(false); }, [activeConversation]);
 
-  // Add visibility-based read marking for active conversations
+  // Visibility-based read marking
   useEffect(() => {
     if (!activeConversation || !markConversationMessagesAsRead) return;
-
-    // Mark messages as read when page becomes visible
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && !document.hidden) {
-        console.log('📖 Messages Page: Page became visible, marking messages as read');
+      if (document.visibilityState === 'visible') {
         markConversationMessagesAsRead(activeConversation);
       }
     };
-
-    // Mark messages as read periodically while viewing
-    const markAsReadInterval = setInterval(() => {
-      if (document.visibilityState === 'visible' && !document.hidden) {
-        console.log('📖 Messages Page: Periodic read marking for active conversation:', activeConversation);
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
         markConversationMessagesAsRead(activeConversation);
       }
-    }, 5000); // Every 5 seconds
-
+    }, 5000);
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearInterval(markAsReadInterval);
+      clearInterval(interval);
     };
   }, [activeConversation, markConversationMessagesAsRead]);
 
-  // Handle initial URL parameter only once
+  // Handle initial URL parameter
   useEffect(() => {
     if (hasProcessedUrlParam || conversations.length === 0) return;
-    
     const cid = searchParams.get('c');
     const messageParam = searchParams.get('message');
-    console.log('🔗 Processing URL parameter:', cid, 'message:', messageParam);
-    
     if (cid) {
       const exists = conversations.find(c => c.id === cid);
       if (exists) {
-        console.log('✅ Setting conversation from URL:', cid);
         setActiveConversation(cid);
         setShowConversations(false);
         setHasPrefilledMessage(false);
-        
-        // Pre-fill message if provided in URL
         if (messageParam) {
           setNewMessage(decodeURIComponent(messageParam));
           setHasPrefilledMessage(true);
-          // Don't set sentAutoMessage to true here since it hasn't been sent yet
         }
-        
         setHasProcessedUrlParam(true);
       }
     } else {
@@ -199,29 +288,8 @@ export default function Messages() {
     }
   }, [conversations, searchParams, hasProcessedUrlParam]);
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !activeConversation) return;
-
-    // Send typing stop indicator
-    sendTypingIndicator(activeConversation, false);
-    
-    await sendMessage(activeConversation, newMessage);
-    
-    // Mark auto message as sent if this was the pre-filled message
-    if (hasPrefilledMessage) {
-      setSentAutoMessage(true);
-      setHasPrefilledMessage(false);
-    }
-    
-    setNewMessage('');
-  };
-
   const handleViewingModalSuccess = () => {
-    // Refresh messages to show new viewing proposal
-    if (activeConversation) {
-      refetchMessages(activeConversation);
-    }
+    if (activeConversation) refetchMessages(activeConversation);
   };
 
   const getOtherUser = (conversation: any) => {
@@ -229,297 +297,258 @@ export default function Messages() {
       return {
         id: conversation.tenant_id,
         name: conversation.tenant_profile?.display_name || 'Tenant',
-        role: 'Tenant'
-      };
-    } else {
-      return {
-        id: conversation.landlord_id,
-        name: conversation.landlord_profile?.display_name || 'Landlord',
-        role: 'Landlord'
+        role: 'Tenant',
       };
     }
-  };
-
-  const getShortPropertyInfo = (conversation: any) => {
-    const fullTitle = conversation.properties?.title || '';
-    
-    // If the title is short enough, show it as is
-    if (fullTitle.length <= 20) {
-      return fullTitle;
-    }
-    
-    // Try to extract just the area/suburb from common address patterns
-    // Look for patterns like "Area, City" or "Suburb, City"
-    const areaCityMatch = fullTitle.match(/([^,]+),\s*([^,]+)(?:,|$)/);
-    if (areaCityMatch) {
-      const area = areaCityMatch[1].trim();
-      return area;
-    }
-    
-    // If no comma pattern, try to get first meaningful word (assuming it might be area)
-    const words = fullTitle.split(' ');
-    if (words.length >= 2) {
-      // Skip common words like "House", "Apartment", "in", "at"
-      const skipWords = ['House', 'Apartment', 'Unit', 'in', 'at', 'the'];
-      for (let i = 0; i < words.length; i++) {
-        if (!skipWords.includes(words[i])) {
-          return words[i];
-        }
-      }
-    }
-    
-    // Fallback: truncate to 20 characters
-    return fullTitle.length > 20 ? fullTitle.substring(0, 20) + '...' : fullTitle;
-  };
-
-  const isMessageRead = (message: any) => {
-    if (isLandlord) {
-      return message.read_by_landlord;
-    } else {
-      return message.read_by_tenant;
-    }
+    return {
+      id: conversation.landlord_id,
+      name: conversation.landlord_profile?.display_name || 'Landlord',
+      role: 'Landlord',
+    };
   };
 
   const handleConversationClick = (conversationId: string) => {
-    console.log('👆 Manual conversation switch to:', conversationId);
     setActiveConversation(conversationId);
     setShowConversations(false);
-    
-    // Set URL parameter for mobile bottom bar to hide
     const newSearchParams = new URLSearchParams(searchParams);
     newSearchParams.set('c', conversationId);
     navigate({ search: newSearchParams.toString() }, { replace: true });
-
-    // Mark messages as read when opening conversation
     setTimeout(() => {
       if (markConversationMessagesAsRead) {
-        console.log('📖 Messages Page: Marking messages as read for conversation:', conversationId);
         markConversationMessagesAsRead(conversationId);
       }
     }, 1500);
   };
 
+  // ─── Auth guards ─────────────────────────────────────────────────────────────
+
   if (auth && auth.user === null) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
-        <div className="p-8 text-center bg-card rounded-lg border shadow-lg">
-          <MessageCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-          <h2 className="text-2xl font-bold mb-2">Sign in to access messages</h2>
-          <p className="text-muted-foreground">Connect with landlords and tenants</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/30 p-6">
+        <div className="text-center max-w-xs">
+          <div className="w-16 h-16 rounded-2xl bg-ocean-blue/10 flex items-center justify-center mx-auto mb-4">
+            <MessageSquare className="h-8 w-8 text-ocean-blue" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">Sign in to message</h2>
+          <p className="text-muted-foreground text-sm">Connect with landlords and tenants</p>
         </div>
       </div>
     );
   }
 
-  // Loading guard to avoid rendering unstable subtrees
   if (auth && authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/20">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingLogo size="lg" />
       </div>
     );
   }
 
-  // Mobile layout
+  // ─── Shared conversation list render ─────────────────────────────────────────
+
+  const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+
+  const renderConversationList = (compact = false) => {
+    if (loading && conversations.length === 0) {
+      return (
+        <div className="p-4 space-y-3">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex items-center gap-3 p-2">
+              <div className="h-11 w-11 rounded-full bg-black/8 animate-pulse shrink-0" />
+              <div className="flex-1 space-y-2">
+                <div className="h-3.5 bg-black/8 rounded-full animate-pulse w-3/5" />
+                <div className="h-3 bg-black/6 rounded-full animate-pulse w-4/5" />
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (conversations.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-ocean-blue/8 flex items-center justify-center mb-4">
+            <MessageSquare className="h-8 w-8 text-ocean-blue/60" />
+          </div>
+          <h3 className="font-semibold text-base mb-1.5">No conversations yet</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            {isLandlord
+              ? 'Messages from tenants and applicants will appear here'
+              : 'Messages from landlords will appear here'}
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="py-2 space-y-0.5">
+        {conversations.map((conversation, i) => {
+          const otherUser = getOtherUser(conversation);
+          return (
+            <ConversationItem
+              key={conversation.id}
+              conversation={conversation}
+              otherUser={otherUser}
+              isOnline={onlineUsers.has(otherUser.id)}
+              isActive={activeConversation === conversation.id}
+              unreadCount={conversation.unread_count || 0}
+              onClick={() => handleConversationClick(conversation.id)}
+              animIndex={i}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
+  // ─── Mobile layout ────────────────────────────────────────────────────────────
+
   if (isMobile) {
     return (
       <>
-        {/* Main Messages Page - Shows with bottom menu */}
+        {/* Conversations list */}
         {showConversations && (
           <div className="min-h-screen bg-background">
-            {/* Mobile Messages Page Header */}
-            <div className="flex items-center gap-3 p-4 border-b bg-background/95 backdrop-blur-sm">
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-6 w-6 text-primary" />
-                <h1 className="text-lg font-semibold">Messages</h1>
-              </div>
-              <div className="ml-auto flex items-center gap-2">
-                <ConnectionHealthIndicator 
-                  status={connectionStatus} 
-                  onlineUsers={onlineUsers}
-                  className="text-xs"
-                />
-                <Badge variant="secondary" className="text-xs">
-                  {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread
-                </Badge>
-              </div>
-            </div>
-            
-            {/* Conversations List - Mobile */}
-            <div className="flex-1 flex flex-col h-[calc(100vh-8rem)]">
-              <div className="flex-1 min-h-0 overflow-auto">
-                {loading ? (
-                  <div className="flex items-center justify-center h-full text-center p-6">
-                    <div>
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-                      <p className="text-muted-foreground">Loading conversations...</p>
-                    </div>
-                  </div>
-                ) : conversations.length === 0 ? (
-                  <div className="flex items-center justify-center h-full text-center p-6">
-                    <div>
-                      <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
-                      <p className="text-muted-foreground">
-                        {isLandlord ? "Messages from tenants and applicants will appear here" : "Messages from landlords will appear here"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-1">
-                    {conversations.map((conversation) => {
-                      const otherUser = getOtherUser(conversation);
-                      const isOnline = onlineUsers.has(otherUser.id);
-                      
-                      return (
-                        <div
-                          key={conversation.id}
-                          className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors border-l-4 ${
-                            activeConversation === conversation.id
-                              ? 'bg-muted border-l-primary'
-                              : 'border-l-transparent'
-                          }`}
-                          onClick={() => handleConversationClick(conversation.id)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="relative flex-shrink-0">
-                              <Avatar className="h-10 w-10">
-                                <AvatarFallback>
-                                  {otherUser.name.charAt(0).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              {isOnline && (
-                                <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
-                              )}
-                            </div>
-                            
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between">
-                                <p className="font-semibold text-sm truncate">
-                                  {otherUser.name}
-                                </p>
-                                {conversation.unread_count && conversation.unread_count > 0 && (
-                                  <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center flex-shrink-0">
-                                    {conversation.unread_count}
-                                  </Badge>
-                                )}
-                              </div>
-                              
-                               <div className="flex items-start gap-1 text-xs text-muted-foreground">
-                                <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                                <span className="break-words leading-tight">{getShortPropertyInfo(conversation)}</span>
-                              </div>
-                              
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {conversation.last_message_at
-                                  ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
-                                  : 'Loading...'}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+            {/* Mobile header */}
+            <div
+              className="sticky top-0 z-20 px-4 pt-3 pb-3 flex items-center justify-between gap-3"
+              style={{
+                background: 'rgba(255,255,255,0.94)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+                borderBottom: '1px solid rgba(0,0,0,0.06)',
+              }}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-ocean-blue flex items-center justify-center shadow-ios-xs">
+                  <MessageSquare className="h-4 w-4 text-white" />
+                </div>
+                <h1 className="text-[18px] font-bold tracking-tight">Messages</h1>
+                {totalUnread > 0 && (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-ocean-blue text-white animate-badge-pop">
+                    {totalUnread}
+                  </span>
                 )}
               </div>
+              <ConnectionHealthIndicator
+                status={connectionStatus}
+                onlineUsers={onlineUsers}
+                className="text-xs"
+              />
+            </div>
+
+            {/* List */}
+            <div
+              className="overflow-auto"
+              style={{ height: 'calc(100vh - 60px - env(safe-area-inset-bottom))' }}
+            >
+              {renderConversationList(true)}
             </div>
           </div>
         )}
 
-        {/* Chat Window - Mobile Full Screen (hides bottom menu) */}
+        {/* Full-screen chat */}
         {!showConversations && selectedConversation && (
-          <div className="fixed inset-0 bg-background flex flex-col z-30" style={{ height: '100svh', overscrollBehavior: 'contain' as any }}>
-              {/* Mobile Chat Header - sticky within chat container */}
-              <div className="sticky top-0 left-0 right-0 flex items-center gap-3 border-b bg-background/95 backdrop-blur-sm z-50 flex-shrink-0" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 8px)', paddingBottom: '10px', paddingLeft: '16px', paddingRight: '16px' }}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setShowConversations(true);
-                    // Clear the conversation parameter from URL to show bottom bar
-                    navigate('/messages', { replace: true });
-                  }}
-                  className="p-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-                
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="relative">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>
-                        {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    {onlineUsers.has(getOtherUser(selectedConversation).id) && (
-                      <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm truncate">{getOtherUser(selectedConversation).name}</h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Badge variant="outline" className="text-xs">
-                        {getOtherUser(selectedConversation).role}
-                      </Badge>
-                      {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
-                        <span className="text-green-600">Online</span>
-                      ) : (
-                        <span>Offline</span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Home className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
-                    </div>
-                  </div>
+          <div
+            className="fixed inset-0 flex flex-col z-30 bg-background"
+            style={{ height: '100svh', overscrollBehavior: 'contain' }}
+          >
+            {/* Chat header */}
+            <div
+              className="shrink-0 flex items-center gap-2.5 px-3 border-b border-black/6"
+              style={{
+                paddingTop: 'calc(env(safe-area-inset-top) + 10px)',
+                paddingBottom: '10px',
+                background: 'rgba(255,255,255,0.95)',
+                backdropFilter: 'blur(20px)',
+                WebkitBackdropFilter: 'blur(20px)',
+              }}
+            >
+              <button
+                onClick={() => {
+                  setShowConversations(true);
+                  navigate('/messages', { replace: true });
+                }}
+                className="w-8 h-8 rounded-full bg-black/6 flex items-center justify-center hover:bg-black/10 active:scale-90 transition-all shrink-0"
+                aria-label="Back"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+
+              <ConversationAvatar
+                name={getOtherUser(selectedConversation).name}
+                size={36}
+                isOnline={onlineUsers.has(getOtherUser(selectedConversation).id)}
+              />
+
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-[14px] leading-tight truncate">
+                  {getOtherUser(selectedConversation).name}
+                </h3>
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <span className="px-1.5 py-0.5 rounded-full bg-black/6 font-medium">
+                    {getOtherUser(selectedConversation).role}
+                  </span>
+                  {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
+                    <span className="text-emerald-600 font-medium">Online</span>
+                  ) : (
+                    <span>Offline</span>
+                  )}
+                  {selectedConversation.properties?.title && (
+                    <>
+                      <span className="text-black/20">·</span>
+                      <span className="truncate flex items-center gap-0.5">
+                        <Home className="h-2.5 w-2.5 shrink-0" />
+                        {getShortPropertyInfo(selectedConversation)}
+                      </span>
+                    </>
+                  )}
                 </div>
-                
-                {/* Create Viewing Button - Mobile */}
-                {isLandlord && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => setShowViewingModal(true)}
-                    className="flex-shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 text-xs px-2.5 py-1.5 h-auto"
-                  >
-                    <CalendarPlus className="h-3.5 w-3.5 mr-1" />
-                    <span className="hidden xs:inline">Create</span> Viewing
-                  </Button>
-                )}
               </div>
-            {/* Viewing Reminder Header - Only show for confirmed viewings */}
+
+              {isLandlord && (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setShowViewingModal(true)}
+                  className="shrink-0 h-8 px-2.5 text-xs gap-1"
+                >
+                  <CalendarPlus className="h-3.5 w-3.5" />
+                  <span className="hidden xs:inline">Viewing</span>
+                </Button>
+              )}
+            </div>
+
+            {/* Viewing reminder */}
             {confirmedViewing && (
-              <ViewingReminderHeader 
+              <ViewingReminderHeader
                 viewing={confirmedViewing}
                 onViewDetails={() => {
                   if (scrollToProposalFn) {
                     scrollToProposalFn(confirmedViewing.id);
                   } else {
-                    // Fallback to custom event
-                    const ev = new CustomEvent('scroll-to-proposal', { detail: { id: confirmedViewing.id } });
-                    window.dispatchEvent(ev);
+                    window.dispatchEvent(
+                      new CustomEvent('scroll-to-proposal', { detail: { id: confirmedViewing.id } })
+                    );
                   }
                 }}
               />
             )}
-            
-            {/* Messages - Mobile */}
+
+            {/* Thread */}
             <div className="flex-1 min-h-0 overflow-hidden">
-              <WhatsAppStyleThread 
+              <WhatsAppStyleThread
                 conversationId={activeConversation}
-                onMessageSent={() => {
-                  // Refresh conversations to update last message
-                  fetchConversations?.();
-                }}
+                onMessageSent={() => fetchConversations?.()}
                 onScrollToProposal={setScrollToProposalFn}
                 onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
               />
             </div>
-            </div>
-          )}
+          </div>
+        )}
 
+        {/* Modals */}
         {selectedConversation && (
           <AddViewingSlotModal
             open={showViewingModal}
@@ -531,8 +560,6 @@ export default function Messages() {
             onSuccess={handleViewingModalSuccess}
           />
         )}
-
-        {/* Tenant booking dialog */}
         {selectedConversation && !isLandlord && (
           <BookViewingDialog
             propertyId={selectedConversation.property_id}
@@ -545,227 +572,154 @@ export default function Messages() {
     );
   }
 
-  // Desktop layout
+  // ─── Desktop layout ───────────────────────────────────────────────────────────
+
   return (
-    <div className="px-4 md:px-8 lg:px-12">
-    {/* Desktop Messages Page Header */}
-    <div className="flex items-center gap-4 mb-6">
-      <div className="flex items-center gap-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => navigate('/')}
-        className="hidden md:inline-flex"
-      >
-        <Home className="h-4 w-4 mr-2" />
-        Home
-      </Button>
-        <MessageCircle className="h-6 w-6 text-primary" />
-        <h1 className="text-2xl font-bold">Messages</h1>
-      </div>
-      <Badge variant="secondary" className="text-sm">
-        {conversations.reduce((total, conv) => total + (conv.unread_count || 0), 0)} unread conversations
-      </Badge>
-    </div>
-    
-    <div className="grid grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
-      {/* Conversations List - Desktop */}
-      <div className="col-span-1">
-        <div className="h-full rounded-lg border bg-card">
-          
-          <div className="p-0">
-            <div className="h-[calc(100vh-8rem)] overflow-auto">
-              {loading && conversations.length === 0 ? (
-                <div className="animate-pulse space-y-3 p-4">
-                  {[1,2,3].map((i) => (
-                    <div key={i} className="h-16 bg-muted rounded-md"></div>
-                  ))}
-                </div>
-              ) : conversations.length === 0 ? (
-                <div className="p-6 text-center">
-                  <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No conversations yet</h3>
-                  <p className="text-muted-foreground">
-                    {isLandlord ? "Messages from tenants and applicants will appear here" : "Messages from landlords will appear here"}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-1">
-                  {conversations.map((conversation) => {
-                    const otherUser = getOtherUser(conversation);
-                    const isOnline = onlineUsers.has(otherUser.id);
-                    
-                    return (
-                      <div
-                        key={conversation.id}
-                        className={`p-4 cursor-pointer hover:bg-muted/50 transition-colors border-l-4 ${
-                          activeConversation === conversation.id
-                            ? 'bg-muted border-l-primary'
-                            : 'border-l-transparent'
-                        }`}
-                        onClick={() => handleConversationClick(conversation.id)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className="relative">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback>
-                                {otherUser.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            {isOnline && (
-                              <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
-                            )}
-                          </div>
-                          
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <p className="font-semibold text-sm truncate">
-                                {otherUser.name}
-                              </p>
-                              {conversation.unread_count && conversation.unread_count > 0 && (
-                                <Badge variant="destructive" className="h-5 w-5 p-0 text-xs flex items-center justify-center">
-                                  {conversation.unread_count}
-                                </Badge>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-start gap-1 text-xs text-muted-foreground">
-                              <Home className="h-3 w-3 flex-shrink-0 mt-0.5" />
-                              <span className="break-words leading-tight">{getShortPropertyInfo(conversation)}</span>
-                            </div>
-                            
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {conversation.last_message_at
-                                ? formatDistanceToNow(new Date(conversation.last_message_at), { addSuffix: true })
-                                : 'Loading...'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+    <div className="px-4 md:px-8 lg:px-10">
+      {/* Desktop header */}
+      <div className="flex items-center gap-4 mb-6 pt-1">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="hidden md:inline-flex gap-1.5"
+        >
+          <Home className="h-3.5 w-3.5" />
+          Home
+        </Button>
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-ocean-blue flex items-center justify-center shadow-ios-xs">
+            <MessageSquare className="h-4.5 w-4.5 text-white" style={{ width: '18px', height: '18px' }} />
           </div>
+          <h1 className="text-2xl font-bold">Messages</h1>
+        </div>
+        {totalUnread > 0 && (
+          <span className="px-2.5 py-1 rounded-full text-sm font-bold bg-ocean-blue text-white animate-badge-pop">
+            {totalUnread} unread
+          </span>
+        )}
+        <div className="ml-auto">
+          <ConnectionHealthIndicator status={connectionStatus} onlineUsers={onlineUsers} className="text-sm" />
         </div>
       </div>
 
-      {/* Chat Window - Desktop */}
-      <div className="col-span-2">
-        {selectedConversation ? (
-          <div className="h-full flex flex-col rounded-lg border bg-card">
-            {/* Desktop Chat Header */}
-            <div className="flex items-center gap-3 p-4 border-b bg-card sticky top-0 z-20 flex-shrink-0">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="relative">
-                  <Avatar className="h-10 w-10">
-                    <AvatarFallback>
-                      {getOtherUser(selectedConversation).name.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  {onlineUsers.has(getOtherUser(selectedConversation).id) && (
-                    <div className="absolute -bottom-1 -right-1 h-3 w-3 bg-green-500 rounded-full border-2 border-background"></div>
-                  )}
-                </div>
-                
+      {/* Two-column layout */}
+      <div className="grid grid-cols-3 gap-5 h-[calc(100vh-11rem)]">
+        {/* Left: conversation list */}
+        <div className="col-span-1 h-full rounded-2xl border border-black/8 bg-white/80 backdrop-blur-sm shadow-ios-sm overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-black/6 shrink-0">
+            <p className="text-[13px] font-semibold text-muted-foreground uppercase tracking-wider">
+              Conversations
+            </p>
+          </div>
+          <div className="flex-1 overflow-auto">
+            {renderConversationList()}
+          </div>
+        </div>
+
+        {/* Right: chat window */}
+        <div className="col-span-2 h-full rounded-2xl border border-black/8 bg-white shadow-ios-sm overflow-hidden flex flex-col">
+          {selectedConversation ? (
+            <>
+              {/* Desktop chat header */}
+              <div className="shrink-0 flex items-center gap-3 px-5 py-3.5 border-b border-black/6 bg-white">
+                <ConversationAvatar
+                  name={getOtherUser(selectedConversation).name}
+                  size={40}
+                  isOnline={onlineUsers.has(getOtherUser(selectedConversation).id)}
+                />
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg">{getOtherUser(selectedConversation).name}</h3>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Badge variant="outline" className="text-xs">
+                  <h3 className="font-semibold text-base leading-tight">
+                    {getOtherUser(selectedConversation).name}
+                  </h3>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-0.5">
+                    <span className="px-1.5 py-0.5 rounded-full bg-black/6 text-xs font-medium">
                       {getOtherUser(selectedConversation).role}
-                    </Badge>
+                    </span>
                     {onlineUsers.has(getOtherUser(selectedConversation).id) ? (
-                      <span className="text-green-600">Online</span>
+                      <span className="text-emerald-600 text-xs font-medium">Online</span>
                     ) : (
-                      <span>Offline</span>
+                      <span className="text-xs">Offline</span>
+                    )}
+                    {selectedConversation.properties?.title && (
+                      <>
+                        <span className="text-black/20">·</span>
+                        <span className="text-xs flex items-center gap-1 truncate">
+                          <Home className="h-3 w-3 shrink-0 opacity-50" />
+                          {getShortPropertyInfo(selectedConversation)}
+                        </span>
+                      </>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                    <Home className="h-4 w-4 flex-shrink-0" />
-                    <span className="truncate">{getShortPropertyInfo(selectedConversation)}</span>
-                  </div>
                 </div>
+                {isLandlordInConversation && (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setShowViewingModal(true)}
+                    className="shrink-0 gap-2"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Create Viewing
+                  </Button>
+                )}
               </div>
-              
-              {/* Create Viewing Button - Desktop */}
-              {isLandlordInConversation && (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowViewingModal(true)}
-                  className="flex-shrink-0"
-                >
-                  <CalendarPlus className="h-4 w-4 mr-2" />
-                  Create Viewing
-                </Button>
-              )}
-            </div>
 
-            {/* Viewing Reminder Header - Desktop */}
-            {confirmedViewing && (
-              <ViewingReminderHeader 
-                viewing={confirmedViewing}
-                onViewDetails={() => {
-                  if (scrollToProposalFn) {
-                    scrollToProposalFn(confirmedViewing.id);
-                  } else {
-                    // Fallback to custom event
-                    const ev = new CustomEvent('scroll-to-proposal', { detail: { id: confirmedViewing.id } });
-                    window.dispatchEvent(ev);
-                  }
-                }}
-              />
-            )}
-
-            {/* Messages */}
-            <div className="flex-1 min-h-0">
-              {loading && messages.length === 0 ? (
-                <div className="animate-pulse space-y-3 p-4">
-                  {[1,2,3,4].map((i) => (
-                    <div key={i} className="h-10 bg-muted rounded-md"></div>
-                  ))}
-                </div>
-              ) : (
-                <WhatsAppStyleThread 
-                  conversationId={activeConversation}
-                  onMessageSent={() => {
-                    // Refresh conversations to update last message
-                    fetchConversations?.();
+              {/* Viewing reminder */}
+              {confirmedViewing && (
+                <ViewingReminderHeader
+                  viewing={confirmedViewing}
+                  onViewDetails={() => {
+                    if (scrollToProposalFn) {
+                      scrollToProposalFn(confirmedViewing.id);
+                    } else {
+                      window.dispatchEvent(
+                        new CustomEvent('scroll-to-proposal', { detail: { id: confirmedViewing.id } })
+                      );
+                    }
                   }}
+                />
+              )}
+
+              {/* Thread */}
+              <div className="flex-1 min-h-0">
+                <WhatsAppStyleThread
+                  conversationId={activeConversation}
+                  onMessageSent={() => fetchConversations?.()}
                   onScrollToProposal={setScrollToProposalFn}
                   onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
                   isLandlordInConversation={isLandlordInConversation}
                   tenantId={selectedConversation?.tenant_id}
                   propertyId={selectedConversation?.property_id}
                 />
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="h-full flex items-center justify-center rounded-lg border bg-card">
-            <div className="text-center p-8">
-              <MessageCircle className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center p-10 text-center">
+              <div className="w-20 h-20 rounded-3xl bg-ocean-blue/8 flex items-center justify-center mb-5 shadow-ios-xs">
+                <MessageSquare className="h-10 w-10 text-ocean-blue/50" />
+              </div>
               <h3 className="text-lg font-semibold mb-2">Select a conversation</h3>
-              <p className="text-muted-foreground">Choose a conversation to start messaging</p>
+              <p className="text-muted-foreground text-sm max-w-xs">
+                Choose a conversation from the list to start messaging
+              </p>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
 
-    {/* Add Viewing Slot Modal */}
-    {selectedConversation && (
-      <AddViewingSlotModal
-        open={showViewingModal}
-        onOpenChange={setShowViewingModal}
-        conversationId={selectedConversation.id}
-        propertyId={selectedConversation.property_id}
-        tenantId={selectedConversation.tenant_id}
-        propertyTitle={selectedConversation.properties?.title}
-        onSuccess={handleViewingModalSuccess}
-      />
-    )}
+      {/* Add Viewing Slot Modal */}
+      {selectedConversation && (
+        <AddViewingSlotModal
+          open={showViewingModal}
+          onOpenChange={setShowViewingModal}
+          conversationId={selectedConversation.id}
+          propertyId={selectedConversation.property_id}
+          tenantId={selectedConversation.tenant_id}
+          propertyTitle={selectedConversation.properties?.title}
+          onSuccess={handleViewingModalSuccess}
+        />
+      )}
     </div>
   );
 }

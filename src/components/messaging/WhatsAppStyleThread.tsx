@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { cn } from '@/lib/utils';
-import { Clock, Check, CheckCheck } from 'lucide-react';
+import { Clock, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import React from 'react';
 
 interface Message {
@@ -38,31 +38,78 @@ interface WhatsAppStyleThreadProps {
   propertyId?: string;
 }
 
-interface MessageStatusIndicatorProps {
+// ─── Status indicator ────────────────────────────────────────────────────────
+
+function MessageStatusIndicator({
+  status,
+  className,
+}: {
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   className?: string;
-}
-
-function MessageStatusIndicator({ status, className }: MessageStatusIndicatorProps) {
-  const base = 'h-3 w-3';
-  const iconClass = cn(base, className);
+}) {
+  const base = 'h-[11px] w-[11px]';
+  const cls = cn(base, className);
   switch (status) {
     case 'sending':
-      return <Clock className={`${iconClass} text-white/60`} aria-label="Sending" />;
+      return <Clock className={cn(cls, 'text-white/50')} aria-label="Sending" />;
     case 'sent':
-      return <Check className={`${iconClass} text-white/80`} aria-label="Sent" />;
+      return <Check className={cn(cls, 'text-white/70')} aria-label="Sent" />;
     case 'delivered':
-      return <CheckCheck className={`${iconClass} text-white`} aria-label="Delivered" />;
+      return <CheckCheck className={cn(cls, 'text-white/85')} aria-label="Delivered" />;
     case 'read':
-      return <CheckCheck className={`${iconClass} text-success-green`} aria-label="Read" />;
+      return <CheckCheck className={cn(cls, 'text-emerald-300')} aria-label="Read" />;
     case 'failed':
-      return <Clock className={`${iconClass} text-red-400`} aria-label="Failed" />;
+      return <Clock className={cn(cls, 'text-red-400')} aria-label="Failed" />;
     default:
       return null;
   }
 }
 
-export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToProposal, onCreateViewing, isLandlordInConversation, tenantId, propertyId }: WhatsAppStyleThreadProps) {
+// ─── Bubble tail SVGs ─────────────────────────────────────────────────────────
+
+// Outgoing tail: bottom-right, matches gradient end colour
+function OutgoingTail() {
+  return (
+    <svg
+      className="absolute bottom-0 -right-[7px]"
+      width="9"
+      height="12"
+      viewBox="0 0 9 12"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path d="M0 12 L0 0 Q9 8 9 12 Z" fill="hsl(214,100%,49%)" />
+    </svg>
+  );
+}
+
+// Incoming tail: bottom-left, white
+function IncomingTail() {
+  return (
+    <svg
+      className="absolute bottom-0 -left-[7px]"
+      width="9"
+      height="12"
+      viewBox="0 0 9 12"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path d="M9 12 L9 0 Q0 8 0 12 Z" fill="white" />
+    </svg>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export function WhatsAppStyleThread({
+  conversationId,
+  onMessageSent,
+  onScrollToProposal,
+  onCreateViewing,
+  isLandlordInConversation,
+  tenantId,
+  propertyId,
+}: WhatsAppStyleThreadProps) {
   const { user, isLandlord } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -73,6 +120,12 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
   const [isTyping, setIsTyping] = useState(false);
   const [proposalsById, setProposalsById] = useState<Record<string, any>>({});
 
+  // Track which message IDs are "initial" for stagger animation
+  const initialMsgIdsRef = useRef<Set<string>>(new Set());
+  const prevConvIdRef = useRef<string | null>(null);
+  // Track newly sent own message IDs for spring pop
+  const newlyAddedIdsRef = useRef<Set<string>>(new Set());
+
   const {
     messages,
     loading,
@@ -81,32 +134,42 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     sendMessage,
     sendTypingIndicator,
     setActiveConversation,
-    markMessagesAsRead
+    markMessagesAsRead,
   } = useWhatsAppMessaging();
 
-  // Load messages when conversation changes - useMessaging handles this automatically
+  // Reset stagger tracking on conversation switch
+  useEffect(() => {
+    if (conversationId !== prevConvIdRef.current) {
+      initialMsgIdsRef.current = new Set();
+      newlyAddedIdsRef.current = new Set();
+      prevConvIdRef.current = conversationId;
+    }
+  }, [conversationId]);
+
+  // Mark first batch of messages as "initial" once loaded
+  useEffect(() => {
+    if (!loading && messages.length > 0 && initialMsgIdsRef.current.size === 0) {
+      messages.forEach(m => initialMsgIdsRef.current.add(m.id));
+    }
+  }, [loading, messages]);
+
+  // Load messages when conversation changes
   useEffect(() => {
     if (conversationId) {
       setActiveConversation(conversationId);
-      
-      // Mark messages as read when opening the conversation
       setTimeout(() => {
         if (markMessagesAsRead) {
-          console.log('📖 WhatsApp Thread: Marking messages as read for conversation:', conversationId);
           markMessagesAsRead(conversationId);
         }
       }, 1000);
     }
   }, [conversationId, setActiveConversation, markMessagesAsRead]);
 
-  // Auto-scroll to bottom when new messages arrive or when typing
+  // Auto-scroll to bottom
   const scrollToBottom = (force = false) => {
     const viewport = scrollContainerRef.current;
     if (!viewport) return;
-
-    const atBottom =
-      viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 20;
-
+    const atBottom = viewport.scrollTop + viewport.clientHeight >= viewport.scrollHeight - 20;
     if (force || atBottom || isScrolledToBottom) {
       requestAnimationFrame(() => {
         viewport.scrollTop = viewport.scrollHeight;
@@ -115,34 +178,55 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     }
   };
 
-  // Handle all scroll-to-bottom scenarios in one effect
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    
+    let tid: NodeJS.Timeout;
     if (messages.length > 0) {
-      // Small delay to ensure DOM is updated
-      timeoutId = setTimeout(() => {
-        // Force scroll for new conversation or if we're at bottom
-        const isNewConversation = messages.length === 1;
-        scrollToBottom(isNewConversation);
+      tid = setTimeout(() => {
+        scrollToBottom(messages.length === 1);
       }, 100);
     }
-
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
+    return () => clearTimeout(tid);
   }, [messages.length, conversationId]);
 
-  // Force scroll to latest message when opening conversation
   useEffect(() => {
     if (conversationId && !loading) {
-      // Always scroll to bottom when switching conversations
-      const timeoutId = setTimeout(() => scrollToBottom(true), 200);
-      return () => clearTimeout(timeoutId);
+      const tid = setTimeout(() => scrollToBottom(true), 200);
+      return () => clearTimeout(tid);
     }
   }, [conversationId, loading]);
 
-  // Load viewing proposals referenced by messages
+  // Scroll tracking
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+
+  const handleScrollPositionUpdate = (viewport: Element) => {
+    const { scrollTop, scrollHeight, clientHeight } = viewport as HTMLElement;
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 20;
+    if (atBottom !== isScrolledToBottom) setIsScrolledToBottom(atBottom);
+  };
+
+  // Smart new-message scroll
+  const previousMessageCount = useRef(messages.length);
+  const lastMessageId = useRef<string | null>(null);
+
+  useEffect(() => {
+    const latestMessage = messages[messages.length - 1];
+    if (
+      messages.length > previousMessageCount.current &&
+      latestMessage &&
+      latestMessage.id !== lastMessageId.current
+    ) {
+      const isOwn = latestMessage.sender_id === user?.id;
+      if (isOwn) {
+        setTimeout(() => scrollToBottom(true), 50);
+      } else if (isScrolledToBottom) {
+        setTimeout(() => scrollToBottom(), 50);
+      }
+      lastMessageId.current = latestMessage.id;
+    }
+    previousMessageCount.current = messages.length;
+  }, [messages, user?.id, isScrolledToBottom]);
+
+  // Load viewing proposals
   useEffect(() => {
     const missingIds = Array.from(
       new Set(
@@ -156,47 +240,33 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
 
     const load = async () => {
       try {
-        console.log('📋 Loading viewing proposals:', missingIds);
         const { data, error } = await supabase
           .from('viewing_proposals')
           .select(`*, properties ( title, location )`)
           .in('id', missingIds as any);
-        
-        if (error) {
-          console.error('Error loading viewing proposals:', error);
-          return;
-        }
-        
+        if (error) return;
         if (data) {
-          console.log('📋 Loaded viewing proposals:', data.length);
           setProposalsById(prev => {
             const next = { ...prev };
             data.forEach((p: any) => { next[p.id] = p; });
             return next;
           });
         }
-      } catch (error) {
-        console.error('Failed to load viewing proposals:', error);
-      }
+      } catch {}
     };
     load();
   }, [messages, proposalsById]);
 
-  // Scroll to specific proposal (called from reminder header)
+  // Scroll-to-proposal
   const scrollToProposal = (proposalId: string) => {
     const anchor = document.getElementById(`proposal-${proposalId}`);
     if (!anchor) return;
-
     anchor.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     setTimeout(() => {
-      const viewport = scrollContainerRef.current;
-      if (viewport) {
-        viewport.scrollBy({ top: -80, behavior: 'smooth' });
-      }
+      scrollContainerRef.current?.scrollBy({ top: -80, behavior: 'smooth' });
     }, 200);
   };
 
-  // Support external scroll-to events from header sticky bar
   useEffect(() => {
     const handler = (e: Event) => {
       const ce = e as CustomEvent<{ id: string }>;
@@ -206,77 +276,19 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     return () => window.removeEventListener('scroll-to-proposal', handler as EventListener);
   }, []);
 
-  // Expose scroll function to parent
-  const handleScrollToProposal = (fn: (id: string) => void) => {
-    // Store the function reference for later use
-    if (onScrollToProposal) {
-      onScrollToProposal(fn);
-    }
-  };
-
   useEffect(() => {
-    handleScrollToProposal(scrollToProposal);
+    if (onScrollToProposal) onScrollToProposal(scrollToProposal);
   }, [onScrollToProposal]);
 
-  // Improved scroll position tracking with debouncing
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
-  
-  const handleScrollPositionUpdate = (viewport: Element) => {
-    const { scrollTop, scrollHeight, clientHeight } = viewport as HTMLElement;
-    const isAtBottom = scrollTop + clientHeight >= scrollHeight - 20; // 20px threshold for better UX
-    
-    if (isAtBottom !== isScrolledToBottom) {
-      setIsScrolledToBottom(isAtBottom);
-    }
-  };
-
-  // Real-time scroll behavior for new messages
-  const previousMessageCount = useRef(messages.length);
-  const lastMessageId = useRef<string | null>(null);
-  
-  useEffect(() => {
-    const currentMessageCount = messages.length;
-    const latestMessage = messages[messages.length - 1];
-    
-    // Check if we have a new message (not just initial load)
-    if (currentMessageCount > previousMessageCount.current && latestMessage && latestMessage.id !== lastMessageId.current) {
-      console.log('📝 New message detected, auto-scrolling');
-      
-      // Always scroll for own messages, smart scroll for others
-      const isOwnMessage = latestMessage.sender_id === user?.id;
-      
-      if (isOwnMessage) {
-        // Always scroll for own messages
-        setTimeout(() => scrollToBottom(true), 50);
-      } else if (isScrolledToBottom) {
-        // Only scroll for others' messages if user is at bottom
-        setTimeout(() => scrollToBottom(), 50);
-      }
-      
-      lastMessageId.current = latestMessage.id;
-    }
-    
-    previousMessageCount.current = currentMessageCount;
-  }, [messages, user?.id, isScrolledToBottom]);
-
-  // Real-time viewing proposals subscription
+  // Real-time viewing proposal subscription
   useEffect(() => {
     if (!conversationId) return;
-
     const channel = supabase
       .channel(`viewing-proposals-${conversationId}`)
       .on(
         'postgres_changes',
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'viewing_proposals',
-          filter: `conversation_id=eq.${conversationId}`
-        },
+        { event: '*', schema: 'public', table: 'viewing_proposals', filter: `conversation_id=eq.${conversationId}` },
         async (payload) => {
-          console.log('🔔 Viewing proposal change:', payload);
-          
-          // Refresh the proposal data when status changes
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
             const proposalId = payload.new?.id;
             if (proposalId) {
@@ -286,36 +298,24 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
                   .select(`*, properties ( title, location )`)
                   .filter('id', 'eq', proposalId)
                   .single();
-                
                 if (!error && data) {
-                  setProposalsById(prev => ({
-                    ...prev,
-                    [proposalId]: data as any
-                  }));
+                  setProposalsById(prev => ({ ...prev, [proposalId]: data as any }));
                 }
-              } catch (error) {
-                console.error('Error refetching proposal:', error);
-              }
+              } catch {}
             }
           }
         }
       )
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [conversationId]);
 
-  // Handle sending messages
   const handleSendMessage = async (content: string, files?: File[]) => {
     if (!user) return;
     const trimmed = content.trim();
     if (!trimmed && (!files || files.length === 0)) return;
 
-    // Stop typing indicator
     sendTypingIndicator(conversationId, false);
-    
     setNewMessage('');
     setTimeout(() => scrollToBottom(true), 50);
 
@@ -323,7 +323,6 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
       await sendMessage(conversationId, trimmed, files || []);
       onMessageSent?.();
     } catch (error: any) {
-      console.error('Error sending message:', error);
       toast({
         variant: 'destructive',
         title: 'Failed to send message',
@@ -332,16 +331,12 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     }
   };
 
-  // Handle input focus for mobile keyboard
   const handleComposerFocus = () => {
-    // Scroll to bottom when keyboard opens on mobile
     setTimeout(() => scrollToBottom(true), 300);
   };
 
   const handleMessageChange = (value: string) => {
     setNewMessage(value);
-    
-    // Send typing indicators
     if (value.length > 0 && !isTyping) {
       setIsTyping(true);
       sendTypingIndicator(conversationId, true);
@@ -351,176 +346,184 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     }
   };
 
-  const handleTypingStart = () => {
-    if (!isTyping) {
-      setIsTyping(true);
-      sendTypingIndicator(conversationId, true);
-    }
-  };
-
-  const handleTypingStop = () => {
-    if (isTyping) {
-      setIsTyping(false);
-      sendTypingIndicator(conversationId, false);
-    }
-  };
+  // ─── Render a single message ───────────────────────────────────────────────
 
   const renderMessage = (message: Message, index: number) => {
     const isOwn = message.sender_id === user?.id;
-    const messageStatus = message.status || (isOwn 
-      ? (isLandlord 
-          ? (message.read_by_tenant ? 'read' : 'delivered')
-          : (message.read_by_landlord ? 'read' : 'delivered'))
-      : 'delivered');
+    const messageStatus: Message['status'] = message.status || (
+      isOwn
+        ? isLandlord
+          ? message.read_by_tenant ? 'read' : 'delivered'
+          : message.read_by_landlord ? 'read' : 'delivered'
+        : 'delivered'
+    );
 
-    const showNewDayDivider = index === 0 ||
-      new Date(message.created_at).toDateString() !== new Date(messages[index - 1]?.created_at || 0).toDateString();
+    const showNewDayDivider =
+      index === 0 ||
+      new Date(message.created_at).toDateString() !==
+        new Date(messages[index - 1]?.created_at || 0).toDateString();
 
-    const showTimeGap = index === 0 ||
-      new Date(message.created_at).getTime() - new Date(messages[index - 1]?.created_at || 0).getTime() > 300000; // 5 minutes
-
-    const messageKey = message.id;
+    const showTimeGap =
+      index === 0 ||
+      new Date(message.created_at).getTime() -
+        new Date(messages[index - 1]?.created_at || 0).getTime() >
+        300_000; // 5 min
 
     const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
 
+    // Decide animation: staggered reveal for initial batch, spring pop for own new messages
+    const isInitial = initialMsgIdsRef.current.has(message.id);
+    const isNewOwn = isOwn && !isInitial;
+    const staggerDelay = isInitial ? Math.min(index * 28, 380) : 0;
+
     const bubbleElement = (
       <div
-        className={cn(
-          'flex items-end gap-2 mb-1',
-          isOwn ? 'justify-end' : 'justify-start'
-        )}
+        className={cn('flex items-end gap-2 mb-0.5', isOwn ? 'justify-end' : 'justify-start')}
       >
         <div
           className={cn(
-            'relative w-fit max-w-[95%] md:max-w-[70%] rounded-3xl px-4 py-3 shadow-soft transition-transform',
-            'backdrop-blur-sm border border-white/20',
+            'relative w-fit max-w-[82%] md:max-w-[68%] px-3.5 py-2.5',
+            'shadow-ios-sm',
+            // Shape — no radius on tail side
             isOwn
-              ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white animate-message-outgoing'
-              : 'bg-white/90 text-ios-gray-dark animate-message-incoming'
+              ? 'rounded-[20px] rounded-br-[6px] bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white'
+              : 'rounded-[20px] rounded-bl-[6px] bg-white text-ios-gray-dark',
+            // Animation
+            isNewOwn
+              ? 'animate-msg-spring-pop'
+              : isOwn
+              ? 'animate-message-outgoing'
+              : 'animate-msg-slide-in'
           )}
-          style={{ wordBreak: 'break-word' }}
+          style={{
+            wordBreak: 'break-word',
+            animationDelay: isInitial ? `${staggerDelay}ms` : '0ms',
+            animationFillMode: 'backwards',
+          }}
         >
-          {(!isOwn && message.profiles?.display_name) && (
-            <div className="text-xs font-semibold text-ios-blue mb-1 tracking-tight">
+          {/* Sender name (incoming only, group context) */}
+          {!isOwn && message.profiles?.display_name && (
+            <div className="text-[11px] font-semibold text-ocean-blue mb-0.5 tracking-tight">
               {message.profiles.display_name}
             </div>
           )}
 
+          {/* Attachment */}
           {hasAttachment && (
             <div className="mb-2">
               <a
                 href={message.attachment_url!}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium"
+                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium hover:bg-white/25 transition-colors"
               >
-                <span className="truncate max-w-[200px]">Attachment</span>
-                <span className="text-[10px] text-white/60">Open</span>
+                <span className="truncate max-w-[180px]">Attachment</span>
+                <span className="text-[10px] opacity-70">Open ↗</span>
               </a>
             </div>
           )}
 
+          {/* Message text */}
           {message.content && (
             <div
-              className="text-sm leading-relaxed whitespace-pre-line break-words hyphens-auto"
+              className="text-[14.5px] leading-[1.45] whitespace-pre-line break-words hyphens-auto"
               style={{ overflowWrap: 'anywhere' }}
             >
               {message.content}
             </div>
           )}
 
-          {/* Timestamp and status - moved below content to prevent overflow */}
-          <div className={cn(
-            'flex items-center justify-end gap-1 text-[11px] mt-1',
-            isOwn ? 'text-white/70' : 'text-ios-gray'
-          )}>
-            {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          {/* Timestamp + status */}
+          <div
+            className={cn(
+              'flex items-center justify-end gap-1 mt-1',
+              isOwn ? 'text-white/60' : 'text-ios-gray/70'
+            )}
+          >
+            <span className="text-[10.5px] font-medium tabular-nums">
+              {new Date(message.created_at).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </span>
             {isOwn && (
-              <MessageStatusIndicator 
+              <MessageStatusIndicator
                 status={messageStatus}
-                className={cn(
-                  'transition-colors duration-200',
-                  messageStatus === 'read' ? 'text-green-400' : ''
-                )}
+                className={cn(messageStatus === 'read' && 'text-emerald-300')}
               />
             )}
           </div>
 
-          {/* Application Invite CTA inside message bubble for tenants */}
-          {!isOwn && !isLandlordInConversation && typeof message.content === 'string' && message.content.includes('/apply/invite/') && (
-            <div className="mt-2">
-              <button
-                className="inline-flex items-center justify-center px-3 py-1.5 rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90"
-                onClick={async () => {
-                  try {
-                    const match = message.content.match(/\/apply\/invite\/([a-zA-Z0-9-]+)/);
-                    if (match && match[1]) {
-                      const token = match[1];
-                      
-                      // Fetch invite details
-                      const { data: invite, error } = await (supabase as any)
-                        .from('application_invites')
-                        .select('id, property_id, landlord_id')
-                        .eq('token', token)
-                        .maybeSingle();
-                      
-                      if (error || !invite) {
-                        toast({
-                          title: "Error",
-                          description: "Could not load application invite. Please try again.",
-                          variant: "destructive",
-                        });
-                        return;
+          {/* Application invite CTA */}
+          {!isOwn &&
+            !isLandlordInConversation &&
+            typeof message.content === 'string' &&
+            message.content.includes('/apply/invite/') && (
+              <div className="mt-2.5">
+                <button
+                  className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-semibold bg-ocean-blue text-white hover:bg-ocean-blue-dark active:scale-95 transition-all shadow-ios-xs"
+                  onClick={async () => {
+                    try {
+                      const match = message.content.match(/\/apply\/invite\/([a-zA-Z0-9-]+)/);
+                      if (match?.[1]) {
+                        const token = match[1];
+                        const { data: invite, error } = await (supabase as any)
+                          .from('application_invites')
+                          .select('id, property_id, landlord_id')
+                          .eq('token', token)
+                          .maybeSingle();
+                        if (error || !invite) {
+                          toast({ title: 'Error', description: 'Could not load invite.', variant: 'destructive' });
+                          return;
+                        }
+                        navigate(`/rental-application/${invite.property_id}?landlord=${invite.landlord_id}&invite=${invite.id}`);
                       }
-                      
-                      // Navigate directly to rental application
-                      navigate(`/rental-application/${(invite as any).property_id}?landlord=${(invite as any).landlord_id}&invite=${(invite as any).id}`);
+                    } catch {
+                      toast({ title: 'Error', description: 'Failed to start application.', variant: 'destructive' });
                     }
-                  } catch (e) {
-                    console.error('Failed to navigate to invite from message:', e);
-                    toast({
-                      title: "Error",
-                      description: "Failed to start application. Please try again.",
-                      variant: "destructive",
-                    });
-                  }
-                }}
-                aria-label="Start rental application"
-              >
-                Start Application
-              </button>
-            </div>
-          )}
+                  }}
+                  aria-label="Start rental application"
+                >
+                  Start Application →
+                </button>
+              </div>
+            )}
+
+          {/* Bubble tail */}
+          {isOwn ? <OutgoingTail /> : <IncomingTail />}
         </div>
       </div>
     );
 
     return (
-      <React.Fragment key={messageKey}>
+      <React.Fragment key={message.id}>
         {showNewDayDivider && (
-          <div className="flex justify-center my-3">
-            <span className="px-3 py-1 text-xs font-medium rounded-full bg-white/80 text-ios-gray-dark shadow-soft">
+          <div className="flex justify-center my-4">
+            <span className="px-3 py-1 text-[11px] font-semibold rounded-full bg-black/8 text-ios-gray-dark backdrop-blur-sm">
               {new Date(message.created_at).toLocaleDateString(undefined, {
                 weekday: 'short',
                 month: 'short',
-                day: 'numeric'
+                day: 'numeric',
               })}
             </span>
           </div>
         )}
 
         {message.message_type === 'viewing_proposal' && message.viewing_proposal_id ? (
-          <div id={`proposal-${message.viewing_proposal_id}`} className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming">
-        {proposalsById[message.viewing_proposal_id] ? (
-          <ViewingProposalCard
-            proposal={proposalsById[message.viewing_proposal_id]}
-            onUpdate={onCreateViewing}
-            isLandlordInConversation={!!isLandlordInConversation}
-          />
+          <div
+            id={`proposal-${message.viewing_proposal_id}`}
+            className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming"
+          >
+            {proposalsById[message.viewing_proposal_id] ? (
+              <ViewingProposalCard
+                proposal={proposalsById[message.viewing_proposal_id]}
+                onUpdate={onCreateViewing}
+                isLandlordInConversation={!!isLandlordInConversation}
+              />
             ) : (
-              <div className="bg-muted/50 rounded-lg p-4 text-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto mb-2"></div>
-                <p className="text-sm text-muted-foreground">Loading viewing proposal...</p>
+              <div className="bg-white/80 rounded-2xl p-4 text-center shadow-ios-xs">
+                <div className="h-5 w-5 border-2 border-ocean-blue border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">Loading viewing proposal…</p>
               </div>
             )}
           </div>
@@ -529,7 +532,7 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         )}
 
         {showTimeGap && index !== messages.length - 1 && (
-          <div className="py-1" aria-hidden="true"></div>
+          <div className="py-0.5" aria-hidden="true" />
         )}
       </React.Fragment>
     );
@@ -539,59 +542,55 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
     <div
       className="flex flex-col h-full"
       style={{
-        // Beige base + subtle WhatsApp-like brown motif (dots + diagonal weave)
-        backgroundImage:
-          'linear-gradient(180deg, rgba(245,240,230,0.96), rgba(245,240,230,0.96)),' +
-          'radial-gradient(rgba(121,85,72,0.10) 1px, transparent 1px),' +
-          'radial-gradient(rgba(121,85,72,0.08) 1px, transparent 1px),' +
-          'repeating-linear-gradient(45deg, rgba(121,85,72,0.06) 0, rgba(121,85,72,0.06) 2px, transparent 2px, transparent 14px)',
-        backgroundSize: 'auto, 18px 18px, 36px 36px, 24px 24px',
-        backgroundRepeat: 'no-repeat, repeat, repeat, repeat',
-        backgroundPosition: 'top left, 0 0, 9px 9px, 0 0',
-        backgroundBlendMode: 'multiply, normal, normal, normal'
+        // Clean, calm background — pure light blue-tinted gray
+        background: 'hsl(214, 22%, 96%)',
       }}
     >
-      {/* Messages Area */}
+      {/* Messages scroll area */}
       <div
         ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto px-4"
-        onScroll={(e) => {
+        className="flex-1 overflow-y-auto overscroll-contain"
+        style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.12) transparent' }}
+        onScroll={e => {
           const viewport = e.currentTarget;
-          if (scrollTimeoutRef.current) {
-            clearTimeout(scrollTimeoutRef.current);
-          }
-          scrollTimeoutRef.current = setTimeout(() => {
-            handleScrollPositionUpdate(viewport);
-          }, 50);
+          if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+          scrollTimeoutRef.current = setTimeout(() => handleScrollPositionUpdate(viewport), 50);
         }}
       >
         <div
-          className="py-3 space-y-1"
-          style={{ paddingBottom: 'calc(84px + env(safe-area-inset-bottom))' }}
+          className="px-3 py-4 space-y-0.5"
+          style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom))' }}
         >
           {loading ? (
-            <div className="flex justify-center py-10">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex flex-col gap-3 pt-6">
+              {/* Skeleton messages */}
+              {[0.7, 0.5, 0.8, 0.6, 0.75].map((w, i) => (
+                <div
+                  key={i}
+                  className={cn('flex', i % 2 === 0 ? 'justify-start' : 'justify-end')}
+                >
+                  <div
+                    className="h-10 rounded-[18px] bg-black/8 animate-pulse"
+                    style={{ width: `${w * 220}px`, maxWidth: '75%' }}
+                  />
+                </div>
+              ))}
             </div>
           ) : (
             <>
               {messages.map(renderMessage)}
-              
-              {/* Show typing indicator */}
+
+              {/* Typing indicator */}
               {(() => {
-                const entries = Array.from(typingUsers.entries()).filter(([userId, convId]) => convId === conversationId && userId !== user?.id);
+                const entries = Array.from(typingUsers.entries()).filter(
+                  ([userId, convId]) => convId === conversationId && userId !== user?.id
+                );
                 if (entries.length === 0) return null;
-                // map user ids to display names where possible
                 const names = entries.map(([id]) => {
                   const conv = messages.find(m => m.sender_id === id)?.profiles?.display_name;
                   return conv || 'Someone';
                 });
-                return (
-                  <TypingIndicator 
-                    userNames={names}
-                    className="mb-2"
-                  />
-                );
+                return <TypingIndicator userNames={names} className="mb-2 mt-1" />;
               })()}
             </>
           )}
@@ -599,26 +598,31 @@ export function WhatsAppStyleThread({ conversationId, onMessageSent, onScrollToP
         </div>
       </div>
 
-      {/* Show scroll to bottom button when not at bottom */}
+      {/* Scroll-to-bottom button */}
       {!isScrolledToBottom && messages.length > 0 && (
-        <div className="absolute bottom-20 right-4 z-10">
-          <button
-            onClick={() => scrollToBottom(true)}
-            className="bg-primary text-primary-foreground rounded-full p-2 shadow-lg hover:bg-primary/90 transition-all"
-          >
-            ↓
-          </button>
-        </div>
+        <button
+          onClick={() => scrollToBottom(true)}
+          className={cn(
+            'absolute bottom-[84px] right-4 z-10',
+            'h-9 w-9 rounded-full flex items-center justify-center',
+            'bg-white shadow-ios-md border border-black/8 text-ios-gray-dark',
+            'hover:shadow-ios-lg active:scale-90 transition-all duration-150',
+            'animate-badge-pop'
+          )}
+          aria-label="Scroll to latest"
+        >
+          <ChevronDown className="h-4 w-4" />
+        </button>
       )}
 
-      {/* Message Input */}
+      {/* Composer */}
       <div
-        className="px-3 py-2.5 bg-white/92 backdrop-blur border-t border-ocean-blue sticky bottom-0 z-10 flex-shrink-0"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 2px)', marginBottom: '8px' }}
+        className="px-3 pt-2 pb-2 bg-white/90 backdrop-blur-md border-t border-black/6 sticky bottom-0 z-10 shrink-0"
+        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}
       >
         <MessageComposer
           onSend={handleSendMessage}
-          placeholder="Type a message..."
+          placeholder="Message…"
           value={newMessage}
           onChange={handleMessageChange}
           onFocus={handleComposerFocus}
