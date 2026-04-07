@@ -223,7 +223,7 @@ export default function EnhancedLandlordDashboard() {
   useEffect(() => {
     const path = location.pathname;
     console.log('[Dashboard] Current path:', path, 'Current tab:', currentTab);
-    
+
     if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
       if (currentTab !== path) {
         console.log('[Dashboard] Setting current tab to:', path);
@@ -231,6 +231,13 @@ export default function EnhancedLandlordDashboard() {
       }
     }
   }, [location.pathname]);
+
+  // Auto-select the only property so landlords with one property skip the selection screen
+  useEffect(() => {
+    if (!loading && properties.length === 1 && !selectedPropertyId && isBaseTab) {
+      handleSelectProperty(properties[0].id);
+    }
+  }, [loading, properties.length, selectedPropertyId, isBaseTab]);
 
   // Add a useEffect to handle tab-specific data fetching when currentTab changes
   useEffect(() => {

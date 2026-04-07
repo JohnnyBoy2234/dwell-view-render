@@ -104,8 +104,8 @@ export function MobileBottomBar() {
               ref={pillRef}
               className="absolute top-1.5 bottom-1.5 rounded-xl pointer-events-none"
               style={{
-                left: `calc(${activeIndex * pillWidth}% + 3px)`,
-                width: `calc(${pillWidth}% - 6px)`,
+                left: `calc(${activeIndex * pillWidth}% + 5px)`,
+                width: `calc(${pillWidth}% - 10px)`,
                 background: 'rgba(255,255,255,0.10)',
                 border: '1px solid rgba(255,255,255,0.12)',
                 transition: 'left 0.38s cubic-bezier(0.34, 1.56, 0.64, 1)',
