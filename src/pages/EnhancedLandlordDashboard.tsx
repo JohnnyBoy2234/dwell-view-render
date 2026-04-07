@@ -234,10 +234,10 @@ export default function EnhancedLandlordDashboard() {
 
   // Auto-select the only property so landlords with one property skip the selection screen
   useEffect(() => {
-    if (!loading && properties.length === 1 && !selectedPropertyId && isBaseTab) {
+    if (!loading && properties.length === 1 && !selectedPropertyId && currentTab === '/enhancedlandlorddashboard') {
       handleSelectProperty(properties[0].id);
     }
-  }, [loading, properties.length, selectedPropertyId, isBaseTab]);
+  }, [loading, properties.length, selectedPropertyId, currentTab]);
 
   // Add a useEffect to handle tab-specific data fetching when currentTab changes
   useEffect(() => {
