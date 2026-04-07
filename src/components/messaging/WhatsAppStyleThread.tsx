@@ -119,6 +119,8 @@ export function WhatsAppStyleThread({
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [proposalsById, setProposalsById] = useState<Record<string, any>>({});
+  // Show skeletons immediately on conversation switch, before the hook's loading flag kicks in
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Track which message IDs are "initial" for stagger animation
   const initialMsgIdsRef = useRef<Set<string>>(new Set());
@@ -137,14 +139,22 @@ export function WhatsAppStyleThread({
     markMessagesAsRead,
   } = useWhatsAppMessaging();
 
-  // Reset stagger tracking on conversation switch
+  // Reset stagger tracking on conversation switch + immediately show skeletons
   useEffect(() => {
     if (conversationId !== prevConvIdRef.current) {
       initialMsgIdsRef.current = new Set();
       newlyAddedIdsRef.current = new Set();
       prevConvIdRef.current = conversationId;
+      setIsTransitioning(true);
     }
   }, [conversationId]);
+
+  // Clear transitioning once messages are available
+  useEffect(() => {
+    if (!loading && messages.length > 0 && isTransitioning) {
+      setIsTransitioning(false);
+    }
+  }, [loading, messages.length, isTransitioning]);
 
   // Mark first batch of messages as "initial" once loaded
   useEffect(() => {
@@ -561,18 +571,39 @@ export function WhatsAppStyleThread({
           className="px-3 py-4 space-y-0.5"
           style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom))' }}
         >
-          {loading ? (
-            <div className="flex flex-col gap-3 pt-6">
-              {/* Skeleton messages */}
-              {[0.7, 0.5, 0.8, 0.6, 0.75].map((w, i) => (
+          {(loading || isTransitioning) ? (
+            <div className="flex flex-col gap-2.5 pt-4">
+              {/* Shimmer bubble skeletons — mimic real conversation shape */}
+              {([
+                { own: false, lines: 2, widthPct: 62 },
+                { own: true,  lines: 1, widthPct: 45 },
+                { own: false, lines: 3, widthPct: 70 },
+                { own: true,  lines: 2, widthPct: 55 },
+                { own: false, lines: 1, widthPct: 38 },
+                { own: true,  lines: 2, widthPct: 60 },
+              ] as { own: boolean; lines: number; widthPct: number }[]).map((s, i) => (
                 <div
                   key={i}
-                  className={cn('flex', i % 2 === 0 ? 'justify-start' : 'justify-end')}
+                  className={cn('flex items-end gap-2', s.own ? 'justify-end' : 'justify-start')}
+                  style={{ animationDelay: `${i * 55}ms` }}
                 >
                   <div
-                    className="h-10 rounded-[18px] bg-black/8 animate-pulse"
-                    style={{ width: `${w * 220}px`, maxWidth: '75%' }}
-                  />
+                    className={cn(
+                      'relative overflow-hidden',
+                      'rounded-[20px]',
+                      s.own ? 'rounded-br-[6px]' : 'rounded-bl-[6px]',
+                      'chat-skeleton'
+                    )}
+                    style={{ width: `${s.widthPct}%`, maxWidth: '78%' }}
+                  >
+                    {/* Invisible content to set height — mimics text lines + timestamp */}
+                    <div className="px-3.5 py-2.5 opacity-0 pointer-events-none select-none">
+                      {Array.from({ length: s.lines }).map((_, li) => (
+                        <div key={li} className="h-[14px] mb-1 last:mb-0" />
+                      ))}
+                      <div className="h-[10px] mt-1.5 w-16 ml-auto" />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>

@@ -219,6 +219,22 @@ All colors MUST be HSL.
     opacity: 0.6;
   }
 
+  /* Chat skeleton shimmer */
+  @keyframes msg-shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  .chat-skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,0.06) 0%,
+      rgba(0,0,0,0.10) 40%,
+      rgba(0,0,0,0.06) 80%
+    );
+    background-size: 800px 100%;
+    animation: msg-shimmer 1.4s ease-in-out infinite;
+  }
+
   /* Glass card effects */
   .glass-card {
     background: rgba(255, 255, 255, 0.1);
