@@ -119,12 +119,12 @@ export function WhatsAppStyleThread({
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [proposalsById, setProposalsById] = useState<Record<string, any>>({});
-  // Show skeletons immediately on conversation switch, before the hook's loading flag kicks in
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  // Show skeletons immediately — start as true so first render never flashes empty content
+  const [isTransitioning, setIsTransitioning] = useState(true);
 
   // Track which message IDs are "initial" for stagger animation
   const initialMsgIdsRef = useRef<Set<string>>(new Set());
-  const prevConvIdRef = useRef<string | null>(null);
+  const prevConvIdRef = useRef<string | null>('__none__');
   // Track newly sent own message IDs for spring pop
   const newlyAddedIdsRef = useRef<Set<string>>(new Set());
 
