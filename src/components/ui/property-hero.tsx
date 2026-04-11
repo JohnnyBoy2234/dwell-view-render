@@ -57,6 +57,7 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
               <button
                 key={m}
                 onClick={() => onModeChange(m)}
+                aria-pressed={mode === m}
                 className="relative px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-200 z-10"
                 style={{ color: mode === m ? '#fff' : 'rgba(255,255,255,0.65)', background: 'transparent' }}
               >
