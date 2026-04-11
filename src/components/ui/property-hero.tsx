@@ -3,6 +3,22 @@ import { motion, AnimatePresence } from 'motion/react';
 
 type Mode = 'rent' | 'buy';
 
+const heroImages: Record<Mode, string> = {
+  rent: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920&auto=format&fit=crop',
+  buy:  'https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=1920&auto=format&fit=crop',
+};
+
+const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
+  rent: {
+    headline: <>Find Your Perfect{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}in South Africa</>,
+    subtext: 'Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent.',
+  },
+  buy: {
+    headline: <>Buy Your Dream{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Property</span>{' '}in South Africa</>,
+    subtext: 'Trusted property sales across South Africa. Browse verified listings and connect directly with sellers — no middlemen.',
+  },
+};
+
 interface PropertyHeroProps {
   children?: React.ReactNode;
   mode?: Mode;
@@ -10,22 +26,6 @@ interface PropertyHeroProps {
 }
 
 export function PropertyHero({ children, mode = 'rent', onModeChange }: PropertyHeroProps) {
-  const heroImages: Record<Mode, string> = {
-    rent: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920&auto=format&fit=crop',
-    buy:  'https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=1920&auto=format&fit=crop',
-  };
-
-  const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
-    rent: {
-      headline: <>Find Your Perfect{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}in South Africa</>,
-      subtext: 'Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent.',
-    },
-    buy: {
-      headline: <>Buy Your Dream{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Property</span>{' '}in South Africa</>,
-      subtext: 'Trusted property sales across South Africa. Browse verified listings and connect directly with sellers — no middlemen.',
-    },
-  };
-
   return (
     <section className="relative flex flex-col min-h-[75vh] sm:min-h-screen overflow-hidden">
       {/* ── Background image — zoom-fade on mode change ── */}
