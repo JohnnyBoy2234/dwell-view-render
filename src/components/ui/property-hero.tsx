@@ -10,11 +10,20 @@ interface PropertyHeroProps {
 }
 
 export function PropertyHero({ children, mode = 'rent', onModeChange }: PropertyHeroProps) {
-  const isRent = mode === 'rent';
-
   const heroImages: Record<Mode, string> = {
     rent: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920&auto=format&fit=crop',
     buy:  'https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=1920&auto=format&fit=crop',
+  };
+
+  const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
+    rent: {
+      headline: <>Find Your Perfect{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}in South Africa</>,
+      subtext: 'Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent.',
+    },
+    buy: {
+      headline: <>Buy Your Dream{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Property</span>{' '}in South Africa</>,
+      subtext: 'Trusted property sales across South Africa. Browse verified listings and connect directly with sellers — no middlemen.',
+    },
   };
 
   return (
@@ -84,21 +93,30 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
           </div>
         )}
 
-        {/* Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-[82px] font-bold text-center leading-[1.05] tracking-tight max-w-4xl mb-5" style={{ color: '#ffffff', textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}>
-          {isRent ? (
-            <>Find Your Perfect{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}in South Africa</>
-          ) : (
-            <>Buy Your Dream{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Property</span>{' '}in South Africa</>
-          )}
-        </h1>
-
-        {/* Sub-headline */}
-        <p className="text-base sm:text-xl text-center max-w-2xl leading-relaxed mb-10" style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}>
-          {isRent
-            ? 'Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent.'
-            : 'Trusted property sales across South Africa. Browse verified listings and connect directly with sellers — no middlemen.'}
-        </p>
+        {/* Headline + Sub-headline — fade-up on mode change */}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={mode}
+            className="flex flex-col items-center"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.5, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h1
+              className="text-4xl sm:text-6xl lg:text-[82px] font-bold text-center leading-[1.05] tracking-tight max-w-4xl mb-5"
+              style={{ color: '#ffffff', textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}
+            >
+              {heroCopy[mode].headline}
+            </h1>
+            <p
+              className="text-base sm:text-xl text-center max-w-2xl leading-relaxed mb-10"
+              style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
+            >
+              {heroCopy[mode].subtext}
+            </p>
+          </motion.div>
+        </AnimatePresence>
 
         {/* Search widget slot */}
         {children && (
