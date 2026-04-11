@@ -12,21 +12,30 @@ interface PropertyHeroProps {
 export function PropertyHero({ children, mode = 'rent', onModeChange }: PropertyHeroProps) {
   const isRent = mode === 'rent';
 
+  const heroImages: Record<Mode, string> = {
+    rent: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920&auto=format&fit=crop',
+    buy:  'https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=1920&auto=format&fit=crop',
+  };
+
   return (
     <section className="relative flex flex-col min-h-[75vh] sm:min-h-screen overflow-hidden">
-      {/* ── Background image + layered gradients ── */}
-      <div
-        className="absolute inset-0 bg-cover sm:bg-cover bg-[center_35%] sm:bg-center"
-        style={{
-          backgroundImage:
-            'url(https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920&auto=format&fit=crop)',
-        }}
-      >
-        {/* Dark overlay — heavier at top (navbar) and bottom (search legibility) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-black/72" />
-        {/* Subtle blue colour wash to match brand */}
-        <div className="absolute inset-0 bg-[hsl(214,100%,30%)] opacity-20" />
-      </div>
+      {/* ── Background image — zoom-fade on mode change ── */}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={mode}
+          className="absolute inset-0 bg-cover bg-[center_35%] sm:bg-center"
+          style={{ backgroundImage: `url(${heroImages[mode]})` }}
+          initial={{ opacity: 0, scale: 1.08 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.04 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/35 to-black/72" />
+          {/* Blue wash */}
+          <div className="absolute inset-0 bg-[hsl(214,100%,30%)] opacity-20" />
+        </motion.div>
+      </AnimatePresence>
 
       {/* ── Vertical grid lines (decorative) ── */}
       <div className="absolute inset-0 z-10 pointer-events-none hidden sm:block">
