@@ -63,6 +63,8 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
         {/* Rent / Buy toggle */}
         {onModeChange && (
           <div
+            role="group"
+            aria-label="View mode"
             className="flex items-center mb-8 p-1 rounded-full"
             style={{
               background: 'rgba(0,0,0,0.35)',
@@ -142,7 +144,7 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
       </div>
 
       {/* ── Scroll cue ── */}
-      <div className="absolute bottom-7 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none">
+      <div aria-hidden="true" className="absolute bottom-7 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1.5 pointer-events-none">
         <div className="w-px h-10 bg-gradient-to-b from-transparent via-white/30 to-white/55" />
         <div className="w-1 h-1 rounded-full bg-white/40" />
       </div>
