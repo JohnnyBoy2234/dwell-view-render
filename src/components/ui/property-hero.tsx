@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 
 type Mode = 'rent' | 'buy';
 
@@ -52,28 +53,24 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
               border: '1px solid rgba(255,255,255,0.15)',
             }}
           >
-            <button
-              onClick={() => onModeChange('rent')}
-              className="px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200"
-              style={
-                isRent
-                  ? { background: 'hsl(214,100%,59%)', color: '#fff', boxShadow: '0 2px 12px rgba(37,99,235,0.45)' }
-                  : { background: 'transparent', color: 'rgba(255,255,255,0.65)' }
-              }
-            >
-              Rent
-            </button>
-            <button
-              onClick={() => onModeChange('buy')}
-              className="px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200"
-              style={
-                !isRent
-                  ? { background: 'hsl(214,100%,59%)', color: '#fff', boxShadow: '0 2px 12px rgba(37,99,235,0.45)' }
-                  : { background: 'transparent', color: 'rgba(255,255,255,0.65)' }
-              }
-            >
-              Buy
-            </button>
+            {(['rent', 'buy'] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => onModeChange(m)}
+                className="relative px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-200 z-10"
+                style={{ color: mode === m ? '#fff' : 'rgba(255,255,255,0.65)', background: 'transparent' }}
+              >
+                {mode === m && (
+                  <motion.div
+                    layoutId="hero-mode-indicator"
+                    className="absolute inset-0 rounded-full"
+                    style={{ background: 'hsl(214,100%,59%)', boxShadow: '0 2px 12px rgba(37,99,235,0.45)' }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10 capitalize">{m}</span>
+              </button>
+            ))}
           </div>
         )}
 
