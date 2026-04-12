@@ -8,6 +8,11 @@ const heroImages: Record<Mode, string> = {
   buy:  'https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=1920&auto=format&fit=crop',
 };
 
+const heroMobileBgPosition: Record<Mode, string> = {
+  rent: 'center 35%',
+  buy:  'center 60%',
+};
+
 const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
   rent: {
     headline: <>Find Your Perfect{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}in South Africa</>,
@@ -32,8 +37,11 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={mode}
-          className="absolute inset-0 bg-cover bg-[center_35%] sm:bg-center"
-          style={{ backgroundImage: `url(${heroImages[mode]})` }}
+          className="absolute inset-0 bg-cover sm:!bg-center"
+          style={{
+            backgroundImage: `url(${heroImages[mode]})`,
+            backgroundPosition: heroMobileBgPosition[mode],
+          }}
           initial={{ opacity: 0, scale: 1.08 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 1.04 }}
