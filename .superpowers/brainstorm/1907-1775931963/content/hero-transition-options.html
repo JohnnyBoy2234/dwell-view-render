@@ -1,0 +1,163 @@
+<style>
+  .demo-hero {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: #0a1628;
+  }
+  .demo-hero img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .demo-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.3), rgba(0,0,0,0.65));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .demo-toggle {
+    display: flex;
+    background: rgba(0,0,0,0.35);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .demo-toggle button {
+    padding: 6px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .demo-toggle .active { background: hsl(214,100%,59%); color: #fff; }
+  .demo-toggle .inactive { background: transparent; color: rgba(255,255,255,0.65); }
+  .demo-headline {
+    color: #fff;
+    font-size: 22px;
+    font-weight: 800;
+    text-align: center;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  }
+  .demo-headline span { color: hsl(214,100%,80%); }
+  .demo-sub {
+    color: rgba(255,255,255,0.8);
+    font-size: 11px;
+    text-align: center;
+    max-width: 280px;
+  }
+
+  /* Option A — cross-fade */
+  @keyframes fadeInA { from { opacity: 0; } to { opacity: 1; } }
+  .option-a-img-rent { animation: none; }
+  .option-a-img-buy { animation: fadeInA 0.6s ease forwards; }
+
+  /* Option B — slide horizontal */
+  @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes slideInLeft  { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .slide-buy  { animation: slideInRight 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .slide-rent { animation: slideInLeft  0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+  /* Option C — scale + fade */
+  @keyframes zoomFade { from { transform: scale(1.08); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .zoom-in { animation: zoomFade 0.55s cubic-bezier(0.16,1,0.3,1) forwards; }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-bottom: 4px;
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.7);
+  }
+</style>
+
+<h2>How should the hero transition when switching Rent → Buy?</h2>
+<p class="subtitle">Each card below previews a different animation style. Click one to select your preferred approach.</p>
+
+<div class="cards">
+
+  <!-- Option A: Cross-fade -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:12px 12px 0 0;">
+      <div class="demo-hero">
+        <img class="option-a-img-buy" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=60&w=600&auto=format&fit=crop" alt="buy" />
+        <div class="demo-overlay">
+          <div class="demo-toggle">
+            <button class="inactive">Rent</button>
+            <button class="active">Buy</button>
+          </div>
+          <div class="tag">After switching to Buy</div>
+          <div class="demo-headline">Buy Your Dream <span>Property</span></div>
+          <div class="demo-sub">Cross-fade — old image fades out as new fades in</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Soft Cross-Fade</h3>
+      <p>Background image fades smoothly between Rent and Buy. Clean and unobtrusive. Great if you want the content (text, search) to stay still while only the image changes.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Slide -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:12px 12px 0 0;">
+      <div class="demo-hero">
+        <img class="slide-buy" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=60&w=600&auto=format&fit=crop" alt="buy" />
+        <div class="demo-overlay">
+          <div class="demo-toggle">
+            <button class="inactive">Rent</button>
+            <button class="active">Buy</button>
+          </div>
+          <div class="tag">After switching to Buy</div>
+          <div class="demo-headline">Buy Your Dream <span>Property</span></div>
+          <div class="demo-sub">Slide — entire hero slides in from the right</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Full Hero Slide</h3>
+      <p>The whole hero section (image + headline + search) slides in from the right when switching to Buy, and from the left when switching back to Rent. Feels like paging between two screens.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Zoom + fade -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:0;overflow:hidden;border-radius:12px 12px 0 0;">
+      <div class="demo-hero">
+        <img class="zoom-in" src="https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=60&w=600&auto=format&fit=crop" alt="buy" />
+        <div class="demo-overlay">
+          <div class="demo-toggle">
+            <button class="inactive">Rent</button>
+            <button class="active">Buy</button>
+          </div>
+          <div class="tag">After switching to Buy</div>
+          <div class="demo-headline">Buy Your Dream <span>Property</span></div>
+          <div class="demo-sub">Zoom-fade — image scales from 108% → 100% while fading in</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Zoom Fade</h3>
+      <p>The new background image zooms gently in while fading up. The headline and subtext also animate in separately. Feels cinematic and premium — the most "Apple-like" of the three.</p>
+    </div>
+  </div>
+
+</div>

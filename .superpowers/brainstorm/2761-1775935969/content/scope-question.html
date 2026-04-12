@@ -1,0 +1,128 @@
+<style>
+  .section-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .section-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .section-card .icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .section-card h4 { margin: 0 0 2px; font-size: 13px; font-weight: 600; color: #fff; }
+  .section-card p { margin: 0; font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.4; }
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 100px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge-done { background: hsl(142,72%,44%,0.2); color: hsl(142,72%,55%); border: 1px solid hsl(142,72%,44%,0.3); }
+  .badge-change { background: hsl(214,100%,59%,0.15); color: hsl(214,100%,75%); border: 1px solid hsl(214,100%,59%,0.25); }
+  .badge-minor { background: hsl(25,95%,53%,0.15); color: hsl(25,95%,65%); border: 1px solid hsl(25,95%,53%,0.25); }
+</style>
+
+<h2>Which page sections should respond to Rent / Buy mode?</h2>
+<p class="subtitle">The hero already switches. Below is every section below it — which ones should change when the user clicks Buy?</p>
+
+<div class="section-row">
+  <div class="section-card">
+    <div class="icon">🎬</div>
+    <div>
+      <h4>Hero <span class="badge badge-done">Done</span></h4>
+      <p>Image, headline, subtext already switch. Toggle pill slides.</p>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="icon">📣</div>
+    <div>
+      <h4>Marquee Feature Belt <span class="badge badge-change">Needs update</span></h4>
+      <p>Currently: "Digital Leases, Auto Invoicing…" — Buy version would emphasise different things (e.g. Verified Listings, Mortgage Guidance, Transfer Attorneys)</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-row">
+  <div class="section-card">
+    <div class="icon">🏠</div>
+    <div>
+      <h4>For Landlords / For Sellers <span class="badge badge-change">Needs update</span></h4>
+      <p>Rent: "List your property, keep your money." Buy: "Sell your property, zero agent fees."</p>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="icon">👤</div>
+    <div>
+      <h4>For Tenants / For Buyers <span class="badge badge-change">Needs update</span></h4>
+      <p>Rent: "Find your next home." Buy: "Find your next property to own."</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-row">
+  <div class="section-card">
+    <div class="icon">⚡</div>
+    <div>
+      <h4>Features Grid <span class="badge badge-minor">Minor update</span></h4>
+      <p>Most features (verified listings, dashboards) apply to both. A few labels/copy would shift for Buy.</p>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="icon">💬</div>
+    <div>
+      <h4>Testimonials <span class="badge badge-minor">Minor update</span></h4>
+      <p>Currently rent-focused quotes. Buy mode could show buyer/seller testimonials instead.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section-row">
+  <div class="section-card">
+    <div class="icon">🏘️</div>
+    <div>
+      <h4>Featured Properties <span class="badge badge-minor">Minor update</span></h4>
+      <p>"Coming soon" placeholder — label could say "For Sale" vs "For Rent" but it's a placeholder either way.</p>
+    </div>
+  </div>
+  <div class="section-card">
+    <div class="icon">🚀</div>
+    <div>
+      <h4>Final CTA <span class="badge badge-change">Needs update</span></h4>
+      <p>Rent: "Rent smarter. Rent safer." Buy: "Buy smarter. Buy safer." Buttons also shift.</p>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:20px">
+  <h3>Which sections do you want to update?</h3>
+  <p class="subtitle">Select all that apply</p>
+  <div class="options" data-multiselect>
+    <div class="option" data-choice="all" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content"><h3>All of them</h3><p>Every section switches for Buy mode — full page experience</p></div>
+    </div>
+    <div class="option" data-choice="main" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content"><h3>Main content only</h3><p>For Sellers, For Buyers, Features, CTA — skip marquee and testimonials</p></div>
+    </div>
+    <div class="option" data-choice="hero-plus" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content"><h3>Hero + CTA only</h3><p>Just the top and bottom change, middle sections stay as-is</p></div>
+    </div>
+  </div>
+</div>
