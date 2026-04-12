@@ -10,7 +10,12 @@ const heroImages: Record<Mode, string> = {
 
 const heroMobileBgPosition: Record<Mode, string> = {
   rent: 'center 35%',
-  buy:  'center 60%',
+  buy:  'center 50%',
+};
+
+const heroMobileBgSize: Record<Mode, string> = {
+  rent: 'cover',
+  buy:  '180%',
 };
 
 const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
@@ -37,9 +42,10 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
           key={mode}
-          className="absolute inset-0 bg-cover sm:!bg-center"
+          className="absolute inset-0 sm:!bg-cover sm:!bg-center"
           style={{
             backgroundImage: `url(${heroImages[mode]})`,
+            backgroundSize: heroMobileBgSize[mode],
             backgroundPosition: heroMobileBgPosition[mode],
           }}
           initial={{ opacity: 0, scale: 1.08 }}
