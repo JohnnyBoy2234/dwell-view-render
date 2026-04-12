@@ -202,9 +202,6 @@ export function useWhatsAppMessaging() {
         };
       });
 
-      // Mark messages as read before setting state
-      await markMessagesAsRead(conversationId);
-
       // Build final server list with read status applied
       const serverMessages: OptimisticMessage[] = optimisticMessages.map(msg =>
         msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
@@ -219,6 +216,9 @@ export function useWhatsAppMessaging() {
         );
         return merged;
       });
+
+      // Mark as read after state is set (fire-and-forget — no await needed)
+      markMessagesAsRead(conversationId);
 
       messagesCache.current.set(conversationId, serverMessages);
 
@@ -622,8 +622,10 @@ export function useWhatsAppMessaging() {
               return [...prev, optimistic];
             });
             const cached = messagesCache.current.get(activeConversation) || [];
-            if (!cached.some(m => m.id === (msg as any).id || m.tempId === (msg as any).id)) {
-              messagesCache.current.set(activeConversation, [...cached, { ...msg, tempId: msg.id, status: 'delivered' }]);
+            const msgId = (msg as any).id;
+            const msgTempId = (msg as any).tempId;
+            if (!cached.some(m => m.id === msgId || m.tempId === msgId || (msgTempId && m.tempId === msgTempId))) {
+              messagesCache.current.set(activeConversation, [...cached, { ...msg, tempId: msgId, status: 'delivered' }]);
             }
           })
           .on('broadcast', { event: 'typing' }, ({ payload }) => {
