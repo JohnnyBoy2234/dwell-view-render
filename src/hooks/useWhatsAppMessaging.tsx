@@ -598,13 +598,25 @@ export function useWhatsAppMessaging() {
             const msg = payload as any;
             if (!msg || msg.conversation_id !== activeConversation) return;
             setMessages(prev => {
-              // If this is a real message carrying tempId, drop the temp optimistic one
+              // Case 1: Self-broadcast of our own optimistic message (tempId === id).
+              // We already inserted it on send — update status in-place, never remove.
+              if (msg.tempId === msg.id) {
+                if (prev.some(m => m.tempId === msg.tempId)) {
+                  return prev.map(m =>
+                    m.tempId === msg.tempId ? { ...m, status: 'delivered' as const } : m
+                  );
+                }
+                return prev;
+              }
+              // Case 2: Server confirmation broadcast (real id + tempId reference).
+              // Replace the optimistic entry with the confirmed message.
               if (msg.tempId) {
                 const withoutTemp = prev.filter(m => m.tempId !== msg.tempId);
                 if (withoutTemp.some(m => m.id === msg.id)) return withoutTemp; // already present
                 const delivered: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
                 return [...withoutTemp, delivered];
               }
+              // Case 3: Message from the other user — add if not already present.
               if (prev.some(m => m.id === msg.id || m.tempId === msg.id)) return prev;
               const optimistic: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
               return [...prev, optimistic];
