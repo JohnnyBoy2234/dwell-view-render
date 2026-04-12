@@ -647,24 +647,6 @@ export function useWhatsAppMessaging() {
     }
   }, [activeConversation, fetchMessages]);
 
-  // Watchdog fallback for realtime dropouts: poll messages if no changes detected
-  useEffect(() => {
-    if (!activeConversation) return;
-    let lastSeen = Date.now();
-    const interval = setInterval(() => {
-      // If we haven't received any new messages for a while, refresh
-      // Using cache size change as a simple heuristic
-      const cached = messagesCache.current.get(activeConversation) || [];
-      const latestTime = cached.length > 0 ? new Date(cached[cached.length - 1].created_at).getTime() : 0;
-      const elapsed = Date.now() - Math.max(lastSeen, latestTime);
-      if (elapsed > 3000) {
-        fetchMessages(activeConversation);
-        lastSeen = Date.now();
-      }
-    }, 2000);
-    return () => clearInterval(interval);
-  }, [activeConversation, fetchMessages]);
-
   // Hydrate from localStorage on mount
   useEffect(() => {
     if (user) {
