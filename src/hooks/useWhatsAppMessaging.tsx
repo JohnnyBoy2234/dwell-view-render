@@ -160,11 +160,9 @@ export function useWhatsAppMessaging() {
     if (!user || !conversationId) return;
 
     try {
-      // Return cached messages immediately if available
+      // Pre-load from cache into ref only — do not overwrite state (would erase optimistic messages)
       const cached = messagesCache.current.get(conversationId);
-      if (cached && cached.length > 0) {
-        setMessages(cached);
-      }
+      void cached; // referenced later via messagesCache.current
 
       console.log('📥 Fetching messages for conversation:', conversationId);
       
@@ -204,22 +202,29 @@ export function useWhatsAppMessaging() {
         };
       });
 
-      messagesCache.current.set(conversationId, optimisticMessages);
-      setMessages(optimisticMessages);
-
-      // Mark messages as read immediately after loading
+      // Mark messages as read before setting state
       await markMessagesAsRead(conversationId);
-      
-      // Update messages status to read for messages from other users
-      const updatedMessages = optimisticMessages.map(msg => 
+
+      // Build final server list with read status applied
+      const serverMessages: OptimisticMessage[] = optimisticMessages.map(msg =>
         msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
       );
-      setMessages(updatedMessages);
-      messagesCache.current.set(conversationId, updatedMessages);
+
+      // Merge: keep any optimistic messages not yet confirmed by the server
+      const serverIds = new Set(serverMessages.map(m => m.id));
+      setMessages(prev => {
+        const pending = prev.filter(m => m.optimistic === true && !serverIds.has(m.id));
+        const merged = [...serverMessages, ...pending].sort(
+          (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+        return merged;
+      });
+
+      messagesCache.current.set(conversationId, serverMessages);
 
       // Cache in localStorage
       try {
-        localStorage.setItem(`messaging_messages_${conversationId}`, JSON.stringify(updatedMessages));
+        localStorage.setItem(`messaging_messages_${conversationId}`, JSON.stringify(serverMessages));
       } catch {}
 
     } catch (error: any) {
