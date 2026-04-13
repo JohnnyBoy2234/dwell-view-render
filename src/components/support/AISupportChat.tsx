@@ -1,400 +1,292 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useLocation } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
+import SupportTicketForm from './SupportTicketForm';
+import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
 }
 
+const QUICK_REPLIES = [
+  'How do I list a property?',
+  'Deposit rules',
+  'Notice periods',
+  'Viewing requests',
+  'Signing a lease',
+];
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
 export function AISupportChat() {
+  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isPaidCustomer, setIsPaidCustomer] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [showEscalation, setShowEscalation] = useState(false);
+  const [escalationDone, setEscalationDone] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const location = useLocation();
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const getButtonSize = useCallback(() => 56, []); // h-14 / w-14
-
-  const getHorizontalMargin = useCallback(() => {
-    if (typeof window === 'undefined') return 24;
-    return window.innerWidth <= 768 ? 16 : 24;
-  }, []);
-
-  const getBottomSafeArea = useCallback(() => {
-    if (typeof window === 'undefined') return 80;
-    return window.innerWidth <= 768 ? 120 : 80;
-  }, []);
-
-  const clampPosition = useCallback(
-    (x: number, y: number) => {
-      if (typeof window === 'undefined') return { x, y };
-      const buttonSize = getButtonSize();
-      const margin = getHorizontalMargin();
-      const bottomSafeArea = getBottomSafeArea();
-
-      const minX = margin;
-      const maxX = Math.max(margin, window.innerWidth - buttonSize - margin);
-      const minY = margin;
-      const maxY = Math.max(margin, window.innerHeight - bottomSafeArea - buttonSize);
-
-      return {
-        x: Math.min(Math.max(x, minX), maxX),
-        y: Math.min(Math.max(y, minY), maxY),
-      };
-    },
-    [getBottomSafeArea, getButtonSize, getHorizontalMargin],
-  );
-
-  const getDefaultPosition = useCallback(() => {
-    if (typeof window === 'undefined') return { x: 0, y: 0 };
-    const buttonSize = getButtonSize();
-    const margin = getHorizontalMargin();
-    const bottomSafeArea = getBottomSafeArea();
-
-    return clampPosition(
-      window.innerWidth - buttonSize - margin,
-      window.innerHeight - bottomSafeArea - buttonSize,
-    );
-  }, [clampPosition, getBottomSafeArea, getButtonSize, getHorizontalMargin]);
-
-  // Load saved position or use defaults
-  useEffect(() => {
-    const saved = localStorage.getItem('aiChatPosition');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setPosition(clampPosition(parsed.x, parsed.y));
-    } else {
-      setPosition(getDefaultPosition());
-    }
-  }, [clampPosition, getDefaultPosition]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setPosition(prev => clampPosition(prev.x, prev.y));
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [clampPosition]);
-
-  // Show chat button to all users
-  useEffect(() => {
-    setIsPaidCustomer(true);
-  }, []);
-
-  // Auto-scroll to bottom
+  // Auto-scroll on new messages
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, showEscalation]);
 
-  const quickActions = [
-    "How do I create a lease?",
-    "How do I add a property?",
-    "Where do I view applications?",
-    "What is SwiftBooks?",
-    "How do I track payments?",
-  ];
+  // Focus input when panel opens
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [isOpen]);
 
-  const sendMessage = async (messageText: string) => {
-    if (!messageText.trim() || isLoading) return;
+  const sendMessage = async (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isStreaming) return;
 
-    const userMessage: Message = { role: 'user', content: messageText };
-    setMessages(prev => [...prev, userMessage]);
+    const next: Message[] = [...messages, { role: 'user', content: trimmed }];
+    setMessages(next);
     setInput('');
-    setIsLoading(true);
+    setIsStreaming(true);
+    setShowEscalation(false);
+
+    // Add empty assistant placeholder
+    setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
     try {
-      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-support-chat`;
-      
-      console.log('Sending request to:', CHAT_URL);
-      console.log('Messages:', [...messages, userMessage]);
-      
-      const response = await fetch(CHAT_URL, {
+      const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-support-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          currentPage: location.pathname,
-        }),
+        body: JSON.stringify({ messages: next }),
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Chat API error:', response.status, errorText);
-        throw new Error(`API error: ${response.status} - ${errorText}`);
+      if (!response.ok || !response.body) {
+        throw new Error(`Request failed: ${response.status}`);
       }
 
-      if (!response.body) {
-        throw new Error('No response body received');
-      }
-
-      // Stream the response
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let assistantMessage = '';
-      let buffer = '';
-
-      console.log('Starting to read stream...');
-
-      // Add empty assistant message that we'll update
-      setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) {
-          console.log('Stream ended');
-          break;
-        }
-
+        if (done) break;
         const chunk = decoder.decode(value, { stream: true });
-        console.log('Received chunk:', chunk);
-        buffer += chunk;
-        let newlineIndex: number;
-
-        while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
-          let line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-
-          if (line.endsWith('\r')) line = line.slice(0, -1);
-          if (line.startsWith(':') || line.trim() === '') continue;
-          if (!line.startsWith('data: ')) continue;
-
-          const jsonStr = line.slice(6).trim();
-          console.log('Processing line:', jsonStr);
-          
-          if (jsonStr === '[DONE]') {
-            console.log('Stream completed');
-            break;
-          }
-
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content;
-            
-            if (content) {
-              console.log('Received content:', content);
-              assistantMessage += content;
-              setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = {
-                  role: 'assistant',
-                  content: assistantMessage,
-                };
-                return newMessages;
-              });
-            }
-          } catch (e) {
-            console.log('JSON parse error:', e, 'for line:', jsonStr);
-            // Incomplete JSON, re-buffer
-            buffer = line + '\n' + buffer;
-            break;
-          }
-        }
+        setMessages(prev => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: 'assistant',
+            content: updated[updated.length - 1].content + chunk,
+          };
+          return updated;
+        });
       }
-
-    } catch (error) {
-      console.error('Chat error:', error);
-      setMessages(prev => [
-        ...prev,
-        { role: 'assistant', content: `Sorry, I encountered an error: ${error instanceof Error ? error.message : 'Unknown error'}. Please try again.` },
-      ]);
+    } catch (err) {
+      setMessages(prev => {
+        const updated = [...prev];
+        updated[updated.length - 1] = {
+          role: 'assistant',
+          content: "Sorry, I couldn't connect right now. Try again or use the 'Still need help?' link below.",
+        };
+        return updated;
+      });
     } finally {
-      setIsLoading(false);
+      setIsStreaming(false);
+      setShowEscalation(true);
     }
   };
 
-  const handleQuickAction = (action: string) => {
-    sendMessage(action);
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input);
+    }
   };
 
-  const startDrag = useCallback((clientX: number, clientY: number) => {
-    if (isOpen) return;
-    setIsDragging(true);
-    setDragStart({ x: clientX - position.x, y: clientY - position.y });
-  }, [isOpen, position.x, position.y]);
-
-  const updateDragPosition = useCallback((clientX: number, clientY: number) => {
-    if (!isDragging) return;
-    const newX = clientX - dragStart.x;
-    const newY = clientY - dragStart.y;
-    setPosition(clampPosition(newX, newY));
-  }, [clampPosition, dragStart.x, dragStart.y, isDragging]);
-
-  const endDrag = useCallback(() => {
-    if (!isDragging) return;
-    setIsDragging(false);
-    localStorage.setItem('aiChatPosition', JSON.stringify(position));
-  }, [isDragging, position]);
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    startDrag(e.clientX, e.clientY);
-  }, [startDrag]);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    updateDragPosition(e.clientX, e.clientY);
-  }, [updateDragPosition]);
-
-  const handleMouseUp = useCallback(() => {
-    endDrag();
-  }, [endDrag]);
-
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    if (e.touches.length === 0) return;
-    const touch = e.touches[0];
-    startDrag(touch.clientX, touch.clientY);
-  }, [startDrag]);
-
-  const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (e.touches.length === 0) return;
-    const touch = e.touches[0];
-    e.preventDefault();
-    updateDragPosition(touch.clientX, touch.clientY);
-  }, [updateDragPosition]);
-
-  const handleTouchEnd = useCallback(() => {
-    endDrag();
-  }, [endDrag]);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-      window.addEventListener('touchmove', handleTouchMove, { passive: false });
-      window.addEventListener('touchend', handleTouchEnd);
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-        window.removeEventListener('touchmove', handleTouchMove);
-        window.removeEventListener('touchend', handleTouchEnd);
-      };
-    }
-  }, [endDrag, handleMouseMove, handleMouseUp, handleTouchEnd, handleTouchMove, isDragging]);
+  const lastAiMessage =
+    messages.filter(m => m.role === 'assistant').slice(-1)[0]?.content || '';
 
   return (
     <>
-      {/* Floating Chat Button */}
+      {/* Floating Action Button */}
       {!isOpen && (
         <Button
+          aria-label="Open support chat"
           onClick={() => setIsOpen(true)}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
-          style={{ 
-            left: `${position.x}px`, 
-            top: `${position.y}px`,
-            cursor: isDragging ? 'grabbing' : 'grab'
-          }}
-          className="fixed h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 transition-none"
+          className={cn(
+            'fixed z-50 h-14 w-14 rounded-full shadow-lg shadow-primary/30',
+            'bg-gradient-to-br from-primary to-primary/80',
+            'hover:scale-105 active:scale-95 transition-transform',
+            'bottom-20 right-4 md:bottom-6 md:right-6'
+          )}
           size="icon"
         >
           <MessageCircle className="h-6 w-6" />
         </Button>
       )}
 
-      {/* Chat Window */}
+      {/* Backdrop (mobile only) */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-background border rounded-lg shadow-2xl z-50 flex flex-col">
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+
+      {/* Chat Panel */}
+      {isOpen && (
+        <div
+          className={cn(
+            'fixed z-50 flex flex-col bg-background overflow-hidden',
+            // Mobile: full-width bottom sheet
+            'bottom-0 left-0 right-0 rounded-t-2xl h-[82vh]',
+            // Desktop: anchored card
+            'md:bottom-6 md:right-6 md:left-auto md:w-[380px] md:h-[560px] md:rounded-2xl',
+            'shadow-2xl shadow-black/20 border border-border/50'
+          )}
+        >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
-            <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
+          <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-4 py-3 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                <Sparkles className="h-4 w-4" />
+              </div>
               <div>
-                <h3 className="font-semibold">RentLekker AI Support</h3>
-                <p className="text-xs opacity-90">Ask me anything about RentLekker</p>
+                <p className="font-semibold text-sm leading-none">RentLekker AI</p>
+                <p className="text-xs opacity-80 mt-0.5">
+                  {isStreaming ? 'Typing…' : 'Ask me anything'}
+                </p>
               </div>
             </div>
             <Button
+              aria-label="Close support chat"
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen(false)}
-              className="hover:bg-primary-foreground/20"
+              className="h-8 w-8 rounded-full hover:bg-primary-foreground/20 text-primary-foreground"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-            {messages.length === 0 && (
+          <ScrollArea className="flex-1 px-4 py-3" ref={scrollRef as any}>
+            {messages.length === 0 ? (
               <div className="space-y-4">
-                <div className="text-center text-muted-foreground text-sm">
-                  <p className="mb-4">👋 Hi! I'm your RentLekker AI assistant.</p>
-                  <p className="mb-4">Ask me anything about using the platform:</p>
+                <div className="text-center text-muted-foreground text-sm py-4">
+                  <p className="mb-1 text-base font-medium text-foreground">Hi there 👋</p>
+                  <p>I know RentLekker inside-out and SA rental law. What can I help with?</p>
                 </div>
-                <div className="space-y-2">
-                  {quickActions.map((action, i) => (
-                    <Button
-                      key={i}
-                      variant="outline"
-                      className="w-full text-left justify-start text-sm h-auto py-2"
-                      onClick={() => handleQuickAction(action)}
+                <div className="flex flex-wrap gap-2">
+                  {QUICK_REPLIES.map(q => (
+                    <button
+                      key={q}
+                      onClick={() => sendMessage(q)}
+                      className={cn(
+                        'rounded-full border border-border/60 bg-background px-3 py-1.5',
+                        'text-sm text-foreground/80 hover:bg-muted transition-colors',
+                        'cursor-pointer'
+                      )}
                     >
-                      {action}
-                    </Button>
+                      {q}
+                    </button>
                   ))}
                 </div>
               </div>
-            )}
+            ) : (
+              <div className="space-y-3">
+                {messages.map((msg, i) => (
+                  <div
+                    key={i}
+                    className={cn(
+                      'flex',
+                      msg.role === 'user' ? 'justify-end' : 'justify-start'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed',
+                        msg.role === 'user'
+                          ? 'bg-primary text-primary-foreground rounded-br-sm'
+                          : 'bg-muted rounded-bl-sm'
+                      )}
+                    >
+                      {msg.content || (
+                        <span className="flex gap-1 items-center h-4">
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:300ms]" />
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
 
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`mb-4 flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-lg p-3 ${
-                    msg.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  }`}
-                >
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                </div>
-              </div>
-            ))}
+                {/* Inline escalation form */}
+                {showEscalation && !escalationDone && (
+                  <SupportTicketForm
+                    prefillMessage={lastAiMessage ? `Context from AI chat:\n${lastAiMessage}` : ''}
+                    onSubmit={() => {
+                      setShowEscalation(false);
+                      setEscalationDone(true);
+                    }}
+                    onCancel={() => setShowEscalation(false)}
+                  />
+                )}
 
-            {isLoading && (
-              <div className="flex justify-start mb-4">
-                <div className="bg-muted rounded-lg p-3">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                </div>
+                {escalationDone && (
+                  <p className="text-xs text-center text-muted-foreground py-2">
+                    Ticket submitted. We'll be in touch soon.
+                  </p>
+                )}
               </div>
             )}
           </ScrollArea>
 
-          {/* Input */}
-          <div className="p-4 border-t space-y-2">
-            <div className="flex gap-2">
-              <Input
+          {/* Input bar */}
+          <div className="px-4 py-3 border-t border-border/50 shrink-0">
+            {messages.length > 0 && !showEscalation && !escalationDone && (
+              <button
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors mb-2 block"
+                onClick={() => setShowEscalation(true)}
+              >
+                Still need help? Talk to us →
+              </button>
+            )}
+            <div className="flex gap-2 items-center">
+              <input
+                ref={inputRef}
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && sendMessage(input)}
-                placeholder="Type your question..."
-                disabled={isLoading}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask a question…"
+                disabled={isStreaming}
+                className={cn(
+                  'flex-1 bg-muted rounded-full px-4 py-2 text-sm outline-none',
+                  'placeholder:text-muted-foreground/60',
+                  'disabled:opacity-50'
+                )}
               />
               <Button
-                onClick={() => sendMessage(input)}
-                disabled={isLoading || !input.trim()}
                 size="icon"
+                onClick={() => sendMessage(input)}
+                disabled={isStreaming || !input.trim()}
+                className="h-9 w-9 rounded-full shrink-0"
               >
-                <Send className="h-4 w-4" />
+                {isStreaming ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
               </Button>
             </div>
           </div>
