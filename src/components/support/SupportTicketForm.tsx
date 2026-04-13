@@ -31,10 +31,6 @@ export default function SupportTicketForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
-    if (!user?.id) {
-      toast.error('Please sign in to submit a support ticket.');
-      return;
-    }
     setSubmitting(true);
 
     try {
@@ -58,6 +54,17 @@ export default function SupportTicketForm({
       setSubmitting(false);
     }
   };
+
+  if (!user) {
+    return (
+      <div className="p-4 bg-muted/40 rounded-xl border border-border/50 text-center">
+        <p className="text-sm text-muted-foreground">
+          <a href="/auth" className="underline text-foreground hover:text-primary">Sign in</a>
+          {' '}to submit a support ticket.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3 p-4 bg-muted/40 rounded-xl border border-border/50">

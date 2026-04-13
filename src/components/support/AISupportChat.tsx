@@ -25,7 +25,8 @@ export function AISupportChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
-  const [showEscalation, setShowEscalation] = useState(false);
+  const [showNudge, setShowNudge] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [escalationDone, setEscalationDone] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -36,7 +37,7 @@ export function AISupportChat() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages, showEscalation]);
+  }, [messages, showNudge, showForm]);
 
   // Focus input when panel opens
   useEffect(() => {
@@ -58,7 +59,8 @@ export function AISupportChat() {
     setMessages(next);
     setInput('');
     setIsStreaming(true);
-    setShowEscalation(false);
+    setShowNudge(false);
+    setShowForm(false);
 
     // Add empty assistant placeholder
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
@@ -106,7 +108,8 @@ export function AISupportChat() {
       });
     } finally {
       setIsStreaming(false);
-      setShowEscalation(true);
+      setShowNudge(true);
+      setShowForm(false);
     }
   };
 
@@ -236,15 +239,27 @@ export function AISupportChat() {
                   </div>
                 ))}
 
-                {/* Inline escalation form */}
-                {showEscalation && !escalationDone && (
+                {/* Escalation nudge — shown after AI response */}
+                {showNudge && !showForm && !escalationDone && (
+                  <div className="pl-1">
+                    <button
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors underline cursor-pointer"
+                      onClick={() => { setShowNudge(false); setShowForm(true); }}
+                    >
+                      Still need help? Talk to us →
+                    </button>
+                  </div>
+                )}
+
+                {/* Escalation form — shown after nudge is clicked */}
+                {showForm && !escalationDone && (
                   <SupportTicketForm
                     prefillMessage={lastAiMessage ? `Context from AI chat:\n${lastAiMessage}` : ''}
                     onSubmit={() => {
-                      setShowEscalation(false);
+                      setShowForm(false);
                       setEscalationDone(true);
                     }}
-                    onCancel={() => setShowEscalation(false)}
+                    onCancel={() => { setShowForm(false); setShowNudge(true); }}
                   />
                 )}
 
@@ -259,14 +274,6 @@ export function AISupportChat() {
 
           {/* Input bar */}
           <div className="px-4 py-3 border-t border-border/50 shrink-0">
-            {messages.length > 0 && !showEscalation && !escalationDone && (
-              <button
-                className="text-xs text-muted-foreground hover:text-foreground transition-colors mb-2 block"
-                onClick={() => setShowEscalation(true)}
-              >
-                Still need help? Talk to us →
-              </button>
-            )}
             <div className="flex gap-2 items-center">
               <input
                 ref={inputRef}
