@@ -96,6 +96,20 @@ serve(async (req) => {
 
   try {
     const { messages } = await req.json();
+
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return new Response(JSON.stringify({ error: 'Invalid messages' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    if (messages.length > 20) {
+      return new Response(JSON.stringify({ error: 'Too many messages' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
 
     if (!ANTHROPIC_API_KEY) {
@@ -109,7 +123,7 @@ serve(async (req) => {
         try {
           const stream = await client.messages.stream({
             model: 'claude-haiku-4-5-20251001',
-            max_tokens: 1024,
+            max_tokens: 2048,
             system: SYSTEM_PROMPT,
             messages,
           });
