@@ -25,7 +25,7 @@ const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
   },
   buy: {
     headline: <>Buy Your Dream{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Property</span>{' '}in South Africa</>,
-    subtext: 'Trusted property sales across South Africa. Browse verified listings and connect directly with sellers — no middlemen.',
+    subtext: 'Trusted property sales across South Africa. Browse verified listings and connect directly with sellers. No middlemen.',
   },
 };
 

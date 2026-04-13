@@ -126,7 +126,7 @@ const featuresContent: Record<Mode, {
     {
       icon: MessageSquare,
       title: "In-App Messaging",
-      description: "Chat, share documents, and track updates — no WhatsApp chaos.",
+      description: "Chat, share documents, and track updates. No WhatsApp chaos.",
       accent: "hsl(235 85% 70%)",
     },
     {
@@ -176,7 +176,7 @@ const featuresContent: Record<Mode, {
     {
       icon: MessageSquare,
       title: "In-App Messaging",
-      description: "Chat, share documents, and track offer updates — no WhatsApp chaos.",
+      description: "Chat, share documents, and track offer updates. No WhatsApp chaos.",
       accent: "hsl(235 85% 70%)",
     },
     {
@@ -319,7 +319,7 @@ const Index = () => {
                   {mode === 'rent' ? 'Built for modern renting' : 'Built for modern property sales'}
                 </h2>
                 <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-                  One platform. Every tool you need to list, {mode === 'rent' ? 'rent' : 'sell'}, manage, and communicate — commission-free.
+                  One platform. Every tool you need to list, {mode === 'rent' ? 'rent' : 'sell'}, manage, and communicate. Commission-free.
                 </p>
               </div>
 
