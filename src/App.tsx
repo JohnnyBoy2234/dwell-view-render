@@ -59,6 +59,7 @@ import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRou
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
 import VerifyId from "@/pages/VerifyId";
 import KycManagement from "@/pages/admin/KycManagement";
+import { SupportMessagesAdmin } from "@/components/admin/SupportMessagesAdmin";
 import MobileCapture from "@/pages/MobileCapture";
 import KycCapture from "@/pages/KycCapture";
 import InventoryStart from "@/pages/InventoryStart";
@@ -199,6 +200,13 @@ function AppRoutes() {
                 <RouteGuard>
                   <AdminLayout>
                     <PropertyReports />
+                  </AdminLayout>
+                </RouteGuard>
+              } />
+              <Route path="/admin/support" element={
+                <RouteGuard>
+                  <AdminLayout>
+                    <SupportMessagesAdmin />
                   </AdminLayout>
                 </RouteGuard>
               } />
