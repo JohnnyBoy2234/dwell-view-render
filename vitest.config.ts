@@ -9,6 +9,15 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
+    server: {
+      deps: {
+        inline: [],
+      },
+    },
+    alias: {
+      // Mock the unbuilt canvas native module on Windows
+      canvas: '/c/Users/Jonathan D Theron/dwell-view-render/src/test/__mocks__/canvas.ts',
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

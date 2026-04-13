@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RentLekker AI Support — Design Options</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 32px 24px 64px; }
+
+  .page-title { text-align: center; margin-bottom: 8px; }
+  .page-title h1 { font-size: 22px; font-weight: 700; color: #f8fafc; }
+  .page-title p { font-size: 14px; color: #64748b; margin-top: 6px; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 32px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+
+  .card { border-radius: 16px; overflow: hidden; border: 2px solid #1e2535; background: #131825; cursor: pointer; transition: border-color .2s, transform .15s; }
+  .card:hover { border-color: #3b82f6; transform: translateY(-2px); }
+  .card.selected { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,.2); }
+
+  .card-label { padding: 14px 18px 0; display: flex; align-items: center; gap: 10px; }
+  .card-label .letter { width: 28px; height: 28px; border-radius: 8px; background: #1e3a5f; color: #60a5fa; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-label .meta h3 { font-size: 15px; font-weight: 600; color: #f1f5f9; }
+  .card-label .meta p { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+  .preview { margin: 14px; border-radius: 12px; overflow: hidden; }
+
+  /* ── Option A: Intercom-style floating chat ── */
+  .chat-a { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,.35); width: 100%; }
+  .chat-a-header { background: linear-gradient(135deg, #1d4ed8, #2563eb); padding: 18px 16px 14px; color: #fff; display: flex; align-items: center; gap: 12px; }
+  .chat-a-avatar { width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .chat-a-header-text h4 { font-size: 14px; font-weight: 600; }
+  .chat-a-header-text p { font-size: 11px; opacity: .75; margin-top: 1px; }
+  .online-dot { width: 8px; height: 8px; background: #4ade80; border-radius: 50%; border: 2px solid #1d4ed8; margin-left: auto; flex-shrink: 0; }
+  .chat-a-body { padding: 14px; background: #f8fafc; display: flex; flex-direction: column; gap: 10px; min-height: 220px; }
+  .msg-row { display: flex; gap: 8px; align-items: flex-end; }
+  .msg-row.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 26px; height: 26px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .msg-avatar.ai { background: linear-gradient(135deg, #1d4ed8, #2563eb); color: #fff; }
+  .bubble { padding: 9px 12px; border-radius: 14px; font-size: 12px; line-height: 1.45; max-width: 80%; }
+  .bubble.ai { background: #fff; color: #1e293b; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .bubble.user { background: #2563eb; color: #fff; border-bottom-right-radius: 4px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .chip { padding: 5px 10px; border-radius: 20px; background: #eff6ff; color: #2563eb; font-size: 11px; border: 1px solid #bfdbfe; cursor: pointer; white-space: nowrap; }
+  .typing { display: flex; gap: 4px; padding: 9px 12px; background: #fff; border-radius: 14px; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,.08); width: fit-content; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: #94a3b8; animation: bounce .9s infinite; }
+  .typing span:nth-child(2) { animation-delay: .2s; }
+  .typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+  .chat-a-footer { padding: 10px 12px; background: #fff; border-top: 1px solid #f1f5f9; display: flex; gap: 8px; align-items: center; }
+  .mock-input-a { flex: 1; padding: 8px 12px; border-radius: 20px; border: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; background: #f8fafc; }
+  .send-btn-a { width: 32px; height: 32px; border-radius: 50%; background: #2563eb; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .send-btn-a svg { width: 14px; height: 14px; fill: none; stroke: #fff; stroke-width: 2; }
+
+  /* ── Option B: Full-page Support Hub ── */
+  .hub-b { background: #fff; border-radius: 12px; overflow: hidden; }
+  .hub-b-header { background: #0f172a; padding: 16px; display: flex; align-items: center; gap: 10px; }
+  .hub-b-header .logo { font-size: 13px; font-weight: 700; color: #60a5fa; }
+  .hub-b-header .search-mock { flex: 1; padding: 7px 12px; background: #1e293b; border-radius: 8px; font-size: 11px; color: #475569; display: flex; align-items: center; gap: 6px; }
+  .hub-b-body { display: flex; min-height: 260px; }
+  .hub-b-sidebar { width: 130px; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 12px 8px; flex-shrink: 0; }
+  .hub-b-sidebar h5 { font-size: 10px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; padding: 0 4px; }
+  .nav-item { padding: 7px 8px; border-radius: 7px; font-size: 11px; color: #475569; margin-bottom: 2px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .nav-item.active { background: #eff6ff; color: #2563eb; font-weight: 600; }
+  .hub-b-main { flex: 1; display: flex; flex-direction: column; }
+  .hub-b-chat { flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 9px; background: #fafafa; }
+  .hub-b-chat-footer { padding: 10px 12px; background: #fff; border-top: 1px solid #f1f5f9; display: flex; gap: 6px; }
+  .mock-input-b { flex: 1; padding: 7px 10px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 11px; color: #94a3b8; }
+  .send-b { padding: 7px 14px; background: #2563eb; color: #fff; border-radius: 8px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .article-cards { display: flex; flex-direction: column; gap: 6px; padding: 12px; }
+  .article-card { padding: 8px 10px; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; }
+  .article-card h6 { font-size: 11px; font-weight: 600; color: #1e293b; }
+  .article-card p { font-size: 10px; color: #64748b; margin-top: 2px; }
+
+  /* ── Option C: Command-palette / spotlight ── */
+  .cmd-c { background: #1a1f2e; border-radius: 14px; overflow: hidden; border: 1px solid #2d3748; }
+  .cmd-c-search { padding: 14px 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #2d3748; }
+  .cmd-c-search svg { width: 16px; height: 16px; opacity: .4; flex-shrink: 0; }
+  .cmd-c-search input { background: none; border: none; font-size: 14px; color: #e2e8f0; flex: 1; outline: none; }
+  .cmd-c-search input::placeholder { color: #4a5568; }
+  .cmd-kbd { padding: 2px 6px; background: #2d3748; border-radius: 4px; font-size: 10px; color: #718096; flex-shrink: 0; }
+  .cmd-c-body { display: flex; min-height: 240px; }
+  .cmd-c-results { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 2px; }
+  .cmd-result { padding: 9px 10px; border-radius: 8px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+  .cmd-result:hover, .cmd-result.active { background: #252d3d; }
+  .cmd-result .icon { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+  .cmd-result.ai-result .icon { background: linear-gradient(135deg, #1d4ed8, #7c3aed); }
+  .cmd-result.article-result .icon { background: #1e293b; }
+  .cmd-result .text h5 { font-size: 12px; font-weight: 500; color: #e2e8f0; }
+  .cmd-result .text p { font-size: 11px; color: #64748b; margin-top: 2px; line-height: 1.4; }
+  .ai-answer-panel { width: 180px; border-left: 1px solid #2d3748; padding: 14px 12px; background: #131825; display: flex; flex-direction: column; gap: 10px; }
+  .ai-answer-panel .label { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: #4a5568; font-weight: 600; }
+  .ai-answer-panel .answer { font-size: 11px; color: #94a3b8; line-height: 1.6; }
+  .ai-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3); border-radius: 20px; font-size: 10px; color: #60a5fa; margin-top: auto; }
+  .cmd-c-footer { padding: 8px 12px; border-top: 1px solid #2d3748; display: flex; gap: 12px; }
+  .cmd-hint { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #4a5568; }
+
+  .card-footer { padding: 12px 18px 16px; }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tag { padding: 3px 9px; border-radius: 20px; font-size: 11px; background: #1e2535; color: #64748b; border: 1px solid #2d3748; }
+  .tag.green { background: rgba(34,197,94,.08); color: #4ade80; border-color: rgba(34,197,94,.2); }
+  .tag.blue { background: rgba(59,130,246,.08); color: #60a5fa; border-color: rgba(59,130,246,.2); }
+
+  .selected-indicator { display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #2563eb; color: #fff; padding: 10px 24px; border-radius: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 20px rgba(37,99,235,.4); z-index: 100; }
+  .selected-indicator.show { display: block; }
+</style>
+</head>
+<body>
+
+<div class="page-title">
+  <h1>RentLekker AI Support — Design Direction</h1>
+  <p>Three world-class approaches. Click a card to select your direction.</p>
+</div>
+
+<div class="grid">
+
+  <!-- Option A -->
+  <div class="card" data-choice="A" onclick="select(this)">
+    <div class="card-label">
+      <div class="letter">A</div>
+      <div class="meta">
+        <h3>Intercom-style Floating Chat</h3>
+        <p>Persistent widget · lives on every page</p>
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="chat-a">
+        <div class="chat-a-header">
+          <div class="chat-a-avatar">🤖</div>
+          <div class="chat-a-header-text">
+            <h4>RentLekker AI</h4>
+            <p>Typically replies instantly</p>
+          </div>
+          <div class="online-dot"></div>
+        </div>
+        <div class="chat-a-body">
+          <div class="msg-row">
+            <div class="msg-avatar ai">RL</div>
+            <div class="bubble ai">👋 Hey! I'm the RentLekker AI. What can I help you with today?</div>
+          </div>
+          <div class="chips">
+            <div class="chip">Create a lease</div>
+            <div class="chip">Add a property</div>
+            <div class="chip">Track payments</div>
+            <div class="chip">View applications</div>
+          </div>
+          <div class="msg-row user">
+            <div class="msg-avatar" style="background:#dbeafe;font-size:11px">JT</div>
+            <div class="bubble user">How do I set up a deposit for my tenant?</div>
+          </div>
+          <div class="msg-row">
+            <div class="msg-avatar ai">RL</div>
+            <div class="typing"><span></span><span></span><span></span></div>
+          </div>
+        </div>
+        <div class="chat-a-footer">
+          <div class="mock-input-a">Ask anything…</div>
+          <div class="send-btn-a">
+            <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="tag-row">
+        <span class="tag green">✓ Always accessible</span>
+        <span class="tag blue">Streaming AI</span>
+        <span class="tag">Quick-reply chips</span>
+        <span class="tag">Typing indicator</span>
+        <span class="tag">Context-aware</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option B -->
+  <div class="card" data-choice="B" onclick="select(this)">
+    <div class="card-label">
+      <div class="letter">B</div>
+      <div class="meta">
+        <h3>Full-Page Support Hub</h3>
+        <p>Dedicated page · AI + articles + tickets</p>
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="hub-b">
+        <div class="hub-b-header">
+          <div class="logo">RentLekker</div>
+          <div class="hub-b-search">
+            <div class="search-mock">
+              <span>🔍</span> Search help articles, guides…
+            </div>
+          </div>
+        </div>
+        <div class="hub-b-body">
+          <div class="hub-b-sidebar">
+            <h5>Support</h5>
+            <div class="nav-item active">💬 AI Chat</div>
+            <div class="nav-item">📄 My Tickets</div>
+            <div class="nav-item">📚 Help Docs</div>
+            <div class="nav-item">🏠 Properties</div>
+            <div class="nav-item">💳 Billing</div>
+          </div>
+          <div class="hub-b-main">
+            <div class="hub-b-chat">
+              <div class="msg-row">
+                <div class="msg-avatar ai" style="width:22px;height:22px;font-size:9px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;flex-shrink:0">RL</div>
+                <div class="bubble ai" style="font-size:11px">Hi! I can help with leases, applications, payments, and more. What do you need?</div>
+              </div>
+              <div class="msg-row user">
+                <div class="msg-avatar" style="width:22px;height:22px;font-size:9px;background:#dbeafe;flex-shrink:0">JT</div>
+                <div class="bubble user" style="font-size:11px">Why can't I approve an application?</div>
+              </div>
+              <div class="msg-row">
+                <div class="msg-avatar ai" style="width:22px;height:22px;font-size:9px;background:linear-gradient(135deg,#1d4ed8,#2563eb);color:#fff;flex-shrink:0">RL</div>
+                <div class="bubble ai" style="font-size:11px">To approve an application, the tenant must first complete their screening form. Check the <strong>Applications</strong> tab…</div>
+              </div>
+            </div>
+            <div class="hub-b-chat-footer">
+              <div class="mock-input-b">Type a message…</div>
+              <div class="send-b">Send</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="tag-row">
+        <span class="tag green">✓ AI + Help Articles</span>
+        <span class="tag blue">Ticket history</span>
+        <span class="tag">Search bar</span>
+        <span class="tag">Category nav</span>
+        <span class="tag">Admin replies</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Option C -->
+  <div class="card" data-choice="C" onclick="select(this)">
+    <div class="card-label">
+      <div class="letter">C</div>
+      <div class="meta">
+        <h3>Command-Palette AI</h3>
+        <p>⌘K overlay · instant answers · Linear/Vercel style</p>
+      </div>
+    </div>
+
+    <div class="preview">
+      <div class="cmd-c">
+        <div class="cmd-c-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input placeholder="Ask AI or search help…" value="How do I add a second property?" readonly />
+          <div class="cmd-kbd">ESC</div>
+        </div>
+        <div class="cmd-c-body">
+          <div class="cmd-c-results">
+            <div style="font-size:10px;color:#4a5568;padding:6px 10px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">AI Answer</div>
+            <div class="cmd-result ai-result active">
+              <div class="icon">✨</div>
+              <div class="text">
+                <h5>Adding a second property</h5>
+                <p>Go to Dashboard → Properties → tap "Add Property". Fill in the details and upload photos…</p>
+              </div>
+            </div>
+            <div style="font-size:10px;color:#4a5568;padding:10px 10px 4px;text-transform:uppercase;letter-spacing:.06em;font-weight:600">Help Articles</div>
+            <div class="cmd-result article-result">
+              <div class="icon">📄</div>
+              <div class="text">
+                <h5>Managing multiple properties</h5>
+                <p>Article · 3 min read</p>
+              </div>
+            </div>
+            <div class="cmd-result article-result">
+              <div class="icon">🎬</div>
+              <div class="text">
+                <h5>Property setup walkthrough</h5>
+                <p>Video guide · 4 min</p>
+              </div>
+            </div>
+          </div>
+          <div class="ai-answer-panel">
+            <div class="label">AI Response</div>
+            <div class="answer">Navigate to your <strong style="color:#e2e8f0">Dashboard</strong>, select <strong style="color:#e2e8f0">Properties</strong>, then tap the <strong style="color:#e2e8f0">+ Add Property</strong> button in the top right…</div>
+            <div class="ai-badge">✨ AI powered</div>
+          </div>
+        </div>
+        <div class="cmd-c-footer">
+          <div class="cmd-hint"><div class="cmd-kbd">↵</div> Open full chat</div>
+          <div class="cmd-hint"><div class="cmd-kbd">↑↓</div> Navigate</div>
+          <div class="cmd-hint"><div class="cmd-kbd">⌘K</div> Open</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="tag-row">
+        <span class="tag green">✓ Fastest UX</span>
+        <span class="tag blue">AI + article search</span>
+        <span class="tag">⌘K shortcut</span>
+        <span class="tag">No widget clutter</span>
+        <span class="tag">Dev-friendly</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="selected-indicator" id="indicator"></div>
+
+<script>
+  let selected = null;
+  function select(card) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selected = card.dataset.choice;
+    const indicator = document.getElementById('indicator');
+    const titles = { A: 'Intercom-style Floating Chat', B: 'Full-Page Support Hub', C: 'Command-Palette AI' };
+    indicator.textContent = '✓ Selected: Option ' + selected + ' — ' + titles[selected];
+    indicator.classList.add('show');
+    // post to companion
+    if (window.__companion) window.__companion.select(selected, card.querySelector('h3').textContent);
+  }
+</script>
+</body>
+</html>
