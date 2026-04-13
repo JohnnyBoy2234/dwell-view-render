@@ -31,22 +31,22 @@ export default function SupportTicketForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
+    if (!user?.id) {
+      toast.error('Please sign in to submit a support ticket.');
+      return;
+    }
     setSubmitting(true);
 
     try {
-      const payload: Record<string, unknown> = {
-        subject: 'Support request via AI chat',
-        message: `Name: ${name}\nEmail: ${email}\n\n${message}`,
-        category: 'general',
-        priority: 'medium',
-      };
-      if (user?.id) payload.user_id = user.id;
-
       const { error } = await supabase
         .from('support_messages')
-        .insert(payload as any)
-        .select()
-        .single();
+        .insert({
+          subject: 'Support request via AI chat',
+          message: `Name: ${name}\nEmail: ${email}\n\n${message}`,
+          category: 'general' as const,
+          priority: 'medium' as const,
+          user_id: user.id,
+        } as any);
 
       if (error) throw error;
 
