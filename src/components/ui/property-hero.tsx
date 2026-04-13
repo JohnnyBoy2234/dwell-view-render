@@ -47,6 +47,7 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
             backgroundImage: `url(${heroImages[mode]})`,
             backgroundSize: heroMobileBgSize[mode],
             backgroundPosition: heroMobileBgPosition[mode],
+            backgroundRepeat: 'no-repeat',
           }}
           initial={{ opacity: 0, scale: 1.08 }}
           animate={{ opacity: 1, scale: 1 }}
