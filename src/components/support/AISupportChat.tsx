@@ -1,10 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import SupportTicketForm from './SupportTicketForm';
-import { useAuth } from '@/hooks/useAuth';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -23,7 +21,6 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 export function AISupportChat() {
-  const { user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -32,6 +29,7 @@ export function AISupportChat() {
   const [escalationDone, setEscalationDone] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   // Auto-scroll on new messages
   useEffect(() => {
@@ -42,10 +40,15 @@ export function AISupportChat() {
 
   // Focus input when panel opens
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
+    if (!isOpen) return;
+    const id = setTimeout(() => inputRef.current?.focus(), 100);
+    return () => clearTimeout(id);
   }, [isOpen]);
+
+  // Abort any in-flight stream on unmount
+  useEffect(() => {
+    return () => abortRef.current?.abort();
+  }, []);
 
   const sendMessage = async (text: string) => {
     const trimmed = text.trim();
@@ -61,12 +64,14 @@ export function AISupportChat() {
     setMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
     try {
+      abortRef.current = new AbortController();
       const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-support-chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
         },
+        signal: abortRef.current.signal,
         body: JSON.stringify({ messages: next }),
       });
 
@@ -179,7 +184,7 @@ export function AISupportChat() {
           </div>
 
           {/* Messages */}
-          <ScrollArea className="flex-1 px-4 py-3" ref={scrollRef as any}>
+          <div ref={scrollRef} className="flex-1 px-4 py-3 overflow-y-auto">
             {messages.length === 0 ? (
               <div className="space-y-4">
                 <div className="text-center text-muted-foreground text-sm py-4">
@@ -250,7 +255,7 @@ export function AISupportChat() {
                 )}
               </div>
             )}
-          </ScrollArea>
+          </div>
 
           {/* Input bar */}
           <div className="px-4 py-3 border-t border-border/50 shrink-0">
