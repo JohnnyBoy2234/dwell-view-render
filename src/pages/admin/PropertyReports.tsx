@@ -145,6 +145,7 @@ export default function PropertyReports() {
       misleading_info: 'Misleading Information',
       duplicate_listing: 'Duplicate Listing',
       pricing_issue: 'Pricing Issue',
+      scam_listing: 'Suspected Scam / Fake Listing',
       fake_listing: 'Fake Listing',
       other: 'Other',
     };

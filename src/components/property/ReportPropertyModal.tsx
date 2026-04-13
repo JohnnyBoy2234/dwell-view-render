@@ -305,7 +305,6 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
             <Button
               type="submit"
               disabled={isSubmitting || !issueType || !description.trim()}
-              onClick={() => setOpen(false)}
               className="flex-1"
             >
               {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

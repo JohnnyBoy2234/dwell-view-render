@@ -48,6 +48,7 @@ import { format } from "date-fns";
 import StartConversation from '@/components/StartConversation';
 import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
 import { SharePropertyMenu } from '@/components/property/SharePropertyMenu';
+import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 
 interface Property {
   id: string;
@@ -99,7 +100,6 @@ export default function PropertyDetail() {
   const [messageOpen, setMessageOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [reportModalOpen, setReportModalOpen] = useState(false);
   const [landlordPlan, setLandlordPlan] = useState<PlanType>('free');
   const [landlordPlanStatus, setLandlordPlanStatus] = useState<string>('inactive');
   const [landlordPlanLoaded, setLandlordPlanLoaded] = useState(false);
@@ -765,12 +765,7 @@ export default function PropertyDetail() {
                     <span className="font-medium">{new Date(property.created_at).toLocaleDateString()}</span>
                   </div>
                   <div className="pt-2 border-t border-white/20">
-                    <button
-                      onClick={() => setReportModalOpen(true)}
-                      className="text-xs font-semibold text-ios-red hover:text-ios-red/80 transition-colors"
-                    >
-                      Report Property
-                    </button>
+                    <ReportPropertyModal propertyId={property.id} />
                   </div>
                 </CardContent>
               </Card>
