@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useKyc } from '@/hooks/useKyc';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -51,7 +50,6 @@ interface NotificationPreferences {
 
 export default function ProfilePage() {
   const { user } = useAuth();
-  const { kycProfile } = useKyc();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -207,20 +205,6 @@ export default function ProfilePage() {
     }
   };
 
-  const getVerificationStatus = () => {
-    if (!kycProfile) return { icon: XCircle, text: 'Not Started', color: 'destructive' };
-    
-    switch (kycProfile.status) {
-      case 'approved':
-        return { icon: CheckCircle, text: 'Verified', color: 'default' };
-      case 'submitted':
-        return { icon: Clock, text: 'Under Review', color: 'secondary' };
-      case 'declined':
-        return { icon: XCircle, text: 'Declined', color: 'destructive' };
-      default:
-        return { icon: XCircle, text: 'Not Started', color: 'destructive' };
-    }
-  };
 
   if (loading) {
     return (
@@ -229,9 +213,6 @@ export default function ProfilePage() {
       </div>
     );
   }
-
-  const verificationStatus = getVerificationStatus();
-  const StatusIcon = verificationStatus.icon;
 
   // Check if user is landlord to show back button
   const isLandlord = user?.user_metadata?.role === 'landlord';
@@ -323,10 +304,6 @@ export default function ProfilePage() {
         <CardContent className="pt-0">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl font-bold">{profile?.display_name || 'User'}</h1>
-            <Badge variant={verificationStatus.color as any} className="flex items-center gap-1">
-              <StatusIcon className="h-3 w-3" />
-              {verificationStatus.text}
-            </Badge>
           </div>
           <p className="text-muted-foreground">{user?.email}</p>
         </CardContent>
@@ -408,23 +385,6 @@ export default function ProfilePage() {
               </Badge>
             </div>
             
-            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <span>Identity Verification</span>
-              </div>
-              <Badge variant={verificationStatus.color as any}>
-                <StatusIcon className="h-3 w-3 mr-1" />
-                {verificationStatus.text}
-              </Badge>
-            </div>
-
-            {kycProfile?.status !== 'approved' && (
-              <Button variant="outline" className="w-full" onClick={() => navigate('/verify-id')}>
-                <Upload className="h-4 w-4 mr-2" />
-                {!kycProfile ? 'Start Verification' : 'Continue Verification'}
-              </Button>
-            )}
           </CardContent>
         </Card>
       </div>

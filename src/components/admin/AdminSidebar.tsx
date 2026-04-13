@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { FileText, Users, Shield, LogOut, Home, UserCheck, Building, Flag, LayoutDashboard } from 'lucide-react';
+import { FileText, Users, Shield, LogOut, Home, Building, Flag, LayoutDashboard } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -21,7 +21,6 @@ const adminItems = [
   { title: 'Admin Users', url: '/admin/admin-users', icon: Shield },
   { title: 'Property Management', url: '/admin/properties', icon: Building },
   { title: 'Document Review', url: '/admin/documents', icon: FileText },
-  { title: 'KYC Management', url: '/admin/kyc', icon: UserCheck },
   { title: 'Reports', url: '/admin/reports', icon: Flag },
 ];
 
