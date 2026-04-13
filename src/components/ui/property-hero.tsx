@@ -15,7 +15,7 @@ const heroMobileBgPosition: Record<Mode, string> = {
 
 const heroMobileBgSize: Record<Mode, string> = {
   rent: 'cover',
-  buy:  '180%',
+  buy:  '140%',
 };
 
 const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {

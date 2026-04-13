@@ -300,7 +300,7 @@ export const Property24SearchInput: React.FC<Property24SearchInputProps> = ({
           disabled={disabled}
           className={cn(
             "w-full h-12 pl-12 pr-12 rounded-lg border border-border bg-background",
-            "text-foreground placeholder:text-muted-foreground",
+            "text-foreground placeholder:text-foreground/60",
             "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary",
             "hover:border-muted-foreground/50 transition-all duration-200",
             "disabled:opacity-50 disabled:cursor-not-allowed",
