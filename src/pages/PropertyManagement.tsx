@@ -11,6 +11,7 @@ import { Property } from '@/types/dashboard';
 import { PropertyOverview } from '@/components/property/PropertyOverview';
 import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
 import { TenantRelations } from '@/components/property/TenantRelations';
+import { TenantInviteSection } from '@/components/property/TenantInviteSection';
 import { PropertyOperations } from '@/components/property/PropertyOperations';
 import { SalePropertyOverview, SaleCompliance } from '@/components/property/SalePropertyManagement';
 import { SellingJourney } from '@/components/property/SellingJourney';
@@ -354,9 +355,12 @@ export default function PropertyManagement() {
           )}
           
           {activeTab === 'tenants' && property.listing_type !== 'sale' && (
-            <TenantRelations 
-              property={property}
-            />
+            <div className="space-y-4">
+              <TenantRelations property={property} />
+              <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                <TenantInviteSection propertyId={property.id} />
+              </div>
+            </div>
           )}
           
           {activeTab === 'operations' && property.listing_type !== 'sale' && (
