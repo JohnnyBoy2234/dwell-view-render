@@ -122,6 +122,7 @@ export default function Properties() {
         .from('properties')
         .select('*', { count: 'exact' })
         .eq('status', 'available')
+        .eq('is_listed', true)
         .order('featured', { ascending: false })
         .order('created_at', { ascending: false })
         .range(from, to);

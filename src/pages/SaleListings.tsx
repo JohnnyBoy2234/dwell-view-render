@@ -142,6 +142,7 @@ export default function SaleListings() {
         .from('properties')
         .select('*', { count: 'exact' })
         .eq('status', 'available')
+        .eq('is_listed', true)
         .eq('listing_type', 'sale') // Only fetch sale listings
         .order('featured', { ascending: false })
         .order('created_at', { ascending: false })

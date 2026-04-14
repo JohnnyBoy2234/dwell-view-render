@@ -54,7 +54,7 @@ export function MobileBottomBar() {
   const navItems: NavItem[] = [
     { path: '/', icon: Home, label: 'Home' },
     { path: '/properties', icon: Search, label: 'Find' },
-    ...(isLandlord ? [{ path: '/list-property', icon: Plus, label: 'List' }] : []),
+    ...(isLandlord ? [{ path: '/listing-type', icon: Plus, label: 'List' }] : []),
     { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
     { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
     { path: getDeskRoute(), icon: Building, label: isLandlord ? 'Manage' : 'My Home' },
