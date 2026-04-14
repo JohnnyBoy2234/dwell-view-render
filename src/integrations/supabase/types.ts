@@ -1530,6 +1530,7 @@ export type Database = {
           email_verified: boolean
           id: string
           id_verification_status: string | null
+          id_number: string | null
           id_verified: boolean
           is_tenant_screened: boolean
           plan: string
@@ -1549,6 +1550,7 @@ export type Database = {
           email_verified?: boolean
           id?: string
           id_verification_status?: string | null
+          id_number?: string | null
           id_verified?: boolean
           is_tenant_screened?: boolean
           plan?: string
@@ -1568,6 +1570,7 @@ export type Database = {
           email_verified?: boolean
           id?: string
           id_verification_status?: string | null
+          id_number?: string | null
           id_verified?: boolean
           is_tenant_screened?: boolean
           plan?: string
@@ -1645,6 +1648,8 @@ export type Database = {
           status: string
           title: string
           updated_at: string
+          is_listed: boolean
+          listing_type: string | null
         }
         Insert: {
           amenities?: string[] | null
@@ -1667,6 +1672,8 @@ export type Database = {
           status?: string
           title: string
           updated_at?: string
+          is_listed?: boolean
+          listing_type?: string | null
         }
         Update: {
           amenities?: string[] | null
@@ -1689,6 +1696,47 @@ export type Database = {
           status?: string
           title?: string
           updated_at?: string
+          is_listed?: boolean
+          listing_type?: string | null
+        }
+        Relationships: []
+      }
+      property_invites: {
+        Row: {
+          id: string
+          property_id: string
+          landlord_id: string
+          token: string
+          monthly_rent: number
+          lease_start: string
+          lease_end: string | null
+          used_at: string | null
+          tenant_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          property_id: string
+          landlord_id: string
+          token?: string
+          monthly_rent: number
+          lease_start: string
+          lease_end?: string | null
+          used_at?: string | null
+          tenant_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          property_id?: string
+          landlord_id?: string
+          token?: string
+          monthly_rent?: number
+          lease_start?: string
+          lease_end?: string | null
+          used_at?: string | null
+          tenant_id?: string | null
+          created_at?: string
         }
         Relationships: []
       }

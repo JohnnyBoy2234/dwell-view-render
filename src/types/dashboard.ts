@@ -12,6 +12,7 @@ export interface Property {
   images?: string[];
   landlord_id: string;
   listing_type?: string;
+  is_listed?: boolean;
   buyer_name?: string;
   sale_date?: string;
 }
