@@ -1,0 +1,83 @@
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { MiniNavbar } from '@/components/ui/mini-navbar';
+
+export default function ListingTypePage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const propertyId = searchParams.get('propertyId');
+
+  const go = (base: string) =>
+    navigate(propertyId ? `${base}?propertyId=${propertyId}` : base);
+
+  return (
+    <>
+      <MiniNavbar />
+      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light pt-28 sm:pt-24 pb-24 px-4">
+        <div className="max-w-md mx-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 mb-6"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back
+          </button>
+
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">What do you want to do?</h1>
+          <p className="text-sm text-gray-500 mb-6">Choose how you want to add your property</p>
+
+          {/* List for Rent */}
+          <button
+            onClick={() => go('/list-property')}
+            className="w-full flex items-center gap-4 bg-white rounded-2xl p-5 mb-3 border-2 border-blue-200 shadow-sm hover:border-blue-400 hover:shadow-md transition-all text-left"
+          >
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+              🏠
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-blue-800 text-base">List for Rent</div>
+              <div className="text-sm text-gray-500 mt-0.5">Publish your property to find tenants</div>
+            </div>
+            <span className="text-blue-300 text-xl">›</span>
+          </button>
+
+          {/* List for Sale */}
+          <button
+            onClick={() => go('/list-sale')}
+            className="w-full flex items-center gap-4 bg-white rounded-2xl p-5 mb-3 border-2 border-green-200 shadow-sm hover:border-green-400 hover:shadow-md transition-all text-left"
+          >
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+              🏷️
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-green-800 text-base">List for Sale</div>
+              <div className="text-sm text-gray-500 mt-0.5">Publish your property to find buyers</div>
+            </div>
+            <span className="text-green-300 text-xl">›</span>
+          </button>
+
+          {/* Add Property Unlisted */}
+          <button
+            onClick={() => go('/add-property-unlisted')}
+            className="w-full flex items-center gap-4 bg-white rounded-2xl p-5 mb-4 border-2 border-purple-200 shadow-sm hover:border-purple-400 hover:shadow-md transition-all text-left"
+          >
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
+              🔧
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-purple-800 text-base">Add Property (Unlisted)</div>
+              <div className="text-sm text-gray-500 mt-0.5">Manage tools without a public listing</div>
+            </div>
+            <span className="text-purple-300 text-xl">›</span>
+          </button>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-xs text-amber-800">
+              💡 <strong>Add Property (Unlisted)</strong> lets you use all management tools — maintenance,
+              leases, payments — without appearing in public search.
+            </p>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

@@ -1,8 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import SupportTicketForm from './SupportTicketForm';
+
+// Routes where the chat bubble should be hidden
+const HIDDEN_ROUTE_PREFIXES = [
+  '/messages',
+  '/tenant/messages',
+  '/admin',
+  '/RentLekker-lease/',
+];
+const HIDDEN_ROUTE_PATTERNS = [
+  /\/leases\/.+\/sign/,
+  /\/contracts\/.+\/sign/,
+  /\/sign$/,
+];
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,6 +35,11 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 export function AISupportChat() {
+  const { pathname } = useLocation();
+  const isHidden =
+    HIDDEN_ROUTE_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/') || pathname.startsWith(p)) ||
+    HIDDEN_ROUTE_PATTERNS.some(r => r.test(pathname));
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -123,6 +142,8 @@ export function AISupportChat() {
   const lastAiMessage =
     messages.filter(m => m.role === 'assistant').slice(-1)[0]?.content || '';
 
+  if (isHidden) return null;
+
   return (
     <>
       {/* Floating Action Button */}
@@ -155,12 +176,13 @@ export function AISupportChat() {
         <div
           className={cn(
             'fixed z-50 flex flex-col bg-background overflow-hidden',
-            // Mobile: full-width bottom sheet
-            'bottom-0 left-0 right-0 rounded-t-2xl h-[82vh]',
+            // Mobile: full-width bottom sheet — use dvh so it doesn't go behind browser chrome/keyboard
+            'bottom-0 left-0 right-0 rounded-t-2xl',
             // Desktop: anchored card
             'md:bottom-6 md:right-6 md:left-auto md:w-[380px] md:h-[560px] md:rounded-2xl',
             'shadow-2xl shadow-black/20 border border-border/50'
           )}
+          style={{ height: 'min(82dvh, 82vh)' } as React.CSSProperties}
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-primary to-primary/80 text-primary-foreground px-4 py-3 flex items-center justify-between shrink-0">
@@ -273,7 +295,10 @@ export function AISupportChat() {
           </div>
 
           {/* Input bar */}
-          <div className="px-4 py-3 border-t border-border/50 shrink-0">
+          <div
+            className="px-4 pt-3 border-t border-border/50 shrink-0 md:pb-3"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
+          >
             <div className="flex gap-2 items-center">
               <input
                 ref={inputRef}

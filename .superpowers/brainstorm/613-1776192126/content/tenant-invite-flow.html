@@ -1,0 +1,117 @@
+<h2>Section 3 — Tenant Invite Flow</h2>
+<p class="subtitle">Landlord generates a shareable link · Tenant registers and is linked to the property</p>
+
+<div class="split">
+
+  <!-- LANDLORD SIDE -->
+  <div class="mockup">
+    <div class="mockup-header">Landlord — Property Management → Tenants tab</div>
+    <div class="mockup-body" style="background:#f8fafc;padding:16px;min-height:560px;">
+
+      <div style="font-size:0.85rem;font-weight:600;color:#374151;margin-bottom:12px;">Tenants</div>
+
+      <!-- Empty state -->
+      <div style="background:white;border-radius:14px;padding:20px;border:1px solid #e5e7eb;text-align:center;margin-bottom:16px;">
+        <div style="font-size:2rem;margin-bottom:8px;">👤</div>
+        <div style="font-size:0.85rem;font-weight:600;color:#374151;">No tenants yet</div>
+        <div style="font-size:0.75rem;color:#6b7280;margin-top:4px;">Invite your existing tenant to connect to this property</div>
+      </div>
+
+      <!-- Invite button -->
+      <button style="width:100%;padding:12px;background:#1d4ed8;color:white;border:none;border-radius:12px;font-weight:600;font-size:0.875rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <span>🔗</span> Generate Tenant Invite Link
+      </button>
+
+      <!-- Invite dialog (expanded) -->
+      <div style="background:white;border-radius:14px;padding:16px;border:1.5px solid #bfdbfe;margin-top:12px;">
+        <div style="font-weight:700;font-size:0.9rem;margin-bottom:12px;color:#1e40af;">Set up invite link</div>
+
+        <div style="margin-bottom:10px;">
+          <div style="font-size:0.75rem;font-weight:600;color:#374151;margin-bottom:4px;">Monthly Rent (R)</div>
+          <input class="mock-input" value="12 500" style="width:100%;" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;color:#374151;margin-bottom:4px;">Start Date</div>
+            <input class="mock-input" value="2024-05-01" style="width:100%;" />
+          </div>
+          <div>
+            <div style="font-size:0.75rem;font-weight:600;color:#374151;margin-bottom:4px;">End Date (optional)</div>
+            <input class="mock-input" placeholder="Ongoing" style="width:100%;" />
+          </div>
+        </div>
+
+        <button style="width:100%;padding:10px;background:#1d4ed8;color:white;border:none;border-radius:10px;font-weight:600;font-size:0.82rem;cursor:pointer;margin-bottom:10px;">
+          Generate Link
+        </button>
+
+        <!-- Generated link -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:10px;">
+          <div style="font-size:0.7rem;color:#166534;font-weight:600;margin-bottom:6px;">✓ Link ready to share</div>
+          <div style="background:white;border-radius:8px;padding:8px;font-size:0.7rem;color:#374151;font-family:monospace;border:1px solid #e5e7eb;margin-bottom:8px;word-break:break-all;">
+            rentlekker.com/join/x7k2m9p4...
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button style="flex:1;padding:6px;background:#25d366;color:white;border:none;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;">WhatsApp</button>
+            <button style="flex:1;padding:6px;background:#374151;color:white;border:none;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;">Copy Link</button>
+            <button style="flex:1;padding:6px;background:#6b7280;color:white;border:none;border-radius:8px;font-size:0.72rem;font-weight:600;cursor:pointer;">Email</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TENANT SIDE -->
+  <div class="mockup">
+    <div class="mockup-header">Tenant — visiting rentlekker.com/join/[token]</div>
+    <div class="mockup-body" style="background:#f8fafc;padding:16px;min-height:560px;">
+
+      <!-- Step 1: Property preview -->
+      <div style="background:white;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;margin-bottom:12px;">
+        <div style="background:linear-gradient(135deg,#1d4ed8,#3b82f6);padding:16px;color:white;">
+          <div style="font-size:0.7rem;opacity:0.8;margin-bottom:2px;">You've been invited to</div>
+          <div style="font-weight:700;font-size:1rem;">3 Bed House, Pretoria</div>
+          <div style="font-size:0.78rem;opacity:0.85;margin-top:2px;">by John Smith (Landlord)</div>
+        </div>
+        <div style="padding:12px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+            <div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:0.7rem;color:#6b7280;">Monthly Rent</div>
+              <div style="font-weight:700;color:#1e40af;font-size:0.95rem;">R12,500</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:10px;text-align:center;">
+              <div style="font-size:0.7rem;color:#6b7280;">Move-in Date</div>
+              <div style="font-weight:700;color:#1e40af;font-size:0.95rem;">1 May 2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Auth gate -->
+      <div style="background:white;border-radius:14px;padding:14px;border:1px solid #e5e7eb;margin-bottom:12px;">
+        <div style="font-weight:700;font-size:0.85rem;margin-bottom:10px;">Sign in or create an account</div>
+        <input class="mock-input" placeholder="Email address" style="width:100%;margin-bottom:8px;" />
+        <input class="mock-input" placeholder="Password" style="width:100%;margin-bottom:10px;" />
+        <button style="width:100%;padding:10px;background:#1d4ed8;color:white;border:none;border-radius:10px;font-weight:600;font-size:0.82rem;cursor:pointer;">Continue</button>
+        <div style="text-align:center;font-size:0.72rem;color:#6b7280;margin-top:8px;">Don't have an account? <span style="color:#1d4ed8;font-weight:600;">Sign up</span></div>
+      </div>
+
+      <!-- Step 3: Lightweight form -->
+      <div style="background:white;border-radius:14px;padding:14px;border:1.5px solid #bfdbfe;">
+        <div style="font-weight:700;font-size:0.85rem;margin-bottom:4px;color:#1e40af;">Almost done — confirm your details</div>
+        <div style="font-size:0.72rem;color:#6b7280;margin-bottom:10px;">This links you to the property</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <input class="mock-input" placeholder="Full name" style="width:100%;" />
+          <input class="mock-input" placeholder="SA ID number" style="width:100%;" />
+          <input class="mock-input" placeholder="Phone number" style="width:100%;" />
+        </div>
+        <button style="width:100%;padding:10px;background:#16a34a;color:white;border:none;border-radius:10px;font-weight:600;font-size:0.82rem;cursor:pointer;margin-top:10px;">
+          ✓ Accept & Register as Tenant
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+</div>

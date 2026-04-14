@@ -1,0 +1,64 @@
+<h2>Listing Choice Page</h2>
+<p class="subtitle">When a landlord taps "+" on mobile — which layout feels right?</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="A" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#1d4ed8 0%,#3b82f6 100%);display:flex;align-items:center;justify-content:center;height:120px;">
+      <div style="text-align:center;color:white;">
+        <div style="font-size:2rem;margin-bottom:8px;">🏠</div>
+        <div style="font-size:1.1rem;font-weight:700;">List for Rent</div>
+        <div style="font-size:0.8rem;opacity:0.85;margin-top:4px;">Publish to find tenants</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Option A — 3 Big Cards (stacked)</h3>
+      <p>Full-width cards stacked vertically. Each card has an icon, title, and a one-line description. Thumb-friendly, easy to read at a glance.</p>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+        <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.4rem;">🏠</span>
+          <div><div style="font-weight:600;font-size:0.9rem;">List for Rent</div><div style="font-size:0.75rem;color:#6b7280;">Publish to find tenants</div></div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.4rem;">🏷️</span>
+          <div><div style="font-weight:600;font-size:0.9rem;">List for Sale</div><div style="font-size:0.75rem;color:#6b7280;">Publish to find buyers</div></div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.4rem;">🔧</span>
+          <div><div style="font-weight:600;font-size:0.9rem;">Add Property (Unlisted)</div><div style="font-size:0.75rem;color:#6b7280;">Manage without listing publicly</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" data-choice="B" onclick="toggleSelect(this)">
+    <div class="card-image" style="background:linear-gradient(135deg,#7c3aed 0%,#a78bfa 100%);display:flex;align-items:center;justify-content:center;height:120px;">
+      <div style="text-align:center;color:white;">
+        <div style="font-size:2rem;margin-bottom:8px;">📋</div>
+        <div style="font-size:1.1rem;font-weight:700;">What do you want to do?</div>
+        <div style="font-size:0.8rem;opacity:0.85;margin-top:4px;">Choose your goal</div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Option B — Icon Cards (2 + 1 layout)</h3>
+      <p>Two cards side-by-side on the top row (Rent + Sale), and the "Add Property" card full-width below. Visually groups the "public listing" options together.</p>
+      <div style="margin-top:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;">
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:1.4rem;">🏠</div>
+            <div style="font-weight:600;font-size:0.8rem;margin-top:4px;">List for Rent</div>
+          </div>
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;text-align:center;">
+            <div style="font-size:1.4rem;">🏷️</div>
+            <div style="font-weight:600;font-size:0.8rem;margin-top:4px;">List for Sale</div>
+          </div>
+        </div>
+        <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:1.4rem;">🔧</span>
+          <div><div style="font-weight:600;font-size:0.9rem;">Add Property (Unlisted)</div><div style="font-size:0.75rem;color:#6b7280;">Use management tools without a public listing</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
