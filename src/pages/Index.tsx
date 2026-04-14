@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/testimonials-columns-1";
 import { motion, AnimatePresence } from "motion/react";
 import { ForSellersSection } from "@/components/sections/ForSellersSection";
+import { SellingStepsPreview } from "@/components/sections/SellingStepsPreview";
 import { ForBuyersSection } from "@/components/sections/ForBuyersSection";
 import {
   Shield,
@@ -293,6 +294,13 @@ const Index = () => {
 
       {/* ── FOR SELLERS / LANDLORDS ── */}
       <ForSellersSection mode={mode} />
+
+      {/* ── SELLING STEPS PREVIEW (buy mode only) ── */}
+      {mode === 'buy' && (
+        <div style={{ background: "hsl(214 60% 97%)" }}>
+          <SellingStepsPreview />
+        </div>
+      )}
 
       {/* ── FOR BUYERS / TENANTS ── */}
       <ForBuyersSection mode={mode} />

@@ -52,7 +52,7 @@ const forSellersContent: Record<Mode, {
     primaryLabel: 'List for Sale',
     primaryHref: '/list-sale',
     secondaryLabel: 'Learn More',
-    secondaryHref: '/about/landlord',
+    secondaryHref: '/about/seller',
   },
 };
 

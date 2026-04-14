@@ -621,36 +621,38 @@ export default function PropertyDetail() {
                 ) : user && property.landlord_id !== user.id ? (
                   <div className="space-y-2">
                     {property.listing_type === 'sale' ? (
-                      /* Contact Section for Sale Properties */
-                      <div className="space-y-2">
-                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                          <div className="flex items-center gap-2 mb-3">
-                            <User className="h-5 w-5 text-blue-600" />
-                            <span className="text-lg font-medium text-blue-900">Contact Landlord</span>
-                          </div>
-                          <div className="space-y-2 text-sm text-blue-700">
-                            <div className="font-medium">{property.contact_name}</div>
+                      /* Inquire Section for Sale Properties */
+                      <div className="space-y-3">
+                        <Button
+                          onClick={handleContactLandlord}
+                          className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-xl py-5 text-base font-semibold"
+                          size="lg"
+                        >
+                          <MessageCircle className="h-5 w-5 mr-2" />
+                          Inquire About This Property
+                        </Button>
+                        {(property.contact_name || property.contact_phone || property.contact_email) && (
+                          <div className="p-3 bg-gray-50 border border-gray-100 rounded-xl text-sm text-gray-600 space-y-1">
+                            {property.contact_name && (
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-gray-400" />
+                                <span>{property.contact_name}</span>
+                              </div>
+                            )}
                             {property.contact_phone && (
                               <div className="flex items-center gap-2">
-                                <Phone className="h-4 w-4" />
+                                <Phone className="h-4 w-4 text-gray-400" />
                                 <span>{property.contact_phone}</span>
                               </div>
                             )}
                             {property.contact_email && (
                               <div className="flex items-center gap-2">
-                                <Mail className="h-4 w-4" />
+                                <Mail className="h-4 w-4 text-gray-400" />
                                 <span>{property.contact_email}</span>
                               </div>
                             )}
                           </div>
-                          <Button 
-                            onClick={handleContactLandlord}
-                            className="w-full mt-3 bg-blue-600 hover:bg-blue-700"
-                          >
-                            <MessageCircle className="h-4 w-4 mr-2" />
-                            Send Message
-                          </Button>
-                        </div>
+                        )}
                       </div>
                     ) : (
                       /* Original Viewing Button for Rental Properties */

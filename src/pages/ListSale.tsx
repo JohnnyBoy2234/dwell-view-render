@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, Phone, Mail } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, Phone, FileText } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -26,6 +26,7 @@ import SalesPricingStep from '@/components/listing/SalesPricingStep';
 import PhotosStep from '@/components/listing/PhotosStep';
 import ReviewStep from '@/components/listing/ReviewStep';
 import ContactStep from '@/components/listing/ContactStep';
+import SellerDocumentsStep from '@/components/listing/SellerDocumentsStep';
 
 export interface SaleListingFormData {
   // Property Type
@@ -65,7 +66,8 @@ const steps = [
   { id: 4, title: 'Pricing', icon: RIcon, description: 'Set your sale price' },
   { id: 5, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
   { id: 6, title: 'Contact', icon: Phone, description: 'Add contact information' },
-  { id: 7, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
+  { id: 7, title: 'Documents', icon: FileText, description: 'Upload seller documents (optional)' },
+  { id: 8, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];
 
 export default function ListSale() {
@@ -277,6 +279,8 @@ export default function ListSale() {
       case 6:
         return <ContactStep control={control} errors={errors} />;
       case 7:
+        return <SellerDocumentsStep />;
+      case 8:
         return <ReviewStep formData={formData} isSale={true} />;
       default:
         return null;

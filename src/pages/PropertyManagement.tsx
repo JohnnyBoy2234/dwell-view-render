@@ -6,13 +6,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield } from 'lucide-react';
+import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield, Key } from 'lucide-react';
 import { Property } from '@/types/dashboard';
 import { PropertyOverview } from '@/components/property/PropertyOverview';
 import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
 import { TenantRelations } from '@/components/property/TenantRelations';
 import { PropertyOperations } from '@/components/property/PropertyOperations';
 import { SalePropertyOverview, SaleCompliance } from '@/components/property/SalePropertyManagement';
+import { SellingJourney } from '@/components/property/SellingJourney';
 
 interface MaintenanceRequest {
   id: string;
@@ -26,7 +27,7 @@ interface MaintenanceRequest {
   notes?: string;
 }
 
-type TabType = 'overview' | 'management' | 'tenants' | 'operations' | 'deed_of_sale' | 'compliance';
+type TabType = 'overview' | 'management' | 'tenants' | 'operations' | 'deed_of_sale' | 'compliance' | 'selling_journey';
 
 export default function PropertyManagement() {
   const { id } = useParams<{ id: string }>();
@@ -134,6 +135,12 @@ export default function PropertyManagement() {
       label: 'Legal & Compliance',
       icon: Shield,
       color: 'ios-purple'
+    },
+    {
+      id: 'selling_journey' as TabType,
+      label: 'Selling Journey',
+      icon: Key,
+      color: 'ios-orange'
     }
   ] : [
     {
@@ -235,7 +242,7 @@ export default function PropertyManagement() {
                   </div>
                 </div>
               </div>
-              <div 
+              <div
                 onClick={() => handleTabChange('compliance')}
                 className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
               >
@@ -246,6 +253,20 @@ export default function PropertyManagement() {
                   <div>
                     <h4 className="font-semibold text-gray-900">Legal & Compliance</h4>
                     <p className="text-sm text-gray-600">Upload documents and certificates</p>
+                  </div>
+                </div>
+              </div>
+              <div
+                onClick={() => handleTabChange('selling_journey')}
+                className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+                    <Key className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Selling Journey</h4>
+                    <p className="text-sm text-gray-600">Track your 9-step conveyancing process</p>
                   </div>
                 </div>
               </div>
@@ -320,6 +341,10 @@ export default function PropertyManagement() {
           
           {activeTab === 'compliance' && property.listing_type === 'sale' && (
             <SaleCompliance property={property} />
+          )}
+
+          {activeTab === 'selling_journey' && property.listing_type === 'sale' && (
+            <SellingJourney propertyId={property.id} />
           )}
           
           {activeTab === 'management' && property.listing_type !== 'sale' && (
