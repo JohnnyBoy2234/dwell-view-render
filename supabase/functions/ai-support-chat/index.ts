@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import Anthropic from "npm:@anthropic-ai/sdk";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -110,30 +109,68 @@ serve(async (req) => {
       });
     }
 
-    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
-    if (!ANTHROPIC_API_KEY) {
-      throw new Error('ANTHROPIC_API_KEY not configured');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+    const upstream = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+        stream: true,
+      }),
+    });
 
+    if (!upstream.ok) {
+      const status = upstream.status === 429 ? 429 : 500;
+      return new Response(
+        JSON.stringify({ error: `Upstream error: ${upstream.status}` }),
+        { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Parse SSE from Lovable and forward as raw text so the frontend
+    // can use its simple TextDecoder reader (no SSE parsing needed client-side).
     const readable = new ReadableStream({
       async start(controller) {
         try {
-          const stream = await client.messages.stream({
-            model: 'claude-haiku-4-5-20251001',
-            max_tokens: 2048,
-            system: SYSTEM_PROMPT,
-            messages,
-          });
+          const reader = upstream.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
 
-          for await (const event of stream) {
-            if (
-              event.type === 'content_block_delta' &&
-              event.delta.type === 'text_delta'
-            ) {
-              controller.enqueue(new TextEncoder().encode(event.delta.text));
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            let newlineIdx: number;
+            while ((newlineIdx = buffer.indexOf('\n')) !== -1) {
+              let line = buffer.slice(0, newlineIdx).trimEnd();
+              buffer = buffer.slice(newlineIdx + 1);
+
+              if (!line.startsWith('data: ')) continue;
+              const jsonStr = line.slice(6).trim();
+              if (jsonStr === '[DONE]') break;
+
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const text = parsed.choices?.[0]?.delta?.content;
+                if (text) {
+                  controller.enqueue(new TextEncoder().encode(text));
+                }
+              } catch {
+                // incomplete JSON fragment — skip
+              }
             }
           }
           controller.close();
