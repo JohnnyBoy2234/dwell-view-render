@@ -58,6 +58,8 @@ interface PropertyWithTenant {
   tenant_name?: string;
   tenant_id?: string;
   lease_status?: string;
+  is_listed?: boolean;
+  listing_type?: string | null;
 }
 
 interface TenantListItem {
@@ -294,7 +296,9 @@ export default function EnhancedLandlordDashboard() {
           location: prop.location,
           images: prop.images || [],
           price: prop.price,
-          status: prop.status
+          status: prop.status,
+          is_listed: prop.is_listed,
+          listing_type: prop.listing_type,
         }));
         setProperties(transformedProperties);
       }

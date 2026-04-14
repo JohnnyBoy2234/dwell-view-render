@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS property_invites (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   property_id uuid NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
   landlord_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  token text UNIQUE NOT NULL DEFAULT substring(replace(gen_random_uuid()::text, '-', ''), 1, 10),
+  token text UNIQUE NOT NULL DEFAULT substring(replace(gen_random_uuid()::text, '-', ''), 1, 20),
   monthly_rent numeric NOT NULL,
   lease_start date NOT NULL,
   lease_end date,

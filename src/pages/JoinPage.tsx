@@ -58,6 +58,13 @@ export default function JoinPage() {
     loadInvite();
   }, [token]);
 
+  useEffect(() => {
+    if (user && invite) {
+      // Re-fetch to confirm invite is still valid under authenticated session
+      loadInvite();
+    }
+  }, [user?.id]);
+
   const loadInvite = async () => {
     setLoading(true);
     const { data: inv, error: invErr } = await supabase
@@ -97,8 +104,14 @@ export default function JoinPage() {
     setAuthLoading(true);
     let authError;
     if (isSignUp) {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
       authError = error;
+      if (!error && !signUpData.session) {
+        toast({
+          title: 'Check your email',
+          description: 'Click the confirmation link in your email, then return to this page and sign in.',
+        });
+      }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       authError = error;

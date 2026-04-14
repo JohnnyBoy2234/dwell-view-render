@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { Link, Copy, MessageSquare, Mail } from 'lucide-react';
+import { Link as LinkIcon, Copy, MessageSquare, Mail } from 'lucide-react';
 
 interface TenantInviteSectionProps {
   propertyId: string;
@@ -71,7 +71,7 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
         <div className="font-semibold text-gray-800 mb-1">No tenants yet</div>
         <div className="text-sm text-gray-500 mb-4">Invite your existing tenant to connect to this property</div>
         <Button onClick={() => setShowForm(true)} className="bg-blue-600 hover:bg-blue-700">
-          <Link className="h-4 w-4 mr-2" /> Generate Tenant Invite Link
+          <LinkIcon className="h-4 w-4 mr-2" /> Generate Tenant Invite Link
         </Button>
       </div>
     );
