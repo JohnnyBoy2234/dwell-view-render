@@ -2539,6 +2539,11 @@ const renderReportsTab = () => (
                   <Badge variant={getStatusBadgeVariant(property.status)} className="text-xs ml-2">
                     {property.status}
                   </Badge>
+                  {!property.is_listed && (
+                    <span className="bg-purple-50 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full border border-purple-200 ml-1">
+                      UNLISTED
+                    </span>
+                  )}
                 </div>
                 
                 <p className="text-xs text-muted-foreground truncate">
@@ -2584,6 +2589,18 @@ const renderReportsTab = () => (
                       }}>
                           <Eye className="h-3 w-3" />
                         </Button>
+                    )}
+                    {!property.is_listed && (
+                      <Button
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/listing-type?propertyId=${property.id}`);
+                        }}
+                      >
+                        ✦ Publish
+                      </Button>
                     )}
                   </div>
                 </div>
