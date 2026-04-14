@@ -20,6 +20,9 @@ import About from "./pages/About";
 import AboutLandlord from "./pages/AboutLandlord";
 import AboutTenant from "./pages/AboutTenant";
 import AboutSeller from "./pages/AboutSeller";
+import ListingTypePage from './pages/ListingTypePage';
+import AddPropertyUnlisted from './pages/AddPropertyUnlisted';
+import JoinPage from './pages/JoinPage';
 import Contact from "./pages/Contact";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -220,6 +223,9 @@ function AppRoutes() {
               <Route path="/about/landlord" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><AboutLandlord /></div></>} />
               <Route path="/about/tenant" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><AboutTenant /></div></>} />
               <Route path="/about/seller" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><AboutSeller /></div></>} />
+              <Route path="/listing-type" element={<ListingTypePage />} />
+              <Route path="/add-property-unlisted" element={<AddPropertyUnlisted />} />
+              <Route path="/join/:token" element={<JoinPage />} />
               <Route path="/contact" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Contact /></div></>} />
               <Route path="/blog" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Blog /></div></>} />
               <Route path="/blog/:postId" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><BlogPost /></div></>} />
