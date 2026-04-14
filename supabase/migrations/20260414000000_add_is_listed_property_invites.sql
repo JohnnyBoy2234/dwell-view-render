@@ -33,10 +33,15 @@ CREATE POLICY "landlord_manage_invites" ON property_invites
   USING (landlord_id = auth.uid())
   WITH CHECK (landlord_id = auth.uid());
 
--- Anyone can read a single invite by token (for unauthenticated join page)
+-- Anyone can read unused invites by token (for unauthenticated join page)
+-- Used invites are only visible to the landlord or linked tenant
 CREATE POLICY "public_read_invite_by_token" ON property_invites
   FOR SELECT TO anon, authenticated
-  USING (true);
+  USING (
+    used_at IS NULL
+    OR landlord_id = auth.uid()
+    OR tenant_id = auth.uid()
+  );
 
 -- Tenant can update used_at + tenant_id when accepting
 CREATE POLICY "tenant_accept_invite" ON property_invites
