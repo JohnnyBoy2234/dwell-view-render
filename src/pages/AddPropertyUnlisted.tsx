@@ -153,27 +153,40 @@ export default function AddPropertyUnlisted() {
 
       const imageUrls = data.images && data.images.length > 0 ? await uploadImages(data.images) : [];
 
-      const { error } = await supabase.from('properties').insert({
-        title: `${data.property_type} in ${data.location}`,
-        description: data.description,
-        location: data.location,
-        property_type: data.property_type,
-        price: 0,
-        bedrooms: Number(data.bedrooms) || 1,
-        bathrooms: Number(data.bathrooms) || 1,
-        parking_spaces: Number(data.parking_spaces) || 0,
-        size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
-        furnished: data.furnished,
-        pets_allowed: data.pets_allowed,
-        amenities: data.amenities,
-        landlord_id: user.id,
-        images: imageUrls,
-        is_listed: false,
-        listing_type: null,
-        status: 'available',
-      });
+      const { data: inserted, error } = await supabase
+        .from('properties')
+        .insert({
+          title: `${data.property_type} in ${data.location}`,
+          description: data.description,
+          location: data.location,
+          property_type: data.property_type,
+          price: 0,
+          bedrooms: Number(data.bedrooms) || 1,
+          bathrooms: Number(data.bathrooms) || 1,
+          parking_spaces: Number(data.parking_spaces) || 0,
+          size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
+          furnished: data.furnished,
+          pets_allowed: data.pets_allowed,
+          amenities: data.amenities,
+          landlord_id: user.id,
+          images: imageUrls,
+          status: 'available',
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Mark as unlisted in a separate update so PostgREST schema cache
+      // issues with the new is_listed column don't block the insert.
+      const { error: updateError } = await supabase
+        .from('properties')
+        .update({ is_listed: false })
+        .eq('id', inserted.id);
+
+      if (updateError) {
+        console.warn('Could not mark property as unlisted:', updateError.message);
+      }
 
       try { localStorage.removeItem(LOCAL_STORAGE_KEY); } catch {}
 
