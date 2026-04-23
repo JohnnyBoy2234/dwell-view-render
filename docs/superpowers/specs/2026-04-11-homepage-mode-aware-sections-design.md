@@ -55,7 +55,7 @@ Replaces the current "For Landlords" inline JSX block in `Index.tsx`.
 ### Rent mode
 - Label: "For Landlords"
 - Headline: "List your property." / "Keep your money."
-- Subtext: "RentLekker finds you tenants and handles referencing, contracts, and more — while you stay in full control and pay zero commission."
+- Subtext: "MzanziHomes finds you tenants and handles referencing, contracts, and more — while you stay in full control and pay zero commission."
 - Bullets: "100% Commission-Free", "No Hidden Fees", "Full Property Management Tools", "Verified Tenant Screening", "Securely Stored Records"
 - Primary CTA: "Add Listing" → `/list-property`
 - Secondary CTA: "Learn More" → `/about/landlord`
@@ -63,7 +63,7 @@ Replaces the current "For Landlords" inline JSX block in `Index.tsx`.
 ### Buy mode
 - Label: "For Sellers"
 - Headline: "Sell your property." / "Zero agent fees."
-- Subtext: "List your property for sale on RentLekker and connect directly with verified buyers — no middlemen, no commissions, full control."
+- Subtext: "List your property for sale on MzanziHomes and connect directly with verified buyers — no middlemen, no commissions, full control."
 - Bullets: "Zero Agent Fees", "Verified Buyer Screening", "Transparent Offer Management", "Secure Transfer Process", "No Hidden Costs"
 - Primary CTA: "List for Sale" → `/list-sale`
 - Secondary CTA: "Learn More" → `/about/landlord`
@@ -85,7 +85,7 @@ Replaces the current "For Tenants" inline JSX block in `Index.tsx`.
 ### Rent mode
 - Label: "For Tenants"
 - Headline: "Find your next home." / "No agent fees."
-- Subtext: "On RentLekker there are never any agent fees. We verify all listings so you never encounter dead adverts. Your safety and security are our priority."
+- Subtext: "On MzanziHomes there are never any agent fees. We verify all listings so you never encounter dead adverts. Your safety and security are our priority."
 - Bullets: "No Agent Fees — Ever", "Verified Properties Only", "Direct Landlord Communication", "Secure Digital Leases"
 - Primary CTA: "Find Rental" → `/properties`
 - Secondary CTA: "Learn More" → `/about/tenant`

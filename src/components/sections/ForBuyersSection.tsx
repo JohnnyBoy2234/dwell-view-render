@@ -26,7 +26,7 @@ const forBuyersContent: Record<Mode, {
     label: 'For Tenants',
     headline: ['Find your next home.', 'No agent fees.'],
     subtext:
-      'On RentLekker there are never any agent fees. We verify all listings so you never encounter dead adverts. Your safety and security are our priority.',
+      'On MzanziHomes there are never any agent fees. We verify all listings so you never encounter dead adverts. Your safety and security are our priority.',
     bullets: [
       'No Agent Fees — Ever',
       'Verified Properties Only',

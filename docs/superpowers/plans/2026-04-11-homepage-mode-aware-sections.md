@@ -56,7 +56,7 @@ const forSellersContent: Record<Mode, {
     headline: ['List your property.', 'Keep your money.'],
     headlineAccent: 'Keep your money.',
     subtext:
-      'RentLekker finds you tenants and handles referencing, contracts, and more — while you stay in full control and pay zero commission.',
+      'MzanziHomes finds you tenants and handles referencing, contracts, and more — while you stay in full control and pay zero commission.',
     bullets: [
       '100% Commission-Free',
       'No Hidden Fees',
@@ -74,7 +74,7 @@ const forSellersContent: Record<Mode, {
     headline: ['Sell your property.', 'Zero agent fees.'],
     headlineAccent: 'Zero agent fees.',
     subtext:
-      'List your property for sale on RentLekker and connect directly with verified buyers — no middlemen, no commissions, full control.',
+      'List your property for sale on MzanziHomes and connect directly with verified buyers — no middlemen, no commissions, full control.',
     bullets: [
       'Zero Agent Fees',
       'Verified Buyer Screening',
@@ -253,7 +253,7 @@ const forBuyersContent: Record<Mode, {
     label: 'For Tenants',
     headline: ['Find your next home.', 'No agent fees.'],
     subtext:
-      'On RentLekker there are never any agent fees. We verify all listings so you never encounter dead adverts. Your safety and security are our priority.',
+      'On MzanziHomes there are never any agent fees. We verify all listings so you never encounter dead adverts. Your safety and security are our priority.',
     bullets: [
       'No Agent Fees — Ever',
       'Verified Properties Only',
@@ -856,7 +856,7 @@ Find the `{/* ── FINAL CTA ── */}` section. Keep the outer `<section>` t
 ```tsx
 <div className="max-w-3xl mx-auto text-center relative z-10">
   <span className="inline-block text-xs font-bold uppercase tracking-widest text-white/60 mb-4">
-    Join RentLekker
+    Join MzanziHomes
   </span>
   <AnimatePresence mode="wait" initial={false}>
     <motion.div

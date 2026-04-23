@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "135650023072",
-    "project_id": "rentlekker-d0c09",
-    "storage_bucket": "rentlekker-d0c09.firebasestorage.app"
+    "project_id": "mzanzihomes-d0c09",
+    "storage_bucket": "mzanzihomes-d0c09.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:135650023072:android:a57e9cbf34b035aded1bc5",
         "android_client_info": {
-          "package_name": "com.RentLekker.app"
+          "package_name": "com.MzanziHomes.app"
         }
       },
       "oauth_client": [],

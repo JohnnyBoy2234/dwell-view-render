@@ -1,4 +1,4 @@
-# RentLekker AI Support — Design Spec
+# MzanziHomes AI Support — Design Spec
 **Date:** 2026-04-13  
 **Status:** Approved
 
@@ -6,14 +6,14 @@
 
 ## Overview
 
-A world-class AI support experience built into the RentLekker app. An Intercom-style floating chat widget powered by Claude (Anthropic) with a custom system prompt covering RentLekker features and South African rental law. Unresolved issues escalate to tickets stored in the existing Supabase backend and surfaced in the admin panel.
+A world-class AI support experience built into the MzanziHomes app. An Intercom-style floating chat widget powered by Claude (Anthropic) with a custom system prompt covering MzanziHomes features and South African rental law. Unresolved issues escalate to tickets stored in the existing Supabase backend and surfaced in the admin panel.
 
 ---
 
 ## Goals
 
 - Give landlords and tenants instant, accurate answers without leaving the app
-- Cover RentLekker feature help + SA rental law (Rental Housing Act, deposits, TPN, PIE Act)
+- Cover MzanziHomes feature help + SA rental law (Rental Housing Act, deposits, TPN, PIE Act)
 - Escalate to a human support ticket when AI isn't enough
 - Zero third-party platform dependency — fully owned, no monthly SaaS fee
 
@@ -30,7 +30,7 @@ A floating action button sits fixed at bottom-right on every page (z-50, above m
 
 ### Chat Panel
 
-- **Header:** "RentLekker AI" label + small brand avatar + close (×) button
+- **Header:** "MzanziHomes AI" label + small brand avatar + close (×) button
 - **Quick-reply chips** (shown when thread is empty):
   - "How do I list a property?"
   - "Viewing requests"
@@ -83,7 +83,7 @@ New page at `/admin/support` added to the existing admin panel:
 - Accepts: `{ messages: { role: 'user' | 'assistant', content: string }[] }`
 - Calls Anthropic Claude API (`claude-haiku-4-5`) with streaming enabled
 - Returns: streamed text response via `TransformStream`
-- System prompt (baked in): RentLekker feature reference + SA rental law summary
+- System prompt (baked in): MzanziHomes feature reference + SA rental law summary
 - Auth: public (no auth token required — support must work for logged-out users too)
 
 **New Table:** `support_tickets`
@@ -110,7 +110,7 @@ create table support_tickets (
 
 The system prompt covers two domains:
 
-**RentLekker Features:**
+**MzanziHomes Features:**
 - Listing a property (steps, requirements, photos)
 - Tenant applications and screening
 - Viewing requests and scheduling

@@ -396,7 +396,7 @@ export default function ListProperty() {
           }}
           icon="home"
           title="Property Listed Successfully!"
-          subtitle="Your property is now live on RentLekker and visible to potential tenants."
+          subtitle="Your property is now live on MzanziHomes and visible to potential tenants."
           nextSteps={[
             { title: "Wait for enquiries", description: "Tenants can now view and enquire about your property" },
             { title: "Manage viewings", description: "Schedule property viewings with interested tenants" },

@@ -38,16 +38,16 @@ export const FOOTER_LINKS = {
 } as const;
 
 export const SOCIAL_LINKS: SocialLink[] = [
-  { icon: Facebook, href: "https://facebook.com/RentLekker", label: "Facebook" },
-  { icon: Twitter, href: "https://twitter.com/RentLekker", label: "Twitter" },
-  { icon: Instagram, href: "https://instagram.com/RentLekker", label: "Instagram" },
-  { icon: Linkedin, href: "https://linkedin.com/company/RentLekker", label: "LinkedIn" }
+  { icon: Facebook, href: "https://facebook.com/MzanziHomes", label: "Facebook" },
+  { icon: Twitter, href: "https://twitter.com/MzanziHomes", label: "Twitter" },
+  { icon: Instagram, href: "https://instagram.com/MzanziHomes", label: "Instagram" },
+  { icon: Linkedin, href: "https://linkedin.com/company/MzanziHomes", label: "LinkedIn" }
 ];
 
 export const FOOTER_CONTENT = {
-  BRAND_NAME: "RentLekker",
+  BRAND_NAME: "MzanziHomes",
   TAGLINE: "Safe, Simple, Commission-Free Renting. Direct landlord-tenant connections with full verification and peace of mind.",
-  COPYRIGHT: "© 2025 RentLekker.com All rights reserved.",
+  COPYRIGHT: "© 2025 MzanziHomes.com All rights reserved.",
   MADE_WITH: "Made with ❤️ in South Africa",
   SECTIONS: {
     COMPANY: "Company",

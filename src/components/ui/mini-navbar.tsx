@@ -73,7 +73,7 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
             <Home className="w-4 h-4 text-white" />
           </div>
           <span className="text-white font-bold text-sm tracking-tight hidden sm:block whitespace-nowrap">
-            RentLekker
+            MzanziHomes
           </span>
         </Link>
 

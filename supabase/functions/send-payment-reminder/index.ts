@@ -107,9 +107,9 @@ serve(async (req) => {
 
     // Send email if we have a tenant email
     if (tenantEmail) {
-      const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@RentLekker.co';
-      const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'RentLekker';
-      const subject = `URGENT: RentLekker Payment Reminder${property?.title ? ` • ${property.title}` : ''}`;
+      const FROM_EMAIL = Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@MzanziHomes.co';
+      const FROM_NAME = Deno.env.get('RESEND_FROM_NAME') || 'MzanziHomes';
+      const subject = `URGENT: MzanziHomes Payment Reminder${property?.title ? ` • ${property.title}` : ''}`;
       const html = `
         <div style="font-family: Arial, sans-serif; max-width:600px; margin:0 auto; padding:24px; background:#f8fafc;">
           <div style="background:#ffffff; padding:24px; border-radius:8px;">
@@ -120,7 +120,7 @@ serve(async (req) => {
             <div style="margin:24px 0;">
               <a href="${Deno.env.get('SUPABASE_URL')?.replace('/v1','')}/tenant/payments" style="display:inline-block; background:#2563eb; color:#fff; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600;">View Payments</a>
             </div>
-            <p style="margin:16px 0 0; color:#6b7280; font-size:12px;">This email was sent by RentLekker on behalf of your landlord.</p>
+            <p style="margin:16px 0 0; color:#6b7280; font-size:12px;">This email was sent by MzanziHomes on behalf of your landlord.</p>
           </div>
         </div>
       `;

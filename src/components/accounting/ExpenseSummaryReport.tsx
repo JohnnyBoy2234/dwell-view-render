@@ -121,11 +121,11 @@ export function ExpenseSummaryReport() {
           <div className="flex items-center mt-2">
             <img 
               src="/favicon-32x32.png" 
-              alt="RentLekker Logo" 
+              alt="MzanziHomes Logo" 
               className="h-6 w-6 mr-2" 
             />
             <span className="text-sm text-muted-foreground">
-              rentlekker.com – Safe, Simple, Commission-Free Renting
+              mzanzihomes.com – Safe, Simple, Commission-Free Renting
             </span>
           </div>
         </div>

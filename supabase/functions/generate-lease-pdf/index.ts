@@ -110,8 +110,8 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
   // --- Document Setup --- 
   const doc = await PDFDocument.create();
   doc.setTitle(`Lease Agreement • ${contract.title || contract.id}`);
-  doc.setAuthor("RentLekker");
-  doc.setCreator("RentLekker Lease Generator");
+  doc.setAuthor("MzanziHomes");
+  doc.setCreator("MzanziHomes Lease Generator");
   doc.setProducer("pdf-lib");
   doc.setCreationDate(today);
   doc.setModificationDate(today);
@@ -212,14 +212,14 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       color: colors.muted
     });
     // Invisible initials anchors
-    p.drawText("RentLekker_INIT_LANDLORD", {
+    p.drawText("MzanziHomes_INIT_LANDLORD", {
       x: margin + 60,
       y: margin - 2,
       size: 8,
       font: fontBody,
       color: colors.invisible
     });
-    p.drawText("RentLekker_INIT_TENANT_1", {
+    p.drawText("MzanziHomes_INIT_TENANT_1", {
       x: margin + 220,
       y: margin - 2,
       size: 8,
@@ -690,14 +690,14 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     drawParagraph('_________________________________');
     drawParagraph('                             TENANT');
     // Invisible DocuSign anchors near bottom for placement
-    page.drawText('RentLekker_SIGN_LANDLORD', {
+    page.drawText('MzanziHomes_SIGN_LANDLORD', {
       x: margin + 120,
       y: margin + 80,
       size: 8,
       font: fontBody,
       color: colors.invisible
     });
-    page.drawText('RentLekker_SIGN_TENANT_1', {
+    page.drawText('MzanziHomes_SIGN_TENANT_1', {
       x: margin + 120,
       y: margin + 40,
       size: 8,

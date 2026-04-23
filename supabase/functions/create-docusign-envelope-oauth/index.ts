@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
           documentBase64: pdfBase64,
           documentId: "1",
           fileExtension: "pdf",
-          name: `RentLekker_Lease_${tenancy.properties?.title?.replace(/\s+/g, '_') || 'Property'}_${new Date().toISOString().split('T')[0]}.pdf`
+          name: `MzanziHomes_Lease_${tenancy.properties?.title?.replace(/\s+/g, '_') || 'Property'}_${new Date().toISOString().split('T')[0]}.pdf`
         }
       ],
       recipients: {
@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
             tabs: {
               signHereTabs: [
                 {
-                  anchorString: "**RentLekker_SIGN_LANDLORD**",
+                  anchorString: "**MzanziHomes_SIGN_LANDLORD**",
                   anchorUnits: "pixels",
                   anchorXOffset: "0",
                   anchorYOffset: "0"
@@ -135,7 +135,7 @@ Deno.serve(async (req) => {
               ],
               initialHereTabs: [
                 {
-                  anchorString: "**RentLekker_INIT_LANDLORD**",
+                  anchorString: "**MzanziHomes_INIT_LANDLORD**",
                   anchorUnits: "pixels",
                   anchorXOffset: "0",
                   anchorYOffset: "0"
@@ -152,7 +152,7 @@ Deno.serve(async (req) => {
             tabs: {
               signHereTabs: [
                 {
-                  anchorString: "**RentLekker_SIGN_TENANT_1**",
+                  anchorString: "**MzanziHomes_SIGN_TENANT_1**",
                   anchorUnits: "pixels",
                   anchorXOffset: "0",
                   anchorYOffset: "0"
@@ -160,7 +160,7 @@ Deno.serve(async (req) => {
               ],
               initialHereTabs: [
                 {
-                  anchorString: "**RentLekker_INIT_TENANT_1**",
+                  anchorString: "**MzanziHomes_INIT_TENANT_1**",
                   anchorUnits: "pixels",
                   anchorXOffset: "0",
                   anchorYOffset: "0"

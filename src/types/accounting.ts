@@ -54,12 +54,12 @@ export const EXPENSE_CATEGORIES = [
   'Rates & Taxes',
   'Insurance',
   'Bank Fees',
-  'RentLekker Subscription',
+  'MzanziHomes Subscription',
   'Other'
 ] as const;
 
 export const getDefaultVATPercent = (category: string): number => {
-  const highVATCategories = ['Maintenance', 'Insurance', 'RentLekker Subscription'];
+  const highVATCategories = ['Maintenance', 'Insurance', 'MzanziHomes Subscription'];
   return highVATCategories.includes(category) ? 15 : 0;
 };
 

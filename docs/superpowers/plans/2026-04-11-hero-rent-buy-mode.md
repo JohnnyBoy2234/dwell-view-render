@@ -153,7 +153,7 @@ Add this constant inside the component function, directly after `heroImages`:
 const heroCopy: Record<Mode, { headline: React.ReactNode; subtext: string }> = {
   rent: {
     headline: <>Find Your Perfect{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Home</span>{' '}in South Africa</>,
-    subtext: 'Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent.',
+    subtext: 'Verified listings. Direct landlords. Zero agent fees. MzanziHomes makes renting simple, safe, and transparent.',
   },
   buy: {
     headline: <>Buy Your Dream{' '}<span style={{ color: 'hsl(214,100%,80%)' }}>Property</span>{' '}in South Africa</>,

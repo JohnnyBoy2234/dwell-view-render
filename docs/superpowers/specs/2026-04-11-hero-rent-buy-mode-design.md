@@ -51,7 +51,7 @@ Text content per mode:
 
 **Rent:**
 - Headline: "Find Your Perfect **Home** in South Africa"
-- Subtext: "Verified listings. Direct landlords. Zero agent fees. RentLekker makes renting simple, safe, and transparent."
+- Subtext: "Verified listings. Direct landlords. Zero agent fees. MzanziHomes makes renting simple, safe, and transparent."
 
 **Buy:**
 - Headline: "Buy Your Dream **Property** in South Africa"

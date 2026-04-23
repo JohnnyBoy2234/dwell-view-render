@@ -14,7 +14,7 @@ const About = () => {
         <div className="text-center mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">We're Transforming Renting in South Africa</h1>
           <p className="text-xl text-muted-foreground max-w-4xl mx-auto">
-            RentLekker is more than a rental platform it's a movement. We're revolutionizing the South African rental market by connecting landlords and tenants directly, eliminating unnecessary fees, and creating genuine, trustworthy connections.
+            MzanziHomes is more than a rental platform it's a movement. We're revolutionizing the South African rental market by connecting landlords and tenants directly, eliminating unnecessary fees, and creating genuine, trustworthy connections.
           </p>
         </div>
 
@@ -24,7 +24,7 @@ const About = () => {
             <div>
               <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
               <p className="text-lg text-muted-foreground mb-6">
-                At RentLekker, we believe finding the perfect rental home shouldn't be complicated, risky, or expensive. Our mission is simple: to make renting fair, transparent, and human again.
+                At MzanziHomes, we believe finding the perfect rental home shouldn't be complicated, risky, or expensive. Our mission is simple: to make renting fair, transparent, and human again.
               </p>
               <p className="text-lg text-muted-foreground mb-6">
                 By eliminating middlemen and outdated processes, we're not just helping landlords save money we're building trust, fostering real relationships, and creating a rental ecosystem where both landlords and tenants thrive.
@@ -53,7 +53,7 @@ const About = () => {
         <section className="mb-16 text-center">
           <h2 className="text-3xl font-bold mb-6">A Vision for the Future</h2>
           <p className="text-lg text-muted-foreground max-w-4xl mx-auto mb-8">
-            RentLekker is not only about saving money today it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
+            MzanziHomes is not only about saving money today it's about reshaping the future of housing in South Africa. By creating a trusted, transparent, and commission-free system, we believe we can ease financial pressure on families, encourage investment in housing, and spark long-term growth in communities nationwide.
           </p>
         </section>
 
@@ -80,7 +80,7 @@ const About = () => {
                 </div>
                 <h3 className="text-xl font-semibold mb-4">Community First</h3>
                 <p className="text-muted-foreground">
-                  Renting should uplift people. RentLekker builds stronger communities where everyone benefits.
+                  Renting should uplift people. MzanziHomes builds stronger communities where everyone benefits.
                 </p>
               </CardContent>
             </Card>
@@ -149,7 +149,7 @@ const About = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-4">For Landlords</h3>
                 <p className="text-muted-foreground mb-6">
-                  Everything you need to know about renting your property on RentLekker. Learn how to list properties, connect with quality tenants, and manage everything from one dashboard.
+                  Everything you need to know about renting your property on MzanziHomes. Learn how to list properties, connect with quality tenants, and manage everything from one dashboard.
                 </p>
                 <Link to="/about/landlord">
                   <Button className="w-full">
@@ -167,7 +167,7 @@ const About = () => {
                 </div>
                 <h3 className="text-2xl font-bold mb-4">For Tenants</h3>
                 <p className="text-muted-foreground mb-6">
-                  Everything you need to know about finding and renting your perfect home on RentLekker. Learn how to search properties, apply easily, and manage your rental.
+                  Everything you need to know about finding and renting your perfect home on MzanziHomes. Learn how to search properties, apply easily, and manage your rental.
                 </p>
                 <Link to="/about/tenant">
                   <Button className="w-full">
@@ -182,9 +182,9 @@ const About = () => {
 
         {/* CTA */}
         <section className="text-center">
-          <h2 className="text-3xl font-bold mb-4">Join the RentLekker Community</h2>
+          <h2 className="text-3xl font-bold mb-4">Join the MzanziHomes Community</h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Whether you're searching for your dream home or renting out your property, RentLekker is here to make the process safe, simple, and rewarding.
+            Whether you're searching for your dream home or renting out your property, MzanziHomes is here to make the process safe, simple, and rewarding.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">

@@ -70,7 +70,7 @@ Deno.serve(async (req) => {
     console.log("=== DocuSign Recipient View Function Started ===");
     const body = await req.json();
     console.log("Request body:", JSON.stringify(body, null, 2));
-    const { tenancyId, role, returnUrl = "https://rentlekker.com/tenant-dashboard" } = body;
+    const { tenancyId, role, returnUrl = "https://mzanzihomes.com/tenant-dashboard" } = body;
     
     if (!tenancyId || !role || (role !== "tenant" && role !== "landlord")) {
       return new Response(JSON.stringify({ error: "tenancyId and role ('tenant'|'landlord') are required" }), { 

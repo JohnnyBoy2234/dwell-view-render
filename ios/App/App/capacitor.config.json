@@ -1,6 +1,6 @@
 {
-	"appId": "com.RentLekker.app",
-	"appName": "RentLekker",
+	"appId": "com.MzanziHomes.app",
+	"appName": "MzanziHomes",
 	"webDir": "dist",
 	"bundledWebRuntime": false,
 	"plugins": {

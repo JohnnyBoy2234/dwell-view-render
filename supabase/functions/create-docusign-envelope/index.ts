@@ -149,16 +149,16 @@ Deno.serve(async (req) => {
       roleName: "tenant",
       tabs: {
         signHereTabs: [
-          { anchorString: "RentLekker_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "MzanziHomes_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
         dateSignedTabs: [
-          { anchorString: "RentLekker_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
+          { anchorString: "MzanziHomes_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
         ],
         fullNameTabs: [
-          { anchorString: "RentLekker_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
+          { anchorString: "MzanziHomes_SIGN_TENANT_1", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
         ],
         initialHereTabs: [
-          { anchorString: "RentLekker_INIT_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "MzanziHomes_INIT_TENANT_1", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
       },
     } as any;
@@ -172,16 +172,16 @@ Deno.serve(async (req) => {
       roleName: "landlord",
       tabs: {
         signHereTabs: [
-          { anchorString: "RentLekker_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "MzanziHomes_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
         dateSignedTabs: [
-          { anchorString: "RentLekker_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
+          { anchorString: "MzanziHomes_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "200" },
         ],
         fullNameTabs: [
-          { anchorString: "RentLekker_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
+          { anchorString: "MzanziHomes_SIGN_LANDLORD", anchorUnits: "pixels", anchorYOffset: "-15", anchorXOffset: "-200" },
         ],
         initialHereTabs: [
-          { anchorString: "RentLekker_INIT_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
+          { anchorString: "MzanziHomes_INIT_LANDLORD", anchorUnits: "pixels", anchorYOffset: "0", anchorXOffset: "0" },
         ],
       },
     } as any;

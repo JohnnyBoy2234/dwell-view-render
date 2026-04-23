@@ -185,15 +185,15 @@ const AboutTenant = () => {
             For Tenants
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Everything you need to know about finding and renting your perfect home on RentLekker. 
+            Everything you need to know about finding and renting your perfect home on MzanziHomes. 
             Connect directly with landlords, apply easily, and manage your rental all in one place.
           </p>
         </div>
 
-        {/* Why RentLekker Section */}
+        {/* Why MzanziHomes Section */}
         <section className="mb-16">
           <div className="bg-ocean-blue/10 rounded-2xl p-8 md:p-12">
-            <h2 className="text-3xl font-bold mb-6 text-center">Why Choose RentLekker?</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center">Why Choose MzanziHomes?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-ocean-blue rounded-lg flex items-center justify-center flex-shrink-0">
@@ -339,7 +339,7 @@ const AboutTenant = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg">
-                RentLekker is completely free for tenants. You can:
+                MzanziHomes is completely free for tenants. You can:
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
@@ -368,7 +368,7 @@ const AboutTenant = () => {
                 </li>
               </ul>
               <p className="text-muted-foreground">
-                <strong>No hidden fees. No agent costs. No surprises.</strong> RentLekker is free for tenants, always.
+                <strong>No hidden fees. No agent costs. No surprises.</strong> MzanziHomes is free for tenants, always.
               </p>
             </CardContent>
           </Card>
@@ -378,7 +378,7 @@ const AboutTenant = () => {
         <section className="text-center bg-ocean-blue/10 rounded-2xl p-12">
           <h2 className="text-3xl font-bold mb-4">Ready to Find Your Home?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of tenants who have found their perfect home on RentLekker. Start searching today.
+            Join thousands of tenants who have found their perfect home on MzanziHomes. Start searching today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>

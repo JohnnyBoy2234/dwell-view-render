@@ -8,7 +8,7 @@ import { BenefitCard } from './landing/BenefitCard';
 import { BENEFITS_DATA, BENEFITS_SECTION, SWIPER_CONFIG } from '@/constants/benefitsConstants';
 
 /**
- * Benefits slider component showcasing RentLekker's key advantages
+ * Benefits slider component showcasing MzanziHomes's key advantages
  * Uses Swiper for smooth carousel functionality
  */
 export function BenefitsSlider() {

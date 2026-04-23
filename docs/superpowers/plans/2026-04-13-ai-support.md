@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Replace the existing basic AI chat widget with a world-class Intercom-style floating support experience powered by Claude, covering RentLekker features and South African rental law, with inline ticket escalation wired to the existing admin panel.
+**Goal:** Replace the existing basic AI chat widget with a world-class Intercom-style floating support experience powered by Claude, covering MzanziHomes features and South African rental law, with inline ticket escalation wired to the existing admin panel.
 
 **Architecture:** Upgrade the existing `ai-support-chat` Supabase edge function to call Claude API with a rich system prompt. Completely redesign `AISupportChat.tsx` into a polished responsive widget (mobile bottom sheet / desktop bottom-right card) with streaming AI responses and an inline escalation form. Wire a new `/admin/support` route to the already-built `SupportMessagesAdmin` component.
 
@@ -40,11 +40,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const SYSTEM_PROMPT = `You are the RentLekker AI Support assistant. RentLekker is a South African property rental platform connecting landlords and tenants.
+const SYSTEM_PROMPT = `You are the MzanziHomes AI Support assistant. MzanziHomes is a South African property rental platform connecting landlords and tenants.
 
-YOUR ROLE: Answer questions about RentLekker features and South African rental law. Be concise, helpful, and friendly. Use plain language.
+YOUR ROLE: Answer questions about MzanziHomes features and South African rental law. Be concise, helpful, and friendly. Use plain language.
 
---- RENTLEKKER FEATURES ---
+--- MZANZIHOMES FEATURES ---
 
 LISTING A PROPERTY (Landlords):
 - Click "List Property" from the dashboard
@@ -120,7 +120,7 @@ RENTAL HOUSING TRIBUNAL:
 --- GUIDELINES ---
 - For account-specific issues, suggest the "Still need help?" link to submit a support ticket
 - For complex legal disputes, recommend consulting a qualified attorney or the Rental Housing Tribunal
-- Stay on topic — only discuss RentLekker and SA rental matters
+- Stay on topic — only discuss MzanziHomes and SA rental matters
 - Keep responses concise (3-5 sentences where possible)`;
 
 serve(async (req) => {
@@ -485,7 +485,7 @@ describe('AISupportChat', () => {
       </BrowserRouter>
     );
     fireEvent.click(screen.getByRole('button', { name: /support/i }));
-    expect(screen.getByText(/RentLekker AI/i)).toBeInTheDocument();
+    expect(screen.getByText(/MzanziHomes AI/i)).toBeInTheDocument();
   });
 
   it('closes panel when X button is clicked', async () => {
@@ -497,7 +497,7 @@ describe('AISupportChat', () => {
     fireEvent.click(screen.getByRole('button', { name: /support/i }));
     fireEvent.click(screen.getByRole('button', { name: /close/i }));
     await waitFor(() =>
-      expect(screen.queryByText(/RentLekker AI/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/MzanziHomes AI/i)).not.toBeInTheDocument()
     );
   });
 
@@ -695,7 +695,7 @@ export function AISupportChat() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-semibold text-sm leading-none">RentLekker AI</p>
+                <p className="font-semibold text-sm leading-none">MzanziHomes AI</p>
                 <p className="text-xs opacity-80 mt-0.5">
                   {isStreaming ? 'Typing…' : 'Ask me anything'}
                 </p>
@@ -718,7 +718,7 @@ export function AISupportChat() {
               <div className="space-y-4">
                 <div className="text-center text-muted-foreground text-sm py-4">
                   <p className="mb-1 text-base font-medium text-foreground">Hi there 👋</p>
-                  <p>I know RentLekker inside-out and SA rental law. What can I help with?</p>
+                  <p>I know MzanziHomes inside-out and SA rental law. What can I help with?</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {QUICK_REPLIES.map(q => (
@@ -931,7 +931,7 @@ git commit -m "feat: add /admin/support route and sidebar nav item for Support T
 ## Self-Review Checklist
 
 - [x] **Spec coverage — Widget UI:** Floating button, gradient header, quick-reply chips, message thread, input bar, escalation nudge — all implemented in Task 3.
-- [x] **Spec coverage — AI backend:** Claude API via upgraded edge function in Task 1. SA rental law + RentLekker features in system prompt.
+- [x] **Spec coverage — AI backend:** Claude API via upgraded edge function in Task 1. SA rental law + MzanziHomes features in system prompt.
 - [x] **Spec coverage — Escalation:** Inline `SupportTicketForm` → inserts to existing `support_messages` table. Implemented in Tasks 2 & 3.
 - [x] **Spec coverage — Admin:** `/admin/support` route + sidebar item wired to existing `SupportMessagesAdmin`. Implemented in Task 4.
 - [x] **Spec coverage — Mobile layout:** `h-[82vh] bottom-0 left-0 right-0 rounded-t-2xl` on mobile, `md:w-[380px] md:h-[560px] md:rounded-2xl md:bottom-6 md:right-6` on desktop.

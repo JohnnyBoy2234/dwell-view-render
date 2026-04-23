@@ -43,7 +43,7 @@ const dummyBlogPost = {
   id: "safe-transparent-new-way",
   title: "Safe, Simple, and Transparent - The New Way to Rent in South Africa",
   excerpt:
-    "Renting shouldn't feel risky or confusing. Discover how RentLekker combines verified safety, data protection, and complete transparency.",
+    "Renting shouldn't feel risky or confusing. Discover how MzanziHomes combines verified safety, data protection, and complete transparency.",
   publishedAt: "2024-12-19",
   readTime: 4,
   category: "Safety & Trust",
@@ -396,7 +396,7 @@ const Index = () => {
               What our users say
             </h2>
             <p className="mt-4 text-gray-500">
-              Landlords and tenants across South Africa trust RentLekker.
+              Landlords and tenants across South Africa trust MzanziHomes.
             </p>
           </motion.div>
 
@@ -524,7 +524,7 @@ const Index = () => {
 
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-white/60 mb-4">
-            Join RentLekker
+            Join MzanziHomes
           </span>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div

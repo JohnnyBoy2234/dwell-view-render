@@ -45,7 +45,7 @@ export const BENEFITS_DATA: Benefit[] = [
 ];
 
 export const BENEFITS_SECTION = {
-  TITLE: "Why Choose RentLekker?",
+  TITLE: "Why Choose MzanziHomes?",
   SUBTITLE: "The smarter, simpler way to rent — for landlords and tenants alike.",
 } as const;
 

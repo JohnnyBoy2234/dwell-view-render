@@ -1,4 +1,4 @@
--- Create tables for RentLekker workflows
+-- Create tables for MzanziHomes workflows
 
 -- Offers table for the offer → lease workflow
 CREATE TABLE public.offers (

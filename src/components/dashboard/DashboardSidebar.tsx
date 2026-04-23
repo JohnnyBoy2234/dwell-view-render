@@ -43,7 +43,7 @@ export function DashboardSidebar() {
             <div className="w-8 h-8 bg-ocean-blue rounded flex items-center justify-center shadow-soft">
               <Home className="w-5 h-5 text-white" />
             </div>
-            {!collapsed && <h1 className="text-xl font-bold">RentLekker</h1>}
+            {!collapsed && <h1 className="text-xl font-bold">MzanziHomes</h1>}
           </div>
         </div>
 

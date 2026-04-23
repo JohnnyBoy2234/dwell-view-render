@@ -24,7 +24,7 @@ const forSellersContent: Record<Mode, {
     label: 'For Landlords',
     headline: ['List your property.', 'Keep your money.'],
     subtext:
-      'RentLekker finds you tenants and handles referencing, contracts, and more — while you stay in full control and pay zero commission.',
+      'MzanziHomes finds you tenants and handles referencing, contracts, and more — while you stay in full control and pay zero commission.',
     bullets: [
       '100% Commission-Free',
       'No Hidden Fees',
@@ -41,7 +41,7 @@ const forSellersContent: Record<Mode, {
     label: 'For Sellers',
     headline: ['Sell your property.', 'Zero agent fees.'],
     subtext:
-      'List your property for sale on RentLekker and connect directly with verified buyers — no middlemen, no commissions, full control.',
+      'List your property for sale on MzanziHomes and connect directly with verified buyers — no middlemen, no commissions, full control.',
     bullets: [
       'Zero Agent Fees',
       'Verified Buyer Screening',

@@ -237,7 +237,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'hsl(214, 100%, 59%)' }}>
                 <Home className="w-4 h-4 text-white" />
               </div>
-              <span className="text-white font-bold text-base tracking-tight">RentLekker</span>
+              <span className="text-white font-bold text-base tracking-tight">MzanziHomes</span>
             </button>
           </div>
 

@@ -422,7 +422,7 @@ export default function ListSale() {
           }}
           icon="home"
           title="Property Listed for Sale Successfully!"
-          subtitle="Your property is now live on RentLekker and visible to potential buyers."
+          subtitle="Your property is now live on MzanziHomes and visible to potential buyers."
           nextSteps={[
             { title: "Wait for enquiries", description: "Buyers can now view and enquire about your property" },
             { title: "Manage viewings", description: "Schedule property viewings with interested buyers" },

@@ -84,7 +84,7 @@ serve(async (req) => {
     console.log('Session created successfully:', session);
 
     // Create JWT token for upload (expires in 15 minutes)
-    const jwtSecret = Deno.env.get('JWT_SECRET') || 'RentLekker-kyc-capture-secret-key-2024';
+    const jwtSecret = Deno.env.get('JWT_SECRET') || 'MzanziHomes-kyc-capture-secret-key-2024';
     const key = await crypto.subtle.importKey(
       'raw',
       new TextEncoder().encode(jwtSecret),

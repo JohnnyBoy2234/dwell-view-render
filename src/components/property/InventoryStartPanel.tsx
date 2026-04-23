@@ -68,7 +68,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const isMobile = typeof navigator !== 'undefined' && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   const deepLink = propertyId
-    ? `https://app.rentlekker.com/inventory/start?propertyId=${propertyId}`
+    ? `https://app.mzanzihomes.com/inventory/start?propertyId=${propertyId}`
     : '';
 
   // Warn user before leaving with unsaved changes

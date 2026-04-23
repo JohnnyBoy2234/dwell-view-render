@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed -i 's/RentLekker/MzanziHomes/g; s/rentlekker/mzanzihomes/g' src/index.css)",
+      "Bash(sed -i 's/RentLekker/MzanziHomes/g; s/rentlekker/mzanzihomes/g' public/robots.txt)",
+      "Bash(sed -i 's/RentLekker/MzanziHomes/g; s/rentlekker/mzanzihomes/g' public/site.webmanifest)"
+    ]
+  }
+}

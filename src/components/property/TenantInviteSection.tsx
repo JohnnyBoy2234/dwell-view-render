@@ -54,7 +54,7 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
   };
 
   const shareWhatsApp = () => {
-    const msg = encodeURIComponent(`You've been invited to join a property on RentLekker. Click here to register: ${generatedLink}`);
+    const msg = encodeURIComponent(`You've been invited to join a property on MzanziHomes. Click here to register: ${generatedLink}`);
     window.open(`https://wa.me/?text=${msg}`, '_blank');
   };
 

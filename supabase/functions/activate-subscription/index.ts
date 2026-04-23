@@ -147,7 +147,7 @@ serve(async (req) => {
     // Create notification
     await admin.rpc("create_notification", {
       _user_id: user.id,
-      _message: `Your RentLekker ${payment.plan_code} plan is now active. Thank you!`,
+      _message: `Your MzanziHomes ${payment.plan_code} plan is now active. Thank you!`,
       _link_url: "/enhancedtenantdashboard",
       _type: "billing_update",
       _metadata: { planCode: payment.plan_code, provider: "callpay" },

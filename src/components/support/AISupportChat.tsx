@@ -10,7 +10,7 @@ const HIDDEN_ROUTE_PREFIXES = [
   '/messages',
   '/tenant/messages',
   '/admin',
-  '/RentLekker-lease/',
+  '/MzanziHomes-lease/',
 ];
 const HIDDEN_ROUTE_PATTERNS = [
   /\/leases\/.+\/sign/,
@@ -191,7 +191,7 @@ export function AISupportChat() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div>
-                <p className="font-semibold text-sm leading-none">RentLekker AI</p>
+                <p className="font-semibold text-sm leading-none">MzanziHomes AI</p>
                 <p className="text-xs opacity-80 mt-0.5">
                   {isStreaming ? 'Typing…' : 'Ask me anything'}
                 </p>
@@ -214,7 +214,7 @@ export function AISupportChat() {
               <div className="space-y-4">
                 <div className="text-center text-muted-foreground text-sm py-4">
                   <p className="mb-1 text-base font-medium text-foreground">Hi there 👋</p>
-                  <p>I know RentLekker inside-out and SA rental law. What can I help with?</p>
+                  <p>I know MzanziHomes inside-out and SA rental law. What can I help with?</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {QUICK_REPLIES.map(q => (

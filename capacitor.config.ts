@@ -1,8 +1,8 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.RentLekker.app',
-  appName: 'RentLekker',
+  appId: 'com.MzanziHomes.app',
+  appName: 'MzanziHomes',
   webDir: 'dist',
   bundledWebRuntime: false,
   plugins: {

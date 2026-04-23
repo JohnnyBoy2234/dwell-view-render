@@ -226,7 +226,7 @@ export function LandlordSupport() {
               <div>
                 <h4 className="font-medium mb-2">Contact</h4>
                 <p className="text-sm text-muted-foreground">
-                  Email: support@rentlekker.com<br />
+                  Email: support@mzanzihomes.com<br />
                   Phone: +27 12 345 6789
                 </p>
               </div>

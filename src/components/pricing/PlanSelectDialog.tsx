@@ -36,7 +36,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
       await startCallpayCheckout({
         plan_code: isYearly ? "pro_landlord_yearly" : "pro_landlord_monthly",
         amount: 8,
-        item_name: isYearly ? "RentLekker Pro Landlord (Yearly)" : "RentLekker Pro Landlord (Monthly)",
+        item_name: isYearly ? "MzanziHomes Pro Landlord (Yearly)" : "MzanziHomes Pro Landlord (Monthly)",
         item_description: isYearly ? "Annual billing" : "Monthly billing",
       });
       console.log('[PlanSelectDialog] Pro checkout initiated successfully');
@@ -59,7 +59,7 @@ export function PlanSelectDialog({ open, onOpenChange, onChooseFree, onChoosePro
       await startCallpayCheckout({
         plan_code: isYearly ? "premium_landlord_yearly" : "premium_landlord_monthly",
         amount: 8,
-        item_name: isYearly ? "RentLekker Premium Landlord (Yearly)" : "RentLekker Premium Landlord (Monthly)",
+        item_name: isYearly ? "MzanziHomes Premium Landlord (Yearly)" : "MzanziHomes Premium Landlord (Monthly)",
         item_description: isYearly ? "Annual billing" : "Monthly billing",
       });
       console.log('[PlanSelectDialog] Premium checkout initiated successfully');

@@ -39,7 +39,7 @@ serve(async (req) => {
   
   if (!isCrawler) {
     // Redirect normal users to the actual page
-    const redirectUrl = `https://rentlekker.com/property/${propertyId}`;
+    const redirectUrl = `https://mzanzihomes.com/property/${propertyId}`;
     return Response.redirect(redirectUrl, 302);
   }
   
@@ -70,7 +70,7 @@ serve(async (req) => {
   // Get the first property image or fallback to logo
   const propertyImage = property.images && property.images.length > 0 
     ? property.images[0] 
-    : 'https://rentlekker.com/apple-touch-icon.png';
+    : 'https://mzanzihomes.com/apple-touch-icon.png';
   
   // Make sure image URL is absolute
   const absoluteImageUrl = propertyImage.startsWith('http') 
@@ -93,31 +93,31 @@ serve(async (req) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${property.title} - RentLekker</title>
+  <title>${property.title} - MzanziHomes</title>
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://rentlekker.com/property/${property.id}" />
+  <meta property="og:url" content="https://mzanzihomes.com/property/${property.id}" />
   <meta property="og:title" content="${property.title} - ${formattedPrice}/month" />
   <meta property="og:description" content="${ogDescription}" />
   <meta property="og:image" content="${absoluteImageUrl}" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="RentLekker" />
+  <meta property="og:site_name" content="MzanziHomes" />
   <meta property="og:locale" content="en_ZA" />
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:url" content="https://rentlekker.com/property/${property.id}" />
+  <meta name="twitter:url" content="https://mzanzihomes.com/property/${property.id}" />
   <meta name="twitter:title" content="${property.title} - ${formattedPrice}/month" />
   <meta name="twitter:description" content="${ogDescription}" />
   <meta name="twitter:image" content="${absoluteImageUrl}" />
   
   <!-- Redirect for browsers that somehow reach this -->
-  <meta http-equiv="refresh" content="0;url=https://rentlekker.com/property/${property.id}" />
+  <meta http-equiv="refresh" content="0;url=https://mzanzihomes.com/property/${property.id}" />
 </head>
 <body>
-  <p>Redirecting to <a href="https://rentlekker.com/property/${property.id}">${property.title}</a>...</p>
+  <p>Redirecting to <a href="https://mzanzihomes.com/property/${property.id}">${property.title}</a>...</p>
 </body>
 </html>`;
 

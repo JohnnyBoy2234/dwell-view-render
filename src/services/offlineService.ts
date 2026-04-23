@@ -9,7 +9,7 @@ interface CachedData {
 }
 
 class OfflineService {
-  private static CACHE_KEY = 'RentLekker_offline_cache';
+  private static CACHE_KEY = 'MzanziHomes_offline_cache';
   private static CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
   // Cache critical data for offline access
@@ -63,7 +63,7 @@ class OfflineService {
 
   // Queue actions for when back online
   static queueAction(action: any) {
-    const QUEUE_KEY = 'RentLekker_offline_queue';
+    const QUEUE_KEY = 'MzanziHomes_offline_queue';
     try {
       const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
       queue.push({
@@ -78,7 +78,7 @@ class OfflineService {
 
   // Process queued actions when back online
   static async processQueuedActions() {
-    const QUEUE_KEY = 'RentLekker_offline_queue';
+    const QUEUE_KEY = 'MzanziHomes_offline_queue';
     try {
       const queue = JSON.parse(localStorage.getItem(QUEUE_KEY) || '[]');
       

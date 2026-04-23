@@ -141,7 +141,7 @@ export default function Pricing() {
       await startCallpayCheckout({
         plan_code: 'pro_landlord_monthly',
         amount: 8,
-        item_name: 'RentLekker Pro Landlord (Monthly)',
+        item_name: 'MzanziHomes Pro Landlord (Monthly)',
         item_description: 'Monthly billing',
       });
       console.log('[Pricing] Pro checkout initiated successfully');
@@ -170,7 +170,7 @@ export default function Pricing() {
       await startCallpayCheckout({
         plan_code: 'premium_landlord_monthly',
         amount: 8,
-        item_name: 'RentLekker Premium Landlord (Monthly)',
+        item_name: 'MzanziHomes Premium Landlord (Monthly)',
         item_description: 'Monthly billing',
       });
       console.log('[Pricing] Premium checkout initiated successfully');
@@ -224,7 +224,7 @@ export default function Pricing() {
             </Button>
 
             <div className="space-y-3 flex-1">
-              <Feature>Single property listing on RentLekker</Feature>
+              <Feature>Single property listing on MzanziHomes</Feature>
               <Feature>Exposure to verified tenants</Feature>
               <Feature>Tenant messaging via phone/email (outside platform)</Feature>
             </div>
@@ -241,7 +241,7 @@ export default function Pricing() {
                 <h3 className="text-lg font-semibold">Pro Landlord</h3>
                 {renderPlanBadge('pro')}
               </div>
-              <p className="text-sm text-muted-foreground mb-4">Handle every step from listing to lease inside RentLekker.</p>
+              <p className="text-sm text-muted-foreground mb-4">Handle every step from listing to lease inside MzanziHomes.</p>
               <div className="inline-flex items-center gap-1 p-1 bg-muted rounded-lg mb-3">
                 <button
                   onClick={() => setProBilling('yearly')}
@@ -325,7 +325,7 @@ export default function Pricing() {
               {/* Premium concierge benefits */}
               <div className="space-y-2 mt-3">
                 <Feature>Full maintenance concierge service</Feature>
-                <Feature>RentLekker intercepts and manages maintenance</Feature>
+                <Feature>MzanziHomes intercepts and manages maintenance</Feature>
                 <Feature>We liaise with contractors; you approve</Feature>
                 <Feature>VIP landlord support line</Feature>
                 <Feature>Annual rental performance report</Feature>

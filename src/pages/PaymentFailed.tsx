@@ -103,7 +103,7 @@ export default function PaymentFailed() {
             </Button>
 
             <Button 
-              onClick={() => window.location.href = 'mailto:support@rentlekker.com'}
+              onClick={() => window.location.href = 'mailto:support@mzanzihomes.com'}
               className="w-full flex items-center gap-2"
               variant="ghost"
             >
@@ -113,7 +113,7 @@ export default function PaymentFailed() {
           </div>
 
           <div className="text-xs text-muted-foreground pt-4">
-            Need help? Email us at support@rentlekker.com
+            Need help? Email us at support@mzanzihomes.com
           </div>
         </CardContent>
       </Card>

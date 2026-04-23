@@ -55,7 +55,7 @@ const CommissionPostContent = () => (
       <section>
         <h3 className="text-xl font-semibold mb-4">4. Technology Has Replaced the Middleman</h3>
         <p>
-          Years ago, landlords may have needed agents to advertise properties, handle paperwork, and do credit checks. But today, platforms like RentLekker provide all of this — instantly, securely, and without hidden costs.
+          Years ago, landlords may have needed agents to advertise properties, handle paperwork, and do credit checks. But today, platforms like MzanziHomes provide all of this — instantly, securely, and without hidden costs.
         </p>
         <p className="mt-4">
           From ID verification and free credit checks to digital lease signing and automated maintenance requests, everything agents used to do can now be handled online at a fraction of the cost.
@@ -85,7 +85,7 @@ const CommissionPostContent = () => (
           Landlords deserve to keep their income. Tenants deserve fair rental prices. And both deserve a system that prioritizes safety, trust, and efficiency.
         </p>
         <p className="mt-4 font-medium">
-          That's why RentLekker exists — to make renting simple, secure, and commission-free.
+          That's why MzanziHomes exists — to make renting simple, secure, and commission-free.
         </p>
       </section>
     </div>
@@ -107,14 +107,14 @@ const TwoPillarsPostContent = () => (
           It means every tenant has a verified ID and a clear credit check. It means every lease is stored securely and POPIA-compliant, where nothing can leak or be altered. It’s a complete record — timestamped, traceable, and undeniable when questions arise.
         </p>
         <p className="mt-4">
-          Safety is what gives control. It stops problems before they start and keeps a property stable. That’s what RentLekker was designed for. It isn’t just about making renting easier; it’s about making it secure from every angle.
+          Safety is what gives control. It stops problems before they start and keeps a property stable. That’s what MzanziHomes was designed for. It isn’t just about making renting easier; it’s about making it secure from every angle.
         </p>
       </section>
 
       <section>
         <h3 className="text-xl font-semibold mb-4">Efficiency Keeps Safety in Motion</h3>
         <p>
-          The second pillar, efficiency, keeps that safety in motion. Automation doesn’t replace responsibility; it strengthens it. Rent reminders go out automatically or could be sent out by you. Every one of them carries the RentLekker name, a mark that signals professionalism, authority, and accountability. It reminds tenants that this isn’t a casual arrangement. It’s a verified, lawful rental agreement backed by structure and trust.
+          The second pillar, efficiency, keeps that safety in motion. Automation doesn’t replace responsibility; it strengthens it. Rent reminders go out automatically or could be sent out by you. Every one of them carries the MzanziHomes name, a mark that signals professionalism, authority, and accountability. It reminds tenants that this isn’t a casual arrangement. It’s a verified, lawful rental agreement backed by structure and trust.
         </p>
         <p className="mt-4">
           Digital signatures are stored in an encrypted environment. Nothing gets lost, nothing is left to chance.
@@ -127,10 +127,10 @@ const TwoPillarsPostContent = () => (
           This isn’t about convenience. It’s about building safety into every part of the rental process, because a safe system is a profitable one. If you want steady income, fewer disputes, and tenants who stay because they feel protected, you need more than a platform. You need pillars you can trust.
         </p>
         <p className="mt-4 font-medium">
-          That’s what RentLekker offers: clarity you can measure, safety you can prove, and efficiency that never stops working.
+          That’s what MzanziHomes offers: clarity you can measure, safety you can prove, and efficiency that never stops working.
         </p>
         <p className="mt-4 font-bold">
-          RentLekker — Safe, Simple, Commission-Free Renting.
+          MzanziHomes — Safe, Simple, Commission-Free Renting.
         </p>
       </section>
     </div>
@@ -140,7 +140,7 @@ const TwoPillarsPostContent = () => (
 const SafetyPostContent = () => (
   <>
     <p className="text-lg text-muted-foreground mb-6">
-      Renting shouldn't feel risky or confusing. Yet for too long, South Africans have had to navigate a system full of hidden fees, empty promises, and unnecessary middlemen. RentLekker was built to change that — to make renting secure, straightforward, and fair for everyone.
+      Renting shouldn't feel risky or confusing. Yet for too long, South Africans have had to navigate a system full of hidden fees, empty promises, and unnecessary middlemen. MzanziHomes was built to change that — to make renting secure, straightforward, and fair for everyone.
     </p>
     <div className="border-l-4 border-primary pl-4 my-8">
       <div className="w-16 h-0.5 bg-muted-foreground mb-4"></div>
@@ -158,7 +158,7 @@ const SafetyPostContent = () => (
       <section>
         <h3 className="text-xl font-semibold mb-4">Your Data, Protected</h3>
         <p>
-          Your data is protected under full POPIA compliance, meaning your personal details stay private and are used only for what they should be: safe, transparent renting. All uploads, payments, and messages are encrypted and traceable, giving you peace of mind that what happens on RentLekker stays secure.
+          Your data is protected under full POPIA compliance, meaning your personal details stay private and are used only for what they should be: safe, transparent renting. All uploads, payments, and messages are encrypted and traceable, giving you peace of mind that what happens on MzanziHomes stays secure.
         </p>
       </section>
       <div className="border-l-4 border-primary pl-4 my-8">
@@ -176,7 +176,7 @@ const SafetyPostContent = () => (
       <section>
         <h3 className="text-xl font-semibold mb-4">Community Protection</h3>
         <p>
-          But technology isn't the only line of defence. South Africans have always protected their neighbourhoods, and RentLekker carries that same spirit online. Our members help keep the platform clean by reporting anything that doesn't feel right. The result is a self-policing community built on respect and accountability.
+          But technology isn't the only line of defence. South Africans have always protected their neighbourhoods, and MzanziHomes carries that same spirit online. Our members help keep the platform clean by reporting anything that doesn't feel right. The result is a self-policing community built on respect and accountability.
         </p>
       </section>
       <div className="border-l-4 border-primary pl-4 my-8">
@@ -185,10 +185,10 @@ const SafetyPostContent = () => (
       <section className="bg-muted/50 p-6 rounded-lg">
         <h3 className="text-xl font-semibold mb-4">The New Standard</h3>
         <p>
-          Safety isn't a luxury here. It's a must. Transparency isn't optional. It's the baseline. RentLekker combines both — creating a trusted space where people can rent, list, and live without fear or friction.
+          Safety isn't a luxury here. It's a must. Transparency isn't optional. It's the baseline. MzanziHomes combines both — creating a trusted space where people can rent, list, and live without fear or friction.
         </p>
         <p className="mt-4 font-medium">
-          RentLekker — Safe, Simple, Commission-Free Renting.
+          MzanziHomes — Safe, Simple, Commission-Free Renting.
         </p>
       </section>
     </div>
@@ -212,10 +212,10 @@ const blogPosts: BlogPostData[] = [
     id: 'safe-transparent-new-way',
     title: 'Safe, Simple, and Transparent - The New Way to Rent in South Africa',
     publishedAt: '2024-12-19',
-    shareText: 'Discover how RentLekker is making renting secure, simple, and transparent across South Africa.',
+    shareText: 'Discover how MzanziHomes is making renting secure, simple, and transparent across South Africa.',
     category: 'Safety & Trust',
     readTime: 4,
-    excerpt: 'Renting shouldn\'t feel risky or confusing. Discover how RentLekker combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.',
+    excerpt: 'Renting shouldn\'t feel risky or confusing. Discover how MzanziHomes combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.',
     content: <SafetyPostContent />,
     featured: true,
   },
@@ -272,7 +272,7 @@ export default function BlogPost() {
     if (!post) return;
     
     const shareData = { 
-      title: post.title + ' - RentLekker Blog', 
+      title: post.title + ' - MzanziHomes Blog', 
       text: post.shareText, 
       url: window.location.href 
     };

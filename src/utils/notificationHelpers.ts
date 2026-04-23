@@ -106,8 +106,8 @@ export const createSystemNotifications = {
   async welcome(userId: string, userType: 'landlord' | 'tenant') {
     await NotificationService.createSystemNotification(
       userId,
-      'Welcome to RentLekker!',
-      `Welcome to RentLekker! Get started by ${userType === 'landlord' ? 'listing your first property' : 'browsing available properties'}.`,
+      'Welcome to MzanziHomes!',
+      `Welcome to MzanziHomes! Get started by ${userType === 'landlord' ? 'listing your first property' : 'browsing available properties'}.`,
       'normal',
       userType === 'landlord' ? '/list-property' : '/properties'
     );

@@ -6,7 +6,7 @@ import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import LandlordInspection from '@/pages/LandlordInspection';
 import InventoryStart from '@/pages/InventoryStart';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
-import { RentLekkerSupport } from '@/components/support/SwiftRentSupport';
+import { MzanziHomesSupport } from '@/components/support/SwiftRentSupport';
 import { PlanGuard } from '@/components/PlanGuard';
 import ProfilePage from '@/components/profile/ProfilePage';
 
@@ -154,7 +154,7 @@ export default function LandlordDashboardRoutes() {
       } />
       <Route path="support" element={
         <EnhancedDashboardLayout title="Support & Help">
-          <RentLekkerSupport />
+          <MzanziHomesSupport />
         </EnhancedDashboardLayout>
       } />
     </Routes>

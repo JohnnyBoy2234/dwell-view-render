@@ -137,7 +137,7 @@ export const COLOR_SCHEMES = {
 };
 
 export const HOW_IT_WORKS_CONTENT = {
-  TITLE: "How RentLekker Works",
+  TITLE: "How MzanziHomes Works",
   SUBTITLE: "Connecting landlords and tenants directly with no agents, zero commission, and full control",
 } as const;
 

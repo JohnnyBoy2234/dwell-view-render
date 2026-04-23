@@ -102,15 +102,15 @@ const AboutSeller = () => {
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Selling property in South Africa involves a structured legal process called conveyancing.
-            RentLekker guides you through every step — from listing to registration — with zero agent fees
+            MzanziHomes guides you through every step — from listing to registration — with zero agent fees
             and full transparency.
           </p>
         </div>
 
-        {/* Why RentLekker Section */}
+        {/* Why MzanziHomes Section */}
         <section className="mb-16">
           <div className="bg-ocean-blue/10 rounded-2xl p-8 md:p-12">
-            <h2 className="text-3xl font-bold mb-6 text-center">Why Sell on RentLekker?</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center">Why Sell on MzanziHomes?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-ocean-blue rounded-lg flex items-center justify-center flex-shrink-0">
@@ -120,7 +120,7 @@ const AboutSeller = () => {
                   <h3 className="text-xl font-semibold mb-2">Zero Commission</h3>
                   <p className="text-muted-foreground">
                     Traditional estate agents charge 5–7.5% (+ VAT) on the sale price. On a R2,000,000
-                    property, that's R115,000–R172,500. With RentLekker, every rand goes to you.
+                    property, that's R115,000–R172,500. With MzanziHomes, every rand goes to you.
                   </p>
                 </div>
               </div>
@@ -267,7 +267,7 @@ const AboutSeller = () => {
             </CardHeader>
             <CardContent className="space-y-3 text-muted-foreground">
               <p>
-                RentLekker provides a guide to the SA property sale process to help you understand
+                MzanziHomes provides a guide to the SA property sale process to help you understand
                 each step. We are not a legal service and cannot provide legal advice.
               </p>
               <p>
@@ -286,7 +286,7 @@ const AboutSeller = () => {
         <section className="text-center bg-ocean-blue/10 rounded-2xl p-12">
           <h2 className="text-3xl font-bold mb-4">Ready to Sell?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            List your property for free on RentLekker and connect directly with verified buyers.
+            List your property for free on MzanziHomes and connect directly with verified buyers.
             Zero agent fees, full guidance, complete control.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

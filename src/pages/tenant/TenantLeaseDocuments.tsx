@@ -58,7 +58,7 @@ export default function TenantLeaseDocuments() {
   const handleDownload = async (lease: any) => {
     const title = lease.property?.title || 'Lease_Agreement';
     const safe = title.replace(/[^a-z0-9]/gi, '_');
-    const fileName = `RentLekker_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `MzanziHomes_${safe}_${new Date().toISOString().split('T')[0]}.pdf`;
     
     try {
       // First try the leases table (new lease pack system)
@@ -104,7 +104,7 @@ export default function TenantLeaseDocuments() {
       }
 
       // Fallback to legacy lease_agreements table (if it exists)
-      const { data: RentLekkerLease } = await supabase
+      const { data: MzanziHomesLease } = await supabase
         .from('lease_agreements')
         .select('pdf_url, pdf_path, created_at')
         .eq('property_id', lease.property_id)
@@ -112,9 +112,9 @@ export default function TenantLeaseDocuments() {
         .limit(1)
         .maybeSingle();
 
-      if (RentLekkerLease?.pdf_url) {
-        await downloadFileFromUrl(RentLekkerLease.pdf_url, fileName);
-        toast({ title: 'RentLekker lease downloaded successfully!' });
+      if (MzanziHomesLease?.pdf_url) {
+        await downloadFileFromUrl(MzanziHomesLease.pdf_url, fileName);
+        toast({ title: 'MzanziHomes lease downloaded successfully!' });
         return;
       }
 
@@ -253,7 +253,7 @@ export default function TenantLeaseDocuments() {
                     )}
                     <Button
                       size="sm"
-                      onClick={() => navigate(`/RentLekker-lease/${lease.id}`)}
+                      onClick={() => navigate(`/MzanziHomes-lease/${lease.id}`)}
                       className="bg-ocean-blue hover:bg-ocean-blue-dark"
                     >
                       <PenTool className="h-4 w-4 mr-2" />

@@ -14,4 +14,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://rentlekker.com/sitemap.xml
+Sitemap: https://mzanzihomes.com/sitemap.xml

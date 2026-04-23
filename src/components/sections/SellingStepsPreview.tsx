@@ -11,7 +11,7 @@ export function SellingStepsPreview() {
           <div>
             <h3 className="text-xl font-bold text-gray-900">How to Sell Your Property</h3>
             <p className="text-sm text-gray-500 mt-1">
-              9 steps from listing to registration — guided by RentLekker
+              9 steps from listing to registration — guided by MzanziHomes
             </p>
           </div>
           <Button

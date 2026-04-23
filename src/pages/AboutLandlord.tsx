@@ -161,15 +161,15 @@ const AboutLandlord = () => {
             For Landlords
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Everything you need to know about renting your property on RentLekker. 
+            Everything you need to know about renting your property on MzanziHomes. 
             Keep 100% of your rental income, connect directly with quality tenants, and manage everything from one powerful dashboard.
           </p>
         </div>
 
-        {/* Why RentLekker Section */}
+        {/* Why MzanziHomes Section */}
         <section className="mb-16">
           <div className="bg-ocean-blue/10 rounded-2xl p-8 md:p-12">
-            <h2 className="text-3xl font-bold mb-6 text-center">Why Choose RentLekker?</h2>
+            <h2 className="text-3xl font-bold mb-6 text-center">Why Choose MzanziHomes?</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-ocean-blue rounded-lg flex items-center justify-center flex-shrink-0">
@@ -178,7 +178,7 @@ const AboutLandlord = () => {
                 <div>
                   <h3 className="text-xl font-semibold mb-2">Zero Commission</h3>
                   <p className="text-muted-foreground">
-                    Traditional agents charge 8-12% commission. On a R15,000/month rental, that's R1,200-R1,800 per month or R14,400-R21,600 per year. With RentLekker, you keep every single rand.
+                    Traditional agents charge 8-12% commission. On a R15,000/month rental, that's R1,200-R1,800 per month or R14,400-R21,600 per year. With MzanziHomes, you keep every single rand.
                   </p>
                 </div>
               </div>
@@ -291,13 +291,13 @@ const AboutLandlord = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-lg">
-                RentLekker offers flexible plans to suit landlords of all sizes:
+                MzanziHomes offers flexible plans to suit landlords of all sizes:
               </p>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-success-green mt-0.5 flex-shrink-0" />
                   <div>
-                    <strong>Free Plan:</strong> Perfect for trying out RentLekker. List properties, receive applications, and connect with tenants.
+                    <strong>Free Plan:</strong> Perfect for trying out MzanziHomes. List properties, receive applications, and connect with tenants.
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
@@ -324,7 +324,7 @@ const AboutLandlord = () => {
         <section className="text-center bg-ocean-blue/10 rounded-2xl p-12">
           <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of landlords who are already saving money and managing their properties more efficiently with RentLekker.
+            Join thousands of landlords who are already saving money and managing their properties more efficiently with MzanziHomes.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>

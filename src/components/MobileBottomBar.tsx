@@ -31,7 +31,7 @@ export function MobileBottomBar() {
     /\/leases\/.+\/sign/.test(location.pathname) ||
     /\/contracts\/.+\/sign/.test(location.pathname) ||
     location.pathname.includes('/sign') ||
-    location.pathname.startsWith('/RentLekker-lease/');
+    location.pathname.startsWith('/MzanziHomes-lease/');
 
   useEffect(() => {
     if (isInConversation || isSigningPage) {

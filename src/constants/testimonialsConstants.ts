@@ -12,14 +12,14 @@ export const TESTIMONIALS_DATA: Testimonial[] = [
     role: "Tenant",
     location: "Cape Town",
     rating: 5,
-    content: "RentLekker made finding my perfect apartment so easy. The verification process gave me confidence, and I saved thousands in agent fees!"
+    content: "MzanziHomes made finding my perfect apartment so easy. The verification process gave me confidence, and I saved thousands in agent fees!"
   },
   {
     name: "Michael van der Merwe", 
     role: "Landlord",
     location: "Johannesburg",
     rating: 5,
-    content: "As a landlord, I love how RentLekker handles everything - from tenant screening to lease agreements. It's professional and secure."
+    content: "As a landlord, I love how MzanziHomes handles everything - from tenant screening to lease agreements. It's professional and secure."
   },
   {
     name: "Priya Patel",

@@ -220,7 +220,7 @@ async function sendCompletionNotifications(supabase: any, contract: any, contrac
 
     if (landlordEmail) {
       await resend.emails.send({
-        from: `RentLekker <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@RentLekker.co"}>`,
+        from: `MzanziHomes <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@MzanziHomes.co"}>`,
         to: [landlordEmail],
         subject: `✅ Lease Agreement Completed - ${propertyAddress}`,
         html: completionEmailHtml(landlordName, tenantName),
@@ -229,7 +229,7 @@ async function sendCompletionNotifications(supabase: any, contract: any, contrac
 
     if (tenantEmail) {
       await resend.emails.send({
-        from: `RentLekker <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@RentLekker.co"}>`,
+        from: `MzanziHomes <${Deno.env.get("RESEND_FROM_EMAIL") || "noreply@MzanziHomes.co"}>`,
         to: [tenantEmail],
         subject: `✅ Lease Agreement Completed - ${propertyAddress}`,
         html: completionEmailHtml(tenantName, landlordName),

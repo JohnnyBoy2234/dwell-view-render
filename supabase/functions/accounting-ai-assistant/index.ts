@@ -23,7 +23,7 @@ serve(async (req) => {
 
     switch (action) {
       case 'categorize':
-        systemPrompt = "You are a financial assistant for South African landlords. Categorize expenses accurately based on common property management categories: Maintenance, Utilities (Water/Electricity), Rates & Taxes, Insurance, Bank Fees, RentLekker Subscription, or Other.";
+        systemPrompt = "You are a financial assistant for South African landlords. Categorize expenses accurately based on common property management categories: Maintenance, Utilities (Water/Electricity), Rates & Taxes, Insurance, Bank Fees, MzanziHomes Subscription, or Other.";
         userPrompt = `Categorize this expense: "${data.description}". Respond with just the category name.`;
         break;
 

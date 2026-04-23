@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 async function exchangeCodeForToken(code: string, state: string) {
   const clientId = Deno.env.get("DOCUSIGN_INTEGRATION_KEY");
   const clientSecret = Deno.env.get("DOCUSIGN_CLIENT_SECRET");
-  const redirectUri = Deno.env.get("DOCUSIGN_REDIRECT_URI") || "https://rentlekker.com/auth/callback";
+  const redirectUri = Deno.env.get("DOCUSIGN_REDIRECT_URI") || "https://mzanzihomes.com/auth/callback";
   const authServer = Deno.env.get("DOCUSIGN_AUTH_SERVER") || "account-d.docusign.com";
 
   if (!clientId || !clientSecret) {

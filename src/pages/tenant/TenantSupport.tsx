@@ -133,7 +133,7 @@ export default function TenantSupport() {
               </div>
               <div>
                 <p className="font-semibold">Email Support</p>
-                <p className="text-sm text-muted-foreground">support@rentlekker.com</p>
+                <p className="text-sm text-muted-foreground">support@mzanzihomes.com</p>
               </div>
             </div>
           </CardContent>

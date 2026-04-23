@@ -59,10 +59,10 @@ export const TestimonialsColumn = (props: {
   );
 };
 
-// RentLekker-specific testimonials data
+// MzanziHomes-specific testimonials data
 export const rentLekkerTestimonials: Testimonial[] = [
   {
-    text: "Found my flat in Cape Town in just 3 days. Zero agent fees saved me over R9,000. RentLekker is exactly what South Africa needed.",
+    text: "Found my flat in Cape Town in just 3 days. Zero agent fees saved me over R9,000. MzanziHomes is exactly what South Africa needed.",
     image: "https://randomuser.me/api/portraits/women/11.jpg",
     name: "Thandi M.",
     role: "Tenant, Cape Town",
@@ -74,13 +74,13 @@ export const rentLekkerTestimonials: Testimonial[] = [
     role: "Landlord, Johannesburg",
   },
   {
-    text: "As a first-time renter I was nervous, but RentLekker made it simple. Verified listings, no hidden fees, and direct chat with my landlord.",
+    text: "As a first-time renter I was nervous, but MzanziHomes made it simple. Verified listings, no hidden fees, and direct chat with my landlord.",
     image: "https://randomuser.me/api/portraits/women/33.jpg",
     name: "Amahle Dube",
     role: "Tenant, Durban",
   },
   {
-    text: "I manage 6 properties and RentLekker's dashboard handles everything — rent tracking, maintenance, invoices. One app, zero chaos.",
+    text: "I manage 6 properties and MzanziHomes's dashboard handles everything — rent tracking, maintenance, invoices. One app, zero chaos.",
     image: "https://randomuser.me/api/portraits/men/44.jpg",
     name: "Pieter Steyn",
     role: "Landlord, Pretoria",
@@ -92,7 +92,7 @@ export const rentLekkerTestimonials: Testimonial[] = [
     role: "Tenant, Sandton",
   },
   {
-    text: "Switching to RentLekker saved me R24,000 per year in agent fees across my two rentals. The platform pays for itself instantly.",
+    text: "Switching to MzanziHomes saved me R24,000 per year in agent fees across my two rentals. The platform pays for itself instantly.",
     image: "https://randomuser.me/api/portraits/men/66.jpg",
     name: "Mark Jacobs",
     role: "Landlord, Cape Town",
@@ -110,7 +110,7 @@ export const rentLekkerTestimonials: Testimonial[] = [
     role: "Landlord, Stellenbosch",
   },
   {
-    text: "After a bad experience with a dodgy agent, RentLekker's verified listings gave me the confidence to rent again. Completely transparent.",
+    text: "After a bad experience with a dodgy agent, MzanziHomes's verified listings gave me the confidence to rent again. Completely transparent.",
     image: "https://randomuser.me/api/portraits/women/99.jpg",
     name: "Zanele Nkosi",
     role: "Tenant, Soweto",

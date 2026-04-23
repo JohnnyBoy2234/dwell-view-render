@@ -309,7 +309,7 @@ export default function PropertyDetail() {
     if (!property) return;
 
     const shareData = {
-      title: "Check out this property on RentLekker",
+      title: "Check out this property on MzanziHomes",
       text: `${property.location} - R${property.price.toLocaleString()} per month. See more details here:`,
       url: window.location.href
     };
@@ -373,7 +373,7 @@ export default function PropertyDetail() {
   }
 
   const propertyUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const ogImage = property.images?.[0] || 'https://rentlekker.com/apple-touch-icon.png';
+  const ogImage = property.images?.[0] || 'https://mzanzihomes.com/apple-touch-icon.png';
   const isSale = property.listing_type === 'sale';
   const ogTitle = `R${property.price.toLocaleString()}${isSale ? '' : '/month'} - ${property.property_type} in ${property.location}`;
   const ogDescription = property.description?.slice(0, 200) || `${property.bedrooms} bed, ${property.bathrooms} bath property available for ${isSale ? 'sale' : 'rent'} in ${property.location}`;
@@ -382,7 +382,7 @@ export default function PropertyDetail() {
     <div className="min-h-screen bg-gradient-to-br from-ocean-blue/5 via-background to-earth-warm/10">
       {/* Dynamic Meta Tags for Social Sharing */}
       <Helmet>
-        <title>{ogTitle} | RentLekker</title>
+        <title>{ogTitle} | MzanziHomes</title>
         <meta name="description" content={ogDescription} />
         
         {/* Open Graph / Facebook */}
@@ -393,7 +393,7 @@ export default function PropertyDetail() {
         <meta property="og:image" content={ogImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:site_name" content="RentLekker" />
+        <meta property="og:site_name" content="MzanziHomes" />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />

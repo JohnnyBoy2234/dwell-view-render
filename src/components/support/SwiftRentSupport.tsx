@@ -33,7 +33,7 @@ const statusConfig = {
   closed: { icon: CheckCircle, color: 'text-gray-500', bg: 'bg-gray-100', label: 'Closed' }
 };
 
-export function RentLekkerSupport() {
+export function MzanziHomesSupport() {
   const { messages, loading, submitting, createMessage } = useSupportMessages();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -127,7 +127,7 @@ export function RentLekkerSupport() {
               <MessageSquare className="h-5 w-5 text-white" />
             </div>
             <div>
-              <CardTitle className="text-lg">RentLekker Support</CardTitle>
+              <CardTitle className="text-lg">MzanziHomes Support</CardTitle>
               <CardDescription>Send us your concerns or queries</CardDescription>
             </div>
           </div>

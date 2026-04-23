@@ -19,7 +19,7 @@ export const NAV_ITEMS: NavItem[] = [
 ];
 
 export const NAVBAR_CONTENT = {
-  BRAND_NAME: "RentLekker",
+  BRAND_NAME: "MzanziHomes",
   LIST_PROPERTY_LABEL: "List Property",
   SIGN_IN_LABEL: "Sign In",
   DASHBOARD_LABEL: "Dashboard",

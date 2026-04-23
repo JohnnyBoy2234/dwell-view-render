@@ -86,7 +86,7 @@ export function UnifiedSidebar({ userRole }: UnifiedSidebarProps) {
             </div>
             {!collapsed && (
               <div>
-                <h1 className="text-xl font-bold text-sidebar-foreground">RentLekker</h1>
+                <h1 className="text-xl font-bold text-sidebar-foreground">MzanziHomes</h1>
                 <p className="text-xs text-sidebar-foreground/60 capitalize">{userRole} Portal</p>
               </div>
             )}
