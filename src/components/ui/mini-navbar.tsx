@@ -58,10 +58,10 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
   return (
     <header
       className={`fixed top-5 left-1/2 z-50 flex flex-col items-center
-                  -translate-x-1/2 px-5 py-2.5
+                  -translate-x-1/2 px-4 py-2.5
                   backdrop-blur-md border border-white/10
                   bg-[rgba(10,10,20,0.65)]
-                  w-[calc(100%-2rem)] sm:w-auto
+                  w-[calc(100%-1rem)] sm:w-auto
                   transition-[border-radius] duration-0 ${shapeClass}`}
       style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.07)' }}
     >
