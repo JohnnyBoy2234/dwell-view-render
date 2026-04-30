@@ -72,7 +72,7 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
           <div className="w-7 h-7 rounded-lg bg-ocean-blue flex items-center justify-center shrink-0">
             <Home className="w-4 h-4 text-white" />
           </div>
-          <span className="text-white font-bold text-sm tracking-tight hidden sm:block whitespace-nowrap">
+          <span className="text-white font-bold text-sm tracking-tight whitespace-nowrap">
             MzanziHomes
           </span>
         </Link>
@@ -121,9 +121,26 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
           )}
         </div>
 
+        {/* Mobile action buttons */}
+        <div className="sm:hidden ml-auto flex items-center gap-1.5 shrink-0">
+          <Link
+            to="/list-property"
+            className="px-2.5 py-1 text-xs font-medium text-gray-300 border border-white/15 bg-white/5 rounded-full hover:text-white hover:border-white/30 transition-all duration-200 whitespace-nowrap"
+          >
+            List
+          </Link>
+          <Link
+            to="/add-property"
+            className="px-2.5 py-1 text-xs font-semibold text-white rounded-full whitespace-nowrap"
+            style={{ background: 'hsl(214,100%,59%)' }}
+          >
+            + Add
+          </Link>
+        </div>
+
         {/* Mobile hamburger */}
         <button
-          className="sm:hidden ml-auto flex items-center justify-center w-8 h-8 text-gray-300 focus:outline-none"
+          className="sm:hidden flex items-center justify-center w-8 h-8 text-gray-300 focus:outline-none"
           onClick={() => setIsOpen((v) => !v)}
           aria-label={isOpen ? 'Close menu' : 'Open menu'}
         >
