@@ -124,13 +124,13 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
         {/* Mobile action buttons */}
         <div className="sm:hidden ml-auto flex items-center gap-1.5 shrink-0">
           <Link
-            to="/list-property"
+            to="/listing-type"
             className="px-2.5 py-1 text-xs font-medium text-gray-300 border border-white/15 bg-white/5 rounded-full hover:text-white hover:border-white/30 transition-all duration-200 whitespace-nowrap"
           >
             List
           </Link>
           <Link
-            to="/add-property"
+            to="/listing-type"
             className="px-2.5 py-1 text-xs font-semibold text-white rounded-full whitespace-nowrap"
             style={{ background: 'hsl(214,100%,59%)' }}
           >
@@ -166,7 +166,7 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
 
         {/* Mode CTA — Add Property (Rent) or List Property (Buy) */}
         <Link
-          to={mode === 'buy' ? '/sell-property' : '/list-property'}
+          to={mode === 'buy' ? '/list-sale' : '/listing-type'}
           className="flex items-center justify-center w-full py-2.5 mb-3 text-sm font-semibold rounded-full transition-all duration-200"
           style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
           onClick={() => setIsOpen(false)}

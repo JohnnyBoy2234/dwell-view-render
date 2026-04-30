@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useTenantNotifications } from '@/hooks/useTenantNotifications';
+import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';
 import { Notification } from '@/types/notification';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
@@ -45,7 +47,11 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { isLandlord } = useAuth();
-  const { notifications, unreadCount, markAsRead, markAsUnread, markAllAsRead, deleteNotification } = useNotifications();
+  const { notifications, unreadCount: notifUnread, markAsRead, markAsUnread, markAllAsRead, deleteNotification } = useNotifications();
+  const { unreadCount: tenantUnread } = useTenantNotifications();
+  const { unreadCount: landlordUnread } = useLandlordNotifications();
+  const leaseUnread = isLandlord ? landlordUnread : tenantUnread;
+  const unreadCount = notifUnread + leaseUnread;
 
   // Close on outside click
   useEffect(() => {

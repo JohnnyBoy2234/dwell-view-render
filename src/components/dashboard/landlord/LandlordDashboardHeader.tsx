@@ -28,7 +28,7 @@ export function LandlordDashboardHeader() {
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 hidden sm:flex"
-              onClick={() => navigate('/dashboard/add-property')}
+              onClick={() => navigate('/listing-type')}
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Property
@@ -39,7 +39,7 @@ export function LandlordDashboardHeader() {
               variant="ghost"
               size="sm"
               className="text-white hover:bg-white/10 sm:hidden"
-              onClick={() => navigate('/dashboard/add-property')}
+              onClick={() => navigate('/listing-type')}
             >
               <Plus className="h-5 w-5" />
             </Button>
