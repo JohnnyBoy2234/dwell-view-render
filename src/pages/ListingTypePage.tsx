@@ -1,6 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { MiniNavbar } from '@/components/ui/mini-navbar';
 
 export default function ListingTypePage() {
   const navigate = useNavigate();
@@ -12,8 +11,7 @@ export default function ListingTypePage() {
 
   return (
     <>
-      <MiniNavbar />
-      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light pt-28 sm:pt-24 pb-24 px-4">
+      <div className="min-h-screen bg-gradient-to-br from-ios-gray-light via-white to-ios-gray-light pt-10 pb-24 px-4">
         <div className="max-w-md mx-auto">
           <button
             onClick={() => navigate(-1)}

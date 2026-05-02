@@ -10,7 +10,6 @@ import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } fr
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';
-import { MiniNavbar } from '@/components/ui/mini-navbar';
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
 import LocationStep from '@/components/listing/LocationStep';
 import DetailsStep from '@/components/listing/DetailsStep';
@@ -225,9 +224,7 @@ export default function AddPropertyUnlisted() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <MiniNavbar />
-
-      <div className="container mx-auto p-6 max-w-4xl pt-28 sm:pt-24 pb-24">
+      <div className="container mx-auto p-6 max-w-4xl pt-6 pb-24">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Button variant="outline" onClick={() => navigate(-1)}>

@@ -357,11 +357,9 @@ export default function PropertyManagement() {
           {activeTab === 'tenants' && property.listing_type !== 'sale' && (
             <div className="space-y-4">
               <TenantRelations property={property} />
-              {property.is_listed === false && (
-                <div className="bg-white rounded-2xl border border-gray-200 p-5">
-                  <TenantInviteSection propertyId={property.id} />
-                </div>
-              )}
+              <div className="bg-white rounded-2xl border border-gray-200 p-5">
+                <TenantInviteSection propertyId={property.id} />
+              </div>
             </div>
           )}
           
