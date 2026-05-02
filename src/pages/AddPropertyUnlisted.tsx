@@ -32,6 +32,7 @@ export default function AddPropertyUnlisted() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [newPropertyId, setNewPropertyId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -189,6 +190,7 @@ export default function AddPropertyUnlisted() {
 
       try { localStorage.removeItem(LOCAL_STORAGE_KEY); } catch {}
 
+      setNewPropertyId(inserted.id);
       setShowSuccessDialog(true);
     } catch (error: any) {
       toast({
@@ -337,15 +339,23 @@ export default function AddPropertyUnlisted() {
         }}
         icon="check"
         title="Property Added!"
-        subtitle="Your property has been saved privately."
+        subtitle="Your property has been saved privately. What would you like to do next?"
         nextSteps={[
-          { title: "Manage", description: "Use all management tools privately" },
+          { title: "List Property", description: "Publish it so tenants or buyers can find it" },
+          { title: "Invite Tenant", description: "Send a private invite link to your existing tenant" },
         ]}
         primaryAction={{
-          label: "Go to Dashboard",
+          label: "List Property",
           onClick: () => {
             setShowSuccessDialog(false);
-            navigate('/enhancedlandlorddashboard');
+            navigate(newPropertyId ? `/listing-type?propertyId=${newPropertyId}` : '/listing-type');
+          },
+        }}
+        secondaryAction={{
+          label: "Invite Tenant",
+          onClick: () => {
+            setShowSuccessDialog(false);
+            navigate(newPropertyId ? `/manage-property/${newPropertyId}?tab=tenants` : '/enhancedlandlorddashboard');
           },
         }}
         showConfetti={true}

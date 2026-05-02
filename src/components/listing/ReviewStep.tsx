@@ -114,9 +114,9 @@ export default function ReviewStep({ formData, isSale }: ReviewStepProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Type:</span>
-              <span className="font-medium">{property_type}</span>
+            <div className="flex justify-between gap-2 min-w-0">
+              <span className="text-muted-foreground shrink-0">Type:</span>
+              <span className="font-medium text-right break-words">{property_type}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Bedrooms:</span>
@@ -176,7 +176,7 @@ export default function ReviewStep({ formData, isSale }: ReviewStepProps) {
           <CardTitle>Description</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed">{description}</p>
+          <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">{description}</p>
         </CardContent>
       </Card>
 
@@ -190,27 +190,27 @@ export default function ReviewStep({ formData, isSale }: ReviewStepProps) {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Contact Name:</span>
-              <span className="font-medium">{contact_name}</span>
+            <div className="flex justify-between gap-2 min-w-0">
+              <span className="text-muted-foreground shrink-0">Contact Name:</span>
+              <span className="font-medium text-right break-words">{contact_name}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground flex items-center gap-1">
+            <div className="flex justify-between gap-2 min-w-0">
+              <span className="text-muted-foreground flex items-center gap-1 shrink-0">
                 <Phone className="h-4 w-4" />
                 Phone:
               </span>
-              <span className="font-medium">{contact_phone}</span>
+              <span className="font-medium text-right break-all">{contact_phone}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground flex items-center gap-1">
+            <div className="flex justify-between gap-2 min-w-0">
+              <span className="text-muted-foreground flex items-center gap-1 shrink-0">
                 <Mail className="h-4 w-4" />
                 Email:
               </span>
-              <span className="font-medium">{contact_email}</span>
+              <span className="font-medium text-right break-all">{contact_email}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Preferred Contact:</span>
-              <span className="font-medium capitalize">
+            <div className="flex justify-between gap-2 min-w-0">
+              <span className="text-muted-foreground shrink-0">Preferred Contact:</span>
+              <span className="font-medium capitalize text-right">
                 {preferred_contact_method === 'both' ? 'Phone or Email' : preferred_contact_method}
               </span>
             </div>

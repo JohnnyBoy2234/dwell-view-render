@@ -341,7 +341,7 @@ export default function ListSale() {
                   >
                     <IconComponent className="h-5 w-5" />
                   </div>
-                  <div className="text-center">
+                  <div className="text-center hidden sm:block">
                     <p className="text-xs font-medium">{step.title}</p>
                     <p className="text-xs opacity-75 hidden sm:block">{step.description}</p>
                   </div>
