@@ -45,7 +45,7 @@ export default function JoinPage() {
   // Auth step
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
 
   // Details step
@@ -58,12 +58,16 @@ export default function JoinPage() {
     loadInvite();
   }, [token]);
 
+  // If the landlord is logged in, sign them out so the tenant can sign in
   useEffect(() => {
-    if (user && invite) {
-      // Re-fetch to confirm invite is still valid under authenticated session
-      loadInvite();
+    if (user && invite && user.id === invite.landlord_id) {
+      supabase.auth.signOut();
+      toast({
+        title: 'Logged out',
+        description: 'Please sign in or create a tenant account to accept this invite.',
+      });
     }
-  }, [user?.id]);
+  }, [user?.id, invite?.landlord_id]);
 
   const loadInvite = async () => {
     setLoading(true);
@@ -96,41 +100,64 @@ export default function JoinPage() {
     setLoading(false);
   };
 
+  // A valid tenant session = logged in AND not the landlord
+  const isTenantSession = !!(user && invite && user.id !== invite.landlord_id);
+
   const handleAuth = async () => {
     if (!email || !password) {
-      toast({ title: 'Required', description: 'Please enter email and password.', variant: 'destructive' });
+      toast({ title: 'Required', description: 'Please enter your email and password.', variant: 'destructive' });
       return;
     }
     setAuthLoading(true);
-    let authError;
+
     if (isSignUp) {
       const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
-      authError = error;
-      if (!error && !signUpData.session) {
+      if (error) {
+        toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
+        setAuthLoading(false);
+        return;
+      }
+      // If email confirmation is required the session won't exist yet
+      if (!signUpData.session) {
         toast({
           title: 'Check your email',
-          description: 'Click the confirmation link in your email, then return to this page and sign in.',
+          description: 'Click the confirmation link we sent you, then return here and sign in.',
         });
+        setIsSignUp(false);
+        setAuthLoading(false);
+        return;
       }
+      // Pre-fill name from email prefix so the details form is partially done
+      setFullName(email.split('@')[0].replace(/[._-]/g, ' '));
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
-      authError = error;
+      if (error) {
+        toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
+        setAuthLoading(false);
+        return;
+      }
     }
+
     setAuthLoading(false);
-    if (authError) {
-      toast({ title: 'Auth error', description: authError.message, variant: 'destructive' });
-    }
   };
 
   const handleAccept = async () => {
     if (!user || !invite || !property) return;
+
+    // Safety: block the landlord from accepting their own invite
+    if (user.id === invite.landlord_id) {
+      toast({ title: 'Error', description: 'You cannot accept your own invite.', variant: 'destructive' });
+      return;
+    }
+
     if (!fullName.trim()) {
       toast({ title: 'Required', description: 'Please enter your full name.', variant: 'destructive' });
       return;
     }
+
     setSubmitting(true);
     try {
-      // 1. Upsert profile with name, phone, id number
+      // 1. Upsert profile
       await supabase.from('profiles').upsert({
         user_id: user.id,
         display_name: fullName.trim(),
@@ -151,7 +178,7 @@ export default function JoinPage() {
       });
       if (tenancyErr) throw tenancyErr;
 
-      // 3. Mark invite as used
+      // 3. Mark invite used
       await supabase.from('property_invites').update({
         used_at: new Date().toISOString(),
         tenant_id: user.id,
@@ -215,37 +242,56 @@ export default function JoinPage() {
           </div>
         </div>
 
-        {/* Auth gate — shown when not logged in */}
-        {!user && (
+        {/* Auth gate — shown when no valid tenant session */}
+        {!isTenantSession && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-            <h3 className="font-bold text-sm mb-4">{isSignUp ? 'Create an account' : 'Sign in to continue'}</h3>
+            <h3 className="font-bold text-sm mb-1">
+              {isSignUp ? 'Create your tenant account' : 'Sign in to continue'}
+            </h3>
+            <p className="text-xs text-gray-500 mb-4">
+              {isSignUp
+                ? 'Enter your email to create an account and accept this invite.'
+                : 'Sign in to your existing account to accept this invite.'}
+            </p>
             <div className="space-y-3">
               <div>
                 <Label className="text-xs">Email address</Label>
-                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} className="mt-1" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="your@email.com"
+                  className="mt-1"
+                />
               </div>
               <div>
                 <Label className="text-xs">Password</Label>
-                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="mt-1" />
+                <Input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder={isSignUp ? 'Choose a password' : 'Your password'}
+                  className="mt-1"
+                />
               </div>
               <Button onClick={handleAuth} disabled={authLoading} className="w-full">
-                {authLoading ? 'Loading…' : 'Continue'}
+                {authLoading ? 'Loading…' : isSignUp ? 'Create Account & Continue' : 'Sign In & Continue'}
               </Button>
               <button
                 className="w-full text-center text-xs text-gray-500 hover:text-blue-600"
                 onClick={() => setIsSignUp(s => !s)}
               >
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
               </button>
             </div>
           </div>
         )}
 
-        {/* Details form — shown when logged in */}
-        {user && (
+        {/* Details form — shown when a valid tenant session exists */}
+        {isTenantSession && (
           <div className="bg-white rounded-2xl border-2 border-blue-200 p-5 shadow-sm">
             <h3 className="font-bold text-sm text-blue-800 mb-1">Almost done — confirm your details</h3>
-            <p className="text-xs text-gray-500 mb-4">This links you to the property</p>
+            <p className="text-xs text-gray-500 mb-4">This links you to the property as a tenant</p>
             <div className="space-y-3">
               <div>
                 <Label className="text-xs font-semibold">Full name *</Label>
