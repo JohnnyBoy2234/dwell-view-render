@@ -65,13 +65,20 @@ buildTypes {
 
 ### 1.4 Keystore Security
 
-`android/keystore.properties` contains plaintext credentials and must not be committed to git.
+`android/keystore.properties` contains plaintext credentials and must not be committed to git. Both files are currently tracked by git, so two steps are needed — not just `.gitignore`:
+
+```bash
+# Untrack without deleting the local files
+git rm --cached android/keystore.properties
+git rm --cached android/app/rentlekker-release-key.jks
+```
 
 - Add `android/keystore.properties` to `.gitignore`
 - Add `android/app/rentlekker-release-key.jks` to `.gitignore`
 - Document the manual setup in a `RELEASE.md` at the repo root:
   - How to recreate `keystore.properties` locally
   - Where the `.jks` file is stored (e.g., 1Password, Google Drive)
+- Back up both files to a secure location **before** running `git rm --cached`
 
 ---
 
