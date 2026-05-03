@@ -355,7 +355,7 @@ export default function AddPropertyUnlisted() {
           label: "Invite Tenant",
           onClick: () => {
             setShowSuccessDialog(false);
-            navigate(newPropertyId ? `/manage-property/${newPropertyId}?tab=tenants` : '/enhancedlandlorddashboard');
+            navigate(newPropertyId ? `/enhancedlandlorddashboard/tenants?property=${newPropertyId}` : '/enhancedlandlorddashboard');
           },
         }}
         showConfetti={true}

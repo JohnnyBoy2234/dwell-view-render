@@ -6,7 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield, Key, Link as LinkIcon, Tag } from 'lucide-react';
+import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield, Key } from 'lucide-react';
 import { Property } from '@/types/dashboard';
 import { PropertyOverview } from '@/components/property/PropertyOverview';
 import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
@@ -277,36 +277,6 @@ export default function PropertyManagement() {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-gray-900">Rental Property Management</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {!property.is_listed && (
-                <div
-                  onClick={() => navigate(`/listing-type?propertyId=${property.id}`)}
-                  className="bg-white border-2 border-purple-300 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer col-span-full md:col-span-1"
-                >
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center">
-                      <Tag className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-purple-900">List Property</h4>
-                      <p className="text-sm text-gray-600">Publish for rent or sale</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div
-                onClick={() => handleTabChange('tenants')}
-                className="bg-white border-2 border-blue-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-              >
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center">
-                    <LinkIcon className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-900">Invite Tenant</h4>
-                    <p className="text-sm text-gray-600">Send a private invite link</p>
-                  </div>
-                </div>
-              </div>
               <div
                 onClick={() => handleTabChange('management')}
                 className="bg-white border border-gray-200 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow cursor-pointer"

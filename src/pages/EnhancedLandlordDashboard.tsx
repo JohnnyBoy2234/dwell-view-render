@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 // Simple R icon for South African Rand
@@ -35,6 +35,7 @@ import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithView
 import { cn } from '@/lib/utils';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { ToolGrid } from '@/components/dashboard/landlord/ToolGrid';
+import { TenantInviteSection } from '@/components/property/TenantInviteSection';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -1156,6 +1157,11 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 pb-8 w-full">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 w-full">
+        {selectedPropertyId && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <TenantInviteSection propertyId={selectedPropertyId} />
+          </div>
+        )}
         {tenants.length === 0 ? (
           <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
             <CardContent className="p-12 text-center">
@@ -2390,9 +2396,14 @@ const renderReportsTab = () => (
       tab?: string;
       path?: string;
       count?: number;
+      action?: () => void;
     };
 
     const tools: ToolItem[] = [
+      { title: 'Invite Tenant', subtitle: 'Send invite link',                 icon: UserPlus, tab: '/enhancedlandlorddashboard/tenants' },
+      ...(selectedProperty && !selectedProperty.is_listed && selectedProperty.listing_type !== 'sale'
+        ? [{ title: 'List Property', subtitle: 'Publish your property', icon: Tag, action: () => navigate(`/listing-type?propertyId=${selectedProperty.id}`) } as ToolItem]
+        : []),
       { title: 'Applications', subtitle: `${applications.length} total`,    icon: Inbox,      tab: '/enhancedlandlorddashboard/applications' },
       { title: 'Maintenance',  subtitle: `${activeMaintenanceRequests} open`, icon: Wrench,   tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
       { title: 'Payments',     subtitle: 'Track rent',                        icon: Receipt,  tab: '/enhancedlandlorddashboard/payments' },
@@ -2483,7 +2494,8 @@ const renderReportsTab = () => (
           tools={tools}
           onToolClick={(tool) => {
             if (!user) { navigate('/auth'); return; }
-            if (tool.tab) handleTabChange(tool.tab);
+            if (tool.action) tool.action();
+            else if (tool.tab) handleTabChange(tool.tab);
             else if (tool.path) navigate(tool.path);
           }}
         />
