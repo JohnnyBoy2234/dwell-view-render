@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">RentLekker</string>
-    <string name="title_activity_main">RentLekker</string>
-    <string name="package_name">com.RentLekker.app</string>
-    <string name="custom_url_scheme">com.RentLekker.app</string>
+    <string name="app_name">MzanziHomes</string>
+    <string name="title_activity_main">MzanziHomes</string>
+    <string name="package_name">com.MzanziHomes.app</string>
+    <string name="custom_url_scheme">com.MzanziHomes.app</string>
 </resources>
