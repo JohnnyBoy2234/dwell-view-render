@@ -10,7 +10,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace "com.RentLekker.app"
+    namespace "com.MzanziHomes.app"
     compileSdk rootProject.ext.compileSdkVersion
 
     signingConfigs {
@@ -25,7 +25,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.RentLekker.app"
+        applicationId "com.MzanziHomes.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
@@ -39,9 +39,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-            // Reference the signing configuration for release builds
             signingConfig signingConfigs.release
         }
     }

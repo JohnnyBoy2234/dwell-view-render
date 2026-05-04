@@ -28,3 +28,7 @@ dist-ssr
 .vercel
 .env.worktrees/
 .worktrees/
+
+# Keystore — do not commit, contains credentials
+android/keystore.properties
+android/app/*.jks
