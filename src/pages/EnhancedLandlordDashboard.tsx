@@ -2400,7 +2400,9 @@ const renderReportsTab = () => (
     };
 
     const tools: ToolItem[] = [
-      { title: 'Invite Tenant', subtitle: 'Send invite link',                 icon: UserPlus, tab: '/enhancedlandlorddashboard/tenants' },
+      ...(selectedProperty?.listing_type !== 'sale'
+        ? [{ title: 'Invite Tenant', subtitle: 'Send invite link', icon: UserPlus, tab: '/enhancedlandlorddashboard/tenants' } as ToolItem]
+        : []),
       ...(selectedProperty && !selectedProperty.is_listed && selectedProperty.listing_type !== 'sale'
         ? [{ title: 'List Property', subtitle: 'Publish your property', icon: Tag, action: () => navigate(`/listing-type?propertyId=${selectedProperty.id}`) } as ToolItem]
         : []),

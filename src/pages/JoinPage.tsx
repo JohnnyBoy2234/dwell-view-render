@@ -42,13 +42,17 @@ export default function JoinPage() {
   const [landlord, setLandlord] = useState<LandlordData | null>(null);
   const [pageError, setPageError] = useState('');
 
-  // Auth step
+  // Step 1: email entry
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(true);
-  const [authLoading, setAuthLoading] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
 
-  // Details step
+  // Step 2: OTP verification
+  const [showOtpStep, setShowOtpStep] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifyLoading, setVerifyLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  // Step 3: tenant details
   const [fullName, setFullName] = useState('');
   const [idNumber, setIdNumber] = useState('');
   const [phone, setPhone] = useState('');
@@ -58,16 +62,30 @@ export default function JoinPage() {
     loadInvite();
   }, [token]);
 
+  // Countdown for resend button
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const t = setTimeout(() => setResendCooldown(c => c - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendCooldown]);
+
   // If the landlord is logged in, sign them out so the tenant can sign in
   useEffect(() => {
     if (user && invite && user.id === invite.landlord_id) {
       supabase.auth.signOut();
       toast({
         title: 'Logged out',
-        description: 'Please sign in or create a tenant account to accept this invite.',
+        description: 'Please enter your email to accept this invite as a tenant.',
       });
     }
   }, [user?.id, invite?.landlord_id]);
+
+  // Pre-fill name from email once the tenant session is established
+  useEffect(() => {
+    if (isTenantSession && email && !fullName) {
+      setFullName(email.split('@')[0].replace(/[._-]/g, ' '));
+    }
+  }, [isTenantSession]);
 
   const loadInvite = async () => {
     setLoading(true);
@@ -103,42 +121,57 @@ export default function JoinPage() {
   // A valid tenant session = logged in AND not the landlord
   const isTenantSession = !!(user && invite && user.id !== invite.landlord_id);
 
-  const handleAuth = async () => {
-    if (!email || !password) {
-      toast({ title: 'Required', description: 'Please enter your email and password.', variant: 'destructive' });
+  // Send OTP via signInWithOtp — works for both new and existing users,
+  // and always delivers a 6-digit code (not a link).
+  const handleSendCode = async () => {
+    if (!email) {
+      toast({ title: 'Required', description: 'Please enter your email address.', variant: 'destructive' });
       return;
     }
-    setAuthLoading(true);
-
-    if (isSignUp) {
-      const { data: signUpData, error } = await supabase.auth.signUp({ email, password });
-      if (error) {
-        toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
-        setAuthLoading(false);
-        return;
-      }
-      // If email confirmation is required the session won't exist yet
-      if (!signUpData.session) {
-        toast({
-          title: 'Check your email',
-          description: 'Click the confirmation link we sent you, then return here and sign in.',
-        });
-        setIsSignUp(false);
-        setAuthLoading(false);
-        return;
-      }
-      // Pre-fill name from email prefix so the details form is partially done
-      setFullName(email.split('@')[0].replace(/[._-]/g, ' '));
+    setSendingCode(true);
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    if (error) {
+      toast({ title: 'Failed to send code', description: error.message, variant: 'destructive' });
     } else {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) {
-        toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
-        setAuthLoading(false);
-        return;
-      }
+      setShowOtpStep(true);
+      setResendCooldown(60);
     }
+    setSendingCode(false);
+  };
 
-    setAuthLoading(false);
+  const handleVerifyOtp = async () => {
+    if (otpCode.length !== 6) {
+      toast({ title: 'Required', description: 'Enter the 6-digit code from your email.', variant: 'destructive' });
+      return;
+    }
+    setVerifyLoading(true);
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: 'email',
+    });
+    if (error) {
+      toast({ title: 'Invalid code', description: error.message, variant: 'destructive' });
+    }
+    // On success the auth listener updates `user` → isTenantSession becomes true
+    setVerifyLoading(false);
+  };
+
+  const handleResendCode = async () => {
+    if (resendCooldown > 0) return;
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: true },
+    });
+    if (error) {
+      toast({ title: 'Failed to resend', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: 'Code resent', description: 'Check your inbox for a new 6-digit code.' });
+      setResendCooldown(60);
+    }
   };
 
   const handleAccept = async () => {
@@ -242,16 +275,12 @@ export default function JoinPage() {
           </div>
         </div>
 
-        {/* Auth gate — shown when no valid tenant session */}
-        {!isTenantSession && (
+        {/* Step 1: Email entry */}
+        {!isTenantSession && !showOtpStep && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
-            <h3 className="font-bold text-sm mb-1">
-              {isSignUp ? 'Create your tenant account' : 'Sign in to continue'}
-            </h3>
+            <h3 className="font-bold text-sm mb-1">Verify your email to continue</h3>
             <p className="text-xs text-gray-500 mb-4">
-              {isSignUp
-                ? 'Enter your email to create an account and accept this invite.'
-                : 'Sign in to your existing account to accept this invite.'}
+              We'll send a 6-digit code to your email. Works for both new and existing accounts.
             </p>
             <div className="space-y-3">
               <div>
@@ -262,32 +291,73 @@ export default function JoinPage() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="your@email.com"
                   className="mt-1"
+                  onKeyDown={e => e.key === 'Enter' && handleSendCode()}
+                  autoFocus
                 />
               </div>
-              <div>
-                <Label className="text-xs">Password</Label>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder={isSignUp ? 'Choose a password' : 'Your password'}
-                  className="mt-1"
-                />
-              </div>
-              <Button onClick={handleAuth} disabled={authLoading} className="w-full">
-                {authLoading ? 'Loading…' : isSignUp ? 'Create Account & Continue' : 'Sign In & Continue'}
+              <Button onClick={handleSendCode} disabled={sendingCode} className="w-full">
+                {sendingCode ? 'Sending…' : 'Send Verification Code'}
               </Button>
-              <button
-                className="w-full text-center text-xs text-gray-500 hover:text-blue-600"
-                onClick={() => setIsSignUp(s => !s)}
-              >
-                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Create one"}
-              </button>
             </div>
           </div>
         )}
 
-        {/* Details form — shown when a valid tenant session exists */}
+        {/* Step 2: OTP verification */}
+        {!isTenantSession && showOtpStep && (
+          <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
+            <div className="text-center mb-5">
+              <div className="text-3xl mb-2">📧</div>
+              <h3 className="font-bold text-sm text-gray-900">Check your email</h3>
+              <p className="text-xs text-gray-500 mt-1">
+                We sent a 6-digit code to
+              </p>
+              <p className="text-xs font-semibold text-blue-700 mt-0.5">{email}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-xs text-center block mb-2">Verification code</Label>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={otpCode}
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  className="text-center text-2xl font-bold tracking-[0.5em] h-14"
+                  onKeyDown={e => e.key === 'Enter' && handleVerifyOtp()}
+                  autoFocus
+                />
+              </div>
+
+              <Button
+                onClick={handleVerifyOtp}
+                disabled={verifyLoading || otpCode.length !== 6}
+                className="w-full"
+              >
+                {verifyLoading ? 'Verifying…' : 'Verify & Continue'}
+              </Button>
+
+              <div className="flex flex-col items-center gap-1.5">
+                <button
+                  onClick={handleResendCode}
+                  disabled={resendCooldown > 0}
+                  className="text-xs text-gray-500 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {resendCooldown > 0 ? `Resend code in ${resendCooldown}s` : 'Resend code'}
+                </button>
+                <button
+                  onClick={() => { setShowOtpStep(false); setOtpCode(''); }}
+                  className="text-xs text-gray-400 hover:text-gray-600"
+                >
+                  Use a different email
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Details form */}
         {isTenantSession && (
           <div className="bg-white rounded-2xl border-2 border-blue-200 p-5 shadow-sm">
             <h3 className="font-bold text-sm text-blue-800 mb-1">Almost done — confirm your details</h3>
