@@ -32,3 +32,4 @@ dist-ssr
 # Keystore — do not commit, contains credentials
 android/keystore.properties
 android/app/*.jks
+.playwright-mcp/
