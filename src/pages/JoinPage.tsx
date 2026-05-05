@@ -218,6 +218,24 @@ export default function JoinPage() {
         tenant_id: user.id,
       }).eq('id', invite.id);
 
+      // 4. Create conversation between tenant and landlord if one doesn't exist
+      const { data: existingConvo } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('property_id', invite.property_id)
+        .eq('landlord_id', invite.landlord_id)
+        .eq('tenant_id', user.id)
+        .maybeSingle();
+
+      if (!existingConvo) {
+        await supabase.from('conversations').insert({
+          property_id: invite.property_id,
+          landlord_id: invite.landlord_id,
+          tenant_id: user.id,
+          status: 'active',
+        });
+      }
+
       toast({ title: 'Welcome! 🎉', description: "You've been linked to the property." });
       navigate('/enhancedtenantdashboard');
     } catch (err: any) {
