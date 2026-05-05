@@ -33,7 +33,9 @@
       "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\public\\\\privacy-policy\")",
       "Bash(Out-Null)",
       "Bash(Copy-Item \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\docs\\\\play-store\\\\privacy-policy.html\" \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\public\\\\privacy-policy\\\\index.html\")",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(curl -I --max-time 10 https://github.com)",
+      "mcp__plugin_supabase_supabase__apply_migration"
     ]
   }
 }
