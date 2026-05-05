@@ -29,7 +29,11 @@
       "mcp__plugin_playwright_playwright__browser_evaluate",
       "mcp__plugin_supabase_supabase__list_projects",
       "mcp__plugin_supabase_supabase__execute_sql",
-      "mcp__plugin_supabase_supabase__get_logs"
+      "mcp__plugin_supabase_supabase__get_logs",
+      "Bash(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\public\\\\privacy-policy\")",
+      "Bash(Out-Null)",
+      "Bash(Copy-Item \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\docs\\\\play-store\\\\privacy-policy.html\" \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\public\\\\privacy-policy\\\\index.html\")",
+      "Bash(git push *)"
     ]
   }
 }
