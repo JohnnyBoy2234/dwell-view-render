@@ -123,12 +123,12 @@
       <h3>2d. Location Data</h3>
       <p>With your permission, we collect your precise GPS location when you use property search, to show rentals near you. We do not track or store your location continuously — it is used only in real-time during an active search session and is not retained after the session ends. You may disable location access at any time in your device settings.</p>
       <h3>2e. Financial and Payment Data</h3>
-      <p>MzanziHomes processes payments through Paystack, a PCI DSS-compliant payment processor. We collect:</p>
+      <p>MzanziHomes processes payments through CallPay, a PCI DSS-compliant payment processor. We collect:</p>
       <ul>
         <li>Payment history (dates, amounts, status)</li>
-        <li>Landlord bank account details for rental payouts (stored securely by Paystack)</li>
+        <li>Landlord bank account details for rental payouts (stored securely by CallPay)</li>
       </ul>
-      <p>We do not store your card number, CVV, or full bank account number on our servers at any time. All sensitive payment credentials are handled exclusively by Paystack.</p>
+      <p>We do not store your card number, CVV, or full bank account number on our servers at any time. All sensitive payment credentials are handled exclusively by CallPay.</p>
       <h3>2f. Communications</h3>
       <p>In-app messages exchanged between landlords and tenants are stored on our servers. These messages may be reviewed by MzanziHomes support staff in the event of a dispute or reported violation of our Terms of Service.</p>
       <h3>2g. Device and Usage Data</h3>
@@ -152,7 +152,7 @@
         <li>Creating and managing your account</li>
         <li>Enabling property listings, searches, and applications</li>
         <li>Facilitating rental agreements between landlords and tenants</li>
-        <li>Processing rent payments and payouts via Paystack</li>
+        <li>Processing rent payments and payouts via CallPay</li>
         <li>Enabling in-app communication between landlords and tenants</li>
         <li>Managing maintenance requests and tracking resolution</li>
       </ul>
@@ -194,10 +194,10 @@
       <h3>4b. Firebase (Google)</h3>
       <p><strong>Purpose:</strong> Push notifications (FCM), app analytics (Firebase Analytics), crash reporting (Crashlytics).</p>
       <p><strong>Privacy policy:</strong> <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></p>
-      <h3>4c. Paystack</h3>
+      <h3>4c. CallPay</h3>
       <p><strong>Purpose:</strong> Processing rent payments and landlord payouts. PCI DSS compliant, licensed in South Africa.</p>
       <p><strong>Data shared:</strong> Transaction amounts, payment references, and landlord bank account details for payouts.</p>
-      <p><strong>Privacy policy:</strong> <a href="https://paystack.com/za/privacy" target="_blank">paystack.com/za/privacy</a></p>
+      <p><strong>Privacy policy:</strong> <a href="https://callpay.com/privacy" target="_blank">callpay.com/privacy</a></p>
       <h3>4d. Google Maps</h3>
       <p><strong>Purpose:</strong> Displaying property locations on a map. Your GPS coordinates are passed to Google Maps in real time when using location search.</p>
       <p><strong>Privacy policy:</strong> <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></p>
@@ -213,7 +213,7 @@
       <ul>
         <li><strong>With landlords you apply to:</strong> Your profile and KYC documents are shared with the relevant landlord for evaluation purposes only.</li>
         <li><strong>With tenants who apply to your listing:</strong> Landlords can see applicant profiles, KYC documents, and application details.</li>
-        <li><strong>With service providers:</strong> We share data with Supabase, Firebase, Paystack, Google Maps, and Vercel solely to operate the Service.</li>
+        <li><strong>With service providers:</strong> We share data with Supabase, Firebase, CallPay, Google Maps, and Vercel solely to operate the Service.</li>
         <li><strong>For legal compliance:</strong> We may disclose information if required by law, court order, or to protect the safety of MzanziHomes users.</li>
         <li><strong>Business transfers:</strong> In the event of a merger, acquisition, or sale of MzanziHomes, your data may be transferred to the acquiring entity subject to equivalent privacy protections.</li>
       </ul>
@@ -264,7 +264,7 @@
         <li><strong>Access controls:</strong> Row Level Security (RLS) is enforced at the database level — users can only access data they are authorised to see</li>
         <li><strong>Password security:</strong> Passwords are hashed using bcrypt via Supabase Auth — never stored in plain text</li>
         <li><strong>KYC document access:</strong> Identity documents are stored in a private Supabase Storage bucket with expiring signed URLs — never publicly accessible</li>
-        <li><strong>Payment security:</strong> All payment credentials are handled by Paystack (PCI DSS Level 1 compliant) — we never receive or store card details</li>
+        <li><strong>Payment security:</strong> All payment credentials are handled by CallPay (PCI DSS Level 1 compliant) — we never receive or store card details</li>
       </ul>
       <p>Despite these measures, no system is completely secure. In the event of a data breach posing a risk to your rights and freedoms, we will notify you and the Information Regulator in accordance with POPIA requirements.</p>
     </section>
