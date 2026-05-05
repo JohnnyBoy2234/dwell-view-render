@@ -58,6 +58,10 @@ export default function JoinPage() {
   const [phone, setPhone] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // A valid tenant session = logged in AND not the landlord
+  // Must be computed before any useEffect that references it
+  const isTenantSession = !!(user && invite && user.id !== invite.landlord_id);
+
   useEffect(() => {
     loadInvite();
   }, [token]);
@@ -117,9 +121,6 @@ export default function JoinPage() {
     setLandlord(land);
     setLoading(false);
   };
-
-  // A valid tenant session = logged in AND not the landlord
-  const isTenantSession = !!(user && invite && user.id !== invite.landlord_id);
 
   // Send OTP via signInWithOtp — works for both new and existing users,
   // and always delivers a 6-digit code (not a link).
