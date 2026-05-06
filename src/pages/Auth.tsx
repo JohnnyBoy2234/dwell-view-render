@@ -58,6 +58,7 @@ export default function Auth() {
     confirmPassword: '',
     role: 'tenant' as 'tenant' | 'landlord'
   });
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [signInData, setSignInData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -583,7 +584,26 @@ export default function Auth() {
                     </RadioGroup>
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={signUpLoading}>
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={e => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 h-4 w-4 shrink-0 rounded border-gray-300 accent-primary"
+                    />
+                    <span className="text-xs text-muted-foreground leading-snug">
+                      I have read and agree to the{' '}
+                      <a href="/terms/" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                        Terms of Service
+                      </a>{' '}
+                      and{' '}
+                      <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                        Privacy Policy
+                      </a>
+                    </span>
+                  </label>
+
+                  <Button type="submit" className="w-full" disabled={signUpLoading || !termsAccepted}>
                     {signUpLoading ? 'Creating account…' : 'Create Account'}
                   </Button>
                 </form>
@@ -593,7 +613,10 @@ export default function Auth() {
         </div>
 
         <p className="text-center text-xs text-muted-foreground mt-4">
-          By continuing you agree to our Terms of Service and Privacy Policy
+          By signing in you agree to our{' '}
+          <a href="/terms/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Terms of Service</a>
+          {' '}and{' '}
+          <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</a>
         </p>
       </div>
     </div>
