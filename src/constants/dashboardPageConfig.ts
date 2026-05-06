@@ -96,6 +96,98 @@ export const TENANT_PAGE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/enhancedtenantdashboard',
   },
+  // Routes served via /tenant/* (TenantDashboardRoutes)
+  '/tenant/maintenance': {
+    title: 'Maintenance',
+    icon: Wrench,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/maintenance/responses': {
+    title: 'Maintenance Responses',
+    icon: Wrench,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/tenant/maintenance',
+  },
+  '/tenant/payments': {
+    title: 'Payments & Rent',
+    icon: Receipt,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/leases': {
+    title: 'Lease System',
+    icon: FileText,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/contracts': {
+    title: 'Contract Documents',
+    icon: FileText,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/viewings': {
+    title: 'Property Viewings',
+    icon: Eye,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/inventory': {
+    title: 'Property Inventory',
+    icon: Clipboard,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/inspection': {
+    title: 'Property Inspection',
+    icon: ClipboardList,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/proof-of-payment': {
+    title: 'Proof of Payment',
+    icon: Receipt,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/applications': {
+    title: 'Applications',
+    icon: Inbox,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/profile': {
+    title: 'Profile Settings',
+    icon: Settings,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/messages': {
+    title: 'Messages',
+    icon: MessageCircle,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
+  '/tenant/support': {
+    title: 'Support & Help',
+    icon: HelpCircle,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedtenantdashboard',
+  },
 };
 
 export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
@@ -178,11 +270,13 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
 };
 
 export const getPageConfig = (path: string, isLandlord: boolean): PageConfig => {
-  const config = isLandlord ? LANDLORD_PAGE_CONFIG[path] : TENANT_PAGE_CONFIG[path];
-  return config || {
-    title: 'Page Not Found',
-    icon: Home,
-    showSidebar: true,
-    showBackButton: true,
-  };
+  const map = isLandlord ? LANDLORD_PAGE_CONFIG : TENANT_PAGE_CONFIG;
+  if (map[path]) return map[path];
+
+  // Handle dynamic segments (e.g. /tenant/maintenance/:ticketId)
+  if (!isLandlord && path.startsWith('/tenant/maintenance/')) {
+    return { title: 'Maintenance Ticket', icon: Wrench, showSidebar: false, showBackButton: true, backPath: '/tenant/maintenance' };
+  }
+
+  return { title: 'Dashboard', icon: Home, showSidebar: true, showBackButton: true, backPath: isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard' };
 };

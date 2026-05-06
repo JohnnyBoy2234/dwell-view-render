@@ -24,8 +24,8 @@ export const FOOTER_LINKS = {
     { label: "Contact", href: "/contact" }
   ],
   legal: [
-    { label: "Privacy Policy", href: "/privacy-policy/" },
-    { label: "Terms of Service", href: "/terms/" },
+    { label: "Privacy Policy", href: "/privacy-policy" },
+    { label: "Terms of Service", href: "/terms" },
     { label: "Safe Renting Policy", href: "/safe-renting" },
     { label: "FAQ", href: "/faq" }
   ],

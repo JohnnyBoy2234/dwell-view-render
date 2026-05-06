@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { LogOut, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { getPageConfig } from '@/constants/dashboardPageConfig';
 
@@ -40,8 +40,9 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
 
+  const { pathname } = useLocation();
   const basePath = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
-  const activePath = currentTab || basePath;
+  const activePath = currentTab || pathname;
 
   const pageConfig = getPageConfig(activePath, isLandlord);
   const PageIcon = pageConfig.icon;

@@ -18,10 +18,7 @@ export function FooterSection({ title, links }: FooterSectionProps) {
       <ul className={FOOTER_STYLES.LINK_LIST}>
         {links.map((link, index) => (
           <li key={index}>
-            <Link 
-              to={link.href}
-              className={FOOTER_STYLES.LINK}
-            >
+            <Link to={link.href} className={FOOTER_STYLES.LINK}>
               {link.label}
             </Link>
           </li>

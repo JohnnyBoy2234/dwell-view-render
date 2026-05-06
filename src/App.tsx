@@ -84,6 +84,8 @@ import ExpenseSummaryPage from "@/pages/accounting/ExpenseSummaryPage";
 import TaxInvoicePage from "@/pages/accounting/TaxInvoicePage";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import SafeRenting from "./pages/SafeRenting";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -230,6 +232,8 @@ function AppRoutes() {
               <Route path="/blog" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Blog /></div></>} />
               <Route path="/blog/:postId" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><BlogPost /></div></>} />
               <Route path="/safe-renting" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><SafeRenting /></div></>} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
               <Route path="/pricing" element={<><MiniNavbar /><div className="pt-28 sm:pt-24"><Pricing /></div></>} />
 
               {/* Routes without Navbar */}

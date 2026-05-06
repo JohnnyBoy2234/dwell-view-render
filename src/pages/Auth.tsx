@@ -593,7 +593,7 @@ export default function Auth() {
                     />
                     <span className="text-xs text-muted-foreground leading-snug">
                       I have read and agree to the{' '}
-                      <a href="/terms/" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
                         Terms of Service
                       </a>{' '}
                       and{' '}
@@ -614,7 +614,7 @@ export default function Auth() {
 
         <p className="text-center text-xs text-muted-foreground mt-4">
           By signing in you agree to our{' '}
-          <a href="/terms/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Terms of Service</a>
+          <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Terms of Service</a>
           {' '}and{' '}
           <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</a>
         </p>
