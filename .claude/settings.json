@@ -36,7 +36,9 @@
       "Bash(git push *)",
       "Bash(curl -I --max-time 10 https://github.com)",
       "mcp__plugin_supabase_supabase__apply_migration",
-      "Bash(curl -s --max-time 5 https://github.com)"
+      "Bash(curl -s --max-time 5 https://github.com)",
+      "Bash(sed -n '244,265p' src/pages/Auth.tsx)",
+      "Bash(sed -n '312,335p' src/pages/Auth.tsx)"
     ]
   }
 }
