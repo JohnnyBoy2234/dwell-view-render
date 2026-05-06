@@ -39,13 +39,18 @@
     li { margin-bottom: 6px; }
     .badge { display: inline-block; background: hsl(214,100%,95%); color: var(--blue-dark); font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 999px; margin-bottom: 12px; }
     .info-box { background: var(--bg-light); border-left: 4px solid var(--blue); border-radius: 0 6px 6px 0; padding: 16px 20px; margin: 20px 0; font-size: 15px; }
+    .warning-box { background: #fff7ed; border-left: 4px solid #f97316; border-radius: 0 6px 6px 0; padding: 16px 20px; margin: 20px 0; font-size: 15px; }
     a { color: var(--blue); }
     footer { background: var(--bg-light); border-top: 1px solid var(--border); padding: 32px; text-align: center; font-size: 14px; color: var(--muted); }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 14px; }
+    th { background: var(--bg-light); text-align: left; padding: 10px 12px; border: 1px solid var(--border); font-weight: 600; }
+    td { padding: 10px 12px; border: 1px solid var(--border); vertical-align: top; }
     @media (max-width: 768px) {
       .layout { flex-direction: column; padding: 24px 16px; }
       .toc { width: 100%; }
       .toc-inner { position: static; }
       header { padding: 20px 16px; }
+      table { display: block; overflow-x: auto; }
     }
   </style>
 </head>
@@ -54,7 +59,7 @@
 <header>
   <div class="brand">MzanziHomes</div>
   <div class="subtitle">Privacy Policy</div>
-  <div class="meta">Last updated: 3 May 2026 &nbsp;·&nbsp; Effective: 3 May 2026</div>
+  <div class="meta">Last updated: 6 May 2026 &nbsp;·&nbsp; Effective: 6 May 2026</div>
 </header>
 
 <div class="layout">
@@ -62,17 +67,28 @@
     <div class="toc-inner">
       <h2>Contents</h2>
       <ol>
-        <li><a href="#s1">Introduction</a></li>
-        <li><a href="#s2">Information We Collect</a></li>
-        <li><a href="#s3">How We Use Your Information</a></li>
-        <li><a href="#s4">Third-Party Services</a></li>
-        <li><a href="#s5">Data Sharing</a></li>
-        <li><a href="#s6">Data Retention</a></li>
-        <li><a href="#s7">Your Rights under POPIA</a></li>
-        <li><a href="#s8">Data Security</a></li>
-        <li><a href="#s9">Children's Privacy</a></li>
-        <li><a href="#s10">Changes to This Policy</a></li>
-        <li><a href="#s11">Contact Us</a></li>
+        <li><a href="#s1">Who We Are</a></li>
+        <li><a href="#s2">Scope</a></li>
+        <li><a href="#s3">Information We Collect</a></li>
+        <li><a href="#s4">Mandatory vs Optional</a></li>
+        <li><a href="#s5">Sources of Information</a></li>
+        <li><a href="#s6">How We Use Your Information</a></li>
+        <li><a href="#s7">POPIA Grounds for Processing</a></li>
+        <li><a href="#s8">Third-Party Operators</a></li>
+        <li><a href="#s9">Sharing and Disclosure</a></li>
+        <li><a href="#s10">International Transfers</a></li>
+        <li><a href="#s11">Data Retention</a></li>
+        <li><a href="#s12">Data Security</a></li>
+        <li><a href="#s13">Security Compromises</a></li>
+        <li><a href="#s14">Direct Marketing</a></li>
+        <li><a href="#s15">Automated Decision-Making</a></li>
+        <li><a href="#s16">Special Personal Information</a></li>
+        <li><a href="#s17">Children's Privacy</a></li>
+        <li><a href="#s18">Your Rights under POPIA</a></li>
+        <li><a href="#s19">How to Exercise Your Rights</a></li>
+        <li><a href="#s20">Complaints</a></li>
+        <li><a href="#s21">Changes to This Policy</a></li>
+        <li><a href="#s22">Contact Us</a></li>
       </ol>
     </div>
   </aside>
@@ -80,219 +96,392 @@
 
     <section id="s1">
       <span class="badge">Section 1</span>
-      <h2>1. Introduction</h2>
-      <p>MzanziHomes (Pty) Ltd ("MzanziHomes", "we", "us", or "our") operates the MzanziHomes mobile application and related services (collectively, the "Service"). This Privacy Policy explains how we collect, use, disclose, and safeguard your personal information when you use our Service.</p>
-      <p>We are committed to protecting your privacy and complying with the Protection of Personal Information Act 4 of 2013 ("POPIA") of South Africa. By using the MzanziHomes app, you acknowledge that you have read, understood, and agree to the practices described in this Privacy Policy.</p>
-      <div class="info-box"><strong>Information Officer:</strong> The MzanziHomes Information Officer is responsible for ensuring compliance with POPIA. You may contact our Information Officer at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>.</div>
-      <p>This Privacy Policy applies to all users of the MzanziHomes application, including landlords, property managers, and tenants.</p>
+      <h2>1. Who We Are</h2>
+      <p>BuildSynergy (Pty) Ltd, trading as <strong>MzanziHomes</strong>, operates the MzanziHomes mobile application, website, and related services (collectively, the "Service"). BuildSynergy (Pty) Ltd is the responsible party for personal information processed through the Service as defined in the Protection of Personal Information Act 4 of 2013 ("POPIA").</p>
+      <div class="info-box">
+        <strong>Responsible Party</strong><br>
+        BuildSynergy (Pty) Ltd, trading as MzanziHomes<br>
+        Email: <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a><br>
+        Website: <a href="https://mzanzihomes.com">mzanzihomes.com</a><br><br>
+        <strong>Information Officer</strong><br>
+        Our registered Information Officer is responsible for ensuring POPIA compliance and can be reached at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>.<br><br>
+        Our <strong>PAIA Manual</strong> is available on request at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>.
+      </div>
+      <p>By using the Service, you acknowledge that you have read this Privacy Policy. Where your consent is required by law, we will request it separately and keep a record of it. If we rely on consent, you may withdraw it at any time with future effect. We process personal information on one or more grounds permitted by POPIA — including where processing is necessary to perform a contract with you, to comply with a legal obligation, or where we or a third party have a legitimate interest that is not overridden by your interests.</p>
     </section>
 
     <section id="s2">
       <span class="badge">Section 2</span>
-      <h2>2. Information We Collect</h2>
-      <p>We collect information you provide directly, information generated through your use of the Service, and information from third-party services you connect to MzanziHomes.</p>
-      <h3>2a. Account Information</h3>
-      <p>When you create a MzanziHomes account, we collect:</p>
+      <h2>2. Scope</h2>
+      <p>This Privacy Policy explains how we collect, use, disclose, store, transfer, and protect personal information when you use the Service as a landlord, property manager, tenant, rental applicant, payor, payee, or support contact.</p>
+      <p>This policy applies to all users of the MzanziHomes application and website. It should be read together with our Terms of Service and any other notices we provide at the point of collection.</p>
+    </section>
+
+    <section id="s3">
+      <span class="badge">Section 3</span>
+      <h2>3. Information We Collect</h2>
+      <p>We may collect the following categories of personal information:</p>
+
+      <h3>3a. Account Information</h3>
       <ul>
         <li>Full name</li>
         <li>Email address</li>
         <li>Phone number</li>
+        <li>Role on the platform (landlord, property manager, or tenant)</li>
         <li>Profile photograph (optional)</li>
-        <li>Account type (landlord or tenant)</li>
         <li>Password (stored as a one-way cryptographic hash — never in plain text)</li>
       </ul>
-      <h3>2b. Identity and KYC Documents</h3>
-      <p>To comply with the Financial Intelligence Centre Act (FICA) and to verify user identity, we collect:</p>
+
+      <h3>3b. Identity and Verification Documents</h3>
       <ul>
         <li>South African ID document or passport (photograph or scan)</li>
         <li>Proof of address (utility bill, bank statement, or municipal account — dated within 3 months)</li>
         <li>Selfie photograph for identity verification</li>
-        <li>Bank statements (for tenant income verification — shared only with landlords of properties you apply to)</li>
+        <li>Bank statements for tenant income verification — shared only with landlords of properties you actively apply to, for the duration of the application process</li>
         <li>Payslips or proof of income (optional, for rental applications)</li>
       </ul>
-      <p>KYC documents are encrypted at rest and in transit. They are shared with a specific landlord only upon your active application to their property, and only for the duration of the application process.</p>
-      <h3>2c. Property Data</h3>
-      <p>Landlords who list properties provide:</p>
+
+      <h3>3c. Property and Tenancy Information</h3>
       <ul>
         <li>Property address and geolocation coordinates</li>
         <li>Property photographs</li>
         <li>Rental amount, deposit amount, and lease terms</li>
         <li>Property description and features</li>
         <li>Availability dates</li>
+        <li>Application details, rental history, references, employment and income information, and supporting documents</li>
+        <li>Lease records and related correspondence</li>
+        <li>Maintenance request details and records</li>
       </ul>
-      <h3>2d. Location Data</h3>
-      <p>With your permission, we collect your precise GPS location when you use property search, to show rentals near you. We do not track or store your location continuously — it is used only in real-time during an active search session and is not retained after the session ends. You may disable location access at any time in your device settings.</p>
-      <h3>2e. Financial and Payment Data</h3>
-      <p>MzanziHomes processes payments through Paystack, a PCI DSS-compliant payment processor. We collect:</p>
+
+      <h3>3d. Payment and Financial Information</h3>
       <ul>
-        <li>Payment history (dates, amounts, status)</li>
-        <li>Landlord bank account details for rental payouts (stored securely by Paystack)</li>
+        <li>Transaction amounts, dates, and status</li>
+        <li>Payment references</li>
+        <li>Landlord bank account details for rental payouts (processed securely by our payment provider)</li>
       </ul>
-      <p>We do not store your card number, CVV, or full bank account number on our servers at any time. All sensitive payment credentials are handled exclusively by Paystack.</p>
-      <h3>2f. Communications</h3>
-      <p>In-app messages exchanged between landlords and tenants are stored on our servers. These messages may be reviewed by MzanziHomes support staff in the event of a dispute or reported violation of our Terms of Service.</p>
-      <h3>2g. Device and Usage Data</h3>
-      <p>We automatically collect:</p>
+      <p>We do not store card numbers, CVV codes, or full bank account numbers on our servers. All sensitive payment credentials are handled by our PCI DSS-compliant payment processor.</p>
+
+      <h3>3e. Communications and Support Records</h3>
+      <ul>
+        <li>In-app messages between landlords and tenants</li>
+        <li>Support tickets and dispute records</li>
+        <li>Correspondence with our team</li>
+      </ul>
+      <p>In-app messages may be reviewed by MzanziHomes support staff in the event of a reported dispute or Terms of Service violation.</p>
+
+      <h3>3f. Location Information</h3>
+      <p>With your permission, we collect your approximate or precise location when you use property search features. Precise GPS location is used only in real time during an active search session and is not stored after the session ends. You may disable location access at any time in your device settings.</p>
+
+      <h3>3g. Device and Usage Data</h3>
       <ul>
         <li>Device type, model, and operating system version</li>
         <li>App version</li>
-        <li>Push notification token (for delivering notifications via Firebase Cloud Messaging)</li>
-        <li>App usage patterns, screens viewed, and features used (via Firebase Analytics)</li>
-        <li>Performance and crash data (via Firebase Crashlytics)</li>
-        <li>General usage metrics (via Vercel Analytics)</li>
+        <li>Push notification token (for delivering notifications)</li>
+        <li>App usage patterns, screens viewed, and features used</li>
+        <li>Performance and crash data</li>
         <li>IP address and approximate location derived from IP (for analytics and fraud prevention)</li>
-      </ul>
-    </section>
-
-    <section id="s3">
-      <span class="badge">Section 3</span>
-      <h2>3. How We Use Your Information</h2>
-      <h3>3a. Service Delivery</h3>
-      <ul>
-        <li>Creating and managing your account</li>
-        <li>Enabling property listings, searches, and applications</li>
-        <li>Facilitating rental agreements between landlords and tenants</li>
-        <li>Processing rent payments and payouts via Paystack</li>
-        <li>Enabling in-app communication between landlords and tenants</li>
-        <li>Managing maintenance requests and tracking resolution</li>
-      </ul>
-      <h3>3b. Identity Verification (KYC)</h3>
-      <ul>
-        <li>Verifying user identity in compliance with FICA requirements</li>
-        <li>Sharing KYC documents with landlords during active rental applications (with your consent)</li>
-        <li>Detecting and preventing fraudulent accounts and listings</li>
-      </ul>
-      <h3>3c. Communications</h3>
-      <ul>
-        <li>Sending push notifications about application updates, payment confirmations, maintenance status, and messages</li>
-        <li>Sending transactional emails (account verification, password reset, receipts)</li>
-      </ul>
-      <p>You may opt out of non-essential push notifications in your device settings or within the app.</p>
-      <h3>3d. Analytics and Improvement</h3>
-      <ul>
-        <li>Understanding how users interact with the app to improve features</li>
-        <li>Diagnosing and fixing technical issues and crashes</li>
-        <li>Measuring the effectiveness of new features</li>
-      </ul>
-      <h3>3e. Legal and Compliance</h3>
-      <ul>
-        <li>Complying with South African laws including POPIA and FICA</li>
-        <li>Retaining financial records as required by tax legislation</li>
-        <li>Responding to lawful requests from law enforcement or regulatory authorities</li>
-        <li>Enforcing our Terms of Service and resolving disputes</li>
       </ul>
     </section>
 
     <section id="s4">
       <span class="badge">Section 4</span>
-      <h2>4. Third-Party Services</h2>
-      <p>MzanziHomes uses the following third-party services. Each is subject to its own privacy policy:</p>
-      <h3>4a. Supabase</h3>
-      <p><strong>Purpose:</strong> Database storage, user authentication, and file storage (KYC documents, property photos).</p>
-      <p><strong>Data location:</strong> European Union (AWS eu-west-1). All data encrypted at rest.</p>
-      <p><strong>Privacy policy:</strong> <a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></p>
-      <h3>4b. Firebase (Google)</h3>
-      <p><strong>Purpose:</strong> Push notifications (FCM), app analytics (Firebase Analytics), crash reporting (Crashlytics).</p>
-      <p><strong>Privacy policy:</strong> <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></p>
-      <h3>4c. Paystack</h3>
-      <p><strong>Purpose:</strong> Processing rent payments and landlord payouts. PCI DSS compliant, licensed in South Africa.</p>
-      <p><strong>Data shared:</strong> Transaction amounts, payment references, and landlord bank account details for payouts.</p>
-      <p><strong>Privacy policy:</strong> <a href="https://paystack.com/za/privacy" target="_blank">paystack.com/za/privacy</a></p>
-      <h3>4d. Google Maps</h3>
-      <p><strong>Purpose:</strong> Displaying property locations on a map. Your GPS coordinates are passed to Google Maps in real time when using location search.</p>
-      <p><strong>Privacy policy:</strong> <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></p>
-      <h3>4e. Vercel</h3>
-      <p><strong>Purpose:</strong> Hosting MzanziHomes web infrastructure and anonymous performance analytics.</p>
-      <p><strong>Privacy policy:</strong> <a href="https://vercel.com/legal/privacy-policy" target="_blank">vercel.com/legal/privacy-policy</a></p>
+      <h2>4. Mandatory vs Optional Information</h2>
+      <p>Some information is mandatory because we need it to create and secure your account, verify identity, process a rental application, conclude or administer a lease, make or receive payments, comply with law, prevent fraud, or resolve disputes. If you do not provide mandatory information, we may be unable to create your account, process an application, generate or administer a lease, make or receive payments, or provide the relevant part of the Service.</p>
+      <p>Other information, such as a profile photograph or optional profile details, is voluntary — withholding it will not prevent you from using core Service features.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Information</th>
+            <th>Status</th>
+            <th>Reason if mandatory</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Name, email, phone number</td><td>Mandatory</td><td>Account creation and identity</td></tr>
+          <tr><td>Account type (landlord / tenant)</td><td>Mandatory</td><td>Role-based access and service delivery</td></tr>
+          <tr><td>Profile photograph</td><td>Optional</td><td>—</td></tr>
+          <tr><td>South African ID document</td><td>Mandatory for KYC</td><td>Identity verification and FICA compliance</td></tr>
+          <tr><td>Proof of address</td><td>Mandatory for KYC</td><td>Identity verification and FICA compliance</td></tr>
+          <tr><td>Selfie for verification</td><td>Mandatory for KYC</td><td>Liveness check and fraud prevention</td></tr>
+          <tr><td>Bank statements / payslips</td><td>Mandatory for rental application</td><td>Income verification for landlord</td></tr>
+          <tr><td>Property address and details</td><td>Mandatory for landlords listing a property</td><td>Service delivery — listing cannot function without it</td></tr>
+          <tr><td>Landlord bank account details</td><td>Mandatory for payout recipients</td><td>Required to process rental payouts</td></tr>
+          <tr><td>Precise GPS location</td><td>Optional (user-initiated)</td><td>Location-based search only, not stored</td></tr>
+        </tbody>
+      </table>
     </section>
 
     <section id="s5">
       <span class="badge">Section 5</span>
-      <h2>5. Data Sharing</h2>
-      <p>We do not sell your personal information to any third party. We share your data only in the following circumstances:</p>
+      <h2>5. Sources of Information</h2>
+      <p>We collect personal information from the following sources:</p>
       <ul>
-        <li><strong>With landlords you apply to:</strong> Your profile and KYC documents are shared with the relevant landlord for evaluation purposes only.</li>
-        <li><strong>With tenants who apply to your listing:</strong> Landlords can see applicant profiles, KYC documents, and application details.</li>
-        <li><strong>With service providers:</strong> We share data with Supabase, Firebase, Paystack, Google Maps, and Vercel solely to operate the Service.</li>
-        <li><strong>For legal compliance:</strong> We may disclose information if required by law, court order, or to protect the safety of MzanziHomes users.</li>
-        <li><strong>Business transfers:</strong> In the event of a merger, acquisition, or sale of MzanziHomes, your data may be transferred to the acquiring entity subject to equivalent privacy protections.</li>
+        <li><strong>Directly from you</strong> — when you register, list a property, submit an application, make a payment, contact support, or otherwise interact with the Service</li>
+        <li><strong>From your use of the Service</strong> — device data, usage patterns, and in-app activity generated automatically</li>
+        <li><strong>From documents you upload</strong> — identity documents, proof of address, payslips, and bank statements</li>
+        <li><strong>From parties to a tenancy</strong> — landlords may provide information about applicants; tenants may provide information about co-occupants</li>
+        <li><strong>From payment service providers</strong> — transaction confirmations and payout status</li>
+        <li><strong>From connected services</strong> — where you choose to sign in via Google or link a third-party service</li>
+        <li><strong>From references and public records</strong> — where lawfully permitted in connection with a tenancy application or fraud prevention</li>
       </ul>
     </section>
 
     <section id="s6">
       <span class="badge">Section 6</span>
-      <h2>6. Data Retention</h2>
+      <h2>6. How We Use Your Information</h2>
+      <p>We process personal information to:</p>
       <ul>
-        <li><strong>Active account data</strong> — retained while your account is active</li>
-        <li><strong>Account data after deletion</strong> — retained for 3 years after account closure to comply with legal obligations and resolve disputes</li>
-        <li><strong>KYC documents</strong> — retained for 5 years from the date of the relevant transaction, as required by FICA</li>
-        <li><strong>Payment records</strong> — retained for 7 years, as required by South African tax legislation (Income Tax Act)</li>
-        <li><strong>Analytics data</strong> — aggregated and anonymised data may be retained indefinitely; identifiable data retained for 14 months by Firebase</li>
-        <li><strong>Communications (messages)</strong> — retained for 3 years after the relevant tenancy ends</li>
+        <li>Create and manage accounts</li>
+        <li>List properties and connect landlords, property managers, and prospective tenants</li>
+        <li>Receive, evaluate, submit, and administer rental applications</li>
+        <li>Generate, store, and administer lease-related records and documents</li>
+        <li>Process rent, deposits, refunds, fees, and payouts</li>
+        <li>Send service notifications, legal notices, payment reminders, maintenance updates, and security alerts</li>
+        <li>Enable in-app communication between landlords and tenants</li>
+        <li>Provide customer support and resolve complaints, disputes, and incidents</li>
+        <li>Verify user identity in compliance with the Financial Intelligence Centre Act ("FICA")</li>
+        <li>Detect, investigate, and prevent fraud, abuse, and security incidents</li>
+        <li>Comply with legal, regulatory, accounting, tax, and record-keeping obligations</li>
+        <li>Improve, secure, and maintain the performance and reliability of the Service</li>
+        <li>Where appropriate and compatible with the original collection purpose, personalise the Service for your use</li>
       </ul>
-      <p>When retention periods expire, data is securely deleted or anonymised.</p>
+      <p>We will not use your personal information for a purpose that is incompatible with the purpose for which it was collected, unless we have a separate lawful basis for doing so.</p>
     </section>
 
     <section id="s7">
       <span class="badge">Section 7</span>
-      <h2>7. Your Rights under POPIA</h2>
-      <h3>7a. Right of Access</h3>
-      <p>You may request a copy of the personal information we hold about you. We will provide this within 30 days of a verified request.</p>
-      <h3>7b. Right to Correction</h3>
-      <p>You may request that we correct inaccurate or incomplete personal information. Most account information can be updated directly within the MzanziHomes app.</p>
-      <h3>7c. Right to Deletion</h3>
-      <p>You may request that we delete your personal information. Some data must be retained for legal compliance (see Section 6) — we will inform you of anything we are unable to delete and explain why.</p>
-      <h3>7d. Right to Object</h3>
-      <p>You may object to the processing of your personal information for direct marketing purposes and opt out at any time.</p>
-      <h3>7e. Right to Lodge a Complaint</h3>
-      <p>If you believe we have violated your rights under POPIA, you may lodge a complaint with:</p>
-      <div class="info-box">
-        <strong>Information Regulator (South Africa)</strong><br>
-        Website: <a href="https://inforegulator.org.za" target="_blank">inforegulator.org.za</a><br>
-        Email: <a href="mailto:complaints.IR@justice.gov.za">complaints.IR@justice.gov.za</a><br>
-        Phone: 012 406 4818
-      </div>
-      <p>To exercise any of the above rights, contact us at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>. We will verify your identity before processing any request.</p>
+      <h2>7. POPIA Grounds for Processing</h2>
+      <p>Depending on the context, we process personal information on the following grounds permitted by section 11 of POPIA:</p>
+      <ul>
+        <li><strong>Contract:</strong> Processing is necessary to conclude or perform a contract to which you are a party, such as creating your account, processing a rental application, administering a lease, or making or receiving a payment.</li>
+        <li><strong>Legal obligation:</strong> Processing is required to comply with a legal obligation, such as identity verification under FICA, financial record-keeping under tax legislation, or responding to a lawful demand from a regulatory authority or court.</li>
+        <li><strong>Legitimate interests:</strong> Processing is necessary for our legitimate interests or those of a third party — such as fraud prevention, security monitoring, service improvement, and dispute resolution — where those interests are not overridden by your rights and interests.</li>
+        <li><strong>Consent:</strong> Where we rely on your consent — such as for optional features, certain marketing communications, or the collection of special personal information — we will request your consent separately, keep a record of it, and you may withdraw it at any time with future effect by contacting us at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>. Withdrawal of consent does not affect processing carried out before withdrawal.</li>
+      </ul>
     </section>
 
     <section id="s8">
       <span class="badge">Section 8</span>
-      <h2>8. Data Security</h2>
-      <ul>
-        <li><strong>Encryption in transit:</strong> All data transmitted between the app and our servers uses TLS 1.2 or higher</li>
-        <li><strong>Encryption at rest:</strong> All data stored in Supabase is encrypted at rest using AES-256</li>
-        <li><strong>Access controls:</strong> Row Level Security (RLS) is enforced at the database level — users can only access data they are authorised to see</li>
-        <li><strong>Password security:</strong> Passwords are hashed using bcrypt via Supabase Auth — never stored in plain text</li>
-        <li><strong>KYC document access:</strong> Identity documents are stored in a private Supabase Storage bucket with expiring signed URLs — never publicly accessible</li>
-        <li><strong>Payment security:</strong> All payment credentials are handled by Paystack (PCI DSS Level 1 compliant) — we never receive or store card details</li>
-      </ul>
-      <p>Despite these measures, no system is completely secure. In the event of a data breach posing a risk to your rights and freedoms, we will notify you and the Information Regulator in accordance with POPIA requirements.</p>
+      <h2>8. Third-Party Operators</h2>
+      <p>We use the following third-party operators and service providers. Each processes personal information only on our instructions, under confidentiality and security obligations, and subject to a written operator agreement.</p>
+
+      <h3>8a. Supabase</h3>
+      <p><strong>Purpose:</strong> Database storage, user authentication, and file storage (identity documents, property photos).</p>
+      <p><strong>Data location:</strong> European Union (AWS eu-west-1). All data encrypted at rest.</p>
+      <p><strong>Privacy policy:</strong> <a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></p>
+
+      <h3>8b. Firebase (Google)</h3>
+      <p><strong>Purpose:</strong> Push notifications (Firebase Cloud Messaging), app analytics (Firebase Analytics), crash reporting (Firebase Crashlytics).</p>
+      <p><strong>Privacy policy:</strong> <a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></p>
+
+      <h3>8c. Paystack</h3>
+      <p><strong>Purpose:</strong> Processing rent payments and landlord payouts. PCI DSS compliant, licensed in South Africa.</p>
+      <p><strong>Data shared:</strong> Transaction amounts, payment references, and landlord bank account details for payouts.</p>
+      <p><strong>Privacy policy:</strong> <a href="https://paystack.com/za/privacy" target="_blank">paystack.com/za/privacy</a></p>
+
+      <h3>8d. Google Maps</h3>
+      <p><strong>Purpose:</strong> Displaying property locations and enabling location-based search. Approximate or GPS coordinates are passed to Google Maps in real time when you use location features.</p>
+      <p><strong>Privacy policy:</strong> <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a></p>
+
+      <h3>8e. Vercel</h3>
+      <p><strong>Purpose:</strong> Hosting MzanziHomes web infrastructure and anonymous performance analytics.</p>
+      <p><strong>Privacy policy:</strong> <a href="https://vercel.com/legal/privacy-policy" target="_blank">vercel.com/legal/privacy-policy</a></p>
     </section>
 
     <section id="s9">
       <span class="badge">Section 9</span>
-      <h2>9. Children's Privacy</h2>
-      <p>MzanziHomes is intended for users who are 18 years of age or older. We do not knowingly collect personal information from anyone under 18. If you believe we have inadvertently collected information from a minor, please contact us immediately at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a> and we will delete the information promptly.</p>
+      <h2>9. Sharing and Disclosure</h2>
+      <p>We do not sell your personal information. We may disclose personal information in the following circumstances:</p>
+      <ul>
+        <li><strong>Counterparties to a tenancy:</strong> We share your profile and, where you have actively applied, your verification documents with the relevant landlord or property manager for evaluation purposes. Landlords and tenants can see application and tenancy details necessary for the rental relationship.</li>
+        <li><strong>Operators and service providers:</strong> We share personal information with operators listed in Section 8 solely to operate the Service, under written agreements requiring them to process data only on our instructions and maintain appropriate security.</li>
+        <li><strong>Legal and regulatory disclosure:</strong> We may disclose personal information if required by law, court order, or lawful demand from a regulatory or law-enforcement authority, or to protect the rights, safety, or property of MzanziHomes users.</li>
+        <li><strong>Business transfers:</strong> In the event of a merger, acquisition, reorganisation, or sale of all or part of our business, personal information may be transferred to the successor entity, subject to equivalent privacy protections.</li>
+      </ul>
     </section>
 
     <section id="s10">
       <span class="badge">Section 10</span>
-      <h2>10. Changes to This Policy</h2>
-      <p>We may update this Privacy Policy from time to time. When we make material changes, we will:</p>
+      <h2>10. International Transfers</h2>
+      <p>Some of our operators host or access personal information outside South Africa. Where we transfer personal information to a recipient in another country, we do so only where at least one of the following applies:</p>
       <ul>
-        <li>Update the "Last updated" date at the top of this page</li>
-        <li>Send a push notification to all app users</li>
-        <li>Display an in-app banner prompting you to review the updated policy</li>
+        <li>The recipient is subject to a law, binding corporate rules, or a binding agreement that provides an adequate level of protection substantially similar to POPIA (section 72 of POPIA).</li>
+        <li>The transfer is necessary to conclude or perform a contract with you or to take steps at your request before entering into a contract.</li>
+        <li>The transfer is necessary for a contract concluded in your interest between us and a third party.</li>
+        <li>You have consented to the transfer.</li>
       </ul>
-      <p>Your continued use of MzanziHomes after a policy update constitutes your acceptance of the revised policy.</p>
+      <p>Our primary international hosting is through Supabase (EU — AWS eu-west-1) and Firebase / Google (global). A current list of transfer locations and operators is available on request from our Information Officer at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>.</p>
     </section>
 
     <section id="s11">
       <span class="badge">Section 11</span>
-      <h2>11. Contact Us</h2>
-      <p>For any questions, concerns, or data requests relating to this Privacy Policy:</p>
+      <h2>11. Data Retention</h2>
+      <p>We keep personal information only for as long as reasonably necessary for the purpose for which it was collected, or as required or authorised by law, contract, or another lawful basis. When we are no longer authorised to retain personal information, we will securely delete, destroy, or de-identify it.</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Data category</th>
+            <th>Retention period</th>
+            <th>Basis</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Active account data</td><td>While account is active</td><td>Contract / service delivery</td></tr>
+          <tr><td>Account data after closure</td><td>3 years from closure</td><td>Legal obligations and dispute resolution</td></tr>
+          <tr><td>Identity and KYC documents</td><td>5 years from relevant transaction</td><td>FICA compliance</td></tr>
+          <tr><td>Payment records</td><td>7 years</td><td>Income Tax Act / SARS requirements</td></tr>
+          <tr><td>Rental application records</td><td>3 years from application outcome</td><td>Dispute resolution and applicant rights</td></tr>
+          <tr><td>Lease records</td><td>5 years from lease end</td><td>Legal obligation and dispute resolution</td></tr>
+          <tr><td>Communications (messages)</td><td>3 years after relevant tenancy ends</td><td>Dispute resolution</td></tr>
+          <tr><td>Analytics data (identifiable)</td><td>14 months (Firebase default)</td><td>Service improvement</td></tr>
+          <tr><td>Analytics data (aggregated)</td><td>Indefinite (anonymised)</td><td>Service improvement — no longer personal information</td></tr>
+        </tbody>
+      </table>
+
+      <p>When retention periods expire, data is securely deleted or de-identified in a manner that prevents reconstruction. Application decision records are retained long enough to allow applicants a reasonable opportunity to request access or raise a query about the outcome.</p>
+    </section>
+
+    <section id="s12">
+      <span class="badge">Section 12</span>
+      <h2>12. Data Security</h2>
+      <p>We take appropriate, reasonable technical and organisational measures to protect personal information against loss, damage, unauthorised destruction, unlawful access, and unlawful processing. These include:</p>
+      <ul>
+        <li><strong>Encryption in transit:</strong> All data transmitted between the app and our servers uses TLS 1.2 or higher.</li>
+        <li><strong>Encryption at rest:</strong> All data stored in Supabase is encrypted at rest using AES-256.</li>
+        <li><strong>Access controls:</strong> Row Level Security (RLS) is enforced at the database level — users can only access data they are authorised to see.</li>
+        <li><strong>Password security:</strong> Passwords are hashed via Supabase Auth — never stored in plain text.</li>
+        <li><strong>Document access:</strong> Identity documents are stored in a private Supabase Storage bucket with expiring signed URLs — never publicly accessible.</li>
+        <li><strong>Payment security:</strong> All payment credentials are handled by Paystack (PCI DSS Level 1 compliant) — we never receive or store card details.</li>
+        <li><strong>Ongoing review:</strong> We periodically review and update our security safeguards to address new or changed risks.</li>
+        <li><strong>Operator oversight:</strong> All operators are required to maintain appropriate security safeguards and report incidents to us without delay.</li>
+      </ul>
+      <p>No method of transmission or storage is completely secure. We continuously work to improve our controls to minimise risk.</p>
+    </section>
+
+    <section id="s13">
+      <span class="badge">Section 13</span>
+      <h2>13. Security Compromises</h2>
+      <p>Where there are reasonable grounds to believe that personal information in our possession has been accessed or acquired by an unauthorised person, we will:</p>
+      <ul>
+        <li>Notify the <strong>Information Regulator of South Africa</strong> as soon as reasonably possible after becoming aware of the compromise.</li>
+        <li>Notify <strong>affected data subjects</strong> as soon as reasonably possible, unless the Regulator directs otherwise or a lawful delay applies.</li>
+      </ul>
+      <p>Our notification will include sufficient information to allow affected persons to take protective measures, including what happened, what information was affected, what steps we have taken, and how to contact us and the Regulator.</p>
       <div class="info-box">
-        <strong>MzanziHomes Privacy Team</strong><br>
+        <strong>Information Regulator (South Africa)</strong><br>
+        Website: <a href="https://inforegulator.org.za" target="_blank">inforegulator.org.za</a><br>
+        Compromise reports: <a href="mailto:POPIAComplaints@inforegulator.org.za">POPIAComplaints@inforegulator.org.za</a><br>
+        Phone: 012 406 4818
+      </div>
+    </section>
+
+    <section id="s14">
+      <span class="badge">Section 14</span>
+      <h2>14. Direct Marketing</h2>
+      <p>We will not send you unsolicited electronic direct marketing unless:</p>
+      <ul>
+        <li>you have given us your consent to do so; or</li>
+        <li>you are an existing customer, we obtained your contact details in the context of a sale of our own product or service, we market only our own similar products or services, and you were given a reasonable opportunity to object free of charge when your details were collected and in each subsequent marketing message.</li>
+      </ul>
+      <p><strong>Service notices are not marketing.</strong> Service notifications, tenancy-administration messages, payment reminders, legal notices, maintenance updates, and security alerts are sent as part of the Service and are not direct marketing.</p>
+      <p>Every marketing message will clearly identify MzanziHomes as the sender and include a simple, free opt-out mechanism. You can opt out at any time by:</p>
+      <ul>
+        <li>clicking the unsubscribe link in the message;</li>
+        <li>adjusting your notification preferences in the app; or</li>
+        <li>contacting us at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a>.</li>
+      </ul>
+    </section>
+
+    <section id="s15">
+      <span class="badge">Section 15</span>
+      <h2>15. Automated Decision-Making</h2>
+      <p>We do not make decisions based solely on automated processing that produce legal consequences for you or affect you to a substantial degree, unless permitted by law and appropriate safeguards are in place.</p>
+      <p>Where we use automated tools for matching, ranking, fraud prevention, or application processing in a way that materially affects you, we will tell you about the logic involved, the significance and likely consequences for you, and how you can request human review and make representations. Contact us at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a> if you believe an automated process has produced an outcome that materially affects you and you wish to seek human review.</p>
+    </section>
+
+    <section id="s16">
+      <span class="badge">Section 16</span>
+      <h2>16. Special Personal Information</h2>
+      <p>POPIA gives additional protection to special personal information, which includes information about a person's health or medical condition, biometric information, criminal behaviour, religion, race, trade union membership, political views, and sexual orientation.</p>
+      <p>We do not intentionally require special personal information unless it is necessary and lawful for a specific purpose, such as establishing, exercising, or defending a legal right, or complying with a legal obligation. Where we process special personal information, we apply additional safeguards and do so only where POPIA permits.</p>
+      <p>If the scope of our identity verification or screening services expands in ways that may implicate special personal information, we will complete the required legal assessments before launch and update this policy accordingly.</p>
+    </section>
+
+    <section id="s17">
+      <span class="badge">Section 17</span>
+      <h2>17. Children's Privacy</h2>
+      <p>The Service is intended for users who are 18 years of age or older. We do not knowingly create accounts for children. If you believe we have inadvertently collected personal information from a minor who opened their own account, please contact us immediately at <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a> and we will take appropriate action.</p>
+      <p>If an adult user lawfully provides personal information about a child in connection with a tenancy, occupancy, maintenance issue, emergency contact, or legal obligation — such as noting a minor dependent occupant in a lease — we will process that information only to the extent permitted by law, apply appropriate safeguards, and not use it for any other purpose.</p>
+    </section>
+
+    <section id="s18">
+      <span class="badge">Section 18</span>
+      <h2>18. Your Rights under POPIA</h2>
+      <p>Subject to POPIA and the Promotion of Access to Information Act ("PAIA"), you have the following rights:</p>
+
+      <h3>18a. Right to Confirmation and Access</h3>
+      <p>You may request confirmation of whether we hold personal information about you, and access to a record or description of that information — including the categories of recipients to whom it has been disclosed. Confirmation of whether we hold your information is free of charge. Access to a record or description may be subject to a prescribed fee where permitted by law.</p>
+
+      <h3>18b. Right to Correction or Deletion</h3>
+      <p>You may request that we correct, update, or delete personal information that is inaccurate, irrelevant, excessive, out of date, incomplete, misleading, or unlawfully obtained, or that we are no longer authorised to retain. Most account information can be updated directly within the app. Where deletion is limited by a legal retention obligation, we will inform you of what we cannot delete and explain why.</p>
+
+      <h3>18c. Right to Object</h3>
+      <p>You may object on reasonable grounds to the processing of your personal information. You have an unconditional right to object to processing for the purpose of direct marketing at any time, free of charge. For other processing activities, we will consider your objection and cease or restrict processing unless we have compelling legitimate grounds that override your interests.</p>
+
+      <h3>18d. Right to Withdraw Consent</h3>
+      <p>Where we rely on your consent as the basis for processing, you may withdraw that consent at any time with future effect. Withdrawal does not affect the lawfulness of processing carried out before withdrawal.</p>
+
+      <h3>18e. Right to Information Quality</h3>
+      <p>We take reasonable steps to ensure that the personal information we hold is complete, accurate, not misleading, and updated where necessary. We ask that you keep your account information current and notify us of any material changes.</p>
+    </section>
+
+    <section id="s19">
+      <span class="badge">Section 19</span>
+      <h2>19. How to Exercise Your Rights</h2>
+      <p>You may submit a request to exercise any of the rights described in Section 18 by:</p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a></li>
+        <li><strong>In-app:</strong> via the account settings or support section of the MzanziHomes app</li>
+        <li><strong>Post:</strong> to our postal address, available on request</li>
+      </ul>
+      <p>We may ask for adequate proof of identity before processing a request, to protect your personal information from unauthorised access. We will respond within a reasonable time and in accordance with the timeframes prescribed under POPIA and PAIA.</p>
+    </section>
+
+    <section id="s20">
+      <span class="badge">Section 20</span>
+      <h2>20. Complaints</h2>
+      <p>If you are dissatisfied with how we have handled your personal information or a request you have made, please contact us first so that we can attempt to resolve the issue.</p>
+      <p>You also have the right to lodge a complaint directly with the Information Regulator of South Africa using its published complaints channels and eServices portal:</p>
+      <div class="info-box">
+        <strong>Information Regulator (South Africa)</strong><br>
+        Website: <a href="https://inforegulator.org.za" target="_blank">inforegulator.org.za</a><br>
+        POPIA complaints: <a href="mailto:POPIAComplaints@inforegulator.org.za">POPIAComplaints@inforegulator.org.za</a><br>
+        General enquiries: <a href="mailto:inforeg@justice.gov.za">inforeg@justice.gov.za</a><br>
+        Phone: 012 406 4818
+      </div>
+    </section>
+
+    <section id="s21">
+      <span class="badge">Section 21</span>
+      <h2>21. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time to reflect changes in the Service, our practices, or applicable law. When we make material changes, we will:</p>
+      <ul>
+        <li>Update the "Last updated" date at the top of this page</li>
+        <li>Post the updated policy in the Service</li>
+        <li>Where the change is material, notify you through the app or by email</li>
+      </ul>
+      <p>We encourage you to review this policy periodically. Continued use of the Service after an update constitutes acknowledgment of the revised policy.</p>
+    </section>
+
+    <section id="s22">
+      <span class="badge">Section 22</span>
+      <h2>22. Contact Us</h2>
+      <p>For any questions, concerns, or data requests relating to this Privacy Policy or our POPIA compliance, contact our Information Officer:</p>
+      <div class="info-box">
+        <strong>MzanziHomes Information Officer</strong><br>
+        BuildSynergy (Pty) Ltd, trading as MzanziHomes<br>
         Email: <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a><br>
         Website: <a href="https://mzanzihomes.com">mzanzihomes.com</a>
       </div>
@@ -303,8 +492,8 @@
 </div>
 
 <footer>
-  <p>© 2026 MzanziHomes (Pty) Ltd · <a href="https://mzanzihomes.com">mzanzihomes.com</a> · <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a></p>
-  <p style="margin-top:8px;">This policy is governed by the laws of the Republic of South Africa.</p>
+  <p>© 2026 BuildSynergy (Pty) Ltd, trading as MzanziHomes · <a href="https://mzanzihomes.com">mzanzihomes.com</a> · <a href="mailto:privacy@mzanzihomes.com">privacy@mzanzihomes.com</a></p>
+  <p style="margin-top:8px;">This policy is governed by the laws of the Republic of South Africa and is subject to POPIA (Act 4 of 2013).</p>
 </footer>
 
 </body>
