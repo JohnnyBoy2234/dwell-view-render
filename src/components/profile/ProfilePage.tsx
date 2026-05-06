@@ -10,20 +10,32 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  Camera, 
-  Shield, 
-  User, 
-  Mail, 
-  Phone, 
-  Key, 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
+  Camera,
+  Shield,
+  User,
+  Mail,
+  Phone,
+  Key,
   Bell,
   CheckCircle,
   XCircle,
   Clock,
   Upload,
   Edit2,
-  ArrowLeft
+  ArrowLeft,
+  Trash2
 } from 'lucide-react';
 
 interface UserProfile {
@@ -55,6 +67,8 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState('');
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>({
     email_notifications: true,
     app_notifications: true,
@@ -205,6 +219,23 @@ export default function ProfilePage() {
     }
   };
 
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirm !== user?.email) {
+      toast({ title: 'Email does not match', description: 'Type your email exactly to confirm.', variant: 'destructive' });
+      return;
+    }
+    setDeleting(true);
+    try {
+      const { error } = await supabase.rpc('delete_my_account');
+      if (error) throw error;
+      await supabase.auth.signOut();
+      window.location.href = '/';
+    } catch (err: any) {
+      toast({ title: 'Failed to delete account', description: err.message, variant: 'destructive' });
+      setDeleting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -471,6 +502,54 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Danger Zone */}
+      <Card className="border-destructive/40">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <Trash2 className="h-5 w-5" />
+            Delete Account
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            Permanently delete your account and all associated data. This action cannot be undone.
+          </p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="w-full">Delete My Account</Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+                <AlertDialogDescription asChild>
+                  <div>
+                    <p>This will permanently delete your account, profile, and all your data. This <strong>cannot be undone</strong>.</p>
+                    <p className="mt-3">Type your email to confirm:</p>
+                    <p className="font-semibold mt-1">{user?.email}</p>
+                    <Input
+                      value={deleteConfirm}
+                      onChange={e => setDeleteConfirm(e.target.value)}
+                      placeholder={user?.email || ''}
+                      className="mt-3"
+                    />
+                  </div>
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setDeleteConfirm('')}>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDeleteAccount}
+                  disabled={deleting || deleteConfirm !== user?.email}
+                  className="bg-destructive hover:bg-destructive/90"
+                >
+                  {deleting ? 'Deleting…' : 'Yes, delete my account'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardContent>
+      </Card>
     </div>
   );
 }
