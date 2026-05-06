@@ -35,7 +35,8 @@
       "Bash(Copy-Item \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\docs\\\\play-store\\\\privacy-policy.html\" \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\public\\\\privacy-policy\\\\index.html\")",
       "Bash(git push *)",
       "Bash(curl -I --max-time 10 https://github.com)",
-      "mcp__plugin_supabase_supabase__apply_migration"
+      "mcp__plugin_supabase_supabase__apply_migration",
+      "Bash(curl -s --max-time 5 https://github.com)"
     ]
   }
 }

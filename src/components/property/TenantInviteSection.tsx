@@ -28,6 +28,19 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
     }
     setIsGenerating(true);
     try {
+      const { data: existingTenancy } = await supabase
+        .from('tenancies')
+        .select('id')
+        .eq('property_id', propertyId)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (existingTenancy) {
+        toast({ title: 'Already has a tenant', description: 'This property already has an active tenant.', variant: 'destructive' });
+        setIsGenerating(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('property_invites')
         .insert({

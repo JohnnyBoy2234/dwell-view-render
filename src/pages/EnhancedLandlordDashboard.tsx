@@ -66,8 +66,10 @@ interface PropertyWithTenant {
 interface TenantListItem {
   id: string;
   name: string;
+  property_id: string;
   property_title: string;
   monthly_rent: number;
+  tenancy_status: string;
   payment_status: 'paid' | 'pending' | 'overdue';
   lease_end_date: string;
 }
@@ -345,8 +347,10 @@ export default function EnhancedLandlordDashboard() {
         const transformedTenants = (tenanciesData || []).map((tenancy: any) => ({
           id: tenancy.tenant_id,
           name: tenancy.tenant_profiles?.display_name || 'Unknown Tenant',
+          property_id: tenancy.property_id,
           property_title: tenancy.properties?.title || 'Unknown Property',
           monthly_rent: tenancy.monthly_rent,
+          tenancy_status: tenancy.status,
           payment_status: 'pending' as 'paid' | 'pending' | 'overdue',
           lease_end_date: tenancy.end_date
         }));
@@ -1215,12 +1219,8 @@ export default function EnhancedLandlordDashboard() {
                           <h4 className="font-semibold text-lg">{tenant.name}</h4>
                           <p className="text-sm text-muted-foreground truncate">{tenant.property_title}</p>
                           <div className="flex flex-wrap items-center gap-2 mt-1">
-                            <Badge variant={
-                              tenant.payment_status === 'paid' ? 'default' : 
-                              tenant.payment_status === 'pending' ? 'secondary' : 
-                              'destructive'
-                            }>
-                              {tenant.payment_status}
+                            <Badge className="bg-green-100 text-green-700 border-green-200">
+                              Active Tenant
                             </Badge>
                             <span className="text-sm font-medium text-green-600">
                               R{tenant.monthly_rent.toLocaleString()}/month
@@ -1357,12 +1357,8 @@ export default function EnhancedLandlordDashboard() {
                         <h4 className="font-semibold text-lg">{tenant.name}</h4>
                         <p className="text-sm text-muted-foreground truncate">{tenant.property_title}</p>
                         <div className="flex flex-wrap items-center gap-2 mt-1">
-                          <Badge variant={
-                            tenant.payment_status === 'paid' ? 'default' : 
-                            tenant.payment_status === 'pending' ? 'secondary' : 
-                            'destructive'
-                          }>
-                            {tenant.payment_status}
+                          <Badge className="bg-green-100 text-green-700 border-green-200">
+                            Active Tenant
                           </Badge>
                           <span className="text-sm font-bold text-green-600">
                             R{tenant.monthly_rent.toLocaleString()}
@@ -2399,8 +2395,10 @@ const renderReportsTab = () => (
       action?: () => void;
     };
 
+    const propertyHasActiveTenant = tenants.some(t => t.property_id === selectedProperty?.id);
+
     const tools: ToolItem[] = [
-      ...(selectedProperty?.listing_type !== 'sale'
+      ...(selectedProperty?.listing_type !== 'sale' && !propertyHasActiveTenant
         ? [{ title: 'Invite Tenant', subtitle: 'Send invite link', icon: UserPlus, tab: '/enhancedlandlorddashboard/tenants' } as ToolItem]
         : []),
       ...(selectedProperty && !selectedProperty.is_listed && selectedProperty.listing_type !== 'sale'
@@ -2662,8 +2660,8 @@ const renderReportsTab = () => (
             </div>
             
             <div className="flex items-center gap-2">
-              <Badge variant={getPaymentStatusBadgeVariant(tenant.payment_status)}>
-                {tenant.payment_status}
+              <Badge className="bg-green-100 text-green-700 border-green-200">
+                Active Tenant
               </Badge>
               <div className="flex gap-1">
                 <Button size="sm" variant="ghost" onClick={() => {
