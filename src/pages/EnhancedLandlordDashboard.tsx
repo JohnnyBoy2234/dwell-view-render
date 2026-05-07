@@ -2411,6 +2411,7 @@ const renderReportsTab = () => (
       { title: 'Leases',       subtitle: 'Contracts',                         icon: FileText, tab: '/enhancedlandlorddashboard/leases' },
       { title: 'Inventory',    subtitle: 'Photos & notes',                    icon: Camera,   tab: '/enhancedlandlorddashboard/inventory' },
       { title: 'Inspection',   subtitle: 'View & start',                      icon: Clipboard,tab: '/enhancedlandlorddashboard/inspection' },
+      { title: 'My Profile',   subtitle: 'Account & settings',                icon: User,       tab: '/enhancedlandlorddashboard/profile' },
       { title: 'Support',      subtitle: 'Help & resources',                  icon: HelpCircle, path: '/landlord/support' },
     ];
 

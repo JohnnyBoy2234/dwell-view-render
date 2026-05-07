@@ -52,6 +52,7 @@ interface UserProfile {
   is_tenant_screened: boolean;
   paystack_subaccount_code: string | null;
   id_verification_status: string | null;
+  notification_prefs: NotificationPreferences | null;
 }
 
 interface NotificationPreferences {
@@ -67,6 +68,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [savingPrefs, setSavingPrefs] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState('');
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreferences>({
@@ -90,20 +92,29 @@ export default function ProfilePage() {
 
   const fetchProfile = async () => {
     if (!user) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .filter('user_id', 'eq', user.id)
+        .eq('user_id', user.id)
         .single();
 
       if (error) throw error;
 
-      setProfile((data as any) || null);
-      setDisplayName(((data as any)?.display_name) || '');
-      setPhone(((data as any)?.phone) || '');
-      setBio(((data as any)?.bio) || '');
+      const p = data as any;
+      setProfile(p || null);
+      setDisplayName(p?.display_name || '');
+      setPhone(p?.phone || '');
+      setBio(p?.bio || '');
+
+      if (p?.notification_prefs) {
+        setNotificationPrefs({
+          email_notifications: p.notification_prefs.email_notifications ?? true,
+          app_notifications: p.notification_prefs.app_notifications ?? true,
+          whatsapp_notifications: p.notification_prefs.whatsapp_notifications ?? false,
+        });
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -113,35 +124,50 @@ export default function ProfilePage() {
 
   const updateProfile = async () => {
     if (!user || !profile) return;
+    const trimmedName = displayName.trim();
+    if (!trimmedName) {
+      toast({ title: 'Display name required', description: 'Please enter a display name.', variant: 'destructive' });
+      return;
+    }
 
     setUpdating(true);
     try {
       const { error } = await supabase
         .from('profiles')
         .update({
-          display_name: displayName,
-          phone: phone,
-          bio: bio,
-          updated_at: new Date().toISOString()
+          display_name: trimmedName,
+          phone: phone.trim(),
+          bio: bio.trim(),
+          updated_at: new Date().toISOString(),
         } as any)
-        .filter('user_id', 'eq', user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been successfully updated."
-      });
-
+      toast({ title: 'Profile updated', description: 'Your profile has been successfully updated.' });
       fetchProfile();
     } catch (error) {
-      toast({
-        title: "Error updating profile",
-        description: "Failed to update your profile. Please try again.",
-        variant: "destructive"
-      });
+      toast({ title: 'Error updating profile', description: 'Failed to update your profile. Please try again.', variant: 'destructive' });
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const saveNotificationPrefs = async () => {
+    if (!user) return;
+    setSavingPrefs(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ notification_prefs: notificationPrefs } as any)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      toast({ title: 'Preferences saved', description: 'Your notification preferences have been updated.' });
+    } catch (error) {
+      toast({ title: 'Error saving preferences', description: 'Failed to save preferences. Please try again.', variant: 'destructive' });
+    } finally {
+      setSavingPrefs(false);
     }
   };
 
@@ -483,21 +509,8 @@ export default function ProfilePage() {
               />
             </div>
             
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="font-medium">WhatsApp Notifications</div>
-                <div className="text-sm text-muted-foreground">Receive notifications via WhatsApp</div>
-              </div>
-              <Switch
-                checked={notificationPrefs.whatsapp_notifications}
-                onCheckedChange={(checked) => 
-                  setNotificationPrefs(prev => ({ ...prev, whatsapp_notifications: checked }))
-                }
-              />
-            </div>
-            
-            <Button variant="outline" className="w-full mt-4">
-              Save Preferences
+            <Button variant="outline" className="w-full mt-4" onClick={saveNotificationPrefs} disabled={savingPrefs}>
+              {savingPrefs ? 'Saving…' : 'Save Preferences'}
             </Button>
           </CardContent>
         </Card>

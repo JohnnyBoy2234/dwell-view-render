@@ -267,6 +267,13 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
   },
+  '/enhancedlandlorddashboard/profile': {
+    title: 'Profile Settings',
+    icon: Settings,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedlandlorddashboard',
+  },
 };
 
 export const getPageConfig = (path: string, isLandlord: boolean): PageConfig => {

@@ -38,7 +38,12 @@
       "mcp__plugin_supabase_supabase__apply_migration",
       "Bash(curl -s --max-time 5 https://github.com)",
       "Bash(sed -n '244,265p' src/pages/Auth.tsx)",
-      "Bash(sed -n '312,335p' src/pages/Auth.tsx)"
+      "Bash(sed -n '312,335p' src/pages/Auth.tsx)",
+      "mcp__plugin_supabase_supabase__list_tables",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
+      "Bash(python3 -m http.server 9090)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s --max-time 3 \"http://localhost:9091/docs/play-store/screenshots/tablet7-1.html\")"
     ]
   }
 }
