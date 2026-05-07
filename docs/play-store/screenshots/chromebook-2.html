@@ -2,32 +2,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{width:1920px;height:1080px;overflow:hidden;background:linear-gradient(140deg,hsl(214,100%,12%) 0%,hsl(214,100%,28%) 60%,hsl(214,95%,38%) 100%);font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;padding:52px 120px}
-.caption{color:white;font-size:46px;font-weight:800;text-align:center;line-height:1.15;letter-spacing:-1.5px;max-width:1400px}
-.window{width:1360px;background:#111;border-radius:10px;box-shadow:0 40px 120px rgba(0,0,0,0.7),0 0 0 1px rgba(255,255,255,0.07);overflow:hidden}
-.titlebar{background:#1e1e1e;height:40px;display:flex;align-items:center;padding:0 16px;gap:8px;border-bottom:1px solid rgba(255,255,255,0.06)}
-.dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+body{width:1920px;height:1080px;overflow:hidden;background:linear-gradient(140deg,hsl(214,100%,12%) 0%,hsl(214,100%,28%) 60%,hsl(214,95%,38%) 100%);font-family:'Inter',-apple-system,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:48px 100px}
+.caption{color:white;font-size:44px;font-weight:800;text-align:center;line-height:1.15;letter-spacing:-1.5px;max-width:1500px}
+.laptop{display:flex;flex-direction:column;align-items:center}
+.lid{width:1160px;background:#1c1c1e;border-radius:14px 14px 0 0;padding:14px 14px 0;position:relative;box-shadow:0 0 0 1px rgba(255,255,255,0.06),0 30px 80px rgba(0,0,0,0.55)}
+.cam{position:absolute;top:7px;left:50%;transform:translateX(-50%);width:8px;height:8px;background:#2c2c2e;border-radius:50%}
+.screen{border-radius:4px 4px 0 0;overflow:hidden}
+.chrome-bar{background:#262626;height:40px;display:flex;align-items:center;padding:0 14px;gap:8px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .dot.r{background:#ff5f56}.dot.y{background:#ffbd2e}.dot.g{background:#27c93f}
-.win-title{flex:1;text-align:center;font-size:12px;color:rgba(255,255,255,0.35);font-weight:500;margin-right:44px}
-.win-body{padding:28px 0;display:flex;justify-content:center;align-items:flex-start;background:#0d0d0d;min-height:400px}
-.phone{width:270px;background:#0a0a0a;border-radius:48px;padding:10px;box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 0 1px rgba(255,255,255,0.06);position:relative;flex-shrink:0}
-.notch{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:82px;height:24px;background:#0a0a0a;border-radius:0 0 14px 14px;z-index:10}
-.p-screen{border-radius:40px;overflow:hidden;width:100%}
-.p-screen img{width:100%;display:block}
+.addr{flex:1;height:24px;background:#1c1c1c;border-radius:12px;margin:0 16px;display:flex;align-items:center;padding:0 14px}
+.addr span{font-size:11px;color:rgba(255,255,255,0.3);font-weight:400}
+.content{height:500px;overflow:hidden}
+.content img{width:100%;height:100%;object-fit:cover;object-position:top;display:block}
+.hinge{width:1200px;height:7px;background:linear-gradient(to bottom,#111,#1e1e1e);border-left:1px solid rgba(255,255,255,0.04);border-right:1px solid rgba(255,255,255,0.04)}
+.base{width:1220px;height:46px;background:#1c1c1e;border-radius:0 0 10px 10px;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(0,0,0,0.45),0 0 0 1px rgba(255,255,255,0.05)}
+.trackpad{width:200px;height:24px;background:#141414;border-radius:4px;border:1px solid rgba(255,255,255,0.07)}
 .brand{color:rgba(255,255,255,0.28);font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase}
 </style></head><body>
 <div class="caption">Browse verified rentals near you</div>
-<div class="window">
-  <div class="titlebar">
-    <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
-    <div class="win-title">MzanziHomes</div>
-  </div>
-  <div class="win-body">
-    <div class="phone">
-      <div class="notch"></div>
-      <div class="p-screen"><img src="raw-1-properties.png"/></div>
+<div class="laptop">
+  <div class="lid">
+    <div class="cam"></div>
+    <div class="screen">
+      <div class="chrome-bar">
+        <div class="dot r"></div><div class="dot y"></div><div class="dot g"></div>
+        <div class="addr"><span>mzanzihomes.com</span></div>
+      </div>
+      <div class="content"><img src="raw-desktop-properties.png"/></div>
     </div>
   </div>
+  <div class="hinge"></div>
+  <div class="base"><div class="trackpad"></div></div>
 </div>
 <div class="brand">MzanziHomes</div>
 </body></html>
