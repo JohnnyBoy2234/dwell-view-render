@@ -1,0 +1,144 @@
+/* WhatsApp-style messaging animations */
+
+@keyframes message-incoming {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes message-outgoing {
+  0% {
+    opacity: 0;
+    transform: translateX(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes message-status-change {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes connection-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes typing-dots {
+  0%, 60%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  30% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.animate-message-incoming {
+  animation: message-incoming 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-message-outgoing {
+  animation: message-outgoing 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-status-change {
+  animation: message-status-change 0.2s ease-in-out;
+}
+
+.animate-connection-pulse {
+  animation: connection-pulse 2s infinite;
+}
+
+.animate-typing-dots {
+  animation: typing-dots 1.5s infinite;
+}
+
+/* WhatsApp-style message bubbles */
+.message-bubble {
+  position: relative;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.message-bubble::before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-style: solid;
+}
+
+/* Outgoing message tail */
+.message-bubble.outgoing::before {
+  right: -8px;
+  bottom: 8px;
+  border-width: 8px 0 8px 8px;
+  border-color: transparent transparent transparent hsl(var(--ocean-blue));
+}
+
+/* Incoming message tail */
+.message-bubble.incoming::before {
+  left: -8px;
+  bottom: 8px;
+  border-width: 8px 8px 8px 0;
+  border-color: transparent hsl(var(--card)) transparent transparent;
+}
+
+/* Smooth transitions for all interactive elements */
+.message-composer,
+.conversation-item,
+.status-indicator {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Focus states for accessibility */
+.message-composer:focus-within {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px -8px hsl(var(--primary) / 0.3);
+}
+
+.conversation-item:hover {
+  transform: translateX(4px);
+  background: hsl(var(--muted) / 0.7);
+}
+
+/* Loading skeleton animations */
+@keyframes skeleton-pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.skeleton-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
