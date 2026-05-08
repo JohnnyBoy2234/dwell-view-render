@@ -7,7 +7,13 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@mzanzihomes/ui": ["./packages/ui/src/index.ts"],
+      "@mzanzihomes/ui/*": ["./packages/ui/src/*"],
+      "@mzanzihomes/supabase": ["./packages/supabase/src/index.ts"],
+      "@mzanzihomes/supabase/*": ["./packages/supabase/src/*"],
+      "@mzanzihomes/common": ["./packages/common/src/index.ts"],
+      "@mzanzihomes/common/*": ["./packages/common/src/*"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,

@@ -3,10 +3,8 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
 
-process.env.ESBUILD_BINARY_PATH = path.resolve('./node_modules/esbuild/bin/esbuild')
+process.env.ESBUILD_BINARY_PATH = path.resolve('./node_modules/esbuild/bin/esbuild');
 
-
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -26,6 +24,9 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@mzanzihomes/ui": path.resolve(__dirname, "./packages/ui/src"),
+      "@mzanzihomes/supabase": path.resolve(__dirname, "./packages/supabase/src"),
+      "@mzanzihomes/common": path.resolve(__dirname, "./packages/common/src"),
     },
   },
 }));
