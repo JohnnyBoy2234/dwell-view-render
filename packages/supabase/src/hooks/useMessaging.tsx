@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '../client';
-import { useToast } from '@/hooks/use-toast'; // FIXME: use-toast not yet in packages/supabase — app-level dep
+import { useToast } from '@mzanzihomes/ui/components/use-toast';
 import { useRealtime } from './useRealtime';
 
 interface Message {
