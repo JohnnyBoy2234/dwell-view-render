@@ -1,7 +1,1 @@
-export interface SearchFilters {
-  location: string;
-  propertyType: string;
-  minPrice: string;
-  maxPrice: string;
-  bedrooms: string;
-}
+export * from '@mzanzihomes/common/types/filters';
