@@ -43,7 +43,28 @@
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
       "Bash(python3 -m http.server 9090)",
       "Bash(node -e ' *)",
-      "Bash(curl -s --max-time 3 \"http://localhost:9091/docs/play-store/screenshots/tablet7-1.html\")"
+      "Bash(curl -s --max-time 3 \"http://localhost:9091/docs/play-store/screenshots/tablet7-1.html\")",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('root entry:', d.get\\('root','NOT FOUND'\\)\\); print\\('k6 entry:', d.get\\('dependencies',{}\\).get\\('k6','NOT FOUND'\\)\\)\")",
+      "Bash(python -c \"import sys; content=sys.stdin.read\\(\\); idx=content.find\\('root'\\); print\\(content[max\\(0,idx-50\\):idx+80]\\)\")",
+      "Bash(npx turbo *)",
+      "Bash(git commit *)",
+      "Bash(grep \"\\\\.ts$\")",
+      "Bash(Copy-Item \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\src\\\\integrations\\\\supabase\\\\client.ts\" \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\packages\\\\supabase\\\\src\\\\client.ts\")",
+      "Bash(Copy-Item \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\src\\\\integrations\\\\supabase\\\\types.ts\" \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\packages\\\\supabase\\\\src\\\\types.ts\")",
+      "Read(//c/Users/Jonathan D Theron/dwell-view-render/.worktrees/monorepo-foundation/packages/supabase/src/hooks/**)",
+      "Bash(cp -r 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/src/lib' 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/packages/common/src/lib')",
+      "Bash(cp -r 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/src/constants' 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/packages/common/src/constants')",
+      "Bash(cp -r 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/src/types' 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/packages/common/src/types')",
+      "Bash(cp -r 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/src/data' 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation/packages/common/src/data')",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\package.json' | Select-String -Pattern 'vitest|@testing-library' | Format-Table -AutoSize\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\src\\\\components\\\\ui\\\\GlassCard.tsx'\")",
+      "Bash(powershell -Command \"Get-Content 'C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\.worktrees\\\\monorepo-foundation\\\\src\\\\components\\\\ui\\\\pricedropdown.tsx'\")",
+      "Bash(git merge-base *)",
+      "Bash(findstr /i \"pass\\\\|fail\\\\|test\\\\|error\\\\|found\")",
+      "Read(//c/Users/Jonathan D Theron/AppData/Local/Temp/claude/c--Users-Jonathan-D-Theron-dwell-view-render/f62a5d87-b129-4c5a-bfc7-465b39540c02/tasks/**)",
+      "Bash(git checkout *)",
+      "Bash(git pull *)",
+      "Bash(git merge *)"
     ]
   }
 }
