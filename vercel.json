@@ -1,6 +1,6 @@
 {
-  "buildCommand": "npm ci --legacy-peer-deps --ignore-scripts && npm run build",
-  "outputDirectory": "dist",
+  "buildCommand": "npm ci --legacy-peer-deps --ignore-scripts && npx turbo run build --filter=@mzanzihomes/web",
+  "outputDirectory": "apps/web/dist",
   "rewrites": [
     {
       "source": "/(.*)",
