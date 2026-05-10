@@ -57,13 +57,13 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
 
   return (
     <header
-      className={`fixed top-8 left-1/2 z-50 flex flex-col items-center
-                  -translate-x-1/2 px-6 py-3.5
+      className={`fixed top-12 left-1/2 z-50 flex flex-col items-center
+                  -translate-x-1/2 px-8 py-3.5
                   backdrop-blur-md border border-white/10
-                  bg-[rgba(10,10,20,0.65)]
-                  w-[calc(100%-1rem)] sm:w-auto sm:min-w-[800px]
+                  bg-[rgba(0,0,0,0.78)]
+                  w-[calc(100%-1rem)] sm:w-auto sm:min-w-[960px]
                   transition-[border-radius] duration-0 ${shapeClass}`}
-      style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.07)' }}
+      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)' }}
     >
       {/* ── Desktop row ── */}
       <div className="flex items-center gap-10 w-full">

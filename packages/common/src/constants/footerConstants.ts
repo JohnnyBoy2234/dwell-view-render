@@ -57,7 +57,7 @@ export const FOOTER_CONTENT = {
 } as const;
 
 export const FOOTER_STYLES = {
-  FOOTER: "bg-gradient-to-br from-foreground to-muted-foreground text-white",
+  FOOTER: "bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 text-white",
   CONTAINER: "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12",
   GRID: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8",
   BRAND_SECTION: "lg:col-span-1",
