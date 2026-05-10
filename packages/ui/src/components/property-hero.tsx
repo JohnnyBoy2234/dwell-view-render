@@ -73,7 +73,7 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
       </div>
 
       {/* ── Main content ── */}
-      <div className="relative z-20 flex flex-col flex-1 items-center justify-center px-5 sm:px-8 pt-28 pb-14 sm:pb-20">
+      <div className="relative z-20 flex flex-col flex-1 items-center justify-center px-5 sm:px-8 pt-40 pb-14 sm:pb-20">
 
         {/* Rent / Buy toggle */}
         {onModeChange && (
@@ -121,7 +121,7 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
             transition={{ duration: 0.5, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
           >
             <h1
-              className="text-5xl sm:text-7xl lg:text-[100px] font-bold text-center leading-[1.05] tracking-tight max-w-5xl mb-5"
+              className="text-4xl sm:text-6xl lg:text-[78px] font-bold text-center leading-[1.05] tracking-tight max-w-5xl mb-5"
               style={{ color: '#ffffff', textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}
             >
               {heroCopy[mode].headline}

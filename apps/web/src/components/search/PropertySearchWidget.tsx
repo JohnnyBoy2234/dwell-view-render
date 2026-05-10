@@ -187,7 +187,7 @@ export function PropertySearchWidget({
       >
         {/* ── Row 1: Location ── */}
         <div ref={locationRef} className="relative w-full">
-          <label className="flex items-center gap-4 px-8 pt-5 pb-5 cursor-text hover:bg-ocean-blue/3 rounded-t-2xl transition-colors">
+          <label className="flex items-center gap-4 px-8 pt-7 pb-7 cursor-text hover:bg-ocean-blue/3 rounded-t-2xl transition-colors">
             <MapPin className="w-5 h-5 text-ocean-blue shrink-0" />
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-[10px] font-bold uppercase tracking-widest text-ocean-blue/70 mb-0.5">Location</span>
@@ -243,7 +243,7 @@ export function PropertySearchWidget({
             type="button"
             onClick={() => toggle("type")}
             className={cn(
-              "flex items-center gap-3 px-6 py-5 transition-colors min-w-[170px]",
+              "flex items-center gap-3 px-6 py-6 transition-colors min-w-[170px]",
               openDropdown === "type" ? "bg-ocean-blue/5" : "hover:bg-ocean-blue/3"
             )}
           >
@@ -277,7 +277,7 @@ export function PropertySearchWidget({
             type="button"
             onClick={() => toggle("minPrice")}
             className={cn(
-              "flex items-center gap-3 px-6 py-5 transition-colors min-w-[180px]",
+              "flex items-center gap-3 px-6 py-6 transition-colors min-w-[180px]",
               openDropdown === "minPrice" ? "bg-ocean-blue/5" : "hover:bg-ocean-blue/3"
             )}
           >
@@ -326,7 +326,7 @@ export function PropertySearchWidget({
             type="button"
             onClick={() => toggle("beds")}
             className={cn(
-              "flex items-center gap-3 px-6 py-5 transition-colors min-w-[150px]",
+              "flex items-center gap-3 px-6 py-6 transition-colors min-w-[150px]",
               openDropdown === "beds" ? "bg-ocean-blue/5" : "hover:bg-ocean-blue/3"
             )}
           >
@@ -355,7 +355,7 @@ export function PropertySearchWidget({
         </div>
 
         {/* ── Search + More Filters ── */}
-        <div className="flex items-center gap-2 px-4 py-4 shrink-0">
+        <div className="flex items-center gap-2 px-4 py-5 shrink-0">
           {onMoreFiltersOpen && (
             <button
               type="button"
