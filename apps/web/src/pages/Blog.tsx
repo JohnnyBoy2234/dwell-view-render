@@ -1,0 +1,64 @@
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { BlogPostCard } from "@/components/blog/BlogPostCard";
+
+type BlogPost = {
+  id: string;
+  title: string;
+  publishedAt: string;
+  category: string;
+  readTime: number;
+  excerpt: string;
+  featured?: boolean;
+};
+
+export default function Blog() {
+  const posts: BlogPost[] = [
+    {
+      id: 'safe-transparent-new-way',
+      title: 'Safe, Simple, and Transparent - The New Way to Rent in South Africa',
+      publishedAt: '2025-10-10',
+      category: 'Safety & Trust',
+      readTime: 4,
+      excerpt: 'Renting shouldn\'t feel risky or confusing. Discover how MzanziHomes combines verified safety, data protection, and complete transparency to create a new standard for renting in South Africa.',
+      featured: true,
+    },
+    {
+      id: 'two-pillars-sustainable-returns',
+      title: 'The Two Pillars of Sustainable Returns: Trust and Efficiency',
+      publishedAt: '2025-10-19',
+      category: 'Property Management',
+      readTime: 5,
+      excerpt: 'Discover how building your rental system on the pillars of trust and efficiency doesn\'t just reduce risk—it creates sustainable, long-term ROI.',
+    },
+    {
+      id: 'why-commission-is-wrong',
+      title: 'Why Paying Commission on Rentals Is Wrong',
+      publishedAt: '2025-09-15',
+      category: 'Industry Insights',
+      readTime: 5,
+      excerpt: 'The commission model punishes success, hurts landlords and tenants alike, and belongs in the past. Learn why technology has made middlemen unnecessary.',
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Blog Posts Grid */}
+      <div className="container mx-auto px-4 py-12 md:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+          {posts.map((post) => (
+            <BlogPostCard
+              key={post.id}
+              id={post.id}
+              title={post.title}
+              excerpt={post.excerpt}
+              publishedAt={post.publishedAt}
+              readTime={post.readTime}
+              category={post.category}
+              featured={post.featured}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}

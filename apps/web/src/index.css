@@ -1,0 +1,627 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    --primary: 203 89% 45%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 55%;
+
+    --accent: 142 76% 47%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 142 72% 44%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 214 31% 91%;
+    --input: 214 31% 91%;
+    --ring: 203 89% 45%;
+
+    /* iOS-inspired color palette */
+    --ios-blue: 214 100% 59%;
+    --ios-blue-dark: 214 100% 49%;
+    --ios-blue-light: 214 100% 69%;
+    --ios-green: 142 72% 44%;
+    --ios-green-light: 142 72% 54%;
+    --ios-orange: 25 95% 53%;
+    --ios-red: 0 78% 62%;
+    --ios-purple: 275 84% 67%;
+    --ios-indigo: 235 85% 70%;
+    --ios-teal: 174 72% 56%;
+    --ios-pink: 332 83% 71%;
+    --ios-gray: 220 9% 46%;
+    --ios-gray-light: 220 14% 96%;
+    --ios-gray-dark: 220 20% 20%;
+    
+    /* Legacy brand colors for compatibility */
+    --ocean-blue: 214 100% 59%;
+    --ocean-blue-dark: 214 100% 49%;
+    --ocean-blue-light: 214 100% 69%;
+    --ocean-blue-glow: 214 100% 79%;
+    
+    --earth-warm: 25 95% 53%;
+    --earth-warm-dark: 25 95% 43%;
+    --earth-light: 25 95% 95%;
+    --earth-muted: 25 40% 85%;
+    
+    --success-green: 142 72% 44%;
+    --success-green-dark: 142 72% 34%;
+    --success-green-light: 142 72% 95%;
+    --success-green-glow: 142 72% 54%;
+
+    /* MzanziHomes design tokens */
+    --sr-blue: 221 83% 53%;
+    --sr-green: 142 76% 36%;
+    --sr-ink: 222 47% 11%;
+    --sr-muted: 220 9% 46%;
+    --sr-bg: 210 40% 98%;
+    
+    /* iOS-style gradients */
+    --ios-gradient-blue: linear-gradient(135deg, hsl(var(--ios-blue)), hsl(var(--ios-blue-light)));
+    --ios-gradient-green: linear-gradient(135deg, hsl(var(--ios-green)), hsl(var(--ios-green-light)));
+    --ios-gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 249, 250, 1));
+    --ios-gradient-subtle: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+    
+    /* iOS-style shadows */
+    --ios-shadow-xs: 0 1px 3px rgba(0, 0, 0, 0.08);
+    --ios-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.08);
+    --ios-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --ios-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.04);
+    --ios-shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.12), 0 8px 32px rgba(0, 0, 0, 0.06);
+    
+    /* Legacy shadows for compatibility */
+    --shadow-soft: var(--ios-shadow-sm);
+    --shadow-medium: var(--ios-shadow-md);
+    --shadow-strong: var(--ios-shadow-lg);
+    --shadow-glow: var(--ios-shadow-xl);
+    --shadow-warm: var(--ios-shadow-md);
+    --shadow-success: var(--ios-shadow-md);
+    
+    /* Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Glass morphism effects */
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-blur: blur(20px);
+    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Brand hex tokens and gradient for glass UI (kept minimal, non-breaking) */
+    --brand-blue-600: #2563EB;
+    --brand-blue-700: #1D4ED8;
+    --brand-green-500: #10B981;
+    --brand-green-600: #059669;
+    --brand-gray-900: #0F172A;
+    --brand-gray-700: #334155;
+    --brand-gray-500: #64748B;
+    --brand-gray-200: #E5E7EB;
+    --brand-white: #FFFFFF;
+    --brand-gradient: linear-gradient(90deg,var(--brand-blue-600) 0%,var(--brand-green-500) 100%);
+  }
+
+/* Subtle noise overlay utility for glass backgrounds */
+@layer utilities {
+  .ui-noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    /* Very light dotted pattern that reads as grain/noise */
+    background-image: radial-gradient(circle at 1px 1px, rgba(0,0,0,0.07) 1px, transparent 1.2px);
+    background-size: 6px 6px;
+    opacity: 0.16;
+    mix-blend-mode: overlay;
+  }
+
+  .dark .ui-noise {
+    opacity: 0.1;
+  }
+
+  /* SUPER VISIBLE background effects */
+  .bg-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(255, 0, 0, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(0, 255, 0, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(0, 0, 255, 0.3) 0%, transparent 50%);
+  }
+  
+  .bg-particles::before,
+  .bg-particles::after {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 20s infinite ease-in-out;
+  }
+  
+  .bg-particles::before {
+    top: 10%;
+    left: -10%;
+    animation-delay: -10s;
+  }
+  
+  .bg-particles::after {
+    bottom: 10%;
+    right: -10%;
+    animation-delay: -5s;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) translateX(0px) scale(1) rotate(0deg); }
+    25% { transform: translateY(-30px) translateX(20px) scale(1.1) rotate(90deg); }
+    50% { transform: translateY(-15px) translateX(-25px) scale(0.9) rotate(180deg); }
+    75% { transform: translateY(20px) translateX(15px) scale(1.05) rotate(270deg); }
+  }
+
+  /* More visible dot pattern */
+  .bg-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    background-image: 
+      radial-gradient(circle at 2px 2px, rgba(37, 99, 235, 0.25) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.6;
+  }
+
+  /* Chat skeleton shimmer */
+  @keyframes msg-shimmer {
+    0%   { background-position: -400px 0; }
+    100% { background-position:  400px 0; }
+  }
+  .chat-skeleton {
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,0.06) 0%,
+      rgba(0,0,0,0.10) 40%,
+      rgba(0,0,0,0.06) 80%
+    );
+    background-size: 800px 100%;
+    animation: msg-shimmer 1.4s ease-in-out infinite;
+  }
+
+  /* Glass card effects */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .glass-card-dark {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+}
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142 72% 54%;
+    --success-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+  
+  /* Dark mode background */
+  .dark body {
+    background: linear-gradient(135deg, 
+      hsl(222 84% 6%) 0%, 
+      hsl(222 84% 4%) 25%, 
+      hsl(222 84% 3%) 50%, 
+      hsl(222 84% 4%) 75%, 
+      hsl(222 84% 6%) 100%
+    );
+  }
+
+  /* Remove the overpowering particle effects */
+  .bg-particles,
+  .bg-pattern {
+    display: none;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply text-foreground;
+    background: linear-gradient(135deg, 
+      hsl(var(--background)) 0%, 
+      hsl(210 40% 96%) 25%, 
+      hsl(210 40% 94%) 50%, 
+      hsl(210 40% 96%) 75%, 
+      hsl(var(--background)) 100%
+    );
+    min-height: 100vh;
+  }
+
+  /* Enhanced text contrast for better readability */
+  .text-foreground {
+    color: hsl(215 25% 10%) !important;
+  }
+  
+  .text-muted-foreground {
+    color: hsl(215 20% 40%) !important;
+  }
+  
+  /* Card backgrounds with better contrast */
+  .bg-card, [class*="bg-white"], [class*="bg-background"] {
+    backdrop-filter: blur(10px);
+  }
+  
+  /* Glass cards with enhanced readability */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  }
+  
+  .glass-card * {
+    color: hsl(215 25% 10%) !important;
+  }
+  
+  .glass-card .text-muted-foreground {
+    color: hsl(215 20% 35%) !important;
+  }
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out forwards;
+}
+
+
+/* Subtle floating animation for mobile cards */
+@keyframes floatSlow {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-float-slow {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+/* Scrollbar hiding for mobile tabs */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* When the mobile bottom bar is present, add safe padding at the bottom */
+@media (max-width: 768px) {
+  body.has-mobile-bottom-bar {
+    padding-bottom: 72px; /* height of bottom bar plus a bit of spacing */
+  }
+}
+
+/* Enhanced dropdown and popover styling for visibility */
+[data-radix-popper-content-wrapper] {
+  z-index: 9999 !important;
+}
+
+/* Google Places Autocomplete styling overrides */
+.pac-container {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+  z-index: 9999 !important;
+  margin-top: 4px !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+  font-family: inherit !important;
+}
+
+.pac-item {
+  color: hsl(var(--foreground)) !important;
+  padding: 12px 16px !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.pac-item:hover,
+.pac-item.pac-item-selected {
+  background-color: hsl(var(--accent) / 0.1) !important;
+}
+
+.pac-item:last-child {
+  border-bottom: none !important;
+}
+
+.pac-item-query {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 500 !important;
+}
+
+.pac-matched {
+  color: hsl(var(--ocean-blue)) !important;
+  font-weight: 600 !important;
+}
+
+/* Ensure all Select dropdowns have proper styling */
+[data-radix-select-content] {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+  z-index: 9999 !important;
+  max-height: 300px !important;
+  overflow-y: auto !important;
+}
+
+[data-radix-select-item] {
+  color: hsl(var(--foreground)) !important;
+  transition: background-color 0.2s ease !important;
+}
+
+[data-radix-select-item]:hover,
+[data-radix-select-item][data-highlighted] {
+  background-color: hsl(var(--accent) / 0.1) !important;
+}
+
+/* Ensure Popover content is visible and properly styled */
+[data-radix-popover-content] {
+  background: hsl(var(--popover)) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 30px -8px hsl(var(--ocean-blue) / 0.18) !important;
+  z-index: 9999 !important;
+}
+
+/* Property24-style Search Bar Styles */
+.property24-search-input {
+  height: 44px;
+  font-size: 15px;
+  font-weight: 400;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 10px;
+  background: white;
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  line-height: 1.5;
+}
+
+.property24-search-input-focused {
+  border-color: hsl(var(--ocean-blue));
+  box-shadow: 0 0 0 3px hsl(var(--ocean-blue) / 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.property24-search-input-typing {
+  border-color: hsl(var(--ocean-blue));
+  box-shadow: 0 0 0 3px hsl(var(--ocean-blue) / 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.property24-search-input::placeholder {
+  color: hsl(var(--muted-foreground));
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.property24-search-input:hover {
+  border-color: hsl(var(--ocean-blue) / 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.property24-search-input:focus {
+  outline: none;
+  border-color: hsl(var(--ocean-blue));
+  box-shadow: 0 0 0 3px hsl(var(--ocean-blue) / 0.1), 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.property24-filter-button {
+  height: 44px;
+  padding: 0 14px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid hsl(var(--border) / 0.5);
+  border-radius: 10px;
+  background: white;
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 100px;
+}
+
+.property24-filter-button:hover {
+  border-color: hsl(var(--ocean-blue));
+  color: hsl(var(--foreground));
+  background: hsl(var(--ocean-blue) / 0.05);
+}
+
+.property24-filter-button.active {
+  border-color: hsl(var(--ocean-blue));
+  background: hsl(var(--ocean-blue));
+  color: white;
+}
+
+/* Filter dropdown styling for better contrast */
+[data-radix-popper-content-wrapper] {
+  z-index: 50;
+}
+
+[data-radix-popper-content-wrapper] .p-4 {
+  background: white;
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+[data-radix-popper-content-wrapper] button {
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease;
+}
+
+[data-radix-popper-content-wrapper] button:hover {
+  background-color: hsl(var(--ocean-blue) / 0.1);
+  color: hsl(var(--foreground));
+}
+
+[data-radix-popper-content-wrapper] button:focus {
+  outline: 2px solid hsl(var(--ocean-blue));
+  outline-offset: 2px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: hsl(var(--ocean-blue) / 0.1);
+  color: hsl(var(--ocean-blue));
+  border: 1px solid hsl(var(--ocean-blue) / 0.2);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.filter-chip .remove-button {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: hsl(var(--ocean-blue) / 0.2);
+  color: hsl(var(--ocean-blue));
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .property24-search-input {
+    height: 52px;
+    font-size: 16px;
+    border-radius: 14px;
+  }
+  
+  .property24-filter-button {
+    height: 44px;
+    font-size: 13px;
+    padding: 0 12px;
+    min-width: 100px;
+  }
+}
+
+.benefits-swiper .swiper-button-next,
+.benefits-swiper .swiper-button-prev {
+  color: hsl(221 83% 53%);
+}
+
+.benefits-swiper .swiper-pagination-bullet {
+  background-color: hsl(0 0% 80%);
+  opacity: 1;
+}
+
+.benefits-swiper .swiper-pagination-bullet-active {
+  background-color: hsl(142 76% 36%);
+}
