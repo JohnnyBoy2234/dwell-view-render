@@ -64,7 +64,30 @@
       "Read(//c/Users/Jonathan D Theron/AppData/Local/Temp/claude/c--Users-Jonathan-D-Theron-dwell-view-render/f62a5d87-b129-4c5a-bfc7-465b39540c02/tasks/**)",
       "Bash(git checkout *)",
       "Bash(git pull *)",
-      "Bash(git merge *)"
+      "Bash(git merge *)",
+      "PowerShell(Get-ChildItem -Path \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\src\\\\hooks\" -Name | Where-Object { $_ -ne \"useAuth.tsx\" -and $_ -ne \"useMessaging.tsx\" -and $_ -ne \"useRealtime.tsx\" -and $_ -ne \"useNotifications.tsx\" -and $_ -ne \"useLandlordNotifications.tsx\" })",
+      "Bash(cat postcss.config.js)",
+      "Bash(cat postcss.config.ts)",
+      "Bash(Copy-Item -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\src\" -Destination \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\tenant\\\\src\" -Recurse -Force)",
+      "PowerShell(Copy-Item -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\src\" -Destination \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\tenant\\\\src\" -Recurse -Force)",
+      "PowerShell(\\(Get-ChildItem -Recurse \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\tenant\\\\src\"\\).Count)",
+      "Bash(npx vite *)",
+      "Bash(Get-ChildItem \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\tenant\\\\src\\\\pages\" -Recurse -Name)",
+      "Bash(Sort-Object)",
+      "Bash(Copy-Item -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\tailwind.config.ts\" -Destination \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\landlord\\\\tailwind.config.ts\")",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\web\" -Force)",
+      "Bash(Write-Host \"Created apps/web\")",
+      "PowerShell(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\web\" -Force)",
+      "PowerShell(Copy-Item -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\src\" -Destination \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\web\\\\src\" -Recurse -Force)",
+      "PowerShell(Copy-Item -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\src\" -Destination \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\admin\\\\src\" -Recurse -Force)",
+      "Bash(node -p \"require\\('C:/Users/Jonathan D Theron/dwell-view-render/packages/ui/package.json'\\).name + ' / ' + \\(require\\('C:/Users/Jonathan D Theron/dwell-view-render/packages/ui/package.json'\\).scripts?.build || 'no build script'\\)\")",
+      "Bash(node -p \"require\\('C:/Users/Jonathan D Theron/dwell-view-render/packages/supabase/package.json'\\).name + ' / ' + \\(require\\('C:/Users/Jonathan D Theron/dwell-view-render/packages/supabase/package.json'\\).scripts?.build || 'no build script'\\)\")",
+      "Bash(node -p \"require\\('C:/Users/Jonathan D Theron/dwell-view-render/packages/common/package.json'\\).name + ' / ' + \\(require\\('C:/Users/Jonathan D Theron/dwell-view-render/packages/common/package.json'\\).scripts?.build || 'no build script'\\)\")",
+      "Bash(node -e \"const p=require\\('C:/Users/Jonathan D Theron/dwell-view-render/package.json'\\); console.log\\('packageManager:', p.packageManager || 'MISSING'\\); console.log\\('workspaces:', JSON.stringify\\(p.workspaces\\)\\)\")",
+      "PowerShell(Get-Item \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\package-lock.json\", \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\pnpm-lock.yaml\", \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\bun.lock\" | Select-Object Name, LastWriteTime, @{n='Size';e={$_.Length}})",
+      "Bash(npm --version)",
+      "Bash(Remove-Item -Recurse -Force \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\landlord\\\\src\\\\pages\\\\admin\")",
+      "Bash(Write-Host \"Done\")"
     ]
   }
 }

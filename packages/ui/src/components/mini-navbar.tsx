@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) => (
   <Link
     to={to}
-    className="relative text-sm text-gray-300 hover:text-white transition-colors duration-200 py-0.5 group"
+    className="relative text-base text-gray-300 hover:text-white transition-colors duration-200 py-0.5 group"
   >
     {children}
     <span className="absolute bottom-0 left-0 w-0 h-px bg-white/60 transition-all duration-300 group-hover:w-full" />
@@ -58,46 +58,46 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
   return (
     <header
       className={`fixed top-5 left-1/2 z-50 flex flex-col items-center
-                  -translate-x-1/2 px-4 py-2.5
+                  -translate-x-1/2 px-6 py-3.5
                   backdrop-blur-md border border-white/10
                   bg-[rgba(10,10,20,0.65)]
-                  w-[calc(100%-1rem)] sm:w-auto
+                  w-[calc(100%-1rem)] sm:w-auto sm:min-w-[720px]
                   transition-[border-radius] duration-0 ${shapeClass}`}
       style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.07)' }}
     >
       {/* ── Desktop row ── */}
-      <div className="flex items-center gap-8 w-full">
+      <div className="flex items-center gap-10 w-full">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-ocean-blue flex items-center justify-center shrink-0">
-            <Home className="w-4 h-4 text-white" />
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-ocean-blue flex items-center justify-center shrink-0">
+            <Home className="w-5 h-5 text-white" />
           </div>
-          <span className="text-white font-bold text-sm tracking-tight whitespace-nowrap">
+          <span className="text-white font-bold text-base tracking-tight whitespace-nowrap">
             MzanziHomes
           </span>
         </Link>
 
         {/* Desktop nav — centered via flex-1 + justify-center */}
-        <nav className="hidden sm:flex flex-1 items-center justify-center gap-7">
+        <nav className="hidden sm:flex flex-1 items-center justify-center gap-8">
           {navLinks.map((link) => (
             <NavLink key={link.to} to={link.to}>{link.label}</NavLink>
           ))}
         </nav>
 
         {/* Desktop auth buttons */}
-        <div className="hidden sm:flex items-center gap-2 shrink-0">
+        <div className="hidden sm:flex items-center gap-3 shrink-0">
           {!loading && (
             user ? (
               <>
                 <button
                   onClick={() => navigate(dashboardPath)}
-                  className="px-4 py-1.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
+                  className="px-5 py-2 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
                 >
                   Dashboard
                 </button>
                 <button
                   onClick={handleSignOut}
-                  className="px-4 py-1.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap"
+                  className="px-5 py-2 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap"
                 >
                   Sign Out
                 </button>
@@ -106,13 +106,13 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
               <>
                 <Link
                   to="/auth"
-                  className="px-4 py-1.5 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
+                  className="px-5 py-2 text-sm border border-white/15 bg-white/5 text-gray-300 rounded-full hover:border-white/35 hover:text-white transition-all duration-200 whitespace-nowrap"
                 >
                   Log In
                 </Link>
                 <Link
                   to="/auth"
-                  className="px-4 py-1.5 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap block"
+                  className="px-5 py-2 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap block"
                 >
                   Sign Up
                 </Link>

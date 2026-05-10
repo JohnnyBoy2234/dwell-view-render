@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -35,6 +35,20 @@ function ScrollToTop() {
 
 function AdminRoleGuard({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const isPublicRoute = pathname === "/auth" || pathname === "/reset-password";
+
+  useEffect(() => {
+    if (!loading && !user && !isPublicRoute) {
+      navigate("/auth", { replace: true });
+    }
+  }, [loading, user, isPublicRoute, navigate]);
+
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
@@ -44,7 +58,11 @@ function AdminRoleGuard({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (user && !isAdmin) {
+  if (!user) {
+    return null;
+  }
+
+  if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background p-8">
         <div className="text-center space-y-4 max-w-sm">

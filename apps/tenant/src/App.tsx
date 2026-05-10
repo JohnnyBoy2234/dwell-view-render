@@ -28,7 +28,6 @@ import ResetPassword from "@/pages/ResetPassword";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
 import Notifications from "@/pages/Notifications";
-import ApplyInvite from "@/pages/ApplyInvite";
 import ApplicationDetail from "@/pages/ApplicationDetail";
 import RentalApplication from "@/pages/RentalApplication";
 import { LeaseSignature } from "@/pages/LeaseSignature";
@@ -130,13 +129,6 @@ function AppRoutes() {
         } />
 
         {/* Applications */}
-        <Route path="/apply/invite/:token" element={
-          <RouteGuard>
-            <PlanGuard requiredPlan="pro" featureName="Tenant Applications">
-              <ApplyInvite />
-            </PlanGuard>
-          </RouteGuard>
-        } />
         <Route path="/application/:id" element={
           <RouteGuard>
             <PlanGuard requiredPlan="pro" featureName="Tenant Applications">
