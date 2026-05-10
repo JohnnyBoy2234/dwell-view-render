@@ -55,7 +55,7 @@ function ScrollToTop() {
 }
 
 function TenantRoleGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading, isLandlord, isAdmin } = useAuth();
+  const { user, loading, isLandlord, isAdmin, signOut } = useAuth();
 
   if (loading) {
     return (
@@ -80,6 +80,12 @@ function TenantRoleGuard({ children }: { children: React.ReactNode }) {
             className="mt-4 w-full rounded-ios-button bg-primary py-3 px-6 text-sm font-semibold text-primary-foreground"
           >
             Get MzanziHomes Landlord
+          </button>
+          <button
+            onClick={() => signOut()}
+            className="w-full rounded-ios-button border border-border py-3 px-6 text-sm font-medium text-muted-foreground"
+          >
+            Sign Out
           </button>
         </div>
       </div>
