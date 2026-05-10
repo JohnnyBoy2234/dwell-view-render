@@ -37,7 +37,7 @@ interface PropertyHeroProps {
 
 export function PropertyHero({ children, mode = 'rent', onModeChange }: PropertyHeroProps) {
   return (
-    <section className="relative flex flex-col min-h-[75vh] sm:min-h-screen overflow-hidden">
+    <section className="relative flex flex-col min-h-screen overflow-hidden">
       {/* ── Background image — zoom-fade on mode change ── */}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
