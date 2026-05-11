@@ -45,9 +45,10 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
 
   const navLinks = [
     { label: 'Properties', to: '/properties' },
-    { label: 'Landlords', to: '/about/landlord' },
-    { label: 'Tenants',   to: '/about/tenant' },
-    { label: 'Pricing',   to: '/pricing' },
+    { label: 'About',      to: '/about' },
+    { label: 'Landlords',  to: '/about/landlord' },
+    { label: 'Tenants',    to: '/about/tenant' },
+    { label: 'Pricing',    to: '/pricing' },
   ];
 
   const handleSignOut = async () => {

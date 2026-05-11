@@ -41,7 +41,7 @@ const About = () => {
             </div>
             <div className="relative">
               <img 
-                src="./about 2.jpg" 
+                src="/about 2.jpg"
                 alt="Modern South African neighborhood" 
                 className="rounded-lg shadow-lg w-full"
               />
@@ -106,7 +106,7 @@ const About = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
                 <img 
-                  src="./about 1.jpg" 
+                  src="/about 1.jpg"
                   alt="South African flag and landscape" 
                   className="rounded-lg shadow-lg w-full h-96 object-cover"
                 />
