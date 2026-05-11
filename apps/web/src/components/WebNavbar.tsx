@@ -50,12 +50,15 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
     location.pathname === to ||
     (to.length > 1 && location.pathname.startsWith(to + '/') && to !== '/about');
 
+  // True when we should show the welcome/centered-logo state
+  const showWelcome = transparent && !scrolled;
+
   return (
     <>
       <header
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          transition: 'background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease',
+          transition: 'background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease',
           background: scrolled ? 'rgba(255,255,255,0.97)' : 'transparent',
           backdropFilter: scrolled ? 'blur(24px)' : 'none',
           WebkitBackdropFilter: scrolled ? 'blur(24px)' : 'none',
@@ -63,51 +66,81 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
           boxShadow: scrolled ? '0 1px 24px rgba(0,0,0,0.06)' : 'none',
         }}
       >
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center h-16 gap-8">
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center h-[72px] gap-6">
 
-          {/* ── Logo ── */}
-          <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          {/* ── Left logo — visible when scrolled, invisible placeholder when welcome ── */}
+          <Link
+            to="/"
+            className="flex items-center gap-3 shrink-0"
+            style={{
+              opacity: showWelcome ? 0 : 1,
+              pointerEvents: showWelcome ? 'none' : 'auto',
+              transition: 'opacity 0.35s ease',
+            }}
+          >
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: 'hsl(214,100%,59%)' }}
             >
-              <Home className="w-5 h-5 text-white" />
+              <Home className="w-6 h-6 text-white" />
             </div>
             <span
-              className="font-bold text-base tracking-tight whitespace-nowrap"
+              className="font-bold text-[17px] tracking-tight whitespace-nowrap"
               style={{
                 color: scrolled ? 'hsl(222,84%,5%)' : '#fff',
-                transition: 'color 0.35s ease',
+                transition: 'color 0.4s ease',
               }}
             >
               MzanziHomes
             </span>
           </Link>
 
-          {/* ── Desktop center: welcome → nav links ── */}
+          {/* ── Center: welcome with big logo  ↔  nav links ── */}
           <div className="hidden md:flex flex-1 items-center justify-center">
             <AnimatePresence mode="wait" initial={false}>
-              {transparent && !scrolled ? (
-                <motion.p
+              {showWelcome ? (
+                <motion.div
                   key="welcome"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-[15px] font-medium tracking-wide select-none"
-                  style={{ color: 'rgba(255,255,255,0.82)' }}
+                  className="flex items-center gap-4"
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.94 }}
+                  transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  Welcome to{' '}
-                  <span className="font-bold text-white">MzanziHomes</span>
-                </motion.p>
+                  <Link to="/">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+                      style={{
+                        background: 'hsl(214,100%,59%)',
+                        boxShadow: '0 8px 24px rgba(37,99,235,0.40)',
+                      }}
+                    >
+                      <Home className="w-7 h-7 text-white" />
+                    </div>
+                  </Link>
+                  <div className="flex flex-col">
+                    <span
+                      className="text-xs font-semibold uppercase tracking-widest leading-none mb-1"
+                      style={{ color: 'rgba(255,255,255,0.55)' }}
+                    >
+                      Welcome to
+                    </span>
+                    <span
+                      className="text-2xl font-bold leading-none tracking-tight"
+                      style={{ color: '#ffffff' }}
+                    >
+                      MzanziHomes
+                    </span>
+                  </div>
+                </motion.div>
               ) : (
                 <motion.nav
                   key="links"
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                   className="flex items-center gap-0.5"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                 >
                   {NAV_LINKS.map(({ label, to }) => {
                     const active = isActive(to);
@@ -153,9 +186,9 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
                 <>
                   <button
                     onClick={() => navigate(dashboardPath)}
-                    className="px-4 py-1.5 text-sm font-medium rounded-full"
+                    className="px-4 py-2 text-sm font-medium rounded-full"
                     style={{
-                      transition: 'color 0.35s ease, border-color 0.35s ease',
+                      transition: 'color 0.4s ease, border-color 0.4s ease',
                       color: scrolled ? 'hsl(220,9%,40%)' : 'rgba(255,255,255,0.82)',
                       border: `1px solid ${scrolled ? 'hsl(220,13%,88%)' : 'rgba(255,255,255,0.24)'}`,
                     }}
@@ -164,9 +197,9 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
                   </button>
                   <button
                     onClick={handleSignOut}
-                    className="px-4 py-1.5 text-sm font-semibold rounded-full"
+                    className="px-4 py-2 text-sm font-semibold rounded-full"
                     style={{
-                      transition: 'background 0.35s ease, color 0.35s ease',
+                      transition: 'background 0.4s ease, color 0.4s ease',
                       background: scrolled ? 'hsl(222,84%,5%)' : '#fff',
                       color: scrolled ? '#fff' : 'hsl(222,84%,5%)',
                     }}
@@ -178,9 +211,9 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
                 <>
                   <Link
                     to="/auth"
-                    className="px-4 py-1.5 text-sm font-medium"
+                    className="px-4 py-2 text-sm font-medium"
                     style={{
-                      transition: 'color 0.35s ease',
+                      transition: 'color 0.4s ease',
                       color: scrolled ? 'hsl(220,9%,40%)' : 'rgba(255,255,255,0.82)',
                     }}
                   >
@@ -190,7 +223,7 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
                     to="/auth"
                     className="px-5 py-2 text-sm font-semibold rounded-full whitespace-nowrap"
                     style={{
-                      transition: 'background 0.35s ease, color 0.35s ease, box-shadow 0.35s ease',
+                      transition: 'background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease',
                       background: scrolled ? 'hsl(214,100%,59%)' : '#fff',
                       color: scrolled ? '#fff' : 'hsl(214,100%,44%)',
                       boxShadow: scrolled ? '0 2px 12px rgba(37,99,235,0.28)' : 'none',
@@ -205,30 +238,18 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
 
           {/* ── Mobile hamburger ── */}
           <button
-            className="md:hidden ml-auto flex items-center justify-center w-8 h-8 rounded-lg"
-            style={{ color: scrolled ? 'hsl(222,84%,5%)' : '#fff', transition: 'color 0.35s ease' }}
+            className="md:hidden ml-auto flex items-center justify-center w-9 h-9 rounded-lg"
+            style={{ color: scrolled ? 'hsl(222,84%,5%)' : '#fff', transition: 'color 0.4s ease' }}
             onClick={() => setMobileOpen((v) => !v)}
             aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
           >
             <AnimatePresence mode="wait" initial={false}>
               {mobileOpen ? (
-                <motion.div
-                  key="x"
-                  initial={{ opacity: 0, rotate: -90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: 90 }}
-                  transition={{ duration: 0.15 }}
-                >
+                <motion.div key="x" initial={{ opacity: 0, rotate: -90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: 90 }} transition={{ duration: 0.15 }}>
                   <X className="w-5 h-5" />
                 </motion.div>
               ) : (
-                <motion.div
-                  key="menu"
-                  initial={{ opacity: 0, rotate: 90 }}
-                  animate={{ opacity: 1, rotate: 0 }}
-                  exit={{ opacity: 0, rotate: -90 }}
-                  transition={{ duration: 0.15 }}
-                >
+                <motion.div key="menu" initial={{ opacity: 0, rotate: 90 }} animate={{ opacity: 1, rotate: 0 }} exit={{ opacity: 0, rotate: -90 }} transition={{ duration: 0.15 }}>
                   <Menu className="w-5 h-5" />
                 </motion.div>
               )}
@@ -246,7 +267,7 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-16 left-0 right-0 z-40 md:hidden"
+            className="fixed top-[72px] left-0 right-0 z-40 md:hidden"
             style={{
               background: 'rgba(255,255,255,0.99)',
               backdropFilter: 'blur(24px)',
@@ -255,7 +276,6 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
               boxShadow: '0 20px 48px rgba(0,0,0,0.10)',
             }}
           >
-            {/* Nav links */}
             <nav className="px-4 pt-3 pb-2 flex flex-col gap-0.5">
               {NAV_LINKS.map(({ label, to }, i) => (
                 <motion.div
@@ -266,7 +286,7 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
                 >
                   <Link
                     to={to}
-                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-medium transition-colors"
+                    className="flex items-center justify-between px-4 py-3.5 rounded-xl text-[15px] font-medium transition-colors"
                     style={{
                       color: isActive(to) ? 'hsl(214,100%,50%)' : 'hsl(222,47%,11%)',
                       background: isActive(to) ? 'hsl(214,100%,96%)' : 'transparent',
@@ -280,7 +300,6 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
               ))}
             </nav>
 
-            {/* Auth buttons */}
             <div className="px-4 pb-5 pt-3 border-t border-gray-100 flex flex-col gap-2.5">
               {!loading && (
                 user ? (

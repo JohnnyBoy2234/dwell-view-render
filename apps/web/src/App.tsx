@@ -49,20 +49,20 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Index />} />
 
-      <Route path="/properties" element={<><MiniNavbar /><div className="pt-16"><Properties /></div></>} />
-      <Route path="/sale-listings" element={<><MiniNavbar /><div className="pt-16"><SaleListings /></div></>} />
+      <Route path="/properties" element={<><MiniNavbar /><div className="pt-[72px]"><Properties /></div></>} />
+      <Route path="/sale-listings" element={<><MiniNavbar /><div className="pt-[72px]"><SaleListings /></div></>} />
       <Route path="/property/:id" element={<PropertyDetail />} />
       <Route path="/apply/:id" element={<PropertyDetail />} />
 
-      <Route path="/about" element={<><MiniNavbar /><div className="pt-16"><About /></div></>} />
-      <Route path="/about/landlord" element={<><MiniNavbar /><div className="pt-16"><AboutLandlord /></div></>} />
-      <Route path="/about/tenant" element={<><MiniNavbar /><div className="pt-16"><AboutTenant /></div></>} />
-      <Route path="/about/seller" element={<><MiniNavbar /><div className="pt-16"><AboutSeller /></div></>} />
-      <Route path="/contact" element={<><MiniNavbar /><div className="pt-16"><Contact /></div></>} />
-      <Route path="/blog" element={<><MiniNavbar /><div className="pt-16"><Blog /></div></>} />
-      <Route path="/blog/:postId" element={<><MiniNavbar /><div className="pt-16"><BlogPost /></div></>} />
-      <Route path="/pricing" element={<><MiniNavbar /><div className="pt-16"><Pricing /></div></>} />
-      <Route path="/safe-renting" element={<><MiniNavbar /><div className="pt-16"><SafeRenting /></div></>} />
+      <Route path="/about" element={<><MiniNavbar /><div className="pt-[72px]"><About /></div></>} />
+      <Route path="/about/landlord" element={<><MiniNavbar /><div className="pt-[72px]"><AboutLandlord /></div></>} />
+      <Route path="/about/tenant" element={<><MiniNavbar /><div className="pt-[72px]"><AboutTenant /></div></>} />
+      <Route path="/about/seller" element={<><MiniNavbar /><div className="pt-[72px]"><AboutSeller /></div></>} />
+      <Route path="/contact" element={<><MiniNavbar /><div className="pt-[72px]"><Contact /></div></>} />
+      <Route path="/blog" element={<><MiniNavbar /><div className="pt-[72px]"><Blog /></div></>} />
+      <Route path="/blog/:postId" element={<><MiniNavbar /><div className="pt-[72px]"><BlogPost /></div></>} />
+      <Route path="/pricing" element={<><MiniNavbar /><div className="pt-[72px]"><Pricing /></div></>} />
+      <Route path="/safe-renting" element={<><MiniNavbar /><div className="pt-[72px]"><SafeRenting /></div></>} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsOfService />} />
 
