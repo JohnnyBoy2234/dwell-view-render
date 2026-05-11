@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">MzanziHomes</string>
     <string name="title_activity_main">MzanziHomes</string>
-    <string name="package_name">com.mzanzihomes.tenant</string>
-    <string name="custom_url_scheme">com.mzanzihomes.tenant</string>
+    <string name="package_name">com.mzanzihomes.app</string>
+    <string name="custom_url_scheme">com.mzanzihomes.app</string>
 </resources>

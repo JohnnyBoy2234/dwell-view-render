@@ -13,14 +13,14 @@
 
         if (error) {
             // Redirect to dashboard with error
-            window.location.href = 'https://swiftrent.co.za/enhancedtenantdashboard?error=' + encodeURIComponent(error);
+            window.location.href = 'https://mzanzihomes.com/enhancedtenantdashboard?error=' + encodeURIComponent(error);
         } else if (code && state) {
             // Redirect to our callback page with parameters
-            const callbackUrl = 'https://swiftrent.co.za/auth/callback?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state);
+            const callbackUrl = 'https://mzanzihomes.com/auth/callback?code=' + encodeURIComponent(code) + '&state=' + encodeURIComponent(state);
             window.location.href = callbackUrl;
         } else {
             // No parameters, redirect to dashboard
-            window.location.href = 'https://swiftrent.co.za/enhancedtenantdashboard';
+            window.location.href = 'https://mzanzihomes.com/enhancedtenantdashboard';
         }
     </script>
     <p>Processing DocuSign authorization...</p>
