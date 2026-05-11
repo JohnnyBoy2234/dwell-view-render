@@ -78,7 +78,7 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
             </div>
             <span
               className="font-bold text-[17px] tracking-tight whitespace-nowrap"
-              style={{ color: '#fff', transition: 'color 0.4s ease' }}
+              style={{ color: scrolled ? 'hsl(222,84%,5%)' : '#fff', transition: 'color 0.4s ease' }}
             >
               MzanziHomes
             </span>
