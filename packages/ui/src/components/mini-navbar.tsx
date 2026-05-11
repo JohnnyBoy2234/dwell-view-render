@@ -16,9 +16,10 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 
 interface MiniNavbarProps {
   mode?: 'rent' | 'buy';
+  hideLandlordActions?: boolean;
 }
 
-export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
+export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniNavbarProps) {
   const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
 
   const dashboardPath = isAdmin
@@ -122,22 +123,24 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
           )}
         </div>
 
-        {/* Mobile action buttons */}
-        <div className="sm:hidden ml-auto flex items-center gap-1.5 shrink-0">
-          <Link
-            to="/listing-type"
-            className="px-2.5 py-1 text-xs font-medium text-gray-300 border border-white/15 bg-white/5 rounded-full hover:text-white hover:border-white/30 transition-all duration-200 whitespace-nowrap"
-          >
-            List
-          </Link>
-          <Link
-            to="/listing-type"
-            className="px-2.5 py-1 text-xs font-semibold text-white rounded-full whitespace-nowrap"
-            style={{ background: 'hsl(214,100%,59%)' }}
-          >
-            + Add
-          </Link>
-        </div>
+        {/* Mobile action buttons — landlord only */}
+        {!hideLandlordActions && (
+          <div className="sm:hidden ml-auto flex items-center gap-1.5 shrink-0">
+            <Link
+              to="/listing-type"
+              className="px-2.5 py-1 text-xs font-medium text-gray-300 border border-white/15 bg-white/5 rounded-full hover:text-white hover:border-white/30 transition-all duration-200 whitespace-nowrap"
+            >
+              List
+            </Link>
+            <Link
+              to="/listing-type"
+              className="px-2.5 py-1 text-xs font-semibold text-white rounded-full whitespace-nowrap"
+              style={{ background: 'hsl(214,100%,59%)' }}
+            >
+              + Add
+            </Link>
+          </div>
+        )}
 
         {/* Mobile hamburger */}
         <button
@@ -165,15 +168,17 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
         {/* Thin separator */}
         <div className="h-px bg-white/10 mb-4" />
 
-        {/* Mode CTA — Add Property (Rent) or List Property (Buy) */}
-        <Link
-          to={mode === 'buy' ? '/list-sale' : '/listing-type'}
-          className="flex items-center justify-center w-full py-2.5 mb-3 text-sm font-semibold rounded-full transition-all duration-200"
-          style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
-          onClick={() => setIsOpen(false)}
-        >
-          {mode === 'buy' ? 'List Property' : 'Add Property'}
-        </Link>
+        {/* Mode CTA — Add Property (Rent) or List Property (Buy) — landlord only */}
+        {!hideLandlordActions && (
+          <Link
+            to={mode === 'buy' ? '/list-sale' : '/listing-type'}
+            className="flex items-center justify-center w-full py-2.5 mb-3 text-sm font-semibold rounded-full transition-all duration-200"
+            style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+            onClick={() => setIsOpen(false)}
+          >
+            {mode === 'buy' ? 'List Property' : 'Add Property'}
+          </Link>
+        )}
 
         {/* Nav links — 2-column grid */}
         <nav className="grid grid-cols-2 gap-1 w-full mb-4">
