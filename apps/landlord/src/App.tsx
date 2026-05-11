@@ -19,6 +19,7 @@ import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboar
 import { EnhancedSidebar } from "@/components/dashboard/EnhancedSidebar";
 import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import { PlanGuard } from "@/components/PlanGuard";
+import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@/pages/ResetPassword";
 import NotFound from "@/pages/NotFound";
@@ -150,8 +151,8 @@ function AppRoutes() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Property browsing & management */}
-        <Route path="/" element={<EnhancedLandlordDashboard />} />
+        {/* Homepage */}
+        <Route path="/" element={<Index />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />

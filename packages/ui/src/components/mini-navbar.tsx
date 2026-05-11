@@ -17,9 +17,10 @@ const NavLink = ({ to, children }: { to: string; children: React.ReactNode }) =>
 interface MiniNavbarProps {
   mode?: 'rent' | 'buy';
   hideLandlordActions?: boolean;
+  transparent?: boolean;
 }
 
-export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniNavbarProps) {
+export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transparent = false }: MiniNavbarProps) {
   const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
 
   const dashboardPath = isAdmin
@@ -30,6 +31,7 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniN
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [shapeClass, setShapeClass] = useState('sm:rounded-full');
+  const [scrolled, setScrolled] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -43,6 +45,13 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniN
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!transparent) return;
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [transparent]);
 
   const navLinks = [
     { label: 'Properties', to: '/properties' },
@@ -59,14 +68,20 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniN
 
   return (
     <header
-      className={`fixed z-50 flex flex-col items-center
-                  backdrop-blur-md border-b border-white/10
-                  bg-[rgba(0,0,0,0.88)]
-                  top-0 left-0 right-0 rounded-none px-4 py-3
+      className={`fixed z-50 flex flex-col items-center backdrop-blur-md
+                  top-0 left-0 right-0 rounded-none px-4 py-3 border-b
                   sm:top-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:px-8 sm:py-3.5
-                  sm:w-auto sm:min-w-[960px] sm:border sm:border-white/10
-                  transition-[border-radius] duration-0 ${shapeClass}`}
-      style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)' }}
+                  sm:w-auto sm:min-w-[960px] sm:border
+                  transition-all duration-300 ${shapeClass}
+                  ${transparent && !scrolled && !isOpen
+                    ? 'bg-transparent border-transparent sm:bg-[rgba(0,0,0,0.45)] sm:border-white/10'
+                    : 'bg-[rgba(0,0,0,0.88)] border-white/10 sm:bg-[rgba(0,0,0,0.78)] sm:border-white/10'
+                  }`}
+      style={
+        transparent && !scrolled && !isOpen
+          ? {}
+          : { boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)' }
+      }
     >
       {/* ── Desktop row ── */}
       <div className="flex items-center gap-10 w-full">

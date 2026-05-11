@@ -14,8 +14,9 @@ import {
   TestimonialsColumn,
   rentLekkerTestimonials,
 } from "@/components/ui/testimonials-columns-1";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { ForBuyersSection } from "@/components/sections/ForBuyersSection";
+import { SellingStepsPreview } from "@/components/sections/SellingStepsPreview";
 import {
   Shield,
   ArrowRight,
@@ -31,7 +32,11 @@ import {
   Star,
   Lock,
   Banknote,
+  Handshake,
+  ClipboardList,
 } from "lucide-react";
+
+type Mode = 'rent' | 'buy';
 
 const dummyBlogPost = {
   id: "safe-transparent-new-way",
@@ -44,71 +49,173 @@ const dummyBlogPost = {
   featured: true,
 };
 
-const marqueeItems = [
-  { icon: Banknote, label: "Commission-Free" },
-  { icon: Shield, label: "Verified Listings" },
-  { icon: FileText, label: "Digital Leases" },
-  { icon: Star, label: "Credit Checks" },
-  { icon: MessageSquare, label: "In-App Messaging" },
-  { icon: Calculator, label: "Auto Invoicing" },
-  { icon: Lock, label: "Secure Contracts" },
-  { icon: LayoutDashboard, label: "Smart Dashboard" },
-  { icon: Smartphone, label: "Mobile-First" },
-  { icon: Zap, label: "List in Minutes" },
-  { icon: Layers, label: "Unlimited Properties" },
-  { icon: MapPin, label: "50+ SA Cities" },
-];
+const marqueeContent: Record<Mode, { icon: React.ElementType; label: string }[]> = {
+  rent: [
+    { icon: Banknote, label: "Commission-Free" },
+    { icon: Shield, label: "Verified Listings" },
+    { icon: FileText, label: "Digital Leases" },
+    { icon: Star, label: "Credit Checks" },
+    { icon: MessageSquare, label: "In-App Messaging" },
+    { icon: Calculator, label: "Auto Invoicing" },
+    { icon: Lock, label: "Secure Contracts" },
+    { icon: LayoutDashboard, label: "Smart Dashboard" },
+    { icon: Smartphone, label: "Mobile-First" },
+    { icon: Zap, label: "Fast Applications" },
+    { icon: Layers, label: "50+ SA Cities" },
+    { icon: MapPin, label: "Verified Landlords" },
+  ],
+  buy: [
+    { icon: Banknote, label: "Zero Agent Fees" },
+    { icon: Shield, label: "Verified Listings" },
+    { icon: ClipboardList, label: "Offer Management" },
+    { icon: Star, label: "Credit Checks" },
+    { icon: MessageSquare, label: "In-App Messaging" },
+    { icon: Handshake, label: "Transfer Support" },
+    { icon: Lock, label: "Secure Contracts" },
+    { icon: LayoutDashboard, label: "Smart Dashboard" },
+    { icon: Smartphone, label: "Mobile-First" },
+    { icon: Zap, label: "Fast Offers" },
+    { icon: Layers, label: "50+ SA Cities" },
+    { icon: MapPin, label: "Verified Sellers" },
+  ],
+};
 
-const features = [
-  {
-    icon: () => <span className="text-xl font-bold text-ocean-blue leading-none">R</span>,
-    title: "Commission-Free",
-    description: "Keep 100% of your rental income. No agent fees, ever.",
-    accent: "hsl(214 100% 59%)",
+const featuresContent: Record<Mode, {
+  icon: React.ElementType | (() => React.ReactElement);
+  title: string;
+  description: string;
+  accent: string;
+}[]> = {
+  rent: [
+    {
+      icon: () => <span className="text-xl font-bold text-ocean-blue leading-none">R</span>,
+      title: "Commission-Free",
+      description: "No agent fees, ever. Every listing you see is direct from the landlord.",
+      accent: "hsl(214 100% 59%)",
+    },
+    {
+      icon: Smartphone,
+      title: "Smart Platform",
+      description: "Digital applications, e-signatures, and smart dashboards built for modern tenants.",
+      accent: "hsl(142 72% 44%)",
+    },
+    {
+      icon: Zap,
+      title: "Apply in Minutes",
+      description: "Submit your application, get screened, and sign your lease — all in-app.",
+      accent: "hsl(25 95% 53%)",
+    },
+    {
+      icon: LayoutDashboard,
+      title: "Tenant Dashboard",
+      description: "Your lease, payments, maintenance requests, and messages in one place.",
+      accent: "hsl(275 84% 67%)",
+    },
+    {
+      icon: Calculator,
+      title: "Rent Payments",
+      description: "Pay rent securely in-app. Auto invoices sent to your landlord every month.",
+      accent: "hsl(174 72% 56%)",
+    },
+    {
+      icon: Shield,
+      title: "Verified & Secure",
+      description: "Verified listings, credit-screened landlords, and legally binding leases.",
+      accent: "hsl(0 78% 62%)",
+    },
+    {
+      icon: MessageSquare,
+      title: "In-App Messaging",
+      description: "Chat with your landlord, share documents, and track issues. No WhatsApp chaos.",
+      accent: "hsl(235 85% 70%)",
+    },
+    {
+      icon: Layers,
+      title: "Maintenance Requests",
+      description: "Log, track, and communicate on repairs directly in your dashboard.",
+      accent: "hsl(25 95% 53%)",
+    },
+  ],
+  buy: [
+    {
+      icon: () => <span className="text-xl font-bold text-ocean-blue leading-none">R</span>,
+      title: "Zero Agent Fees",
+      description: "Buy direct. No commission layers, no hidden fees — just the price on the listing.",
+      accent: "hsl(214 100% 59%)",
+    },
+    {
+      icon: Smartphone,
+      title: "Smart Platform",
+      description: "Digital offers, e-signatures, and smart dashboards built for modern property buyers.",
+      accent: "hsl(142 72% 44%)",
+    },
+    {
+      icon: Zap,
+      title: "Make Offers Fast",
+      description: "Submit a binding offer, negotiate, and close — without setting foot in an office.",
+      accent: "hsl(25 95% 53%)",
+    },
+    {
+      icon: LayoutDashboard,
+      title: "Buyer Dashboard",
+      description: "Your saved listings, active offers, and transfer status all in one place.",
+      accent: "hsl(275 84% 67%)",
+    },
+    {
+      icon: ClipboardList,
+      title: "Offer Management",
+      description: "Track your offer status in real time. Full audit trail included.",
+      accent: "hsl(174 72% 56%)",
+    },
+    {
+      icon: Shield,
+      title: "Verified & Secure",
+      description: "Verified listings, credit-checked sellers, and legally binding offer documents.",
+      accent: "hsl(0 78% 62%)",
+    },
+    {
+      icon: MessageSquare,
+      title: "In-App Messaging",
+      description: "Chat with sellers, share documents, and track offer updates. No WhatsApp chaos.",
+      accent: "hsl(235 85% 70%)",
+    },
+    {
+      icon: Handshake,
+      title: "Transfer Support",
+      description: "Built-in transfer attorney referral network. We guide you through to registration.",
+      accent: "hsl(25 95% 53%)",
+    },
+  ],
+};
+
+const ctaContent: Record<Mode, {
+  line1: string;
+  line2: string;
+  subtext: string;
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+}> = {
+  rent: {
+    line1: 'Rent smarter.',
+    line2: 'Rent safer.',
+    subtext: "Join South Africa's most trusted commission-free rental platform today.",
+    primaryLabel: 'Browse Properties',
+    primaryHref: '/properties',
+    secondaryLabel: 'Sign Up Free',
+    secondaryHref: '/auth',
   },
-  {
-    icon: Smartphone,
-    title: "Smart Platform",
-    description: "Digital leases, e-signatures, and smart dashboards built for modern landlords.",
-    accent: "hsl(142 72% 44%)",
+  buy: {
+    line1: 'Buy smarter.',
+    line2: 'Buy safer.',
+    subtext: "Find your dream property on South Africa's most trusted commission-free platform.",
+    primaryLabel: 'Browse for Sale',
+    primaryHref: '/sale-listings',
+    secondaryLabel: 'Sign Up Free',
+    secondaryHref: '/auth',
   },
-  {
-    icon: Zap,
-    title: "Speed & Simplicity",
-    description: "List, screen, and sign in minutes. No delays, no middlemen.",
-    accent: "hsl(25 95% 53%)",
-  },
-  {
-    icon: LayoutDashboard,
-    title: "All-in-One Dashboard",
-    description: "Listings, leases, rent, maintenance and accounting from one place.",
-    accent: "hsl(275 84% 67%)",
-  },
-  {
-    icon: Calculator,
-    title: "Built-In Invoicing",
-    description: "Professional invoices generated automatically. Save time, stay compliant.",
-    accent: "hsl(174 72% 56%)",
-  },
-  {
-    icon: Shield,
-    title: "Verified & Secure",
-    description: "Credit-checked tenants, verified listings, legally binding contracts.",
-    accent: "hsl(0 78% 62%)",
-  },
-  {
-    icon: MessageSquare,
-    title: "In-App Messaging",
-    description: "Chat, share documents, and track updates. No WhatsApp chaos.",
-    accent: "hsl(235 85% 70%)",
-  },
-  {
-    icon: Layers,
-    title: "Unlimited Properties",
-    description: "Manage one property or a hundred. Scalable from day one.",
-    accent: "hsl(25 95% 53%)",
-  },
-];
+};
 
 const firstCol = rentLekkerTestimonials.slice(0, 3);
 const secondCol = rentLekkerTestimonials.slice(3, 6);
@@ -117,14 +224,15 @@ const thirdCol = rentLekkerTestimonials.slice(6, 9);
 const Index = () => {
   const { filters, updateFilters, executeSearch, clearFilters } = usePropertySearchFilters();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
-  const [mode, setMode] = useState<'rent' | 'buy'>('rent');
+  const [mode, setMode] = useState<Mode>('rent');
 
   const onFiltersChange = (patch: Partial<typeof filters>) => updateFilters(patch);
+  const handleSearch = () => executeSearch();
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
       {/* NAVBAR */}
-      <MiniNavbar hideLandlordActions mode={mode} />
+      <MiniNavbar transparent hideLandlordActions mode={mode} />
 
       {/* HERO */}
       <PropertyHero mode={mode} onModeChange={setMode}>
@@ -141,7 +249,7 @@ const Index = () => {
             availableFrom: filters.availableFrom,
           }}
           onFiltersChange={onFiltersChange}
-          onSearch={executeSearch}
+          onSearch={handleSearch}
           onMoreFiltersOpen={() => setShowMoreFilters(true)}
         />
       </PropertyHero>
@@ -151,73 +259,98 @@ const Index = () => {
         className="py-5 border-y"
         style={{ background: "hsl(214 70% 96%)", borderColor: "hsl(214 60% 88%)" }}
       >
-        <Marquee duration={30} pauseOnHover fadeAmount={8}>
-          {marqueeItems.map(({ icon: Icon, label }) => (
-            <div
-              key={label}
-              className="mx-5 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
-              style={{
-                background: "hsl(214 100% 59% / 0.08)",
-                color: "hsl(214 100% 40%)",
-                border: "1px solid hsl(214 100% 59% / 0.15)",
-              }}
-            >
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              {label}
-            </div>
-          ))}
-        </Marquee>
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={mode}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <Marquee duration={30} pauseOnHover fadeAmount={8}>
+              {marqueeContent[mode].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="mx-5 flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium"
+                  style={{
+                    background: "hsl(214 100% 59% / 0.08)",
+                    color: "hsl(214 100% 40%)",
+                    border: "1px solid hsl(214 100% 59% / 0.15)",
+                  }}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  {label}
+                </div>
+              ))}
+            </Marquee>
+          </motion.div>
+        </AnimatePresence>
       </section>
 
       {/* FOR TENANTS / BUYERS */}
       <ForBuyersSection mode={mode} />
 
+      {/* SELLING STEPS — buy mode only */}
+      {mode === 'buy' && (
+        <div style={{ background: "hsl(214 60% 97%)" }}>
+          <SellingStepsPreview />
+        </div>
+      )}
+
       {/* FEATURES GRID */}
       <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8" style={{ background: "hsl(214 60% 97%)" }}>
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "hsl(214 100% 45%)" }}>
-              Everything you need
-            </span>
-            <h2 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              {mode === 'rent' ? 'Built for modern renting' : 'Built for smart buying'}
-            </h2>
-            <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              {mode === 'rent'
-                ? 'One platform. Every tool you need to find, rent, and manage your home. Commission-free.'
-                : 'One platform. Every tool you need to search, compare, and buy your home. Commission-free.'}
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {features.map(({ icon: Icon, title, description, accent }) => (
-              <div
-                key={title}
-                className="group p-6 rounded-2xl border transition-all duration-300"
-                style={{ background: "rgba(255,255,255,0.7)", borderColor: "hsl(214 60% 90%)" }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "white";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(37,99,235,0.09)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.7)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "none";
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: `${accent}14` }}
-                >
-                  {typeof Icon === "function" && Icon.length === 0 ? (
-                    <Icon />
-                  ) : (
-                    <Icon className="w-5 h-5" style={{ color: accent }} />
-                  )}
-                </div>
-                <h3 className="font-semibold text-gray-900 text-sm mb-1.5">{title}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{description}</p>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={mode}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="text-center mb-14">
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "hsl(214 100% 45%)" }}>
+                  Everything you need
+                </span>
+                <h2 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+                  {mode === 'rent' ? 'Built for modern renting' : 'Built for smart buying'}
+                </h2>
+                <p className="mt-3 text-gray-500 max-w-xl mx-auto">
+                  One platform. Every tool you need to {mode === 'rent' ? 'find, rent, and manage your home' : 'search, offer, and own your home'}. Commission-free.
+                </p>
               </div>
-            ))}
-          </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {featuresContent[mode].map(({ icon: Icon, title, description, accent }) => (
+                  <div
+                    key={title}
+                    className="group p-6 rounded-2xl border transition-all duration-300"
+                    style={{ background: "rgba(255,255,255,0.7)", borderColor: "hsl(214 60% 90%)" }}
+                    onMouseEnter={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "white";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(37,99,235,0.09)";
+                    }}
+                    onMouseLeave={(e) => {
+                      (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.7)";
+                      (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                    }}
+                  >
+                    <div
+                      className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+                      style={{ background: `${accent}14` }}
+                    >
+                      {typeof Icon === "function" && Icon.length === 0 ? (
+                        <Icon />
+                      ) : (
+                        <Icon className="w-5 h-5" style={{ color: accent }} />
+                      )}
+                    </div>
+                    <h3 className="font-semibold text-gray-900 text-sm mb-1.5">{title}</h3>
+                    <p className="text-gray-500 text-xs leading-relaxed">{description}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </section>
 
@@ -356,30 +489,38 @@ const Index = () => {
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-white/60 mb-4">
             Join MzanziHomes
           </span>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
-            {mode === 'rent' ? 'Rent smarter.' : 'Buy smarter.'}
-            <br />
-            {mode === 'rent' ? 'Rent safer.' : 'Buy safer.'}
-          </h2>
-          <p className="mt-5 text-lg text-white/75 max-w-xl mx-auto">
-            {mode === 'rent'
-              ? "Join South Africa's most trusted commission-free rental platform today."
-              : "Find your dream home on South Africa's most trusted commission-free platform."}
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              asChild
-              className="bg-white text-ocean-blue hover:bg-white/90 rounded-full px-8 py-3.5 text-sm font-bold shadow-lg"
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={mode}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <Link to="/properties">Browse Properties</Link>
-            </Button>
-            <Button
-              asChild
-              className="bg-white/15 hover:bg-white/25 text-white border border-white/30 rounded-full px-8 py-3.5 text-sm font-semibold backdrop-blur-sm"
-            >
-              <Link to="/auth">Sign Up Free</Link>
-            </Button>
-          </div>
+              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
+                {ctaContent[mode].line1}
+                <br />
+                {ctaContent[mode].line2}
+              </h2>
+              <p className="mt-5 text-lg text-white/75 max-w-xl mx-auto">
+                {ctaContent[mode].subtext}
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  asChild
+                  className="bg-white text-ocean-blue hover:bg-white/90 rounded-full px-8 py-3.5 text-sm font-bold shadow-lg"
+                >
+                  <Link to={ctaContent[mode].primaryHref}>{ctaContent[mode].primaryLabel}</Link>
+                </Button>
+                <Button
+                  asChild
+                  className="bg-white/15 hover:bg-white/25 text-white border border-white/30 rounded-full px-8 py-3.5 text-sm font-semibold backdrop-blur-sm"
+                >
+                  <Link to={ctaContent[mode].secondaryHref}>{ctaContent[mode].secondaryLabel}</Link>
+                </Button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </section>
 
@@ -391,7 +532,7 @@ const Index = () => {
         filters={filters}
         onFiltersChange={onFiltersChange}
         onClearFilters={clearFilters}
-        onApplyFilters={executeSearch}
+        onApplyFilters={handleSearch}
       />
     </div>
   );
