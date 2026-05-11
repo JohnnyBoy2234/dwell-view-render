@@ -7,7 +7,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@/components/RouteGuard";
-import { TenantAppHeader } from "@/components/TenantAppHeader";
+import { MiniNavbar } from "@/components/ui/mini-navbar";
+import Index from "@/pages/Index";
 import { MobileBottomBar } from "@/components/MobileBottomBar";
 import { MobileServices } from "@/services/mobileServices";
 import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
@@ -104,8 +105,8 @@ function AppRoutes() {
       <PaymentRedirectHandler />
       <Routes>
         {/* Public browsing */}
-        <Route path="/" element={<><TenantAppHeader /><div className="pt-14"><Properties /></div></>} />
-        <Route path="/properties" element={<><TenantAppHeader /><div className="pt-14"><Properties /></div></>} />
+        <Route path="/" element={<Index />} />
+        <Route path="/properties" element={<><MiniNavbar hideLandlordActions /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/:id" element={<PropertyDetail />} />
 
