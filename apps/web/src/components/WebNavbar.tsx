@@ -68,13 +68,13 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
           {/* ── Logo ── */}
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
               style={{ background: 'hsl(214,100%,59%)' }}
             >
-              <Home className="w-4 h-4 text-white" />
+              <Home className="w-5 h-5 text-white" />
             </div>
             <span
-              className="font-bold text-sm tracking-tight whitespace-nowrap"
+              className="font-bold text-base tracking-tight whitespace-nowrap"
               style={{
                 color: scrolled ? 'hsl(222,84%,5%)' : '#fff',
                 transition: 'color 0.35s ease',
@@ -92,7 +92,7 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
                 <Link
                   key={to}
                   to={to}
-                  className="relative px-3.5 py-2 rounded-lg text-sm font-medium"
+                  className="relative px-3.5 py-2 rounded-lg text-[15px] font-medium"
                   style={{
                     transition: 'color 0.2s ease',
                     color: active
