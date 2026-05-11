@@ -57,7 +57,7 @@ export function MiniNavbar({ mode = 'rent' }: MiniNavbarProps) {
 
   return (
     <header
-      className={`fixed top-12 left-1/2 z-50 flex flex-col items-center
+      className={`fixed top-6 left-1/2 z-50 flex flex-col items-center
                   -translate-x-1/2 px-8 py-3.5
                   backdrop-blur-md border border-white/10
                   bg-[rgba(0,0,0,0.78)]
