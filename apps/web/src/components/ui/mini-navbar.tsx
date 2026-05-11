@@ -1,1 +1,1 @@
-﻿export * from '@mzanzihomes/ui/components/mini-navbar';
+export { WebNavbar as MiniNavbar } from '../WebNavbar';

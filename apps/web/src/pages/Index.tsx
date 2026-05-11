@@ -234,7 +234,7 @@ const Index = () => {
   return (
     <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
       {/* ── NAVBAR (floats over hero) ── */}
-      <MiniNavbar mode={mode} />
+      <MiniNavbar transparent mode={mode} />
 
       {/* ── HERO (search embedded inside) ── */}
       <PropertyHero mode={mode} onModeChange={setMode}>
