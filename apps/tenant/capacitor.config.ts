@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.mzanzihomes.tenant',
+  appId: 'com.mzanzihomes.app',
   appName: 'MzanziHomes',
   webDir: 'dist',
   bundledWebRuntime: false,

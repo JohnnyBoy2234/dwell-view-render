@@ -38,7 +38,7 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
 
   return (
     <header
-      className="fixed z-50 top-0 left-0 right-0 h-[60px] flex items-center px-4 md:px-8"
+      className="fixed z-50 top-0 left-0 right-0 h-[68px] flex items-center px-4 md:px-8"
       style={{
         transition: 'background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
         background: scrolled ? 'rgba(255,255,255,0.97)' : 'transparent',
@@ -49,12 +49,12 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
       }}
     >
       {/* Logo */}
-      <Link to="/" className="flex items-center gap-2.5 shrink-0">
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%)' }}>
-          <Home className="w-5 h-5 text-white" />
+      <Link to="/" className="flex items-center gap-3 shrink-0">
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%)' }}>
+          <Home className="w-6 h-6 text-white" />
         </div>
         <span
-          className="font-bold text-base tracking-tight whitespace-nowrap"
+          className="font-bold text-lg tracking-tight whitespace-nowrap"
           style={{
             color: scrolled ? 'hsl(222,84%,5%)' : '#fff',
             transition: 'color 0.3s ease',
@@ -82,22 +82,11 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
       <div className="flex items-center gap-2 ml-auto shrink-0">
         {/* Mobile: List + Add buttons (no hamburger — bottom bar handles navigation) */}
         {!hideLandlordActions && (
-          <div className="flex md:hidden items-center gap-1.5">
+          <div className="flex md:hidden items-center">
             <Link
               to="/listing-type"
-              className="px-3 py-1.5 text-xs font-medium rounded-full border transition-all duration-200"
-              style={{
-                color: scrolled ? 'hsl(220,9%,40%)' : 'rgba(255,255,255,0.85)',
-                borderColor: scrolled ? 'hsl(220,13%,88%)' : 'rgba(255,255,255,0.25)',
-                background: scrolled ? 'transparent' : 'rgba(255,255,255,0.08)',
-              }}
-            >
-              List
-            </Link>
-            <Link
-              to="/listing-type"
-              className="px-3 py-1.5 text-xs font-semibold rounded-full text-white whitespace-nowrap"
-              style={{ background: 'hsl(214,100%,59%)' }}
+              className="px-5 py-2.5 text-sm font-semibold rounded-full text-white whitespace-nowrap"
+              style={{ background: 'hsl(214,100%,59%)', boxShadow: '0 2px 12px rgba(37,99,235,0.35)' }}
             >
               + Add
             </Link>
