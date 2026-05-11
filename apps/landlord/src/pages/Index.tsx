@@ -230,7 +230,7 @@ const Index = () => {
   const handleSearch = () => executeSearch();
 
   return (
-    <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
+    <div className="min-h-screen pb-[80px] md:pb-0" style={{ background: "hsl(214 60% 97%)" }}>
       {/* NAVBAR */}
       <MiniNavbar transparent mode={mode} />
 
