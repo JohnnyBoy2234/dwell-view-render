@@ -73,7 +73,7 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transpa
   return (
     <header
       className={`fixed z-50 flex flex-col backdrop-blur-md
-                  top-2 left-2 right-2 rounded-xl px-4 py-3 border
+                  top-4 left-2 right-2 rounded-xl px-4 py-3 border
                   sm:top-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:px-8 sm:py-3.5
                   sm:w-auto sm:min-w-[960px] sm:rounded-full
                   sm:bg-[rgba(0,0,0,0.78)] sm:border-white/10
