@@ -51,7 +51,7 @@ export default function EmailVerification({
 
     setIsVerifying(true);
     try {
-      const { error } = await supabase.auth.verifyOtp({ email, token: verificationCode, type: 'email' });
+      const { error } = await supabase.auth.verifyOtp({ email, token: verificationCode, type: 'signup' });
       if (error) throw error;
       toast({ title: 'Email Verified!', description: 'Your email has been successfully verified.' });
       onVerified();
