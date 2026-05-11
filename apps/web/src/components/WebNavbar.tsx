@@ -84,41 +84,67 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
             </span>
           </Link>
 
-          {/* ── Desktop nav ── */}
-          <nav className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
-            {NAV_LINKS.map(({ label, to }) => {
-              const active = isActive(to);
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className="relative px-3.5 py-2 rounded-lg text-[15px] font-medium"
-                  style={{
-                    transition: 'color 0.2s ease',
-                    color: active
-                      ? scrolled ? 'hsl(214,100%,50%)' : '#fff'
-                      : scrolled
-                      ? 'hsl(220,9%,46%)'
-                      : 'rgba(255,255,255,0.72)',
-                  }}
+          {/* ── Desktop center: welcome → nav links ── */}
+          <div className="hidden md:flex flex-1 items-center justify-center">
+            <AnimatePresence mode="wait" initial={false}>
+              {transparent && !scrolled ? (
+                <motion.p
+                  key="welcome"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="text-[15px] font-medium tracking-wide select-none"
+                  style={{ color: 'rgba(255,255,255,0.82)' }}
                 >
-                  {active && (
-                    <motion.div
-                      layoutId="web-nav-active"
-                      className="absolute inset-0 rounded-lg"
-                      style={{
-                        background: scrolled
-                          ? 'hsl(214,100%,96%)'
-                          : 'rgba(255,255,255,0.14)',
-                      }}
-                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                    />
-                  )}
-                  <span className="relative">{label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+                  Welcome to{' '}
+                  <span className="font-bold text-white">MzanziHomes</span>
+                </motion.p>
+              ) : (
+                <motion.nav
+                  key="links"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-0.5"
+                >
+                  {NAV_LINKS.map(({ label, to }) => {
+                    const active = isActive(to);
+                    return (
+                      <Link
+                        key={to}
+                        to={to}
+                        className="relative px-3.5 py-2 rounded-lg text-[15px] font-medium"
+                        style={{
+                          transition: 'color 0.2s ease',
+                          color: active
+                            ? scrolled ? 'hsl(214,100%,50%)' : '#fff'
+                            : scrolled
+                            ? 'hsl(220,9%,46%)'
+                            : 'rgba(255,255,255,0.72)',
+                        }}
+                      >
+                        {active && (
+                          <motion.div
+                            layoutId="web-nav-active"
+                            className="absolute inset-0 rounded-lg"
+                            style={{
+                              background: scrolled
+                                ? 'hsl(214,100%,96%)'
+                                : 'rgba(255,255,255,0.14)',
+                            }}
+                            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                          />
+                        )}
+                        <span className="relative">{label}</span>
+                      </Link>
+                    );
+                  })}
+                </motion.nav>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* ── Desktop auth ── */}
           <div className="hidden md:flex items-center gap-2 shrink-0">
