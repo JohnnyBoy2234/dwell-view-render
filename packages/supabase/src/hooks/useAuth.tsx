@@ -156,26 +156,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (data.user && !data.user.email_confirmed_at) {
-      // User created but email not verified - this is expected
-      try {
-        // Create user role record
-        await supabase.from('user_roles').insert({
-          user_id: data.user.id,
-          role: role
-        });
-        
-        // Create user profile (email_verified will be false until verified)
-        await supabase.from('profiles').insert({
-          user_id: data.user.id,
-          display_name: data.user.email?.split('@')[0] || 'User',
-          email_verified: false
-        });
-
-      } catch (roleError) {
-        console.error('Error creating user role/profile:', roleError);
-        // Don't fail signup if role creation fails, but log the error
-      }
-      
+      // User created but email not verified — profile/role are created by
+      // database triggers on auth.users insert, so no manual inserts needed here.
+      // Attempting them now would 401 (no session yet) and 409 (trigger already ran).
       return { error: null, isNewUser: true };
     }
     
