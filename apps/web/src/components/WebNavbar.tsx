@@ -68,10 +68,26 @@ export function WebNavbar({ hideLandlordActions = false, transparent = false }: 
       >
         <div className="max-w-7xl mx-auto px-5 sm:px-8 flex items-center h-[72px] gap-6">
 
-          {/* ── Left logo — visible when scrolled, invisible placeholder when welcome ── */}
+          {/* ── Mobile logo — always visible on mobile ── */}
+          <Link to="/" className="flex md:hidden items-center gap-3 shrink-0">
+            <div
+              className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: 'hsl(214,100%,59%)' }}
+            >
+              <Home className="w-6 h-6 text-white" />
+            </div>
+            <span
+              className="font-bold text-[17px] tracking-tight whitespace-nowrap"
+              style={{ color: '#fff', transition: 'color 0.4s ease' }}
+            >
+              MzanziHomes
+            </span>
+          </Link>
+
+          {/* ── Desktop logo — invisible placeholder when welcome state active ── */}
           <Link
             to="/"
-            className="flex items-center gap-3 shrink-0"
+            className="hidden md:flex items-center gap-3 shrink-0"
             style={{
               opacity: showWelcome ? 0 : 1,
               pointerEvents: showWelcome ? 'none' : 'auto',
