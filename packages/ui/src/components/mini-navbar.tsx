@@ -29,15 +29,15 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniN
     : '/tenant-dashboard';
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const [shapeClass, setShapeClass] = useState('rounded-full');
+  const [shapeClass, setShapeClass] = useState('sm:rounded-full');
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (isOpen) {
-      setShapeClass('rounded-2xl');
+      setShapeClass('sm:rounded-2xl');
     } else {
-      timerRef.current = setTimeout(() => setShapeClass('rounded-full'), 300);
+      timerRef.current = setTimeout(() => setShapeClass('sm:rounded-full'), 300);
     }
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -59,11 +59,12 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false }: MiniN
 
   return (
     <header
-      className={`fixed top-6 left-1/2 z-50 flex flex-col items-center
-                  -translate-x-1/2 px-8 py-3.5
-                  backdrop-blur-md border border-white/10
-                  bg-[rgba(0,0,0,0.78)]
-                  w-[calc(100%-1rem)] sm:w-auto sm:min-w-[960px]
+      className={`fixed z-50 flex flex-col items-center
+                  backdrop-blur-md border-b border-white/10
+                  bg-[rgba(0,0,0,0.88)]
+                  top-0 left-0 right-0 rounded-none px-4 py-3
+                  sm:top-6 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:px-8 sm:py-3.5
+                  sm:w-auto sm:min-w-[960px] sm:border sm:border-white/10
                   transition-[border-radius] duration-0 ${shapeClass}`}
       style={{ boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)' }}
     >

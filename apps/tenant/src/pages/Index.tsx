@@ -117,16 +117,17 @@ const thirdCol = rentLekkerTestimonials.slice(6, 9);
 const Index = () => {
   const { filters, updateFilters, executeSearch, clearFilters } = usePropertySearchFilters();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
+  const [mode, setMode] = useState<'rent' | 'buy'>('rent');
 
   const onFiltersChange = (patch: Partial<typeof filters>) => updateFilters(patch);
 
   return (
     <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
       {/* NAVBAR */}
-      <MiniNavbar hideLandlordActions />
+      <MiniNavbar hideLandlordActions mode={mode} />
 
       {/* HERO */}
-      <PropertyHero mode="rent">
+      <PropertyHero mode={mode} onModeChange={setMode}>
         <PropertySearchWidget
           filters={{
             searchTerm: filters.searchTerm,
@@ -168,8 +169,8 @@ const Index = () => {
         </Marquee>
       </section>
 
-      {/* FOR TENANTS */}
-      <ForBuyersSection mode="rent" />
+      {/* FOR TENANTS / BUYERS */}
+      <ForBuyersSection mode={mode} />
 
       {/* FEATURES GRID */}
       <section className="py-20 md:py-28 px-4 sm:px-6 lg:px-8" style={{ background: "hsl(214 60% 97%)" }}>
@@ -179,10 +180,12 @@ const Index = () => {
               Everything you need
             </span>
             <h2 className="mt-3 text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              Built for modern renting
+              {mode === 'rent' ? 'Built for modern renting' : 'Built for smart buying'}
             </h2>
             <p className="mt-3 text-gray-500 max-w-xl mx-auto">
-              One platform. Every tool you need to find, rent, and manage your home. Commission-free.
+              {mode === 'rent'
+                ? 'One platform. Every tool you need to find, rent, and manage your home. Commission-free.'
+                : 'One platform. Every tool you need to search, compare, and buy your home. Commission-free.'}
             </p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -354,12 +357,14 @@ const Index = () => {
             Join MzanziHomes
           </span>
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.05] tracking-tight">
-            Rent smarter.
+            {mode === 'rent' ? 'Rent smarter.' : 'Buy smarter.'}
             <br />
-            Rent safer.
+            {mode === 'rent' ? 'Rent safer.' : 'Buy safer.'}
           </h2>
           <p className="mt-5 text-lg text-white/75 max-w-xl mx-auto">
-            Join South Africa's most trusted commission-free rental platform today.
+            {mode === 'rent'
+              ? "Join South Africa's most trusted commission-free rental platform today."
+              : "Find your dream home on South Africa's most trusted commission-free platform."}
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Button
