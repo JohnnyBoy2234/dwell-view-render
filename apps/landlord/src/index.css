@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Navbar height accounting for Android/iOS status bar */
+:root {
+  --navbar-h: calc(68px + env(safe-area-inset-top));
+}
+
+/* Apply to any page that sits under the fixed navbar */
+.page-top {
+  padding-top: var(--navbar-h);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

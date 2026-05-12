@@ -38,8 +38,10 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
 
   return (
     <header
-      className="fixed z-50 top-0 left-0 right-0 h-[68px] flex items-center px-4 md:px-8"
+      className="fixed z-50 top-0 left-0 right-0 flex items-end px-4 md:px-8"
       style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        height: 'calc(68px + env(safe-area-inset-top))',
         transition: 'background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
         background: scrolled ? 'rgba(255,255,255,0.97)' : 'transparent',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',

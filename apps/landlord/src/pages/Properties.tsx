@@ -214,7 +214,7 @@ export default function Properties() {
 
   return (
     <div className="min-h-screen" style={{ background: 'hsl(214 60% 97%)' }}>
-      <div className="container mx-auto px-4 sm:px-6 pb-12">
+      <div className="page-top container mx-auto px-4 sm:px-6 pb-12">
 
         {/* ── Page heading ──────────────────────────────────── */}
         <div className="flex items-baseline justify-between mb-5 animate-in fade-in duration-300">
