@@ -7,9 +7,47 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:156290768313:android:d686a38f2a8ceb81f76a68",
+        "mobilesdk_app_id": "1:156290768313:android:b85c977f859edd32f76a68",
         "android_client_info": {
           "package_name": "com.mzanzihomes.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvv4Tf-81a2dDwjUdGO63tDHwr17bF-f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156290768313:android:2b5a43b5ff8b2512f76a68",
+        "android_client_info": {
+          "package_name": "com.mzanzihomes.landlord"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvv4Tf-81a2dDwjUdGO63tDHwr17bF-f8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:156290768313:android:d686a38f2a8ceb81f76a68",
+        "android_client_info": {
+          "package_name": "com.mzanzihomes.tenant"
         }
       },
       "oauth_client": [],
