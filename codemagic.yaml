@@ -1,0 +1,47 @@
+workflows:
+  tenant-ios:
+    name: MzanziHomes Tenant - iOS
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic
+    environment:
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.mzanzihomes.app
+      vars:
+        XCODE_WORKSPACE: "apps/tenant/ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+      node: 22
+      xcode: latest
+      cocoapods: default
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+      cancel_previous_builds: true
+    scripts:
+      - name: Install dependencies
+        script: npm ci --legacy-peer-deps --ignore-scripts
+      - name: Build web assets
+        script: npx turbo run build --filter=@mzanzihomes/tenant
+      - name: Sync Capacitor iOS
+        script: cd apps/tenant && npx cap sync ios
+      - name: Install CocoaPods dependencies
+        script: cd apps/tenant/ios/App && pod install
+      - name: Set up code signing
+        script: xcode-project use-profiles
+      - name: Build .ipa
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
