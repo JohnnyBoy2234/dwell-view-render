@@ -25,7 +25,10 @@
       "Bash(git reset *)",
       "Bash(git mv *)",
       "Bash(cd *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(sed -i \"s| // ponytail: landlord component pulls viewing data; retire when it moves to a slice||\" apps/landlord/src/components/landlord/ApplicationsWithViewings.tsx)",
+      "Bash(sed -i \"s| // ponytail: admin review pulls kyc; retire when admin sliced;||\" apps/admin/src/components/admin/KycReviewDrawer.tsx)",
+      "Bash(sed -i \"s| // ponytail: admin support view; retire when admin sliced;||\" apps/admin/src/components/admin/SupportMessagesAdmin.tsx)"
     ]
   },
   "enabledMcpjsonServers": [
