@@ -23,7 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import TenantBadgeInline from './TenantBadgeInline';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';

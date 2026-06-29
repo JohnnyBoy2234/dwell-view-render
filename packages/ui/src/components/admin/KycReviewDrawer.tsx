@@ -23,7 +23,7 @@ import {
   Camera,
   AlertTriangle
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { KycStatusPill } from '@/components/kyc/KycStatusPill';
 import type { AdminKycListItem } from '@mzanzihomes/common/types/kyc';

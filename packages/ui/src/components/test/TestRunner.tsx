@@ -12,7 +12,7 @@ import {
   RefreshCw,
   TestTube
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface TestCase {

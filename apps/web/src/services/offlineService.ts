@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 
 interface CachedData {
   properties: any[];

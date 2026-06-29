@@ -34,7 +34,7 @@ import {
   Eye,
   MessageCircle
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { PlanType } from '@/hooks/useSubscription';

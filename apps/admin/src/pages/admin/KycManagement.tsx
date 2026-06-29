@@ -19,7 +19,7 @@ import {
   Eye,
   AlertCircle
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { KycStatusPill } from '@/components/kyc/KycStatusPill';
 import { KycReviewDrawer } from '@/components/admin/KycReviewDrawer';

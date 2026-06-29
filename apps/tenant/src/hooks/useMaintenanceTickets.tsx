@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from './useAuth';
 import { classifyMaintenance, getSLAHours } from '@/utils/maintenanceClassifier';
 import type { MaintenanceRequest, CreateMaintenanceRequest } from '@mzanzihomes/common/types/maintenance';

@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, Eye, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookViewingDialog } from '@/components/viewing/BookViewingDialog';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ViewingSlotNotificationProps {

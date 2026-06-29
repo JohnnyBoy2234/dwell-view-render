@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { useProofOfPayment } from '@/hooks/useProofOfPayment';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PaymentVerificationUpload from '@/components/payments/PaymentVerificationUpload';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useEffect, useState } from 'react';
 
 export default function TenantProofOfPayment() {

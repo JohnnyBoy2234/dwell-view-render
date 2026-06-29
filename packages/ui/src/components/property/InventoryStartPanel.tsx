@@ -8,7 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { X, Trash2, Camera } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { MultiPhotoCapture } from '@/components/mobile/MultiPhotoCapture';
 import { PhotoGallery } from '@/components/inspection/PhotoGallery';
 import { PhotoLightbox } from '@/components/inspection/PhotoLightbox';

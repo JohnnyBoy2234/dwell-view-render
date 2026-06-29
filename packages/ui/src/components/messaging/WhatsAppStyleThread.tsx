@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { TypingIndicator } from '@/components/messaging/TypingIndicator';

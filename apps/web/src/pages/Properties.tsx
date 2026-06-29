@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { LoadingLogo } from '@/components/ui/LoadingLogo';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
 import { useNavigate, useSearchParams } from 'react-router-dom';

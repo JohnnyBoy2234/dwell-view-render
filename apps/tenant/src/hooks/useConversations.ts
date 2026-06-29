@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { MESSAGE_QUERY_FIELDS, UI_CONSTANTS } from '@mzanzihomes/common/constants/messagesConstants';
 
 export interface Message {

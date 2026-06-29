@@ -13,7 +13,7 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';

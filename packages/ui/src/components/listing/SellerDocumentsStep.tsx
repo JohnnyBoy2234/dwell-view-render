@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Upload, FileText, X, Loader2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
 interface UploadedDoc {

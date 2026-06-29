@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@mzanzihomes/supabase/client";
 
 /**
  * Custom hook to fetch all properties belonging to a landlord.

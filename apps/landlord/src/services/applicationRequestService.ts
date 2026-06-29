@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { ApplicationRequest, ApplicationRequestInsert, ApplicationRequestUpdate, ApplicationRequestFilters, ApplicationRequestResponse } from '@mzanzihomes/common/types/application';
 
 // Import the status type from the types file

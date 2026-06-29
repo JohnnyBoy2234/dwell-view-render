@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Transaction, AccountingKPIs, MonthlyData, CategoryData } from '@mzanzihomes/common/types/accounting';
 import { toast } from '@/hooks/use-toast';

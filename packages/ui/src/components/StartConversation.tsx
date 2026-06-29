@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Calendar, Send, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import ViewingPreScreeningForm from '@/components/viewing/ViewingPreScreeningForm';
 import { formatPreScreeningMessage, type PreScreeningData } from '@mzanzihomes/common/types/message';
 

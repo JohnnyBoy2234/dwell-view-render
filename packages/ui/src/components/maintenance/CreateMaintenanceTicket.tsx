@@ -9,7 +9,7 @@ import { useMaintenanceTickets } from '@/hooks/useMaintenanceTickets';
 import { toast } from 'sonner';
 import { Upload, Camera, X } from 'lucide-react';
 import type { Priority, Category } from '@mzanzihomes/common/types/maintenance';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';
 

@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@mzanzihomes/supabase/client";
 import { FileText, Upload, X } from "lucide-react";
 import { SuccessDialog } from "@/components/ui/SuccessDialog";
 

@@ -7,7 +7,7 @@ import { Calendar, Clock, MapPin, CheckCircle, XCircle, AlertCircle } from 'luci
 import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 interface ViewingProposal {

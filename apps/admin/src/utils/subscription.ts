@@ -1,5 +1,5 @@
 // src/utils/subscription.ts
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 
 export type PlanType = 'free' | 'pro' | 'premium';
 

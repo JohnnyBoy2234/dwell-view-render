@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { DEFAULT_WIZARD_DATA, WIZARD_STEPS, type LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { LeasePreviewModal } from './LeasePreviewModal';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';

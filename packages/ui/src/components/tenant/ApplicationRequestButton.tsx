@@ -5,7 +5,7 @@ import { Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { createApplicationRequest } from '@/services/applicationRequestService';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 
 interface ApplicationRequestButtonProps {
   propertyId: string;

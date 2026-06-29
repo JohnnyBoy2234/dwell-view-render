@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@mzanzihomes/supabase/client';
 import type { MaintenanceMessage, Role } from '@mzanzihomes/common/types/maintenance';
 
 interface MessagesResponse {
