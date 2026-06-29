@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Camera, Upload, X, Check } from 'lucide-react';
-import { MobileServices } from '@/services/mobileServices';
+import { MobileServices } from '@mzanzihomes/ui/services/mobileServices';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface MultiPhotoCaptureProps {

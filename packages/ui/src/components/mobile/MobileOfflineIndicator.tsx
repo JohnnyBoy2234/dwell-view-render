@@ -2,8 +2,8 @@ import React from 'react';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { WifiOff, RefreshCw, Database } from 'lucide-react';
-import { useOffline } from '@/hooks/useOffline';
-import { MobileServices } from '@/services/mobileServices';
+import { useOffline } from '@mzanzihomes/ui/hooks/useOffline';
+import { MobileServices } from '@mzanzihomes/ui/services/mobileServices';
 
 export function MobileOfflineIndicator() {
   const { isOnline, hasOfflineData, getOfflineData } = useOffline();

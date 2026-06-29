@@ -10,7 +10,7 @@ import { RouteGuard } from "@/components/RouteGuard";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Index from "@/pages/Index";
 import { MobileBottomBar } from "@/components/MobileBottomBar";
-import { MobileServices } from "@/services/mobileServices";
+import { MobileServices } from "@mzanzihomes/ui/services/mobileServices";
 import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
 import { AISupportChat } from "@mzanzihomes/features/support";
 import { AuthBootstrap } from "@/components/AuthBootstrap";

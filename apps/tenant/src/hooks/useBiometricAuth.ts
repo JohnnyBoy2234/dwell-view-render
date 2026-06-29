@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MobileServices } from '@/services/mobileServices';
+import { MobileServices } from '@mzanzihomes/ui/services/mobileServices';
 import { toast } from 'sonner';
 import { MOBILE_AUTH_LABELS } from '@mzanzihomes/common/constants/mobileConstants';
 

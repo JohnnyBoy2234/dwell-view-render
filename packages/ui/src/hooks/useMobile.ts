@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MobileServices } from '@/services/mobileServices';
+import { MobileServices } from '@mzanzihomes/ui/services/mobileServices';
 
 export function useMobile() {
   const [isNative, setIsNative] = useState(false);

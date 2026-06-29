@@ -2,8 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
-import { MobileServices } from '@/services/mobileServices';
-import { useMobile } from '@/hooks/useMobile';
+import { MobileServices } from '@mzanzihomes/ui/services/mobileServices';
+import { useMobile } from '@mzanzihomes/ui/hooks/useMobile';
 
 interface MobileBackButtonProps {
   fallbackPath?: string;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { OfflineService } from '@/services/offlineService';
-import { MobileServices } from '@/services/mobileServices';
-import { useAuth } from '@/hooks/useAuth';
+import { OfflineService } from '@mzanzihomes/ui/services/offlineService';
+import { MobileServices } from '@mzanzihomes/ui/services/mobileServices';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 export function useOffline() {
   const [isOnline, setIsOnline] = useState(true);
