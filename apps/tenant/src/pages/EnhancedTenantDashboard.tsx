@@ -5,7 +5,7 @@ import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboar
 import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
 import { SidebarProvider } from '@mzanzihomes/ui/components/sidebar';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
-import { useUnreadMessages } from '@mzanzihomes/features/messaging';
+import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';

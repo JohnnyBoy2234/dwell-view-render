@@ -22,7 +22,7 @@ import { ViewingProposalCard } from '@mzanzihomes/features/viewing';
 import { ViewingReminderHeader } from '@mzanzihomes/features/viewing';
 import { useConfirmedViewing } from '@mzanzihomes/features/viewing';
 import { useIsMobile } from '@mzanzihomes/ui/hooks/use-mobile';
-import { useUnreadMessages } from '@mzanzihomes/features/messaging';
+import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
 import { cn } from '@mzanzihomes/common/lib/utils';
 
 // ─── Avatar gradient palette (deterministic from name) ───────────────────────

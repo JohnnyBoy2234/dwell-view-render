@@ -4,8 +4,7 @@ import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, 
 import { RIcon } from '@mzanzihomes/ui/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
-import { useUnreadMessages } from '@mzanzihomes/features/messaging'; // ponytail: dashboard pulls unread count; resolves when EnhancedSidebar moves to a dashboard slice
-import { useUnreadCounts } from '@mzanzihomes/features/maintenance'; // ponytail: dashboard pulls maintenance count; resolves when EnhancedSidebar moves to a dashboard slice
+import { useUnreadCounts } from '@mzanzihomes/supabase/hooks/useUnreadCounts';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
@@ -134,7 +133,6 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const location = useLocation();
   const navigate = useNavigate();
   const { isLandlord, user } = useAuth();
-  const { unreadCount } = useUnreadMessages();
   const { data: maintenanceUnread } = useUnreadCounts();
   const { toast } = useToast();
   const { plan, loading: subscriptionLoading } = useSubscription();
@@ -161,12 +159,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
     
     return {
       ...item,
-      badge:
-        item.title === 'Messages'
-          ? unreadCount
-          : item.title === 'Maintenance'
-          ? maintenanceTotal
-          : undefined,
+      badge: item.title === 'Maintenance' ? maintenanceTotal : undefined,
       isLocked,
       className: isLocked ? 'opacity-70' : ''
     };

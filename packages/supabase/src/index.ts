@@ -9,4 +9,6 @@ export * from './hooks/useUserProperties';
 export * from './hooks/useSubscription';
 export * from './hooks/useTenantNotifications';
 export * from './hooks/useAdminAuth';
+export * from './hooks/useUnreadMessages';
+export * from './hooks/useUnreadCounts';
 export type { Database } from './types';

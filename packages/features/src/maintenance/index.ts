@@ -7,5 +7,4 @@ export {
   useCreateMaintenanceRequest,
   useUpdateMaintenanceRequest,
 } from './hooks/useMaintenanceRequests';
-export { useUnreadCounts } from './hooks/useUnreadCounts';
 export { useTenantResponses } from './hooks/useTenantResponses';
