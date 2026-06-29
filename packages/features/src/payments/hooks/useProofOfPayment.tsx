@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from './useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export interface ProofDocument {

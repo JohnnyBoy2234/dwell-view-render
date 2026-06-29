@@ -13,7 +13,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MobileBottomBar } from "@/components/MobileBottomBar";
 import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
 import { AISupportChat } from "@/components/support/AISupportChat";
-import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
+import { PaymentRedirectHandler } from "@mzanzihomes/features/payments";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
 import { EnhancedSidebar } from "@/components/dashboard/EnhancedSidebar";

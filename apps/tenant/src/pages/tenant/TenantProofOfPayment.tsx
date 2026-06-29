@@ -5,9 +5,9 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { useProofOfPayment } from '@/hooks/useProofOfPayment';
+import { useProofOfPayment } from '@mzanzihomes/features/payments';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
-import PaymentVerificationUpload from '@/components/payments/PaymentVerificationUpload';
+import { PaymentVerificationUpload } from '@mzanzihomes/features/payments';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useEffect, useState } from 'react';
 

@@ -17,7 +17,7 @@ import { AuthBootstrap } from "@/components/AuthBootstrap";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { VerificationGate } from "@/components/VerificationGate";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { PaymentRedirectHandler } from "@/components/payments/PaymentRedirectHandler";
+import { PaymentRedirectHandler } from "@mzanzihomes/features/payments";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@/components/dashboard/EnhancedDashboardLayout";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";

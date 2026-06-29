@@ -4,7 +4,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Upload, Loader2 } from 'lucide-react';
-import { usePaymentVerification } from '@/hooks/usePaymentVerification';
+import { usePaymentVerification } from '../hooks/usePaymentVerification';
 import StarCelebrationModal from './StarCelebrationModal';
 import BadgeUnlockModal from './BadgeUnlockModal';
 
