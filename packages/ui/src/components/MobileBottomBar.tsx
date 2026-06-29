@@ -2,7 +2,7 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useEffect, useRef } from 'react';
 import { Home, Search, Bell, Building, Plus, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useUnreadMessages } from '@mzanzihomes/features/messaging'; // ponytail: kernel navbar pulls unread count; retire when this moves to a slice
 import { useNotifications } from '@/hooks/useNotifications';
 import { useTenantNotifications } from '@/hooks/useTenantNotifications';
 import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';

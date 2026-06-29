@@ -40,13 +40,14 @@ import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import type { PlanType } from '@/hooks/useSubscription';
 import { useForm } from 'react-hook-form';
 import { useApplications } from '@/hooks/useApplications';
-import { useMessaging } from '@/hooks/useMessaging';
+import { useMessaging } from '@mzanzihomes/supabase/hooks/useMessaging';
 import { TenantApplicationButton } from '@/components/tenant/TenantApplicationButton';
-import { BookViewingDialog } from "@/components/viewing/BookViewingDialog";
-import { useViewingBooking } from "@/hooks/useViewingBooking";
+import { BookViewingDialog } from '@mzanzihomes/features/viewing';
+import { useViewingBooking } from '@mzanzihomes/features/viewing';
 import { format } from "date-fns";
-import StartConversation from '@/components/StartConversation';
-import { GatedViewingButton } from '@/components/viewing/GatedViewingButton';
+import { StartConversation } from '@mzanzihomes/features/messaging';
+import { ViewingPreScreeningForm } from '@mzanzihomes/features/viewing';
+import { GatedViewingButton } from '@mzanzihomes/features/viewing';
 import { SharePropertyMenu } from '@/components/property/SharePropertyMenu';
 import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
 
@@ -661,6 +662,12 @@ export default function PropertyDetail() {
                           propertyId={property.id}
                           landlordId={property.landlord_id}
                           propertyTitle={property.title}
+                          renderStartConversation={(sc) => (
+                            <StartConversation
+                              {...sc}
+                              renderPreScreening={(ps) => <ViewingPreScreeningForm {...ps} />}
+                            />
+                          )}
                         />
                         
                         {/* Application Button */}
@@ -676,6 +683,12 @@ export default function PropertyDetail() {
                     propertyId={property.id}
                     landlordId={property.landlord_id}
                     propertyTitle={property.title}
+                    renderStartConversation={(sc) => (
+                      <StartConversation
+                        {...sc}
+                        renderPreScreening={(ps) => <ViewingPreScreeningForm {...ps} />}
+                      />
+                    )}
                   />
                 ) : null}
 

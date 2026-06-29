@@ -4,7 +4,7 @@ import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, 
 import { RIcon } from '@/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useUnreadMessages } from '@mzanzihomes/features/messaging'; // ponytail: dashboard pulls unread count; resolves when EnhancedSidebar moves to a dashboard slice
 import { useUnreadCounts } from '@mzanzihomes/features/maintenance'; // ponytail: dashboard pulls maintenance count; resolves when EnhancedSidebar moves to a dashboard slice
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';

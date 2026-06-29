@@ -1,7 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Wifi, WifiOff, RotateCw, CheckCircle } from 'lucide-react';
 import { cn } from '@mzanzihomes/common/lib/utils';
-import type { ConnectionStatus as ConnectionStatusType } from '@/hooks/useWebSocketConnection';
+
+// ponytail: kernel declares the prop shape it accepts; the messaging slice's
+// useWebSocketConnection owns the producing copy (no kernel->slice edge)
+interface ConnectionStatusType {
+  status: 'connecting' | 'connected' | 'disconnected' | 'reconnecting';
+  lastConnected?: Date;
+  reconnectAttempts: number;
+}
 
 interface ConnectionHealthIndicatorProps {
   status: ConnectionStatusType;

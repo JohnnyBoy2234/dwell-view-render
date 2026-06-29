@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
-import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
+import { useWhatsAppMessaging } from '@mzanzihomes/features/messaging';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
@@ -15,13 +15,14 @@ import {
 import { ConnectionHealthIndicator } from '@/components/messaging/ConnectionHealthIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { AddViewingSlotModal } from '@/components/messaging/AddViewingSlotModal';
-import { BookViewingDialog } from '@/components/viewing/BookViewingDialog';
-import { WhatsAppStyleThread } from '@/components/messaging/WhatsAppStyleThread';
-import { ViewingReminderHeader } from '@/components/messaging/ViewingReminderHeader';
-import { useConfirmedViewing } from '@/hooks/useConfirmedViewing';
+import { AddViewingSlotModal } from '@mzanzihomes/features/viewing';
+import { BookViewingDialog } from '@mzanzihomes/features/viewing';
+import { WhatsAppStyleThread } from '@mzanzihomes/features/messaging';
+import { ViewingProposalCard } from '@mzanzihomes/features/viewing';
+import { ViewingReminderHeader } from '@mzanzihomes/features/viewing';
+import { useConfirmedViewing } from '@mzanzihomes/features/viewing';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import { useUnreadMessages } from '@mzanzihomes/features/messaging';
 import { cn } from '@mzanzihomes/common/lib/utils';
 
 // ─── Avatar gradient palette (deterministic from name) ───────────────────────
@@ -543,6 +544,13 @@ export default function Messages() {
                 onMessageSent={() => fetchConversations?.()}
                 onScrollToProposal={setScrollToProposalFn}
                 onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
+                renderViewingProposal={(p) => (
+                  <ViewingProposalCard
+                    proposal={p.proposal as any}
+                    onUpdate={p.onUpdate}
+                    isLandlordInConversation={p.isLandlordInConversation}
+                  />
+                )}
               />
             </div>
           </div>
@@ -691,6 +699,13 @@ export default function Messages() {
                   isLandlordInConversation={isLandlordInConversation}
                   tenantId={selectedConversation?.tenant_id}
                   propertyId={selectedConversation?.property_id}
+                  renderViewingProposal={(p) => (
+                    <ViewingProposalCard
+                      proposal={p.proposal as any}
+                      onUpdate={p.onUpdate}
+                      isLandlordInConversation={p.isLandlordInConversation}
+                    />
+                  )}
                 />
               </div>
             </>
