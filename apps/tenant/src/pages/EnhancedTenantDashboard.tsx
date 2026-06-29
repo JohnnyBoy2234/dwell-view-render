@@ -17,7 +17,7 @@ import {
   Receipt, Clipboard, HelpCircle, MapPin,
   Calendar, AlertCircle, Clock,
 } from 'lucide-react';
-import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
+import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 import { VerificationGate } from '@/components/VerificationGate';

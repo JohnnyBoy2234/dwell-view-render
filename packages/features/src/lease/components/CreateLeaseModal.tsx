@@ -5,8 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useLeaseContracts } from '@/hooks/useLeaseContracts';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { useLeaseContracts } from '../hooks/useLeaseContracts';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 

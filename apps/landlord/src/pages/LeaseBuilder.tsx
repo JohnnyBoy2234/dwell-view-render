@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { SALeaseWizard } from '@/components/lease/SALeaseWizard';
+import { SALeaseWizard } from '@mzanzihomes/features/lease';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';

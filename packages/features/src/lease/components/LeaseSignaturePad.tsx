@@ -5,8 +5,8 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { AlertTriangle, PenTool, RotateCcw, Check } from 'lucide-react';
-import { useESignature } from '@/hooks/useESignature';
-import { useAuth } from '@/hooks/useAuth';
+import { useESignature } from '../hooks/useESignature';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { toast } from 'sonner';
 import type { LeaseContract } from '@mzanzihomes/common/types/lease';
 

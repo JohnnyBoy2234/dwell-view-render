@@ -7,10 +7,10 @@ import { Separator } from '@mzanzihomes/ui/components/separator';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { FileText, Pen, RotateCcw, Send, Download, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
-import { renderLeaseAsHtml, getLeaseStyles } from '@/utils/leaseHtmlRenderer';
-import { processLeaseTemplate, formatDate } from '@/utils/leaseTemplateEngine';
-import { MASTER_LEASE_TEMPLATE } from '@/templates/masterLeaseTemplate';
-import { CONDITION_REPORT_TEMPLATE } from '@/templates/conditionReportTemplate';
+import { renderLeaseAsHtml, getLeaseStyles } from '../utils/leaseHtmlRenderer';
+import { processLeaseTemplate, formatDate } from '../utils/leaseTemplateEngine';
+import { MASTER_LEASE_TEMPLATE } from '../templates/masterLeaseTemplate';
+import { CONDITION_REPORT_TEMPLATE } from '../templates/conditionReportTemplate';
 import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { toast } from 'sonner';
 

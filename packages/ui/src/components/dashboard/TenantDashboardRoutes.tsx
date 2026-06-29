@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { EnhancedDashboardLayout } from './EnhancedDashboardLayout';
-import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
+import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease'; // ponytail: dashboard pulls lease view; retire when dashboard is sliced
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
 import TenantInspection from '@/pages/tenant/TenantInspection';

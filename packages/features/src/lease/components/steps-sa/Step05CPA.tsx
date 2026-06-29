@@ -6,7 +6,7 @@ import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/
 import { HelpCircle, Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
 import { Alert, AlertDescription, AlertTitle } from '@mzanzihomes/ui/components/alert';
-import { calculateCPAApplicability } from '@/utils/leaseTemplateEngine';
+import { calculateCPAApplicability } from '../../utils/leaseTemplateEngine';
 
 interface Step05Props {
   data: LeaseWizardData;

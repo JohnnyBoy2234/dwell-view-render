@@ -4,7 +4,7 @@ import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-gro
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Input } from '@mzanzihomes/ui/components/input';
 import type { LeaseWizardData, ConditionAnswer, ConditionReportAnswers, StepValidationResult } from '@mzanzihomes/common/types/lease';
-import { CONDITION_QUESTIONS } from '@/templates/conditionReportTemplate';
+import { CONDITION_QUESTIONS } from '../../templates/conditionReportTemplate';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { AlertTriangle } from 'lucide-react';
 

@@ -21,7 +21,7 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
+import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';

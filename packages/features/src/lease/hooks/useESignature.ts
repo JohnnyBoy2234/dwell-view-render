@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { toast } from 'sonner';
 import type { SignatureData, ESignatureSession } from '@mzanzihomes/common/types/lease';
 

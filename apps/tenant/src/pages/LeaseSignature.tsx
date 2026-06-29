@@ -7,7 +7,7 @@ import { FileText, ArrowLeft } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { LeasePreviewModal } from '@/components/lease/LeasePreviewModal';
+import { LeasePreviewModal } from '@mzanzihomes/features/lease';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import { DEFAULT_WIZARD_DATA, type LeaseWizardData } from '@mzanzihomes/common/types/lease';
 

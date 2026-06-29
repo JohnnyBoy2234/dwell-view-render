@@ -1,5 +1,5 @@
 import React from 'react';
-import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
+import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 
 export function LeaseDashboard() {
   return (
