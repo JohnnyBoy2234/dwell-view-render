@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
-import { useSupportMessages } from '@/hooks/useSupportMessages';
+import { useSupportMessages } from '@mzanzihomes/features/support';
 
 export function LandlordSupport() {
   const navigate = useNavigate();

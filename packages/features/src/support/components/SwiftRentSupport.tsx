@@ -6,10 +6,10 @@ import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { MessageSquare, Send, Clock, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
-import { useSupportMessages, SupportMessage, CreateSupportMessage } from '@/hooks/useSupportMessages';
+import { useSupportMessages, SupportMessage, CreateSupportMessage } from '../hooks/useSupportMessages';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 const categoryOptions = [
   { value: 'general', label: 'General Inquiry', icon: '💬' },

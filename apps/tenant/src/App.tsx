@@ -12,7 +12,7 @@ import Index from "@/pages/Index";
 import { MobileBottomBar } from "@/components/MobileBottomBar";
 import { MobileServices } from "@/services/mobileServices";
 import { MobileNetworkStatus } from "@/components/mobile/MobileNetworkStatus";
-import { AISupportChat } from "@/components/support/AISupportChat";
+import { AISupportChat } from "@mzanzihomes/features/support";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { VerificationGate } from "@/components/VerificationGate";

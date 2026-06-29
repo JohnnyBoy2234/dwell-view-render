@@ -6,7 +6,7 @@ import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import LandlordInspection from '@/pages/LandlordInspection';
 import InventoryStart from '@/pages/InventoryStart';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
-import { MzanziHomesSupport } from '@/components/support/SwiftRentSupport';
+import { MzanziHomesSupport } from '@mzanzihomes/features/support';
 import { PlanGuard } from '@/components/PlanGuard';
 import ProfilePage from '@/components/profile/ProfilePage';
 

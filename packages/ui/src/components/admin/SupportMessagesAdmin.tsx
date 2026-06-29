@@ -17,7 +17,7 @@ import {
   Mail,
   Calendar
 } from 'lucide-react';
-import { useAdminSupportMessages } from '@/hooks/useSupportMessages';
+import { useAdminSupportMessages } from '@mzanzihomes/features/support'; // ponytail: admin support view; retire when admin sliced;
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
