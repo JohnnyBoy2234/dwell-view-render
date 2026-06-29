@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '@mzanzihomes/ui/components/dropdown-menu';
 import { Share2, Facebook, Twitter, Copy, Check, MessageCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

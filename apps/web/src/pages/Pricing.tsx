@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Check, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mzanzihomes/ui/components/button";
 import { startCallpayCheckout } from "@/services/callpayService";
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { SectionHeader } from "@mzanzihomes/ui/components/SectionHeader";
 import { toast } from "@/hooks/use-toast";
 import { useSubscription } from "@/hooks/useSubscription";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@mzanzihomes/ui/components/badge";
 
 const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <div className="flex items-start gap-2.5 text-sm">

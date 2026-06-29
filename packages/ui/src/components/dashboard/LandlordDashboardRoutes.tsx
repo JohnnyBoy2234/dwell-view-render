@@ -1,7 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { EnhancedDashboardLayout } from './EnhancedDashboardLayout';
 import Messages from '@/pages/Messages';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import LandlordInspection from '@/pages/LandlordInspection';
 import InventoryStart from '@/pages/InventoryStart';

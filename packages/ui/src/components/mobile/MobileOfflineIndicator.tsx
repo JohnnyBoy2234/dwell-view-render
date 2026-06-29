@@ -1,6 +1,6 @@
 import React from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { WifiOff, RefreshCw, Database } from 'lucide-react';
 import { useOffline } from '@/hooks/useOffline';
 import { MobileServices } from '@/services/mobileServices';

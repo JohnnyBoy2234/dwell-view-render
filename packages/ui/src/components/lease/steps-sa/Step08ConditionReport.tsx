@@ -1,11 +1,11 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Input } from '@mzanzihomes/ui/components/input';
 import type { LeaseWizardData, ConditionAnswer, ConditionReportAnswers, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { CONDITION_QUESTIONS } from '@/templates/conditionReportTemplate';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { AlertTriangle } from 'lucide-react';
 
 interface Step08Props {

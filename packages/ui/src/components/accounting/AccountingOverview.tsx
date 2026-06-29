@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { useAccounting } from '@/hooks/useAccounting';
 import { useUserProperties } from '@/hooks/useUserProperties';
 import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle, Bell } from 'lucide-react';
@@ -16,9 +16,9 @@ const RIcon = ({ className }: { className?: string }) => (
 import { format, subDays, subMonths, parseISO, isBefore, isAfter, addDays } from 'date-fns';
 import { Link, useNavigate } from 'react-router-dom';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, AreaChart, Area, BarChart, Bar, Pie, PieChart, Label } from 'recharts';
-import { ChartContainer, ChartConfig, ChartLegend, ChartLegendContent } from '@/components/ui/chart';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { ChartContainer, ChartConfig, ChartLegend, ChartLegendContent } from '@mzanzihomes/ui/components/chart';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
+import { Input } from '@mzanzihomes/ui/components/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@mzanzihomes/common/types/accounting';
 import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
 import { AccountingNav } from './AccountingNav';

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import type { LeaseWizardData, MaintenanceResponsibility, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { Droplets, Trees, ShieldCheck } from 'lucide-react';
 

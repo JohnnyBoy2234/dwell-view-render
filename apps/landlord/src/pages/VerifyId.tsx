@@ -5,9 +5,9 @@ import { useKyc } from '@/hooks/useKyc';
 import { EmailVerificationGate } from '@/components/kyc/EmailVerificationGate';
 import { EnhancedKycWizard } from '@/components/kyc/EnhancedKycWizard';
 import { KycStatusPill } from '@/components/kyc/KycStatusPill';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react';
 
 export default function VerifyId() {

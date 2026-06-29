@@ -1,5 +1,5 @@
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@mzanzihomes/ui/components/dialog";
+import { Button } from "@mzanzihomes/ui/components/button";
 import { Award, Star } from "lucide-react";
 import confetti from "canvas-confetti";
 import { useEffect } from "react";

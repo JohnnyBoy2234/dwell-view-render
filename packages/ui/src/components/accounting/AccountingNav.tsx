@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Plus, List } from 'lucide-react';
 
 // Custom styles for accounting page buttons

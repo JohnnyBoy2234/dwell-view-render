@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, Copy, ExternalLink, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';

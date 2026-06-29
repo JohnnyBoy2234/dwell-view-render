@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@mzanzihomes/ui/components/dialog';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
+import { ScrollArea } from '@mzanzihomes/ui/components/scroll-area';
+import { Separator } from '@mzanzihomes/ui/components/separator';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { FileText, Pen, RotateCcw, Send, Download, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { renderLeaseAsHtml, getLeaseStyles } from '@/utils/leaseHtmlRenderer';
 import { processLeaseTemplate, formatDate } from '@/utils/leaseTemplateEngine';

@@ -3,15 +3,15 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAdminUsers } from '@/hooks/useAdminUsers';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@mzanzihomes/ui/components/alert-dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@mzanzihomes/ui/components/form';
+import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { UserPlus, Shield, Trash2, Users } from 'lucide-react';
 
 const createAdminSchema = z.object({

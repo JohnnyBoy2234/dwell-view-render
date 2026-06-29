@@ -1,4 +1,4 @@
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { CheckCircle, Clock, XCircle, FileX } from 'lucide-react';
 import type { KycStatus } from '@mzanzihomes/common/types/kyc';
 

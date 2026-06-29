@@ -4,14 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
+} from '@mzanzihomes/ui/components/dialog';
 import {
   Form,
   FormControl,
@@ -20,16 +20,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Calendar } from '@/components/ui/calendar';
+} from '@mzanzihomes/ui/components/form';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
+import { Calendar } from '@mzanzihomes/ui/components/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
+} from '@mzanzihomes/ui/components/popover';
 import { cn } from '@mzanzihomes/common/lib/utils';
 
 const preScreeningSchema = z.object({

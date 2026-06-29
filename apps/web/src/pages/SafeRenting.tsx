@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@mzanzihomes/ui/components/button";
+import { Card, CardContent } from "@mzanzihomes/ui/components/card";
 import { Shield, Lock, FileCheck, MessageSquareText, CheckCircle, AlertTriangle, UserCheck, CreditCard } from "lucide-react";
 import { Link } from "react-router-dom";
 

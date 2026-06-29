@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
 import { Calendar, CheckCircle, Clock, User, Mail, Phone, Building, MapPin, FileText, Download } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';

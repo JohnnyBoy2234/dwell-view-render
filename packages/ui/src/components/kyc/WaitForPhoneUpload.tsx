@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Smartphone, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 

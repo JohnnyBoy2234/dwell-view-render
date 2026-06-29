@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface MaintenanceImageGalleryProps {

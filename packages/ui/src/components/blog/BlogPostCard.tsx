@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
-import GlassCard from "@/components/ui/GlassCard";
+import GlassCard from "@mzanzihomes/ui/components/GlassCard";
 import { Calendar, Clock, ArrowRight } from "lucide-react";
 import { formatPublishedDate } from "@/utils/date";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@mzanzihomes/ui/components/badge";
 
 interface BlogPostCardProps {
   id: string;

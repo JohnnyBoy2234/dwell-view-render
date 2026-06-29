@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Tag } from 'lucide-react';
 import { SaleListingFormData } from '@/pages/ListSale';
 

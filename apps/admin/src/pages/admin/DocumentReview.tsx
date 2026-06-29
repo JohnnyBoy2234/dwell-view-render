@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
+import { Label } from '@mzanzihomes/ui/components/label';
 import { Eye, CheckCircle, XCircle, Clock, FileText, Image as ImageIcon } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 
 export default function DocumentReview() {
   const documents: any[] = [];

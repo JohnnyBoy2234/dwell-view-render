@@ -8,7 +8,7 @@ import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useToast } from '@/hooks/use-toast';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
 import { 
   Sidebar,
   SidebarContent,
@@ -19,9 +19,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from '@mzanzihomes/ui/components/sidebar';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 
 type PlanType = 'free' | 'pro' | 'premium';
 

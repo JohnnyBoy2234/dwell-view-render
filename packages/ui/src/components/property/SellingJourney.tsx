@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle2, Circle, ChevronRight, Key, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Link } from 'react-router-dom';
 import { SELLING_STEPS, SELLING_PHASES, SellingStep } from '@mzanzihomes/common/data/sellingSteps';
 import { SellingStepDialog } from './SellingStepDialog';

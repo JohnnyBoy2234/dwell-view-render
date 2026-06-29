@@ -1,5 +1,5 @@
 import { jsPDF } from "jspdf";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mzanzihomes/ui/components/button";
 import { Download } from "lucide-react";
 
 interface InvoiceItem {

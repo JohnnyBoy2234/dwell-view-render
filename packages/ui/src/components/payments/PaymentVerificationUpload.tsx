@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
 import { Upload, Loader2 } from 'lucide-react';
 import { usePaymentVerification } from '@/hooks/usePaymentVerification';
 import StarCelebrationModal from './StarCelebrationModal';

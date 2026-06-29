@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { LogOut, AlertTriangle, ArrowLeft } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
 import { getPageConfig } from '@mzanzihomes/common/constants/dashboardPageConfig';

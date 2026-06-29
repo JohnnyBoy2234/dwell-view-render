@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Switch } from '@mzanzihomes/ui/components/switch';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Bed, Bath, Car, Ruler, Sofa, Heart } from 'lucide-react';
 import { ListingFormData } from '@/pages/ListProperty';
 

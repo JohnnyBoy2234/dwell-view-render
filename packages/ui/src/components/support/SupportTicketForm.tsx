@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
 import { Loader2, Send } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';

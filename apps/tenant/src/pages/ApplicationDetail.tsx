@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { ArrowLeft, FileText, Home, MapPin, Calendar, Download } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';

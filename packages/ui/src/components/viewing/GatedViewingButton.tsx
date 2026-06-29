@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Calendar, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';

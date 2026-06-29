@@ -3,9 +3,9 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Progress } from '@mzanzihomes/ui/components/progress';
 import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, Phone, FileText } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
@@ -16,7 +16,7 @@ const RIcon = ({ className }: { className?: string }) => (
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useSubscription } from '@/hooks/useSubscription';
-import { SuccessDialog } from '@/components/ui/SuccessDialog';
+import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 
 // Import step components (reuse from rental listing)
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';

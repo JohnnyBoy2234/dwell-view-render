@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { LoadingLogo } from "@/components/ui/LoadingLogo";
+import { LoadingLogo } from "@mzanzihomes/ui/components/LoadingLogo";
 
 interface AuthenticatedRouteProps {
   children: ReactNode;

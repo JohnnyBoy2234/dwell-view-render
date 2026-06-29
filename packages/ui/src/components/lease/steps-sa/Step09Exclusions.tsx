@@ -1,6 +1,6 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 
 interface Step09Props {

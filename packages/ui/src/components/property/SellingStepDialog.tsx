@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { CheckCircle2, Upload, Loader2, FileText, X } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { SuccessDialog } from '@/components/ui/SuccessDialog';
+import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import { SellingStep, SELLING_STEPS } from '@mzanzihomes/common/data/sellingSteps';
 
 interface SellingStepDialogProps {

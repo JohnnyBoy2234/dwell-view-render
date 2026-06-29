@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@mzanzihomes/ui/components/table';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { 
   Search, 
   Filter, 

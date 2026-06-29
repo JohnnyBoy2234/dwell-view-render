@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { CheckCircle2, ArrowRight, FileText } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mzanzihomes/ui/components/button";
 import { SELLING_STEPS } from "@mzanzihomes/common/data/sellingSteps";
 
 export function SellingStepsPreview() {

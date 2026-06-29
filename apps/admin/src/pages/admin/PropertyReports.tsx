@@ -1,10 +1,10 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Flag, ExternalLink, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';

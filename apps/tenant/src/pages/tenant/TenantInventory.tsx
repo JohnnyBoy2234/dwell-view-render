@@ -4,9 +4,9 @@ import { InventoryDetailModal } from '@/components/inventory/InventoryDetailModa
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useInventory } from '@/hooks/useInventory';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Home, FileText, Camera, Mic, Download, Eye } from 'lucide-react';
 import { InventoryRecordWithDetails } from '@mzanzihomes/common/types/inventory';

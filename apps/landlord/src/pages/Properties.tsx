@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { LoadingLogo } from '@/components/ui/LoadingLogo';
+import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
@@ -11,7 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from '@mzanzihomes/ui/components/select';
 import {
   Pagination,
   PaginationContent,
@@ -20,7 +20,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
+} from '@mzanzihomes/ui/components/pagination';
 import { X } from 'lucide-react';
 
 interface Property {

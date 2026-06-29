@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { useMessageParsing } from '@/hooks/useMessageParsing';
 import { MESSAGE_STYLES, BUTTON_LABELS, ARIA_LABELS } from '@mzanzihomes/common/constants/messageConstants';

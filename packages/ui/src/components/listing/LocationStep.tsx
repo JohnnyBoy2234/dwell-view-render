@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { AddressAutocomplete } from '@/components/ui/address-autocomplete';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
 import { MapPin, FileText } from 'lucide-react';
 import { ListingFormData } from '@/pages/ListProperty';
 

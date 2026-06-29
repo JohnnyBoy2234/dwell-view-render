@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';

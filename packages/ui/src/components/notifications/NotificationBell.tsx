@@ -4,9 +4,9 @@ import {
   MessageCircle, FileText, Calendar, Wrench, Home,
   CreditCard, Package, Tag, Shield, Settings,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@mzanzihomes/ui/components/dropdown-menu';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useTenantNotifications } from '@/hooks/useTenantNotifications';
 import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';

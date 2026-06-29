@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Separator } from '@mzanzihomes/ui/components/separator';
 import { 
   Sheet, 
   SheetContent, 
@@ -12,7 +12,7 @@ import {
   SheetHeader, 
   SheetTitle,
   SheetTrigger 
-} from '@/components/ui/sheet';
+} from '@mzanzihomes/ui/components/sheet';
 import { 
   CheckCircle, 
   XCircle, 

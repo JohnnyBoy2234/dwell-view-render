@@ -1,5 +1,5 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@mzanzihomes/ui/components/dialog';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Check, Lock, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { PlanType } from '@/hooks/useSubscription';

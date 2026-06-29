@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Switch } from '@mzanzihomes/ui/components/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { HelpCircle, Shield, AlertTriangle, CheckCircle2 } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
+import { Alert, AlertDescription, AlertTitle } from '@mzanzihomes/ui/components/alert';
 import { calculateCPAApplicability } from '@/utils/leaseTemplateEngine';
 
 interface Step05Props {

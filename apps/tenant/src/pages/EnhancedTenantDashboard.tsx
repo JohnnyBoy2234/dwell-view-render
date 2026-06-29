@@ -3,22 +3,22 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
+import { SidebarProvider } from '@mzanzihomes/ui/components/sidebar';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
+import { Separator } from '@mzanzihomes/ui/components/separator';
 import {
   FileText, Eye, Settings, Building, User,
   Receipt, Clipboard, HelpCircle, MapPin,
   Calendar, AlertCircle, Clock,
 } from 'lucide-react';
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 import { VerificationGate } from '@/components/VerificationGate';
 import { cn } from '@mzanzihomes/common/lib/utils';

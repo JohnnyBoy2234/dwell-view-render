@@ -4,12 +4,12 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useUpdateMaintenanceRequest } from '@/hooks/maintenance/useMaintenanceRequests';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { ArrowLeft, Wrench, Calendar, User, Building } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (

@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Property } from '@mzanzihomes/common/types/dashboard';
 import { PROPERTY_LABELS } from '@mzanzihomes/common/constants/propertyConstants';
 

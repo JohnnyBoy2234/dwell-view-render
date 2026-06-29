@@ -1,9 +1,9 @@
 import React from 'react';
 import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { Phone, Mail, User } from 'lucide-react';
 import { SaleListingFormData } from '@/pages/ListSale';
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent } from '@mzanzihomes/ui/components/dialog';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Progress } from '@mzanzihomes/ui/components/progress';
 import { 
   CheckCircle, 
   Send, 

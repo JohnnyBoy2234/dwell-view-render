@@ -1,4 +1,4 @@
-import { SectionHeader } from "@/components/ui/SectionHeader";
+import { SectionHeader } from "@mzanzihomes/ui/components/SectionHeader";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 
 type BlogPost = {

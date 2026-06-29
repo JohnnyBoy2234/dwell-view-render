@@ -1,7 +1,7 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { Shield, CheckCircle, Camera } from 'lucide-react';
 import { useKyc } from '@/hooks/useKyc';
 import { 

@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@mzanzihomes/ui/components/dialog";
 import { X } from "lucide-react";
 import { cn } from "@mzanzihomes/common/lib/utils";
 import type { PropertySearchFilters } from "@/hooks/usePropertySearchFilters";

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Check, X, Clock, User, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';

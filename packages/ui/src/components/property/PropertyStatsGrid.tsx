@@ -1,4 +1,4 @@
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { TrendingUp } from 'lucide-react';
 import { PropertyStat } from '@/hooks/usePropertyStats';
 

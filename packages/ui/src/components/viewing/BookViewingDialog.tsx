@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@mzanzihomes/ui/components/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@mzanzihomes/ui/components/dialog";
 import { useAuth } from "@/hooks/useAuth";
 import { format } from "date-fns";
 import { Check, Calendar, Clock, Edit, X } from "lucide-react";
 import { cn } from "@mzanzihomes/common/lib/utils";
 import { useViewingBooking } from "@/hooks/useViewingBooking";
-import { SuccessDialog } from "@/components/ui/SuccessDialog";
+import { SuccessDialog } from "@mzanzihomes/ui/components/SuccessDialog";
 
 interface BookViewingDialogProps {
   propertyId: string;

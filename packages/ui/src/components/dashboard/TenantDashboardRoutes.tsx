@@ -15,8 +15,8 @@ import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
 import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
 import { FileText, User } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
 import ProfilePage from '@/components/profile/ProfilePage';
 
 export default function TenantDashboardRoutes() {

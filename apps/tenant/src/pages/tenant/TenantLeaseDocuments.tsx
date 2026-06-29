@@ -2,9 +2,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Eye, Calendar, MapPin, PenTool, Download } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { downloadFileFromUrl, openUrlInNewTab } from '@mzanzihomes/common/lib/download';
 import { supabase } from '@mzanzihomes/supabase/client';

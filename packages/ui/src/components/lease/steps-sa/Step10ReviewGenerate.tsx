@@ -1,6 +1,6 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { formatZAR, formatDate } from '@/utils/leaseTemplateEngine';
 import { FileText, Send, CheckCircle2, Eye } from 'lucide-react';

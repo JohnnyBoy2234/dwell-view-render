@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { useSubscription, PlanType } from '@/hooks/useSubscription';
 import { UpgradePrompt } from './subscription/UpgradePrompt';
 import { Loader2, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { useAuth } from '@/hooks/useAuth';
 
 interface PlanGuardProps {

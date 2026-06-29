@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { useRef } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Upload, X, Camera, AlertCircle } from 'lucide-react';
 import { ListingFormData } from '@/pages/ListProperty';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { LoadingLogo } from '@/components/ui/LoadingLogo';
+import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
 
 export function AuthBootstrap({ children }: { children: React.ReactNode }) {
 	const { loading } = useAuth();

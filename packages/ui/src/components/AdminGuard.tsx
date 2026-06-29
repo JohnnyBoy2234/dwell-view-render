@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { AlertTriangle } from 'lucide-react';
 
 interface AdminGuardProps {

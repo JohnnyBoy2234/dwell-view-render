@@ -1,4 +1,4 @@
-import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger } from '@mzanzihomes/ui/components/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminGuard } from '@/components/AdminGuard';
 import { AdminAuthProvider } from '@/hooks/useAdminAuth';

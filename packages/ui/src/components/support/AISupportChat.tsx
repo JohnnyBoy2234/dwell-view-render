@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import SupportTicketForm from './SupportTicketForm';
 

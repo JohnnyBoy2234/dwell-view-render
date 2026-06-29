@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
 import { useToast } from '@/hooks/use-toast';
 import { Mail, ArrowLeft, CheckCircle2, RotateCcw, Home } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';

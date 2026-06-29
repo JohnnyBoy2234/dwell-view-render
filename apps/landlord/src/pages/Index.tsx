@@ -1,19 +1,19 @@
 import { useState } from "react";
 import React from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@mzanzihomes/ui/components/button";
 import { Link } from "react-router-dom";
 import { PropertySearchWidget } from "@/components/search/PropertySearchWidget";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 import { BlogPostCard } from "@/components/blog/BlogPostCard";
 import { Footer } from "@/components/Footer";
-import { PropertyHero } from "@/components/ui/property-hero";
+import { PropertyHero } from "@mzanzihomes/ui/components/property-hero";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
-import { Marquee } from "@/components/ui/marquee";
+import { Marquee } from "@mzanzihomes/ui/components/marquee";
 import {
   TestimonialsColumn,
   rentLekkerTestimonials,
-} from "@/components/ui/testimonials-columns-1";
+} from "@mzanzihomes/ui/components/testimonials-columns-1";
 import { motion, AnimatePresence } from "motion/react";
 import { ForSellersSection } from "@/components/sections/ForSellersSection";
 import { SellingStepsPreview } from "@/components/sections/SellingStepsPreview";

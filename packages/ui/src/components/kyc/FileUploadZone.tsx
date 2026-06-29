@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, X, Check, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Progress } from '@mzanzihomes/ui/components/progress';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 
 interface FileUploadZoneProps {
   onFileSelect: (file: File) => void;

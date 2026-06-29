@@ -1,19 +1,19 @@
 // @ts-nocheck
 import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mzanzihomes/ui/components/card";
+import { Button } from "@mzanzihomes/ui/components/button";
+import { Input } from "@mzanzihomes/ui/components/input";
+import { Label } from "@mzanzihomes/ui/components/label";
+import { Textarea } from "@mzanzihomes/ui/components/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@mzanzihomes/ui/components/select";
+import { Checkbox } from "@mzanzihomes/ui/components/checkbox";
+import { Separator } from "@mzanzihomes/ui/components/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@mzanzihomes/supabase/client";
 import { FileText, Upload, X } from "lucide-react";
-import { SuccessDialog } from "@/components/ui/SuccessDialog";
+import { SuccessDialog } from "@mzanzihomes/ui/components/SuccessDialog";
 
 export interface ScreeningApplicationWizardProps {
   propertyId: string;

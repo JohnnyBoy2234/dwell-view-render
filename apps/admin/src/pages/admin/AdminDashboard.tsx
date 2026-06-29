@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { FileText, Users, Shield, TrendingUp, MessageSquare } from 'lucide-react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { SupportMessagesAdmin } from '@/components/admin/SupportMessagesAdmin';

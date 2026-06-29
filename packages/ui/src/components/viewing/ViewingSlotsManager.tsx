@@ -1,13 +1,13 @@
 // @ts-nocheck
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@mzanzihomes/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@mzanzihomes/ui/components/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mzanzihomes/ui/components/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@mzanzihomes/ui/components/dialog";
+import { Label } from "@mzanzihomes/ui/components/label";
+import { Input } from "@mzanzihomes/ui/components/input";
+import { Calendar } from "@mzanzihomes/ui/components/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@mzanzihomes/ui/components/popover";
 import { cn } from "@mzanzihomes/common/lib/utils";
 import { Calendar as CalendarIcon, Clock, PlusCircle, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";

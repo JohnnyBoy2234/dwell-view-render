@@ -1,11 +1,11 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { LoadingLogo } from '@/components/ui/LoadingLogo';
+import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Button } from "@/components/ui/button";
+import { Button } from "@mzanzihomes/ui/components/button";
 import { X, Home } from "lucide-react";
 import {
   Pagination,
@@ -15,7 +15,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
+} from "@mzanzihomes/ui/components/pagination";
 
 interface Property {
   id: string;

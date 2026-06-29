@@ -1,6 +1,6 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Switch } from '@mzanzihomes/ui/components/switch';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { Droplets, Trees, PawPrint, Cigarette, ShieldCheck } from 'lucide-react';
 

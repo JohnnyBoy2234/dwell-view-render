@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { HelpCircle, MessageSquare, Phone, Mail, Search, ChevronDown, ChevronRight } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@mzanzihomes/ui/components/collapsible';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { useToast } from '@/hooks/use-toast';
 
 const faqItems = [

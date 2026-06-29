@@ -1,11 +1,11 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Separator } from '@mzanzihomes/ui/components/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { Download, Plus, Trash2, Send, ArrowLeft } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';

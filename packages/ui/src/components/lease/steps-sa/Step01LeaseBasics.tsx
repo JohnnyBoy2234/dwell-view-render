@@ -1,11 +1,11 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import type { LeaseWizardData, LeaseType, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { HelpCircle } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
 
 interface Step01Props {
   data: LeaseWizardData;

@@ -1,6 +1,6 @@
 import { useTenantResponses } from '@/hooks/maintenance/useTenantResponses';
 import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 
 export function ResponsesList() {
   const { data, isLoading } = useTenantResponses();

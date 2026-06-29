@@ -1,5 +1,5 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
 import { FileText, ExternalLink } from 'lucide-react';
 import { useTenantApplications } from '@/hooks/useTenantApplications';
 import { useNavigate } from 'react-router-dom';

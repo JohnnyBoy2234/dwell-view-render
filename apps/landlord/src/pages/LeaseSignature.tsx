@@ -1,14 +1,14 @@
 // @ts-nocheck
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { FileText, ArrowLeft } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { LeasePreviewModal } from '@/components/lease/LeasePreviewModal';
-import { SuccessDialog } from '@/components/ui/SuccessDialog';
+import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import { DEFAULT_WIZARD_DATA, type LeaseWizardData } from '@mzanzihomes/common/types/lease';
 
 interface SignatureInfo {

@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 
 interface Photo {
   id: string;

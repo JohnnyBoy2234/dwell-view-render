@@ -1,7 +1,7 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { Home, Plus, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { RIcon } from '@/components/icons/RIcon';

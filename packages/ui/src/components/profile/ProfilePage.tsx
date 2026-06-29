@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Switch } from '@mzanzihomes/ui/components/switch';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Separator } from '@mzanzihomes/ui/components/separator';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   AlertDialog,
@@ -20,7 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+} from '@mzanzihomes/ui/components/alert-dialog';
 import {
   Camera,
   Shield,

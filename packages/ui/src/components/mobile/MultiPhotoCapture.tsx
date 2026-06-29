@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Camera, Upload, X, Check } from 'lucide-react';
 import { MobileServices } from '@/services/mobileServices';
 import { useToast } from '@/hooks/use-toast';

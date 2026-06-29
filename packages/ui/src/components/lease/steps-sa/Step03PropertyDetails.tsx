@@ -1,12 +1,12 @@
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@mzanzihomes/ui/components/label';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Switch } from '@mzanzihomes/ui/components/switch';
+import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { HelpCircle, Home, Building } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 
 interface Step03Props {
   data: LeaseWizardData;

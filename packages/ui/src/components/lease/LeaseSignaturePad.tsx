@@ -1,9 +1,9 @@
 // @ts-nocheck
 import React, { useRef, useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { AlertTriangle, PenTool, RotateCcw, Check } from 'lucide-react';
 import { useESignature } from '@/hooks/useESignature';
 import { useAuth } from '@/hooks/useAuth';

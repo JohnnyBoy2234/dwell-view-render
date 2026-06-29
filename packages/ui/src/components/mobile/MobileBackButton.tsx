@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
 import { MobileServices } from '@/services/mobileServices';
 import { useMobile } from '@/hooks/useMobile';

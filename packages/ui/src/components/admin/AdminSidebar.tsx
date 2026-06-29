@@ -11,8 +11,8 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
   useSidebar,
-} from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
+} from '@mzanzihomes/ui/components/sidebar';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { useAuth } from '@/hooks/useAuth';
 
 const adminItems = [

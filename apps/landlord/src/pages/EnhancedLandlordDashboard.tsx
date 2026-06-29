@@ -7,14 +7,14 @@ import InvoiceDownloadButton from '@/components/InvoiceDownloadButton';
 import { BackButton } from '@/components/common/BackButton';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { SidebarProvider } from '@mzanzihomes/ui/components/sidebar';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
 import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag } from "lucide-react";
-import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>

@@ -3,8 +3,8 @@
  */
 
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { ArrowLeft, AlertCircle } from 'lucide-react';
 
 export default function CreateInspection() {

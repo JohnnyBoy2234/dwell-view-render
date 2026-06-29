@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Progress } from '@mzanzihomes/ui/components/progress';
+import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
+import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { ArrowLeft, ArrowRight, CheckCircle, QrCode } from 'lucide-react';
 import { FileUploadZone } from './FileUploadZone';
 import { QRCaptureModal } from './QRCaptureModal';
