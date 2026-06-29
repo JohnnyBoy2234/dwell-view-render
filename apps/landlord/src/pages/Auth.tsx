@@ -47,8 +47,14 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const AppleIcon = () => (
+  <svg className="w-4 h-4 mr-2 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-3.014 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.077.28.077.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.332-1.26-3.428-2.8-1.287-1.82-2.323-4.63-2.323-7.28 0-4.28 2.797-6.55 5.552-6.55 1.448 0 2.675.95 3.6.95.865 0 2.222-1.01 3.902-1.01.633 0 2.91.06 4.402 2.19-.116.074-2.624 1.535-2.624 4.68 0 3.71 3.26 5 3.402 5.05z"/>
+  </svg>
+);
+
 export default function Auth() {
-  const { user, signUp, signIn, signInWithGoogle, resetPassword, loading } = useAuth();
+  const { user, signUp, signIn, signInWithGoogle, signInWithApple, resetPassword, loading, isLandlord, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -76,6 +82,10 @@ export default function Auth() {
 
   useEffect(() => {
     if (user && !loading) {
+      if (!isLandlord && !isAdmin) {
+        window.location.href = 'https://mzanzihomes-tenant.vercel.app';
+        return;
+      }
       const returnTo = sessionStorage.getItem('returnTo');
       if (returnTo) {
         sessionStorage.removeItem('returnTo');
@@ -84,7 +94,7 @@ export default function Auth() {
       }
       navigate('/');
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isLandlord, isAdmin, navigate]);
 
   const validateEmailInput = (email: string, isSignUp: boolean = false) => {
     const validation = validateEmail(email);
@@ -178,6 +188,11 @@ export default function Auth() {
   const handleGoogleSignIn = async (role: 'tenant' | 'landlord') => {
     const { error } = await signInWithGoogle(role);
     if (error) toast({ variant: "destructive", title: "Google Sign In Failed", description: error.message || "Failed to sign in with Google." });
+  };
+
+  const handleAppleSignIn = async (role: 'tenant' | 'landlord') => {
+    const { error } = await signInWithApple(role);
+    if (error) toast({ variant: "destructive", title: "Apple Sign In Failed", description: error.message || "Failed to sign in with Apple." });
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
@@ -368,6 +383,17 @@ export default function Auth() {
                   Continue with Google
                 </Button>
 
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-black text-white hover:bg-black/90 hover:text-white border-black"
+                  onClick={() => handleAppleSignIn('tenant')}
+                  disabled={signInLoading}
+                >
+                  <AppleIcon />
+                  Continue with Apple
+                </Button>
+
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <Separator className="w-full" />
@@ -455,6 +481,30 @@ export default function Auth() {
                   </Button>
                 </div>
                 <p className="text-center text-xs text-muted-foreground -mt-2">Continue with Google as…</p>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full text-xs bg-black text-white hover:bg-black/90 hover:text-white border-black"
+                    onClick={() => handleAppleSignIn('tenant')}
+                    disabled={signUpLoading}
+                  >
+                    <AppleIcon />
+                    Tenant
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full text-xs bg-black text-white hover:bg-black/90 hover:text-white border-black"
+                    onClick={() => handleAppleSignIn('landlord')}
+                    disabled={signUpLoading}
+                  >
+                    <AppleIcon />
+                    Landlord
+                  </Button>
+                </div>
+                <p className="text-center text-xs text-muted-foreground -mt-2">Continue with Apple as…</p>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
