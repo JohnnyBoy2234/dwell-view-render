@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check user role
         if (session?.user) {
           setRolesLoading(true);
-          checkUserRole(session.user.id);
+          checkUserRole(session.user.id, session.user.created_at);
         } else {
           setIsLandlord(false);
           setIsAdmin(false);
@@ -87,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (session?.user) {
         setRolesLoading(true);
-        checkUserRole(session.user.id);
+        checkUserRole(session.user.id, session.user.created_at);
       } else {
         setRolesLoading(false);
       }
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const checkUserRole = async (userId: string) => {
+  const checkUserRole = async (userId: string, createdAt?: string) => {
     try {
       // Fast hydration from localStorage
       const cached = localStorage.getItem(`sr_roles_${userId}`);
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
-      
+
       if (error) {
         console.warn('Could not fetch user roles:', error.message);
         // Set defaults and continue - don't retry
@@ -122,14 +122,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRolesLoading(false);
         return;
       }
-      
-      const userRoles = roles?.map(r => r.role) || [];
+
+      let userRoles = roles?.map(r => r.role) || [];
+
+      // A DB trigger always writes a default 'tenant' role on signup, since Apple/Google
+      // don't round-trip our own params back through the OAuth redirect. The role chosen
+      // on the sign-in button is stashed in sessionStorage just before the redirect; if
+      // this account was created moments ago (a brand-new signup, not a returning user)
+      // and only has the trigger's default role, correct it to what was actually chosen.
+      const pendingRole = sessionStorage.getItem('pendingOAuthRole');
+      if (pendingRole === 'landlord' || pendingRole === 'tenant') {
+        sessionStorage.removeItem('pendingOAuthRole');
+        const isFreshSignup = !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 2 * 60 * 1000;
+        const onlyHasDefaultTenantRole = userRoles.length === 1 && userRoles[0] === 'tenant';
+
+        if (isFreshSignup && onlyHasDefaultTenantRole && pendingRole !== userRoles[0]) {
+          const { error: updateError } = await supabase
+            .from('user_roles')
+            .update({ role: pendingRole })
+            .eq('user_id', userId)
+            .eq('role', 'tenant');
+          if (!updateError) {
+            userRoles = [pendingRole];
+          }
+        } else if (isFreshSignup && userRoles.length === 0) {
+          const { error: insertError } = await supabase
+            .from('user_roles')
+            .insert({ user_id: userId, role: pendingRole });
+          if (!insertError) {
+            userRoles = [pendingRole];
+          }
+        }
+      }
+
       setIsLandlord(userRoles.includes('landlord'));
       setIsAdmin(userRoles.includes('admin'));
 
       // Cache roles
-      localStorage.setItem(`sr_roles_${userId}` , JSON.stringify({ 
-        isLandlord: userRoles.includes('landlord'), 
+      localStorage.setItem(`sr_roles_${userId}` , JSON.stringify({
+        isLandlord: userRoles.includes('landlord'),
         isAdmin: userRoles.includes('admin')
       }));
     } catch (error) {
@@ -190,6 +221,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' = 'tenant') => {
+    // Apple/Google don't round-trip our own params back through the OAuth redirect,
+    // so the chosen role is stashed here and applied in checkUserRole if this turns
+    // out to be a brand-new signup with no role yet.
+    sessionStorage.setItem('pendingOAuthRole', role);
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
