@@ -92,7 +92,7 @@ export default function Auth() {
         navigate(returnTo);
         return;
       }
-      navigate('/');
+      navigate('/enhancedlandlorddashboard');
     }
   }, [user, loading, isLandlord, isAdmin, navigate]);
 
