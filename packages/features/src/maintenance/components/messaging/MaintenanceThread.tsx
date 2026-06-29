@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import { MessageBubble } from './MessageBubble';
-import { MessageComposer } from './MessageComposer';
+import { MessageBubble } from '@mzanzihomes/ui/components/messaging/MessageBubble';
+import { MessageComposer } from '@mzanzihomes/ui/components/messaging/MessageComposer';
 import { useTicketMessages } from '../../hooks/useTicketMessages';
 import { useSendMessage } from '../../hooks/useSendMessage';
 import { useMarkMessageRead } from '../../hooks/useMarkMessageRead';
