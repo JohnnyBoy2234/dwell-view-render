@@ -13,4 +13,3 @@ export { useProperties } from './hooks/useProperties';
 export { usePropertyActions } from './hooks/usePropertyActions';
 export { usePropertyActivity } from './hooks/usePropertyActivity';
 export { usePropertyStats } from './hooks/usePropertyStats';
-export { useUserProperties } from './hooks/useUserProperties';

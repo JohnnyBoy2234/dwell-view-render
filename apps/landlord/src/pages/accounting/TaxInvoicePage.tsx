@@ -1,5 +1,5 @@
 import React from 'react';
-import { TaxInvoiceGenerator } from '@/components/accounting/TaxInvoiceGenerator';
+import { TaxInvoiceGenerator } from '@mzanzihomes/features/accounting';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 import { useNavigate } from 'react-router-dom';
 

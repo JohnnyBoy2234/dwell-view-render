@@ -5,4 +5,5 @@ export * from './hooks/useMessaging';
 export * from './hooks/useRealtime';
 export * from './hooks/useNotifications';
 export * from './hooks/useLandlordNotifications';
+export * from './hooks/useUserProperties';
 export type { Database } from './types';

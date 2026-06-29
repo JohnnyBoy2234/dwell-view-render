@@ -2,8 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
-import { useAccounting } from '@/hooks/useAccounting';
-import { useUserProperties } from '@mzanzihomes/features/property'; // ponytail: accounting pulls property list; retire when accounting is sliced
+import { useAccounting } from '../hooks/useAccounting';
+import { useUserProperties } from '@mzanzihomes/supabase/hooks/useUserProperties';
 import { Plus, FileText, Receipt, TrendingUp, TrendingDown, AlertCircle, Bell } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -20,7 +20,7 @@ import { ChartContainer, ChartConfig, ChartLegend, ChartLegendContent } from '@m
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { INCOME_CATEGORIES, EXPENSE_CATEGORIES, getDefaultVATPercent } from '@mzanzihomes/common/types/accounting';
-import { AIInsightsCard } from '@/components/accounting/AIInsightsCard';
+import { AIInsightsCard } from './AIInsightsCard';
 import { AccountingNav } from './AccountingNav';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 

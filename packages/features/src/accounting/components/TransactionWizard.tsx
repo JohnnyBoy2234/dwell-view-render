@@ -6,7 +6,7 @@ import { TransactionWizardState, WizardIncomeData, WizardExpenseData } from '@mz
 import { IncomeStep } from './steps/IncomeStep';
 import { ExpenseStep } from './steps/ExpenseStep';
 import { TransactionSummary } from './steps/TransactionSummary';
-import { useAccounting } from '@/hooks/useAccounting';
+import { useAccounting } from '../hooks/useAccounting';
 import { toast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export function TransactionWizard() {

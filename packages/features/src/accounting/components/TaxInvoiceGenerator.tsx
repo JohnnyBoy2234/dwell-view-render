@@ -6,7 +6,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Separator } from '@mzanzihomes/ui/components/separator';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { Download, Plus, Trash2, Send, ArrowLeft } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -194,7 +194,7 @@ export function TaxInvoiceGenerator() {
 
   const generatePDF = async () => {
     // Generate PDF using react-pdf
-    const { generateTaxInvoicePDF } = await import('@/components/accounting/PDFGenerator');
+    const { generateTaxInvoicePDF } = await import('./PDFGenerator');
     // Adjust line items: expenses become negative in PDF display
     const adjustedItems = invoiceData.lineItems.map((it) =>
       it.type === 'expense'
@@ -517,7 +517,7 @@ export function TaxInvoiceGenerator() {
                 </Button>
                 <Button variant="outline" size="lg" onClick={async () => {
                   try {
-                    const { generateTaxInvoicePDF } = await import('@/components/accounting/PDFGenerator');
+                    const { generateTaxInvoicePDF } = await import('./PDFGenerator');
                     const adjustedItems = invoiceData.lineItems.map((it) =>
                       it.type === 'expense'
                         ? { ...it, amountExclVat: -Math.abs(it.amountExclVat || 0), vatAmount: -Math.abs(it.vatAmount || 0), totalInclVat: -Math.abs(it.totalInclVat || 0) }

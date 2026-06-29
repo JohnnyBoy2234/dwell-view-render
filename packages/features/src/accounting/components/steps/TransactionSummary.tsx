@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { WizardIncomeData, WizardExpenseData, calculateVATInclusive } from '@mzanzihomes/common/types/accounting';
-import { useUserProperties } from '@mzanzihomes/features/property'; // ponytail: accounting pulls property list; retire when accounting is sliced
+import { useUserProperties } from '@mzanzihomes/supabase/hooks/useUserProperties';
 
 interface TransactionSummaryProps {
   income: WizardIncomeData | null;

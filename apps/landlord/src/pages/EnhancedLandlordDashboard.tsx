@@ -26,7 +26,7 @@ import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
-import { AccountingOverview } from '@/components/accounting/AccountingOverview';
+import { AccountingOverview } from '@mzanzihomes/features/accounting';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';

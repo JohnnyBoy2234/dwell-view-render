@@ -4,12 +4,12 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
-import { useAccounting } from '@/hooks/useAccounting';
-import { useUserProperties } from '@mzanzihomes/features/property'; // ponytail: accounting pulls property list; retire when accounting is sliced
+import { useAccounting } from '../hooks/useAccounting';
+import { useUserProperties } from '@mzanzihomes/supabase/hooks/useUserProperties';
 import { Transaction, EXPENSE_CATEGORIES } from '@mzanzihomes/common/types/accounting';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { Download, FileText } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 export function ExpenseSummaryReport() {
   const [selectedMonth, setSelectedMonth] = useState(format(new Date(), 'yyyy-MM'));
@@ -67,7 +67,7 @@ export function ExpenseSummaryReport() {
 
   const handleDownloadPDF = async () => {
     // Generate PDF using react-pdf
-    const { generateExpenseSummaryPDF } = await import('@/components/accounting/PDFGenerator');
+    const { generateExpenseSummaryPDF } = await import('./PDFGenerator');
     
     await generateExpenseSummaryPDF({
       month: format(new Date(selectedMonth + '-01'), 'MMMM yyyy'),

@@ -1,5 +1,5 @@
 import React from 'react';
-import { AddTransaction } from '@/components/accounting/AddTransaction';
+import { AddTransaction } from '@mzanzihomes/features/accounting';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 
 export default function AddTransactionPage() {

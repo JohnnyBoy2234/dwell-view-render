@@ -1,5 +1,5 @@
 import React from 'react';
-import { TransactionsList } from '@/components/accounting/TransactionsList';
+import { TransactionsList } from '@mzanzihomes/features/accounting';
 import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
 
 export default function TransactionsPage() {
