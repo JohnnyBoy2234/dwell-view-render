@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
-import { ApplicationRequest, ApplicationRequestInsert, ApplicationRequestUpdate, ApplicationRequestFilters, ApplicationRequestResponse } from '@/types/application';
+import { ApplicationRequest, ApplicationRequestInsert, ApplicationRequestUpdate, ApplicationRequestFilters, ApplicationRequestResponse } from '@mzanzihomes/common/types/application';
 
 // Import the status type from the types file
-import { ApplicationRequestStatus } from '@/types/application';
+import { ApplicationRequestStatus } from '@mzanzihomes/common/types/application';
 
 // Re-export for backward compatibility
 export type ApplicationStatus = ApplicationRequestStatus;

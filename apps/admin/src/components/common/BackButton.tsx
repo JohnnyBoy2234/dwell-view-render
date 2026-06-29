@@ -1,1 +1,1 @@
-﻿export * from '@mzanzihomes/ui/common/BackButton';
+export * from '@mzanzihomes/ui/components/common/BackButton';

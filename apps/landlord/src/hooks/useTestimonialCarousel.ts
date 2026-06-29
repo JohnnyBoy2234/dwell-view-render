@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TESTIMONIALS_CONFIG } from '@/constants/testimonialsConstants';
+import { TESTIMONIALS_CONFIG } from '@mzanzihomes/common/constants/testimonialsConstants';
 
 interface UseTestimonialCarouselProps {
   totalSlides: number;

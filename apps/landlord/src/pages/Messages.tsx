@@ -22,7 +22,7 @@ import { ViewingReminderHeader } from '@/components/messaging/ViewingReminderHea
 import { useConfirmedViewing } from '@/hooks/useConfirmedViewing';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
-import { cn } from '@/lib/utils';
+import { cn } from '@mzanzihomes/common/lib/utils';
 
 // ─── Avatar gradient palette (deterministic from name) ───────────────────────
 

@@ -11,7 +11,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Button } from '@/components/ui/button';
 import { Wrench, Building, Images } from 'lucide-react';
 import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
-import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
+import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 
 interface MaintenanceRequest {
   id: string;

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
 import { Input } from '@/components/ui/input';
 import { MapPin, Loader2, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from '@mzanzihomes/common/lib/utils';
 
 interface EnhancedAddressAutocompleteProps {
   value: string;

@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { PropertyCardProps } from '@/types/dashboard';
+import { PropertyCardProps } from '@mzanzihomes/common/types/dashboard';
 import { FindTenantsTab } from './FindTenantsTab';
 import { ManageTenantsTab } from './ManageTenantsTab';
 import { Home } from 'lucide-react';

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@mzanzihomes/common/lib/utils";
 import { Home } from "lucide-react";
 
 const aspectClasses = {

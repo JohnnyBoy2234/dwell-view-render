@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import type { LeaseContract, LeaseContractData, LeaseTemplate } from '@/types/lease';
+import type { LeaseContract, LeaseContractData, LeaseTemplate } from '@mzanzihomes/common/types/lease';
 
 export function useLeaseContracts(propertyId?: string) {
   const { user } = useAuth();

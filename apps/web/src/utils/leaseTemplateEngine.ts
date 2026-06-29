@@ -7,7 +7,7 @@
  * 3. Removing false conditional blocks entirely
  */
 
-import type { LeaseWizardData } from '@/types/lease';
+import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { format, parseISO } from 'date-fns';
 
 /**

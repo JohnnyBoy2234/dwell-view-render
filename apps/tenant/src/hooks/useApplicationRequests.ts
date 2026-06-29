@@ -7,7 +7,7 @@ import {
   ApplicationRequestFilters, 
   ApplicationRequestResponse,
   ApplicationRequestStatus
-} from '@/types/application';
+} from '@mzanzihomes/common/types/application';
 import { 
   createApplicationRequest, 
   getApplicationRequest, 

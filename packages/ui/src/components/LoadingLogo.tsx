@@ -1,5 +1,5 @@
 import { Home } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@mzanzihomes/common/lib/utils";
 
 interface LoadingLogoProps {
   size?: "sm" | "default" | "lg";

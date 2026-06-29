@@ -18,7 +18,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { useState } from 'react';
-import type { MaintenanceRequest, MaintenanceStatus } from '@/types/maintenance';
+import type { MaintenanceRequest, MaintenanceStatus } from '@mzanzihomes/common/types/maintenance';
 import { MaintenanceThread } from '@/components/maintenance/messaging/MaintenanceThread';
 
 const statusOptions: { value: MaintenanceStatus; label: string; description: string }[] = [

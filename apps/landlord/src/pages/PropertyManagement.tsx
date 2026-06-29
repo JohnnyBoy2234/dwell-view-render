@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield, Key } from 'lucide-react';
-import { Property } from '@/types/dashboard';
+import { Property } from '@mzanzihomes/common/types/dashboard';
 import { PropertyOverview } from '@/components/property/PropertyOverview';
 import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
 import { TenantRelations } from '@/components/property/TenantRelations';

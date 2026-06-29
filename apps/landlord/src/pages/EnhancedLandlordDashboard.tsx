@@ -24,15 +24,15 @@ const RIcon = ({ className }: { className?: string }) => (
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
-import { MaintenanceRequest } from '@/types/maintenance';
+import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
 import { AccountingOverview } from '@/components/accounting/AccountingOverview';
-import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
+import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
 import { PropertySelection } from '@/components/dashboard/PropertySelection';
 import { ApplicationRequestsManager } from '@/components/landlord/ApplicationRequestsManager';
 import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithViewings';
-import { cn } from '@/lib/utils';
+import { cn } from '@mzanzihomes/common/lib/utils';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { ToolGrid } from '@/components/dashboard/landlord/ToolGrid';
 import { TenantInviteSection } from '@/components/property/TenantInviteSection';

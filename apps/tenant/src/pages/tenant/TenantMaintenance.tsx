@@ -18,7 +18,7 @@ import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import type { Priority, Category } from '@/types/maintenance';
+import type { Priority, Category } from '@mzanzihomes/common/types/maintenance';
 
 const priorityColors = {
   low: 'bg-success-green text-white',

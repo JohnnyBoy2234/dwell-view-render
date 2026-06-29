@@ -6,13 +6,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Plus, Eye, Download } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInspection } from '@/hooks/useInspection';
-import { InspectionRecordWithDetails } from '@/types/inspection';
+import { InspectionRecordWithDetails } from '@mzanzihomes/common/types/inspection';
 import { supabase } from '@/integrations/supabase/client';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
 import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
 import { useProperties } from '@/hooks/useProperties';
-import { cn } from '@/lib/utils';
+import { cn } from '@mzanzihomes/common/lib/utils';
 
 // Move the inspectionChecklist to the top level
 const inspectionChecklist = {

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Home, FileText, Camera, Mic, Download, Eye } from 'lucide-react';
-import { InventoryRecordWithDetails } from '@/types/inventory';
+import { InventoryRecordWithDetails } from '@mzanzihomes/common/types/inventory';
 
 export default function TenantInventory() {
   const { tenantProperty, loading } = useTenantDashboard();

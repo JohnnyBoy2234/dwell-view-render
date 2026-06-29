@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { FORM_FIELDS, REQUIRED_FIELDS, TOAST_MESSAGES } from '@/constants/applicationConstants';
+import { FORM_FIELDS, REQUIRED_FIELDS, TOAST_MESSAGES } from '@mzanzihomes/common/constants/applicationConstants';
 import { useToast } from '@/hooks/use-toast';
 
 export interface FormData {

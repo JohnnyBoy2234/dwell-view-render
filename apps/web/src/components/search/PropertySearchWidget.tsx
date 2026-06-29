@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, MapPin, Home, Banknote, BedDouble, SlidersHorizontal, ChevronDown, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@mzanzihomes/common/lib/utils";
 import type { PropertySearchFilters } from "@/hooks/usePropertySearchFilters";
 
 const SA_LOCATIONS = [

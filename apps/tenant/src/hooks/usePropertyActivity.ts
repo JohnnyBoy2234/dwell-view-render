@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Users, Wrench, Calendar } from 'lucide-react';
-import { ACTIVITY_TYPES, PROPERTY_COLORS } from '@/constants/propertyConstants';
+import { ACTIVITY_TYPES, PROPERTY_COLORS } from '@mzanzihomes/common/constants/propertyConstants';
 
 export interface PropertyActivity {
   type: string;

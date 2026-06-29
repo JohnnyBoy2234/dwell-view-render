@@ -16,7 +16,7 @@ import {
   Stamp,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { SELLING_PHASES, SELLING_STEPS } from "@/data/sellingSteps";
+import { SELLING_PHASES, SELLING_STEPS } from "@mzanzihomes/common/data/sellingSteps";
 
 const phaseIcons = [Home, FileText, Scale, ClipboardList, Stamp];
 const phaseColors = [

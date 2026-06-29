@@ -1,6 +1,1 @@
-import React from 'react';
-import { MobileOfflineIndicator } from './MobileOfflineIndicator';
-
-export function MobileNetworkStatus() {
-  return <MobileOfflineIndicator />;
-}
+export * from '@mzanzihomes/ui/components/mobile/MobileNetworkStatus';

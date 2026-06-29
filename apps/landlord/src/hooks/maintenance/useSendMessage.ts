@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import type { MaintenanceMessage, Role } from '@/types/maintenance';
+import type { MaintenanceMessage, Role } from '@mzanzihomes/common/types/maintenance';
 
 async function sendMessage(
   ticketId: string,

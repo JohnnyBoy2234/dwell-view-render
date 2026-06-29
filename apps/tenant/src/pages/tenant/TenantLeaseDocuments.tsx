@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
-import { downloadFileFromUrl, openUrlInNewTab } from '@/lib/download';
+import { downloadFileFromUrl, openUrlInNewTab } from '@mzanzihomes/common/lib/download';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';

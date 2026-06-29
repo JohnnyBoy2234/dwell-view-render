@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { classifyMaintenance, getSLAHours } from '@/utils/maintenanceClassifier';
-import type { MaintenanceRequest, CreateMaintenanceRequest } from '@/types/maintenance';
+import type { MaintenanceRequest, CreateMaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 
 export function useMaintenanceTickets(propertyId?: string) {
   const [tickets, setTickets] = useState<MaintenanceRequest[]>([]);

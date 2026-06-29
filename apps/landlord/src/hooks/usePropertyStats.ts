@@ -2,13 +2,13 @@ import React from 'react';
 import { useMemo } from 'react';
 import { Home, Users, Wrench, type LucideIcon } from 'lucide-react';
 import { RIcon } from '../components/icons/RIcon';
-import { Property } from '@/types/dashboard';
+import { Property } from '@mzanzihomes/common/types/dashboard';
 import { 
   PROPERTY_LABELS, 
   OCCUPANCY_STATUS, 
   APPLICATION_STATUS_TEXT,
   PROPERTY_COLORS 
-} from '@/constants/propertyConstants';
+} from '@mzanzihomes/common/constants/propertyConstants';
 
 interface MaintenanceRequest {
   id: string;

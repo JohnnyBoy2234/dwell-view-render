@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { supabase } from '@/integrations/supabase/client';
-import { CreateNotificationData, NotificationType, NotificationPriority } from '@/types/notification';
+import { CreateNotificationData, NotificationType, NotificationPriority } from '@mzanzihomes/common/types/notification';
 import { NotificationUrls } from '@/utils/notificationRoutes';
 
 export class NotificationService {

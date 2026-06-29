@@ -19,7 +19,7 @@ import {
 import { getNotificationTargetUrl } from '@/utils/notificationRoutes';
 import { formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { Notification } from '@/types/notification';
+import { Notification } from '@mzanzihomes/common/types/notification';
 
 // ── Type config ───────────────────────────────────────────────────────────────
 

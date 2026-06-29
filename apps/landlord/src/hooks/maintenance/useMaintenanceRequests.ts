@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtime } from '@/hooks/useRealtime';
-import type { MaintenanceRequest, CreateMaintenanceRequest } from '@/types/maintenance';
+import type { MaintenanceRequest, CreateMaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 import { useToast } from '@/hooks/use-toast';
 
 export function useMaintenanceRequests() {

@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import type { KycProfile, KycAuditLog } from '@/types/kyc';
+import type { KycProfile, KycAuditLog } from '@mzanzihomes/common/types/kyc';
 
 export function useKyc() {
   const { user } = useAuth();

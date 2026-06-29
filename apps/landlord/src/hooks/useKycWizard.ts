@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useKyc } from '@/hooks/useKyc';
 import { useToast } from '@/hooks/use-toast';
-import { KYC_STEPS, KYC_TOAST_MESSAGES, KycStepType } from '@/constants/kycConstants';
+import { KYC_STEPS, KYC_TOAST_MESSAGES, KycStepType } from '@mzanzihomes/common/constants/kycConstants';
 
 export interface KycWizardState {
   currentStep: number;

@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { LeasePreviewModal } from '@/components/lease/LeasePreviewModal';
 import { SuccessDialog } from '@/components/ui/SuccessDialog';
-import { DEFAULT_WIZARD_DATA, type LeaseWizardData } from '@/types/lease';
+import { DEFAULT_WIZARD_DATA, type LeaseWizardData } from '@mzanzihomes/common/types/lease';
 
 interface SignatureInfo {
   imageUrl: string;

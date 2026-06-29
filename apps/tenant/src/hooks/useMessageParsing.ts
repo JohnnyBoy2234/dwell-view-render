@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { URL_PATTERNS } from '@/constants/messageConstants';
+import { URL_PATTERNS } from '@mzanzihomes/common/constants/messageConstants';
 
 export interface ParsedURL {
   href: string;

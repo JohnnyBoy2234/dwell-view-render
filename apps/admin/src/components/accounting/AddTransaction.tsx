@@ -1,6 +1,1 @@
-import React from 'react';
-import { TransactionWizard } from './TransactionWizard';
-
-export function AddTransaction() {
-  return <TransactionWizard />;
-}
+export * from '@mzanzihomes/ui/components/accounting/AddTransaction';

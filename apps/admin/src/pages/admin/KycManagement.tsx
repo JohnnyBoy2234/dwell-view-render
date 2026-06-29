@@ -24,7 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 import { KycStatusPill } from '@/components/kyc/KycStatusPill';
 import { KycReviewDrawer } from '@/components/admin/KycReviewDrawer';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import type { AdminKycListItem, KycStatus } from '@/types/kyc';
+import type { AdminKycListItem, KycStatus } from '@mzanzihomes/common/types/kyc';
 
 function KycManagementContent() {
   const { toast } = useToast();

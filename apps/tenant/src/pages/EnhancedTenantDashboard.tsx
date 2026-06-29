@@ -21,7 +21,7 @@ import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/Le
 import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
 import { VerificationGate } from '@/components/VerificationGate';
-import { cn } from '@/lib/utils';
+import { cn } from '@mzanzihomes/common/lib/utils';
 
 // Hoisted outside component — stable reference, no re-creation on render
 const FEATURE_BLOCKS = [

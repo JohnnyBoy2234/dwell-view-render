@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { SLA_HOURS } from '@/constants/maintenanceConstants';
-import type { MaintenanceRequest } from '@/types/maintenance';
+import { SLA_HOURS } from '@mzanzihomes/common/constants/maintenanceConstants';
+import type { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 
 export interface MaintenanceStats {
   totalTickets: number;

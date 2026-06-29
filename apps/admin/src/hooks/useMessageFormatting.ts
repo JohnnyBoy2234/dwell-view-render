@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { format } from 'date-fns';
-import { TIME_FORMATS } from '@/constants/messageConstants';
+import { TIME_FORMATS } from '@mzanzihomes/common/constants/messageConstants';
 
 export interface MessageFormattingOptions {
   createdAt: string;

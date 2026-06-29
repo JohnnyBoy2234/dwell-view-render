@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageSquare, FileText, Calendar } from 'lucide-react';
-import { QUICK_ACTION_LABELS, PROPERTY_COLORS, PROPERTY_ROUTES } from '@/constants/propertyConstants';
+import { QUICK_ACTION_LABELS, PROPERTY_COLORS, PROPERTY_ROUTES } from '@mzanzihomes/common/constants/propertyConstants';
 
 export interface PropertyAction {
   label: string;

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { MobileServices } from '@/services/mobileServices';
 import { toast } from 'sonner';
-import { MOBILE_AUTH_LABELS } from '@/constants/mobileConstants';
+import { MOBILE_AUTH_LABELS } from '@mzanzihomes/common/constants/mobileConstants';
 
 export interface BiometricAuthConfig {
   onSuccess: () => void;
