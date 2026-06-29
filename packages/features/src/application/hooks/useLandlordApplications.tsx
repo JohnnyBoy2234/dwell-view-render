@@ -1,9 +1,9 @@
 // @ts-nocheck
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { useRealtime } from './useRealtime';
+import { useRealtime } from '@mzanzihomes/supabase/hooks/useRealtime';
 
 export interface ApplicationWithTenant {
   id: string;

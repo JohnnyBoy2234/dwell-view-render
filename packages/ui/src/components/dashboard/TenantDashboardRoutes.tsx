@@ -13,7 +13,7 @@ import TenantSupport from '@/pages/tenant/TenantSupport';
 import Messages from '@/pages/Messages';
 import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
-import { TenantApplicationsSection } from '@/components/tenant/TenantApplicationsSection';
+import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import { FileText, User } from 'lucide-react';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';

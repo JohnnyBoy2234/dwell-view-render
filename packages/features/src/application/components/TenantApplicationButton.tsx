@@ -1,7 +1,7 @@
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { FileText, ExternalLink } from 'lucide-react';
-import { useTenantApplications } from '@/hooks/useTenantApplications';
+import { useTenantApplications } from '../hooks/useTenantApplications';
 import { useNavigate } from 'react-router-dom';
 
 interface TenantApplicationButtonProps {

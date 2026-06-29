@@ -1,8 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mzanzihomes/ui/components/card";
 import { Badge } from "@mzanzihomes/ui/components/badge";
 import { Button } from "@mzanzihomes/ui/components/button";
-import { useApplicationInvites } from "@/hooks/useApplicationInvites";
-import { useTenantApplications } from "@/hooks/useTenantApplications";
+import { useApplicationInvites } from "@mzanzihomes/features/application";
+import { useTenantApplications } from "@mzanzihomes/features/application";
 import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@mzanzihomes/ui/components/tabs";
 import { CheckCircle, FileText, Clock, Plus } from 'lucide-react';
@@ -10,9 +10,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@mzanzihomes/ui/components/input';
 import { useState, useEffect } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useApplications } from '@/hooks/useApplications';
+import { useApplications } from '../hooks/useApplications';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
-import { createApplicationRequest } from '@/services/applicationRequestService';
+import { createApplicationRequest } from '../services/applicationRequestService';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export const TenantApplicationsSection = () => {

@@ -11,7 +11,7 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useViewings } from '@mzanzihomes/features/viewing'; // ponytail: landlord component pulls viewing data; retire when it moves to a slice
-import { useLandlordApplications, type ApplicationWithTenant } from '@/hooks/useLandlordApplications';
+import { useLandlordApplications, type ApplicationWithTenant } from '@mzanzihomes/features/application';
 import { ViewingWorkflow } from '@mzanzihomes/features/viewing';
 import { format } from 'date-fns';
 
