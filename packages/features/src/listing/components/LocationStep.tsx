@@ -6,7 +6,7 @@ import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
 import { MapPin, FileText } from 'lucide-react';
-import { ListingFormData } from '@/pages/ListProperty';
+import { ListingFormData } from '../types';
 
 interface LocationStepProps {
   control: Control<ListingFormData>;

@@ -5,7 +5,7 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { Phone, Mail, User } from 'lucide-react';
-import { SaleListingFormData } from '@/pages/ListSale';
+import { SaleListingFormData } from '../types';
 
 interface ContactStepProps {
   control: Control<SaleListingFormData>;

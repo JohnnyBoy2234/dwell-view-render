@@ -3,7 +3,7 @@ import { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Home, Building2, Building, Warehouse } from 'lucide-react';
-import { ListingFormData } from '@/pages/ListProperty';
+import { ListingFormData } from '../types';
 
 interface PropertyTypeStepProps {
   control: Control<ListingFormData>;

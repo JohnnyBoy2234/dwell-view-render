@@ -8,8 +8,8 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { ListingFormData } from '@/pages/ListProperty';
-import { SaleListingFormData } from '@/pages/ListSale';
+import { ListingFormData } from '../types';
+import { SaleListingFormData } from '../types';
 
 interface ReviewStepProps {
   formData: ListingFormData | SaleListingFormData;

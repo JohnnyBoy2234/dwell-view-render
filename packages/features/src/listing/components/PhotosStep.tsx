@@ -5,7 +5,7 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Upload, X, Camera, AlertCircle } from 'lucide-react';
-import { ListingFormData } from '@/pages/ListProperty';
+import { ListingFormData } from '../types';
 
 interface PhotosStepProps {
   setValue: UseFormSetValue<ListingFormData>;

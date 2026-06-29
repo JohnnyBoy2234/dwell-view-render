@@ -5,7 +5,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Tag } from 'lucide-react';
-import { SaleListingFormData } from '@/pages/ListSale';
+import { SaleListingFormData } from '../types';
 
 interface SalesPricingStepProps {
   control: Control<SaleListingFormData>;

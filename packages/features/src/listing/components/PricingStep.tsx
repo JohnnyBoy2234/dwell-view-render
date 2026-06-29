@@ -11,7 +11,7 @@ const RIcon = ({ className }: { className?: string }) => (
     R
   </div>
 );
-import { ListingFormData } from '@/pages/ListProperty';
+import { ListingFormData } from '../types';
 
 interface PricingStepProps {
   control: Control<ListingFormData>;

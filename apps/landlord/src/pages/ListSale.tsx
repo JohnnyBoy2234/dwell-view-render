@@ -19,45 +19,16 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 
 // Import step components (reuse from rental listing)
-import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
-import LocationStep from '@/components/listing/LocationStep';
-import DetailsStep from '@/components/listing/DetailsStep';
-import SalesPricingStep from '@/components/listing/SalesPricingStep';
-import PhotosStep from '@/components/listing/PhotosStep';
-import ReviewStep from '@/components/listing/ReviewStep';
-import ContactStep from '@/components/listing/ContactStep';
-import SellerDocumentsStep from '@/components/listing/SellerDocumentsStep';
+import { PropertyTypeStep } from '@mzanzihomes/features/listing';
+import { LocationStep } from '@mzanzihomes/features/listing';
+import { DetailsStep } from '@mzanzihomes/features/listing';
+import { SalesPricingStep } from '@mzanzihomes/features/listing';
+import { PhotosStep } from '@mzanzihomes/features/listing';
+import { ReviewStep } from '@mzanzihomes/features/listing';
+import { ContactStep } from '@mzanzihomes/features/listing';
+import { SellerDocumentsStep } from '@mzanzihomes/features/listing';
 
-export interface SaleListingFormData {
-  // Property Type
-  property_type: string;
-  
-  // Location
-  location: string;
-  description: string;
-  
-  // Details
-  bedrooms: number;
-  bathrooms: number;
-  parking_spaces: number;
-  size_sqm?: number;
-  furnished: boolean;
-  pets_allowed: boolean;
-  amenities: string[];
-  
-  // Pricing & Availability
-  price: number;
-  available_from?: string;
-  
-  // Photos
-  images: File[];
-  
-  // Contact Information (for sales)
-  contact_name: string;
-  contact_phone: string;
-  contact_email: string;
-  preferred_contact_method: 'phone' | 'email' | 'both';
-}
+import type { SaleListingFormData } from '@mzanzihomes/features/listing';
 
 const steps = [
   { id: 1, title: 'Property Type', icon: Home, description: 'What are you selling?' },

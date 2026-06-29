@@ -10,12 +10,12 @@ import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } fr
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
-import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
-import LocationStep from '@/components/listing/LocationStep';
-import DetailsStep from '@/components/listing/DetailsStep';
-import PhotosStep from '@/components/listing/PhotosStep';
-import ReviewStep from '@/components/listing/ReviewStep';
-import type { ListingFormData } from '@/pages/ListProperty';
+import { PropertyTypeStep } from '@mzanzihomes/features/listing';
+import { LocationStep } from '@mzanzihomes/features/listing';
+import { DetailsStep } from '@mzanzihomes/features/listing';
+import { PhotosStep } from '@mzanzihomes/features/listing';
+import { ReviewStep } from '@mzanzihomes/features/listing';
+import type { ListingFormData } from '@mzanzihomes/features/listing';
 
 const steps = [
   { id: 1, title: 'Property Type', icon: Home, description: 'What are you adding?' },

@@ -6,7 +6,7 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Switch } from '@mzanzihomes/ui/components/switch';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Bed, Bath, Car, Ruler, Sofa, Heart } from 'lucide-react';
-import { ListingFormData } from '@/pages/ListProperty';
+import { ListingFormData } from '../types';
 
 interface DetailsStepProps {
   control: Control<ListingFormData>;
