@@ -13,9 +13,6 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "test": "turbo test",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage",
-    "test:watch": "vitest watch",
     "supabase": "supabase"
   },
   "dependencies": {
