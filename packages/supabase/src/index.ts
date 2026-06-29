@@ -8,4 +8,5 @@ export * from './hooks/useLandlordNotifications';
 export * from './hooks/useUserProperties';
 export * from './hooks/useSubscription';
 export * from './hooks/useTenantNotifications';
+export * from './hooks/useAdminAuth';
 export type { Database } from './types';

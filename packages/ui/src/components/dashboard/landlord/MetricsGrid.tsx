@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Building, Users, FileText, Banknote, TrendingUp, Home } from 'lucide-react';
-import { StatCard } from '@/components/dashboard/shared/StatCard';
+import { StatCard } from '../shared/StatCard';
 
 interface LandlordMetrics {
   totalProperties: number;

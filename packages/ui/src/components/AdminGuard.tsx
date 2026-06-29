@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { useAdminAuth } from '@mzanzihomes/supabase/hooks/useAdminAuth';
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { AlertTriangle } from 'lucide-react';

@@ -1,7 +1,7 @@
 import { SidebarProvider, SidebarTrigger } from '@mzanzihomes/ui/components/sidebar';
 import { AdminSidebar } from './AdminSidebar';
 import { AdminGuard } from '@mzanzihomes/ui/components/AdminGuard';
-import { AdminAuthProvider } from '@/hooks/useAdminAuth';
+import { AdminAuthProvider } from '@mzanzihomes/supabase/hooks/useAdminAuth';
 
 interface AdminLayoutProps {
   children: React.ReactNode;

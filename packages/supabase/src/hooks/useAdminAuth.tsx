@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { createContext, useContext, useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 
 interface AdminAuthContextType {

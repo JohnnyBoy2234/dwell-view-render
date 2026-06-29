@@ -1,6 +1,6 @@
 import { ReactNode, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@mzanzihomes/supabase/hooks/useAuth";
 import { LoadingLogo } from "@mzanzihomes/ui/components/LoadingLogo";
 
 interface VerificationGateProps {
