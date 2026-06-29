@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
+import { InventoryStartPanel } from '@mzanzihomes/features/property';
 import { InventoryDetailModal } from '@/components/inventory/InventoryDetailModal';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useInventory } from '@/hooks/useInventory';

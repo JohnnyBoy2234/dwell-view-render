@@ -35,7 +35,7 @@ import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithView
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { MetricsGrid } from '@/components/dashboard/landlord/MetricsGrid';
 import { ToolGrid } from '@/components/dashboard/landlord/ToolGrid';
-import { TenantInviteSection } from '@/components/property/TenantInviteSection';
+import { TenantInviteSection } from '@mzanzihomes/features/property';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {

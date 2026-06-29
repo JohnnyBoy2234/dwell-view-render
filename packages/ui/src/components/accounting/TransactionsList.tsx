@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { useAccounting } from '@/hooks/useAccounting';
-import { useUserProperties } from '@/hooks/useUserProperties';
+import { useUserProperties } from '@mzanzihomes/features/property'; // ponytail: accounting pulls property list; retire when accounting is sliced
 import { Transaction } from '@mzanzihomes/common/types/accounting';
 import { format, subMonths } from 'date-fns';
 import { Download, Trash2, FileText, Plus } from 'lucide-react';

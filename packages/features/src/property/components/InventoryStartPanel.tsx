@@ -7,11 +7,11 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { X, Trash2, Camera } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { MultiPhotoCapture } from '@/components/mobile/MultiPhotoCapture';
-import { PhotoGallery } from '@/components/inspection/PhotoGallery';
-import { PhotoLightbox } from '@/components/inspection/PhotoLightbox';
+import { MultiPhotoCapture } from '@mzanzihomes/ui/components/mobile/MultiPhotoCapture';
+import { PhotoGallery } from '@mzanzihomes/ui/components/inspection/PhotoGallery';
+import { PhotoLightbox } from '@mzanzihomes/ui/components/inspection/PhotoLightbox';
 import { generateId } from '@mzanzihomes/common/lib/uuid';
 
 interface InventoryStartPanelProps {

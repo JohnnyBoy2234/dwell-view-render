@@ -6,7 +6,7 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Switch } from '@mzanzihomes/ui/components/switch';
-import { useUserProperties } from '@/hooks/useUserProperties';
+import { useUserProperties } from '@mzanzihomes/features/property'; // ponytail: accounting pulls property list; retire when accounting is sliced
 import { WizardExpenseData, EXPENSE_CATEGORIES, getDefaultVATPercent, calculateVATExclusive, calculateVATInclusive } from '@mzanzihomes/common/types/accounting';
 import { format } from 'date-fns';
 import { X } from 'lucide-react';

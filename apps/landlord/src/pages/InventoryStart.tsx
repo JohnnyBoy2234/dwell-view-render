@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import InventoryStartPanel from '@/components/property/InventoryStartPanel';
+import { InventoryStartPanel } from '@mzanzihomes/features/property';
 
 export default function InventoryStart() {
   const propertyId = useMemo(() => {

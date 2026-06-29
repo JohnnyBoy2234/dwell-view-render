@@ -9,9 +9,9 @@ import { useInspection } from '@/hooks/useInspection';
 import { InspectionRecordWithDetails } from '@mzanzihomes/common/types/inspection';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { InspectionDetailModal } from '@/components/inspection/InspectionDetailModal';
-import { InventoryStartPanel } from '@/components/property/InventoryStartPanel';
+import { InventoryStartPanel } from '@mzanzihomes/features/property';
 import { MobileBackButton } from '@/components/mobile/MobileBackButton';
-import { useProperties } from '@/hooks/useProperties';
+import { useProperties } from '@mzanzihomes/features/property';
 import { cn } from '@mzanzihomes/common/lib/utils';
 
 // Move the inspectionChecklist to the top level

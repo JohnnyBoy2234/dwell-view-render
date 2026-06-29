@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { PropertyActivity } from '@/hooks/usePropertyActivity';
+import { PropertyActivity } from '../hooks/usePropertyActivity';
 import { PROPERTY_LABELS } from '@mzanzihomes/common/constants/propertyConstants';
 
 interface PropertyActivityFeedProps {

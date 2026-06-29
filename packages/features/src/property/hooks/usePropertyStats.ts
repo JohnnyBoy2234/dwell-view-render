@@ -1,7 +1,7 @@
 import React from 'react';
 import { useMemo } from 'react';
 import { Home, Users, Wrench, type LucideIcon } from 'lucide-react';
-import { RIcon } from '../components/icons/RIcon';
+import { RIcon } from '@mzanzihomes/ui/components/icons/RIcon';
 import { Property } from '@mzanzihomes/common/types/dashboard';
 import { 
   PROPERTY_LABELS, 

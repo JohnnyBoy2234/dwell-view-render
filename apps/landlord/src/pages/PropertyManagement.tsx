@@ -8,13 +8,13 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { ArrowLeft, Home, Users, Wrench, CreditCard, BarChart3, Calendar, MessageSquare, Settings, FileText, Shield, Key } from 'lucide-react';
 import { Property } from '@mzanzihomes/common/types/dashboard';
-import { PropertyOverview } from '@/components/property/PropertyOverview';
-import { PropertyManagementSection } from '@/components/property/PropertyManagementSection';
-import { TenantRelations } from '@/components/property/TenantRelations';
-import { TenantInviteSection } from '@/components/property/TenantInviteSection';
-import { PropertyOperations } from '@/components/property/PropertyOperations';
-import { SalePropertyOverview, SaleCompliance } from '@/components/property/SalePropertyManagement';
-import { SellingJourney } from '@/components/property/SellingJourney';
+import { PropertyOverview } from '@mzanzihomes/features/property';
+import { PropertyManagementSection } from '@mzanzihomes/features/property';
+import { TenantRelations } from '@mzanzihomes/features/property';
+import { TenantInviteSection } from '@mzanzihomes/features/property';
+import { PropertyOperations } from '@mzanzihomes/features/property';
+import { SalePropertyOverview, SaleCompliance } from '@mzanzihomes/features/property';
+import { SellingJourney } from '@mzanzihomes/features/property';
 
 interface MaintenanceRequest {
   id: string;

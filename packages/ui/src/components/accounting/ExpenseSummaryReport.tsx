@@ -5,7 +5,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { useAccounting } from '@/hooks/useAccounting';
-import { useUserProperties } from '@/hooks/useUserProperties';
+import { useUserProperties } from '@mzanzihomes/features/property'; // ponytail: accounting pulls property list; retire when accounting is sliced
 import { Transaction, EXPENSE_CATEGORIES } from '@mzanzihomes/common/types/accounting';
 import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { Download, FileText } from 'lucide-react';

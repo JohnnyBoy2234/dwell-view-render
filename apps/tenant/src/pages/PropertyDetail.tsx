@@ -48,8 +48,8 @@ import { format } from "date-fns";
 import { StartConversation } from '@mzanzihomes/features/messaging';
 import { ViewingPreScreeningForm } from '@mzanzihomes/features/viewing';
 import { GatedViewingButton } from '@mzanzihomes/features/viewing';
-import { SharePropertyMenu } from '@/components/property/SharePropertyMenu';
-import { ReportPropertyModal } from '@/components/property/ReportPropertyModal';
+import { SharePropertyMenu } from '@mzanzihomes/features/property';
+import { ReportPropertyModal } from '@mzanzihomes/features/property';
 
 interface Property {
   id: string;

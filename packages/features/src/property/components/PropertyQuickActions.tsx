@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { ArrowRight } from 'lucide-react';
-import { PropertyAction } from '@/hooks/usePropertyActions';
+import { PropertyAction } from '../hooks/usePropertyActions';
 import { PROPERTY_LABELS } from '@mzanzihomes/common/constants/propertyConstants';
 
 interface PropertyQuickActionsProps {

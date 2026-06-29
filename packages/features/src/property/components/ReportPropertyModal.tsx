@@ -7,7 +7,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface ReportPropertyModalProps {

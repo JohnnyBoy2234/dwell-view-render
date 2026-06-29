@@ -1,7 +1,7 @@
 import { Property } from '@mzanzihomes/common/types/dashboard';
-import { usePropertyStats } from '@/hooks/usePropertyStats';
-import { usePropertyActions } from '@/hooks/usePropertyActions';
-import { usePropertyActivity } from '@/hooks/usePropertyActivity';
+import { usePropertyStats } from '../hooks/usePropertyStats';
+import { usePropertyActions } from '../hooks/usePropertyActions';
+import { usePropertyActivity } from '../hooks/usePropertyActivity';
 import { PropertyStatsGrid } from './PropertyStatsGrid';
 import { PropertyQuickActions } from './PropertyQuickActions';
 import { PropertyActivityFeed } from './PropertyActivityFeed';

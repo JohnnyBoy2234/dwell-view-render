@@ -1,5 +1,5 @@
 import { Bed, Bath, Car, Star } from "lucide-react";
-import { usePropertyNavigation } from '@/hooks/usePropertyNavigation';
+import { usePropertyNavigation } from '@mzanzihomes/ui/hooks/usePropertyNavigation';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { PROPERTY_CARD_CURRENCY } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { cn } from '@mzanzihomes/common/lib/utils';

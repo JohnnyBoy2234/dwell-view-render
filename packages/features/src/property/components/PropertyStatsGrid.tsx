@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { TrendingUp } from 'lucide-react';
-import { PropertyStat } from '@/hooks/usePropertyStats';
+import { PropertyStat } from '../hooks/usePropertyStats';
 
 interface PropertyStatsGridProps {
   stats: PropertyStat[];
