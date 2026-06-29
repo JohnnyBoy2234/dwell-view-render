@@ -6,8 +6,8 @@ import { Toaster } from "@mzanzihomes/ui/components/toaster";
 import { Toaster as Sonner } from "@mzanzihomes/ui/components/sonner";
 import { TooltipProvider } from "@mzanzihomes/ui/components/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AuthBootstrap } from "@/components/AuthBootstrap";
 import { AuthenticatedRoute } from "@/components/AuthenticatedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -34,6 +34,8 @@ import Notifications from "@/pages/Notifications";
 import SettingsPage from "@/pages/SettingsPage";
 import NotFound from "@/pages/NotFound";
 
+const AdminRoutes = React.lazy(() => import("@/pages/admin/AdminRoutes"));
+
 const queryClient = new QueryClient();
 
 function ScrollToTop() {
@@ -42,6 +44,49 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [pathname]);
   return null;
+}
+
+function Spinner() {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    </div>
+  );
+}
+
+function AdminRouteGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate("/auth", { replace: true });
+    }
+  }, [loading, user, navigate]);
+
+  if (loading) return <Spinner />;
+  if (!user) return null;
+
+  if (!isAdmin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-background p-8">
+        <div className="text-center space-y-4 max-w-sm">
+          <h2 className="text-xl font-bold text-foreground">Access Denied</h2>
+          <p className="text-muted-foreground text-sm">
+            This portal is restricted to MzanziHomes administrators.
+          </p>
+          <button
+            onClick={() => signOut()}
+            className="w-full rounded-ios-button bg-destructive py-3 px-6 text-sm font-semibold text-destructive-foreground"
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 function AppRoutes() {
@@ -76,6 +121,14 @@ function AppRoutes() {
             <SettingsPage />
           </EnhancedDashboardLayout>
         </AuthenticatedRoute>
+      } />
+
+      <Route path="/admin/*" element={
+        <AdminRouteGuard>
+          <React.Suspense fallback={<Spinner />}>
+            <AdminRoutes />
+          </React.Suspense>
+        </AdminRouteGuard>
       } />
 
       <Route path="*" element={<NotFound />} />
