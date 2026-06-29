@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MessageComposer } from '@/components/maintenance/messaging/MessageComposer';
+import { MessageComposer } from '@mzanzihomes/features/maintenance'; // ponytail: temporary ui->features edge until messaging slice exists
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';

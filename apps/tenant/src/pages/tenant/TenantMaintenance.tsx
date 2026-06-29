@@ -1,11 +1,11 @@
 // @ts-nocheck
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@/hooks/maintenance/useMaintenanceRequests';
-import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
-import { useTenantResponses } from '@/hooks/maintenance/useTenantResponses';
+import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
+import { useUnreadCounts } from '@mzanzihomes/features/maintenance';
+import { useTenantResponses } from '@mzanzihomes/features/maintenance';
 import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera, Images } from 'lucide-react';
-import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
+import { MaintenanceImageGallery } from '@mzanzihomes/features/maintenance';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useUpdateMaintenanceRequest } from '@/hooks/maintenance/useMaintenanceRequests';
+import { useUpdateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
@@ -19,7 +19,7 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { useState } from 'react';
 import type { MaintenanceRequest, MaintenanceStatus } from '@mzanzihomes/common/types/maintenance';
-import { MaintenanceThread } from '@/components/maintenance/messaging/MaintenanceThread';
+import { MaintenanceThread } from '@mzanzihomes/features/maintenance';
 
 const statusOptions: { value: MaintenanceStatus; label: string; description: string }[] = [
   { value: 'submitted', label: 'Submitted', description: 'Request has been submitted' },

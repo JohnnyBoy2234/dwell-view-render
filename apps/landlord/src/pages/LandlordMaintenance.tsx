@@ -10,7 +10,7 @@ import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@mzanzihomes/ui/components/select';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Wrench, Building, Images } from 'lucide-react';
-import { MaintenanceImageGallery } from '@/components/maintenance/MaintenanceImageGallery';
+import { MaintenanceImageGallery } from '@mzanzihomes/features/maintenance';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 
 interface MaintenanceRequest {

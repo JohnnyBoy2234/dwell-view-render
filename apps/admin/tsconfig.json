@@ -13,7 +13,8 @@
       "@mzanzihomes/supabase": ["../../packages/supabase/src/index.ts"],
       "@mzanzihomes/supabase/*": ["../../packages/supabase/src/*"],
       "@mzanzihomes/common": ["../../packages/common/src/index.ts"],
-      "@mzanzihomes/common/*": ["../../packages/common/src/*"]
+      "@mzanzihomes/common/*": ["../../packages/common/src/*"],
+      "@mzanzihomes/features/*": ["../../packages/features/src/*"]
     },
     "noImplicitAny": false,
     "noUnusedParameters": false,

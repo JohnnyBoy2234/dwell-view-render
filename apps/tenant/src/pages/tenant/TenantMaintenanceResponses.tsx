@@ -1,4 +1,4 @@
-import { ResponsesList } from '@/components/maintenance/messaging/ResponsesList';
+import { ResponsesList } from '@mzanzihomes/features/maintenance';
 
 export default function TenantMaintenanceResponses() {
   return (

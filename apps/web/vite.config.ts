@@ -12,6 +12,7 @@ export default defineConfig({
       "@mzanzihomes/ui": path.resolve(__dirname, "../../packages/ui/src"),
       "@mzanzihomes/supabase": path.resolve(__dirname, "../../packages/supabase/src"),
       "@mzanzihomes/common": path.resolve(__dirname, "../../packages/common/src"),
+      "@mzanzihomes/features": path.resolve(__dirname, "../../packages/features/src"),
     },
   },
   server: {
