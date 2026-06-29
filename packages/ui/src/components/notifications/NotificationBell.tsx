@@ -7,14 +7,14 @@ import {
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@mzanzihomes/ui/components/dropdown-menu';
-import { useNotifications } from '@/hooks/useNotifications';
-import { useTenantNotifications } from '@/hooks/useTenantNotifications';
-import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';
+import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
+import { useTenantNotifications } from '@mzanzihomes/supabase/hooks/useTenantNotifications';
+import { useLandlordNotifications } from '@mzanzihomes/supabase/hooks/useLandlordNotifications';
 import { Notification } from '@mzanzihomes/common/types/notification';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { getNotificationTargetUrl } from '@/utils/notificationRoutes';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { getNotificationTargetUrl } from '@mzanzihomes/ui/utils/notificationRoutes';
 
 // ── Type icon map ─────────────────────────────────────────────────────────────
 

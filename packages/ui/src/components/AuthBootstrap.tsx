@@ -1,5 +1,5 @@
 import React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
 
 export function AuthBootstrap({ children }: { children: React.ReactNode }) {

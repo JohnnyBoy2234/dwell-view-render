@@ -1,9 +1,9 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { LogOut, AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { NotificationBell } from '@mzanzihomes/ui/components/notifications/NotificationBell';
 import { getPageConfig } from '@mzanzihomes/common/constants/dashboardPageConfig';
 
 interface EnhancedDashboardLayoutProps {

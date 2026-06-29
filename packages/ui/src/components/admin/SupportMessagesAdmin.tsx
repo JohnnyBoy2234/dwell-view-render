@@ -18,7 +18,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { useAdminSupportMessages } from '@mzanzihomes/features/support'; // ponytail: admin support view; retire when admin sliced;
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 const statusOptions = [

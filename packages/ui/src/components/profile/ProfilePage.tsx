@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { toast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';

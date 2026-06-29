@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
 import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, Lock, type LucideIcon } from 'lucide-react';
-import { RIcon } from '@/components/icons/RIcon';
+import { RIcon } from '@mzanzihomes/ui/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useUnreadMessages } from '@mzanzihomes/features/messaging'; // ponytail: dashboard pulls unread count; resolves when EnhancedSidebar moves to a dashboard slice
 import { useUnreadCounts } from '@mzanzihomes/features/maintenance'; // ponytail: dashboard pulls maintenance count; resolves when EnhancedSidebar moves to a dashboard slice
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
 import { 

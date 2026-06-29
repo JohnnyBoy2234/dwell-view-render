@@ -1,9 +1,9 @@
 import { ReactNode, useEffect, useState } from 'react';
-import { useSubscription, PlanType } from '@/hooks/useSubscription';
+import { useSubscription, PlanType } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { UpgradePrompt } from './subscription/UpgradePrompt';
 import { Loader2, Lock } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 interface PlanGuardProps {
   children: ReactNode;

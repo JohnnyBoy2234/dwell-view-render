@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { supabase } from '@mzanzihomes/supabase/client';
 import { NotificationService } from '@/services/notificationService';
-import { NotificationUrls } from '@/utils/notificationRoutes';
+import { NotificationUrls } from '@mzanzihomes/ui/utils/notificationRoutes';
 
 export interface UpcomingViewingLike {
   id: string;

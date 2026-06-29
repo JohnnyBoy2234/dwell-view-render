@@ -5,7 +5,7 @@ import { Button } from "@mzanzihomes/ui/components/button";
 import { startCallpayCheckout } from "@/services/callpayService";
 import { SectionHeader } from "@mzanzihomes/ui/components/SectionHeader";
 import { toast } from "@mzanzihomes/ui/hooks/use-toast";
-import { useSubscription } from "@/hooks/useSubscription";
+import { useSubscription } from "@mzanzihomes/supabase/hooks/useSubscription";
 import { Badge } from "@mzanzihomes/ui/components/badge";
 
 const Feature: React.FC<{ children: React.ReactNode }> = ({ children }) => (

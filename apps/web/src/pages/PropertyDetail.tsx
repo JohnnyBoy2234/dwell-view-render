@@ -37,7 +37,7 @@ import {
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import type { PlanType } from '@/hooks/useSubscription';
+import type { PlanType } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { useForm } from 'react-hook-form';
 import { useApplications } from '@/hooks/useApplications';
 import { useMessaging } from '@mzanzihomes/supabase/hooks/useMessaging';

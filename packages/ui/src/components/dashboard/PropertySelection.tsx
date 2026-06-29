@@ -4,7 +4,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { Home, Plus, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { RIcon } from '@/components/icons/RIcon';
+import { RIcon } from '@mzanzihomes/ui/components/icons/RIcon';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { cn } from '@mzanzihomes/common/lib/utils';
 

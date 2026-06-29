@@ -16,7 +16,7 @@ import {
   Tag,
   Settings,
 } from 'lucide-react';
-import { getNotificationTargetUrl } from '@/utils/notificationRoutes';
+import { getNotificationTargetUrl } from '@mzanzihomes/ui/utils/notificationRoutes';
 import { formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Notification } from '@mzanzihomes/common/types/notification';

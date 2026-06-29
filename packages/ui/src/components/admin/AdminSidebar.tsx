@@ -13,7 +13,7 @@ import {
   useSidebar,
 } from '@mzanzihomes/ui/components/sidebar';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 const adminItems = [
   { title: 'Dashboard', url: '/admin/dashboard', icon: LayoutDashboard },

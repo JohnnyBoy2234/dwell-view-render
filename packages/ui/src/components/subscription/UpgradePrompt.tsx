@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Check, Lock, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { PlanType } from '@/hooks/useSubscription';
+import { PlanType } from '@mzanzihomes/supabase/hooks/useSubscription';
 
 interface UpgradePromptProps {
   open: boolean;

@@ -15,7 +15,7 @@ const RIcon = ({ className }: { className?: string }) => (
 );
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 
 // Import step components (reuse from rental listing)

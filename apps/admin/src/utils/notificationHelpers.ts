@@ -1,5 +1,5 @@
 import { NotificationService } from '@/services/notificationService';
-import { NotificationUrls } from '@/utils/notificationRoutes';
+import { NotificationUrls } from '@mzanzihomes/ui/utils/notificationRoutes';
 
 /**
  * Helper functions to create notifications for common events

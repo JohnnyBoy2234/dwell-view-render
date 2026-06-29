@@ -11,7 +11,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { useState, useEffect } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useApplications } from '@/hooks/useApplications';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { createApplicationRequest } from '@/services/applicationRequestService';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
