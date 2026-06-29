@@ -1,6 +1,6 @@
 import { SidebarProvider, SidebarTrigger } from '@mzanzihomes/ui/components/sidebar';
 import { AdminSidebar } from './AdminSidebar';
-import { AdminGuard } from '@/components/AdminGuard';
+import { AdminGuard } from '@mzanzihomes/ui/components/AdminGuard';
 import { AdminAuthProvider } from '@/hooks/useAdminAuth';
 
 interface AdminLayoutProps {

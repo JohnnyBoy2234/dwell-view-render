@@ -1,6 +1,6 @@
 import { Button } from "@mzanzihomes/ui/components/button";
 import { ArrowLeft, Share2, Calendar, Clock } from "lucide-react";
-import { formatPublishedDate } from "@/utils/date";
+import { formatPublishedDate } from "@mzanzihomes/common/lib/date";
 import { useNavigate } from "react-router-dom";
 
 interface BlogPostHeroProps {
