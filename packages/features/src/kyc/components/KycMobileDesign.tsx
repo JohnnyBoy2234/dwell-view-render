@@ -3,7 +3,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { Shield, CheckCircle, Camera } from 'lucide-react';
-import { useKyc } from '@/hooks/useKyc';
+import { useKyc } from '../hooks/useKyc';
 import { 
   KYC_STEPS, 
   TRUST_INDICATORS, 
@@ -11,7 +11,7 @@ import {
   KYC_MOBILE_DESIGN,
   KycStepType 
 } from '@mzanzihomes/common/constants/kycConstants';
-import type { KycWizardState, KycWizardActions } from '@/hooks/useKycWizard';
+import type { KycWizardState, KycWizardActions } from '../hooks/useKycWizard';
 
 interface KycMobileDesignProps extends KycWizardState, KycWizardActions {
   kycProfile: any;

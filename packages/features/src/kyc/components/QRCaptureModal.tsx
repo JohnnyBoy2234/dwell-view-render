@@ -6,7 +6,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, Copy, ExternalLink, RefreshCw } from 'lucide-react';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { WaitForPhoneUpload } from './WaitForPhoneUpload';
-import { useKycCapture } from '@/hooks/useKycCapture';
+import { useKycCapture } from '../hooks/useKycCapture';
 
 interface QRCaptureModalProps {
   open: boolean;

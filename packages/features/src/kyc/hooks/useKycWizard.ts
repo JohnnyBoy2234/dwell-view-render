@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { useKyc } from '@/hooks/useKyc';
+import { useKyc } from './useKyc';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { KYC_STEPS, KYC_TOAST_MESSAGES, KycStepType } from '@mzanzihomes/common/constants/kycConstants';
 

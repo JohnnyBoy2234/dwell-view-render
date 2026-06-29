@@ -25,7 +25,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { KycStatusPill } from '@/components/kyc/KycStatusPill';
+import { KycStatusPill } from '@mzanzihomes/features/kyc'; // ponytail: admin review pulls kyc; retire when admin sliced;
 import type { AdminKycListItem } from '@mzanzihomes/common/types/kyc';
 
 interface KycReviewDrawerProps {

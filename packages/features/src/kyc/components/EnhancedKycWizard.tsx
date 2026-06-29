@@ -1,6 +1,6 @@
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useKyc } from '@/hooks/useKyc';
-import { useKycWizard } from '@/hooks/useKycWizard';
+import { useIsMobile } from '@mzanzihomes/ui/hooks/use-mobile';
+import { useKyc } from '../hooks/useKyc';
+import { useKycWizard } from '../hooks/useKycWizard';
 import { KycMobileDesign } from './KycMobileDesign';
 import { KycDesktopDesign } from './KycDesktopDesign';
 

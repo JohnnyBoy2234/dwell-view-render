@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { KycStatusPill } from '@/components/kyc/KycStatusPill';
+import { KycStatusPill } from '@mzanzihomes/features/kyc';
 import { KycReviewDrawer } from '@/components/admin/KycReviewDrawer';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import type { AdminKycListItem, KycStatus } from '@mzanzihomes/common/types/kyc';

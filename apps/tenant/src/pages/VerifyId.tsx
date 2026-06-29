@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useKyc } from '@/hooks/useKyc';
-import { EmailVerificationGate } from '@/components/kyc/EmailVerificationGate';
-import { EnhancedKycWizard } from '@/components/kyc/EnhancedKycWizard';
-import { KycStatusPill } from '@/components/kyc/KycStatusPill';
+import { useKyc } from '@mzanzihomes/features/kyc';
+import { EmailVerificationGate } from '@mzanzihomes/features/kyc';
+import { EnhancedKycWizard } from '@mzanzihomes/features/kyc';
+import { KycStatusPill } from '@mzanzihomes/features/kyc';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';

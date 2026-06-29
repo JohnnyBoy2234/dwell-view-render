@@ -3,7 +3,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Mail, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 

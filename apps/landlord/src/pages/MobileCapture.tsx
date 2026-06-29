@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { MobilePhotoCapture } from '@/components/kyc/MobilePhotoCapture';
+import { MobilePhotoCapture } from '@mzanzihomes/features/kyc';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { AlertTriangle } from 'lucide-react';
 

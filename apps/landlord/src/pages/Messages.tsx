@@ -21,7 +21,7 @@ import { WhatsAppStyleThread } from '@mzanzihomes/features/messaging';
 import { ViewingProposalCard } from '@mzanzihomes/features/viewing';
 import { ViewingReminderHeader } from '@mzanzihomes/features/viewing';
 import { useConfirmedViewing } from '@mzanzihomes/features/viewing';
-import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@mzanzihomes/ui/hooks/use-mobile';
 import { useUnreadMessages } from '@mzanzihomes/features/messaging';
 import { cn } from '@mzanzihomes/common/lib/utils';
 

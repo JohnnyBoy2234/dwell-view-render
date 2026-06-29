@@ -3,7 +3,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Camera, Upload, X, CheckCircle, AlertTriangle } from 'lucide-react';
-import { useKyc } from '@/hooks/useKyc';
+import { useKyc } from '../hooks/useKyc';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface MobilePhotoCaptureProps {

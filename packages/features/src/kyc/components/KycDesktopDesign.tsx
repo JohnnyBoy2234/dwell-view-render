@@ -13,7 +13,7 @@ import {
   KYC_DESKTOP_DESIGN,
   KycStepType 
 } from '@mzanzihomes/common/constants/kycConstants';
-import type { KycWizardState, KycWizardActions } from '@/hooks/useKycWizard';
+import type { KycWizardState, KycWizardActions } from '../hooks/useKycWizard';
 
 interface KycDesktopDesignProps extends KycWizardState, KycWizardActions {
   kycProfile: any;
