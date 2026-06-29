@@ -22,7 +22,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { LeaseDashboard as LeaseDashboardComponent } from '@/components/lease/LeaseDashboard';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';

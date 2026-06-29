@@ -13,7 +13,7 @@ import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { ArrowLeft, Upload, X } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface PropertyFormData {
   title: string;

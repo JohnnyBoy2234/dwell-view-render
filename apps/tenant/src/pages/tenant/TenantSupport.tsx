@@ -7,7 +7,7 @@ import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@mzanzihomes/ui/components/collapsible';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 const faqItems = [
   {

@@ -12,7 +12,7 @@ import { format } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface AddViewingSlotModalProps {
   open: boolean;

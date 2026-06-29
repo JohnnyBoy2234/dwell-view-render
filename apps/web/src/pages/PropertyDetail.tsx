@@ -36,7 +36,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import type { PlanType } from '@/hooks/useSubscription';
 import { useForm } from 'react-hook-form';
 import { useApplications } from '@/hooks/useApplications';

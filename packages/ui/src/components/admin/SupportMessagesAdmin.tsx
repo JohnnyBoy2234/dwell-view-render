@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useAdminSupportMessages } from '@/hooks/useSupportMessages';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 const statusOptions = [
   { value: 'all', label: 'All Status' },

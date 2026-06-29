@@ -5,7 +5,7 @@ import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Mail, RefreshCw, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface EmailVerificationGateProps {
   onVerified: () => void;

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from './useAuth';
-import { useToast } from './use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export interface ProofDocument {
   id: string;

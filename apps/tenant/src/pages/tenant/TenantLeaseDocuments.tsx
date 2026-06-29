@@ -9,7 +9,7 @@ import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { downloadFileFromUrl, openUrlInNewTab } from '@mzanzihomes/common/lib/download';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export default function TenantLeaseDocuments() {
   const navigate = useNavigate();

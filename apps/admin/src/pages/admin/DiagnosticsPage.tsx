@@ -14,7 +14,7 @@ import {
   Shield
 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 
 interface DiagnosticsResponse {

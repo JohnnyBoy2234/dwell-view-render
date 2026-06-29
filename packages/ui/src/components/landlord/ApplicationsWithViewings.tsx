@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Calendar, CheckCircle, Clock, User, Mail, Phone, Building, MapPin, FileText, Download } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useViewings } from '@/hooks/useViewings';
 import { useLandlordApplications, type ApplicationWithTenant } from '@/hooks/useLandlordApplications';
 import ViewingWorkflow from '@/components/viewing/ViewingWorkflow';

@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzan
 import { Progress } from '@mzanzihomes/ui/components/progress';
 import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import PropertyTypeStep from '@/components/listing/PropertyTypeStep';
 import LocationStep from '@/components/listing/LocationStep';

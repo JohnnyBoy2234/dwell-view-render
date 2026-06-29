@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { SALeaseWizard } from '@/components/lease/SALeaseWizard';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export function LeaseBuilder() {
   const { contractId, propertyId: pathPropertyId } = useParams();

@@ -5,7 +5,7 @@ import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Check, X, Clock, User, Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { createApplicationNotifications } from '@/utils/notificationHelpers';
 
 interface ApplicationRequest {

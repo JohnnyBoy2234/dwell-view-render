@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from './useAuth';
 import { supabase } from '../client';
-import { useToast } from '@mzanzihomes/ui/components/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useRealtime } from './useRealtime';
 
 interface Message {

@@ -4,7 +4,7 @@ import { MessageComposer } from '@/components/maintenance/messaging/MessageCompo
 import { useWhatsAppMessaging } from '@/hooks/useWhatsAppMessaging';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { ViewingProposalCard } from '@/components/messaging/ViewingProposalCard';
 import { TypingIndicator } from '@/components/messaging/TypingIndicator';
 import { cn } from '@mzanzihomes/common/lib/utils';

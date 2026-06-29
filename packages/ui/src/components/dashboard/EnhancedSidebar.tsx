@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { useUnreadCounts } from '@/hooks/maintenance/useUnreadCounts';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
 import { 
   Sidebar,

@@ -1,5 +1,5 @@
 import { supabase } from "@mzanzihomes/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "@mzanzihomes/ui/hooks/use-toast";
 
 export type CallpayPlan = {
   plan_code: string;

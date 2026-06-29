@@ -6,7 +6,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { Separator } from '@mzanzihomes/ui/components/separator';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, ArrowLeft, Mail, Home } from 'lucide-react';
 import EmailVerification from '@/components/auth/EmailVerification';

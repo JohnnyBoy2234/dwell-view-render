@@ -4,7 +4,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';

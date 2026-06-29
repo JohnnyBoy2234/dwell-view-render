@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzan
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Camera, Upload, X, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useKyc } from '@/hooks/useKyc';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface MobilePhotoCaptureProps {
   type: 'id_front' | 'selfie';

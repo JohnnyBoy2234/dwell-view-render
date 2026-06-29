@@ -7,7 +7,7 @@ import { Badge } from '@mzanzihomes/ui/components/badge';
 import { ArrowLeft, FileText, Home, MapPin, Calendar, Download } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 
 interface ApplicationDetail {

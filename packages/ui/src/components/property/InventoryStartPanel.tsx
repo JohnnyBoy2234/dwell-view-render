@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/compon
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { X, Trash2, Camera } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';

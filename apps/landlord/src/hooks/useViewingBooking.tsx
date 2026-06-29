@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export interface ActiveBooking {
   has_booking: boolean;

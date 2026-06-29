@@ -3,7 +3,7 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useRealtime } from '@/hooks/useRealtime';
 import type { MaintenanceRequest, CreateMaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export function useMaintenanceRequests() {
   const { user, isLandlord } = useAuth();

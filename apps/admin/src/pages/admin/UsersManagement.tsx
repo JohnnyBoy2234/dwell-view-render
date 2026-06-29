@@ -5,7 +5,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@mzanzihomes/ui/components/table';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { MoreHorizontal, Trash2, AlertCircle, User } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 
 export interface User {

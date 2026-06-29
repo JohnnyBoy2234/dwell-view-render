@@ -5,7 +5,7 @@ import { Badge } from '@mzanzihomes/ui/components/badge';
 import { CheckCircle2, Upload, Loader2, FileText, X } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import { SellingStep, SELLING_STEPS } from '@mzanzihomes/common/data/sellingSteps';
 

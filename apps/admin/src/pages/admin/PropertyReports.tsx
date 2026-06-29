@@ -7,7 +7,7 @@ import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Flag, ExternalLink, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { format } from 'date-fns';
 
 interface PropertyReport {

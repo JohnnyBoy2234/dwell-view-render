@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@mzanzihomes/ui/compone
 import { cn } from "@mzanzihomes/common/lib/utils";
 import { Calendar as CalendarIcon, Clock, PlusCircle, User } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@mzanzihomes/ui/hooks/use-toast";
 import { format } from "date-fns";
 import { generateId } from '@mzanzihomes/common/lib/uuid';
 

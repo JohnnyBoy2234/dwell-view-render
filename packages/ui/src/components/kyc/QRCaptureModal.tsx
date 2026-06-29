@@ -4,7 +4,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { QRCodeSVG } from 'qrcode.react';
 import { Smartphone, Copy, ExternalLink, RefreshCw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { WaitForPhoneUpload } from './WaitForPhoneUpload';
 import { useKycCapture } from '@/hooks/useKycCapture';
 

@@ -5,7 +5,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
 import { useSupportMessages } from '@/hooks/useSupportMessages';
 

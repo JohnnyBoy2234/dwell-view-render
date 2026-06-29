@@ -6,7 +6,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Trash2, MapPin, Calendar, User, AlertCircle, Building } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,

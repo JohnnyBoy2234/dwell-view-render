@@ -15,7 +15,7 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import type { Priority, Category } from '@mzanzihomes/common/types/maintenance';

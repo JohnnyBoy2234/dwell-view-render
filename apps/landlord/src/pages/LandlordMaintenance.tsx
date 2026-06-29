@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@mzanzihomes/ui/components/select';

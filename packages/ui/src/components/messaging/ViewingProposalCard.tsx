@@ -8,7 +8,7 @@ import { format } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface ViewingProposal {
   id: string;

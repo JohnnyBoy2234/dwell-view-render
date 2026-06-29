@@ -13,7 +13,7 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useApplications } from '@/hooks/useApplications';
 import { useAuth } from '@/hooks/useAuth';
 import { createApplicationRequest } from '@/services/applicationRequestService';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 export const TenantApplicationsSection = () => {
   const { user } = useAuth();

@@ -4,7 +4,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { Camera, Upload, X, CheckCircle, AlertTriangle, RotateCcw } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 
 export default function KycCapture() {

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface VerificationResult {
   success: boolean;

@@ -8,7 +8,7 @@ import { Textarea } from "@mzanzihomes/ui/components/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@mzanzihomes/ui/components/select";
 import { Checkbox } from "@mzanzihomes/ui/components/checkbox";
 import { Separator } from "@mzanzihomes/ui/components/separator";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@mzanzihomes/ui/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@mzanzihomes/supabase/client";

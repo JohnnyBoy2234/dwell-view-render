@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/compon
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface AIInsightsCardProps {
   rentCollected: number;

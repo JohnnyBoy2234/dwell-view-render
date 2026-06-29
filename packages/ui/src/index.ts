@@ -64,7 +64,7 @@ export * from './components/toaster';
 export * from './components/toggle';
 export * from './components/toggle-group';
 export * from './components/tooltip';
-export * from './components/use-toast';
+export * from './hooks/use-toast';
 export * from './components/verification-wrapper';
 
 // common layout components

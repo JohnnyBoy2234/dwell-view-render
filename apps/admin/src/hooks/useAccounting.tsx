@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { Transaction, AccountingKPIs, MonthlyData, CategoryData } from '@mzanzihomes/common/types/accounting';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@mzanzihomes/ui/hooks/use-toast';
 import { startOfMonth, endOfMonth, format, subMonths } from 'date-fns';
 
 export function useAccounting() {

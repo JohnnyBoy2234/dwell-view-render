@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { TOAST_MESSAGES, NAVIGATION_DELAY, APPLICATION_STATUS, FORM_FIELDS } from '@mzanzihomes/common/constants/applicationConstants';
 import type { FormData } from './useApplicationForm';
 

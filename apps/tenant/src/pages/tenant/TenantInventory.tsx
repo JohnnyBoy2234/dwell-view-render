@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Home, FileText, Camera, Mic, Download, Eye } from 'lucide-react';
 import { InventoryRecordWithDetails } from '@mzanzihomes/common/types/inventory';
 

@@ -5,7 +5,7 @@ import { Textarea } from "@mzanzihomes/ui/components/textarea";
 import { Mail, Phone, MapPin, Clock, MessageSquare, Users, Wrench, Briefcase } from "lucide-react";
 import { SectionHeader } from "@mzanzihomes/ui/components/SectionHeader";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@mzanzihomes/ui/hooks/use-toast";
 
 const Contact = () => {
   const [formData, setFormData] = useState({

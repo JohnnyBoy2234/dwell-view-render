@@ -9,7 +9,7 @@ import { Separator } from '@mzanzihomes/ui/components/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { Download, Plus, Trash2, Send, ArrowLeft } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { AccountingNav } from './AccountingNav';

@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@mzanzihomes/ui/components/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { User, Key, Trash2, Save, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

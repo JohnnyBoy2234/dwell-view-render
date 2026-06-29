@@ -7,7 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@mzanzihomes/ui/components/dropdown-menu';
 import { Share2, Facebook, Twitter, Copy, Check, MessageCircle } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface SharePropertyMenuProps {
   propertyUrl: string;

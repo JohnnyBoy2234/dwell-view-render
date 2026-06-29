@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import type { KycProfile, KycAuditLog } from '@mzanzihomes/common/types/kyc';
 
 export function useKyc() {
