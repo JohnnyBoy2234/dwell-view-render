@@ -13,7 +13,22 @@
       "Bash(claude plugin:*)",
       "Bash(grep -n \"from ''''@/lib/utils''''\\\\|from \"\"@/lib/utils\"\"\\\\|import.*cn\" src/pages/EnhancedLandlordDashboard.tsx)",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "mcp__plugin_playwright_playwright__browser_console_messages"
+      "mcp__plugin_playwright_playwright__browser_console_messages",
+      "Bash(xargs -n1 basename)",
+      "Bash(set -e)",
+      "Bash(sed -i \"s#@/hooks/use-toast#@mzanzihomes/ui/hooks/use-toast#\" packages/ui/src/components/toaster.tsx)",
+      "Bash(sed -i \"s#'./components/use-toast'#'./hooks/use-toast'#\" packages/ui/src/index.ts)",
+      "Bash(sed -i \"s#@mzanzihomes/ui/components/use-toast#@mzanzihomes/ui/hooks/use-toast#\" packages/supabase/src/hooks/useMessaging.tsx)",
+      "Bash(xargs -r sed -i \"s#from '@/hooks/use-toast'#from '@mzanzihomes/ui/hooks/use-toast'#\")",
+      "Bash(xargs -r sed -i \"s#from './use-toast'#from '@mzanzihomes/ui/hooks/use-toast'#\")",
+      "Bash(xargs -r sed -i 's#from \"@/hooks/use-toast\"#from \"@mzanzihomes/ui/hooks/use-toast\"#')",
+      "Bash(git reset *)",
+      "Bash(git mv *)",
+      "Bash(cd *)",
+      "Bash(git rm *)"
     ]
-  }
+  },
+  "enabledMcpjsonServers": [
+    "shadcn"
+  ]
 }
