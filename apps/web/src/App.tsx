@@ -16,7 +16,7 @@ import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/En
 import Index from "@/pages/Index";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
-import SaleListings from "@/pages/SaleListings";
+import SaleListings from "@mzanzihomes/ui/components/pages/SaleListings";
 import About from "@/pages/About";
 import AboutLandlord from "@/pages/AboutLandlord";
 import AboutTenant from "@/pages/AboutTenant";

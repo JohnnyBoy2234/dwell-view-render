@@ -1,19 +1,31 @@
 // @ts-nocheck
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@mzanzihomes/ui/components/button';
-import { Input } from '@mzanzihomes/ui/components/input';
-import { Label } from '@mzanzihomes/ui/components/label';
-import { Textarea } from '@mzanzihomes/ui/components/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
-import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
-import { Badge } from '@mzanzihomes/ui/components/badge';
-import { ArrowLeft, Upload, X } from 'lucide-react';
-import { supabase } from '@mzanzihomes/supabase/client';
-import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@mzanzihomes/ui/components/button";
+import { Input } from "@mzanzihomes/ui/components/input";
+import { Label } from "@mzanzihomes/ui/components/label";
+import { Textarea } from "@mzanzihomes/ui/components/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@mzanzihomes/ui/components/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@mzanzihomes/ui/components/select";
+import { Checkbox } from "@mzanzihomes/ui/components/checkbox";
+import { Badge } from "@mzanzihomes/ui/components/badge";
+import { ArrowLeft, Upload, X } from "lucide-react";
+import { supabase } from "@mzanzihomes/supabase/client";
+import { useToast } from "@mzanzihomes/ui/hooks/use-toast";
 
 interface PropertyFormData {
   title: string;
@@ -31,29 +43,29 @@ interface PropertyFormData {
 }
 
 const propertyTypes = [
-  'Apartment',
-  'House',
-  'Townhouse',
-  'Flat',
-  'Studio',
-  'Bachelor',
-  'Room',
-  'Other'
+  "Apartment",
+  "House",
+  "Townhouse",
+  "Flat",
+  "Studio",
+  "Bachelor",
+  "Room",
+  "Other",
 ];
 
 const amenitiesList = [
-  'Swimming Pool',
-  'Garden',
-  'Security',
-  'Gym/Fitness Center',
-  'Braai Area',
-  'Air Conditioning',
-  'WiFi',
-  'DSTV',
-  'Backup Power',
-  'Water Tank',
-  'Fiber Internet',
-  'Pet Friendly'
+  "Swimming Pool",
+  "Garden",
+  "Security",
+  "Gym/Fitness Center",
+  "Braai Area",
+  "Air Conditioning",
+  "WiFi",
+  "DSTV",
+  "Backup Power",
+  "Water Tank",
+  "Fiber Internet",
+  "Pet Friendly",
 ];
 
 const getAutosaveKey = (userId: string) => `sr_add_property_autosave_${userId}`;
@@ -66,11 +78,17 @@ export default function AddProperty() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<PropertyFormData>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<PropertyFormData>({
     defaultValues: {
       furnished: false,
-      pets_allowed: false
-    }
+      pets_allowed: false,
+    },
   });
 
   useEffect(() => {
@@ -80,16 +98,18 @@ export default function AddProperty() {
       const raw = localStorage.getItem(key);
       if (!raw) return;
       const saved = JSON.parse(raw);
-      if (saved?.formData && typeof saved.formData === 'object') {
-        Object.entries(saved.formData as Partial<PropertyFormData>).forEach(([field, value]) => {
-          setValue(field as keyof PropertyFormData, value as any);
-        });
+      if (saved?.formData && typeof saved.formData === "object") {
+        Object.entries(saved.formData as Partial<PropertyFormData>).forEach(
+          ([field, value]) => {
+            setValue(field as keyof PropertyFormData, value as any);
+          },
+        );
       }
       if (Array.isArray(saved?.selectedAmenities)) {
         setSelectedAmenities(saved.selectedAmenities);
       }
     } catch (error) {
-      console.warn('Failed to load property autosave', error);
+      console.warn("Failed to load property autosave", error);
     }
   }, [user?.id, setValue]);
 
@@ -104,10 +124,10 @@ export default function AddProperty() {
             formData: value,
             selectedAmenities,
             updatedAt: Date.now(),
-          })
+          }),
         );
       } catch (error) {
-        console.warn('Failed to autosave property form', error);
+        console.warn("Failed to autosave property form", error);
       }
     });
     return () => subscription.unsubscribe();
@@ -118,36 +138,36 @@ export default function AddProperty() {
     try {
       localStorage.removeItem(getAutosaveKey(user.id));
     } catch (error) {
-      console.warn('Failed to clear property autosave', error);
+      console.warn("Failed to clear property autosave", error);
     }
   };
 
   if (!user) {
-    navigate('/auth');
+    navigate("/auth");
     return null;
   }
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setImages(prev => [...prev, ...files].slice(0, 10)); // Max 10 images
+      setImages((prev) => [...prev, ...files].slice(0, 10)); // Max 10 images
     }
   };
 
   const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
+    setImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const uploadImages = async () => {
     const uploadedUrls: string[] = [];
 
     for (const image of images) {
-      const fileExt = image.name.split('.').pop();
+      const fileExt = image.name.split(".").pop();
       const fileName = `${crypto.randomUUID()}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('property-images')
+        .from("property-images")
         .upload(filePath, image);
 
       if (uploadError) {
@@ -155,7 +175,7 @@ export default function AddProperty() {
       }
 
       const { data } = supabase.storage
-        .from('property-images')
+        .from("property-images")
         .getPublicUrl(filePath);
 
       uploadedUrls.push(data.publicUrl);
@@ -170,9 +190,9 @@ export default function AddProperty() {
     try {
       // Ensure user has landlord role before creating property
       if (!isLandlord) {
-        const { error: roleError } = await supabase.rpc('promote_to_landlord');
+        const { error: roleError } = await supabase.rpc("promote_to_landlord");
         if (roleError) {
-          console.error('Error promoting to landlord:', roleError);
+          console.error("Error promoting to landlord:", roleError);
           // Continue anyway - the RLS policy allows users without roles to create properties
         }
       }
@@ -181,34 +201,32 @@ export default function AddProperty() {
       const imageUrls = images.length > 0 ? await uploadImages() : [];
 
       // Insert property - use exact values to prevent precision loss
-      const { error } = await supabase
-        .from('properties')
-        .insert({
-          ...data,
-          landlord_id: user.id,
-          images: imageUrls,
-          amenities: selectedAmenities,
-          price: data.price, // Use exact price value
-          bedrooms: Number(data.bedrooms),
-          bathrooms: Number(data.bathrooms),
-          parking_spaces: Number(data.parking_spaces),
-          size_sqm: data.size_sqm ? Number(data.size_sqm) : null
-        });
+      const { error } = await supabase.from("properties").insert({
+        ...data,
+        landlord_id: user.id,
+        images: imageUrls,
+        amenities: selectedAmenities,
+        price: data.price, // Use exact price value
+        bedrooms: Number(data.bedrooms),
+        bathrooms: Number(data.bathrooms),
+        parking_spaces: Number(data.parking_spaces),
+        size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
+      });
 
       if (error) throw error;
 
       toast({
         title: "Property added successfully!",
-        description: "Your property is now listed on MzanziHomes."
+        description: "Your property is now listed on MzanziHomes.",
       });
 
       clearAutosave();
-      navigate('/enhancedlandlorddashboard');
+      navigate("/enhancedlandlorddashboard");
     } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Error adding property",
-        description: error.message
+        description: error.message,
       });
     } finally {
       setUploading(false);
@@ -216,10 +234,10 @@ export default function AddProperty() {
   };
 
   const toggleAmenity = (amenity: string) => {
-    setSelectedAmenities(prev =>
+    setSelectedAmenities((prev) =>
       prev.includes(amenity)
-        ? prev.filter(a => a !== amenity)
-        : [...prev, amenity]
+        ? prev.filter((a) => a !== amenity)
+        : [...prev, amenity],
     );
   };
 
@@ -227,12 +245,17 @@ export default function AddProperty() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto p-6 max-w-4xl">
         <div className="flex flex-col items-left gap-4 mb-8">
-          <Button variant="outline" onClick={() => navigate('/enhancedlandlorddashboard')}>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/enhancedlandlorddashboard")}
+          >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dashboard
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-primary">Add New Property</h1>
+            <h1 className="text-3xl font-bold text-primary">
+              Add New Property
+            </h1>
             <p className="text-muted-foreground">List your property for rent</p>
           </div>
         </div>
@@ -242,28 +265,38 @@ export default function AddProperty() {
           <Card>
             <CardHeader>
               <CardTitle>Basic Information</CardTitle>
-              <CardDescription>Essential details about your property</CardDescription>
+              <CardDescription>
+                Essential details about your property
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="title">Property Title *</Label>
                   <Input
-                    {...register('title', { required: 'Title is required' })}
+                    {...register("title", { required: "Title is required" })}
                     placeholder="e.g., Modern 2-bedroom apartment in Sandton"
                   />
-                  {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+                  {errors.title && (
+                    <p className="text-sm text-destructive">
+                      {errors.title.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="property_type">Property Type *</Label>
-                  <Select onValueChange={(value) => setValue('property_type', value)}>
+                  <Select
+                    onValueChange={(value) => setValue("property_type", value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select property type" />
                     </SelectTrigger>
                     <SelectContent>
-                      {propertyTypes.map(type => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                      {propertyTypes.map((type) => (
+                        <SelectItem key={type} value={type}>
+                          {type}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -273,20 +306,32 @@ export default function AddProperty() {
               <div className="space-y-2">
                 <Label htmlFor="location">Location *</Label>
                 <Input
-                  {...register('location', { required: 'Location is required' })}
+                  {...register("location", {
+                    required: "Location is required",
+                  })}
                   placeholder="e.g., Sandton, Johannesburg, Gauteng"
                 />
-                {errors.location && <p className="text-sm text-destructive">{errors.location.message}</p>}
+                {errors.location && (
+                  <p className="text-sm text-destructive">
+                    {errors.location.message}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
-                  {...register('description', { required: 'Description is required' })}
+                  {...register("description", {
+                    required: "Description is required",
+                  })}
                   placeholder="Describe your property, its features, and surroundings..."
                   rows={4}
                 />
-                {errors.description && <p className="text-sm text-destructive">{errors.description.message}</p>}
+                {errors.description && (
+                  <p className="text-sm text-destructive">
+                    {errors.description.message}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -303,17 +348,24 @@ export default function AddProperty() {
                   <Label htmlFor="price">Monthly Rent (R) *</Label>
                   <Input
                     type="number"
-                    {...register('price', { required: 'Price is required', min: 1 })}
+                    {...register("price", {
+                      required: "Price is required",
+                      min: 1,
+                    })}
                     placeholder="12000"
                   />
-                  {errors.price && <p className="text-sm text-destructive">{errors.price.message}</p>}
+                  {errors.price && (
+                    <p className="text-sm text-destructive">
+                      {errors.price.message}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="bedrooms">Bedrooms *</Label>
                   <Input
                     type="number"
-                    {...register('bedrooms', { required: true, min: 0 })}
+                    {...register("bedrooms", { required: true, min: 0 })}
                     min="0"
                   />
                 </div>
@@ -322,7 +374,7 @@ export default function AddProperty() {
                   <Label htmlFor="bathrooms">Bathrooms *</Label>
                   <Input
                     type="number"
-                    {...register('bathrooms', { required: true, min: 1 })}
+                    {...register("bathrooms", { required: true, min: 1 })}
                     min="1"
                   />
                 </div>
@@ -331,7 +383,7 @@ export default function AddProperty() {
                   <Label htmlFor="parking_spaces">Parking Spaces</Label>
                   <Input
                     type="number"
-                    {...register('parking_spaces')}
+                    {...register("parking_spaces")}
                     min="0"
                   />
                 </div>
@@ -342,17 +394,14 @@ export default function AddProperty() {
                   <Label htmlFor="size_sqm">Size (sqm)</Label>
                   <Input
                     type="number"
-                    {...register('size_sqm')}
+                    {...register("size_sqm")}
                     placeholder="85"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="available_from">Available From</Label>
-                  <Input
-                    type="date"
-                    {...register('available_from')}
-                  />
+                  <Input type="date" {...register("available_from")} />
                 </div>
               </div>
 
@@ -360,8 +409,10 @@ export default function AddProperty() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="furnished"
-                    checked={watch('furnished')}
-                    onCheckedChange={(checked) => setValue('furnished', !!checked)}
+                    checked={watch("furnished")}
+                    onCheckedChange={(checked) =>
+                      setValue("furnished", !!checked)
+                    }
                   />
                   <Label htmlFor="furnished">Furnished</Label>
                 </div>
@@ -369,8 +420,10 @@ export default function AddProperty() {
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="pets_allowed"
-                    checked={watch('pets_allowed')}
-                    onCheckedChange={(checked) => setValue('pets_allowed', !!checked)}
+                    checked={watch("pets_allowed")}
+                    onCheckedChange={(checked) =>
+                      setValue("pets_allowed", !!checked)
+                    }
                   />
                   <Label htmlFor="pets_allowed">Pets Allowed</Label>
                 </div>
@@ -386,10 +439,14 @@ export default function AddProperty() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {amenitiesList.map(amenity => (
+                {amenitiesList.map((amenity) => (
                   <Badge
                     key={amenity}
-                    variant={selectedAmenities.includes(amenity) ? "default" : "outline"}
+                    variant={
+                      selectedAmenities.includes(amenity)
+                        ? "default"
+                        : "outline"
+                    }
                     className="cursor-pointer justify-center p-2"
                     onClick={() => toggleAmenity(amenity)}
                   >
@@ -404,7 +461,9 @@ export default function AddProperty() {
           <Card>
             <CardHeader>
               <CardTitle>Property Images</CardTitle>
-              <CardDescription>Add up to 10 high-quality images</CardDescription>
+              <CardDescription>
+                Add up to 10 high-quality images
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
@@ -452,11 +511,15 @@ export default function AddProperty() {
 
           {/* Submit */}
           <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => navigate('/enhancedlandlorddashboard')}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/enhancedlandlorddashboard")}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={uploading}>
-              {uploading ? 'Adding Property...' : 'Add Property'}
+              {uploading ? "Adding Property..." : "Add Property"}
             </Button>
           </div>
         </form>
@@ -464,3 +527,4 @@ export default function AddProperty() {
     </div>
   );
 }
+
