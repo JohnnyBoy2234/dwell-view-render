@@ -23,7 +23,7 @@ import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/En
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
 import { PlanGuard } from "@mzanzihomes/ui/components/PlanGuard";
 import Properties from "@/pages/Properties";
-import PropertyDetail from "@/pages/PropertyDetail";
+import { PropertyDetail } from "@mzanzihomes/features/pages";
 import Auth from "@/pages/Auth";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";

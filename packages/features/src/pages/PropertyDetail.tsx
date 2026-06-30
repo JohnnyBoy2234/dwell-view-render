@@ -35,7 +35,7 @@ import {
   MessageCircle
 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import type { PlanType } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { useForm } from 'react-hook-form';

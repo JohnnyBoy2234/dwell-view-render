@@ -15,7 +15,7 @@ import { MiniNavbar } from "@/components/ui/mini-navbar";
 import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout";
 import Index from "@/pages/Index";
 import Properties from "@/pages/Properties";
-import PropertyDetail from "@/pages/PropertyDetail";
+import { PropertyDetail } from "@mzanzihomes/features/pages";
 import SaleListings from "@/pages/SaleListings";
 import About from "@/pages/About";
 import AboutLandlord from "@/pages/AboutLandlord";

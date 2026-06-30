@@ -24,7 +24,7 @@ import Auth from "@/pages/Auth";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 import Properties from "@/pages/Properties";
-import PropertyDetail from "@/pages/PropertyDetail";
+import { PropertyDetail } from "@mzanzihomes/features/pages";
 import PropertyManagement from "@/pages/PropertyManagement";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import LandlordInspection from "@/pages/LandlordInspection";
