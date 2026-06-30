@@ -2420,6 +2420,40 @@ const renderReportsTab = () => (
         className="p-4 space-y-4"
         style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
       >
+        {/* First-time landlord prompt — shown only when no properties exist yet */}
+        {properties.length === 0 && (
+          <div
+            className="rounded-2xl p-5 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-400"
+            style={{
+              background: 'linear-gradient(135deg, hsl(214,100%,59%,0.12) 0%, hsl(214,100%,59%,0.05) 100%)',
+              border: '1px solid hsl(214,100%,59%,0.2)',
+            }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: 'hsl(214,100%,59%,0.15)' }}
+              >
+                <Building className="w-5 h-5" style={{ color: 'hsl(214,100%,59%)' }} />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground">Do you already have a property?</p>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Add your first listing to start managing tenants, leases and payments.
+                </p>
+              </div>
+            </div>
+            <Button
+              className="w-full rounded-xl font-semibold"
+              style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+              onClick={() => navigate('/listing-type')}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Your Property
+            </Button>
+          </div>
+        )}
+
         {/* Property header */}
         {selectedProperty && (
           <Card className="animate-in fade-in slide-in-from-top-4 duration-300 border-primary/20 bg-primary/5">
