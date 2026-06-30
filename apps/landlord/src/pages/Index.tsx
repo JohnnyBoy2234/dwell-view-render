@@ -4,7 +4,7 @@ import { Button } from "@mzanzihomes/ui/components/button";
 import { Link } from "react-router-dom";
 import { PropertySearchWidget } from "@/components/search/PropertySearchWidget";
 import { MoreFiltersModal } from "@mzanzihomes/ui/components/search/MoreFiltersModal";
-import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
+import { usePropertySearchFilters } from "@mzanzihomes/ui/hooks/usePropertySearchFilters";
 import { BlogPostCard } from "@mzanzihomes/ui/components/blog/BlogPostCard";
 import { Footer } from "@mzanzihomes/ui/components/Footer";
 import { PropertyHero } from "@mzanzihomes/ui/components/property-hero";

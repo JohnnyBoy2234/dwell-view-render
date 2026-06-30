@@ -1,8 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@mzanzihomes/ui/components/dialog";
 import { X } from "lucide-react";
 import { cn } from "@mzanzihomes/common/lib/utils";
-// eslint-disable-next-line no-restricted-imports -- TODO(search-slice): extract usePropertySearch/usePropertySearchFilters into a search slice
-import type { PropertySearchFilters } from "@/hooks/usePropertySearchFilters";
+import type { PropertySearchFilters } from "@mzanzihomes/ui/hooks/usePropertySearchFilters";
 
 interface MoreFiltersModalProps {
   open: boolean;
