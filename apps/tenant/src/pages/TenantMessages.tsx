@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import Messages from '@/pages/Messages';
+import { Messages } from '@mzanzihomes/features/pages';
 import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout';
 
 export default function TenantMessages() {

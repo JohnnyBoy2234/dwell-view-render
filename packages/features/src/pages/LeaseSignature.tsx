@@ -5,7 +5,7 @@ import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { FileText, ArrowLeft } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { toast } from 'sonner';
 import { LeasePreviewModal } from '@mzanzihomes/features/lease';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';

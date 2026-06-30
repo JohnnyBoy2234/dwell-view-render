@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom';
 import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout';
-import Messages from '@/pages/Messages';
+import { Messages } from '@mzanzihomes/features/pages';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
 import LandlordInspection from '@/pages/LandlordInspection';
-import InventoryStart from '@/pages/InventoryStart';
-import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
+import { InventoryStart } from '@mzanzihomes/features/pages';
+import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { MzanziHomesSupport } from '@mzanzihomes/features/support';
 import { PlanGuard } from '@mzanzihomes/ui/components/PlanGuard';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';

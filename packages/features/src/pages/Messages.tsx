@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
 import { useWhatsAppMessaging } from '@mzanzihomes/features/messaging';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import {
