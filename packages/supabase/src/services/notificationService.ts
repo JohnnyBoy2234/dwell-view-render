@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { supabase } from '@mzanzihomes/supabase/client';
+import { supabase } from '../client';
 import { CreateNotificationData, NotificationType, NotificationPriority } from '@mzanzihomes/common/types/notification';
 import { NotificationUrls } from '@mzanzihomes/ui/utils/notificationRoutes';
 

@@ -1,4 +1,4 @@
-import { NotificationService } from '@/services/notificationService';
+import { NotificationService } from './notificationService';
 import { NotificationUrls } from '@mzanzihomes/ui/utils/notificationRoutes';
 
 /**

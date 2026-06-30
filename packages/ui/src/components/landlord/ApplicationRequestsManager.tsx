@@ -6,8 +6,7 @@ import { Check, X, Clock, User, Home } from 'lucide-react';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-// eslint-disable-next-line no-restricted-imports -- TODO(services-tier): lift notificationService→kernel, then re-home notificationHelpers
-import { createApplicationNotifications } from '@/utils/notificationHelpers';
+import { createApplicationNotifications } from '@mzanzihomes/supabase/services/notificationHelpers';
 
 interface ApplicationRequest {
   id: string;
