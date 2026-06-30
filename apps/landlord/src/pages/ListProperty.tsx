@@ -373,20 +373,6 @@ export default function ListProperty() {
           )}
         </div>
 
-        {(plan === 'free' || planStatus !== 'active') && (
-          <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <div>
-              <p className="font-semibold text-primary">Upgrade for unlimited pro features</p>
-              <p className="text-sm text-muted-foreground">
-                Stay on the free plan or unlock messaging, applications, and premium support whenever you’re ready.
-              </p>
-            </div>
-            <Button variant="outline" onClick={() => navigate('/pricing')}>
-              View Plans
-            </Button>
-          </div>
-        )}
-
         {/* Success Dialog */}
         <SuccessDialog
           open={showSuccessDialog}

@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { PropertySearchWidget } from "@/components/search/PropertySearchWidget";
 import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
@@ -222,9 +223,18 @@ const secondCol = rentLekkerTestimonials.slice(3, 6);
 const thirdCol = rentLekkerTestimonials.slice(6, 9);
 
 const Index = () => {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const { filters, updateFilters, executeSearch, clearFilters } = usePropertySearchFilters();
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [mode, setMode] = useState<Mode>('rent');
+
+  // Signed-in landlords have no need for the marketing home page
+  useEffect(() => {
+    if (!loading && user) {
+      navigate('/enhancedlandlorddashboard', { replace: true });
+    }
+  }, [user, loading, navigate]);
 
   const onFiltersChange = (patch: Partial<typeof filters>) => updateFilters(patch);
   const handleSearch = () => executeSearch();
@@ -505,18 +515,12 @@ const Index = () => {
               <p className="mt-5 text-lg text-white/75 max-w-xl mx-auto">
                 {ctaContent[mode].subtext}
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+              <div className="mt-8 flex justify-center">
                 <Button
                   asChild
-                  className="bg-white text-ocean-blue hover:bg-white/90 rounded-full px-8 py-3.5 text-sm font-bold shadow-lg"
+                  className="bg-white text-ocean-blue hover:bg-white/90 rounded-full px-10 py-3.5 text-sm font-bold shadow-lg"
                 >
-                  <Link to={ctaContent[mode].primaryHref}>{ctaContent[mode].primaryLabel}</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="bg-white/15 hover:bg-white/25 text-white border border-white/30 rounded-full px-8 py-3.5 text-sm font-semibold backdrop-blur-sm"
-                >
-                  <Link to={ctaContent[mode].secondaryHref}>{ctaContent[mode].secondaryLabel}</Link>
+                  <Link to="/auth">Sign In</Link>
                 </Button>
               </div>
             </motion.div>
