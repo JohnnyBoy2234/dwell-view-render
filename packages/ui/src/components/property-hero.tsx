@@ -33,9 +33,15 @@ interface PropertyHeroProps {
   children?: React.ReactNode;
   mode?: Mode;
   onModeChange?: (mode: Mode) => void;
+  /** Override the default per-mode background image */
+  image?: string;
+  /** Override the default per-mode headline */
+  headline?: React.ReactNode;
+  /** Override the default per-mode subtext */
+  subtext?: string;
 }
 
-export function PropertyHero({ children, mode = 'rent', onModeChange }: PropertyHeroProps) {
+export function PropertyHero({ children, mode = 'rent', onModeChange, image, headline, subtext }: PropertyHeroProps) {
   return (
     <section className="relative flex flex-col min-h-screen overflow-hidden">
       {/* ── Background image — zoom-fade on mode change ── */}
@@ -44,7 +50,7 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
           key={mode}
           className="absolute inset-0 sm:!bg-cover sm:!bg-center"
           style={{
-            backgroundImage: `url(${heroImages[mode]})`,
+            backgroundImage: `url(${image ?? heroImages[mode]})`,
             backgroundSize: heroMobileBgSize[mode],
             backgroundPosition: heroMobileBgPosition[mode],
             backgroundRepeat: 'no-repeat',
@@ -124,13 +130,13 @@ export function PropertyHero({ children, mode = 'rent', onModeChange }: Property
               className="text-4xl sm:text-6xl lg:text-[78px] font-bold text-center leading-[1.05] tracking-tight max-w-5xl mb-5"
               style={{ color: '#ffffff', textShadow: '0 2px 16px rgba(0,0,0,0.5)' }}
             >
-              {heroCopy[mode].headline}
+              {headline ?? heroCopy[mode].headline}
             </h1>
             <p
               className="text-base sm:text-xl text-center max-w-2xl leading-relaxed mb-10"
               style={{ color: 'rgba(255,255,255,0.85)', textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
             >
-              {heroCopy[mode].subtext}
+              {subtext ?? heroCopy[mode].subtext}
             </p>
           </motion.div>
         </AnimatePresence>

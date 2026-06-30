@@ -115,7 +115,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
-          <NotificationBell className="hidden sm:flex text-gray-300" />
+          <NotificationBell className="flex text-gray-300" />
           {actions}
           <button
             onClick={signOut}
