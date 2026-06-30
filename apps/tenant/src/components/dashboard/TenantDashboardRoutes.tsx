@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { EnhancedDashboardLayout } from './EnhancedDashboardLayout';
+import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
@@ -15,7 +15,7 @@ import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import MaintenanceTicketDetails from '@/pages/MaintenanceTicketDetails';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import { FileText } from 'lucide-react';
-import ProfilePage from '@/components/profile/ProfilePage';
+import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
 
 export default function TenantDashboardRoutes() {
   return (

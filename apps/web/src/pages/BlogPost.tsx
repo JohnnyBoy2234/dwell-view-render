@@ -1,5 +1,5 @@
 import { useParams, Navigate } from "react-router-dom";
-import { BlogPostHero } from "@/components/blog/BlogPostHero";
+import { BlogPostHero } from "@mzanzihomes/ui/components/blog/BlogPostHero";
 import { useToast } from "@mzanzihomes/ui/hooks/use-toast";
 import { useEffect } from "react";
 

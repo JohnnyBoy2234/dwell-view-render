@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { AdminLayout } from "@/components/admin/AdminLayout";
+import { AdminLayout } from "@mzanzihomes/ui/components/admin/AdminLayout";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminManagement from "@/pages/admin/AdminManagement";
 import AdminProperties from "@/pages/admin/AdminProperties";

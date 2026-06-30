@@ -3,10 +3,10 @@ import React from "react";
 import { Button } from "@mzanzihomes/ui/components/button";
 import { Link } from "react-router-dom";
 import { PropertySearchWidget } from "@/components/search/PropertySearchWidget";
-import { MoreFiltersModal } from "@/components/search/MoreFiltersModal";
+import { MoreFiltersModal } from "@mzanzihomes/ui/components/search/MoreFiltersModal";
 import { usePropertySearchFilters } from "@/hooks/usePropertySearchFilters";
-import { BlogPostCard } from "@/components/blog/BlogPostCard";
-import { Footer } from "@/components/Footer";
+import { BlogPostCard } from "@mzanzihomes/ui/components/blog/BlogPostCard";
+import { Footer } from "@mzanzihomes/ui/components/Footer";
 import { PropertyHero } from "@mzanzihomes/ui/components/property-hero";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import { Marquee } from "@mzanzihomes/ui/components/marquee";
@@ -15,9 +15,9 @@ import {
   rentLekkerTestimonials,
 } from "@mzanzihomes/ui/components/testimonials-columns-1";
 import { motion, AnimatePresence } from "motion/react";
-import { ForSellersSection } from "@/components/sections/ForSellersSection";
-import { SellingStepsPreview } from "@/components/sections/SellingStepsPreview";
-import { ForBuyersSection } from "@/components/sections/ForBuyersSection";
+import { ForSellersSection } from "@mzanzihomes/ui/components/sections/ForSellersSection";
+import { SellingStepsPreview } from "@mzanzihomes/ui/components/sections/SellingStepsPreview";
+import { ForBuyersSection } from "@mzanzihomes/ui/components/sections/ForBuyersSection";
 import {
   Shield,
   ArrowRight,

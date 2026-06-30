@@ -1,5 +1,5 @@
 import { SectionHeader } from "@mzanzihomes/ui/components/SectionHeader";
-import { BlogPostCard } from "@/components/blog/BlogPostCard";
+import { BlogPostCard } from "@mzanzihomes/ui/components/blog/BlogPostCard";
 
 type BlogPost = {
   id: string;

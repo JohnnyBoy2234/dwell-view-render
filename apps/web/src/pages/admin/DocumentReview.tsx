@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
+import { AdminLayout } from '@mzanzihomes/ui/components/admin/AdminLayout';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';

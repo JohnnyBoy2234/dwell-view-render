@@ -12,7 +12,7 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import { ConnectionHealthIndicator } from '@/components/messaging/ConnectionHealthIndicator';
+import { ConnectionHealthIndicator } from '@mzanzihomes/ui/components/messaging/ConnectionHealthIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AddViewingSlotModal } from '@mzanzihomes/features/viewing';

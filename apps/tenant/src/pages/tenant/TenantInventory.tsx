@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { InventoryStartPanel } from '@mzanzihomes/features/property';
-import { InventoryDetailModal } from '@/components/inventory/InventoryDetailModal';
+import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/InventoryDetailModal';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useInventory } from '@/hooks/useInventory';
 import { useAuth } from '@/hooks/useAuth';

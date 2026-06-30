@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import Messages from '@/pages/Messages';
-import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
+import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout';
 
 export default function TenantMessages() {
   const { user, isLandlord } = useAuth();

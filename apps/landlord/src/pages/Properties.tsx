@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { LoadingLogo } from '@mzanzihomes/ui/components/LoadingLogo';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { ResponsivePropertyGrid } from '@/components/ResponsivePropertyGrid';
+import { ResponsivePropertyGrid } from '@mzanzihomes/ui/components/ResponsivePropertyGrid';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Select,

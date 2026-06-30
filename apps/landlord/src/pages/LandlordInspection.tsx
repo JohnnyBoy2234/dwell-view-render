@@ -10,7 +10,7 @@ import { InspectionRecordWithDetails } from '@mzanzihomes/common/types/inspectio
 import { supabase } from '@mzanzihomes/supabase/client';
 import { InspectionDetailModal } from '@mzanzihomes/features/inspection';
 import { InventoryStartPanel } from '@mzanzihomes/features/property';
-import { MobileBackButton } from '@/components/mobile/MobileBackButton';
+import { MobileBackButton } from '@mzanzihomes/ui/components/mobile/MobileBackButton';
 import { useProperties } from '@mzanzihomes/features/property';
 import { cn } from '@mzanzihomes/common/lib/utils';
 

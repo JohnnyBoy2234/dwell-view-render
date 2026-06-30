@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { EnhancedDashboardLayout } from '@/components/dashboard/EnhancedDashboardLayout';
-import { EnhancedSidebar } from '@/components/dashboard/EnhancedSidebar';
+import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout';
+import { EnhancedSidebar } from '@mzanzihomes/ui/components/dashboard/EnhancedSidebar';
 import { SidebarProvider } from '@mzanzihomes/ui/components/sidebar';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
@@ -20,7 +20,7 @@ import {
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
-import { VerificationGate } from '@/components/VerificationGate';
+import { VerificationGate } from '@mzanzihomes/ui/components/VerificationGate';
 import { cn } from '@mzanzihomes/common/lib/utils';
 
 // Hoisted outside component — stable reference, no re-creation on render
