@@ -29,10 +29,10 @@ import SafeRenting from "@/pages/SafeRenting";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 import Auth from "@/pages/Auth";
-import ResetPassword from "@/pages/ResetPassword";
-import Notifications from "@/pages/Notifications";
-import SettingsPage from "@/pages/SettingsPage";
-import NotFound from "@/pages/NotFound";
+import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
+import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
+import SettingsPage from "@mzanzihomes/ui/components/pages/SettingsPage";
+import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 
 const AdminRoutes = React.lazy(() => import("@/pages/admin/AdminRoutes"));
 

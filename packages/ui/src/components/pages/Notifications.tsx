@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useNotifications } from '@/hooks/useNotifications';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
 import { Button } from '@mzanzihomes/ui/components/button';
 import {
   Bell,

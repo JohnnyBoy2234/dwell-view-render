@@ -25,10 +25,10 @@ import { PlanGuard } from "@mzanzihomes/ui/components/PlanGuard";
 import Properties from "@/pages/Properties";
 import PropertyDetail from "@/pages/PropertyDetail";
 import Auth from "@/pages/Auth";
-import ResetPassword from "@/pages/ResetPassword";
+import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
-import Notifications from "@/pages/Notifications";
+import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
 import ApplicationDetail from "@/pages/ApplicationDetail";
 import RentalApplication from "@/pages/RentalApplication";
 import { LeaseSignature } from "@/pages/LeaseSignature";
@@ -40,9 +40,9 @@ import Messages from "@/pages/Messages";
 import MobileCapture from "@/pages/MobileCapture";
 import InventoryStart from "@/pages/InventoryStart";
 import MaintenanceTicketDetails from "@/pages/MaintenanceTicketDetails";
-import SettingsPage from "@/pages/SettingsPage";
+import SettingsPage from "@mzanzihomes/ui/components/pages/SettingsPage";
 import CreateInspection from "@/pages/CreateInspection";
-import NotFound from "@/pages/NotFound";
+import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 
 const queryClient = new QueryClient();
 
