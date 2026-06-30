@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useEffect, useState } from "react";
 import { supabase } from "@mzanzihomes/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@mzanzihomes/supabase/hooks/useAuth";
 
 export interface ApplicationInvite {
   id: string;

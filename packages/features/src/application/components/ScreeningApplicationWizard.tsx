@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@mzanzihomes/ui/components/checkbox";
 import { Separator } from "@mzanzihomes/ui/components/separator";
 import { useToast } from "@mzanzihomes/ui/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth } from "@mzanzihomes/supabase/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@mzanzihomes/supabase/client";
 import { FileText, Upload, X } from "lucide-react";

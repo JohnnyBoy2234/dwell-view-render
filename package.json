@@ -12,6 +12,7 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "lint": "turbo lint",
+    "lint:boundaries": "eslint \"packages/**/*.{ts,tsx}\"",
     "test": "turbo test",
     "supabase": "supabase"
   },

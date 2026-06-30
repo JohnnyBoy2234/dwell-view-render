@@ -1,8 +1,8 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { useRealtime } from '@/hooks/useRealtime';
+import { useAuth } from './useAuth';
+import { useRealtime } from './useRealtime';
 
 export interface TenantNotification {
   id: string;
