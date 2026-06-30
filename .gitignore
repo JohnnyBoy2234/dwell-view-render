@@ -33,3 +33,6 @@ dist-ssr
 android/keystore.properties
 android/app/*.jks
 .playwright-mcp/
+
+# turbo build cache
+.turbo/
