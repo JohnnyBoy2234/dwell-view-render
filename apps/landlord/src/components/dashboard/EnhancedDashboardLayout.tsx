@@ -115,7 +115,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
-          <NotificationBell className="flex text-gray-300" />
+          {/* Notification bell removed — notifications surface via the tile badge in management tools */}
           {actions}
           <button
             onClick={signOut}

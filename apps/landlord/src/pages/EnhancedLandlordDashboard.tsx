@@ -26,6 +26,8 @@ import { useToast } from '@/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@/types/maintenance';
 import { useLandlordApplications } from '@/hooks/useLandlordApplications';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useLandlordNotifications } from '@/hooks/useLandlordNotifications';
 import { AccountingOverview } from '@/components/accounting/AccountingOverview';
 import { PROPERTY_CARD_STYLES } from '@/constants/propertyCardConstants';
 import { VerificationGate } from '@/components/VerificationGate';
@@ -130,7 +132,37 @@ export default function EnhancedLandlordDashboard() {
   });
 
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications(selectedPropertyId || undefined);
-  
+  const { unreadCount: generalUnread } = useNotifications();
+  const { unreadCount: landlordUnread } = useLandlordNotifications();
+  const totalNotificationCount = (generalUnread || 0) + (landlordUnread || 0);
+
+  // Inline "add property by address" state
+  const [addressInput, setAddressInput] = useState('');
+  const [addingProperty, setAddingProperty] = useState(false);
+
+  const handleAddPropertyByAddress = async () => {
+    if (!addressInput.trim() || !user) return;
+    setAddingProperty(true);
+    try {
+      const { error } = await supabase.from('properties').insert({
+        landlord_id: user.id,
+        title: addressInput.trim(),
+        location: addressInput.trim(),
+        status: 'unlisted',
+        listing_type: 'rent',
+        price: 0,
+      });
+      if (error) throw error;
+      setAddressInput('');
+      await fetchProperties();
+      toast({ title: 'Property added', description: 'Your property has been added. You can now invite a tenant.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Failed to add property', description: e?.message || 'Please try again.' });
+    } finally {
+      setAddingProperty(false);
+    }
+  };
+
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
     const path = location.pathname;
@@ -2330,18 +2362,19 @@ const renderReportsTab = () => (
     };
 
     const tools: ToolItem[] = [
-      { title: 'Properties',   subtitle: `${properties.length} listed`,      icon: Building,   tab: '/enhancedlandlorddashboard/properties' },
-      { title: 'List Property',subtitle: 'Add a new listing',                icon: Tag,        action: () => navigate('/listing-type') },
-      { title: 'Messages',     subtitle: 'Chat with tenants',                icon: MessageCircle, path: '/messages' },
-      { title: 'Applications', subtitle: `${applications.length} total`,    icon: Inbox,      tab: '/enhancedlandlorddashboard/applications' },
-      { title: 'Maintenance',  subtitle: `${activeMaintenanceRequests} open`, icon: Wrench,   tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
-      { title: 'Payments',     subtitle: 'Track rent',                        icon: Receipt,  tab: '/enhancedlandlorddashboard/payments' },
-      { title: 'SwiftBooks',   subtitle: 'Analytics',                         icon: BarChart3,tab: '/enhancedlandlorddashboard/swiftbooks' },
-      { title: 'Leases',       subtitle: 'Contracts',                         icon: FileText, tab: '/enhancedlandlorddashboard/leases' },
-      { title: 'Inventory',    subtitle: 'Photos & notes',                    icon: Camera,   tab: '/enhancedlandlorddashboard/inventory' },
-      { title: 'Inspection',   subtitle: 'View & start',                      icon: Clipboard,tab: '/enhancedlandlorddashboard/inspection' },
-      { title: 'My Profile',   subtitle: 'Account & settings',                icon: User,       tab: '/enhancedlandlorddashboard/profile' },
-      { title: 'Support',      subtitle: 'Help & resources',                  icon: HelpCircle, path: '/landlord/support' },
+      { title: 'Properties',     subtitle: `${properties.length} listed`,        icon: Building,      tab: '/enhancedlandlorddashboard/properties' },
+      { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
+      { title: 'Messages',       subtitle: 'Chat with tenants',                  icon: MessageCircle, path: '/messages' },
+      { title: 'Notifications',  subtitle: totalNotificationCount > 0 ? `${totalNotificationCount} new` : 'All caught up', icon: Bell, tab: '/enhancedlandlorddashboard/notifications', count: totalNotificationCount },
+      { title: 'Applications',   subtitle: `${applications.length} total`,       icon: Inbox,         tab: '/enhancedlandlorddashboard/applications' },
+      { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
+      { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
+      { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
+      { title: 'Leases',         subtitle: 'Contracts',                          icon: FileText,      tab: '/enhancedlandlorddashboard/leases' },
+      { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
+      { title: 'Inspection',     subtitle: 'View & start',                       icon: Clipboard,     tab: '/enhancedlandlorddashboard/inspection' },
+      { title: 'My Profile',     subtitle: 'Account & settings',                 icon: User,          tab: '/enhancedlandlorddashboard/profile' },
+      { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/landlord/support' },
     ];
 
     return (
@@ -2349,39 +2382,70 @@ const renderReportsTab = () => (
         className="p-4 space-y-4"
         style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
       >
-        {/* First-time landlord prompt — shown only when no properties exist yet */}
-        {properties.length === 0 && (
+        {/* Top prompt: address form when no properties, invite tenant link once property exists */}
+        {properties.length === 0 ? (
           <div
-            className="rounded-2xl p-5 flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-400"
+            className="rounded-2xl p-5 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
             style={{
               background: 'linear-gradient(135deg, hsl(214,100%,59%,0.12) 0%, hsl(214,100%,59%,0.05) 100%)',
               border: '1px solid hsl(214,100%,59%,0.2)',
             }}
           >
-            <div className="flex items-start gap-3">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: 'hsl(214,100%,59%,0.15)' }}
-              >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%,0.15)' }}>
                 <Building className="w-5 h-5" style={{ color: 'hsl(214,100%,59%)' }} />
               </div>
               <div>
-                <p className="font-semibold text-foreground">Do you already have a property?</p>
-                <p className="text-sm text-muted-foreground mt-0.5">
-                  Add your first listing to start managing tenants, leases and payments.
-                </p>
+                <p className="font-semibold text-foreground">Add property</p>
+                <p className="text-xs text-muted-foreground">Enter the address to get started</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={addressInput}
+                onChange={e => setAddressInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddPropertyByAddress()}
+                placeholder="e.g. 12 Long Street, Cape Town"
+                className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+              <Button
+                disabled={!addressInput.trim() || addingProperty}
+                onClick={handleAddPropertyByAddress}
+                className="rounded-xl px-4 shrink-0"
+                style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+              >
+                {addingProperty ? '...' : 'Add'}
+              </Button>
+            </div>
+          </div>
+        ) : tenants.length === 0 ? (
+          <div
+            className="rounded-2xl p-4 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
+            style={{
+              background: 'linear-gradient(135deg, hsl(142,72%,44%,0.10) 0%, hsl(142,72%,44%,0.04) 100%)',
+              border: '1px solid hsl(142,72%,44%,0.2)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(142,72%,44%,0.12)' }}>
+                <UserPlus className="w-4 h-4" style={{ color: 'hsl(142,72%,44%)' }} />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground text-sm">Property added!</p>
+                <p className="text-xs text-muted-foreground">Ready to invite a tenant?</p>
               </div>
             </div>
             <Button
-              className="w-full rounded-xl font-semibold"
-              style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
-              onClick={() => navigate('/listing-type')}
+              size="sm"
+              className="rounded-full shrink-0"
+              style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
+              onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
             >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Your Property
+              Invite Tenant
             </Button>
           </div>
-        )}
+        ) : null}
 
         {/* ── Section divider ────────────────────────────────── */}
         <div className="flex items-center gap-3 py-1">
