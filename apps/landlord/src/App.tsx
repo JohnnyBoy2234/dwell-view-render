@@ -365,7 +365,6 @@ const App = () => {
                 <LandlordRoleGuard>
                   <AppRoutes />
                 </LandlordRoleGuard>
-                <MobileBottomBar />
               </ErrorBoundary>
             </BrowserRouter>
           </AuthBootstrap>

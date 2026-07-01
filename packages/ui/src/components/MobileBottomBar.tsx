@@ -51,14 +51,21 @@ export function MobileBottomBar() {
     return isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
   };
 
-  const navItems: NavItem[] = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/properties', icon: Search, label: 'Find' },
-    ...(isLandlord ? [{ path: '/listing-type', icon: Plus, label: 'List' }] : []),
-    { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
-    { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
-    { path: getDeskRoute(), icon: Building, label: isLandlord ? 'Manage' : 'My Home' },
-  ];
+  const navItems: NavItem[] = isLandlord
+    ? [
+        { path: getDeskRoute(), icon: Building, label: 'Dashboard' },
+        { path: '/properties', icon: Search, label: 'Find' },
+        { path: '/listing-type', icon: Plus, label: 'List' },
+        { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
+        { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
+      ]
+    : [
+        { path: '/', icon: Home, label: 'Home' },
+        { path: '/properties', icon: Search, label: 'Find' },
+        { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
+        { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
+        { path: getDeskRoute(), icon: Building, label: 'My Home' },
+      ];
 
   const isItemActive = (item: NavItem, index: number) => {
     const p = location.pathname;

@@ -155,7 +155,7 @@ export function AISupportChat() {
             'fixed z-50 h-14 w-14 rounded-full shadow-lg shadow-primary/30',
             'bg-gradient-to-br from-primary to-primary/80',
             'hover:scale-105 active:scale-95 transition-transform',
-            'bottom-20 right-4 md:bottom-6 md:right-6'
+            'bottom-6 right-4 md:bottom-6 md:right-6'
           )}
           size="icon"
         >

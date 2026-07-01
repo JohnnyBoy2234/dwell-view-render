@@ -53,27 +53,6 @@ export default function ListingTypePage() {
             <span className="text-green-300 text-xl">›</span>
           </button>
 
-          {/* Add Property Unlisted */}
-          <button
-            onClick={() => go('/add-property-unlisted')}
-            className="w-full flex items-center gap-4 bg-white rounded-2xl p-5 mb-4 border-2 border-purple-200 shadow-sm hover:border-purple-400 hover:shadow-md transition-all text-left"
-          >
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl flex-shrink-0">
-              🔧
-            </div>
-            <div className="flex-1">
-              <div className="font-bold text-purple-800 text-base">Add Property (Unlisted)</div>
-              <div className="text-sm text-gray-500 mt-0.5">Manage tools without a public listing</div>
-            </div>
-            <span className="text-purple-300 text-xl">›</span>
-          </button>
-
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
-            <p className="text-xs text-amber-800">
-              💡 <strong>Add Property (Unlisted)</strong> lets you use all management tools — maintenance,
-              leases, payments — without appearing in public search.
-            </p>
-          </div>
         </div>
       </div>
     </>

@@ -26,6 +26,8 @@ import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 import { useLandlordApplications } from '@mzanzihomes/features/application';
+import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
+import { useLandlordNotifications } from '@mzanzihomes/supabase/hooks/useLandlordNotifications';
 import { AccountingOverview } from '@mzanzihomes/features/accounting';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { VerificationGate } from '@mzanzihomes/ui/components/VerificationGate';
@@ -130,7 +132,37 @@ export default function EnhancedLandlordDashboard() {
   });
 
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications(selectedPropertyId || undefined);
-  
+  const { unreadCount: generalUnread } = useNotifications();
+  const { unreadCount: landlordUnread } = useLandlordNotifications();
+  const totalNotificationCount = (generalUnread || 0) + (landlordUnread || 0);
+
+  // Inline "add property by address" state
+  const [addressInput, setAddressInput] = useState('');
+  const [addingProperty, setAddingProperty] = useState(false);
+
+  const handleAddPropertyByAddress = async () => {
+    if (!addressInput.trim() || !user) return;
+    setAddingProperty(true);
+    try {
+      const { error } = await supabase.from('properties').insert({
+        landlord_id: user.id,
+        title: addressInput.trim(),
+        location: addressInput.trim(),
+        status: 'unlisted',
+        listing_type: 'rent',
+        price: 0,
+      });
+      if (error) throw error;
+      setAddressInput('');
+      await fetchProperties();
+      toast({ title: 'Property added', description: 'Your property has been added. You can now invite a tenant.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Failed to add property', description: e?.message || 'Please try again.' });
+    } finally {
+      setAddingProperty(false);
+    }
+  };
+
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
     const path = location.pathname;
@@ -236,13 +268,6 @@ export default function EnhancedLandlordDashboard() {
       }
     }
   }, [location.pathname]);
-
-  // Auto-select the only property so landlords with one property skip the selection screen
-  useEffect(() => {
-    if (!loading && properties.length === 1 && !selectedPropertyId && currentTab === '/enhancedlandlorddashboard') {
-      handleSelectProperty(properties[0].id);
-    }
-  }, [loading, properties.length, selectedPropertyId, currentTab]);
 
   // Add a useEffect to handle tab-specific data fetching when currentTab changes
   useEffect(() => {
@@ -986,13 +1011,11 @@ export default function EnhancedLandlordDashboard() {
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
 
-          {/* Submitted Applications Section */}
-          {selectedPropertyId && (
-            <ApplicationsWithViewings 
-              propertyId={selectedPropertyId} 
-              propertyTitle={properties.find(p => p.id === selectedPropertyId)?.title || "Selected Property"}
-            />
-          )}
+          {/* Submitted Applications Section — shows all properties combined */}
+          <ApplicationsWithViewings
+            propertyId={undefined}
+            propertyTitle="All Properties"
+          />
           
           {/* Loading State */}
           {applicationsLoading ? (
@@ -2117,6 +2140,11 @@ const renderReportsTab = () => (
     const submittedRequests = maintenanceRequests.filter(r => r.status === 'submitted' && r.priority !== 'urgent');
     const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
 
+    // Showing all properties combined now (no property selection step) — label each
+    // request with which property it belongs to.
+    const getPropertyTitle = (propertyId: string) =>
+      properties.find(p => p.id === propertyId)?.title || 'Property';
+
     return (
       <div className="min-h-screen bg-white pb-8">
         <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8 w-full">
@@ -2164,6 +2192,10 @@ const renderReportsTab = () => (
                             <h4 className="font-semibold text-lg">{request.title}</h4>
                             <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
                             <div className="flex flex-wrap items-center gap-2 mt-2">
+                              <Badge variant="outline" className="gap-1">
+                                <Building className="h-3 w-3" />
+                                {getPropertyTitle(request.property_id)}
+                              </Badge>
                               <Badge variant="destructive">{request.priority}</Badge>
                               <Badge variant="secondary">{request.status.replace('_', ' ')}</Badge>
                               <span className="text-xs text-muted-foreground">
@@ -2214,6 +2246,10 @@ const renderReportsTab = () => (
                             <h4 className="font-semibold text-lg">{request.title}</h4>
                             <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
                             <div className="flex flex-wrap items-center gap-2 mt-2">
+                              <Badge variant="outline" className="gap-1">
+                                <Building className="h-3 w-3" />
+                                {getPropertyTitle(request.property_id)}
+                              </Badge>
                               <Badge variant={request.priority === 'high' ? 'default' : 'secondary'}>{request.priority}</Badge>
                               <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
                               <span className="text-xs text-muted-foreground">
@@ -2259,6 +2295,10 @@ const renderReportsTab = () => (
                             <h4 className="font-semibold text-lg">{request.title}</h4>
                             <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
                             <div className="flex flex-wrap items-center gap-2 mt-2">
+                              <Badge variant="outline" className="gap-1">
+                                <Building className="h-3 w-3" />
+                                {getPropertyTitle(request.property_id)}
+                              </Badge>
                               <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
                               <Badge>In Progress</Badge>
                               <span className="text-xs text-muted-foreground">
@@ -2308,81 +2348,7 @@ const renderReportsTab = () => (
       );
     }
 
-    // ── No property selected — show reminder + PropertySelection (rendered above) ──
-    if (!selectedPropertyId) {
-      return (
-        <div
-          className="p-4 space-y-4"
-          style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
-        >
-          {/* Payment reminder */}
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                  <Bell className="w-4 h-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-foreground text-sm">Send Payment Reminder</p>
-                  <p className="text-xs text-muted-foreground">Notify a tenant instantly via app and email</p>
-                </div>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <Select value={reminderPropertyId} onValueChange={setReminderPropertyId}>
-                  <SelectTrigger className="flex-1 min-w-0">
-                    <SelectValue placeholder="Select property…" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {properties.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.title}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button
-                  disabled={sendingReminder || !reminderPropertyId}
-                  onClick={async () => {
-                    if (!reminderPropertyId) {
-                      toast({ title: 'Select a property', description: 'Choose a property to notify its tenant.' });
-                      return;
-                    }
-                    try {
-                      setSendingReminder(true);
-                      const { data: tenancy } = await supabase
-                        .from('tenancies')
-                        .select('tenant_id')
-                        .eq('landlord_id', user?.id)
-                        .eq('property_id', reminderPropertyId)
-                        .eq('status', 'active')
-                        .limit(1)
-                        .maybeSingle();
-                      if (!tenancy?.tenant_id) {
-                        toast({ variant: 'destructive', title: 'No active tenant', description: 'This property has no active tenant.' });
-                        return;
-                      }
-                      const { error } = await supabase.functions.invoke('send-payment-reminder', {
-                        body: { tenant_id: tenancy.tenant_id, property_id: reminderPropertyId }
-                      });
-                      if (error) throw error;
-                      toast({ title: 'Reminder sent', description: 'Tenant notified via app and email.' });
-                    } catch (e: any) {
-                      toast({ variant: 'destructive', title: 'Failed to send reminder', description: e?.message || 'Please try again.' });
-                    } finally {
-                      setSendingReminder(false);
-                    }
-                  }}
-                  className="shrink-0"
-                >
-                  {sendingReminder ? 'Sending…' : 'Send Reminder'}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      );
-    }
-
-    // ── Property selected — show management tools ──────────────────────────────
-    const selectedProperty = getSelectedProperty();
+    // ── Management tools are always shown — no property-selection step ─────────
     const activeMaintenanceRequests = maintenanceRequests.filter(r => r.status !== 'completed').length;
 
     type ToolItem = {
@@ -2395,24 +2361,20 @@ const renderReportsTab = () => (
       action?: () => void;
     };
 
-    const propertyHasActiveTenant = tenants.some(t => t.property_id === selectedProperty?.id);
-
     const tools: ToolItem[] = [
-      ...(selectedProperty?.listing_type !== 'sale' && !propertyHasActiveTenant
-        ? [{ title: 'Invite Tenant', subtitle: 'Send invite link', icon: UserPlus, tab: '/enhancedlandlorddashboard/tenants' } as ToolItem]
-        : []),
-      ...(selectedProperty && !selectedProperty.is_listed && selectedProperty.listing_type !== 'sale'
-        ? [{ title: 'List Property', subtitle: 'Publish your property', icon: Tag, action: () => navigate(`/listing-type?propertyId=${selectedProperty.id}`) } as ToolItem]
-        : []),
-      { title: 'Applications', subtitle: `${applications.length} total`,    icon: Inbox,      tab: '/enhancedlandlorddashboard/applications' },
-      { title: 'Maintenance',  subtitle: `${activeMaintenanceRequests} open`, icon: Wrench,   tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
-      { title: 'Payments',     subtitle: 'Track rent',                        icon: Receipt,  tab: '/enhancedlandlorddashboard/payments' },
-      { title: 'SwiftBooks',   subtitle: 'Analytics',                         icon: BarChart3,tab: '/enhancedlandlorddashboard/swiftbooks' },
-      { title: 'Leases',       subtitle: 'Contracts',                         icon: FileText, tab: '/enhancedlandlorddashboard/leases' },
-      { title: 'Inventory',    subtitle: 'Photos & notes',                    icon: Camera,   tab: '/enhancedlandlorddashboard/inventory' },
-      { title: 'Inspection',   subtitle: 'View & start',                      icon: Clipboard,tab: '/enhancedlandlorddashboard/inspection' },
-      { title: 'My Profile',   subtitle: 'Account & settings',                icon: User,       tab: '/enhancedlandlorddashboard/profile' },
-      { title: 'Support',      subtitle: 'Help & resources',                  icon: HelpCircle, path: '/landlord/support' },
+      { title: 'Properties',     subtitle: `${properties.length} listed`,        icon: Building,      tab: '/enhancedlandlorddashboard/properties' },
+      { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
+      { title: 'Messages',       subtitle: 'Chat with tenants',                  icon: MessageCircle, path: '/messages' },
+      { title: 'Notifications',  subtitle: totalNotificationCount > 0 ? `${totalNotificationCount} new` : 'All caught up', icon: Bell, tab: '/enhancedlandlorddashboard/notifications', count: totalNotificationCount },
+      { title: 'Applications',   subtitle: `${applications.length} total`,       icon: Inbox,         tab: '/enhancedlandlorddashboard/applications' },
+      { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
+      { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
+      { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
+      { title: 'Leases',         subtitle: 'Contracts',                          icon: FileText,      tab: '/enhancedlandlorddashboard/leases' },
+      { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
+      { title: 'Inspection',     subtitle: 'View & start',                       icon: Clipboard,     tab: '/enhancedlandlorddashboard/inspection' },
+      { title: 'My Profile',     subtitle: 'Account & settings',                 icon: User,          tab: '/enhancedlandlorddashboard/profile' },
+      { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/landlord/support' },
     ];
 
     return (
@@ -2420,66 +2382,70 @@ const renderReportsTab = () => (
         className="p-4 space-y-4"
         style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
       >
-        {/* Property header */}
-        {selectedProperty && (
-          <Card className="animate-in fade-in slide-in-from-top-4 duration-300 border-primary/20 bg-primary/5">
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <Home className="w-4 h-4 text-primary" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="font-semibold text-foreground truncate">{selectedProperty.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">{selectedProperty.location}</p>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={handleBackToProperties} className="shrink-0">
-                  <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
-                  Properties
-                </Button>
+        {/* Top prompt: address form when no properties, invite tenant link once property exists */}
+        {properties.length === 0 ? (
+          <div
+            className="rounded-2xl p-5 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
+            style={{
+              background: 'linear-gradient(135deg, hsl(214,100%,59%,0.12) 0%, hsl(214,100%,59%,0.05) 100%)',
+              border: '1px solid hsl(214,100%,59%,0.2)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%,0.15)' }}>
+                <Building className="w-5 h-5" style={{ color: 'hsl(214,100%,59%)' }} />
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Sale-specific quick actions */}
-        {selectedProperty?.listing_type === 'sale' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=deed_of_sale`)}
-              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-            >
-              <Card className="h-full group-hover:border-primary/30 group-active:scale-[0.98] transition-all">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <FileText className="w-5 h-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm text-foreground">Deed of Sale</p>
-                    <p className="text-xs text-muted-foreground">Generate sale documents</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </button>
-            <button
-              onClick={() => navigate(`/manage-property/${selectedProperty.id}?tab=compliance`)}
-              className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
-            >
-              <Card className="h-full group-hover:border-primary/30 group-active:scale-[0.98] transition-all">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
-                    <Shield className="w-5 h-5 text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-sm text-foreground">Legal & Compliance</p>
-                    <p className="text-xs text-muted-foreground">Upload certificates</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </button>
+              <div>
+                <p className="font-semibold text-foreground">Add property</p>
+                <p className="text-xs text-muted-foreground">Enter the address to get started</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={addressInput}
+                onChange={e => setAddressInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleAddPropertyByAddress()}
+                placeholder="e.g. 12 Long Street, Cape Town"
+                className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              />
+              <Button
+                disabled={!addressInput.trim() || addingProperty}
+                onClick={handleAddPropertyByAddress}
+                className="rounded-xl px-4 shrink-0"
+                style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+              >
+                {addingProperty ? '...' : 'Add'}
+              </Button>
+            </div>
           </div>
-        )}
+        ) : tenants.length === 0 ? (
+          <div
+            className="rounded-2xl p-4 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
+            style={{
+              background: 'linear-gradient(135deg, hsl(142,72%,44%,0.10) 0%, hsl(142,72%,44%,0.04) 100%)',
+              border: '1px solid hsl(142,72%,44%,0.2)',
+            }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(142,72%,44%,0.12)' }}>
+                <UserPlus className="w-4 h-4" style={{ color: 'hsl(142,72%,44%)' }} />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground text-sm">Property added!</p>
+                <p className="text-xs text-muted-foreground">Ready to invite a tenant?</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="rounded-full shrink-0"
+              style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
+              onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
+            >
+              Invite Tenant
+            </Button>
+          </div>
+        ) : null}
 
         {/* ── Section divider ────────────────────────────────── */}
         <div className="flex items-center gap-3 py-1">
@@ -2714,13 +2680,6 @@ const renderReportsTab = () => (
               selectedPropertyId={selectedPropertyId}
               onBackToProperties={handleBackToProperties}
             >
-              {!selectedPropertyId && isBaseTab && (
-                <PropertySelection 
-                  properties={properties}
-                  onSelectProperty={handleSelectProperty}
-                  loading={loading}
-                />
-              )}
               {renderTabContent()}
             </EnhancedDashboardLayout>
           </div>

@@ -422,6 +422,13 @@ export default function Messages() {
               }}
             >
               <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => navigate('/enhancedlandlorddashboard')}
+                  className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-muted transition-colors"
+                  aria-label="Back to management tools"
+                >
+                  <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                </button>
                 <div className="w-8 h-8 rounded-xl bg-ocean-blue flex items-center justify-center shadow-ios-xs">
                   <MessageSquare className="h-4 w-4 text-white" />
                 </div>
