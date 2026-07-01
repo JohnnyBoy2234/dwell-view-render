@@ -29,7 +29,11 @@
       "Bash(sed -i \"s| // ponytail: landlord component pulls viewing data; retire when it moves to a slice||\" apps/landlord/src/components/landlord/ApplicationsWithViewings.tsx)",
       "Bash(sed -i \"s| // ponytail: admin review pulls kyc; retire when admin sliced;||\" apps/admin/src/components/admin/KycReviewDrawer.tsx)",
       "Bash(sed -i \"s| // ponytail: admin support view; retire when admin sliced;||\" apps/admin/src/components/admin/SupportMessagesAdmin.tsx)",
-      "Bash(awk -F/ '{print $1}')"
+      "Bash(awk -F/ '{print $1}')",
+      "Bash(git stash *)",
+      "Bash(tee /tmp/claude-1000/-home-caleb-Projects-dwell-view-render/c6634a33-78b3-472c-9b4e-b638c9fea844/scratchpad/vite-web.log)",
+      "Read(//home/caleb/.cache/ms-playwright/**)",
+      "Bash(pkill -f \"vite\")"
     ]
   },
   "enabledMcpjsonServers": [
