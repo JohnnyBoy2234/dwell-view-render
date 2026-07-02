@@ -232,7 +232,7 @@ const Index = () => {
   return (
     <div className="min-h-screen" style={{ background: "hsl(214 60% 97%)" }}>
       {/* NAVBAR */}
-      <MiniNavbar transparent hideLandlordActions mode={mode} />
+      <MiniNavbar transparent hideLandlordActions minimal mode={mode} />
 
       {/* HERO */}
       <PropertyHero mode={mode} onModeChange={setMode}>

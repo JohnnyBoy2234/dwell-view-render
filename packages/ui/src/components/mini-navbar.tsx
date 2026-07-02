@@ -7,9 +7,10 @@ interface MiniNavbarProps {
   mode?: 'rent' | 'buy';
   hideLandlordActions?: boolean;
   transparent?: boolean;
+  minimal?: boolean;
 }
 
-export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transparent = false }: MiniNavbarProps) {
+export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transparent = false, minimal = false }: MiniNavbarProps) {
   const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
 
   const dashboardPath = isAdmin
@@ -98,21 +99,23 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transpa
         </Link>
 
         {/* Desktop nav — centered */}
-        <nav className="hidden sm:flex flex-1 items-center justify-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="relative text-base text-gray-300 hover:text-white transition-colors duration-200 py-0.5 group"
-            >
-              {link.label}
-              <span className="absolute bottom-0 left-0 w-0 h-px bg-white/60 transition-all duration-300 group-hover:w-full" />
-            </Link>
-          ))}
-        </nav>
+        {!minimal && (
+          <nav className="hidden sm:flex flex-1 items-center justify-center gap-8">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="relative text-base text-gray-300 hover:text-white transition-colors duration-200 py-0.5 group"
+              >
+                {link.label}
+                <span className="absolute bottom-0 left-0 w-0 h-px bg-white/60 transition-all duration-300 group-hover:w-full" />
+              </Link>
+            ))}
+          </nav>
+        )}
 
         {/* Desktop auth buttons */}
-        <div className="hidden sm:flex items-center gap-3 shrink-0">
+        <div className={`hidden sm:flex items-center gap-3 shrink-0 ${minimal ? 'ml-auto' : ''}`}>
           {!loading && (
             user ? (
               <>
@@ -129,6 +132,13 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transpa
                   Sign Out
                 </button>
               </>
+            ) : minimal ? (
+              <Link
+                to="/auth"
+                className="px-5 py-2 text-sm font-semibold text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full hover:brightness-110 transition-all duration-200 whitespace-nowrap"
+              >
+                Sign In
+              </Link>
             ) : (
               <>
                 <Link
@@ -204,18 +214,20 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transpa
           </Link>
         )}
 
-        <nav className="grid grid-cols-2 gap-1 w-full mb-4">
-          {navLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className={`flex items-center justify-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${dropdownLink}`}
-              onClick={() => setIsOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        {!minimal && (
+          <nav className="grid grid-cols-2 gap-1 w-full mb-4">
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`flex items-center justify-center px-4 py-3 rounded-xl text-sm font-medium transition-colors ${dropdownLink}`}
+                onClick={() => setIsOpen(false)}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
 
         {!loading && (
           user ? (
@@ -234,6 +246,14 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transpa
                 Sign Out
               </button>
             </div>
+          ) : minimal ? (
+            <Link
+              to="/auth"
+              className="block w-full py-2.5 text-sm font-semibold text-center text-gray-900 bg-gradient-to-b from-gray-100 to-gray-300 rounded-full"
+              onClick={() => setIsOpen(false)}
+            >
+              Sign In
+            </Link>
           ) : (
             <div className="flex gap-2">
               <Link

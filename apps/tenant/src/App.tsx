@@ -106,7 +106,7 @@ function AppRoutes() {
       <Routes>
         {/* Public browsing */}
         <Route path="/" element={<Index />} />
-        <Route path="/properties" element={<><MiniNavbar hideLandlordActions /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
+        <Route path="/properties" element={<><MiniNavbar hideLandlordActions minimal /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/:id" element={<PropertyDetail />} />
 
