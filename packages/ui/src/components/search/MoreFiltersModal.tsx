@@ -95,6 +95,7 @@ export const MoreFiltersModal = ({
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent
+        hideClose
         className="max-w-lg w-[calc(100vw-2rem)] max-h-[90vh] overflow-hidden flex flex-col rounded-3xl border-0 p-0"
         style={{ boxShadow: "0 24px 64px rgba(37,99,235,0.18)" }}
       >
