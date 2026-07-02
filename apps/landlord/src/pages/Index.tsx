@@ -11,6 +11,7 @@ const LANDLORD_HERO_IMAGE =
 
 const TRUST_POINTS = [
   'Commission-free — keep 100% of your rental income',
+  'Cutting-edge payment automation — rent flows straight from tenant to landlord, no middleman',
   'Legally binding e-signatures',
   'Automated rent tracking & invoicing',
   'Designed for South Africa',

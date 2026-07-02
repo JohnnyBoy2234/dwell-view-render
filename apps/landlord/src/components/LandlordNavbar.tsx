@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -12,15 +11,9 @@ interface LandlordNavbarProps {
 export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, transparent = false }: LandlordNavbarProps) {
   const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [scrolled, setScrolled] = useState(!transparent);
-
-  useEffect(() => {
-    if (!transparent) { setScrolled(true); return; }
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, [transparent]);
+  // Transparent pages (the hero landing) stay transparent — no white-on-scroll
+  // switch. Other pages remain solid white.
+  const scrolled = !transparent;
 
   const dashboardPath = isAdmin
     ? '/admin/dashboard'
@@ -52,11 +45,11 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
     >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3 shrink-0">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%)' }}>
-          <Home className="w-6 h-6 text-white" />
+        <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%)' }}>
+          <Home className="w-8 h-8 text-white" />
         </div>
         <span
-          className="font-bold text-lg tracking-tight whitespace-nowrap"
+          className="font-bold text-2xl tracking-tight whitespace-nowrap"
           style={{
             color: scrolled ? 'hsl(222,84%,5%)' : '#fff',
             transition: 'color 0.3s ease',

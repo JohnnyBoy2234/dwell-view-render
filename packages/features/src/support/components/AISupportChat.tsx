@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -144,7 +145,10 @@ export function AISupportChat() {
 
   if (isHidden) return null;
 
-  return (
+  // Render through a portal to <body> so the fixed positioning is always
+  // relative to the viewport — never trapped by a transformed/filtered ancestor
+  // (which was pinning the bubble to the top-right corner).
+  return createPortal(
     <>
       {/* Floating Action Button */}
       {!isOpen && (
@@ -155,7 +159,7 @@ export function AISupportChat() {
             'fixed z-50 h-14 w-14 rounded-full shadow-lg shadow-primary/30',
             'bg-gradient-to-br from-primary to-primary/80',
             'hover:scale-105 active:scale-95 transition-transform',
-            'bottom-6 right-4 md:bottom-6 md:right-6'
+            'bottom-24 right-4 md:bottom-6 md:right-6'
           )}
           size="icon"
         >
@@ -329,6 +333,7 @@ export function AISupportChat() {
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body,
   );
 }
