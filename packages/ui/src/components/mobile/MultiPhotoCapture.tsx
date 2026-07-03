@@ -138,6 +138,8 @@ export function MultiPhotoCapture({ onPhotosSelected, maxPhotos = 10 }: MultiPho
               <Camera className="h-4 w-4 mr-2" />
               Take Photos
             </Button>
+            {/* visually hidden (not display:none - iOS Safari won't open the camera/file
+                picker via .click() on a display:none input) */}
             <input
               ref={fileInputRef}
               type="file"
@@ -145,7 +147,7 @@ export function MultiPhotoCapture({ onPhotosSelected, maxPhotos = 10 }: MultiPho
               multiple
               capture="environment"
               onChange={handleFileInput}
-              className="hidden"
+              className="sr-only"
             />
           </>
         )}

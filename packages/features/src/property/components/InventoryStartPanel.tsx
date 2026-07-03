@@ -587,13 +587,14 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
             <p className="text-center text-sm text-muted-foreground">
               {isMobile ? 'Capture a photo note immediately.' : 'Scan with your camera or tap to continue on mobile.'}
             </p>
-            {/* hidden input to trigger camera on mobile */}
+            {/* visually hidden (not display:none - iOS Safari won't open the camera/file
+                picker via .click() on a display:none input) */}
             <input
               ref={quickPhotoInputRef}
               type="file"
               accept="image/jpeg,image/png,image/webp"
               capture="environment"
-              className="hidden"
+              className="sr-only"
               onChange={(e) => {
                 if (!pendingQuickNoteId) return;
                 handleAddPhotos(pendingQuickNoteId, e.target.files);
