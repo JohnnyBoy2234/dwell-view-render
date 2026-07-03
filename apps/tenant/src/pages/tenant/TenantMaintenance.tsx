@@ -190,18 +190,18 @@ export default function TenantMaintenance() {
   return (
     <div className="space-y-8">
       {/* Header with prominent action button */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Maintenance Requests</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Maintenance Requests</h1>
+          <p className="text-muted-foreground text-sm sm:text-base">
             Submit new requests and track the status of existing ones
           </p>
         </div>
-        
-        <Button 
+
+        <Button
           onClick={() => setIsCreateDialogOpen(true)}
           size="lg"
-          className="bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          className="w-full sm:w-auto bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-lg hover:shadow-xl transition-all duration-200"
         >
           <Plus className="h-5 w-5 mr-2" />
           New Request
