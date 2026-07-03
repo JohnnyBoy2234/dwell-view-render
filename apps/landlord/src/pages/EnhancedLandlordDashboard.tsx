@@ -2451,6 +2451,17 @@ const renderReportsTab = () => (
           </div>
         ) : null}
 
+        {/* Always-visible Add Property CTA once the landlord has at least one property */}
+        {properties.length > 0 && (
+          <Button
+            onClick={() => navigate('/enhancedlandlorddashboard/add-property')}
+            className="w-full rounded-2xl py-5 justify-center gap-2 font-semibold shadow-sm"
+            style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+          >
+            <Plus className="h-4 w-4" /> Add Property
+          </Button>
+        )}
+
         {/* ── Section divider ────────────────────────────────── */}
         <div className="flex items-center gap-3 py-1">
           <div className="flex-1 h-px bg-border" />
