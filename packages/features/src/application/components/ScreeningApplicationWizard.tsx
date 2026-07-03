@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mzanzihomes/ui/components/card";
 import { Button } from "@mzanzihomes/ui/components/button";
 import { Input } from "@mzanzihomes/ui/components/input";
@@ -79,6 +79,16 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const [creditDocuments, setCreditDocuments] = useState<DocumentItem[]>([]);
   const [hasLoadedAutosave, setHasLoadedAutosave] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const stepChipRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Keep the active step chip in view on mobile as the wizard advances
+  useEffect(() => {
+    stepChipRefs.current[currentStep]?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [currentStep]);
 
   const clearAutosave = useCallback(() => {
     if (!user) return;
@@ -704,17 +714,23 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           </div>
         ))}
       </div>
-      {/* Mobile: scrollable chips */}
-      <div className="sm:hidden -mx-2 px-2 overflow-x-auto pb-2">
-        <div className="flex gap-2 snap-x snap-mandatory">
-          {steps.map((s, idx) => (
-            <div
-              key={s.key}
-              className={`shrink-0 snap-start px-3 py-1.5 rounded-full text-xs border ${idx === currentStep ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-foreground border-muted"}`}
-            >
-              {s.title}
-            </div>
-          ))}
+      {/* Mobile: always-visible step count + scrollable chips that auto-scroll into view */}
+      <div className="sm:hidden">
+        <div className="text-xs font-medium text-muted-foreground mb-2">
+          Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
+        </div>
+        <div className="-mx-2 px-2 overflow-x-auto pb-2">
+          <div className="flex gap-2 snap-x snap-mandatory">
+            {steps.map((s, idx) => (
+              <div
+                key={s.key}
+                ref={(el) => { stepChipRefs.current[idx] = el; }}
+                className={`shrink-0 snap-center px-3 py-1.5 rounded-full text-xs border ${idx === currentStep ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-foreground border-muted"}`}
+              >
+                {s.title}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
