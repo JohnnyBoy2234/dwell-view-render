@@ -15,11 +15,10 @@ export default function TenantInventory() {
   const { tenantProperty, loading } = useTenantDashboard();
   const { user } = useAuth();
   const { toast } = useToast();
-  const { 
-    inventoryRecords, 
-    loading: inventoryLoading, 
+  const {
+    inventoryRecords,
+    loading: inventoryLoading,
     error: inventoryError,
-    downloadInventoryReport,
     viewInventoryRecord
   } = useInventory();
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
@@ -44,20 +43,13 @@ export default function TenantInventory() {
     setIsDetailModalOpen(true);
   };
 
-  const handleDownloadReport = async (recordId: string) => {
-    try {
-      await downloadInventoryReport(recordId);
-      toast({
-        title: "Report Download",
-        description: "Inventory report download initiated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Download Failed",
-        description: "Failed to download inventory report. Please try again.",
-        variant: "destructive",
-      });
-    }
+  const handleDownloadReport = async (_recordId: string) => {
+    // Report generation/export isn't implemented yet - be honest instead of
+    // claiming success for something that didn't happen.
+    toast({
+      title: "Not available yet",
+      description: "Inventory report generation is coming soon.",
+    });
   };
 
   const handleStartNewInventory = () => {

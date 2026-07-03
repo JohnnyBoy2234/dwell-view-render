@@ -38,6 +38,7 @@ import { cn } from '@mzanzihomes/common/lib/utils';
 import { MetricsGrid } from '@mzanzihomes/ui/components/dashboard/landlord/MetricsGrid';
 import { ToolGrid } from '@mzanzihomes/ui/components/dashboard/landlord/ToolGrid';
 import { TenantInviteSection } from '@mzanzihomes/features/property';
+import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/InventoryDetailModal';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -116,6 +117,26 @@ interface Invoice {
   branchCode: string;
   paymentDueDate: string;
   createdAt: string;
+}
+
+// Inventory photos live in the private kyc-uploads bucket - the storage path
+// isn't a fetchable URL on its own, so resolve a signed URL before rendering.
+function InventoryPhotoThumb({ path }: { path: string }) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    supabase.storage
+      .from('kyc-uploads')
+      .createSignedUrl(path, 300)
+      .then(({ data }) => {
+        if (active && data?.signedUrl) setUrl(data.signedUrl);
+      });
+    return () => { active = false; };
+  }, [path]);
+
+  if (!url) return <div className="w-full h-20 bg-muted rounded border animate-pulse" />;
+  return <img src={url} alt="Inventory" className="w-full h-20 object-cover rounded border" />;
 }
 
 export default function EnhancedLandlordDashboard() {
@@ -903,7 +924,8 @@ export default function EnhancedLandlordDashboard() {
         .from('inventory_records')
         .select(`
           *,
-          inventory_items (*)
+          inventory_items (*),
+          property:properties (title, location)
         `)
         .eq('landlord_id', user.id);
       
@@ -958,8 +980,8 @@ export default function EnhancedLandlordDashboard() {
                   </div>
                   {preview.length > 0 ? (
                     <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-                      {preview.map((url, idx) => (
-                        <img key={idx} src={url} alt="Inventory" className="w-full h-20 object-cover rounded border" />
+                      {preview.map((path, idx) => (
+                        <InventoryPhotoThumb key={idx} path={path} />
                       ))}
                     </div>
                   ) : (
@@ -977,7 +999,15 @@ export default function EnhancedLandlordDashboard() {
         </div>
       )}
 
-        {/* Inventory detail modal removed - functionality can be added back if needed */}
+        <InventoryDetailModal
+          record={selectedInventoryRecord}
+          isOpen={inventoryModalOpen}
+          onClose={() => { setInventoryModalOpen(false); setSelectedInventoryRecord(null); }}
+          onDownloadReport={() => toast({
+            title: 'Not available yet',
+            description: 'Inventory report generation is coming soon.',
+          })}
+        />
       </div>
     </div>
   );
