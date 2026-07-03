@@ -286,26 +286,6 @@ export default function PropertyDetail() {
     }
   };
 
-  const handleRequestViewing = async () => {
-    if (!user) {
-      toast({
-        variant: "destructive",
-        title: "Sign in required",
-        description: "Please sign in to request a viewing."
-      });
-      navigate('/auth');
-      return;
-    }
-
-    if (!property) return;
-
-    const conv = await createConversation(property.id, property.landlord_id, user.id);
-    if (conv) {
-      const viewingMessage = `Hi! I'm interested in viewing this property (${property.title}). Could we schedule a viewing? Please let me know what times work best for you.`;
-      navigate(`/messages?c=${conv.id}&message=${encodeURIComponent(viewingMessage)}`);
-    }
-  };
-
   const handleShare = async () => {
     if (!property) return;
 
@@ -802,12 +782,25 @@ export default function PropertyDetail() {
                 Contact Landlord
               </button>
             ) : (
-              <button
-                onClick={handleRequestViewing}
-                className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
-              >
-                Request Viewing
-              </button>
+              <GatedViewingButton
+                propertyId={property.id}
+                landlordId={property.landlord_id}
+                propertyTitle={property.title}
+                renderStartConversation={(sc) => (
+                  <StartConversation
+                    {...sc}
+                    renderPreScreening={(ps) => <ViewingPreScreeningForm {...ps} />}
+                    renderTrigger={(onClick) => (
+                      <button
+                        onClick={onClick}
+                        className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
+                      >
+                        Request Viewing
+                      </button>
+                    )}
+                  />
+                )}
+              />
             )}
             <button
               onClick={handleContactLandlord}

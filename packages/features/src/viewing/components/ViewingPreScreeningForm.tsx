@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Info } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
+import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import {
   Dialog,
   DialogContent,
@@ -53,6 +54,33 @@ const preScreeningSchema = z.object({
 
 type PreScreeningFormData = z.infer<typeof preScreeningSchema>;
 
+// ponytail: reuse across landlords via localStorage — no backend record, just a local convenience cache
+const STORAGE_KEY = 'mzanzihomes:prescreening';
+
+interface SavedPreScreening {
+  moveInDate: string;
+  monthlyIncome: number;
+  evictionHistory: 'no' | 'yes' | 'first';
+  collectionsHistory: 'no' | 'yes';
+}
+
+function loadSavedPreScreening(): SavedPreScreening | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveSavedPreScreening(data: SavedPreScreening) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore (private browsing / storage unavailable)
+  }
+}
+
 interface ViewingPreScreeningFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -80,6 +108,7 @@ export default function ViewingPreScreeningForm({
   propertyTitle,
 }: ViewingPreScreeningFormProps) {
   const [incomeDisplay, setIncomeDisplay] = useState('');
+  const [usedSavedData, setUsedSavedData] = useState(false);
 
   const form = useForm<PreScreeningFormData>({
     resolver: zodResolver(preScreeningSchema),
@@ -87,6 +116,27 @@ export default function ViewingPreScreeningForm({
       message: `Hi! I'm interested in viewing your property "${propertyTitle}". I believe it would be a great fit for my needs. Looking forward to hearing from you!`,
     },
   });
+
+  // Prefill from the last time this tenant filled out pre-screening (e.g. for a different landlord)
+  useEffect(() => {
+    if (!open) return;
+    const saved = loadSavedPreScreening();
+    if (!saved) {
+      setUsedSavedData(false);
+      return;
+    }
+
+    const savedMoveInDate = new Date(saved.moveInDate);
+    form.reset({
+      ...form.getValues(),
+      ...(savedMoveInDate > new Date() ? { moveInDate: savedMoveInDate } : {}),
+      monthlyIncome: saved.monthlyIncome as any,
+      evictionHistory: saved.evictionHistory,
+      collectionsHistory: saved.collectionsHistory,
+    });
+    setIncomeDisplay(`R ${saved.monthlyIncome.toLocaleString()}`);
+    setUsedSavedData(true);
+  }, [open]);
 
   const handleIncomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/[^0-9]/g, '');
@@ -101,6 +151,12 @@ export default function ViewingPreScreeningForm({
   };
 
   const handleSubmit = (data: PreScreeningFormData) => {
+    saveSavedPreScreening({
+      moveInDate: data.moveInDate.toISOString(),
+      monthlyIncome: data.monthlyIncome,
+      evictionHistory: data.evictionHistory,
+      collectionsHistory: data.collectionsHistory,
+    });
     onSubmit(data);
   };
 
@@ -113,6 +169,15 @@ export default function ViewingPreScreeningForm({
             Help landlords get to know you better by providing some basic information
           </DialogDescription>
         </DialogHeader>
+
+        {usedSavedData && (
+          <Alert className="border-blue-200 bg-blue-50 dark:bg-blue-900/20">
+            <Info className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-800 dark:text-blue-200">
+              We've filled this in using the info you provided last time. Feel free to update anything before sending.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">

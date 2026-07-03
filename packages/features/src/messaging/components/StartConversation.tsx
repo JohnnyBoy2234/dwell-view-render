@@ -23,15 +23,18 @@ interface StartConversationProps {
     loading: boolean;
     propertyTitle: string;
   }) => ReactNode;
+  // Custom trigger (e.g. a compact button for a mobile action bar); defaults to the full-width button below
+  renderTrigger?: (onClick: () => void) => ReactNode;
 }
 
-export default function StartConversation({ 
-  propertyId, 
-  landlordId, 
-  propertyTitle, 
+export default function StartConversation({
+  propertyId,
+  landlordId,
+  propertyTitle,
   inquiryId,
   onConversationCreated,
   renderPreScreening,
+  renderTrigger,
 }: StartConversationProps) {
   const { user } = useAuth();
   const { createConversation, sendMessage } = useMessaging();
@@ -208,10 +211,14 @@ export default function StartConversation({
 
   return (
     <>
-      <Button className="w-full" onClick={handleRequestViewingClick}>
-        <Calendar className="h-4 w-4 mr-2" />
-        Request Viewing
-      </Button>
+      {renderTrigger ? (
+        renderTrigger(handleRequestViewingClick)
+      ) : (
+        <Button className="w-full" onClick={handleRequestViewingClick}>
+          <Calendar className="h-4 w-4 mr-2" />
+          Request Viewing
+        </Button>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
