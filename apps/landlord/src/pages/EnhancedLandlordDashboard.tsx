@@ -26,8 +26,8 @@ import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
 import { useLandlordApplications } from '@mzanzihomes/features/application';
-import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
 import { useLandlordNotifications } from '@mzanzihomes/supabase/hooks/useLandlordNotifications';
+import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
 import { AccountingOverview } from '@mzanzihomes/features/accounting';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { VerificationGate } from '@mzanzihomes/ui/components/VerificationGate';
@@ -132,9 +132,8 @@ export default function EnhancedLandlordDashboard() {
   });
 
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications(selectedPropertyId || undefined);
-  const { unreadCount: generalUnread } = useNotifications();
-  const { unreadCount: landlordUnread } = useLandlordNotifications();
-  const totalNotificationCount = (generalUnread || 0) + (landlordUnread || 0);
+  const { pendingSignatures } = useLandlordNotifications();
+  const { unreadCount: unreadMessages } = useUnreadMessages();
 
   // Inline "add property by address" state
   const [addressInput, setAddressInput] = useState('');
@@ -2350,6 +2349,12 @@ const renderReportsTab = () => (
 
     // ── Management tools are always shown — no property-selection step ─────────
     const activeMaintenanceRequests = maintenanceRequests.filter(r => r.status !== 'completed').length;
+    // Applications that still need the landlord's attention (not yet actioned)
+    const ACTIONED_APPLICATION_STATUSES = ['accepted', 'approved', 'declined', 'rejected', 'withdrawn', 'cancelled'];
+    const newApplications = applications.filter(
+      (a) => !ACTIONED_APPLICATION_STATUSES.includes((a.status || '').toLowerCase())
+    ).length;
+    const pendingLeaseSignatures = pendingSignatures?.length || 0;
 
     type ToolItem = {
       title: string;
@@ -2364,13 +2369,12 @@ const renderReportsTab = () => (
     const tools: ToolItem[] = [
       { title: 'Properties',     subtitle: `${properties.length} listed`,        icon: Building,      tab: '/enhancedlandlorddashboard/properties' },
       { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
-      { title: 'Messages',       subtitle: 'Chat with tenants',                  icon: MessageCircle, path: '/messages' },
-      { title: 'Notifications',  subtitle: totalNotificationCount > 0 ? `${totalNotificationCount} new` : 'All caught up', icon: Bell, tab: '/enhancedlandlorddashboard/notifications', count: totalNotificationCount },
-      { title: 'Applications',   subtitle: `${applications.length} total`,       icon: Inbox,         tab: '/enhancedlandlorddashboard/applications' },
+      { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
+      { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: Inbox, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
       { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
       { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
       { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
-      { title: 'Leases',         subtitle: 'Contracts',                          icon: FileText,      tab: '/enhancedlandlorddashboard/leases' },
+      { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
       { title: 'Inspection',     subtitle: 'View & start',                       icon: Clipboard,     tab: '/enhancedlandlorddashboard/inspection' },
       { title: 'My Profile',     subtitle: 'Account & settings',                 icon: User,          tab: '/enhancedlandlorddashboard/profile' },

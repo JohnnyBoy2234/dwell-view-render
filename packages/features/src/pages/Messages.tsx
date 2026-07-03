@@ -12,7 +12,6 @@ import {
   Wifi,
   WifiOff,
 } from 'lucide-react';
-import { ConnectionHealthIndicator } from '@mzanzihomes/ui/components/messaging/ConnectionHealthIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AddViewingSlotModal } from '@mzanzihomes/features/viewing';
@@ -439,11 +438,6 @@ export default function Messages() {
                   </span>
                 )}
               </div>
-              <ConnectionHealthIndicator
-                status={connectionStatus}
-                onlineUsers={onlineUsers}
-                className="text-xs"
-              />
             </div>
 
             {/* List */}
@@ -613,9 +607,6 @@ export default function Messages() {
             {totalUnread} unread
           </span>
         )}
-        <div className="ml-auto">
-          <ConnectionHealthIndicator status={connectionStatus} onlineUsers={onlineUsers} className="text-sm" />
-        </div>
       </div>
 
       {/* Two-column layout */}
