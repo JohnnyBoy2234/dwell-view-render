@@ -25,6 +25,8 @@ import {
 interface SALeaseWizardProps {
   contractId?: string;
   propertyId?: string;
+  tenantId?: string;
+  onContractSaved?: (contractId: string) => void;
   onComplete?: (contractId: string) => void;
   onCancel?: () => void;
 }
@@ -37,7 +39,7 @@ interface SignatureInfo {
 
 const validators = [validateStep01, validateStep02, validateStep03, validateStep04, validateStep05, validateStep06, validateStep07, validateStep08, validateStep09, validateStep10];
 
-export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: SALeaseWizardProps) {
+export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSaved, onComplete, onCancel }: SALeaseWizardProps) {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [data, setData] = useState<LeaseWizardData>(DEFAULT_WIZARD_DATA);
@@ -63,14 +65,60 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
     if (contractId) {
       loadContract(contractId);
     } else if (user) {
-      // Pre-fill landlord info
-      setData(prev => ({
-        ...prev,
-        landlordEmail: user.email || '',
-        landlordFullName: user.user_metadata?.full_name || '',
-      }));
+      initializeNewContract();
     }
-  }, [contractId, user]);
+    // Only re-run when the contract identity or landlord identity actually
+    // changes, not on every `user` object reference change (e.g. token
+    // refresh) - otherwise landlord edits to these same fields get clobbered.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contractId, user?.id]);
+
+  // For a brand-new lease started from an accepted application, resume any
+  // existing draft for this landlord/property/tenant instead of starting
+  // blank, and pre-fill tenant details from their application so the
+  // landlord isn't guessing at data they were never told.
+  const initializeNewContract = async () => {
+    if (!user) return;
+
+    if (propertyId && tenantId) {
+      const { data: existingDraft } = await supabase
+        .from('lease_contracts')
+        .select('id')
+        .eq('landlord_id', user.id)
+        .eq('property_id', propertyId)
+        .eq('tenant_id', tenantId)
+        .eq('status', 'draft')
+        .maybeSingle();
+
+      if (existingDraft) {
+        setSavedContractId(existingDraft.id);
+        onContractSaved?.(existingDraft.id);
+        await loadContract(existingDraft.id);
+        return;
+      }
+    }
+
+    let tenantPrefill: Partial<LeaseWizardData> = {};
+    if (tenantId) {
+      const [{ data: profile }, { data: screening }] = await Promise.all([
+        supabase.from('profiles').select('display_name').eq('user_id', tenantId).maybeSingle(),
+        supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', tenantId).maybeSingle(),
+      ]);
+      tenantPrefill = {
+        tenantFullName: screening?.full_name || profile?.display_name || '',
+        tenantIdNumber: screening?.id_number || '',
+        tenantPhone: screening?.phone || '',
+        tenantAddress: screening?.current_address || '',
+      };
+    }
+
+    setData(prev => ({
+      ...prev,
+      landlordEmail: user.email || '',
+      landlordFullName: user.user_metadata?.full_name || '',
+      ...tenantPrefill,
+    }));
+  };
 
   // Auto-save effect - triggers 2 seconds after data changes
   useEffect(() => {
@@ -101,7 +149,8 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
         clearTimeout(autoSaveTimerRef.current);
       }
     };
-  }, [data, user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, user?.id]);
 
   // Update initial data ref when contract loads
   useEffect(() => {
@@ -154,12 +203,14 @@ export function SALeaseWizard({ contractId, propertyId, onComplete, onCancel }: 
         const { data: newContract, error } = await supabase.from('lease_contracts').insert({
           landlord_id: user.id,
           property_id: propertyId,
+          tenant_id: tenantId,
           title: data.propertyAddress ? `Lease for ${data.propertyAddress.split('\n')[0]}` : 'New Lease Agreement',
           contract_data: data as any,
           status: 'draft'
         }).select().single();
         if (error) throw error;
         setSavedContractId(newContract.id);
+        onContractSaved?.(newContract.id);
       }
     } catch (err) {
       console.error('Error saving:', err);

@@ -171,6 +171,17 @@ export function LeaseSignature() {
     }
   };
 
+  const handleUpdateTenantDetails = async (updates: Partial<LeaseWizardData>) => {
+    if (!contractId) return;
+    const newData = { ...wizardData, ...updates };
+    const { error } = await supabase
+      .from('lease_contracts')
+      .update({ contract_data: newData as any, updated_at: new Date().toISOString() })
+      .eq('id', contractId);
+    if (error) throw error;
+    setWizardData(newData);
+  };
+
   const handleSuccessClose = () => {
     setShowSuccessDialog(false);
     navigate('/leases');
@@ -293,6 +304,7 @@ export function LeaseSignature() {
         landlordSignature={landlordSignature}
         tenantSignature={tenantSignature}
         onSign={handleTenantSign}
+        onUpdateTenantDetails={handleUpdateTenantDetails}
         isSigning={isSigning}
         contractStatus={contract.status}
       />

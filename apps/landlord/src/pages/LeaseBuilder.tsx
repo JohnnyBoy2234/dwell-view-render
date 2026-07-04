@@ -13,6 +13,7 @@ export function LeaseBuilder() {
   
   // Support both path params and query params for propertyId
   const propertyId = pathPropertyId || searchParams.get('propertyId') || undefined;
+  const tenantId = searchParams.get('tenantId') || undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -28,6 +29,8 @@ export function LeaseBuilder() {
       <SALeaseWizard
         contractId={contractId}
         propertyId={propertyId}
+        tenantId={tenantId}
+        onContractSaved={(id) => navigate(`/lease/builder/${id}`, { replace: true })}
         onComplete={(id) => {
           toast({
             title: "Contract Completed",

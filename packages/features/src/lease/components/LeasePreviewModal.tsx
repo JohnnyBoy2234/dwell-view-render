@@ -1,11 +1,15 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@mzanzihomes/ui/components/dialog';
+import { SheetContent } from '@mzanzihomes/ui/components/sheet';
+import { useIsMobile } from '@mzanzihomes/ui/hooks/use-mobile';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { ScrollArea } from '@mzanzihomes/ui/components/scroll-area';
 import { Separator } from '@mzanzihomes/ui/components/separator';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Label } from '@mzanzihomes/ui/components/label';
 import { FileText, Pen, RotateCcw, Send, Download, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 import { renderLeaseAsHtml, getLeaseStyles } from '../utils/leaseHtmlRenderer';
 import { processLeaseTemplate, formatDate } from '../utils/leaseTemplateEngine';
@@ -28,6 +32,7 @@ interface LeasePreviewModalProps {
   landlordSignature?: SignatureInfo;
   tenantSignature?: SignatureInfo;
   onSign?: (signatureDataUrl: string) => Promise<void>;
+  onUpdateTenantDetails?: (updates: Partial<LeaseWizardData>) => Promise<void>;
   onSendToTenant?: () => void;
   onDownloadPdf?: () => void;
   isSigning?: boolean;
@@ -43,18 +48,47 @@ export function LeasePreviewModal({
   landlordSignature,
   tenantSignature,
   onSign,
+  onUpdateTenantDetails,
   onSendToTenant,
   onDownloadPdf,
   isSigning = false,
   isSending = false,
   contractStatus = 'draft',
 }: LeasePreviewModalProps) {
+  const isMobile = useIsMobile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
   const [consentAcknowledged, setConsentAcknowledged] = useState(false);
   const [lastX, setLastX] = useState(0);
   const [lastY, setLastY] = useState(0);
+  const [tenantAddress, setTenantAddress] = useState(wizardData.tenantAddress || '');
+  const [tenantPhone, setTenantPhone] = useState(wizardData.tenantPhone || '');
+  const [occupantsList, setOccupantsList] = useState(wizardData.occupantsList || '');
+  const [isSavingTenantDetails, setIsSavingTenantDetails] = useState(false);
+
+  useEffect(() => {
+    setTenantAddress(wizardData.tenantAddress || '');
+    setTenantPhone(wizardData.tenantPhone || '');
+    setOccupantsList(wizardData.occupantsList || '');
+  }, [wizardData.tenantAddress, wizardData.tenantPhone, wizardData.occupantsList]);
+
+  const tenantDetailsChanged = tenantAddress !== (wizardData.tenantAddress || '')
+    || tenantPhone !== (wizardData.tenantPhone || '')
+    || occupantsList !== (wizardData.occupantsList || '');
+
+  const handleSaveTenantDetails = async () => {
+    if (!onUpdateTenantDetails) return;
+    setIsSavingTenantDetails(true);
+    try {
+      await onUpdateTenantDetails({ tenantAddress, tenantPhone, occupantsList });
+      toast.success('Your details have been updated');
+    } catch {
+      toast.error('Failed to save your details');
+    } finally {
+      setIsSavingTenantDetails(false);
+    }
+  };
 
   // Process the lease template
   const processedLease = processLeaseTemplate(MASTER_LEASE_TEMPLATE, wizardData);
@@ -69,12 +103,20 @@ export function LeasePreviewModal({
   const hasOtherPartySignature = mode === 'landlord' ? !!tenantSignature : !!landlordSignature;
   const bothSigned = !!landlordSignature && !!tenantSignature;
 
-  // Setup canvas
+  // Setup canvas - match the internal drawing buffer to the canvas's actual
+  // rendered size (it's styled w-full, so on narrow mobile screens the CSS
+  // size shrinks below the 500x150 default). Without this, touch/mouse
+  // coordinates (measured in rendered CSS pixels) get drawn into the wrong
+  // spot in the buffer, making the signature look broken or unresponsive.
   useEffect(() => {
     if (!open || !canSign) return;
-    
+
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -215,9 +257,14 @@ export function LeasePreviewModal({
     return <Badge variant="outline"><AlertTriangle className="h-3 w-3 mr-1" /> Draft</Badge>;
   };
 
+  const ContentComponent = isMobile ? SheetContent : DialogContent;
+  const contentProps = isMobile
+    ? { side: 'bottom' as const, className: 'h-[95vh] max-h-[95vh] w-full flex flex-col p-0 gap-0 rounded-t-xl' }
+    : { className: 'max-w-5xl h-[95vh] flex flex-col p-0 gap-0 overflow-hidden' };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl h-[95vh] flex flex-col p-0 gap-0">
+      <ContentComponent {...contentProps}>
         {/* Header */}
         <DialogHeader className="px-6 py-4 border-b shrink-0">
           <div className="flex items-center justify-between">
@@ -235,12 +282,59 @@ export function LeasePreviewModal({
         </DialogHeader>
 
         {/* Scrollable Content */}
-        <ScrollArea className="flex-1 px-6">
+        <ScrollArea className="flex-1 min-h-0 px-6">
           <style>{getLeaseStyles()}</style>
           
           {/* Draft Watermark */}
           {!bothSigned && (
             <div className="lease-draft-watermark">DRAFT</div>
+          )}
+
+          {/* Tenant self-service correction - the landlord may not know the
+              tenant's current address, phone, or co-occupants, so let the
+              tenant fix those before they sign rather than sign off on the
+              landlord's guess. */}
+          {mode === 'tenant' && canSign && onUpdateTenantDetails && (
+            <Card className="my-6 border-primary/30 bg-primary/5 relative z-10">
+              <CardContent className="pt-6 space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-1">Confirm your details</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Your landlord filled in this lease - please check these fields are correct before signing.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tenantAddressConfirm">Current Address</Label>
+                  <Input
+                    id="tenantAddressConfirm"
+                    value={tenantAddress}
+                    onChange={(e) => setTenantAddress(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tenantPhoneConfirm">Phone Number</Label>
+                  <Input
+                    id="tenantPhoneConfirm"
+                    value={tenantPhone}
+                    onChange={(e) => setTenantPhone(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="occupantsListConfirm">Other Authorized Occupants (family members living with you)</Label>
+                  <Input
+                    id="occupantsListConfirm"
+                    value={occupantsList}
+                    onChange={(e) => setOccupantsList(e.target.value)}
+                    placeholder="e.g. Jane Doe (spouse), Tom Doe (child)"
+                  />
+                </div>
+                {tenantDetailsChanged && (
+                  <Button size="sm" onClick={handleSaveTenantDetails} disabled={isSavingTenantDetails}>
+                    {isSavingTenantDetails ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Main Lease Content */}
@@ -393,7 +487,7 @@ export function LeasePreviewModal({
               {canSign && onSign && (
                 <Button 
                   onClick={handleSign}
-                  disabled={!hasSignature || !consentAcknowledged || isSigning}
+                  disabled={!hasSignature || !consentAcknowledged || isSigning || tenantDetailsChanged}
                 >
                   <Pen className="h-4 w-4 mr-2" />
                   {isSigning ? 'Signing...' : `Sign as ${mode === 'landlord' ? 'Landlord' : 'Tenant'}`}
@@ -402,7 +496,7 @@ export function LeasePreviewModal({
             </div>
           </div>
         </div>
-      </DialogContent>
+      </ContentComponent>
     </Dialog>
   );
 }
