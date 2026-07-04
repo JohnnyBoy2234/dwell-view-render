@@ -131,6 +131,12 @@ const ViewingWorkflow: React.FC<ViewingWorkflowProps> = ({
                     {viewing.status.charAt(0).toUpperCase() + viewing.status.slice(1)}
                   </Badge>
                 </div>
+                {user?.id !== viewing.tenant_id && (
+                  <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                    <User className="h-3.5 w-3.5" />
+                    <span>{viewing.tenant_profile?.display_name || 'Tenant'}</span>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">

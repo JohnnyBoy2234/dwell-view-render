@@ -69,7 +69,22 @@ export const useViewings = (propertyId?: string, conversationId?: string) => {
       const { data, error } = await query;
 
       if (error) throw error;
-      setViewings(data || []);
+
+      const tenantIds = Array.from(new Set((data || []).map((v) => v.tenant_id)));
+      let profilesById: Record<string, { display_name: string }> = {};
+      if (tenantIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('user_id, display_name')
+          .in('user_id', tenantIds);
+        profilesById = Object.fromEntries(
+          (profiles || []).map((p) => [p.user_id, { display_name: p.display_name }])
+        );
+      }
+
+      setViewings(
+        (data || []).map((v) => ({ ...v, tenant_profile: profilesById[v.tenant_id] }))
+      );
     } catch (error) {
       console.error('Error fetching viewings:', error);
       toast({
