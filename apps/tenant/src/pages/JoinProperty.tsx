@@ -144,6 +144,8 @@ export default function JoinProperty() {
         console.error('Post-join updates failed:', notifyErr);
       }
 
+      // Tell the dashboard to greet them with a first-time welcome.
+      localStorage.setItem('tenantWelcome', '1');
       setDone(true);
     } catch (e: any) {
       setError(e.message || 'Could not accept this invitation. Please try again.');
