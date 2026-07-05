@@ -224,7 +224,7 @@ export default function ListProperty() {
       case 1:
         return <PropertyTypeStep control={control} errors={errors} />;
       case 2:
-        return <LocationStep control={control} errors={errors} />;
+        return <LocationStep control={control} errors={errors} watch={watch} setValue={setValue} />;
       case 3:
         return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 4:
