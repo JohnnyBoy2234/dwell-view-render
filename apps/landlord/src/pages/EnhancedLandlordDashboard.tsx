@@ -160,6 +160,7 @@ export default function EnhancedLandlordDashboard() {
   const [addressInput, setAddressInput] = useState('');
   const [addingProperty, setAddingProperty] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
+  const [inviteForPropertyId, setInviteForPropertyId] = useState<string | null>(null);
 
   const handleAddPropertyByAddress = async () => {
     if (!addressInput.trim() || !user) return;
@@ -2401,7 +2402,6 @@ const renderReportsTab = () => (
     };
 
     const tools: ToolItem[] = [
-      { title: 'Properties',     subtitle: `${properties.length} listed`,        icon: Building,      tab: '/enhancedlandlorddashboard/properties' },
       { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
       { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
       { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: Inbox, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
@@ -2494,6 +2494,39 @@ const renderReportsTab = () => (
           >
             <Plus className="h-4 w-4" /> Add Property
           </Button>
+        )}
+
+        {/* Your properties — single hub; tap Invite to onboard a tenant */}
+        {properties.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest px-1">Your Properties</p>
+            {properties.map((property) => (
+              <div
+                key={property.id}
+                className="flex items-center gap-3 rounded-2xl border border-black/[0.06] bg-white p-3 shadow-sm"
+              >
+                <div className="w-11 h-11 rounded-xl bg-ocean-blue/10 flex items-center justify-center overflow-hidden shrink-0">
+                  {property.images?.length > 0 ? (
+                    <img src={property.images[0]} alt={property.title} className="w-full h-full object-cover" />
+                  ) : (
+                    <Home className="w-5 h-5 text-ocean-blue/50" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm truncate">{property.title}</p>
+                  <p className="text-xs text-muted-foreground truncate">{property.location}</p>
+                </div>
+                <Button
+                  size="sm"
+                  className="shrink-0 rounded-full"
+                  style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+                  onClick={() => setInviteForPropertyId(property.id)}
+                >
+                  <UserPlus className="h-4 w-4 mr-1" /> Invite
+                </Button>
+              </div>
+            ))}
+          </div>
         )}
 
         {/* ── Section divider ────────────────────────────────── */}
@@ -2753,6 +2786,17 @@ const renderReportsTab = () => (
                 {addingProperty ? 'Adding…' : 'Add property'}
               </Button>
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Per-property tenant invite — short form then share */}
+        <Dialog open={!!inviteForPropertyId} onOpenChange={(open) => { if (!open) setInviteForPropertyId(null); }}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Invite tenant</DialogTitle>
+              <DialogDescription>Fill in a few details, then share the invite.</DialogDescription>
+            </DialogHeader>
+            {inviteForPropertyId && <TenantInviteSection propertyId={inviteForPropertyId} />}
           </DialogContent>
         </Dialog>
       </SidebarProvider>
