@@ -277,12 +277,12 @@ export default function ListProperty() {
               return (
                 <div
                   key={step.id}
-                  className={`flex flex-col items-center space-y-2 ${
+                  className={`flex flex-col items-center space-y-2 flex-1 min-w-0 px-0.5 ${
                     isActive ? 'text-primary' : isCompleted ? 'text-green-600' : 'text-muted-foreground'
                   }`}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                       isActive
                         ? 'bg-primary text-primary-foreground'
                         : isCompleted
@@ -292,8 +292,8 @@ export default function ListProperty() {
                   >
                     <IconComponent className="h-5 w-5" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-xs font-medium">{step.title}</p>
+                  <div className="text-center w-full">
+                    <p className="text-[10px] sm:text-xs font-medium leading-tight break-words">{step.title}</p>
                     <p className="text-xs opacity-75 hidden sm:block">{step.description}</p>
                   </div>
                 </div>
