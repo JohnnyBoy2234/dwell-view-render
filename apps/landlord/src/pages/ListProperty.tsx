@@ -254,7 +254,6 @@ export default function ListProperty() {
           </Button>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-primary">List Your Property</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">Get your property in front of thousands of potential tenants</p>
           </div>
         </div>
 
@@ -268,7 +267,7 @@ export default function ListProperty() {
           <Progress value={progress} className="h-2" />
           
           {/* Step indicators */}
-          <div className="flex justify-between mt-4">
+          <div className="grid grid-cols-6 gap-1 mt-4">
             {steps.map((step) => {
               const IconComponent = step.icon;
               const isActive = currentStep === step.id;
@@ -294,7 +293,6 @@ export default function ListProperty() {
                   </div>
                   <div className="text-center w-full">
                     <p className="text-[10px] sm:text-xs font-medium leading-tight break-words">{step.title}</p>
-                    <p className="text-xs opacity-75 hidden sm:block">{step.description}</p>
                   </div>
                 </div>
               );
@@ -304,19 +302,7 @@ export default function ListProperty() {
 
         {/* Step Content */}
         <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {steps[currentStep - 1]?.icon && (() => {
-                const IconComponent = steps[currentStep - 1].icon;
-                return <IconComponent className="h-5 w-5" />;
-              })()}
-              {steps[currentStep - 1]?.title}
-            </CardTitle>
-            <CardDescription>
-              {steps[currentStep - 1]?.description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {renderStepContent()}
           </CardContent>
         </Card>

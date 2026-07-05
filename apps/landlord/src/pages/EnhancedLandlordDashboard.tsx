@@ -159,6 +159,7 @@ export default function EnhancedLandlordDashboard() {
   // Inline "add property by address" state
   const [addressInput, setAddressInput] = useState('');
   const [addingProperty, setAddingProperty] = useState(false);
+  const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
 
   const handleAddPropertyByAddress = async () => {
     if (!addressInput.trim() || !user) return;
@@ -174,6 +175,7 @@ export default function EnhancedLandlordDashboard() {
       });
       if (error) throw error;
       setAddressInput('');
+      setShowAddPropertyModal(false);
       await fetchProperties();
       toast({ title: 'Property added', description: 'Your property has been added. You can now invite a tenant.' });
     } catch (e: any) {
@@ -1169,7 +1171,7 @@ export default function EnhancedLandlordDashboard() {
           <Building className="h-6 w-6 text-ocean-blue" />
           <h2 className="text-xl font-bold">Manage Properties</h2>
         </div>
-        <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')} size="sm">
+        <Button onClick={() => setShowAddPropertyModal(true)} size="sm">
           <Plus className="h-4 w-4 mr-1" />
           Add Property
         </Button>
@@ -2486,7 +2488,7 @@ const renderReportsTab = () => (
         {/* Always-visible Add Property CTA once the landlord has at least one property */}
         {properties.length > 0 && (
           <Button
-            onClick={() => navigate('/enhancedlandlorddashboard/add-property')}
+            onClick={() => setShowAddPropertyModal(true)}
             className="w-full rounded-2xl py-5 justify-center gap-2 font-semibold shadow-sm"
             style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
           >
@@ -2528,7 +2530,7 @@ const renderReportsTab = () => (
                       if (!user) {
                         navigate('/auth');
                       } else {
-                        navigate('/enhancedlandlorddashboard/add-property');
+                        setShowAddPropertyModal(true);
                       }
                     }}>
             <Plus className="h-4 w-4 mr-2" />
@@ -2724,6 +2726,35 @@ const renderReportsTab = () => (
             </EnhancedDashboardLayout>
           </div>
         </div>
+
+        {/* Address-only quick add — no full listing wizard */}
+        <Dialog open={showAddPropertyModal} onOpenChange={setShowAddPropertyModal}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Add property</DialogTitle>
+              <DialogDescription>Enter the property address to get started.</DialogDescription>
+            </DialogHeader>
+            <input
+              type="text"
+              autoFocus
+              value={addressInput}
+              onChange={(e) => setAddressInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') handleAddPropertyByAddress(); }}
+              placeholder="e.g. 12 Long Street, Cape Town"
+              className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            />
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" onClick={() => setShowAddPropertyModal(false)}>Cancel</Button>
+              <Button
+                disabled={!addressInput.trim() || addingProperty}
+                onClick={handleAddPropertyByAddress}
+                style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+              >
+                {addingProperty ? 'Adding…' : 'Add property'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </SidebarProvider>
     </VerificationGate>
   );
