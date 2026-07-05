@@ -9,16 +9,27 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { Copy, MessageSquare, Mail, Sparkles } from 'lucide-react';
 
 interface TenantInviteSectionProps {
-  propertyId: string;
+  /** When provided, the invite is locked to this property (no picker shown). */
+  propertyId?: string;
+}
+
+interface InvitableProperty {
+  id: string;
+  title: string;
+  location: string;
+  price: number;
 }
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const phoneDigits = (v: string) => v.replace(/[^\d]/g, '');
 
-export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
+export function TenantInviteSection({ propertyId: fixedPropertyId }: TenantInviteSectionProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const [properties, setProperties] = useState<InvitableProperty[]>([]);
+  const [selectedPropertyId, setSelectedPropertyId] = useState(fixedPropertyId || '');
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [monthlyRent, setMonthlyRent] = useState('');
@@ -27,23 +38,57 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
   const [generatedLink, setGeneratedLink] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Pre-fill monthly rent from the property's listed price.
+  // Fixed-property mode: just pre-fill the rent from that property.
   useEffect(() => {
+    if (!fixedPropertyId) return;
     let active = true;
     (async () => {
       const { data } = await supabase
         .from('properties')
         .select('price')
-        .eq('id', propertyId)
+        .eq('id', fixedPropertyId)
         .maybeSingle();
-      if (active && data?.price && Number(data.price) > 0) {
-        setMonthlyRent(String(data.price));
+      if (active && data?.price && Number(data.price) > 0) setMonthlyRent(String(data.price));
+    })();
+    return () => { active = false; };
+  }, [fixedPropertyId]);
+
+  // Picker mode: load the landlord's ADDED (unlisted) properties only —
+  // invites are not offered for publicly listed properties.
+  useEffect(() => {
+    if (fixedPropertyId || !user) return;
+    let active = true;
+    (async () => {
+      const { data } = await supabase
+        .from('properties')
+        .select('id, title, location, price')
+        .eq('landlord_id', user.id)
+        .eq('status', 'unlisted')
+        .order('created_at', { ascending: false });
+      if (!active) return;
+      const list = (data || []) as InvitableProperty[];
+      setProperties(list);
+      if (list.length > 0) {
+        setSelectedPropertyId(list[0].id);
+        if (Number(list[0].price) > 0) setMonthlyRent(String(list[0].price));
       }
     })();
     return () => { active = false; };
-  }, [propertyId]);
+  }, [fixedPropertyId, user?.id]);
+
+  const handleSelectProperty = (id: string) => {
+    setSelectedPropertyId(id);
+    const p = properties.find(x => x.id === id);
+    if (p && Number(p.price) > 0) setMonthlyRent(String(p.price));
+  };
+
+  const propertyIdToUse = fixedPropertyId || selectedPropertyId;
 
   const handleGenerate = async () => {
+    if (!propertyIdToUse) {
+      toast({ title: 'Select a property', description: 'Choose which added property this invite is for.', variant: 'destructive' });
+      return;
+    }
     if (!name.trim()) {
       toast({ title: 'Tenant name required', description: 'Enter the tenant’s name.', variant: 'destructive' });
       return;
@@ -57,7 +102,7 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
       const { data: existingTenancy } = await supabase
         .from('tenancies')
         .select('id')
-        .eq('property_id', propertyId)
+        .eq('property_id', propertyIdToUse)
         .eq('status', 'active')
         .maybeSingle();
 
@@ -70,7 +115,7 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
       const { data, error } = await supabase
         .from('property_invites')
         .insert({
-          property_id: propertyId,
+          property_id: propertyIdToUse,
           landlord_id: user!.id,
           monthly_rent: Number(monthlyRent),
           lease_start: leaseStart || todayISO(),
@@ -95,14 +140,12 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
     toast({ title: 'Copied!', description: 'Invite link copied to clipboard.' });
   };
 
-  // If a phone number was captured, send the WhatsApp message straight to them.
   const shareWhatsApp = () => {
     const num = contact && !isEmail(contact) ? phoneDigits(contact) : '';
     const base = num ? `https://wa.me/${num}` : 'https://wa.me/';
     window.open(`${base}?text=${encodeURIComponent(inviteMessage())}`, '_blank');
   };
 
-  // If an email was captured, pre-address the email to them.
   const shareEmail = () => {
     const to = contact && isEmail(contact) ? contact.trim() : '';
     const subject = encodeURIComponent('Your MzanziHomes tenant invite');
@@ -143,13 +186,32 @@ export function TenantInviteSection({ propertyId }: TenantInviteSectionProps) {
     );
   }
 
+  // Picker mode with no added properties → nothing to invite to.
+  if (!fixedPropertyId && properties.length === 0) {
+    return (
+      <div className="text-sm text-gray-500 py-2">
+        Add a property first — tenant invites are only for properties you've added, not publicly listed ones.
+      </div>
+    );
+  }
+
   // ── Short form ─────────────────────────────────────────────────────────
   return (
     <div className="space-y-3">
-      <div>
-        <div className="font-semibold text-gray-800">Invite your tenant</div>
-        <div className="text-sm text-gray-500">A few details, then share the registration link.</div>
-      </div>
+      {!fixedPropertyId && (
+        <div>
+          <Label className="text-xs font-semibold mb-1 block">Property</Label>
+          <select
+            value={selectedPropertyId}
+            onChange={e => handleSelectProperty(e.target.value)}
+            className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          >
+            {properties.map(p => (
+              <option key={p.id} value={p.id}>{p.title || p.location}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div>
         <Label className="text-xs font-semibold mb-1 block">Tenant name</Label>

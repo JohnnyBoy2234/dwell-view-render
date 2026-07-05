@@ -55,13 +55,6 @@ const landlordItems: SidebarItem[] = [
     requiredPlan: 'free'
   },
   { 
-    title: 'Properties', 
-    url: '/enhancedlandlorddashboard/properties', 
-    icon: Building,
-    description: 'Manage your properties',
-    requiredPlan: 'free'
-  },
-  { 
     title: 'Applications', 
     url: '/enhancedlandlorddashboard/applications', 
     icon: Inbox,

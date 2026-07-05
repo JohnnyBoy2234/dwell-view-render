@@ -25,7 +25,6 @@ import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
-import PropertyManagement from "@/pages/PropertyManagement";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import LandlordInspection from "@/pages/LandlordInspection";
 import LandlordMaintenance from "@/pages/LandlordMaintenance";
@@ -155,7 +154,6 @@ function AppRoutes() {
         <Route path="/" element={<Index />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
-        <Route path="/manage-property/:id" element={<RouteGuard><PropertyManagement /></RouteGuard>} />
         <Route path="/sale-listings" element={<SaleListings />} />
 
         {/* Property listing flows */}
