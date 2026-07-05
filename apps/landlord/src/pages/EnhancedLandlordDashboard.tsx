@@ -1048,14 +1048,18 @@ export default function EnhancedLandlordDashboard() {
       })
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
+    // Only show application sections for properties that actually have applications.
+    const propertyIdsWithApps = new Set(applications.map((a: any) => a.property_id));
+    const appProperties = properties.filter((p) => propertyIdsWithApps.has(p.id));
+
     return (
       <div className="min-h-screen bg-white pb-8 w-full">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
 
-          {/* Submitted applications — split per property */}
-          {properties.map((p) => (
+          {/* Submitted applications — split per property (only those with applications) */}
+          {appProperties.map((p) => (
             <ApplicationsWithViewings
               key={p.id}
               propertyId={p.id}
