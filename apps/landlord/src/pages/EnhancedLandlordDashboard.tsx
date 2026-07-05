@@ -170,6 +170,8 @@ export default function EnhancedLandlordDashboard() {
         landlord_id: user.id,
         title: addressInput.trim(),
         location: addressInput.trim(),
+        description: '',
+        property_type: 'Other',
         status: 'unlisted',
         listing_type: 'rent',
         price: 0,
