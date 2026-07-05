@@ -132,6 +132,7 @@ export function TenantInviteSection({ propertyId: fixedPropertyId, properties: p
           monthly_rent: Number(monthlyRent),
           lease_start: leaseStart || todayISO(),
           lease_end: leaseEnd || null,
+          invitee_name: name.trim() || null,
         })
         .select('token')
         .single();

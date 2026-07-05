@@ -32,9 +32,10 @@ export function MobileBottomBar() {
     /\/contracts\/.+\/sign/.test(location.pathname) ||
     location.pathname.includes('/sign') ||
     location.pathname.startsWith('/MzanziHomes-lease/');
+  const isJoinPage = location.pathname.startsWith('/join');
 
   useEffect(() => {
-    if (isInConversation || isSigningPage) {
+    if (isInConversation || isSigningPage || isJoinPage) {
       document.body.classList.remove('has-mobile-bottom-bar');
       return;
     }
@@ -42,7 +43,7 @@ export function MobileBottomBar() {
     return () => {
       document.body.classList.remove('has-mobile-bottom-bar');
     };
-  }, [isInConversation, isSigningPage]);
+  }, [isInConversation, isSigningPage, isJoinPage]);
 
   const totalNotifications = notificationUnread + (isLandlord ? landlordUnread : tenantUnread);
 
@@ -87,7 +88,7 @@ export function MobileBottomBar() {
   const activeIndex = navItems.findIndex(isItemActive);
   const pillWidth = 100 / navItems.length;
 
-  if (isInConversation || isSigningPage) return null;
+  if (isInConversation || isSigningPage || isJoinPage) return null;
 
   return (
     <nav

@@ -1,9 +1,8 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { AlertCircle, CheckCircle, Home, Loader2 } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Home, Loader2, PartyPopper, Sparkles, Calendar, Coins, KeyRound } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -12,6 +11,25 @@ const plusOneYear = (isoDate: string) => {
   d.setFullYear(d.getFullYear() + 1);
   return d.toISOString().slice(0, 10);
 };
+
+// Celebratory full-screen backdrop shared by every state.
+function Backdrop({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
+      style={{ minHeight: '100dvh', background: 'linear-gradient(135deg, hsl(214,100%,55%) 0%, hsl(221,83%,53%) 45%, hsl(160,84%,39%) 100%)' }}>
+      {/* Soft floating glow blobs */}
+      <div className="pointer-events-none absolute -top-28 -left-24 w-72 h-72 rounded-full bg-white/25 blur-3xl animate-pulse" />
+      <div className="pointer-events-none absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-emerald-300/30 blur-3xl animate-pulse" style={{ animationDelay: '0.6s' }} />
+      <div className="pointer-events-none absolute top-1/3 right-8 w-3 h-3 rounded-full bg-amber-300/80 blur-[1px] animate-ping" />
+      <div className="pointer-events-none absolute bottom-1/3 left-10 w-2 h-2 rounded-full bg-white/80 blur-[1px] animate-ping" style={{ animationDelay: '0.9s' }} />
+      <div className="relative w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
+        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl ring-1 ring-white/40 p-6 sm:p-7">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function JoinProperty() {
   const { token } = useParams<{ token: string }>();
@@ -98,6 +116,34 @@ export default function JoinProperty() {
         .update({ tenant_id: user.id, used_at: new Date().toISOString() })
         .eq('id', invite.id);
 
+      // 3) Give the tenant a real display name (from the invite) if theirs is
+      //    still a placeholder / email-derived handle, then notify the landlord.
+      try {
+        const invitedName = (invite.invitee_name || '').trim();
+        const { data: me } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        const current = (me?.display_name || '').trim();
+        // A real name has a space ("First Last"); single-token handles like
+        // "gprpg89wjs" are treated as placeholders and replaced.
+        if (invitedName && (!current || !current.includes(' '))) {
+          await supabase.from('profiles').update({ display_name: invitedName }).eq('user_id', user.id);
+        }
+        const tenantName = invitedName || current || 'Your tenant';
+        const where = property?.location || property?.title || 'your property';
+        await supabase.from('notifications').insert({
+          user_id: invite.landlord_id,
+          title: 'Tenant joined 🎉',
+          message: `${tenantName} accepted your invite and joined ${where}.`,
+          type: 'system',
+          action_url: '/enhancedlandlorddashboard',
+        });
+      } catch (notifyErr) {
+        console.error('Post-join updates failed:', notifyErr);
+      }
+
       setDone(true);
     } catch (e: any) {
       setError(e.message || 'Could not accept this invitation. Please try again.');
@@ -106,94 +152,133 @@ export default function JoinProperty() {
     }
   };
 
-  const Shell = ({ children }: { children: React.ReactNode }) => (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/5 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">{children}</Card>
-    </div>
-  );
-
   if (loading || authLoading) {
     return (
-      <Shell>
-        <CardContent className="py-12 flex flex-col items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+      <Backdrop>
+        <div className="py-10 flex flex-col items-center gap-3">
+          <Loader2 className="h-7 w-7 animate-spin text-ocean-blue" />
           <p className="text-sm text-muted-foreground">Loading your invitation…</p>
-        </CardContent>
-      </Shell>
+        </div>
+      </Backdrop>
     );
   }
 
   if (error) {
     return (
-      <Shell>
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-2">
-            <AlertCircle className="h-6 w-6 text-destructive" />
+      <Backdrop>
+        <div className="text-center">
+          <div className="mx-auto w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mb-4">
+            <AlertCircle className="h-7 w-7 text-destructive" />
           </div>
-          <CardTitle>Invitation problem</CardTitle>
-          <CardDescription>{error}</CardDescription>
-        </CardHeader>
-        <CardContent>
+          <h1 className="text-xl font-bold mb-1">Invitation problem</h1>
+          <p className="text-sm text-muted-foreground mb-5">{error}</p>
           <Button variant="outline" className="w-full" onClick={() => navigate('/')}>Go home</Button>
-        </CardContent>
-      </Shell>
+        </div>
+      </Backdrop>
     );
   }
 
   if (done) {
     return (
-      <Shell>
-        <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-2">
-            <CheckCircle className="h-6 w-6 text-green-600" />
+      <Backdrop>
+        <div className="text-center">
+          <div className="mx-auto mb-4 relative w-24 h-24">
+            <div className="absolute inset-0 rounded-full bg-emerald-400/30 blur-xl animate-pulse" />
+            <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-500">
+              <CheckCircle2 className="h-12 w-12 text-white" />
+            </div>
+            <PartyPopper className="absolute -top-1 -right-1 w-8 h-8 text-amber-400 drop-shadow animate-bounce" />
           </div>
-          <CardTitle>You're all set!</CardTitle>
-          <CardDescription>You've been connected to your rental. You can now manage everything from your dashboard.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button className="w-full" onClick={() => navigate('/tenant-dashboard')}>Go to my dashboard</Button>
-        </CardContent>
-      </Shell>
+          <h1 className="text-2xl font-extrabold mb-1">Welcome home! 🏡</h1>
+          <p className="text-sm text-muted-foreground mb-6">
+            You're connected to your rental. Manage rent, messages and everything else from your dashboard.
+          </p>
+          <Button
+            className="w-full h-12 text-base rounded-xl text-white font-semibold shadow-lg"
+            style={{ background: 'linear-gradient(90deg, hsl(214,100%,55%), hsl(160,84%,39%))' }}
+            onClick={() => navigate('/tenant-dashboard')}
+          >
+            <KeyRound className="h-5 w-5 mr-2" /> Go to my dashboard
+          </Button>
+        </div>
+      </Backdrop>
     );
   }
 
   return (
-    <Shell>
-      <CardHeader className="text-center">
-        <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-2">
-          <Home className="h-6 w-6 text-primary" />
+    <Backdrop>
+      <div className="text-center">
+        {/* Hero badge */}
+        <div className="mx-auto mb-4 relative w-20 h-20">
+          <div className="absolute inset-0 rounded-2xl rotate-6 opacity-30 blur-md" style={{ background: 'linear-gradient(135deg, hsl(214,100%,55%), hsl(160,84%,39%))' }} />
+          <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, hsl(214,100%,55%), hsl(160,84%,39%))' }}>
+            <Home className="w-9 h-9 text-white" />
+          </div>
+          <PartyPopper className="absolute -top-2 -right-2 w-7 h-7 text-amber-400 drop-shadow animate-bounce" />
+          <Sparkles className="absolute -bottom-1 -left-2 w-5 h-5 text-ocean-blue/70 animate-pulse" />
         </div>
-        <CardTitle>You've been invited</CardTitle>
-        <CardDescription>
+
+        <p className="text-xs font-bold uppercase tracking-widest text-ocean-blue/80 mb-1">You're invited</p>
+        <h1 className="text-2xl font-extrabold leading-tight mb-1">
+          Your new home<br />awaits 🎉
+        </h1>
+        <p className="text-sm text-muted-foreground mb-5">
           {property?.title || property?.location
             ? `Join ${property.title || property.location} on MzanziHomes.`
-            : 'Join your rental on MzanziHomes.'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="rounded-xl bg-muted/50 p-4 text-sm space-y-1">
+            : 'Your landlord has invited you to join your rental on MzanziHomes.'}
+        </p>
+
+        {/* Details */}
+        <div className="rounded-2xl bg-muted/50 p-4 text-sm space-y-2.5 text-left mb-5">
           {property?.location && (
-            <div className="flex justify-between gap-3">
-              <span className="text-muted-foreground">Property</span>
-              <span className="font-medium text-right">{property.location}</span>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-ocean-blue/10 flex items-center justify-center shrink-0">
+                <Home className="h-4 w-4 text-ocean-blue" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] text-muted-foreground leading-none mb-0.5">Property</p>
+                <p className="font-semibold truncate">{property.location}</p>
+              </div>
             </div>
           )}
-          <div className="flex justify-between gap-3">
-            <span className="text-muted-foreground">Monthly rent</span>
-            <span className="font-medium">R{Number(invite.monthly_rent).toLocaleString()}</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Coins className="h-4 w-4 text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground leading-none mb-0.5">Monthly rent</p>
+              <p className="font-semibold">R{Number(invite.monthly_rent).toLocaleString()}</p>
+            </div>
           </div>
-          <div className="flex justify-between gap-3">
-            <span className="text-muted-foreground">Starts</span>
-            <span className="font-medium">{invite.lease_start}</span>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+              <Calendar className="h-4 w-4 text-amber-600" />
+            </div>
+            <div>
+              <p className="text-[11px] text-muted-foreground leading-none mb-0.5">Starts</p>
+              <p className="font-semibold">{invite.lease_start}</p>
+            </div>
           </div>
         </div>
-        <Button className="w-full" onClick={handleAccept} disabled={accepting}>
-          {accepting ? 'Joining…' : user ? 'Accept & join' : 'Sign in to accept'}
+
+        <Button
+          className="w-full h-12 text-base rounded-xl text-white font-semibold shadow-lg hover:brightness-105 active:scale-[0.98] transition"
+          style={{ background: 'linear-gradient(90deg, hsl(214,100%,55%), hsl(160,84%,39%))' }}
+          onClick={handleAccept}
+          disabled={accepting}
+        >
+          {accepting ? (
+            <><Loader2 className="h-5 w-5 mr-2 animate-spin" /> Joining…</>
+          ) : user ? (
+            <><KeyRound className="h-5 w-5 mr-2" /> Accept & move in</>
+          ) : (
+            <><Sparkles className="h-5 w-5 mr-2" /> Sign in to accept</>
+          )}
         </Button>
-        <p className="text-xs text-center text-muted-foreground">
+        <p className="text-xs text-muted-foreground mt-3">
           By accepting you'll be linked to this property as its tenant.
         </p>
-      </CardContent>
-    </Shell>
+      </div>
+    </Backdrop>
   );
 }
