@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Progress } from '@mzanzihomes/ui/components/progress';
 import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, Phone, FileText } from 'lucide-react';
 // Simple R icon for South African Rand
@@ -324,19 +324,7 @@ export default function ListSale() {
 
         {/* Step Content */}
         <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {steps[currentStep - 1]?.icon && (() => {
-                const IconComponent = steps[currentStep - 1].icon;
-                return <IconComponent className="h-5 w-5" />;
-              })()}
-              {steps[currentStep - 1]?.title}
-            </CardTitle>
-            <CardDescription>
-              {steps[currentStep - 1]?.description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             {renderStepContent()}
           </CardContent>
         </Card>
