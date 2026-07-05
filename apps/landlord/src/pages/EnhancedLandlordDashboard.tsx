@@ -2610,14 +2610,7 @@ const renderReportsTab = () => (
                           <Shield className="h-3 w-3" />
                         </Button>
                       </>
-                    ) : (
-                      <Button size="sm" variant="ghost" onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/manage-property/${property.id}`);
-                      }}>
-                          <Eye className="h-3 w-3" />
-                        </Button>
-                    )}
+                    ) : null}
                     {!property.is_listed && (
                       <Button
                         size="sm"

@@ -205,19 +205,19 @@ export default function PropertyManagement() {
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
         {/* Property Details Header */}
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-lg hover:shadow-xl transition-shadow duration-300 mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-lg flex items-center justify-center">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-4 min-w-0">
+              <div className="w-12 h-12 bg-gradient-to-br from-ocean-blue to-ocean-blue-light rounded-lg flex items-center justify-center flex-shrink-0">
                 <Home className="w-6 h-6 text-white" />
               </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">{property.title}</h2>
-                <p className="text-sm text-gray-600">{property.location}</p>
+              <div className="min-w-0">
+                <h2 className="text-xl font-bold text-gray-900 truncate">{property.title}</h2>
+                <p className="text-sm text-gray-600 truncate">{property.location}</p>
               </div>
             </div>
-            <Button 
+            <Button
               onClick={() => navigate('/enhancedlandlorddashboard')}
-              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white"
+              className="bg-ocean-blue hover:bg-ocean-blue-dark text-white flex-shrink-0"
             >
               Back to Dashboard
             </Button>
