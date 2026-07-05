@@ -161,6 +161,7 @@ export default function EnhancedLandlordDashboard() {
   const [addingProperty, setAddingProperty] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [invitedPropertyIds, setInvitedPropertyIds] = useState<Set<string>>(new Set());
 
   const handleAddPropertyByAddress = async () => {
     if (!addressInput.trim() || !user) return;
@@ -354,6 +355,14 @@ export default function EnhancedLandlordDashboard() {
           listing_type: prop.listing_type,
         }));
         setProperties(transformedProperties);
+
+        // Track which properties already have an invite, so the Invite Tenant
+        // entry hides once every added property has been invited.
+        const { data: invitesData } = await supabase
+          .from('property_invites')
+          .select('property_id')
+          .eq('landlord_id', user.id);
+        setInvitedPropertyIds(new Set((invitesData || []).map((i: any) => i.property_id)));
       }
     } catch (error) {
       console.error('Error in fetchProperties:', error);
@@ -2405,7 +2414,7 @@ const renderReportsTab = () => (
 
     const tools: ToolItem[] = [
       { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
-      { title: 'Invite Tenant',  subtitle: 'Onboard your tenant',                icon: UserPlus,      action: () => setShowInviteModal(true) },
+      ...(canInvite ? [{ title: 'Invite Tenant', subtitle: 'Onboard your tenant', icon: UserPlus, action: () => setShowInviteModal(true) }] : []),
       { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
       { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: Inbox, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
       { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
@@ -2460,7 +2469,7 @@ const renderReportsTab = () => (
               </Button>
             </div>
           </div>
-        ) : tenants.length === 0 ? (
+        ) : canInvite ? (
           <div
             className="rounded-2xl p-4 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
             style={{
@@ -2704,6 +2713,13 @@ const renderReportsTab = () => (
     navigate(`${tab}${params}`);
   };
 
+  // Added (not publicly listed) properties that haven't been invited yet.
+  // The Invite Tenant entry only appears while at least one of these exists.
+  const pendingInviteProperties = properties.filter(
+    (p) => p.is_listed === false && !invitedPropertyIds.has(p.id)
+  );
+  const canInvite = pendingInviteProperties.length > 0;
+
   const headerTitle = isBaseTab
     ? 'Management Tools'
     : selectedPropertyId
@@ -2760,13 +2776,13 @@ const renderReportsTab = () => (
         </Dialog>
 
         {/* Per-property tenant invite — short form then share */}
-        <Dialog open={showInviteModal} onOpenChange={setShowInviteModal}>
+        <Dialog open={showInviteModal} onOpenChange={(open) => { setShowInviteModal(open); if (!open) fetchProperties(); }}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
               <DialogTitle>Invite tenant</DialogTitle>
               <DialogDescription>Pick the property, add a few details, then share the invite.</DialogDescription>
             </DialogHeader>
-            {showInviteModal && <TenantInviteSection />}
+            {showInviteModal && <TenantInviteSection properties={pendingInviteProperties} />}
           </DialogContent>
         </Dialog>
       </SidebarProvider>

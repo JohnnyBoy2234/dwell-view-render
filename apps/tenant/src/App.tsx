@@ -25,6 +25,7 @@ import { PlanGuard } from "@mzanzihomes/ui/components/PlanGuard";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
 import Auth from "@/pages/Auth";
+import JoinProperty from "@/pages/JoinProperty";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
@@ -109,6 +110,7 @@ function AppRoutes() {
         <Route path="/properties" element={<><MiniNavbar hideLandlordActions minimal /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/:id" element={<PropertyDetail />} />
+        <Route path="/join/:token" element={<JoinProperty />} />
 
         {/* Auth */}
         <Route path="/auth" element={<Auth />} />

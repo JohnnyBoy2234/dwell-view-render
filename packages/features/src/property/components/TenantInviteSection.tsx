@@ -11,6 +11,8 @@ import { Copy, MessageSquare, Mail, Sparkles } from 'lucide-react';
 interface TenantInviteSectionProps {
   /** When provided, the invite is locked to this property (no picker shown). */
   propertyId?: string;
+  /** Explicit list of invitable (added/unlisted) properties for the picker. */
+  properties?: InvitableProperty[];
 }
 
 interface InvitableProperty {
@@ -24,7 +26,7 @@ const todayISO = () => new Date().toISOString().slice(0, 10);
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const phoneDigits = (v: string) => v.replace(/[^\d]/g, '');
 
-export function TenantInviteSection({ propertyId: fixedPropertyId }: TenantInviteSectionProps) {
+export function TenantInviteSection({ propertyId: fixedPropertyId, properties: providedProperties }: TenantInviteSectionProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -53,10 +55,25 @@ export function TenantInviteSection({ propertyId: fixedPropertyId }: TenantInvit
     return () => { active = false; };
   }, [fixedPropertyId]);
 
-  // Picker mode: load the landlord's ADDED (unlisted) properties only —
-  // invites are not offered for publicly listed properties.
+  // Picker mode: use the caller-provided list when given (already filtered to
+  // added/unlisted, not-yet-invited properties); otherwise load them here.
   useEffect(() => {
-    if (fixedPropertyId || !user) return;
+    if (fixedPropertyId) return;
+
+    const applyList = (list: InvitableProperty[]) => {
+      setProperties(list);
+      if (list.length > 0) {
+        setSelectedPropertyId(list[0].id);
+        if (Number(list[0].price) > 0) setMonthlyRent(String(list[0].price));
+      }
+    };
+
+    if (providedProperties) {
+      applyList(providedProperties);
+      return;
+    }
+
+    if (!user) return;
     let active = true;
     (async () => {
       const { data } = await supabase
@@ -66,15 +83,10 @@ export function TenantInviteSection({ propertyId: fixedPropertyId }: TenantInvit
         .eq('is_listed', false)
         .order('created_at', { ascending: false });
       if (!active) return;
-      const list = (data || []) as InvitableProperty[];
-      setProperties(list);
-      if (list.length > 0) {
-        setSelectedPropertyId(list[0].id);
-        if (Number(list[0].price) > 0) setMonthlyRent(String(list[0].price));
-      }
+      applyList((data || []) as InvitableProperty[]);
     })();
     return () => { active = false; };
-  }, [fixedPropertyId, user?.id]);
+  }, [fixedPropertyId, providedProperties, user?.id]);
 
   const handleSelectProperty = (id: string) => {
     setSelectedPropertyId(id);
@@ -124,7 +136,10 @@ export function TenantInviteSection({ propertyId: fixedPropertyId }: TenantInvit
         .select('token')
         .single();
       if (error) throw error;
-      setGeneratedLink(`${window.location.origin}/join/${data.token}`);
+      // The join/registration page lives in the tenant app, not the landlord app.
+      const tenantAppUrl =
+        (import.meta as any).env?.VITE_TENANT_APP_URL || 'https://mzanzihomes-tenant.vercel.app';
+      setGeneratedLink(`${tenantAppUrl}/join/${data.token}`);
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
     } finally {
