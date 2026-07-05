@@ -25,6 +25,16 @@ interface InvitableProperty {
 const todayISO = () => new Date().toISOString().slice(0, 10);
 const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 const phoneDigits = (v: string) => v.replace(/[^\d]/g, '');
+// WhatsApp (wa.me) needs an international number with no leading 0 or +.
+// Normalise common South African formats to 27XXXXXXXXX.
+const toIntlPhone = (v: string) => {
+  const d = phoneDigits(v);
+  if (!d) return '';
+  if (d.startsWith('27')) return d;
+  if (d.startsWith('0')) return '27' + d.slice(1);
+  if (d.length === 9) return '27' + d; // e.g. 821234567 (leading 0 omitted)
+  return d;
+};
 
 export function TenantInviteSection({ propertyId: fixedPropertyId, properties: providedProperties }: TenantInviteSectionProps) {
   const { user } = useAuth();
@@ -157,7 +167,7 @@ export function TenantInviteSection({ propertyId: fixedPropertyId, properties: p
   };
 
   const shareWhatsApp = () => {
-    const num = contact && !isEmail(contact) ? phoneDigits(contact) : '';
+    const num = contact && !isEmail(contact) ? toIntlPhone(contact) : '';
     const base = num ? `https://wa.me/${num}` : 'https://wa.me/';
     window.open(`${base}?text=${encodeURIComponent(inviteMessage())}`, '_blank');
   };

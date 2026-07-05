@@ -1054,11 +1054,14 @@ export default function EnhancedLandlordDashboard() {
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
 
-          {/* Submitted Applications Section — shows all properties combined */}
-          <ApplicationsWithViewings
-            propertyId={undefined}
-            propertyTitle="All Properties"
-          />
+          {/* Submitted applications — split per property */}
+          {properties.map((p) => (
+            <ApplicationsWithViewings
+              key={p.id}
+              propertyId={p.id}
+              propertyTitle={p.title}
+            />
+          ))}
           
           {/* Loading State */}
           {applicationsLoading ? (
@@ -2180,15 +2183,76 @@ const renderReportsTab = () => (
 
 
       const renderMaintenanceTab = () => {
-    // Organize by status
-    const urgentRequests = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed');
-    const submittedRequests = maintenanceRequests.filter(r => r.status === 'submitted' && r.priority !== 'urgent');
-    const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
-
-    // Showing all properties combined now (no property selection step) — label each
-    // request with which property it belongs to.
     const getPropertyTitle = (propertyId: string) =>
       properties.find(p => p.id === propertyId)?.title || 'Property';
+
+    // Group requests by property so each property's maintenance shows together.
+    const rank = (r: any) =>
+      (r.priority === 'urgent' && r.status !== 'completed') ? 0
+      : r.status === 'in_progress' ? 1
+      : r.status === 'submitted' ? 2 : 3;
+    const maintenanceGroups: any[] = Object.values(
+      maintenanceRequests.reduce((acc: any, r: any) => {
+        const key = r.property_id || 'unknown';
+        (acc[key] = acc[key] || { pid: key, title: getPropertyTitle(key), reqs: [] }).reqs.push(r);
+        return acc;
+      }, {})
+    ).map((g: any) => ({
+      ...g,
+      reqs: g.reqs.slice().sort((a: any, b: any) => rank(a) - rank(b)),
+      open: g.reqs.filter((r: any) => r.status !== 'completed').length,
+    }));
+
+    const renderMaintenanceCard = (request: any) => {
+      const border = (request.priority === 'urgent' && request.status !== 'completed') ? 'border-l-red-500'
+        : request.status === 'in_progress' ? 'border-l-blue-500'
+        : request.status === 'submitted' ? 'border-l-yellow-500' : 'border-l-gray-300';
+      const iconBg = request.priority === 'urgent' ? 'bg-red-500'
+        : request.status === 'in_progress' ? 'bg-blue-500'
+        : request.priority === 'high' ? 'bg-orange-500' : 'bg-yellow-500';
+      return (
+        <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 ${border}`}>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-start gap-4">
+              <div className="flex gap-3 flex-1 min-w-0">
+                <div className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                  <Wrench className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-lg">{request.title}</h4>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
+                    <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
+                </Button>
+                {request.status === 'submitted' && (
+                  <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Start
+                  </Button>
+                )}
+                {request.status === 'in_progress' && (
+                  <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700" onClick={() => updateMaintenanceStatus(request.id, 'completed')}>
+                    <Check className="h-4 w-4 mr-2" />
+                    Complete
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    };
 
     return (
       <div className="min-h-screen bg-white pb-8">
@@ -2207,168 +2271,21 @@ const renderReportsTab = () => (
               <p className="text-muted-foreground mb-6">
                 Requests will appear here once tenants submit them.
               </p>
-              <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
-                <Building className="h-4 w-4 mr-2" />
-                View Properties
-              </Button>
             </CardContent>
           </Card>
         ) : (
-          <>
-            {/* Section headers only, no stats cards */}
-
-            {/* Urgent Requests Section */}
-            {urgentRequests.length > 0 && (
-              <div className="space-y-3">
+          <div className="space-y-8">
+            {maintenanceGroups.map((group: any) => (
+              <div key={group.pid} className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <h3 className="text-lg font-semibold">Urgent Requests</h3>
-                  <Badge variant="destructive">{urgentRequests.length}</Badge>
+                  <Building className="h-5 w-5 text-ocean-blue" />
+                  <h3 className="text-lg font-semibold">{group.title}</h3>
+                  <Badge variant="secondary">{group.open} open</Badge>
                 </div>
-                {urgentRequests.map((request) => (
-                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-red-500`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex gap-3 flex-1 min-w-0">
-                          <div className="h-12 w-12 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                            <Wrench className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-lg">{request.title}</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge variant="outline" className="gap-1">
-                                <Building className="h-3 w-3" />
-                                {getPropertyTitle(request.property_id)}
-                              </Badge>
-                              <Badge variant="destructive">{request.priority}</Badge>
-                              <Badge variant="secondary">{request.status.replace('_', ' ')}</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          {request.status === 'submitted' && (
-                            <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
-                              <Play className="h-4 w-4 mr-2" />
-                              Start
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {group.reqs.map(renderMaintenanceCard)}
               </div>
-            )}
-
-            {/* New Requests Section */}
-            {submittedRequests.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-yellow-600" />
-                  <h3 className="text-lg font-semibold">New Requests</h3>
-                  <Badge variant="secondary">{submittedRequests.length}</Badge>
-                </div>
-                {submittedRequests.map((request) => (
-                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-yellow-500`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex gap-3 flex-1 min-w-0">
-                          <div className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            request.priority === 'high' ? 'bg-orange-500' :
-                            request.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
-                          }`}>
-                            <Wrench className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-lg">{request.title}</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge variant="outline" className="gap-1">
-                                <Building className="h-3 w-3" />
-                                {getPropertyTitle(request.property_id)}
-                              </Badge>
-                              <Badge variant={request.priority === 'high' ? 'default' : 'secondary'}>{request.priority}</Badge>
-                              <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
-                            <Play className="h-4 w-4 mr-2" />
-                            Start Work
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {/* In Progress Section */}
-            {inProgressRequests.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">In Progress</h3>
-                  <Badge variant="secondary">{inProgressRequests.length}</Badge>
-                </div>
-                {inProgressRequests.map((request) => (
-                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-blue-500`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex gap-3 flex-1 min-w-0">
-                          <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                            <Wrench className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-lg">{request.title}</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge variant="outline" className="gap-1">
-                                <Building className="h-3 w-3" />
-                                {getPropertyTitle(request.property_id)}
-                              </Badge>
-                              <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
-                              <Badge>In Progress</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700" onClick={() => updateMaintenanceStatus(request.id, 'completed')}>
-                            <Check className="h-4 w-4 mr-2" />
-                            Complete
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
         </div>
       </div>
