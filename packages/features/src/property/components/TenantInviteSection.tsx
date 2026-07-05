@@ -63,7 +63,7 @@ export function TenantInviteSection({ propertyId: fixedPropertyId }: TenantInvit
         .from('properties')
         .select('id, title, location, price')
         .eq('landlord_id', user.id)
-        .eq('status', 'unlisted')
+        .eq('is_listed', false)
         .order('created_at', { ascending: false });
       if (!active) return;
       const list = (data || []) as InvitableProperty[];

@@ -172,7 +172,7 @@ export default function EnhancedLandlordDashboard() {
         location: addressInput.trim(),
         description: '',
         property_type: 'Other',
-        status: 'unlisted',
+        is_listed: false,
         listing_type: 'rent',
         price: 0,
       });
