@@ -75,7 +75,7 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
           <TabsTrigger value="all">All ({contracts.length})</TabsTrigger>
           <TabsTrigger value="draft">Draft ({getDraftContracts().length})</TabsTrigger>
           <TabsTrigger value="pending">Pending ({getPendingContracts().length})</TabsTrigger>

@@ -891,12 +891,10 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <Button
-                    type="button"
-                    className="w-full"
-                    onClick={() => window.open('https://up.experian.co.za', '_blank', 'noopener,noreferrer')}
-                  >
-                    Get My Free Experian Credit Report
+                  <Button asChild className="w-full">
+                    <a href="https://up.experian.co.za" target="_blank" rel="noopener noreferrer">
+                      Get My Free Experian Credit Report
+                    </a>
                   </Button>
                   
                   <div className="space-y-2">

@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useMessaging } from '@mzanzihomes/supabase/hooks/useMessaging';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -41,51 +41,17 @@ export default function StartConversation({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [showPreScreening, setShowPreScreening] = useState(false);
-  const [isFirstMessage, setIsFirstMessage] = useState(false);
+  const [checkingConversation, setCheckingConversation] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Check if this is the first message to this landlord
-  useEffect(() => {
-    const checkFirstMessage = async () => {
-      if (!user || !landlordId) return;
-      
-      console.log('🔍 Checking for existing conversations:', { userId: user.id, landlordId });
-      
-      try {
-        const { data, error } = await supabase
-          .from('conversations')
-          .select('id')
-          .eq('tenant_id', user.id as any)
-          .eq('landlord_id', landlordId as any)
-          .limit(1);
-          
-        if (error) {
-          console.error('❌ Error checking existing conversations:', error);
-          return;
-        }
-        
-        console.log('✅ Existing conversations check result:', { data, count: data?.length });
-        setIsFirstMessage(!data || data.length === 0);
-      } catch (error) {
-        console.error('❌ Error checking first message:', error);
-      }
-    };
-    
-    checkFirstMessage();
-  }, [user, landlordId]);
-
-  const handleRequestViewingClick = () => {
-    console.log('🔵 Request Viewing clicked', { user, landlordId, isFirstMessage, showPreScreening, open });
-    
+  const handleRequestViewingClick = async () => {
     if (!user) {
-      console.log('🔴 No user, navigating to auth');
       navigate('/auth');
       return;
     }
-    
+
     if (user.id === landlordId) {
-      console.log('🔴 User is landlord, showing error');
       toast({
         variant: "destructive",
         title: "Cannot message yourself",
@@ -93,15 +59,34 @@ export default function StartConversation({
       });
       return;
     }
-    
-    // Route to appropriate dialog based on first message status
-    console.log('🟢 Routing to dialog', { isFirstMessage });
-    if (isFirstMessage) {
-      console.log('🟢 Setting showPreScreening to true');
+
+    // Check on click (not in a background effect) so a fast tap can never
+    // race ahead of the result and land on the wrong dialog.
+    setCheckingConversation(true);
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('tenant_id', user.id as any)
+        .eq('landlord_id', landlordId as any)
+        .limit(1);
+
+      if (error) throw error;
+
+      const isFirstMessage = !data || data.length === 0;
+      if (isFirstMessage) {
+        setShowPreScreening(true);
+      } else {
+        setOpen(true);
+      }
+    } catch (error) {
+      console.error('Error checking existing conversations:', error);
+      // Default to the pre-screening flow - worst case the tenant fills in
+      // details that were already known, which is safer than silently
+      // skipping the form.
       setShowPreScreening(true);
-    } else {
-      console.log('🟢 Setting open to true');
-      setOpen(true);
+    } finally {
+      setCheckingConversation(false);
     }
   };
 
@@ -214,9 +199,9 @@ export default function StartConversation({
       {renderTrigger ? (
         renderTrigger(handleRequestViewingClick)
       ) : (
-        <Button className="w-full" onClick={handleRequestViewingClick}>
+        <Button className="w-full" onClick={handleRequestViewingClick} disabled={checkingConversation}>
           <Calendar className="h-4 w-4 mr-2" />
-          Request Viewing
+          {checkingConversation ? 'Loading...' : 'Request Viewing'}
         </Button>
       )}
 

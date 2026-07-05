@@ -144,15 +144,15 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
               return (
                 <Card key={application.id}>
                   <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 shrink-0 bg-primary rounded-full flex items-center justify-center">
                           <User className="h-5 w-5 text-white" />
                         </div>
-                        <div>
-                          <CardTitle className="text-base">
-                            {application.screening_profile?.first_name} {application.screening_profile?.last_name} 
-                            {application.tenant_profile?.display_name && 
+                        <div className="min-w-0">
+                          <CardTitle className="text-base truncate">
+                            {application.screening_profile?.first_name} {application.screening_profile?.last_name}
+                            {application.tenant_profile?.display_name &&
                               ` (${application.tenant_profile.display_name})`
                             }
                           </CardTitle>
@@ -166,7 +166,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                       </Badge>
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent>
                     <div className="space-y-4">
                       {/* Viewing Status */}
@@ -184,24 +184,8 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                         )}
                       </div>
 
-                      {/* Application Details */}
-                      {application.screening_details && (
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Employment:</span>
-                            <div className="font-medium">{application.screening_details.employment_status}</div>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Monthly Income:</span>
-                            <div className="font-medium">
-                              R{application.screening_details.net_monthly_income?.toLocaleString()}
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
                       {/* Action Buttons */}
-                      <div className="flex gap-2 pt-2">
+                      <div className="flex flex-wrap items-center gap-2 pt-2">
                         <Dialog>
                           <DialogTrigger asChild>
                             <Button 
@@ -212,13 +196,13 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                               View Details
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="max-w-2xl">
+                          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>Application Details</DialogTitle>
                             </DialogHeader>
                             {selectedApplication && (
                               <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                   <div>
                                     <h4 className="font-semibold mb-2">Personal Information</h4>
                                     <div className="space-y-1 text-sm">

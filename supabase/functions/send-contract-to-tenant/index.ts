@@ -79,6 +79,14 @@ serve(async (req) => {
 
     if (updateError) throw updateError;
 
+    // Let the tenant know inside the app too - email alone is easy to miss.
+    await supabase.from('notifications').insert({
+      user_id: tenantUserId,
+      message: `A lease has been prepared for ${contract.contract_data?.propertyAddress || 'your property'}. Please review and sign.`,
+      type: 'lease',
+      link_url: `/lease/sign/${contractId}`,
+    });
+
     // Add audit entry
     await supabase.rpc('add_lease_audit_entry', {
       contract_id: contractId,

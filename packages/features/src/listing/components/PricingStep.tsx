@@ -83,7 +83,7 @@ export default function PricingStep({ control, errors }: PricingStepProps) {
                 <Input
                   {...field}
                   type="date"
-                  className="text-base h-12"
+                  className="text-sm sm:text-base h-12 pr-2"
                   min={new Date().toISOString().split('T')[0]}
                 />
               )}

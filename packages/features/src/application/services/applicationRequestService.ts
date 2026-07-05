@@ -25,6 +25,9 @@ export const createApplicationRequest = async (
 
     if (error) {
       console.error('Error creating application request:', error);
+      if (error.code === '23505') {
+        throw new Error("You've already requested an application for this property.");
+      }
       throw error;
     }
 

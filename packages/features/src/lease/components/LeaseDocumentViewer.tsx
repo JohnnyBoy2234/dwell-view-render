@@ -90,10 +90,10 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="min-w-0">
+            <CardTitle className="flex items-center gap-2 truncate">
+              <FileText className="h-5 w-5 shrink-0" />
               {contract.title}
             </CardTitle>
             <CardDescription>
@@ -108,7 +108,7 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
 
       <CardContent className="space-y-4">
         {/* Contract Details */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
             <p className="font-medium text-muted-foreground">Property</p>
             <p>{contract.contract_data?.propertyAddress || 'Not specified'}</p>
@@ -134,7 +134,7 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
               <Shield className="h-4 w-4" />
               Signature Status
             </h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2">
                 <User className="h-4 w-4" />
                 <div>

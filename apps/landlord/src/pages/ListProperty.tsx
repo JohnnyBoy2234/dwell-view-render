@@ -9,7 +9,7 @@ import { Progress } from '@mzanzihomes/ui/components/progress';
 import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
-  <div className={`${className} flex items-center justify-center font-bold text-lg`}>
+  <div className={`${className} flex items-center justify-center font-bold text-xs leading-none`}>
     R
   </div>
 );
@@ -247,14 +247,14 @@ export default function ListProperty() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container mx-auto p-6 max-w-4xl pb-32 md:pb-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" onClick={() => navigate('/')}>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-8">
+          <Button variant="outline" onClick={() => navigate('/')} className="self-start">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-primary">List Your Property</h1>
-            <p className="text-muted-foreground">Get your property in front of thousands of potential tenants</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-primary">List Your Property</h1>
+            <p className="text-muted-foreground text-sm sm:text-base">Get your property in front of thousands of potential tenants</p>
           </div>
         </div>
 

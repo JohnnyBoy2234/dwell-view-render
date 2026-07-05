@@ -333,16 +333,17 @@ export default function ViewingPreScreeningForm({
               )}
             />
 
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
+                className="flex-1 sm:flex-none"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading}>
+              <Button type="submit" disabled={loading} className="flex-1 sm:flex-none">
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
