@@ -1162,7 +1162,8 @@ export default function EnhancedLandlordDashboard() {
   };
 
   const renderPropertiesTab = () => (
-    <div className="space-y-6">
+    <div className="min-h-screen bg-white pb-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Building className="h-6 w-6 text-ocean-blue" />
@@ -1174,6 +1175,7 @@ export default function EnhancedLandlordDashboard() {
         </Button>
       </div>
       {renderPropertiesGrid()}
+      </div>
     </div>
   );
 
@@ -1212,7 +1214,7 @@ export default function EnhancedLandlordDashboard() {
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-green-50 pb-8 w-full">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 w-full">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
         {selectedPropertyId && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm">
             <TenantInviteSection propertyId={selectedPropertyId} />
