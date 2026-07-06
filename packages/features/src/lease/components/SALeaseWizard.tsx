@@ -294,14 +294,14 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   };
 
   const handleSendToTenant = async () => {
-    if (!savedContractId || !data.tenantEmail) { 
-      toast.error('Tenant email required'); 
-      return; 
+    if (!savedContractId || (!tenantId && !data.tenantEmail)) {
+      toast.error('Select a tenant or enter their email');
+      return;
     }
     setIsSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-contract-to-tenant', { 
-        body: { contractId: savedContractId, tenantEmail: data.tenantEmail } 
+      const { error } = await supabase.functions.invoke('send-contract-to-tenant', {
+        body: { contractId: savedContractId, tenantEmail: data.tenantEmail, tenantId }
       });
       if (error) throw error;
       
