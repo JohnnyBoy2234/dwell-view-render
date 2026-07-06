@@ -1,16 +1,18 @@
-# Rent Billing Cycle, Paystack Test Mode, Rent Collection Onboarding & SwiftBooks Redesign
+# Rent Billing Cycle, Paystack Test Mode, Rent Collection Onboarding, Monetization & SwiftBooks Redesign
 
 **Date:** 2026-07-06
 **Status:** Approved by user (brainstorming session)
 
 ## Overview
 
-Four connected pieces of work:
+Six connected pieces of work:
 
 1. **Paystack test mode** — run the whole payment stack against Paystack test keys so rent collection can be verified end-to-end with test cards before going live.
 2. **Monthly billing cycle** — 2 days before month-end, landlords are prompted to complete a bill (rent auto-filled + that month's utility charges); the tenant pays the total through Paystack; both parties get receipts; the platform keeps its own record.
 3. **Rent Collection onboarding** — a landlord dashboard tile that creates the landlord's Paystack subaccount, with the existing lease-banking flow as a fallback.
-4. **SwiftBooks redesign** — the accounting feature becomes a "Calm ledger": simpler, better-looking, same functionality, and auto-fed by rent payments.
+4. **Apple Pay** — tenants can pay rent with Apple Pay through Paystack checkout on iOS.
+5. **Monetization** — two landlord tiers replacing Pro/Premium: R99 once-off listing fee (contact-only leads) or R149/month subscription (full platform), both billed via Paystack.
+6. **SwiftBooks redesign** — the accounting feature becomes a "Calm ledger": simpler, better-looking, same functionality, and auto-fed by rent payments.
 
 ## Decisions made during brainstorming
 
@@ -25,6 +27,9 @@ Four connected pieces of work:
 | Billing architecture | **Supabase-native**: pg_cron → `billing-cycle` edge function → new bill tables |
 | Banner style | **Red alert bar with white "Pay now" pill** (option B) — bar tap opens bill, pill tap goes straight to payment |
 | SwiftBooks direction | **Calm ledger** (option A) — net-income hero + sparkline, income/expense chips, auto-fed ledger, toolbar to existing pages |
+| Plan model | **Replace Pro/Premium entirely** — exactly two landlord options: R99 once-off per listing, or R149/month subscription (unlimited listings, everything) |
+| Billing processor | **Paystack for everything** — listing fee, subscription, and rent. PayFast billing code retired |
+| Paywall placement | **Pay to publish** — free to sign up and prepare listings; publishing requires the R99 fee for that listing or an active subscription |
 
 ## 1. Paystack test mode
 
@@ -116,6 +121,33 @@ Keep all functionality; declutter the surface. Same `transactions` table, **no d
 - **Consolidate:** add-income / add-expense modals fold into the existing TransactionWizard.
 - Aesthetic follows `.impeccable.md`: iOS-inspired, Inter, calm and trustworthy, light + dark both polished.
 
+## 8. Apple Pay for tenant rent payment
+
+- Enable the Apple Pay channel on the Paystack dashboard (one-time domain/merchant registration with Paystack).
+- **Constraint:** Apple Pay does not render inside an embedded WKWebView. On iOS, Paystack checkout opens in the system browser sheet (SFSafariViewController via the Capacitor Browser plugin) instead of the in-app `PaystackWebView`; a deep link returns the tenant to the app after payment. Android keeps the current in-app checkout.
+- The **webhook remains the source of truth** for marking bills paid — the browser return is only a UX signal (show "confirming payment…" until the realtime status change arrives).
+- Rent is a real-world service, so Apple's in-app-purchase rules do not apply; Paystack checkout is compliant.
+
+## 9. Monetization — two landlord tiers via Paystack
+
+Replaces the existing Pro/Premium plans entirely. Tenants are always free.
+
+### Tiers
+
+- **Listing fee — R99 once-off, per listing:** the listing is publicly visible. When a tenant makes contact, the landlord receives a notification + email containing the tenant's name, email, and phone — **no in-app message thread is created**. Everything past tenant contact (messaging, viewings, applications, screening, leases, rent collection, SwiftBooks) is gated behind an upgrade prompt. The tenant sees "the landlord will contact you directly."
+- **Subscription — R149/month:** unlimited listings and the full platform, including the rent-collection cycle in this spec.
+
+### Paywall
+
+- Free landlords can sign up, add properties, and prepare listings. **"Publish listing" is the paywall:** a sheet offers the two options, checkout runs through Paystack (one-time charge for R99; Paystack Plans + Subscriptions for R149/month auto-billing). Nothing is publicly visible until one is paid.
+
+### Data & enforcement
+
+- New **`listing_payments`** table: `id, property_id, landlord_id, amount, paystack_reference, paid_at` — records which listing the R99 covers.
+- `profiles.plan` values become `free | subscriber` (kept in sync by Paystack subscription webhook events: charge success, invoice payment, subscription disable → status/expiry updates).
+- Access rule: `canPublish(property)` = active subscriber **or** listing payment exists for that property. Feature gates (messaging and beyond) = active subscriber only, enforced in RLS/edge functions as well as UI.
+- Existing Pro/Premium profiles map to the subscription tier until their current expiry. PayFast billing code is retired. The Pricing page and `UpgradePrompt` are rewritten for the two-tier model.
+
 ## Error handling
 
 - **Webhook retries / double delivery:** marking `paid` is idempotent (status check before side effects); receipts and book entries are generated once (guarded by `receipt_pdf_path` / existing-transaction checks).
@@ -123,13 +155,17 @@ Keep all functionality; declutter the surface. Same `transactions` table, **no d
 - **PDF or email failure after successful payment:** payment state still commits; receipt generation retried via the webhook handler's error path (never block `paid` on receipt delivery).
 - **Missing subaccount at send time:** blocked in UI and re-checked server-side.
 - **Cron overlap/downtime:** daily run is idempotent; a missed day self-heals on the next run (bills are created when `today >= month-end − 2 days` and no bill exists for the period, not only on the exact day).
+- **Failed subscription renewal:** Paystack retries; on final failure the webhook sets `plan_status` to lapsed — landlord keeps read access but gated features lock with a "renew" prompt. Listings already paid via R99 stay live.
+- **Apple Pay return without deep link (user closes browser):** bill state is driven by the webhook; the POP tile reflects "paid" on next realtime update regardless.
 
 ## Testing
 
 - **Edge functions:** unit-test `billing-cycle` date logic (month lengths, February, idempotency) and webhook handling (signature, double delivery, unknown reference).
 - **End-to-end (test mode):** create tenancy → cron creates draft → landlord fills expenses → tenant sees banner → pay with Paystack test card → webhook → receipt + emails + notification + SwiftBooks entries. Verify banner clears.
-- **RLS:** tenant cannot read `awaiting_landlord` bills; landlord cannot read other landlords' bills.
-- **UI:** banner persistence across all tenant routes; TEST MODE badge visibility; SwiftBooks empty state with zero transactions.
+- **RLS:** tenant cannot read `awaiting_landlord` bills; landlord cannot read other landlords' bills; non-subscriber landlords cannot read message threads or gated data.
+- **UI:** banner persistence across all tenant routes; TEST MODE badge visibility; SwiftBooks empty state with zero transactions; publish paywall for free landlords; contact-notification (not message thread) for listing-fee landlords.
+- **Monetization:** subscription webhook lifecycle (activate, renew, lapse); `canPublish` for both tiers; Pro/Premium → subscriber migration.
+- **Apple Pay (manual, on-device):** checkout opens in the browser sheet on iOS, Apple Pay option appears, deep link returns to the app, bill marked paid via webhook.
 
 ## Out of scope
 
@@ -137,3 +173,5 @@ Keep all functionality; declutter the surface. Same `transactions` table, **no d
 - Late fees, partial payments, payment plans.
 - Supplementary/second bills in a month.
 - Multi-currency (ZAR only).
+- Google Pay (can follow the same browser-sheet pattern later).
+- Refunds/proration on subscription cancellation (Paystack default behavior applies).
