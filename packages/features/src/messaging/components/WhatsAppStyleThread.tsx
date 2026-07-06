@@ -574,8 +574,7 @@ export function WhatsAppStyleThread({
         }}
       >
         <div
-          className="px-3 py-4 space-y-0.5"
-          style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom))' }}
+          className="px-3 pt-3 pb-2 space-y-0.5 min-h-full flex flex-col justify-end"
         >
           {(loading || isTransitioning) ? (
             <div className="flex flex-col gap-2.5 pt-4">
