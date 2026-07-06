@@ -80,24 +80,6 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   const initializeNewContract = async () => {
     if (!user) return;
 
-    if (propertyId && tenantId) {
-      const { data: existingDraft } = await supabase
-        .from('lease_contracts')
-        .select('id')
-        .eq('landlord_id', user.id)
-        .eq('property_id', propertyId)
-        .eq('tenant_id', tenantId)
-        .eq('status', 'draft')
-        .maybeSingle();
-
-      if (existingDraft) {
-        setSavedContractId(existingDraft.id);
-        onContractSaved?.(existingDraft.id);
-        await loadContract(existingDraft.id);
-        return;
-      }
-    }
-
     // Pull every fact we already hold so the landlord isn't asked to enter
     // details they were never told (tenant, property and lease terms).
     const prefill: Partial<LeaseWizardData> = { landlordEmail: user.email || '' };
@@ -173,6 +155,40 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
       prefill.landlordBranchCode = settings.branch_code || '';
     } else {
       prefill.landlordAccountHolder = prefill.landlordFullName || '';
+    }
+
+    // Resume an existing draft if there is one, but backfill any BLANK fields
+    // from the prefill (older drafts were saved before auto-fill existed).
+    const isBlank = (v: any) => v === undefined || v === null || v === '' || v === 0;
+    if (propertyId && tenantId) {
+      const { data: existingDraft } = await supabase
+        .from('lease_contracts')
+        .select('id, contract_data, landlord_signed_at, landlord_signature_data')
+        .eq('landlord_id', user.id)
+        .eq('property_id', propertyId)
+        .eq('tenant_id', tenantId)
+        .eq('status', 'draft')
+        .maybeSingle();
+
+      if (existingDraft) {
+        setSavedContractId(existingDraft.id);
+        onContractSaved?.(existingDraft.id);
+        const saved = (existingDraft.contract_data || {}) as any;
+        const merged: any = { ...DEFAULT_WIZARD_DATA, ...saved };
+        for (const [k, pv] of Object.entries(prefill)) {
+          if (pv != null && pv !== '' && isBlank(merged[k])) merged[k] = pv;
+        }
+        setData(merged);
+        if (existingDraft.landlord_signed_at && existingDraft.landlord_signature_data) {
+          const sig = existingDraft.landlord_signature_data as any;
+          setLandlordSignature({
+            imageUrl: sig.signature_image_url || sig.signatureImageUrl,
+            name: merged.landlordFullName || 'Landlord',
+            signedAt: new Date(existingDraft.landlord_signed_at).toLocaleString(),
+          });
+        }
+        return;
+      }
     }
 
     setData(prev => ({ ...prev, ...prefill }));
