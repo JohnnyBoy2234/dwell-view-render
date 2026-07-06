@@ -1,14 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Switch } from '@mzanzihomes/ui/components/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { HelpCircle, Wallet, CreditCard, Landmark } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@mzanzihomes/ui/components/tooltip';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
-import { supabase } from '@mzanzihomes/supabase/client';
 
 interface Step04Props {
   data: LeaseWizardData;
@@ -18,32 +16,6 @@ interface Step04Props {
 export function Step04DepositFees({ data, onUpdate }: Step04Props) {
   // Calculate suggested deposit (typically 1-2 months rent)
   const suggestedDeposit = data.rentAmount || 0;
-
-  // Live Paystack bank list (used both for the PDF and to set up rent payouts).
-  const [banks, setBanks] = useState<{ name: string; code: string }[]>([]);
-  const [banksLoading, setBanksLoading] = useState(true);
-  const [banksFailed, setBanksFailed] = useState(false);
-  const [manualBank, setManualBank] = useState(false);
-  useEffect(() => {
-    let active = true;
-    supabase.functions
-      .invoke('list-paystack-banks')
-      .then(({ data: res, error }: any) => {
-        if (!active) return;
-        if (error || res?.error || !res?.banks?.length) {
-          setBanksFailed(true);
-        } else {
-          setBanks(res.banks);
-        }
-      })
-      .catch(() => { if (active) setBanksFailed(true); })
-      .finally(() => { if (active) setBanksLoading(false); });
-    return () => { active = false; };
-  }, []);
-
-  // Fall back to manual bank-name entry when the live list can't be loaded, so
-  // a missing Paystack key never blocks lease generation.
-  const useManualBank = manualBank || (!banksLoading && banksFailed);
 
   return (
     <div className="space-y-6">
@@ -214,47 +186,12 @@ export function Step04DepositFees({ data, onUpdate }: Step04Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="landlordBankName">Bank *</Label>
-              {useManualBank ? (
-                <>
-                  <Input
-                    id="landlordBankName"
-                    value={data.landlordBankName || ''}
-                    onChange={(e) => onUpdate({ landlordBankName: e.target.value, landlordBankCode: '' })}
-                    placeholder="e.g. FNB, Capitec, Standard Bank"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Couldn't load the bank list — enter your bank name manually.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <Select
-                    value={data.landlordBankCode || ''}
-                    onValueChange={(code) => {
-                      const bank = banks.find(b => b.code === code);
-                      onUpdate({ landlordBankCode: code, landlordBankName: bank?.name || data.landlordBankName });
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={banksLoading ? 'Loading banks…' : 'Select your bank'} />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-72">
-                      {banks.map(b => (
-                        <SelectItem key={b.code} value={b.code}>{b.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {!banksLoading && (
-                    <button
-                      type="button"
-                      onClick={() => setManualBank(true)}
-                      className="text-xs text-muted-foreground underline hover:text-foreground"
-                    >
-                      Can't find your bank? Enter it manually
-                    </button>
-                  )}
-                </>
-              )}
+              <Input
+                id="landlordBankName"
+                value={data.landlordBankName || ''}
+                onChange={(e) => onUpdate({ landlordBankName: e.target.value })}
+                placeholder="e.g. FNB, Capitec, Standard Bank"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="landlordBranchCode">Branch Code</Label>
