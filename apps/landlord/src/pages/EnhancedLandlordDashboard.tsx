@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag } from "lucide-react";
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
+import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -2372,14 +2373,14 @@ const renderReportsTab = () => (
               </div>
             </div>
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={addressInput}
-                onChange={e => setAddressInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleAddPropertyByAddress()}
-                placeholder="e.g. 12 Long Street, Cape Town"
-                className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
+              <div className="flex-1">
+                <AddressAutocomplete
+                  value={addressInput}
+                  onChange={setAddressInput}
+                  placeholder="e.g. 12 Long Street, Cape Town"
+                  className="rounded-xl"
+                />
+              </div>
               <Button
                 disabled={!addressInput.trim() || addingProperty}
                 onClick={handleAddPropertyByAddress}
@@ -2674,14 +2675,11 @@ const renderReportsTab = () => (
               <DialogTitle>Add property</DialogTitle>
               <DialogDescription>Enter the property address to get started.</DialogDescription>
             </DialogHeader>
-            <input
-              type="text"
-              autoFocus
+            <AddressAutocomplete
               value={addressInput}
-              onChange={(e) => setAddressInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === 'Enter') handleAddPropertyByAddress(); }}
+              onChange={setAddressInput}
               placeholder="e.g. 12 Long Street, Cape Town"
-              className="w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="rounded-xl"
             />
             <div className="flex justify-end gap-2 pt-1">
               <Button variant="ghost" onClick={() => setShowAddPropertyModal(false)}>Cancel</Button>
