@@ -124,8 +124,38 @@ serve(async (req) => {
       }
     });
 
-    // Send notifications if contract is fully signed
+    // Once both parties have signed, create the tenancy — regardless of who
+    // signed last (tenant-first or landlord-first). Idempotent + service role.
     if (updateData.status === 'signed') {
+      try {
+        if (contract.property_id && contract.tenant_id) {
+          const { data: existingTenancy } = await supabase
+            .from('tenancies')
+            .select('id')
+            .eq('property_id', contract.property_id)
+            .eq('tenant_id', contract.tenant_id)
+            .eq('status', 'active')
+            .maybeSingle();
+          if (!existingTenancy) {
+            const cd = contract.contract_data || {};
+            const start = cd.leaseStartDate || now.slice(0, 10);
+            const end = cd.leaseEndDate ||
+              new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+            await supabase.from('tenancies').insert({
+              property_id: contract.property_id,
+              tenant_id: contract.tenant_id,
+              landlord_id: contract.landlord_id,
+              start_date: start,
+              end_date: end,
+              monthly_rent: Number(cd.rentAmount) || 0,
+              security_deposit: Number(cd.depositAmount) || 0,
+              status: 'active',
+            });
+          }
+        }
+      } catch (e) {
+        console.error('Tenancy creation on full-sign failed:', e);
+      }
       await sendCompletionNotifications(supabase, contract, contractId);
     }
 
