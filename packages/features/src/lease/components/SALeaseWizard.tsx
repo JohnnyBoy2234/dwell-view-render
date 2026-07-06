@@ -160,7 +160,68 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
       }
     }
 
+    // ── Banking details from saved settings (so it's entered once) ──
+    const { data: settings } = await supabase
+      .from('landlord_settings')
+      .select('bank, account_holder, account_number, branch_code')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (settings) {
+      prefill.landlordBankName = settings.bank || '';
+      prefill.landlordAccountHolder = settings.account_holder || prefill.landlordFullName || '';
+      prefill.landlordAccountNumber = settings.account_number || '';
+      prefill.landlordBranchCode = settings.branch_code || '';
+    } else {
+      prefill.landlordAccountHolder = prefill.landlordFullName || '';
+    }
+
     setData(prev => ({ ...prev, ...prefill }));
+  };
+
+  // Save banking details for reuse and, on the first lease, create the
+  // landlord's Paystack payout subaccount from what they entered.
+  const ensureBankingSetup = async () => {
+    if (!user) return;
+    const holder = (data.landlordAccountHolder || data.landlordFullName || '').trim();
+    try {
+      const bankFields = {
+        bank: data.landlordBankName || '',
+        account_holder: holder,
+        account_number: data.landlordAccountNumber || '',
+        branch_code: data.landlordBranchCode || '',
+        updated_at: new Date().toISOString(),
+      };
+      const { data: existing } = await supabase
+        .from('landlord_settings').select('id').eq('user_id', user.id).maybeSingle();
+      if (existing) {
+        await supabase.from('landlord_settings').update(bankFields as any).eq('user_id', user.id);
+      } else {
+        await supabase.from('landlord_settings').insert({
+          user_id: user.id,
+          name: data.landlordFullName || holder || 'Landlord',
+          address: data.landlordAddress || '',
+          contact: data.landlordPhone || data.landlordEmail || '',
+          ...bankFields,
+        } as any);
+      }
+    } catch (e) {
+      console.warn('Saving banking settings failed', e);
+    }
+    try {
+      const { data: profile } = await supabase
+        .from('profiles').select('paystack_subaccount_code').eq('user_id', user.id).maybeSingle();
+      if (!profile?.paystack_subaccount_code && data.landlordBankCode && data.landlordAccountNumber && holder) {
+        await supabase.functions.invoke('create-paystack-subaccount', {
+          body: {
+            bankName: data.landlordBankCode,
+            accountNumber: data.landlordAccountNumber,
+            accountHolderName: holder,
+          },
+        });
+      }
+    } catch (e) {
+      console.warn('Payout subaccount setup failed', e);
+    }
   };
 
   // Auto-save effect - triggers 2 seconds after data changes
@@ -343,6 +404,8 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
     }
     setIsSending(true);
     try {
+      // Save banking details + set up rent payouts (subaccount) once-off.
+      await ensureBankingSetup();
       const { error } = await supabase.functions.invoke('send-contract-to-tenant', {
         body: { contractId: savedContractId, tenantEmail: data.tenantEmail, tenantId }
       });

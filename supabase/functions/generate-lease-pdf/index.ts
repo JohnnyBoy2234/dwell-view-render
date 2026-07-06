@@ -83,8 +83,23 @@ serve(async (req)=>{
   }
 });
 async function generatePDFDocument(contract: any, requestOrigin: string | undefined) {
-  // --- Constants & Config --- 
+  // --- Constants & Config ---
   const data = contract.contract_data || {};
+
+  // The wizard stores fields as landlord*/tenant*/depositAmount while this
+  // template historically referenced bankName/deposit/landlordName/etc.
+  // Alias them so populated values actually appear (was the "missing info").
+  data.landlordName = data.landlordName || data.landlordFullName;
+  data.tenantName = data.tenantName || data.tenantFullName;
+  data.landlordId = data.landlordId || data.landlordIdNumber;
+  data.tenantId = data.tenantId || data.tenantIdNumber;
+  data.bankName = data.bankName || data.landlordBankName;
+  data.branchCode = data.branchCode || data.landlordBranchCode;
+  data.accountNumber = data.accountNumber || data.landlordAccountNumber;
+  data.paymentReference = data.paymentReference || data.landlordReference;
+  data.deposit = data.deposit ?? data.depositAmount;
+  data.securityDeposit = data.securityDeposit ?? data.depositAmount;
+  data.propertyDescription = data.propertyDescription || data.description;
   const today = new Date();
   const margin = 48;
   const lineGap = 8;
@@ -446,9 +461,9 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     drawSectionTitle('4.', 'Rental and Payments');
     drawNumberedText('4.1.', `The monthly rental (“Rent” or “Rental”) payable by the Tenant to the Landlord for the  Property is ${formatMoney(data.rentAmount, data.rentCurrency) || '________________'} per month`);
     drawNumberedText('4.2.', 'All Rental payments shall be made monthly in advance before the seventh (7TH) day of each and every month, free from any deductions or set off for any reason whatsoever, directly into the Landlord’s bank account reflected below.');
+    drawFormRow('Account Holder:', data.landlordAccountHolder || data.landlordName);
     drawFormRow('Bank:', data.bankName);
     drawFormRow('Branch Code:', data.branchCode);
-    drawFormRow('Branch Name:', data.branchName);
     drawFormRow('Account Number:', data.accountNumber);
     drawFormRow('Reference:', data.paymentReference);
     drawNumberedText('4.3.', 'Should the Agreement be renewed or extended, the Tenant agrees to a Rental escalation of __ % per annum, or any other amount as may be agreed on between the parties.');
