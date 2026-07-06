@@ -9,5 +9,11 @@
     "./types/*": "./src/types/*.ts",
     "./constants/*": "./src/constants/*.ts",
     "./data/*": "./src/data/*.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.15"
   }
 }
