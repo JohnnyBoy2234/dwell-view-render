@@ -22,39 +22,38 @@ export default function TenantDashboardRoutes() {
     <Routes>
       {/* Default dashboard route */}
       <Route index element={<EnhancedTenantDashboard />} />
-      <Route path="/" element={<EnhancedTenantDashboard />} />
 
-      <Route path="/contracts" element={
+      <Route path="contracts" element={
         <EnhancedDashboardLayout title="Contract Documents">
           <TenantLeaseDocuments />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/leases" element={
+      <Route path="leases" element={
         <EnhancedDashboardLayout title="Lease System">
           <LeaseDashboardComponent />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/viewings" element={
+      <Route path="viewings" element={
         <EnhancedDashboardLayout title="Property Viewings">
           <TenantPropertyViewings />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/inventory" element={
+      <Route path="inventory" element={
         <EnhancedDashboardLayout title="Property Inventory">
           <TenantInventory />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/inspection" element={
+      <Route path="inspection" element={
         <EnhancedDashboardLayout title="Property Inspection">
           <TenantInspection />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/proof-of-payment" element={
+      <Route path="proof-of-payment" element={
         <EnhancedDashboardLayout title="Proof of Payment">
           <TenantProofOfPayment />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/applications" element={
+      <Route path="applications" element={
         <EnhancedDashboardLayout title="Applications">
           <div className="space-y-6">
             <div className="flex items-center gap-3 mb-2">
@@ -65,37 +64,37 @@ export default function TenantDashboardRoutes() {
           </div>
         </EnhancedDashboardLayout>
       } />
-      <Route path="/profile" element={
+      <Route path="profile" element={
         <EnhancedDashboardLayout title="Profile Settings">
           <ProfilePage />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/maintenance" element={
+      <Route path="maintenance" element={
         <EnhancedDashboardLayout title="Maintenance Requests">
           <TenantMaintenance />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/maintenance/responses" element={
+      <Route path="maintenance/responses" element={
         <EnhancedDashboardLayout title="Maintenance Responses">
           <TenantMaintenanceResponses />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/maintenance/:ticketId" element={
+      <Route path="maintenance/:ticketId" element={
         <EnhancedDashboardLayout title="Maintenance Ticket">
           <MaintenanceTicketDetails />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/messages" element={
+      <Route path="messages" element={
         <EnhancedDashboardLayout title="Messages">
           <Messages />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/payments" element={
+      <Route path="payments" element={
         <EnhancedDashboardLayout title="Payments & Rent">
           <TenantPayments />
         </EnhancedDashboardLayout>
       } />
-      <Route path="/support" element={
+      <Route path="support" element={
         <EnhancedDashboardLayout title="Support & Help">
           <TenantSupport />
         </EnhancedDashboardLayout>
