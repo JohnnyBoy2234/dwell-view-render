@@ -46,6 +46,7 @@ import { BookViewingDialog } from '@mzanzihomes/features/viewing';
 import { useViewingBooking } from '@mzanzihomes/features/viewing';
 import { format } from "date-fns";
 import { StartConversation } from '@mzanzihomes/features/messaging';
+import { formatPreScreeningMessage, type PreScreeningData } from '@mzanzihomes/common/types/message';
 import { ViewingPreScreeningForm } from '@mzanzihomes/features/viewing';
 import { GatedViewingButton } from '@mzanzihomes/features/viewing';
 import { SharePropertyMenu } from '@mzanzihomes/features/property';
@@ -99,6 +100,8 @@ export default function PropertyDetail() {
   const [messageLoading, setMessageLoading] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [messageOpen, setMessageOpen] = useState(false);
+  const [contactPreScreenOpen, setContactPreScreenOpen] = useState(false);
+  const [contactPreScreenLoading, setContactPreScreenLoading] = useState(false);
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [landlordPlan, setLandlordPlan] = useState<PlanType>('free');
@@ -280,9 +283,59 @@ export default function PropertyDetail() {
 
     if (!property) return;
 
+    if (user.id === property.landlord_id) return;
+
+    // First contact with this landlord should collect the pre-screening info
+    // (the same form the "Request Viewing" button shows) instead of dropping
+    // the tenant into a blank thread. Scope the check to landlord, matching
+    // StartConversation, so we don't re-ask on every property.
+    try {
+      const { data: existing } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('tenant_id', user.id as any)
+        .eq('landlord_id', property.landlord_id as any)
+        .limit(1);
+
+      if (!existing || existing.length === 0) {
+        setContactPreScreenOpen(true);
+        return;
+      }
+    } catch (error) {
+      // On a lookup failure fall through to the pre-screening form rather than
+      // silently opening a blank conversation.
+      console.error('Error checking existing conversations:', error);
+      setContactPreScreenOpen(true);
+      return;
+    }
+
     const conv = await createConversation(property.id, property.landlord_id, user.id);
     if (conv) {
       navigate(`/messages?c=${conv.id}`);
+    }
+  };
+
+  const handleContactPreScreeningSubmit = async (formData: PreScreeningData) => {
+    if (!user || !property) return;
+    setContactPreScreenLoading(true);
+    try {
+      const conv = await createConversation(property.id, property.landlord_id, user.id);
+      if (conv && 'id' in conv) {
+        const preScreeningMessage = formatPreScreeningMessage(formData, property.title);
+        await sendMessage(conv.id as string, preScreeningMessage);
+        navigate(`/messages?c=${conv.id}`);
+        toast({
+          title: "Message sent!",
+          description: "The landlord will review your information and respond soon."
+        });
+      } else {
+        toast({ variant: "destructive", title: "Error", description: "Failed to create conversation" });
+      }
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Error", description: error?.message || "Failed to send message. Please try again." });
+    } finally {
+      setContactPreScreenLoading(false);
+      setContactPreScreenOpen(false);
     }
   };
 
@@ -824,6 +877,16 @@ export default function PropertyDetail() {
           landlordId={property.landlord_id}
           open={bookingOpen}
           onOpenChange={setBookingOpen}
+        />
+      )}
+
+      {property && (
+        <ViewingPreScreeningForm
+          open={contactPreScreenOpen}
+          onOpenChange={setContactPreScreenOpen}
+          onSubmit={handleContactPreScreeningSubmit}
+          loading={contactPreScreenLoading}
+          propertyTitle={property.title}
         />
       )}
     </div>
