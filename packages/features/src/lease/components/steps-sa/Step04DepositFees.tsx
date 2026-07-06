@@ -21,14 +21,29 @@ export function Step04DepositFees({ data, onUpdate }: Step04Props) {
 
   // Live Paystack bank list (used both for the PDF and to set up rent payouts).
   const [banks, setBanks] = useState<{ name: string; code: string }[]>([]);
+  const [banksLoading, setBanksLoading] = useState(true);
+  const [banksFailed, setBanksFailed] = useState(false);
+  const [manualBank, setManualBank] = useState(false);
   useEffect(() => {
     let active = true;
     supabase.functions
       .invoke('list-paystack-banks')
-      .then(({ data: res }: any) => { if (active && res?.banks) setBanks(res.banks); })
-      .catch(() => {});
+      .then(({ data: res, error }: any) => {
+        if (!active) return;
+        if (error || res?.error || !res?.banks?.length) {
+          setBanksFailed(true);
+        } else {
+          setBanks(res.banks);
+        }
+      })
+      .catch(() => { if (active) setBanksFailed(true); })
+      .finally(() => { if (active) setBanksLoading(false); });
     return () => { active = false; };
   }, []);
+
+  // Fall back to manual bank-name entry when the live list can't be loaded, so
+  // a missing Paystack key never blocks lease generation.
+  const useManualBank = manualBank || (!banksLoading && banksFailed);
 
   return (
     <div className="space-y-6">
@@ -198,23 +213,48 @@ export function Step04DepositFees({ data, onUpdate }: Step04Props) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label>Bank *</Label>
-              <Select
-                value={data.landlordBankCode || ''}
-                onValueChange={(code) => {
-                  const bank = banks.find(b => b.code === code);
-                  onUpdate({ landlordBankCode: code, landlordBankName: bank?.name || data.landlordBankName });
-                }}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={banks.length ? 'Select your bank' : 'Loading banks…'} />
-                </SelectTrigger>
-                <SelectContent className="max-h-72">
-                  {banks.map(b => (
-                    <SelectItem key={b.code} value={b.code}>{b.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="landlordBankName">Bank *</Label>
+              {useManualBank ? (
+                <>
+                  <Input
+                    id="landlordBankName"
+                    value={data.landlordBankName || ''}
+                    onChange={(e) => onUpdate({ landlordBankName: e.target.value, landlordBankCode: '' })}
+                    placeholder="e.g. FNB, Capitec, Standard Bank"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Couldn't load the bank list — enter your bank name manually.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <Select
+                    value={data.landlordBankCode || ''}
+                    onValueChange={(code) => {
+                      const bank = banks.find(b => b.code === code);
+                      onUpdate({ landlordBankCode: code, landlordBankName: bank?.name || data.landlordBankName });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={banksLoading ? 'Loading banks…' : 'Select your bank'} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-72">
+                      {banks.map(b => (
+                        <SelectItem key={b.code} value={b.code}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {!banksLoading && (
+                    <button
+                      type="button"
+                      onClick={() => setManualBank(true)}
+                      className="text-xs text-muted-foreground underline hover:text-foreground"
+                    >
+                      Can't find your bank? Enter it manually
+                    </button>
+                  )}
+                </>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="landlordBranchCode">Branch Code</Label>
