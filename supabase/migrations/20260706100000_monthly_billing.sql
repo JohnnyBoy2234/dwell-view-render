@@ -56,6 +56,7 @@ CREATE TRIGGER update_monthly_bills_updated_at
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- Realtime for the tenant banner (status changes must push instantly)
+ALTER TABLE public.monthly_bills REPLICA IDENTITY FULL;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.monthly_bills;
 
 CREATE INDEX idx_monthly_bills_tenant_status ON public.monthly_bills (tenant_id, status);
