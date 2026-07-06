@@ -98,26 +98,69 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
       }
     }
 
-    let tenantPrefill: Partial<LeaseWizardData> = {};
+    // Pull every fact we already hold so the landlord isn't asked to enter
+    // details they were never told (tenant, property and lease terms).
+    const prefill: Partial<LeaseWizardData> = { landlordEmail: user.email || '' };
+
+    // ── Landlord (from their own profile + screening) ──
+    const [{ data: llProfile }, { data: llScreening }] = await Promise.all([
+      supabase.from('profiles').select('display_name').eq('user_id', user.id).maybeSingle(),
+      supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', user.id).maybeSingle(),
+    ]);
+    prefill.landlordFullName = llScreening?.full_name || llProfile?.display_name || user.user_metadata?.full_name || '';
+    prefill.landlordIdNumber = llScreening?.id_number || '';
+    prefill.landlordPhone = llScreening?.phone || '';
+    prefill.landlordAddress = llScreening?.current_address || '';
+
+    // ── Tenant (from their profile + screening) ──
     if (tenantId) {
-      const [{ data: profile }, { data: screening }] = await Promise.all([
+      const [{ data: tProfile }, { data: tScreening }] = await Promise.all([
         supabase.from('profiles').select('display_name').eq('user_id', tenantId).maybeSingle(),
         supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', tenantId).maybeSingle(),
       ]);
-      tenantPrefill = {
-        tenantFullName: screening?.full_name || profile?.display_name || '',
-        tenantIdNumber: screening?.id_number || '',
-        tenantPhone: screening?.phone || '',
-        tenantAddress: screening?.current_address || '',
-      };
+      prefill.tenantFullName = tScreening?.full_name || tProfile?.display_name || '';
+      prefill.tenantIdNumber = tScreening?.id_number || '';
+      prefill.tenantPhone = tScreening?.phone || '';
+      prefill.tenantAddress = tScreening?.current_address || '';
     }
 
-    setData(prev => ({
-      ...prev,
-      landlordEmail: user.email || '',
-      landlordFullName: user.user_metadata?.full_name || '',
-      ...tenantPrefill,
-    }));
+    // ── Property details ──
+    if (propertyId) {
+      const { data: property } = await supabase
+        .from('properties')
+        .select('title, location, price')
+        .eq('id', propertyId)
+        .maybeSingle();
+      if (property) {
+        prefill.propertyAddress = property.location || property.title || '';
+        if (property.price) {
+          prefill.rentAmount = Number(property.price);
+          prefill.depositAmount = Number(property.price); // default: one month
+        }
+      }
+    }
+
+    // ── Lease terms from the invite the tenant accepted (rent + dates) ──
+    if (propertyId && tenantId) {
+      const { data: invite } = await supabase
+        .from('property_invites')
+        .select('monthly_rent, lease_start, lease_end')
+        .eq('property_id', propertyId)
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (invite) {
+        if (invite.monthly_rent) {
+          prefill.rentAmount = Number(invite.monthly_rent);
+          prefill.depositAmount = Number(invite.monthly_rent);
+        }
+        if (invite.lease_start) prefill.leaseStartDate = invite.lease_start;
+        if (invite.lease_end) prefill.leaseEndDate = invite.lease_end;
+      }
+    }
+
+    setData(prev => ({ ...prev, ...prefill }));
   };
 
   // Auto-save effect - triggers 2 seconds after data changes

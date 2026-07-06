@@ -270,18 +270,44 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     });
   };
   // --- Text Helpers --- 
-  function drawParagraph(text: string) {
-    ensureSpace(sizes.body + lineGap);
-    if (text) {
-      page.drawText(text, {
-        x: margin,
-        y,
-        size: sizes.body,
-        font: fontBody,
-        color: colors.text
-      });
+  // Word-wrap so long clauses/values don't run off the right edge.
+  function wrapLines(text: string, font: any, size: number, maxWidth: number): string[] {
+    const words = String(text ?? "").split(/\s+/).filter(Boolean);
+    if (words.length === 0) return [""];
+    const lines: string[] = [];
+    let line = "";
+    for (const w of words) {
+      const test = line ? `${line} ${w}` : w;
+      if (font.widthOfTextAtSize(test, size) > maxWidth && line) {
+        lines.push(line);
+        line = w;
+      } else {
+        line = test;
+      }
     }
-    y -= sizes.body + lineGap;
+    if (line) lines.push(line);
+    return lines;
+  }
+  function drawWrapped(text: string, opts: { font?: any; size?: number; indent?: number } = {}) {
+    const font = opts.font || fontBody;
+    const size = opts.size ?? sizes.body;
+    const indent = opts.indent || 0;
+    const maxWidth = pageWidth - 2 * margin - indent;
+    for (const ln of wrapLines(text, font, size, maxWidth)) {
+      ensureSpace(size + lineGap);
+      if (ln) {
+        page.drawText(ln, { x: margin + indent, y, size, font, color: colors.text });
+      }
+      y -= size + lineGap;
+    }
+  }
+  function drawParagraph(text: string) {
+    if (!text) {
+      ensureSpace(sizes.body + lineGap);
+      y -= sizes.body + lineGap;
+      return;
+    }
+    drawWrapped(text);
   }
   function drawFormRow(label: string, value: any) {
     ensureSpace(sizes.body + lineGap);
@@ -346,15 +372,7 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     y -= sizes.h2 + lineGap;
   }
   function drawNumberedText(number: string, text: string) {
-    ensureSpace(sizes.body + lineGap);
-    page.drawText(`${number}. ${text}`, {
-      x: margin,
-      y,
-      size: sizes.body,
-      font: fontBody,
-      color: colors.text
-    });
-    y -= sizes.body + lineGap;
+    drawWrapped(number ? `${number}. ${text}` : text);
   }
   // --- Section Rendering --- 
   function renderAgreementIntro() {

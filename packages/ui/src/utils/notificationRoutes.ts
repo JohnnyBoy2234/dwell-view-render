@@ -34,18 +34,6 @@ export const getNotificationTargetUrl = (
   isLandlord: boolean
 ): string => {
   const metadata = notification.metadata || {};
-
-  // Priority 1: Valid stored URLs (skip broken dashboard sub-paths)
-  const storedUrl =
-    notification.action_url ||
-    notification.link_url ||
-    notification.actionUrl ||
-    notification.linkUrl;
-  if (storedUrl && isValidRoute(storedUrl, isLandlord)) {
-    return storedUrl;
-  }
-
-  // Priority 2: Build URL from type + metadata
   const {
     leaseId,
     requestId,
@@ -66,7 +54,6 @@ export const getNotificationTargetUrl = (
     const params = new URLSearchParams();
     if (propertyId) params.set('property', propertyId);
     if (extra) {
-      // extra is already in "key=val&key=val" form
       extra.split('&').forEach(pair => {
         const [k, v] = pair.split('=');
         if (k && v) params.set(k, v);
@@ -76,109 +63,106 @@ export const getNotificationTargetUrl = (
     return qs ? `${path}?${qs}` : path;
   };
 
-  switch (notification.type) {
-    // ── Lease ───────────────────────────────────────────────────────────────
-    case 'lease':
-      if (leaseId) return `/lease/sign/${leaseId}`;
-      if (isLandlord) return landlordPath(`${landlordBase}/leases`);
-      return `${tenantBase}/leases`;
+  // Priority 1: a stored URL — but only if it's actually a route that exists
+  // for this app/role. Legacy links (/dashboard, /admin, /lease-signing,
+  // /tenant/payments, the other role's dashboard, …) are rejected and rebuilt.
+  let storedUrl =
+    notification.action_url ||
+    notification.link_url ||
+    notification.actionUrl ||
+    notification.linkUrl;
+  // Normalise a couple of known-renamed paths before validating.
+  if (storedUrl) {
+    const m = storedUrl.match(/^\/lease-signing\/([^/?#]+)/);
+    if (m) storedUrl = `/lease/sign/${m[1]}`;
+  }
+  if (storedUrl && isValidRoute(storedUrl, isLandlord)) {
+    return storedUrl;
+  }
 
-    // ── Maintenance ─────────────────────────────────────────────────────────
-    case 'maintenance':
-      if (requestId) return `/maintenance/${requestId}`;
-      if (isLandlord) return landlordPath(`${landlordBase}/maintenance`);
-      return `${tenantBase}/maintenance`;
+  // Priority 2: build from a normalised "kind" (stored types vary a lot:
+  // lease_sent, application_submitted, viewing_booked, payment_reminder, …).
+  const t = (notification.type || '').toLowerCase();
+  const kind =
+    t.includes('message') ? 'message'
+    : t.includes('lease') ? 'lease'
+    : (t.includes('application') || t.includes('offer')) ? 'application'
+    : t.includes('viewing') ? 'viewing'
+    : t.includes('maintenance') ? 'maintenance'
+    : (t.includes('payment') || t.includes('billing')) ? 'payment'
+    : t.includes('inventory') ? 'inventory'
+    : t.includes('kyc') ? 'kyc'
+    : 'other';
 
-    // ── Application ─────────────────────────────────────────────────────────
-    case 'application':
-      if (isLandlord) {
-        // Land landlords directly on their applications tab for the right property
-        if (propertyId) return landlordPath(`${landlordBase}/applications`);
-        if (applicationId) return `/application/${applicationId}`;
-        return `${landlordBase}/applications`;
-      }
-      return applicationId ? `/application/${applicationId}` : `${tenantBase}/applications`;
-
-    // ── Payment ─────────────────────────────────────────────────────────────
-    case 'payment':
-      if (isLandlord) return landlordPath(`${landlordBase}/payments`);
-      return `${tenantBase}/payments`;
-
-    // ── Viewing ─────────────────────────────────────────────────────────────
-    case 'viewing':
-      if (isLandlord) {
-        const extra = viewingId ? `tab=viewings&viewingId=${viewingId}` : 'tab=viewings';
-        return landlordPath(`${landlordBase}/applications`, extra);
-      }
-      return viewingId
-        ? `${tenantBase}/viewings?id=${viewingId}`
-        : `${tenantBase}/viewings`;
-
-    // ── Inventory ────────────────────────────────────────────────────────────
-    case 'inventory':
-      if (isLandlord) {
-        const extra = inventoryId ? `id=${inventoryId}` : undefined;
-        return landlordPath(`${landlordBase}/inventory`, extra);
-      }
-      return inventoryId
-        ? `${tenantBase}/inventory?id=${inventoryId}`
-        : `${tenantBase}/inventory`;
-
-    // ── Offer ────────────────────────────────────────────────────────────────
-    case 'offer':
-      if (offerId) return `/application/${offerId}`;
-      if (applicationId) return `/application/${applicationId}`;
-      if (isLandlord) return landlordPath(`${landlordBase}/applications`);
-      return '/applications';
-
-    // ── Message ──────────────────────────────────────────────────────────────
+  switch (kind) {
     case 'message':
       return conversationId ? `/messages?c=${conversationId}` : '/messages';
 
-    // ── System ───────────────────────────────────────────────────────────────
-    case 'system':
-      if (redirect_url) return redirect_url;
-      break;
+    case 'lease':
+      if (leaseId) return `/lease/sign/${leaseId}`;
+      return isLandlord ? landlordPath(`${landlordBase}/leases`) : `${tenantBase}/leases`;
 
-    // ── KYC ──────────────────────────────────────────────────────────────────
+    case 'application':
+      if (applicationId) return `/application/${applicationId}`;
+      if (offerId) return `/application/${offerId}`;
+      return isLandlord ? landlordPath(`${landlordBase}/applications`) : `${tenantBase}/applications`;
+
+    case 'viewing':
+      if (isLandlord) {
+        return landlordPath(`${landlordBase}/applications`, viewingId ? `tab=viewings&viewingId=${viewingId}` : 'tab=viewings');
+      }
+      return viewingId ? `${tenantBase}/viewings?id=${viewingId}` : `${tenantBase}/viewings`;
+
+    case 'maintenance':
+      if (requestId) return `/maintenance/${requestId}`;
+      return isLandlord ? landlordPath(`${landlordBase}/maintenance`) : `${tenantBase}/maintenance`;
+
+    case 'payment':
+      // Tenant payments live under proof-of-payment; there is no /payments route.
+      return isLandlord ? landlordPath(`${landlordBase}/payments`) : `${tenantBase}/proof-of-payment`;
+
+    case 'inventory':
+      if (isLandlord) return landlordPath(`${landlordBase}/inventory`, inventoryId ? `id=${inventoryId}` : undefined);
+      return inventoryId ? `${tenantBase}/inventory?id=${inventoryId}` : `${tenantBase}/inventory`;
+
     case 'kyc':
       return '/verify-id';
 
     default:
+      if (redirect_url && isValidRoute(redirect_url, isLandlord)) return redirect_url;
       if (conversationId) return `/messages?c=${conversationId}`;
+      if (propertyId && !isLandlord) return `/property/${propertyId}`;
       if (propertyId && isLandlord) return landlordPath(landlordBase);
-      if (propertyId) return `/property/${propertyId}`;
+      return isLandlord ? landlordBase : tenantBase;
   }
-
-  return isLandlord ? landlordBase : tenantBase;
 };
 
 /**
- * Patterns that are known to cause 404s — rebuild from type+metadata instead.
+ * Allowlist of routes that actually exist for the current app/role. Anything
+ * not matched is treated as a stale/foreign link and rebuilt from type+metadata.
  */
 function isValidRoute(url: string, isLandlord: boolean): boolean {
   if (!url || !url.startsWith('/')) return false;
+  const path = url.split('?')[0].replace(/\/$/, '') || '/';
 
-  const brokenPatterns = [
-    /^\/enhanced(landlord|tenant)dashboard\/leases\/.+/,
-    /^\/enhanced(landlord|tenant)dashboard\/applications\/.+/,
-    /^\/enhanced(landlord|tenant)dashboard\/viewings\/.+/,
-    /^\/enhanced(landlord|tenant)dashboard\/offers\/.+/,
-    /^\/enhanced(landlord|tenant)dashboard\/inventory\/.+/,
-    /^\/enhanced(landlord|tenant)dashboard\/maintenance\/.+/,
-    /^\/tenant\/viewings$/,
-    // The tenant app never mounted routes under /enhancedtenantdashboard except
-    // the bare path and /leases — anything else here is a stale stored URL
-    // from before notification links were fixed to use /tenant-dashboard.
-    /^\/enhancedtenantdashboard\/(maintenance|payments|viewings|inventory|applications)(\/.*)?$/,
+  // Routes mounted in both apps
+  const shared = [
+    /^\/messages$/,
+    /^\/notifications$/,
+    /^\/verify-id$/,
+    /^\/lease\/sign\/[^/]+$/,
+    /^\/application\/[^/]+$/,
+    /^\/maintenance\/[^/]+$/,
+    /^\/property\/[^/]+$/,
   ];
+  if (shared.some(p => p.test(path))) return true;
 
-  // /leases and /applications only exist as top-level routes in the landlord app
-  if (!isLandlord && (url === '/leases' || url === '/applications')) {
-    return false;
+  if (isLandlord) {
+    return /^\/enhancedlandlorddashboard(\/(applications|maintenance|payments|leases|inventory|properties|profile|inspection|swiftbooks|notifications))?$/.test(path);
   }
-
-  return !brokenPatterns.some(p => p.test(url));
+  // Tenant dashboard base + its real sub-routes (note: proof-of-payment, not payments)
+  return /^\/(tenant-dashboard|enhancedtenantdashboard)$/.test(path)
+    || /^\/tenant-dashboard\/(leases|maintenance|viewings|inventory|applications|proof-of-payment|profile|inspection|contracts)$/.test(path);
 }
 
 /** Canonical URL builders — use these when creating notifications */
