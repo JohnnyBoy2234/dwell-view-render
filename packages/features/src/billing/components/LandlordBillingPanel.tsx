@@ -21,8 +21,9 @@ export function LandlordBillingPanel() {
     queryKey: ['landlord-subaccount', user?.id],
     enabled: !!user,
     queryFn: async () => {
-      const { data } = await supabase
-        .from('profiles').select('paystack_subaccount_code').eq('user_id', user!.id).single();
+      const { data, error } = await supabase
+        .from('profiles').select('paystack_subaccount_code').eq('user_id', user!.id).maybeSingle();
+      if (error) throw error;
       return data;
     },
   });
@@ -50,7 +51,7 @@ export function LandlordBillingPanel() {
           <CardContent>
             <BillExpenseForm
               rentAmount={Number(bill.rent_amount)}
-              sending={sendBill.isPending}
+              sending={sendBill.isPending && sendBill.variables?.billId === bill.id}
               sendBlockedReason={hasSubaccount ? undefined
                 : 'Complete Rent Collection setup (bank details) before sending — the payment needs somewhere to go.'}
               onSend={(lineItems) =>
