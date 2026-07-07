@@ -15,15 +15,13 @@ const plusOneYear = (isoDate: string) => {
 // Celebratory full-screen backdrop shared by every state.
 function Backdrop({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4"
-      style={{ minHeight: '100dvh', background: 'linear-gradient(135deg, hsl(214,100%,55%) 0%, hsl(221,83%,53%) 45%, hsl(160,84%,39%) 100%)' }}>
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20"
+      style={{ minHeight: '100dvh' }}>
       {/* Soft floating glow blobs */}
-      <div className="pointer-events-none absolute -top-28 -left-24 w-72 h-72 rounded-full bg-white/25 blur-3xl animate-pulse" />
-      <div className="pointer-events-none absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-emerald-300/30 blur-3xl animate-pulse" style={{ animationDelay: '0.6s' }} />
-      <div className="pointer-events-none absolute top-1/3 right-8 w-3 h-3 rounded-full bg-amber-300/80 blur-[1px] animate-ping" />
-      <div className="pointer-events-none absolute bottom-1/3 left-10 w-2 h-2 rounded-full bg-white/80 blur-[1px] animate-ping" style={{ animationDelay: '0.9s' }} />
+      <div className="pointer-events-none absolute -top-28 -left-24 w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-pulse" />
+      <div className="pointer-events-none absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-success/10 blur-3xl animate-pulse" style={{ animationDelay: '0.6s' }} />
       <div className="relative w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
-        <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl ring-1 ring-white/40 p-6 sm:p-7">
+        <div className="bg-card rounded-3xl shadow-xl border border-border p-6 sm:p-7">
           {children}
         </div>
       </div>
@@ -185,9 +183,9 @@ export default function JoinProperty() {
       <Backdrop>
         <div className="text-center">
           <div className="mx-auto mb-4 relative w-24 h-24">
-            <div className="absolute inset-0 rounded-full bg-emerald-400/30 blur-xl animate-pulse" />
-            <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-500">
-              <CheckCircle2 className="h-12 w-12 text-white" />
+            <div className="absolute inset-0 rounded-full bg-success/20 blur-xl animate-pulse" />
+            <div className="relative w-24 h-24 rounded-full bg-success flex items-center justify-center shadow-lg animate-in zoom-in-50 duration-500">
+              <CheckCircle2 className="h-12 w-12 text-success-foreground" />
             </div>
             <PartyPopper className="absolute -top-1 -right-1 w-8 h-8 text-amber-400 drop-shadow animate-bounce" />
           </div>
@@ -196,8 +194,7 @@ export default function JoinProperty() {
             You're connected to your rental. Manage rent, messages and everything else from your dashboard.
           </p>
           <Button
-            className="w-full h-12 text-base rounded-xl text-white font-semibold shadow-lg"
-            style={{ background: 'linear-gradient(90deg, hsl(214,100%,55%), hsl(160,84%,39%))' }}
+            className="w-full h-12 text-base rounded-xl font-semibold shadow-lg"
             onClick={() => navigate('/tenant-dashboard')}
           >
             <KeyRound className="h-5 w-5 mr-2" /> Go to my dashboard
@@ -212,9 +209,9 @@ export default function JoinProperty() {
       <div className="text-center">
         {/* Hero badge */}
         <div className="mx-auto mb-4 relative w-20 h-20">
-          <div className="absolute inset-0 rounded-2xl rotate-6 opacity-30 blur-md" style={{ background: 'linear-gradient(135deg, hsl(214,100%,55%), hsl(160,84%,39%))' }} />
-          <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg" style={{ background: 'linear-gradient(135deg, hsl(214,100%,55%), hsl(160,84%,39%))' }}>
-            <Home className="w-9 h-9 text-white" />
+          <div className="absolute inset-0 rounded-2xl rotate-6 bg-primary/30 blur-md" />
+          <div className="relative w-20 h-20 rounded-2xl flex items-center justify-center shadow-lg bg-primary">
+            <Home className="w-9 h-9 text-primary-foreground" />
           </div>
           <PartyPopper className="absolute -top-2 -right-2 w-7 h-7 text-amber-400 drop-shadow animate-bounce" />
           <Sparkles className="absolute -bottom-1 -left-2 w-5 h-5 text-ocean-blue/70 animate-pulse" />
@@ -264,8 +261,7 @@ export default function JoinProperty() {
         </div>
 
         <Button
-          className="w-full h-12 text-base rounded-xl text-white font-semibold shadow-lg hover:brightness-105 active:scale-[0.98] transition"
-          style={{ background: 'linear-gradient(90deg, hsl(214,100%,55%), hsl(160,84%,39%))' }}
+          className="w-full h-12 text-base rounded-xl font-semibold shadow-lg active:scale-[0.98] transition"
           onClick={handleAccept}
           disabled={accepting}
         >
