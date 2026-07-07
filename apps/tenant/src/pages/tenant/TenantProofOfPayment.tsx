@@ -32,7 +32,8 @@ export default function TenantProofOfPayment() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('monthly_bills')
-        .select('*, properties(title, location), bill_line_items(*)');
+        .select('*, properties(title, location), bill_line_items(*)')
+        .order('period', { ascending: false });
       if (error) throw error;
       return data;
     },
@@ -143,7 +144,7 @@ export default function TenantProofOfPayment() {
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="bills">Bills & receipts</TabsTrigger>
           <TabsTrigger value="ai-verification">AI Payment Verification</TabsTrigger>
-          <TabsTrigger value="documents">Upload proof</TabsTrigger>
+          <TabsTrigger value="documents">Document Archive</TabsTrigger>
         </TabsList>
 
         <TabsContent value="bills" className="space-y-6">
