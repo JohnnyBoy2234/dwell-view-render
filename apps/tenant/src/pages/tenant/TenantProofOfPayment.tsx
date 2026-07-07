@@ -8,8 +8,10 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { useProofOfPayment } from '@mzanzihomes/features/payments';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { PaymentVerificationUpload } from '@mzanzihomes/features/payments';
+import { BillDetailSheet } from '@mzanzihomes/features/billing';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export default function TenantProofOfPayment() {
   const {
@@ -23,6 +25,21 @@ export default function TenantProofOfPayment() {
 
   const [activeTenancy, setActiveTenancy] = useState<any>(null);
   const [loadingTenancy, setLoadingTenancy] = useState(true);
+  const [openBillId, setOpenBillId] = useState<string | null>(null);
+
+  const { data: bills = [] } = useQuery({
+    queryKey: ['tenant-bills'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('monthly_bills')
+        .select('*, properties(title, location), bill_line_items(*)');
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const receiptUrl = (path: string) =>
+    supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl;
 
   useEffect(() => {
     loadActiveTenancy();
@@ -122,11 +139,60 @@ export default function TenantProofOfPayment() {
         </p>
       </div>
 
-      <Tabs defaultValue="ai-verification" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue="bills" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="bills">Bills & receipts</TabsTrigger>
           <TabsTrigger value="ai-verification">AI Payment Verification</TabsTrigger>
-          <TabsTrigger value="documents">Document Archive</TabsTrigger>
+          <TabsTrigger value="documents">Upload proof</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="bills" className="space-y-6">
+          {bills.filter(b => b.status === 'sent').length === 0 && bills.filter(b => b.status === 'paid').length === 0 ? (
+            <p className="text-sm text-muted-foreground">No bills yet.</p>
+          ) : (
+            <>
+              {bills.filter(b => b.status === 'sent').map(bill => (
+                <Card key={bill.id} className="border-red-300 mb-3">
+                  <CardHeader>
+                    <CardTitle className="text-base">Current bill — {bill.period}</CardTitle>
+                    <CardDescription>
+                      {new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' })
+                        .format(Number(bill.total_amount))} outstanding
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button
+                      className="w-full"
+                      onClick={() => setOpenBillId(bill.id)}
+                    >
+                      View & pay
+                    </Button>
+                  </CardContent>
+                  <BillDetailSheet
+                    bill={bill}
+                    open={openBillId === bill.id}
+                    onOpenChange={(v) => setOpenBillId(v ? bill.id : null)}
+                  />
+                </Card>
+              ))}
+              {bills.filter(b => b.status === 'paid').map(bill => (
+                <div key={bill.id} className="flex items-center justify-between rounded-lg border px-4 py-3 mb-2">
+                  <div>
+                    <p className="text-sm font-medium">{bill.period} — {bill.properties?.title || bill.properties?.location}</p>
+                    <p className="text-xs text-muted-foreground">
+                      Paid {bill.paid_at ? new Date(bill.paid_at).toLocaleDateString('en-ZA') : ''}
+                    </p>
+                  </div>
+                  {bill.receipt_pdf_path ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
+                    </Button>
+                  ) : null}
+                </div>
+              ))}
+            </>
+          )}
+        </TabsContent>
 
         <TabsContent value="ai-verification" className="space-y-6">
           {activeTenancy ? (
