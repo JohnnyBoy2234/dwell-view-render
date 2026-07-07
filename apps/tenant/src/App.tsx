@@ -18,6 +18,7 @@ import { AuthenticatedRoute } from "@mzanzihomes/ui/components/AuthenticatedRout
 import { VerificationGate } from "@mzanzihomes/ui/components/VerificationGate";
 import { ErrorBoundary } from "@mzanzihomes/ui/components/ErrorBoundary";
 import { PaymentRedirectHandler } from "@mzanzihomes/features/payments";
+import { RentDueBanner } from "@mzanzihomes/features/billing";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
@@ -216,6 +217,7 @@ const App = () => {
               <ScrollToTop />
               <ErrorBoundary>
                 <MobileNetworkStatus />
+                <RentDueBanner />
                 <AISupportChat />
                 <TenantRoleGuard>
                   <AppRoutes />
