@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@mzan
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark } from "lucide-react";
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
@@ -23,6 +23,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
+import { RentCollectionCard } from '@mzanzihomes/features/billing';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
@@ -162,6 +163,7 @@ export default function EnhancedLandlordDashboard() {
   const [addingProperty, setAddingProperty] = useState(false);
   const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showRentCollectionModal, setShowRentCollectionModal] = useState(false);
   const [invitedPropertyIds, setInvitedPropertyIds] = useState<Set<string>>(new Set());
 
   const handleAddPropertyByAddress = async () => {
@@ -2341,6 +2343,7 @@ const renderReportsTab = () => (
       { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: Inbox, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
       { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
       { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
+      ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
       { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
@@ -2702,6 +2705,16 @@ const renderReportsTab = () => (
               <DialogDescription>Pick the property, add a few details, then share the invite.</DialogDescription>
             </DialogHeader>
             {showInviteModal && <TenantInviteSection properties={pendingInviteProperties} />}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showRentCollectionModal} onOpenChange={setShowRentCollectionModal}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Rent collection</DialogTitle>
+              <DialogDescription>Set up where rent gets paid out so tenants can pay in-app.</DialogDescription>
+            </DialogHeader>
+            {showRentCollectionModal && <RentCollectionCard />}
           </DialogContent>
         </Dialog>
       </SidebarProvider>
