@@ -69,13 +69,16 @@ serve(async (req) => {
 
       created++;
       const propertyName = t.properties?.title || t.properties?.location || 'your property';
-      await supabase.rpc('create_notification', {
+      // Not transactional with the insert: if we crash between insert and here, the
+      // notification is lost for this period (next run skips via 23505). Accepted for now.
+      const { error: notifyError } = await supabase.rpc('create_notification', {
         _user_id: t.landlord_id,
         _message: `Billing information needed for ${propertyName} — add this month's expenses and send the bill.`,
         _link_url: '/enhancedlandlorddashboard/payments',
         _type: 'billing',
         _metadata: { tenancy_id: t.id, period },
       });
+      if (notifyError) logStep('Notification failed', { tenancy: t.id, error: notifyError.message });
     }
 
     logStep('Done', { period, created });
