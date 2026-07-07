@@ -114,3 +114,6 @@ verify_jwt = true
 
 [functions.pay-monthly-bill]
 verify_jwt = true
+
+[functions.generate-rent-receipt]
+verify_jwt = true
