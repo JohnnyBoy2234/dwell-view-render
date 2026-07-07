@@ -9,6 +9,7 @@ import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { MzanziHomesSupport } from '@mzanzihomes/features/support';
 import { PlanGuard } from '@mzanzihomes/ui/components/PlanGuard';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
+import { LandlordBillingPanel } from '@mzanzihomes/features/billing';
 
 // Placeholder components for missing landlord pages
 function LandlordProperties() {
@@ -51,16 +52,7 @@ function LandlordApplications() {
 }
 
 function LandlordPayments() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Payments</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p>Payments and billing features coming soon.</p>
-      </CardContent>
-    </Card>
-  );
+  return <LandlordBillingPanel />;
 }
 
 function LandlordReports() {
