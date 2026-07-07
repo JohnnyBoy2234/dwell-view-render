@@ -193,7 +193,9 @@ export default function TenantProofOfPayment() {
                     <Button variant="outline" size="sm" asChild>
                       <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
                     </Button>
-                  ) : null}
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Receipt generating…</span>
+                  )}
                 </div>
               ))}
             </>

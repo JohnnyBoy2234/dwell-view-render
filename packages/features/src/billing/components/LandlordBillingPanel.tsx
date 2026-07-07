@@ -83,10 +83,14 @@ export function LandlordBillingPanel() {
                 {bill.status === 'paid'
                   ? <Badge className="bg-green-600 text-white">Paid</Badge>
                   : <Badge variant="secondary">Sent — awaiting payment</Badge>}
-                {bill.receipt_pdf_path ? (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
-                  </Button>
+                {bill.status === 'paid' ? (
+                  bill.receipt_pdf_path ? (
+                    <Button variant="outline" size="sm" asChild>
+                      <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
+                    </Button>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">Receipt generating…</span>
+                  )
                 ) : null}
               </div>
             </div>
