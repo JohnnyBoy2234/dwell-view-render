@@ -105,3 +105,6 @@ verify_jwt = true
 
 [functions.og-property]
 verify_jwt = false
+
+[functions.billing-cycle]
+verify_jwt = true
