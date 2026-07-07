@@ -58,6 +58,11 @@ serve(async (req) => {
 
     const items = (lineItems ?? []).filter(li => li.amount > 0);
     for (const li of items) {
+      if (!li || typeof li !== 'object' || typeof li.category !== 'string') throw new Error('Invalid line item');
+      if (!Number.isFinite(li.amount) || li.amount <= 0 || li.amount > 99999999.99) {
+        throw new Error(`Invalid amount for ${li.category}`);
+      }
+      li.amount = Math.round(li.amount * 100) / 100;
       if (!['water','sewage','electricity','refuse','other'].includes(li.category)) {
         throw new Error(`Invalid category: ${li.category}`);
       }
@@ -66,7 +71,23 @@ serve(async (req) => {
       }
     }
 
+    const total = Number(bill.rent_amount) + items.reduce((s, li) => s + li.amount, 0);
+
+    const { data: updated, error: updateError } = await supabase
+      .from('monthly_bills')
+      .update({ status: 'sent', total_amount: total, sent_at: new Date().toISOString() })
+      .eq('id', billId)
+      .eq('status', 'awaiting_landlord')
+      .select('id');
+    if (updateError) throw updateError;
+    if (!updated || updated.length === 0) {
+      throw new Error('Bill has already been sent');
+    }
+
     if (items.length > 0) {
+      // Status is already 'sent'; a failure here leaves a sent bill without its
+      // line items (no cross-table transaction from the edge runtime). Accepted:
+      // rent_amount/total_amount on the bill remain authoritative for payment.
       const { error: itemsError } = await supabase.from('bill_line_items').insert(
         items.map(li => ({
           bill_id: billId,
@@ -77,15 +98,6 @@ serve(async (req) => {
       );
       if (itemsError) throw itemsError;
     }
-
-    const total = Number(bill.rent_amount) + items.reduce((s, li) => s + li.amount, 0);
-
-    const { error: updateError } = await supabase
-      .from('monthly_bills')
-      .update({ status: 'sent', total_amount: total, sent_at: new Date().toISOString() })
-      .eq('id', billId)
-      .eq('status', 'awaiting_landlord'); // guard against double-send race
-    if (updateError) throw updateError;
 
     const propertyName = bill.properties?.title || bill.properties?.location || 'your home';
     const { error: notifyError } = await supabase.rpc('create_notification', {
