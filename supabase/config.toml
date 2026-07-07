@@ -108,3 +108,6 @@ verify_jwt = false
 
 [functions.billing-cycle]
 verify_jwt = true
+
+[functions.send-monthly-bill]
+verify_jwt = true
