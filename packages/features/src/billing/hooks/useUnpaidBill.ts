@@ -30,7 +30,10 @@ export function useUnpaidBill() {
       .channel('unpaid-bill-watch')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'monthly_bills', filter: `tenant_id=eq.${user.id}` },
-        () => queryClient.invalidateQueries({ queryKey: ['unpaid-bill', user.id] })
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['unpaid-bill', user.id] });
+          queryClient.invalidateQueries({ queryKey: ['tenant-bills'] });
+        }
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };

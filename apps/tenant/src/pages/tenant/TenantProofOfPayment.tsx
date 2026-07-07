@@ -27,7 +27,7 @@ export default function TenantProofOfPayment() {
   const [loadingTenancy, setLoadingTenancy] = useState(true);
   const [openBillId, setOpenBillId] = useState<string | null>(null);
 
-  const { data: bills = [] } = useQuery({
+  const { data: bills = [], isLoading: billsLoading } = useQuery({
     queryKey: ['tenant-bills'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -38,6 +38,9 @@ export default function TenantProofOfPayment() {
       return data;
     },
   });
+
+  const sentBills = bills.filter(b => b.status === 'sent');
+  const paidBills = bills.filter(b => b.status === 'paid');
 
   const receiptUrl = (path: string) =>
     supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl;
@@ -148,11 +151,13 @@ export default function TenantProofOfPayment() {
         </TabsList>
 
         <TabsContent value="bills" className="space-y-6">
-          {bills.filter(b => b.status === 'sent').length === 0 && bills.filter(b => b.status === 'paid').length === 0 ? (
+          {billsLoading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : sentBills.length === 0 && paidBills.length === 0 ? (
             <p className="text-sm text-muted-foreground">No bills yet.</p>
           ) : (
             <>
-              {bills.filter(b => b.status === 'sent').map(bill => (
+              {sentBills.map(bill => (
                 <Card key={bill.id} className="border-red-300 mb-3">
                   <CardHeader>
                     <CardTitle className="text-base">Current bill — {bill.period}</CardTitle>
@@ -176,7 +181,7 @@ export default function TenantProofOfPayment() {
                   />
                 </Card>
               ))}
-              {bills.filter(b => b.status === 'paid').map(bill => (
+              {paidBills.map(bill => (
                 <div key={bill.id} className="flex items-center justify-between rounded-lg border px-4 py-3 mb-2">
                   <div>
                     <p className="text-sm font-medium">{bill.period} — {bill.properties?.title || bill.properties?.location}</p>
