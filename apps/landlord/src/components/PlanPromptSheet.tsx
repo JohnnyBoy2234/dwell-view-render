@@ -1,6 +1,6 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@mzanzihomes/ui/components/sheet';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { Sparkles, Tag, Check } from 'lucide-react';
+import { Loader2, Sparkles, Tag, Check } from 'lucide-react';
 import { usePlanCheckout } from '@mzanzihomes/features/billing';
 
 const SUBSCRIBER_FEATURES = [
@@ -18,10 +18,15 @@ interface PlanPromptSheetProps {
 }
 
 export function PlanPromptSheet({ open, onOpenChange }: PlanPromptSheetProps) {
-  const { startCheckout, starting, error } = usePlanCheckout();
+  const { startCheckout, starting, error, reset } = usePlanCheckout();
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl max-w-lg mx-auto max-h-[90dvh] overflow-y-auto">
         <SheetHeader className="text-left">
           <SheetTitle>Choose how you want to use MzanziHomes</SheetTitle>
@@ -44,7 +49,13 @@ export function PlanPromptSheet({ open, onOpenChange }: PlanPromptSheetProps) {
               ))}
             </ul>
             <Button className="w-full rounded-xl" disabled={starting} onClick={() => startCheckout('subscription')}>
-              Subscribe now
+              {starting ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Opening secure checkout…
+                </>
+              ) : (
+                'Subscribe now'
+              )}
             </Button>
           </div>
 
@@ -57,7 +68,7 @@ export function PlanPromptSheet({ open, onOpenChange }: PlanPromptSheetProps) {
               Each listing goes live for a once-off R99. Tenants send you their contact
               details and you take it from there. You can subscribe any time.
             </p>
-            <Button variant="outline" className="w-full rounded-xl" onClick={() => onOpenChange(false)}>
+            <Button variant="outline" className="w-full rounded-xl" onClick={() => handleOpenChange(false)}>
               Continue free — pay when I publish
             </Button>
           </div>
