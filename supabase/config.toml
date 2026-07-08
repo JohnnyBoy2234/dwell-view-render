@@ -117,3 +117,6 @@ verify_jwt = true
 
 [functions.generate-rent-receipt]
 verify_jwt = true
+
+[functions.submit-property-lead]
+verify_jwt = true
