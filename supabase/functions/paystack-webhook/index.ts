@@ -20,7 +20,7 @@ async function activateSubscription(
 ) {
   const periodEnd = fields.periodEnd
     ?? new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString(); // fallback: paid_at + 35d
-  await supabase.from("billing_subscriptions").upsert({
+  const { error: subError } = await supabase.from("billing_subscriptions").upsert({
     user_id: userId,
     plan_code: "subscriber",
     status: "active",
@@ -29,22 +29,30 @@ async function activateSubscription(
     ...(fields.customerCode ? { paystack_customer_code: fields.customerCode } : {}),
     ...(fields.subscriptionCode ? { paystack_subscription_code: fields.subscriptionCode } : {}),
   }, { onConflict: "user_id" });
+  if (subError) {
+    // Fail loudly: the webhook returns 500 so Paystack retries. The upsert is idempotent.
+    throw new Error(`billing_subscriptions upsert failed for ${userId}: ${subError.message}`);
+  }
   // The DB trigger on billing_subscriptions syncs profiles.plan; update directly too
   // in case the trigger is ever disabled.
-  await supabase.from("profiles").update({
+  const { error: profileError } = await supabase.from("profiles").update({
     plan: "subscriber",
     plan_status: "active",
     plan_expires_at: periodEnd,
     plan_last_synced: new Date().toISOString(),
   }).eq("user_id", userId);
+  if (profileError) {
+    throw new Error(`profiles plan update failed for ${userId}: ${profileError.message}`);
+  }
 }
 
 async function resolveUserByCustomerCode(supabase: any, customerCode: string): Promise<string | null> {
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from("billing_subscriptions")
     .select("user_id")
     .eq("paystack_customer_code", customerCode)
     .maybeSingle();
+  if (error) logStep("resolveUserByCustomerCode query failed", { customerCode, error: error.message });
   return data?.user_id ?? null;
 }
 
@@ -184,17 +192,24 @@ serve(async (req) => {
         } else {
           // 1) Record the payment (idempotent), 2) publish — order matters: the
           // publish trigger checks listing_payments.
-          await supabase.from("listing_payments").upsert({
+          const { error: feeErr } = await supabase.from("listing_payments").upsert({
             property_id: propertyId,
             landlord_id: landlordId,
             amount: amount / 100,
             paystack_reference: reference,
           }, { onConflict: "property_id", ignoreDuplicates: true });
+          if (feeErr) {
+            // Fail loudly: 500 makes Paystack retry; the upsert is idempotent.
+            throw new Error(`LISTING_ listing_payments upsert failed: ${feeErr.message}`);
+          }
           const { error: pubErr } = await supabase
             .from("properties")
             .update({ is_listed: true })
             .eq("id", propertyId);
-          if (pubErr) logStep("LISTING_ publish failed", { propertyId, error: pubErr.message });
+          if (pubErr) {
+            logStep("LISTING_ publish failed", { propertyId, error: pubErr.message });
+            return new Response('Listing publish failed', { status: 500 });
+          }
           await supabase.rpc("create_notification", {
             _user_id: landlordId,
             _message: "Payment received — your listing is now live on MzanziHomes.",
@@ -204,15 +219,22 @@ serve(async (req) => {
           });
         }
       } else if (reference?.startsWith('SUB_') || event.data?.plan?.plan_code) {
+        const customerCode = event.data?.customer?.customer_code;
         const landlordId = event.data?.metadata?.landlord_id
-          ?? (event.data?.customer?.customer_code
-              ? await resolveUserByCustomerCode(supabase, event.data.customer.customer_code)
-              : null);
+          ?? (customerCode ? await resolveUserByCustomerCode(supabase, customerCode) : null);
         if (!landlordId) {
-          logStep("SUB charge: could not resolve user", { reference });
+          // Money was taken but we cannot grant the entitlement — fail loudly (500)
+          // so Paystack retries instead of silently acknowledging with 200.
+          throw new Error(`SUB charge: could not resolve user for reference ${reference}`);
         } else {
+          // Persist the customer code on first activation (even when resolution came
+          // via metadata.landlord_id) — renewals and subscription.disable/not_renew
+          // events can only resolve the user by customer_code.
+          if (!customerCode) {
+            logStep("SUB charge: no customer_code in payload — lifecycle events may not resolve this user", { reference });
+          }
           await activateSubscription(supabase, landlordId, {
-            customerCode: event.data?.customer?.customer_code,
+            customerCode,
             periodEnd: null, // paid_at + 35d fallback; subscription.create refines it
           });
           // Optional auto-publish when the subscription was bought from the publish paywall.
