@@ -30,16 +30,12 @@ export default function Pricing() {
       return null;
     }
 
-    if (targetPlan === 'pro') {
-      if (plan === 'pro') {
-        return <Badge className="bg-blue-600 text-white">Current Plan</Badge>;
-      }
-      if (plan === 'premium') {
-        return <Badge className="bg-amber-600 text-white">Included in Premium</Badge>;
-      }
+    // Two-tier model: 'subscriber' covers what used to be pro and premium.
+    if (targetPlan === 'pro' && plan === 'subscriber') {
+      return <Badge className="bg-blue-600 text-white">Current Plan</Badge>;
     }
 
-    if (targetPlan === 'premium' && plan === 'premium') {
+    if (targetPlan === 'premium' && plan === 'subscriber') {
       return <Badge className="bg-amber-600 text-white">Current Plan</Badge>;
     }
 
@@ -56,24 +52,15 @@ export default function Pricing() {
       );
     }
 
-    if (targetPlan === 'pro') {
-      if (plan === 'pro') {
-        return (
-          <Button className="w-full mb-6" variant="outline" disabled>
-            You're on this plan
-          </Button>
-        );
-      }
-      if (plan === 'premium') {
-        return (
-          <Button className="w-full mb-6" variant="outline" disabled>
-            Included with Premium
-          </Button>
-        );
-      }
+    if (targetPlan === 'pro' && plan === 'subscriber') {
+      return (
+        <Button className="w-full mb-6" variant="outline" disabled>
+          You're on this plan
+        </Button>
+      );
     }
 
-    if (targetPlan === 'premium' && plan === 'premium') {
+    if (targetPlan === 'premium' && plan === 'subscriber') {
       return (
         <Button className="w-full mb-6" variant="outline" disabled>
           You're on this plan
@@ -120,17 +107,10 @@ export default function Pricing() {
     if (subscriptionLoading) {
       return;
     }
-    if (plan === 'pro') {
+    if (plan === 'subscriber') {
       toast({
-        title: "You're already on Pro",
-        description: "Visit your dashboard to start using Pro features.",
-      });
-      return;
-    }
-    if (plan === 'premium') {
-      toast({
-        title: "Already covered",
-        description: "Premium already includes every Pro feature.",
+        title: "You're already subscribed",
+        description: "Your subscription already includes every Pro feature.",
       });
       return;
     }
@@ -156,10 +136,10 @@ export default function Pricing() {
     if (subscriptionLoading) {
       return;
     }
-    if (plan === 'premium') {
+    if (plan === 'subscriber') {
       toast({
-        title: "You're already on Premium",
-        description: "Thanks for being on our top plan!",
+        title: "You're already subscribed",
+        description: "Your subscription already includes every Premium feature.",
       });
       return;
     }
@@ -194,7 +174,7 @@ export default function Pricing() {
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-primary">
               <Check className="h-4 w-4" />
               <span>
-                You&apos;re currently on the {plan === 'premium' ? 'Premium' : 'Pro'} plan
+                You&apos;re currently on a paid plan
               </span>
             </div>
           </div>
