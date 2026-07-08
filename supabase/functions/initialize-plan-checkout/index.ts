@@ -30,6 +30,10 @@ async function paystack(path: string, secretKey: string, init?: RequestInit) {
 }
 
 // Find-or-create the R149/month ZAR plan so we never hardcode a plan code.
+// Note: this find-or-create is non-atomic — two concurrent first-ever checkouts could
+// create duplicate Paystack plans. Harmless: both charge R149/mo, and once one exists
+// the find path wins. Also, the interval/amount query filter on GET /plan is best-effort
+// narrowing only; the authoritative match is the .find() on name + currency below.
 async function ensurePlan(secretKey: string): Promise<string> {
   const list = await paystack(`/plan?interval=monthly&amount=${SUBSCRIPTION_PRICE_CENTS}`, secretKey);
   const existing = (list.data ?? []).find((p: any) => p.name === PLAN_NAME && p.currency === "ZAR");
@@ -80,6 +84,7 @@ serve(async (req) => {
         .single();
       if (propErr || !prop) throw new Error("Property not found");
       if (prop.landlord_id !== user.id) throw new Error("Not your property");
+      // Advisory only — the UNIQUE(property_id) constraint on listing_payments (enforced when the webhook inserts) is the real double-payment guard; never treat this check as the authority on "already paid".
       const { data: paid } = await supabase
         .from("listing_payments")
         .select("id")
