@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -23,6 +23,105 @@ const fmtR = (n?: number) =>
     ? new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(n)
     : '';
 
+// ── Face ID-style verification animation ──────────────────────────────────
+// Sequence: face glyph pulses while verifying → morphs into a drawn checkmark
+// with a springy pop → holds → shrinks away, then the success card fades up.
+type CelebrationPhase = 'idle' | 'morph' | 'exit' | 'done';
+
+const MORPH_MS = 750; // face-out + circle sweep + check draw + pop
+const HOLD_MS = 1800; // how long the checkmark lingers
+const EXIT_MS = 400; // shrink + fade away
+const CONFETTI_AT_MS = 450; // fire confetti right as the check pops
+
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false);
+
+const FACEID_CSS = `
+.faceid-wrap{display:flex;align-items:center;justify-content:center;}
+.faceid-svg{overflow:visible;}
+@keyframes faceid-scan{0%,100%{opacity:.9;transform:scale(1);}50%{opacity:.4;transform:scale(.965);}}
+.faceid-scanning .faceid-face{animation:faceid-scan 1.6s ease-in-out infinite;transform-origin:center;transform-box:fill-box;}
+@keyframes faceid-face-out{to{opacity:0;transform:scale(.55);}}
+.faceid-morph .faceid-face{animation:faceid-face-out .25s ease-in forwards;transform-origin:center;transform-box:fill-box;}
+@keyframes faceid-pop{0%{opacity:0;transform:scale(.6);}60%{opacity:1;transform:scale(1.08);}100%{opacity:1;transform:scale(1);}}
+.faceid-check{animation:faceid-pop .6s cubic-bezier(.34,1.56,.64,1) .1s both;transform-origin:center;transform-box:fill-box;}
+@keyframes faceid-draw{to{stroke-dashoffset:0;}}
+.faceid-check-circle{stroke-dasharray:189;stroke-dashoffset:189;animation:faceid-draw .45s cubic-bezier(.65,0,.35,1) .15s forwards;}
+.faceid-check-path{stroke-dasharray:44;stroke-dashoffset:44;animation:faceid-draw .3s cubic-bezier(.65,0,.35,1) .32s forwards;}
+.faceid-stage{display:flex;flex-direction:column;align-items:center;}
+@keyframes faceid-exit{to{opacity:0;transform:scale(.5);}}
+.faceid-stage-exit{animation:faceid-exit .4s ease-in forwards;}
+@keyframes faceid-fade-up{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.faceid-content-in{animation:faceid-fade-up .45s cubic-bezier(.16,1,.3,1) both;}
+@keyframes faceid-caption-in{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.faceid-caption{animation:faceid-caption-in .4s ease-out .5s both;}
+@media (prefers-reduced-motion:reduce){
+  .faceid-scanning .faceid-face,.faceid-morph .faceid-face,.faceid-check,.faceid-check-circle,.faceid-check-path,.faceid-stage-exit,.faceid-content-in,.faceid-caption{animation:none !important;}
+  .faceid-check-circle,.faceid-check-path{stroke-dashoffset:0;}
+  .faceid-morph .faceid-face{opacity:0;}
+  .faceid-check{opacity:1;}
+}
+`;
+
+const FaceIdStyles = () => <style>{FACEID_CSS}</style>;
+
+/**
+ * iOS Face ID-style glyph. `scanning` shows the pulsing face inside the
+ * corner-bracket frame; `morph` fades the face out while a green circle
+ * sweeps in and the check stroke draws itself with a springy pop.
+ */
+function FaceIdGlyph({ phase }: { phase: 'scanning' | 'morph' }) {
+  return (
+    <div
+      className={`faceid-wrap faceid-${phase}`}
+      role="status"
+      aria-label={phase === 'scanning' ? 'Verifying payment' : 'Payment verified'}
+    >
+      <svg
+        className="faceid-svg"
+        width="96"
+        height="96"
+        viewBox="0 0 96 96"
+        fill="none"
+        aria-hidden="true"
+      >
+        <g
+          className="faceid-face text-foreground/80"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          {/* Face ID corner brackets */}
+          <path d="M8 30 V26 C8 16.06 16.06 8 26 8 H30" />
+          <path d="M66 8 H70 C79.94 8 88 16.06 88 26 V30" />
+          <path d="M88 66 V70 C88 79.94 79.94 88 70 88 H66" />
+          <path d="M30 88 H26 C16.06 88 8 79.94 8 70 V66" />
+          {/* Eyes */}
+          <path d="M34 36 V44" />
+          <path d="M62 36 V44" />
+          {/* Smile */}
+          <path d="M33 58 C37 65 42 68 48 68 C54 68 59 65 63 58" />
+        </g>
+        {phase === 'morph' && (
+          <g
+            className="faceid-check text-green-600"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle className="faceid-check-circle" cx="48" cy="48" r="30" transform="rotate(-90 48 48)" />
+            <path className="faceid-check-path" d="M34 49 L44 59 L63 38" />
+          </g>
+        )}
+      </svg>
+      <FaceIdStyles />
+    </div>
+  );
+}
+
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -31,8 +130,30 @@ export default function PaymentSuccess() {
   const [verificationStatus, setVerificationStatus] = useState<VerificationStatus>('loading');
   const [planCode, setPlanCode] = useState<string>('');
   const [paidBill, setPaidBill] = useState<PaidBill | null>(null);
+  const [celebration, setCelebration] = useState<CelebrationPhase>('idle');
+  const celebrationTimers = useRef<number[]>([]);
 
   const isRentBill = !!reference && reference.startsWith('BILL_');
+
+  useEffect(() => {
+    const timers = celebrationTimers.current;
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, []);
+
+  // Face → checkmark → gone, then the success content takes over.
+  const startCelebration = () => {
+    if (prefersReducedMotion()) {
+      setCelebration('done');
+      triggerConfetti();
+      return;
+    }
+    setCelebration('morph');
+    celebrationTimers.current.push(
+      window.setTimeout(triggerConfetti, CONFETTI_AT_MS),
+      window.setTimeout(() => setCelebration('exit'), MORPH_MS + HOLD_MS),
+      window.setTimeout(() => setCelebration('done'), MORPH_MS + HOLD_MS + EXIT_MS),
+    );
+  };
 
   useEffect(() => {
     if (!user) {
@@ -73,7 +194,7 @@ export default function PaymentSuccess() {
             property: data.bill?.property,
           });
           setVerificationStatus('success');
-          triggerConfetti();
+          startCelebration();
           toast.success('Payment successful!', {
             description: 'Your receipt is saved in your POP section.',
             duration: 5000,
@@ -269,9 +390,15 @@ export default function PaymentSuccess() {
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <Card className="max-w-md w-full text-center">
           <CardHeader>
-            <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
-              <Loader2 className="h-12 w-12 text-primary animate-spin" />
-            </div>
+            {isRentBill ? (
+              <div className="mx-auto mb-4">
+                <FaceIdGlyph phase="scanning" />
+              </div>
+            ) : (
+              <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+                <Loader2 className="h-12 w-12 text-primary animate-spin" />
+              </div>
+            )}
             <CardTitle className="text-2xl">
               {isRentBill ? 'Confirming your payment…' : 'Verifying Your Payment...'}
             </CardTitle>
@@ -343,6 +470,20 @@ export default function PaymentSuccess() {
     );
   }
 
+  // Celebration interstitial — Face ID-style face → checkmark, then it goes away
+  if (isRentBill && (celebration === 'morph' || celebration === 'exit')) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className={`faceid-stage ${celebration === 'exit' ? 'faceid-stage-exit' : ''}`}>
+          <FaceIdGlyph phase="morph" />
+          <p className="faceid-caption mt-6 text-lg font-semibold text-foreground">
+            Payment successful
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   // Success state — rent bill
   if (isRentBill) {
     const monthLabel = paidBill?.period
@@ -350,7 +491,8 @@ export default function PaymentSuccess() {
       : '';
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="max-w-md w-full text-center">
+        <FaceIdStyles />
+        <Card className="max-w-md w-full text-center faceid-content-in">
           <CardHeader>
             <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
               <CheckCircle className="h-12 w-12 text-green-600" />
