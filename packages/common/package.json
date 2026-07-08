@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./lib/*": "./src/lib/*.ts",
+    "./utils/*": "./src/utils/*.ts",
     "./types/*": "./src/types/*.ts",
     "./constants/*": "./src/constants/*.ts",
     "./data/*": "./src/data/*.ts"
