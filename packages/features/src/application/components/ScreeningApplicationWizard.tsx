@@ -698,19 +698,26 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     );
   }
 
-  // Allow re-applications for all statuses except accepted/declined
-  if (existingApplication && ['accepted', 'declined'].includes(existingApplication.status)) {
+  // Once an application exists (anything past the "invited" state) it's already
+  // submitted — show its status instead of the form so it doesn't look like a to-do.
+  if (existingApplication && existingApplication.status !== 'invited') {
+    const st = existingApplication.status;
+    const isReview = st === 'pending' || st === 'submitted';
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>Application Status</CardTitle>
+          <CardTitle>{isReview ? 'Application submitted' : 'Application Status'}</CardTitle>
           <CardDescription>Your application for this property</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <p className="text-lg mb-2">Application {existingApplication.status}</p>
+            <p className="text-lg mb-2">
+              {isReview ? 'Thanks — your application is in! 🎉' : `Application ${st}`}
+            </p>
             <p className="text-sm text-muted-foreground mb-4">
-              Status: <span className="capitalize font-medium">{existingApplication.status}</span>
+              {isReview
+                ? "The landlord is reviewing it. We'll let you know as soon as there's an update."
+                : <>Status: <span className="capitalize font-medium">{st}</span></>}
             </p>
             <Button variant="outline" onClick={() => navigate("/tenant-dashboard")}>Go to Dashboard</Button>
           </div>

@@ -104,8 +104,10 @@ export interface LeaseWizardData {
   // STEP 9: Exclusions
   excludedItemsList: string;
 
-  // Bank Details (for payment schedule)
+  // Bank Details (for payment schedule + Paystack rent payouts)
   landlordBankName: string;
+  landlordBankCode?: string;      // Paystack bank code (used to create the subaccount)
+  landlordAccountHolder?: string;
   landlordBranchCode: string;
   landlordAccountNumber: string;
   landlordReference?: string;
@@ -266,6 +268,8 @@ export const DEFAULT_WIZARD_DATA: LeaseWizardData = {
   
   // Bank Details
   landlordBankName: '',
+  landlordBankCode: '',
+  landlordAccountHolder: '',
   landlordBranchCode: '',
   landlordAccountNumber: '',
   landlordReference: '',

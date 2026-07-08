@@ -259,7 +259,7 @@ export default function ListProperty() {
       case 1:
         return <PropertyTypeStep control={control} errors={errors} />;
       case 2:
-        return <LocationStep control={control} errors={errors} />;
+        return <LocationStep control={control} errors={errors} watch={watch} setValue={setValue} />;
       case 3:
         return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 4:
@@ -289,7 +289,6 @@ export default function ListProperty() {
           </Button>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-primary">List Your Property</h1>
-            <p className="text-muted-foreground text-sm sm:text-base">Get your property in front of thousands of potential tenants</p>
           </div>
         </div>
 
@@ -303,7 +302,7 @@ export default function ListProperty() {
           <Progress value={progress} className="h-2" />
           
           {/* Step indicators */}
-          <div className="flex justify-between mt-4">
+          <div className="grid grid-cols-6 gap-1 mt-4">
             {steps.map((step) => {
               const IconComponent = step.icon;
               const isActive = currentStep === step.id;
@@ -329,7 +328,6 @@ export default function ListProperty() {
                   </div>
                   <div className="text-center w-full">
                     <p className="text-[10px] sm:text-xs font-medium leading-tight break-words">{step.title}</p>
-                    <p className="text-xs opacity-75 hidden sm:block">{step.description}</p>
                   </div>
                 </div>
               );

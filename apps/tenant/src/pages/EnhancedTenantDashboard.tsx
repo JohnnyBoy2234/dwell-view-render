@@ -12,6 +12,7 @@ import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Separator } from '@mzanzihomes/ui/components/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@mzanzihomes/ui/components/dialog';
 import {
   FileText, Eye, Settings, Building, User,
   Receipt, Clipboard, HelpCircle, MapPin,
@@ -58,6 +59,15 @@ export default function EnhancedTenantDashboard() {
   const [currentTab, setCurrentTab] = useState('/enhancedtenantdashboard');
   const { loading, rentDue, tenantProperty, recentMaintenance, upcomingViewings } =
     useTenantDashboard();
+
+  // First-time welcome, shown right after a tenant joins via an invite.
+  const [showWelcome, setShowWelcome] = useState(false);
+  useEffect(() => {
+    if (localStorage.getItem('tenantWelcome') === '1') {
+      localStorage.removeItem('tenantWelcome');
+      setShowWelcome(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (user && isLandlord) {
@@ -311,6 +321,26 @@ export default function EnhancedTenantDashboard() {
             </EnhancedDashboardLayout>
           </div>
         </div>
+
+        {/* First-time welcome after joining via an invite */}
+        <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Welcome to your dashboard 👋</DialogTitle>
+              <DialogDescription>
+                This is your home base as a tenant — everything about your rental lives here:
+              </DialogDescription>
+            </DialogHeader>
+            <ul className="space-y-2 text-sm">
+              <li className="flex items-start gap-2"><span>💳</span><span>Pay your rent and see what's due</span></li>
+              <li className="flex items-start gap-2"><span>💬</span><span>Message your landlord anytime</span></li>
+              <li className="flex items-start gap-2"><span>📄</span><span>View your lease and documents</span></li>
+              <li className="flex items-start gap-2"><span>🔧</span><span>Log maintenance requests</span></li>
+              <li className="flex items-start gap-2"><span>📅</span><span>Track viewings and reminders</span></li>
+            </ul>
+            <Button className="w-full mt-2" onClick={() => setShowWelcome(false)}>Got it, let's go</Button>
+          </DialogContent>
+        </Dialog>
       </SidebarProvider>
     </VerificationGate>
   );

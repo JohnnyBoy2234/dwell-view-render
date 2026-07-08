@@ -80,10 +80,90 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   const initializeNewContract = async () => {
     if (!user) return;
 
+    // Pull every fact we already hold so the landlord isn't asked to enter
+    // details they were never told (tenant, property and lease terms).
+    const prefill: Partial<LeaseWizardData> = { landlordEmail: user.email || '' };
+
+    // ── Landlord (from their own profile + screening) ──
+    const [{ data: llProfile }, { data: llScreening }] = await Promise.all([
+      supabase.from('profiles').select('display_name').eq('user_id', user.id).maybeSingle(),
+      supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', user.id).maybeSingle(),
+    ]);
+    prefill.landlordFullName = llScreening?.full_name || llProfile?.display_name || user.user_metadata?.full_name || '';
+    prefill.landlordIdNumber = llScreening?.id_number || '';
+    prefill.landlordPhone = llScreening?.phone || '';
+    prefill.landlordAddress = llScreening?.current_address || '';
+
+    // ── Tenant (from their profile + screening) ──
+    if (tenantId) {
+      const [{ data: tProfile }, { data: tScreening }] = await Promise.all([
+        supabase.from('profiles').select('display_name').eq('user_id', tenantId).maybeSingle(),
+        supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', tenantId).maybeSingle(),
+      ]);
+      prefill.tenantFullName = tScreening?.full_name || tProfile?.display_name || '';
+      prefill.tenantIdNumber = tScreening?.id_number || '';
+      prefill.tenantPhone = tScreening?.phone || '';
+      prefill.tenantAddress = tScreening?.current_address || '';
+    }
+
+    // ── Property details ──
+    if (propertyId) {
+      const { data: property } = await supabase
+        .from('properties')
+        .select('title, location, price')
+        .eq('id', propertyId)
+        .maybeSingle();
+      if (property) {
+        prefill.propertyAddress = property.location || property.title || '';
+        if (property.price) {
+          prefill.rentAmount = Number(property.price);
+          prefill.depositAmount = Number(property.price); // default: one month
+        }
+      }
+    }
+
+    // ── Lease terms from the invite the tenant accepted (rent + dates) ──
+    if (propertyId && tenantId) {
+      const { data: invite } = await supabase
+        .from('property_invites')
+        .select('monthly_rent, lease_start, lease_end')
+        .eq('property_id', propertyId)
+        .eq('tenant_id', tenantId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (invite) {
+        if (invite.monthly_rent) {
+          prefill.rentAmount = Number(invite.monthly_rent);
+          prefill.depositAmount = Number(invite.monthly_rent);
+        }
+        if (invite.lease_start) prefill.leaseStartDate = invite.lease_start;
+        if (invite.lease_end) prefill.leaseEndDate = invite.lease_end;
+      }
+    }
+
+    // ── Banking details from saved settings (so it's entered once) ──
+    const { data: settings } = await supabase
+      .from('landlord_settings')
+      .select('bank, account_holder, account_number, branch_code')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (settings) {
+      prefill.landlordBankName = settings.bank || '';
+      prefill.landlordAccountHolder = settings.account_holder || prefill.landlordFullName || '';
+      prefill.landlordAccountNumber = settings.account_number || '';
+      prefill.landlordBranchCode = settings.branch_code || '';
+    } else {
+      prefill.landlordAccountHolder = prefill.landlordFullName || '';
+    }
+
+    // Resume an existing draft if there is one, but backfill any BLANK fields
+    // from the prefill (older drafts were saved before auto-fill existed).
+    const isBlank = (v: any) => v === undefined || v === null || v === '' || v === 0;
     if (propertyId && tenantId) {
       const { data: existingDraft } = await supabase
         .from('lease_contracts')
-        .select('id')
+        .select('id, contract_data, landlord_signed_at, landlord_signature_data')
         .eq('landlord_id', user.id)
         .eq('property_id', propertyId)
         .eq('tenant_id', tenantId)
@@ -93,44 +173,71 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
       if (existingDraft) {
         setSavedContractId(existingDraft.id);
         onContractSaved?.(existingDraft.id);
-        await loadContract(existingDraft.id);
+        const saved = (existingDraft.contract_data || {}) as any;
+        const merged: any = { ...DEFAULT_WIZARD_DATA, ...saved };
+        for (const [k, pv] of Object.entries(prefill)) {
+          if (pv != null && pv !== '' && isBlank(merged[k])) merged[k] = pv;
+        }
+        setData(merged);
+        if (existingDraft.landlord_signed_at && existingDraft.landlord_signature_data) {
+          const sig = existingDraft.landlord_signature_data as any;
+          setLandlordSignature({
+            imageUrl: sig.signature_image_url || sig.signatureImageUrl,
+            name: merged.landlordFullName || 'Landlord',
+            signedAt: new Date(existingDraft.landlord_signed_at).toLocaleString(),
+          });
+        }
         return;
       }
     }
 
-    let tenantPrefill: Partial<LeaseWizardData> = {};
-    if (tenantId) {
-      const [{ data: profile }, { data: screening }] = await Promise.all([
-        supabase.from('profiles').select('display_name').eq('user_id', tenantId).maybeSingle(),
-        supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', tenantId).maybeSingle(),
-      ]);
-      tenantPrefill = {
-        tenantFullName: screening?.full_name || profile?.display_name || '',
-        tenantIdNumber: screening?.id_number || '',
-        tenantPhone: screening?.phone || '',
-        tenantAddress: screening?.current_address || '',
+    setData(prev => ({ ...prev, ...prefill }));
+  };
+
+  // Save banking details for reuse and, on the first lease, create the
+  // landlord's Paystack payout subaccount from what they entered.
+  const ensureBankingSetup = async () => {
+    if (!user) return;
+    const holder = (data.landlordAccountHolder || data.landlordFullName || '').trim();
+    try {
+      const bankFields = {
+        bank: data.landlordBankName || '',
+        account_holder: holder,
+        account_number: data.landlordAccountNumber || '',
+        branch_code: data.landlordBranchCode || '',
+        updated_at: new Date().toISOString(),
       };
-    }
-
-    let propertyPrefill: Partial<LeaseWizardData> = {};
-    if (propertyId) {
-      const { data: property } = await supabase
-        .from('properties')
-        .select('location')
-        .eq('id', propertyId)
-        .maybeSingle();
-      if (property?.location) {
-        propertyPrefill = { propertyAddress: property.location };
+      const { data: existing } = await supabase
+        .from('landlord_settings').select('id').eq('user_id', user.id).maybeSingle();
+      if (existing) {
+        await supabase.from('landlord_settings').update(bankFields as any).eq('user_id', user.id);
+      } else {
+        await supabase.from('landlord_settings').insert({
+          user_id: user.id,
+          name: data.landlordFullName || holder || 'Landlord',
+          address: data.landlordAddress || '',
+          contact: data.landlordPhone || data.landlordEmail || '',
+          ...bankFields,
+        } as any);
       }
+    } catch (e) {
+      console.warn('Saving banking settings failed', e);
     }
-
-    setData(prev => ({
-      ...prev,
-      landlordEmail: user.email || '',
-      landlordFullName: user.user_metadata?.full_name || '',
-      ...tenantPrefill,
-      ...propertyPrefill,
-    }));
+    try {
+      const { data: profile } = await supabase
+        .from('profiles').select('paystack_subaccount_code').eq('user_id', user.id).maybeSingle();
+      if (!profile?.paystack_subaccount_code && data.landlordBankCode && data.landlordAccountNumber && holder) {
+        await supabase.functions.invoke('create-paystack-subaccount', {
+          body: {
+            bankName: data.landlordBankCode,
+            accountNumber: data.landlordAccountNumber,
+            accountHolderName: holder,
+          },
+        });
+      }
+    } catch (e) {
+      console.warn('Payout subaccount setup failed', e);
+    }
   };
 
   // Auto-save effect - triggers 2 seconds after data changes
@@ -307,14 +414,16 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   };
 
   const handleSendToTenant = async () => {
-    if (!savedContractId || !data.tenantEmail) { 
-      toast.error('Tenant email required'); 
-      return; 
+    if (!savedContractId || (!tenantId && !data.tenantEmail)) {
+      toast.error('Select a tenant or enter their email');
+      return;
     }
     setIsSending(true);
     try {
-      const { error } = await supabase.functions.invoke('send-contract-to-tenant', { 
-        body: { contractId: savedContractId, tenantEmail: data.tenantEmail } 
+      // Save banking details + set up rent payouts (subaccount) once-off.
+      await ensureBankingSetup();
+      const { error } = await supabase.functions.invoke('send-contract-to-tenant', {
+        body: { contractId: savedContractId, tenantEmail: data.tenantEmail, tenantId }
       });
       if (error) throw error;
       

@@ -48,6 +48,91 @@ serve(async (req) => {
     if (event.event === 'charge.success') {
       const { reference, amount, paid_at, transaction } = event.data;
 
+      // Monthly bill payment? (references are BILL_<uuid>_<ts>)
+      if (reference?.startsWith('BILL_')) {
+        // The reference column can be overwritten by a re-initialized checkout,
+        // so resolve the bill by metadata first, then by parsing the reference,
+        // and only then by the stored column.
+        const metadataBillId = event.data.metadata?.bill_id as string | undefined;
+        const parsedBillId = reference.split('_')[1];
+        const billId = metadataBillId || parsedBillId;
+
+        let bill = null;
+        if (billId) {
+          const { data } = await supabase
+            .from('monthly_bills')
+            .select('id, status, tenant_id, period, total_amount')
+            .eq('id', billId)
+            .single();
+          bill = data;
+        }
+        if (!bill) {
+          const { data } = await supabase
+            .from('monthly_bills')
+            .select('id, status, tenant_id, period, total_amount')
+            .eq('paystack_reference', reference)
+            .single();
+          bill = data;
+        }
+
+        if (!bill) {
+          console.error('Bill not found for reference:', reference);
+          return new Response('Bill not found', { status: 404 });
+        }
+        if (bill.status === 'paid') {
+          return new Response('Already processed', { status: 200, headers: corsHeaders });
+        }
+
+        // Verify the charged amount matches the bill before marking paid.
+        const expectedCents = Math.round(Number(bill.total_amount) * 100);
+        if (typeof amount === 'number' && amount !== expectedCents) {
+          console.error('Bill amount mismatch — not marking paid', {
+            billId: bill.id, expectedCents, receivedCents: amount, reference,
+          });
+          return new Response('Amount mismatch', { status: 200, headers: corsHeaders });
+        }
+
+        const { data: updated, error: updateError } = await supabase
+          .from('monthly_bills')
+          .update({ status: 'paid', paid_at: paid_at ?? new Date().toISOString() })
+          .eq('id', bill.id)
+          .eq('status', 'sent') // idempotency guard for duplicate deliveries
+          .select('id');
+        if (updateError) {
+          console.error('Failed to mark bill paid:', updateError.message);
+          return new Response('Update failed', { status: 500 });
+        }
+        if (!updated || updated.length === 0) {
+          // Lost a concurrent race or bill not in 'sent' — nothing more to do.
+          return new Response('Already processed', { status: 200, headers: corsHeaders });
+        }
+
+        const { error: notifyError } = await supabase.rpc('create_notification', {
+          _user_id: bill.tenant_id,
+          _message: `Payment confirmed — your ${bill.period} bill is settled. Receipt on its way.`,
+          _link_url: '/enhancedtenantdashboard/payments',
+          _type: 'payment',
+          _metadata: { bill_id: bill.id },
+        });
+        if (notifyError) console.error('Bill payment notification failed (non-fatal):', notifyError.message);
+
+        // Receipt + emails + landlord notification + SwiftBooks (own function, retryable).
+        // Awaited so the edge runtime doesn't kill it, but failures never fail the webhook.
+        const receiptRes = await fetch(`${supabaseUrl}/functions/v1/generate-rent-receipt`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({ billId: bill.id }),
+        });
+        if (!receiptRes.ok) {
+          console.error('Receipt generation failed (bill stays paid):', await receiptRes.text());
+        }
+
+        return new Response('Bill payment processed', { status: 200, headers: corsHeaders });
+      }
+
       // Find payment by reference
       const { data: payment } = await supabase
         .from('payments')

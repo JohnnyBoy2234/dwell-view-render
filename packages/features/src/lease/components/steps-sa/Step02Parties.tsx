@@ -175,14 +175,13 @@ export function Step02Parties({ data, onUpdate }: Step02Props) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="tenantEmail">Email Address *</Label>
+              <Label htmlFor="tenantEmail">Email Address <span className="text-muted-foreground font-normal">(optional)</span></Label>
               <Input
                 id="tenantEmail"
                 type="email"
                 value={data.tenantEmail}
                 onChange={(e) => onUpdate({ tenantEmail: e.target.value })}
-                placeholder="tenant@email.com"
-                required
+                placeholder="We'll use their account email automatically"
               />
             </div>
             <div className="space-y-2">

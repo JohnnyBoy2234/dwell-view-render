@@ -49,21 +49,36 @@ export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: Le
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }, [open]);
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Map a pointer event to canvas-buffer coordinates. The canvas buffer is a
+  // fixed 600x200 but it is displayed at w-full (much narrower on mobile), so
+  // we must scale from the rendered size to the buffer size or strokes land in
+  // the wrong place.
+  const getPoint = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY,
+    };
+  };
+
+  const startDrawing = (e: React.PointerEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    e.preventDefault();
+    // Keep receiving move/up events even if the finger leaves the canvas.
+    canvas.setPointerCapture(e.pointerId);
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
+    const { x, y } = getPoint(e);
     setIsDrawing(true);
     setLastX(x);
     setLastY(y);
     setHasSignature(true);
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const draw = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!isDrawing) return;
 
     const canvas = canvasRef.current;
@@ -71,10 +86,9 @@ export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: Le
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    e.preventDefault();
 
-    const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = getPoint(e);
 
     ctx.beginPath();
     ctx.moveTo(lastX, lastY);
@@ -199,11 +213,12 @@ export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: Le
                 ref={canvasRef}
                 width={600}
                 height={200}
-                className="w-full cursor-crosshair border rounded"
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseLeave={stopDrawing}
+                className="w-full cursor-crosshair border rounded touch-none select-none"
+                style={{ touchAction: 'none' }}
+                onPointerDown={startDrawing}
+                onPointerMove={draw}
+                onPointerUp={stopDrawing}
+                onPointerCancel={stopDrawing}
               />
               <div className="flex justify-between items-center mt-2">
                 <p className="text-sm text-muted-foreground">

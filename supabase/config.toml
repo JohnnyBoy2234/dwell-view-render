@@ -105,3 +105,15 @@ verify_jwt = true
 
 [functions.og-property]
 verify_jwt = false
+
+[functions.billing-cycle]
+verify_jwt = true
+
+[functions.send-monthly-bill]
+verify_jwt = true
+
+[functions.pay-monthly-bill]
+verify_jwt = true
+
+[functions.generate-rent-receipt]
+verify_jwt = true

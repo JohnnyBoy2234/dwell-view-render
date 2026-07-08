@@ -324,6 +324,13 @@
             "npm:zod@^3.23.8"
           ]
         }
+      },
+      "packages/common": {
+        "packageJson": {
+          "dependencies": [
+            "npm:vitest@^4.0.15"
+          ]
+        }
       }
     }
   }

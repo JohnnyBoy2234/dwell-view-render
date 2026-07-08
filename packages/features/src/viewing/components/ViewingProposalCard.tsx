@@ -178,20 +178,11 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
     if (!user) return;
 
     try {
-      // Get tenant profile ID first
-      const { data: tenantProfile } = await (supabase as any)
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (!tenantProfile) return;
-
       const { data, error } = await supabase
         .from('application_requests')
         .select('id, status')
         .filter('property_id', 'eq', proposal.property_id)
-        .filter('tenant_id', 'eq', (tenantProfile as any).id)
+        .filter('tenant_id', 'eq', user.id)
         .maybeSingle();
 
       if (error && error.code !== 'PGRST116') throw error;
@@ -207,33 +198,14 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
     setLoading(true);
     
     try {
-      // Get tenant profile ID (profiles.id, not auth.users.id)
-      const { data: tenantProfile, error: profileError } = await (supabase as any)
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-      if (!tenantProfile) throw new Error('Tenant profile not found');
-
-      // Get landlord profile ID
-      const { data: landlordProfile, error: landlordProfileError } = await (supabase as any)
-        .from('profiles')
-        .select('id')
-        .eq('user_id', proposal.landlord_id)
-        .maybeSingle();
-
-      if (landlordProfileError) throw landlordProfileError;
-      if (!landlordProfile) throw new Error('Landlord profile not found');
-
-      // Create application request using profile IDs
+      // application_requests uses auth user ids — RLS checks auth.uid() = tenant_id
+      // (or landlord_id), so profiles.id must NOT be used here.
       const { error } = await supabase
         .from('application_requests')
         .insert({
           property_id: proposal.property_id,
-          tenant_id: (tenantProfile as any).id,
-          landlord_id: (landlordProfile as any).id,
+          tenant_id: user.id,
+          landlord_id: proposal.landlord_id,
           status: 'pending'
         } as any);
 

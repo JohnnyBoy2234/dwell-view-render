@@ -12,9 +12,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@mzan
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark } from "lucide-react";
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
+import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -22,6 +23,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
+import { RentCollectionCard } from '@mzanzihomes/features/billing';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
@@ -159,6 +161,10 @@ export default function EnhancedLandlordDashboard() {
   // Inline "add property by address" state
   const [addressInput, setAddressInput] = useState('');
   const [addingProperty, setAddingProperty] = useState(false);
+  const [showAddPropertyModal, setShowAddPropertyModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showRentCollectionModal, setShowRentCollectionModal] = useState(false);
+  const [invitedPropertyIds, setInvitedPropertyIds] = useState<Set<string>>(new Set());
 
   const handleAddPropertyByAddress = async () => {
     if (!addressInput.trim() || !user) return;
@@ -168,12 +174,15 @@ export default function EnhancedLandlordDashboard() {
         landlord_id: user.id,
         title: addressInput.trim(),
         location: addressInput.trim(),
-        status: 'unlisted',
+        description: '',
+        property_type: 'Other',
+        is_listed: false,
         listing_type: 'rent',
         price: 0,
       });
       if (error) throw error;
       setAddressInput('');
+      setShowAddPropertyModal(false);
       await fetchProperties();
       toast({ title: 'Property added', description: 'Your property has been added. You can now invite a tenant.' });
     } catch (e: any) {
@@ -349,6 +358,14 @@ export default function EnhancedLandlordDashboard() {
           listing_type: prop.listing_type,
         }));
         setProperties(transformedProperties);
+
+        // Track which properties already have an invite, so the Invite Tenant
+        // entry hides once every added property has been invited.
+        const { data: invitesData } = await supabase
+          .from('property_invites')
+          .select('property_id')
+          .eq('landlord_id', user.id);
+        setInvitedPropertyIds(new Set((invitesData || []).map((i: any) => i.property_id)));
       }
     } catch (error) {
       console.error('Error in fetchProperties:', error);
@@ -1034,17 +1051,24 @@ export default function EnhancedLandlordDashboard() {
       })
       .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
 
+    // Only show application sections for properties that actually have applications.
+    const propertyIdsWithApps = new Set(applications.map((a: any) => a.property_id));
+    const appProperties = properties.filter((p) => propertyIdsWithApps.has(p.id));
+
     return (
       <div className="min-h-screen bg-white pb-8 w-full">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
 
-          {/* Submitted Applications Section — shows all properties combined */}
-          <ApplicationsWithViewings
-            propertyId={undefined}
-            propertyTitle="All Properties"
-          />
+          {/* Submitted applications — split per property (only those with applications) */}
+          {appProperties.map((p) => (
+            <ApplicationsWithViewings
+              key={p.id}
+              propertyId={p.id}
+              propertyTitle={p.title}
+            />
+          ))}
           
           {/* Loading State */}
           {applicationsLoading ? (
@@ -1169,7 +1193,7 @@ export default function EnhancedLandlordDashboard() {
           <Building className="h-6 w-6 text-ocean-blue" />
           <h2 className="text-xl font-bold">Manage Properties</h2>
         </div>
-        <Button onClick={() => navigate('/enhancedlandlorddashboard/add-property')} size="sm">
+        <Button onClick={() => setShowAddPropertyModal(true)} size="sm">
           <Plus className="h-4 w-4 mr-1" />
           Add Property
         </Button>
@@ -2166,15 +2190,76 @@ const renderReportsTab = () => (
 
 
       const renderMaintenanceTab = () => {
-    // Organize by status
-    const urgentRequests = maintenanceRequests.filter(r => r.priority === 'urgent' && r.status !== 'completed');
-    const submittedRequests = maintenanceRequests.filter(r => r.status === 'submitted' && r.priority !== 'urgent');
-    const inProgressRequests = maintenanceRequests.filter(r => r.status === 'in_progress');
-
-    // Showing all properties combined now (no property selection step) — label each
-    // request with which property it belongs to.
     const getPropertyTitle = (propertyId: string) =>
       properties.find(p => p.id === propertyId)?.title || 'Property';
+
+    // Group requests by property so each property's maintenance shows together.
+    const rank = (r: any) =>
+      (r.priority === 'urgent' && r.status !== 'completed') ? 0
+      : r.status === 'in_progress' ? 1
+      : r.status === 'submitted' ? 2 : 3;
+    const maintenanceGroups: any[] = Object.values(
+      maintenanceRequests.reduce((acc: any, r: any) => {
+        const key = r.property_id || 'unknown';
+        (acc[key] = acc[key] || { pid: key, title: getPropertyTitle(key), reqs: [] }).reqs.push(r);
+        return acc;
+      }, {})
+    ).map((g: any) => ({
+      ...g,
+      reqs: g.reqs.slice().sort((a: any, b: any) => rank(a) - rank(b)),
+      open: g.reqs.filter((r: any) => r.status !== 'completed').length,
+    }));
+
+    const renderMaintenanceCard = (request: any) => {
+      const border = (request.priority === 'urgent' && request.status !== 'completed') ? 'border-l-red-500'
+        : request.status === 'in_progress' ? 'border-l-blue-500'
+        : request.status === 'submitted' ? 'border-l-yellow-500' : 'border-l-gray-300';
+      const iconBg = request.priority === 'urgent' ? 'bg-red-500'
+        : request.status === 'in_progress' ? 'bg-blue-500'
+        : request.priority === 'high' ? 'bg-orange-500' : 'bg-yellow-500';
+      return (
+        <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 ${border}`}>
+          <CardContent className="p-4">
+            <div className="flex flex-col md:flex-row md:items-start gap-4">
+              <div className="flex gap-3 flex-1 min-w-0">
+                <div className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${iconBg}`}>
+                  <Wrench className="h-6 w-6 text-white" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className="font-semibold text-lg">{request.title}</h4>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
+                    <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                  <Eye className="h-4 w-4 mr-2" />
+                  View
+                </Button>
+                {request.status === 'submitted' && (
+                  <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Start
+                  </Button>
+                )}
+                {request.status === 'in_progress' && (
+                  <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700" onClick={() => updateMaintenanceStatus(request.id, 'completed')}>
+                    <Check className="h-4 w-4 mr-2" />
+                    Complete
+                  </Button>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    };
 
     return (
       <div className="min-h-screen bg-white pb-8">
@@ -2193,168 +2278,21 @@ const renderReportsTab = () => (
               <p className="text-muted-foreground mb-6">
                 Requests will appear here once tenants submit them.
               </p>
-              <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
-                <Building className="h-4 w-4 mr-2" />
-                View Properties
-              </Button>
             </CardContent>
           </Card>
         ) : (
-          <>
-            {/* Section headers only, no stats cards */}
-
-            {/* Urgent Requests Section */}
-            {urgentRequests.length > 0 && (
-              <div className="space-y-3">
+          <div className="space-y-8">
+            {maintenanceGroups.map((group: any) => (
+              <div key={group.pid} className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-red-600" />
-                  <h3 className="text-lg font-semibold">Urgent Requests</h3>
-                  <Badge variant="destructive">{urgentRequests.length}</Badge>
+                  <Building className="h-5 w-5 text-ocean-blue" />
+                  <h3 className="text-lg font-semibold">{group.title}</h3>
+                  <Badge variant="secondary">{group.open} open</Badge>
                 </div>
-                {urgentRequests.map((request) => (
-                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-red-500`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex gap-3 flex-1 min-w-0">
-                          <div className="h-12 w-12 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
-                            <Wrench className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-lg">{request.title}</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge variant="outline" className="gap-1">
-                                <Building className="h-3 w-3" />
-                                {getPropertyTitle(request.property_id)}
-                              </Badge>
-                              <Badge variant="destructive">{request.priority}</Badge>
-                              <Badge variant="secondary">{request.status.replace('_', ' ')}</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          {request.status === 'submitted' && (
-                            <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
-                              <Play className="h-4 w-4 mr-2" />
-                              Start
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                {group.reqs.map(renderMaintenanceCard)}
               </div>
-            )}
-
-            {/* New Requests Section */}
-            {submittedRequests.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-5 w-5 text-yellow-600" />
-                  <h3 className="text-lg font-semibold">New Requests</h3>
-                  <Badge variant="secondary">{submittedRequests.length}</Badge>
-                </div>
-                {submittedRequests.map((request) => (
-                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-yellow-500`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex gap-3 flex-1 min-w-0">
-                          <div className={`h-12 w-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                            request.priority === 'high' ? 'bg-orange-500' :
-                            request.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
-                          }`}>
-                            <Wrench className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-lg">{request.title}</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge variant="outline" className="gap-1">
-                                <Building className="h-3 w-3" />
-                                {getPropertyTitle(request.property_id)}
-                              </Badge>
-                              <Badge variant={request.priority === 'high' ? 'default' : 'secondary'}>{request.priority}</Badge>
-                              <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
-                            <Play className="h-4 w-4 mr-2" />
-                            Start Work
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-
-            {/* In Progress Section */}
-            {inProgressRequests.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold">In Progress</h3>
-                  <Badge variant="secondary">{inProgressRequests.length}</Badge>
-                </div>
-                {inProgressRequests.map((request) => (
-                  <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 border-l-blue-500`}>
-                    <CardContent className="p-4">
-                      <div className="flex flex-col md:flex-row md:items-start gap-4">
-                        <div className="flex gap-3 flex-1 min-w-0">
-                          <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0">
-                            <Wrench className="h-6 w-6 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-lg">{request.title}</h4>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
-                            <div className="flex flex-wrap items-center gap-2 mt-2">
-                              <Badge variant="outline" className="gap-1">
-                                <Building className="h-3 w-3" />
-                                {getPropertyTitle(request.property_id)}
-                              </Badge>
-                              <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
-                              <Badge>In Progress</Badge>
-                              <span className="text-xs text-muted-foreground">
-                                {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-2">
-                          <Button variant="outline" size="sm" className="w-full sm:w-auto" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            View
-                          </Button>
-                          <Button size="sm" className="w-full sm:w-auto bg-green-600 hover:bg-green-700" onClick={() => updateMaintenanceStatus(request.id, 'completed')}>
-                            <Check className="h-4 w-4 mr-2" />
-                            Complete
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </>
+            ))}
+          </div>
         )}
         </div>
       </div>
@@ -2399,12 +2337,13 @@ const renderReportsTab = () => (
     };
 
     const tools: ToolItem[] = [
-      { title: 'Properties',     subtitle: `${properties.length} listed`,        icon: Building,      tab: '/enhancedlandlorddashboard/properties' },
       { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
+      ...(canInvite ? [{ title: 'Invite Tenant', subtitle: 'Onboard your tenant', icon: UserPlus, action: () => setShowInviteModal(true) }] : []),
       { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
       { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: Inbox, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
       { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
       { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
+      ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
       { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
@@ -2437,14 +2376,14 @@ const renderReportsTab = () => (
               </div>
             </div>
             <div className="flex gap-2">
-              <input
-                type="text"
-                value={addressInput}
-                onChange={e => setAddressInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleAddPropertyByAddress()}
-                placeholder="e.g. 12 Long Street, Cape Town"
-                className="flex-1 rounded-xl border border-border bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
+              <div className="flex-1">
+                <AddressAutocomplete
+                  value={addressInput}
+                  onChange={setAddressInput}
+                  placeholder="e.g. 12 Long Street, Cape Town"
+                  className="rounded-xl"
+                />
+              </div>
               <Button
                 disabled={!addressInput.trim() || addingProperty}
                 onClick={handleAddPropertyByAddress}
@@ -2455,7 +2394,7 @@ const renderReportsTab = () => (
               </Button>
             </div>
           </div>
-        ) : tenants.length === 0 ? (
+        ) : canInvite ? (
           <div
             className="rounded-2xl p-4 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
             style={{
@@ -2476,7 +2415,7 @@ const renderReportsTab = () => (
               size="sm"
               className="rounded-full shrink-0"
               style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
-              onClick={() => handleTabChange('/enhancedlandlorddashboard/tenants')}
+              onClick={() => setShowInviteModal(true)}
             >
               Invite Tenant
             </Button>
@@ -2486,7 +2425,7 @@ const renderReportsTab = () => (
         {/* Always-visible Add Property CTA once the landlord has at least one property */}
         {properties.length > 0 && (
           <Button
-            onClick={() => navigate('/enhancedlandlorddashboard/add-property')}
+            onClick={() => setShowAddPropertyModal(true)}
             className="w-full rounded-2xl py-5 justify-center gap-2 font-semibold shadow-sm"
             style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
           >
@@ -2528,7 +2467,7 @@ const renderReportsTab = () => (
                       if (!user) {
                         navigate('/auth');
                       } else {
-                        navigate('/enhancedlandlorddashboard/add-property');
+                        setShowAddPropertyModal(true);
                       }
                     }}>
             <Plus className="h-4 w-4 mr-2" />
@@ -2699,6 +2638,13 @@ const renderReportsTab = () => (
     navigate(`${tab}${params}`);
   };
 
+  // Added (not publicly listed) properties that haven't been invited yet.
+  // The Invite Tenant entry only appears while at least one of these exists.
+  const pendingInviteProperties = properties.filter(
+    (p) => p.is_listed === false && !invitedPropertyIds.has(p.id)
+  );
+  const canInvite = pendingInviteProperties.length > 0;
+
   const headerTitle = isBaseTab
     ? 'Management Tools'
     : selectedPropertyId
@@ -2724,6 +2670,53 @@ const renderReportsTab = () => (
             </EnhancedDashboardLayout>
           </div>
         </div>
+
+        {/* Address-only quick add — no full listing wizard */}
+        <Dialog open={showAddPropertyModal} onOpenChange={setShowAddPropertyModal}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Add property</DialogTitle>
+              <DialogDescription>Enter the property address to get started.</DialogDescription>
+            </DialogHeader>
+            <AddressAutocomplete
+              value={addressInput}
+              onChange={setAddressInput}
+              placeholder="e.g. 12 Long Street, Cape Town"
+              className="rounded-xl"
+            />
+            <div className="flex justify-end gap-2 pt-1">
+              <Button variant="ghost" onClick={() => setShowAddPropertyModal(false)}>Cancel</Button>
+              <Button
+                disabled={!addressInput.trim() || addingProperty}
+                onClick={handleAddPropertyByAddress}
+                style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+              >
+                {addingProperty ? 'Adding…' : 'Add property'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Per-property tenant invite — short form then share */}
+        <Dialog open={showInviteModal} onOpenChange={(open) => { setShowInviteModal(open); if (!open) fetchProperties(); }}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Invite tenant</DialogTitle>
+              <DialogDescription>Pick the property, add a few details, then share the invite.</DialogDescription>
+            </DialogHeader>
+            {showInviteModal && <TenantInviteSection properties={pendingInviteProperties} />}
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showRentCollectionModal} onOpenChange={setShowRentCollectionModal}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Rent collection</DialogTitle>
+              <DialogDescription>Set up where rent gets paid out so tenants can pay in-app.</DialogDescription>
+            </DialogHeader>
+            {showRentCollectionModal && <RentCollectionCard />}
+          </DialogContent>
+        </Dialog>
       </SidebarProvider>
     </VerificationGate>
   );

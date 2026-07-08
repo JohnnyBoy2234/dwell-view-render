@@ -46,6 +46,7 @@ export function useWhatsAppMessaging() {
   const conversationsCache = useRef<ConversationData[]>([]);
   const pendingMessages = useRef<Map<string, OptimisticMessage>>(new Map());
   const chatChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const chatDbChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const globalChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
   const {
@@ -590,6 +591,10 @@ export function useWhatsAppMessaging() {
           supabase.removeChannel(chatChannelRef.current);
           chatChannelRef.current = null;
         }
+        if (chatDbChannelRef.current) {
+          supabase.removeChannel(chatDbChannelRef.current);
+          chatDbChannelRef.current = null;
+        }
         const channel = supabase.channel(`chat-${activeConversation}`, {
           config: { broadcast: { self: true } }
         });
@@ -653,6 +658,21 @@ export function useWhatsAppMessaging() {
           })
           .subscribe();
         chatChannelRef.current = channel;
+
+        // Reliable DB-level realtime: incoming messages appear instantly even
+        // if a broadcast is missed. Refetch on any insert for this conversation.
+        const dbChannel = supabase
+          .channel(`chat-db-${activeConversation}`)
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `conversation_id=eq.${activeConversation}`,
+          }, () => {
+            fetchMessages(activeConversation);
+          })
+          .subscribe();
+        chatDbChannelRef.current = dbChannel;
       } catch (e) {
         console.warn('Failed to join chat channel', e);
       }
@@ -662,6 +682,10 @@ export function useWhatsAppMessaging() {
       if (chatChannelRef.current) {
         supabase.removeChannel(chatChannelRef.current);
         chatChannelRef.current = null;
+      }
+      if (chatDbChannelRef.current) {
+        supabase.removeChannel(chatDbChannelRef.current);
+        chatDbChannelRef.current = null;
       }
     }
   }, [activeConversation, fetchMessages]);

@@ -555,11 +555,6 @@ export default function Messages() {
                 onMessageSent={() => fetchConversations?.()}
                 onScrollToProposal={setScrollToProposalFn}
                 onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
-                onRequestApplication={
-                  !isLandlordInConversation && selectedConversation
-                    ? () => navigate(`/rental-application/${selectedConversation.property_id}?landlord=${selectedConversation.landlord_id}`)
-                    : undefined
-                }
                 isLandlordInConversation={isLandlordInConversation}
                 renderViewingProposal={(p) => (
                   <ViewingProposalCard
@@ -720,11 +715,6 @@ export default function Messages() {
                   onMessageSent={() => fetchConversations?.()}
                   onScrollToProposal={setScrollToProposalFn}
                   onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
-                  onRequestApplication={
-                    !isLandlordInConversation && selectedConversation
-                      ? () => navigate(`/rental-application/${selectedConversation.property_id}?landlord=${selectedConversation.landlord_id}`)
-                      : undefined
-                  }
                   isLandlordInConversation={isLandlordInConversation}
                   tenantId={selectedConversation?.tenant_id}
                   propertyId={selectedConversation?.property_id}

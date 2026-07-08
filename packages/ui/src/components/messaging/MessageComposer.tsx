@@ -1,5 +1,5 @@
 import { useState, ChangeEvent, useRef, useEffect, useCallback } from 'react';
-import { Send, Paperclip, X, Calendar, FileText } from 'lucide-react';
+import { Send, Paperclip, X, Calendar } from 'lucide-react';
 import { cn } from '@mzanzihomes/common/lib/utils';
 
 interface MessageComposerProps {
@@ -13,8 +13,6 @@ interface MessageComposerProps {
   autoFocus?: boolean;
   onCreateViewing?: () => void;
   showViewingButton?: boolean;
-  onRequestApplication?: () => void;
-  showApplicationButton?: boolean;
 }
 
 export function MessageComposer({
@@ -28,8 +26,6 @@ export function MessageComposer({
   autoFocus = false,
   onCreateViewing,
   showViewingButton = false,
-  onRequestApplication,
-  showApplicationButton = false,
 }: MessageComposerProps) {
   const [internalValue, setInternalValue] = useState('');
   const [files, setFiles] = useState<File[]>([]);
@@ -141,17 +137,6 @@ export function MessageComposer({
               className="p-2 rounded-full text-muted-foreground hover:text-ocean-blue hover:bg-ocean-blue/8 transition-all duration-150 active:scale-90"
             >
               <Calendar className="h-4.5 w-4.5" style={{ width: '18px', height: '18px' }} />
-            </button>
-          )}
-          {showApplicationButton && (
-            <button
-              onClick={onRequestApplication}
-              disabled={disabled}
-              title="Request application"
-              aria-label="Request application"
-              className="p-2 rounded-full text-muted-foreground hover:text-ocean-blue hover:bg-ocean-blue/8 transition-all duration-150 active:scale-90"
-            >
-              <FileText className="h-4.5 w-4.5" style={{ width: '18px', height: '18px' }} />
             </button>
           )}
           <button

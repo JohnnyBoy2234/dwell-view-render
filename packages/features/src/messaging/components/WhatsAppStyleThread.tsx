@@ -34,7 +34,6 @@ interface WhatsAppStyleThreadProps {
   onMessageSent?: () => void;
   onScrollToProposal?: (fn: (proposalId: string) => void) => void;
   onCreateViewing?: () => void;
-  onRequestApplication?: () => void;
   isLandlordInConversation?: boolean;
   tenantId?: string;
   propertyId?: string;
@@ -114,7 +113,6 @@ export function WhatsAppStyleThread({
   onMessageSent,
   onScrollToProposal,
   onCreateViewing,
-  onRequestApplication,
   isLandlordInConversation,
   tenantId,
   propertyId,
@@ -585,8 +583,7 @@ export function WhatsAppStyleThread({
         }}
       >
         <div
-          className="px-3 py-4 space-y-0.5"
-          style={{ paddingBottom: 'calc(88px + env(safe-area-inset-bottom))' }}
+          className="px-3 pt-3 pb-2 space-y-0.5 min-h-full flex flex-col justify-end"
         >
           {(loading || isTransitioning) ? (
             <div className="flex flex-col gap-2.5 pt-4">
@@ -677,8 +674,6 @@ export function WhatsAppStyleThread({
           autoFocus={false}
           onCreateViewing={onCreateViewing}
           showViewingButton={!!onCreateViewing}
-          onRequestApplication={onRequestApplication}
-          showApplicationButton={!!onRequestApplication}
         />
       </div>
     </div>

@@ -136,25 +136,40 @@ export function Step04DepositFees({ data, onUpdate }: Step04Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Alert>
+            <Landmark className="h-4 w-4" />
+            <AlertDescription>
+              Where rent gets paid. When you send the lease we'll set up your secure Paystack payout account with these details (once-off — reused for future leases).
+            </AlertDescription>
+          </Alert>
+
+          <div className="space-y-2">
+            <Label htmlFor="landlordAccountHolder">Account Holder *</Label>
+            <Input
+              id="landlordAccountHolder"
+              value={data.landlordAccountHolder || ''}
+              onChange={(e) => onUpdate({ landlordAccountHolder: e.target.value })}
+              placeholder={data.landlordFullName || 'Account holder name'}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="landlordBankName">Bank Name *</Label>
+              <Label htmlFor="landlordBankName">Bank *</Label>
               <Input
                 id="landlordBankName"
-                value={data.landlordBankName}
+                value={data.landlordBankName || ''}
                 onChange={(e) => onUpdate({ landlordBankName: e.target.value })}
-                placeholder="Standard Bank"
-                required
+                placeholder="e.g. FNB, Capitec, Standard Bank"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="landlordBranchCode">Branch Code *</Label>
+              <Label htmlFor="landlordBranchCode">Branch Code</Label>
               <Input
                 id="landlordBranchCode"
                 value={data.landlordBranchCode}
                 onChange={(e) => onUpdate({ landlordBranchCode: e.target.value })}
-                placeholder="051001"
-                required
+                placeholder="051001 (optional)"
               />
             </div>
           </div>
@@ -196,12 +211,8 @@ export function validateStep04(data: LeaseWizardData): StepValidationResult {
     errors.push('Deposit amount is required');
   }
 
-  if (!data.landlordBankName?.trim()) {
-    errors.push('Bank name is required');
-  }
-
-  if (!data.landlordBranchCode?.trim()) {
-    errors.push('Branch code is required');
+  if (!data.landlordBankName?.trim() && !data.landlordBankCode?.trim()) {
+    errors.push('Please select your bank');
   }
 
   if (!data.landlordAccountNumber?.trim()) {
