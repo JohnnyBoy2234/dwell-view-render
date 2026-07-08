@@ -17,6 +17,7 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
+import { PublishPaywallSheet } from '@mzanzihomes/features/billing';
 
 // Import step components (reuse from rental listing)
 import { PropertyTypeStep } from '@mzanzihomes/features/listing';
@@ -47,6 +48,8 @@ export default function ListSale() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -191,8 +194,8 @@ export default function ListSale() {
       // Upload images first
       const imageUrls = data.images.length > 0 ? await uploadImages(data.images) : [];
 
-      // Insert property as a sale listing
-      const { error } = await supabase
+      // Insert property as an unlisted sale listing
+      const { data: newProperty, error } = await supabase
         .from('properties')
         .insert({
           title: `${data.property_type} in ${data.location}`,
@@ -215,9 +218,29 @@ export default function ListSale() {
           contact_phone: data.contact_phone,
           contact_email: data.contact_email,
           preferred_contact_method: data.preferred_contact_method,
-        });
+          is_listed: false,
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Attempt to publish the newly created draft property
+      const { error: publishErr } = await supabase
+        .from('properties')
+        .update({ is_listed: true })
+        .eq('id', newProperty.id);
+      if (publishErr) {
+        if (publishErr.message?.includes('PUBLISH_PAYWALL')) {
+          try {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+          } catch {}
+          setPaywallPropertyId(newProperty.id);
+          setShowPaywall(true);
+          return; // draft saved; success dialog is skipped
+        }
+        throw publishErr;
+      }
 
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -400,6 +423,13 @@ export default function ListSale() {
             }
           }}
           showConfetti={true}
+        />
+
+        {/* Publish Paywall */}
+        <PublishPaywallSheet
+          open={showPaywall}
+          onOpenChange={setShowPaywall}
+          propertyId={paywallPropertyId}
         />
       </div>
     </div>

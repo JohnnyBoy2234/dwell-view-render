@@ -17,6 +17,7 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
+import { PublishPaywallSheet } from '@mzanzihomes/features/billing';
 
 // Import step components
 import { PropertyTypeStep } from '@mzanzihomes/features/listing';
@@ -43,6 +44,8 @@ export default function ListProperty() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -180,8 +183,8 @@ export default function ListProperty() {
       // Upload images first
       const imageUrls = data.images.length > 0 ? await uploadImages(data.images) : [];
 
-      // Insert property - keep price as the exact number without any conversion that could cause precision loss
-      const { error } = await supabase
+      // Insert property unlisted - keep price as the exact number without any conversion that could cause precision loss
+      const { data: newProperty, error } = await supabase
         .from('properties')
         .insert({
           title: `${data.property_type} in ${data.location}`, // Generate title from property type and location
@@ -199,9 +202,29 @@ export default function ListProperty() {
           landlord_id: user.id,
           images: imageUrls,
           amenities: data.amenities,
-        });
+          is_listed: false,
+        })
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Attempt to publish the newly created draft property
+      const { error: publishErr } = await supabase
+        .from('properties')
+        .update({ is_listed: true })
+        .eq('id', newProperty.id);
+      if (publishErr) {
+        if (publishErr.message?.includes('PUBLISH_PAYWALL')) {
+          try {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+          } catch {}
+          setPaywallPropertyId(newProperty.id);
+          setShowPaywall(true);
+          return; // draft saved; success dialog is skipped
+        }
+        throw publishErr;
+      }
 
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -366,6 +389,13 @@ export default function ListProperty() {
             }
           }}
           showConfetti={true}
+        />
+
+        {/* Publish Paywall */}
+        <PublishPaywallSheet
+          open={showPaywall}
+          onOpenChange={setShowPaywall}
+          propertyId={paywallPropertyId}
         />
       </div>
     </div>
