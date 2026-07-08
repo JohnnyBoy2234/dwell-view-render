@@ -19,8 +19,10 @@ interface SignatureInfo {
 
 export function LeaseSignature() {
   const { contractId } = useParams<{ contractId: string }>();
-  const { user } = useAuth();
+  const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
+  // Tenant app has no top-level /leases route -- only the landlord app does.
+  const leasesPath = isLandlord ? '/leases' : '/tenant-dashboard/leases';
   
   const [isLoading, setIsLoading] = useState(true);
   const [contract, setContract] = useState<any>(null);
@@ -132,29 +134,9 @@ export function LeaseSignature() {
       setShowPreview(false);
       setShowSuccessDialog(true);
       
-      // Create tenancy record and generate PDF if both signed
+      // Tenancy record is created server-side by a DB trigger once both
+      // signatures are present (tenants have no RLS insert access here).
       if (bothSigned && contract?.property_id) {
-        try {
-          // Create tenancy record to link tenant to property
-          const leaseStart = wizardData.leaseStartDate || new Date().toISOString().split('T')[0];
-          const leaseEnd = wizardData.leaseEndDate || 
-            new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-          
-          await supabase.from('tenancies').insert({
-            property_id: contract.property_id,
-            tenant_id: user.id,
-            landlord_id: contract.landlord_id,
-            start_date: leaseStart,
-            end_date: leaseEnd,
-            monthly_rent: wizardData.rentAmount || 0,
-            security_deposit: wizardData.depositAmount || 0,
-            status: 'active',
-          });
-        } catch (tenancyErr) {
-          console.error('Tenancy creation error:', tenancyErr);
-          // Don't fail the signing if tenancy creation fails
-        }
-        
         try {
           await supabase.functions.invoke('generate-lease-pdf', {
             body: { contractId }
@@ -184,7 +166,7 @@ export function LeaseSignature() {
 
   const handleSuccessClose = () => {
     setShowSuccessDialog(false);
-    navigate('/leases');
+    navigate(leasesPath);
   };
 
   const handleDownloadPdf = async () => {
@@ -216,7 +198,7 @@ export function LeaseSignature() {
             <p className="text-muted-foreground mb-4">
               The lease contract you're looking for doesn't exist or you don't have access to it.
             </p>
-            <Button onClick={() => navigate('/leases')}>
+            <Button onClick={() => navigate(leasesPath)}>
               Back to Leases
             </Button>
           </CardContent>
@@ -230,7 +212,7 @@ export function LeaseSignature() {
     return (
       <div className="min-h-screen bg-background p-4">
         <div className="max-w-4xl mx-auto">
-          <Button variant="ghost" onClick={() => navigate('/leases')} className="mb-6">
+          <Button variant="ghost" onClick={() => navigate(leasesPath)} className="mb-6">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Leases
           </Button>
@@ -277,7 +259,7 @@ export function LeaseSignature() {
   return (
     <div className="min-h-screen bg-background p-4">
       <div className="max-w-4xl mx-auto">
-        <Button variant="ghost" onClick={() => navigate('/leases')} className="mb-6">
+        <Button variant="ghost" onClick={() => navigate(leasesPath)} className="mb-6">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Leases
         </Button>

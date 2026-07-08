@@ -6,6 +6,8 @@ import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { TypingIndicator } from '@mzanzihomes/ui/components/messaging/TypingIndicator';
+import { MessageContent } from '@mzanzihomes/ui/components/messaging/MessageContent';
+import { MessageAttachment } from '@mzanzihomes/ui/components/messaging/MessageAttachment';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { Clock, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import React from 'react';
@@ -32,6 +34,7 @@ interface WhatsAppStyleThreadProps {
   onMessageSent?: () => void;
   onScrollToProposal?: (fn: (proposalId: string) => void) => void;
   onCreateViewing?: () => void;
+  onRequestApplication?: () => void;
   isLandlordInConversation?: boolean;
   tenantId?: string;
   propertyId?: string;
@@ -111,6 +114,7 @@ export function WhatsAppStyleThread({
   onMessageSent,
   onScrollToProposal,
   onCreateViewing,
+  onRequestApplication,
   isLandlordInConversation,
   tenantId,
   propertyId,
@@ -273,6 +277,21 @@ export function WhatsAppStyleThread({
     load();
   }, [messages, proposalsById]);
 
+  // Re-fetch one proposal's row after a decline/confirm mutation, since the
+  // "load missing" effect above skips ids already in proposalsById and the
+  // realtime subscription can lag.
+  const refreshProposal = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('viewing_proposals')
+        .select(`*, properties ( title, location )`)
+        .eq('id', id as any)
+        .maybeSingle();
+      if (error || !data) return;
+      setProposalsById(prev => ({ ...prev, [(data as any).id]: data }));
+    } catch {}
+  };
+
   // Scroll-to-proposal
   const scrollToProposal = (proposalId: string) => {
     const anchor = document.getElementById(`proposal-${proposalId}`);
@@ -427,15 +446,7 @@ export function WhatsAppStyleThread({
           {/* Attachment */}
           {hasAttachment && (
             <div className="mb-2">
-              <a
-                href={message.attachment_url!}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium hover:bg-white/25 transition-colors"
-              >
-                <span className="truncate max-w-[180px]">Attachment</span>
-                <span className="text-[10px] opacity-70">Open ↗</span>
-              </a>
+              <MessageAttachment url={message.attachment_url!} />
             </div>
           )}
 
@@ -445,7 +456,7 @@ export function WhatsAppStyleThread({
               className="text-[14.5px] leading-[1.45] whitespace-pre-line break-words hyphens-auto"
               style={{ overflowWrap: 'anywhere' }}
             >
-              {message.content}
+              <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} />
             </div>
           )}
 
@@ -533,7 +544,7 @@ export function WhatsAppStyleThread({
             {proposalsById[message.viewing_proposal_id] ? (
               renderViewingProposal?.({
                 proposal: proposalsById[message.viewing_proposal_id],
-                onUpdate: onCreateViewing,
+                onUpdate: () => refreshProposal(message.viewing_proposal_id as string),
                 isLandlordInConversation: !!isLandlordInConversation,
               })
             ) : (
@@ -666,6 +677,8 @@ export function WhatsAppStyleThread({
           autoFocus={false}
           onCreateViewing={onCreateViewing}
           showViewingButton={!!onCreateViewing}
+          onRequestApplication={onRequestApplication}
+          showApplicationButton={!!onRequestApplication}
         />
       </div>
     </div>

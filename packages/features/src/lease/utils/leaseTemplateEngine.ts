@@ -123,8 +123,6 @@ export function evaluateCondition(condition: string, data: LeaseWizardData): boo
       return data.leaseType === 'fixed';
     case 'LEASE_TYPE_MONTH_TO_MONTH':
       return data.leaseType === 'month_to_month';
-    case 'DEPOSIT_INTEREST_APPLIES':
-      return data.depositInterestApplies;
     default:
       console.warn(`Unknown condition: ${condition}`);
       return false;

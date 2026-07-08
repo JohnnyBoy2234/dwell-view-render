@@ -1,7 +1,6 @@
 import React from 'react';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Input } from '@mzanzihomes/ui/components/input';
-import { Switch } from '@mzanzihomes/ui/components/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import type { LeaseWizardData, StepValidationResult } from '@mzanzihomes/common/types/lease';
 import { HelpCircle, Wallet, CreditCard, Landmark } from 'lucide-react';
@@ -67,35 +66,6 @@ export function Step04DepositFees({ data, onUpdate }: Step04Props) {
                 Suggested: R {suggestedDeposit.toLocaleString()} (1 month's rent)
               </p>
             )}
-          </div>
-
-          {/* Deposit Interest */}
-          <div className="flex items-center justify-between p-4 bg-muted/50 rounded-lg">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Label htmlFor="depositInterestApplies" className="font-medium">
-                  Deposit held in interest-bearing account
-                </Label>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-xs">
-                      <p>Required by law in South Africa. The deposit plus interest (less bank charges) is refundable at lease end.</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                As required by the Rental Housing Act
-              </p>
-            </div>
-            <Switch
-              id="depositInterestApplies"
-              checked={data.depositInterestApplies}
-              onCheckedChange={(checked) => onUpdate({ depositInterestApplies: checked })}
-            />
           </div>
 
           <Alert>

@@ -509,7 +509,7 @@ export default function Messages() {
                 </div>
               </div>
 
-              {isLandlord && (
+              {isLandlordInConversation ? (
                 <Button
                   variant="default"
                   size="sm"
@@ -518,6 +518,16 @@ export default function Messages() {
                 >
                   <CalendarPlus className="h-3.5 w-3.5" />
                   <span className="hidden xs:inline">Viewing</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setShowBookingDialog(true)}
+                  className="shrink-0 h-8 px-2.5 text-xs gap-1"
+                >
+                  <CalendarPlus className="h-3.5 w-3.5" />
+                  <span className="hidden xs:inline">Request Viewing</span>
                 </Button>
               )}
             </div>
@@ -544,7 +554,13 @@ export default function Messages() {
                 conversationId={activeConversation}
                 onMessageSent={() => fetchConversations?.()}
                 onScrollToProposal={setScrollToProposalFn}
-                onCreateViewing={isLandlord ? () => setShowViewingModal(true) : undefined}
+                onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
+                onRequestApplication={
+                  !isLandlordInConversation && selectedConversation
+                    ? () => navigate(`/rental-application/${selectedConversation.property_id}?landlord=${selectedConversation.landlord_id}`)
+                    : undefined
+                }
+                isLandlordInConversation={isLandlordInConversation}
                 renderViewingProposal={(p) => (
                   <ViewingProposalCard
                     proposal={p.proposal as any}
@@ -569,7 +585,7 @@ export default function Messages() {
             onSuccess={handleViewingModalSuccess}
           />
         )}
-        {selectedConversation && !isLandlord && (
+        {selectedConversation && !isLandlordInConversation && (
           <BookViewingDialog
             propertyId={selectedConversation.property_id}
             landlordId={selectedConversation.landlord_id}
@@ -658,7 +674,7 @@ export default function Messages() {
                     )}
                   </div>
                 </div>
-                {isLandlordInConversation && (
+                {isLandlordInConversation ? (
                   <Button
                     variant="default"
                     size="sm"
@@ -667,6 +683,16 @@ export default function Messages() {
                   >
                     <CalendarPlus className="h-4 w-4" />
                     Create Viewing
+                  </Button>
+                ) : (
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setShowBookingDialog(true)}
+                    className="shrink-0 gap-2"
+                  >
+                    <CalendarPlus className="h-4 w-4" />
+                    Request Viewing
                   </Button>
                 )}
               </div>
@@ -694,6 +720,11 @@ export default function Messages() {
                   onMessageSent={() => fetchConversations?.()}
                   onScrollToProposal={setScrollToProposalFn}
                   onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
+                  onRequestApplication={
+                    !isLandlordInConversation && selectedConversation
+                      ? () => navigate(`/rental-application/${selectedConversation.property_id}?landlord=${selectedConversation.landlord_id}`)
+                      : undefined
+                  }
                   isLandlordInConversation={isLandlordInConversation}
                   tenantId={selectedConversation?.tenant_id}
                   propertyId={selectedConversation?.property_id}
@@ -731,6 +762,14 @@ export default function Messages() {
           tenantId={selectedConversation.tenant_id}
           propertyTitle={selectedConversation.properties?.title}
           onSuccess={handleViewingModalSuccess}
+        />
+      )}
+      {selectedConversation && !isLandlordInConversation && (
+        <BookViewingDialog
+          propertyId={selectedConversation.property_id}
+          landlordId={selectedConversation.landlord_id}
+          open={showBookingDialog}
+          onOpenChange={setShowBookingDialog}
         />
       )}
     </div>

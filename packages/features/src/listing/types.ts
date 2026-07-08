@@ -11,7 +11,8 @@ export interface ListingFormData {
   amenities: string[];
   price: number;
   available_from?: string;
-  images: File[];
+  // Existing (already-uploaded) photos are kept as URL strings; new photos are File objects.
+  images: (File | string)[];
 }
 
 export interface SaleListingFormData extends ListingFormData {

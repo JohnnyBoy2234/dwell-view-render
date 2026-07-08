@@ -99,7 +99,7 @@ export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
               <div key={index} className="relative group">
                 <div className="aspect-square rounded-lg overflow-hidden bg-muted">
                   <img
-                    src={URL.createObjectURL(image)}
+                    src={typeof image === 'string' ? image : URL.createObjectURL(image)}
                     alt={`Property ${index + 1}`}
                     className="w-full h-full object-cover"
                   />

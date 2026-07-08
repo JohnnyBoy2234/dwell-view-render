@@ -4,6 +4,7 @@ import { MessageComposer } from '@mzanzihomes/ui/components/messaging/MessageCom
 import { useTicketMessages } from '../../hooks/useTicketMessages';
 import { useSendMessage } from '../../hooks/useSendMessage';
 import { useMarkMessageRead } from '../../hooks/useMarkMessageRead';
+import { toMessageBubbleData } from '../../utils/toMessageBubbleData';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 interface MaintenanceThreadProps {
@@ -34,7 +35,7 @@ export function MaintenanceThread({ ticketId }: MaintenanceThreadProps) {
         {data?.pages.map((page: any) => (
           <div key={page.cursor}>
             {page.messages?.map((msg: any) => (
-              <MessageBubble key={msg.id} message={msg} currentUserId={user?.id || ''} />
+              <MessageBubble key={msg.id} message={toMessageBubbleData(msg)} currentUserId={user?.id || ''} />
             ))}
           </div>
         ))}

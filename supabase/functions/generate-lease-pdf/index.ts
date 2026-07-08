@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
+import { wrapText } from "../_shared/pdfTextWrap.ts";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type"
@@ -269,24 +270,35 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       day: "2-digit"
     });
   };
-  // --- Text Helpers --- 
+  // --- Text Helpers ---
+  const contentWidth = pageWidth - margin * 2;
   function drawParagraph(text: string) {
-    ensureSpace(sizes.body + lineGap);
-    if (text) {
-      page.drawText(text, {
-        x: margin,
-        y,
-        size: sizes.body,
-        font: fontBody,
-        color: colors.text
-      });
+    const lines = wrapText(text || "", fontBody, sizes.body, contentWidth);
+    for (const line of lines) {
+      ensureSpace(sizes.body + lineGap);
+      if (line) {
+        page.drawText(line, {
+          x: margin,
+          y,
+          size: sizes.body,
+          font: fontBody,
+          color: colors.text
+        });
+      }
+      y -= sizes.body + lineGap;
     }
-    y -= sizes.body + lineGap;
   }
   function drawFormRow(label: string, value: any) {
-    ensureSpace(sizes.body + lineGap);
     const labelText = label ? `${label}` : "";
     const valueText = value ? String(value) : "________________________";
+    const labelWidth = fontBold.widthOfTextAtSize(labelText, sizes.body);
+    const colonWidth = fontBody.widthOfTextAtSize(":", sizes.body);
+    const colonX = margin + labelWidth + 4;
+    const valueX = colonX + colonWidth + 6;
+    const valueMaxWidth = Math.max(pageWidth - margin - valueX, 50);
+    const valueLines = wrapText(valueText, fontBody, sizes.body, valueMaxWidth);
+
+    ensureSpace(sizes.body + lineGap);
     // Draw label in bold
     page.drawText(labelText, {
       x: margin,
@@ -296,9 +308,6 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       color: colors.text
     });
     // Draw colon
-    const labelWidth = fontBold.widthOfTextAtSize(labelText, sizes.body);
-    const colonWidth = fontBody.widthOfTextAtSize(":", sizes.body);
-    const colonX = margin + labelWidth + 4;
     page.drawText(":", {
       x: colonX,
       y,
@@ -306,9 +315,8 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       font: fontBody,
       color: colors.text
     });
-    // Draw value or underline filler
-    const valueX = colonX + colonWidth + 6;
-    page.drawText(valueText, {
+    // Draw first line of value
+    page.drawText(valueLines[0], {
       x: valueX,
       y,
       size: sizes.body,
@@ -316,6 +324,18 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       color: colors.text
     });
     y -= sizes.body + lineGap;
+    // Continuation lines, indented under the value (not repeating label/colon)
+    for (let i = 1; i < valueLines.length; i++) {
+      ensureSpace(sizes.body + lineGap);
+      page.drawText(valueLines[i], {
+        x: valueX,
+        y,
+        size: sizes.body,
+        font: fontBody,
+        color: colors.text
+      });
+      y -= sizes.body + lineGap;
+    }
   }
   function drawRule() {
     ensureSpace(16);
@@ -334,27 +354,33 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     y -= lineGap;
   }
   function drawSectionTitle(number: string, text: string) {
-    ensureSpace(sizes.h2 + lineGap);
     const titleText = number ? `${number}. ${text}` : text;
-    page.drawText(titleText, {
-      x: margin,
-      y,
-      size: sizes.h2,
-      font: fontBold,
-      color: colors.text
-    });
-    y -= sizes.h2 + lineGap;
+    const lines = wrapText(titleText, fontBold, sizes.h2, contentWidth);
+    for (const line of lines) {
+      ensureSpace(sizes.h2 + lineGap);
+      page.drawText(line, {
+        x: margin,
+        y,
+        size: sizes.h2,
+        font: fontBold,
+        color: colors.text
+      });
+      y -= sizes.h2 + lineGap;
+    }
   }
   function drawNumberedText(number: string, text: string) {
-    ensureSpace(sizes.body + lineGap);
-    page.drawText(`${number}. ${text}`, {
-      x: margin,
-      y,
-      size: sizes.body,
-      font: fontBody,
-      color: colors.text
-    });
-    y -= sizes.body + lineGap;
+    const lines = wrapText(`${number}. ${text}`, fontBody, sizes.body, contentWidth);
+    for (const line of lines) {
+      ensureSpace(sizes.body + lineGap);
+      page.drawText(line, {
+        x: margin,
+        y,
+        size: sizes.body,
+        font: fontBody,
+        color: colors.text
+      });
+      y -= sizes.body + lineGap;
+    }
   }
   // --- Section Rendering --- 
   function renderAgreementIntro() {
@@ -428,11 +454,10 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     drawSectionTitle('4.', 'Rental and Payments');
     drawNumberedText('4.1.', `The monthly rental (“Rent” or “Rental”) payable by the Tenant to the Landlord for the  Property is ${formatMoney(data.rentAmount, data.rentCurrency) || '________________'} per month`);
     drawNumberedText('4.2.', 'All Rental payments shall be made monthly in advance before the seventh (7TH) day of each and every month, free from any deductions or set off for any reason whatsoever, directly into the Landlord’s bank account reflected below.');
-    drawFormRow('Bank:', data.bankName);
-    drawFormRow('Branch Code:', data.branchCode);
-    drawFormRow('Branch Name:', data.branchName);
-    drawFormRow('Account Number:', data.accountNumber);
-    drawFormRow('Reference:', data.paymentReference);
+    drawFormRow('Bank:', data.landlordBankName);
+    drawFormRow('Branch Code:', data.landlordBranchCode);
+    drawFormRow('Account Number:', data.landlordAccountNumber);
+    drawFormRow('Reference:', data.landlordReference);
     drawNumberedText('4.3.', 'Should the Agreement be renewed or extended, the Tenant agrees to a Rental escalation of __ % per annum, or any other amount as may be agreed on between the parties.');
     drawNumberedText('4.4.', `The Tenant agrees to pay a deposit of ${data.deposit}`);
     ensureSpace(sizes.body + lineGap);

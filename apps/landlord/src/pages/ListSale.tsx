@@ -27,6 +27,7 @@ import { PhotosStep } from '@mzanzihomes/features/listing';
 import { ReviewStep } from '@mzanzihomes/features/listing';
 import { ContactStep } from '@mzanzihomes/features/listing';
 import { SellerDocumentsStep } from '@mzanzihomes/features/listing';
+import { useExistingProperty } from '@mzanzihomes/features/listing';
 
 import type { SaleListingFormData } from '@mzanzihomes/features/listing';
 
@@ -49,6 +50,7 @@ export default function ListSale() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { propertyId, property: existingProperty } = useExistingProperty();
 
   const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<SaleListingFormData>({
     defaultValues: {
@@ -82,6 +84,9 @@ export default function ListSale() {
   const progress = (currentStep / steps.length) * 100;
 
   useEffect(() => {
+    // Continuing a specific existing property (e.g. "Publish" on an unlisted
+    // draft) takes priority over any unrelated leftover localStorage draft.
+    if (propertyId) return;
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
@@ -96,7 +101,30 @@ export default function ListSale() {
     } catch (error) {
       console.warn('Failed to restore draft listing', error);
     }
-  }, [reset]);
+  }, [reset, propertyId]);
+
+  useEffect(() => {
+    if (!existingProperty) return;
+    reset({
+      property_type: existingProperty.property_type || '',
+      location: existingProperty.location || '',
+      description: existingProperty.description || '',
+      bedrooms: existingProperty.bedrooms ?? undefined,
+      bathrooms: existingProperty.bathrooms ?? undefined,
+      parking_spaces: existingProperty.parking_spaces ?? undefined,
+      size_sqm: existingProperty.size_sqm ?? undefined,
+      furnished: !!existingProperty.furnished,
+      pets_allowed: !!existingProperty.pets_allowed,
+      amenities: existingProperty.amenities || [],
+      price: existingProperty.price > 0 ? existingProperty.price : undefined,
+      available_from: existingProperty.available_from ?? undefined,
+      images: existingProperty.images || [],
+      contact_name: existingProperty.contact_name || '',
+      contact_phone: existingProperty.contact_phone || '',
+      contact_email: existingProperty.contact_email || '',
+      preferred_contact_method: existingProperty.preferred_contact_method || 'both',
+    });
+  }, [existingProperty, reset]);
 
   useEffect(() => {
     const payload = {
@@ -188,34 +216,44 @@ export default function ListSale() {
         }
       }
 
-      // Upload images first
-      const imageUrls = data.images.length > 0 ? await uploadImages(data.images) : [];
+      // Existing (already-uploaded) photos are URL strings; only upload the new File ones.
+      const existingImageUrls = data.images.filter((img): img is string => typeof img === 'string');
+      const newFiles = data.images.filter((img): img is File => img instanceof File);
+      const uploadedUrls = newFiles.length > 0 ? await uploadImages(newFiles) : [];
+      const imageUrls = [...existingImageUrls, ...uploadedUrls];
 
-      // Insert property as a sale listing
-      const { error } = await supabase
-        .from('properties')
-        .insert({
-          title: `${data.property_type} in ${data.location}`,
-          description: data.description,
-          location: data.location,
-          property_type: data.property_type,
-          price: data.price,
-          bedrooms: Number(data.bedrooms) || 1,
-          bathrooms: Number(data.bathrooms) || 1,
-          parking_spaces: Number(data.parking_spaces) || 0,
-          size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
-          furnished: data.furnished,
-          pets_allowed: data.pets_allowed,
-          available_from: data.available_from || null,
-          landlord_id: user.id,
-          images: imageUrls,
-          amenities: data.amenities,
-          listing_type: 'sale', // Add listing_type to distinguish from rentals
-          contact_name: data.contact_name,
-          contact_phone: data.contact_phone,
-          contact_email: data.contact_email,
-          preferred_contact_method: data.preferred_contact_method,
-        });
+      const propertyFields = {
+        title: `${data.property_type} in ${data.location}`,
+        description: data.description,
+        location: data.location,
+        property_type: data.property_type,
+        price: data.price,
+        bedrooms: Number(data.bedrooms) || 1,
+        bathrooms: Number(data.bathrooms) || 1,
+        parking_spaces: Number(data.parking_spaces) || 0,
+        size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
+        furnished: data.furnished,
+        pets_allowed: data.pets_allowed,
+        available_from: data.available_from || null,
+        images: imageUrls,
+        amenities: data.amenities,
+        listing_type: 'sale', // Add listing_type to distinguish from rentals
+        contact_name: data.contact_name,
+        contact_phone: data.contact_phone,
+        contact_email: data.contact_email,
+        preferred_contact_method: data.preferred_contact_method,
+      };
+
+      // Continuing an existing (e.g. previously-unlisted) property publishes
+      // that same row instead of inserting a duplicate.
+      const { error } = propertyId
+        ? await supabase
+            .from('properties')
+            .update({ ...propertyFields, is_listed: true })
+            .eq('id', propertyId)
+        : await supabase
+            .from('properties')
+            .insert({ ...propertyFields, landlord_id: user.id });
 
       if (error) throw error;
 

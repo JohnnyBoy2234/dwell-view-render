@@ -41,7 +41,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
   const navigate = useNavigate();
 
   const { pathname } = useLocation();
-  const basePath = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+  const basePath = isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard';
   const activePath = currentTab || pathname;
 
   const pageConfig = getPageConfig(activePath, isLandlord);

@@ -125,7 +125,7 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
       return;
     }
 
-    if (!useExistingTenant && !tenantEmail) {
+    if (!tenantEmail) {
       toast.error('Please enter tenant email');
       return;
     }
@@ -138,7 +138,7 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
 
       const contractData = {
         propertyAddress: property ? `${property.title}, ${property.location}` : '',
-        tenantEmail: useExistingTenant ? '' : tenantEmail,
+        tenantEmail,
         tenantName: useExistingTenant ? selectedTenantData?.name : '',
         landlordName: user?.user_metadata?.full_name || user?.user_metadata?.name || 'Landlord',
         landlordEmail: user?.email || ''
@@ -237,18 +237,21 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
                   ))}
                 </SelectContent>
               </Select>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="tenantEmail">Tenant Email *</Label>
-                <Input
-                  id="tenantEmail"
-                  type="email"
-                  placeholder="Enter tenant email address"
-                  value={tenantEmail}
-                  onChange={(e) => setTenantEmail(e.target.value)}
-                />
-              </div>
-            )}
+            ) : null}
+
+            {/* The app doesn't have a queryable email for existing tenants either
+                (auth.users isn't client-accessible), so this is always needed --
+                the lease wizard's next step requires it regardless. */}
+            <div className="space-y-2">
+              <Label htmlFor="tenantEmail">Tenant Email *</Label>
+              <Input
+                id="tenantEmail"
+                type="email"
+                placeholder="Enter tenant email address"
+                value={tenantEmail}
+                onChange={(e) => setTenantEmail(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 

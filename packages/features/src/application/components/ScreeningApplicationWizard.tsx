@@ -64,6 +64,22 @@ const steps = [
 
 type StepKey = typeof steps[number]["key"];
 
+// Raw Postgres/RLS errors are meaningless to a tenant ("new row violates
+// row-level security policy for table applications"). Translate the ones
+// worth explaining; anything else (e.g. a trigger's own raised message,
+// which is already human-written) passes through unchanged.
+export function friendlySubmitError(error: any): string {
+  const message = typeof error?.message === "string" ? error.message : "";
+  const lower = message.toLowerCase();
+  if (lower.includes("row-level security") || lower.includes("permission denied")) {
+    return "You don't have permission to submit this application right now. Please try again, or contact the landlord if this keeps happening.";
+  }
+  if (lower.includes("duplicate key")) {
+    return "You've already applied for this property.";
+  }
+  return message || "Something went wrong submitting your application. Please try again.";
+}
+
 export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, onSubmissionComplete }: ScreeningApplicationWizardProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -666,7 +682,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
       console.error("Submit application error", error);
       toast({
         title: "Submission failed",
-        description: error?.message || "Please try again.",
+        description: friendlySubmitError(error),
         variant: "destructive",
       });
     } finally {
@@ -822,7 +838,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                 </div>
                 <div>
                   <Label htmlFor="net_monthly_income">Net Monthly Income (R)</Label>
-                  <Input id="net_monthly_income" type="number" value={formData.net_monthly_income} onChange={(e) => handleInputChange("net_monthly_income", e.target.value)} />
+                  <Input id="net_monthly_income" type="text" inputMode="decimal" value={formData.net_monthly_income} onChange={(e) => handleInputChange("net_monthly_income", e.target.value.replace(/,/g, ''))} />
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

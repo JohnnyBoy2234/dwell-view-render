@@ -96,99 +96,110 @@ export const TENANT_PAGE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/enhancedtenantdashboard',
   },
-  // Routes served via /tenant/* (TenantDashboardRoutes)
-  '/tenant/maintenance': {
+};
+
+// Routes served by TenantDashboardRoutes, mounted at both /tenant/* and
+// /tenant-dashboard/* (true aliases of the same router). backPath points at
+// /tenant-dashboard -- the live tenant hub -- not the legacy
+// /enhancedtenantdashboard shell, which is a disconnected, separate page.
+const TENANT_DASHBOARD_ROUTE_CONFIG: Record<string, PageConfig> = {
+  '/maintenance': {
     title: 'Maintenance',
     icon: Wrench,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/maintenance/responses': {
+  '/maintenance/responses': {
     title: 'Maintenance Responses',
     icon: Wrench,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/tenant/maintenance',
+    backPath: '/tenant-dashboard/maintenance',
   },
-  '/tenant/payments': {
+  '/payments': {
     title: 'Payments & Rent',
     icon: Receipt,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/leases': {
+  '/leases': {
     title: 'Lease System',
     icon: FileText,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/contracts': {
+  '/contracts': {
     title: 'Contract Documents',
     icon: FileText,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/viewings': {
+  '/viewings': {
     title: 'Property Viewings',
     icon: Eye,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/inventory': {
+  '/inventory': {
     title: 'Property Inventory',
     icon: Clipboard,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/inspection': {
+  '/inspection': {
     title: 'Property Inspection',
     icon: ClipboardList,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/proof-of-payment': {
+  '/proof-of-payment': {
     title: 'Proof of Payment',
     icon: Receipt,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/applications': {
+  '/applications': {
     title: 'Applications',
     icon: Inbox,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/profile': {
+  '/profile': {
     title: 'Profile Settings',
     icon: Settings,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/messages': {
+  '/messages': {
     title: 'Messages',
     icon: MessageCircle,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
-  '/tenant/support': {
+  '/support': {
     title: 'Support & Help',
     icon: HelpCircle,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedtenantdashboard',
+    backPath: '/tenant-dashboard',
   },
 };
+
+for (const [suffix, config] of Object.entries(TENANT_DASHBOARD_ROUTE_CONFIG)) {
+  TENANT_PAGE_CONFIG[`/tenant${suffix}`] = config;
+  TENANT_PAGE_CONFIG[`/tenant-dashboard${suffix}`] = config;
+}
 
 export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   '/enhancedlandlorddashboard': {
@@ -280,10 +291,10 @@ export const getPageConfig = (path: string, isLandlord: boolean): PageConfig => 
   const map = isLandlord ? LANDLORD_PAGE_CONFIG : TENANT_PAGE_CONFIG;
   if (map[path]) return map[path];
 
-  // Handle dynamic segments (e.g. /tenant/maintenance/:ticketId)
-  if (!isLandlord && path.startsWith('/tenant/maintenance/')) {
-    return { title: 'Maintenance Ticket', icon: Wrench, showSidebar: false, showBackButton: true, backPath: '/tenant/maintenance' };
+  // Handle dynamic segments (e.g. /tenant/maintenance/:ticketId, /tenant-dashboard/maintenance/:ticketId)
+  if (!isLandlord && (path.startsWith('/tenant/maintenance/') || path.startsWith('/tenant-dashboard/maintenance/'))) {
+    return { title: 'Maintenance Ticket', icon: Wrench, showSidebar: false, showBackButton: true, backPath: '/tenant-dashboard/maintenance' };
   }
 
-  return { title: 'Dashboard', icon: Home, showSidebar: true, showBackButton: true, backPath: isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard' };
+  return { title: 'Dashboard', icon: Home, showSidebar: true, showBackButton: true, backPath: isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard' };
 };

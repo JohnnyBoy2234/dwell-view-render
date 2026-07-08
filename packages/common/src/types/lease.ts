@@ -79,7 +79,6 @@ export interface LeaseWizardData {
 
   // STEP 4: Deposit & Fees
   depositAmount: number;
-  depositInterestApplies: boolean;
   lateFeeAmount: number;
 
   // STEP 5: CPA (Consumer Protection Act)
@@ -240,7 +239,6 @@ export const DEFAULT_WIZARD_DATA: LeaseWizardData = {
   
   // Step 4
   depositAmount: 0,
-  depositInterestApplies: true,
   lateFeeAmount: 250,
   
   // Step 5

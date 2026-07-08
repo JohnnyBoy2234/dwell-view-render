@@ -2,6 +2,7 @@ import { cn } from "@mzanzihomes/common/lib/utils";
 import useMessageStatus from "../../hooks/useMessageStatus";
 import { useMessageFormatting } from "../../hooks/useMessageFormatting";
 import { MessageContent } from "./MessageContent";
+import { MessageAttachment } from "./MessageAttachment";
 import { MessageStatusIcon } from "./MessageStatusIcon";
 import { MESSAGE_STYLES } from "@mzanzihomes/common/constants/messageConstants";
 import type { MessageBubbleProps } from "@mzanzihomes/common/types/message";
@@ -32,20 +33,6 @@ export function MessageBubble({
   const hasAttachment =
     message.message_type === "attachment" && message.attachment_url;
 
-  // Helper function to check if attachment is an image
-  const isImageAttachment = (url: string) => {
-    const imageExtensions = [
-      ".jpg",
-      ".jpeg",
-      ".png",
-      ".gif",
-      ".webp",
-      ".bmp",
-      ".svg",
-    ];
-    return imageExtensions.some((ext) => url.toLowerCase().includes(ext));
-  };
-
   return (
     <div
       className={cn(
@@ -70,42 +57,7 @@ export function MessageBubble({
 
         {hasAttachment && (
           <div className="mb-2">
-            {isImageAttachment(message.attachment_url!) ? (
-              <div className="relative">
-                <img
-                  src={message.attachment_url!}
-                  alt="Shared image"
-                  className="max-w-[250px] max-h-[200px] rounded-xl object-cover cursor-pointer hover:opacity-95 transition-opacity"
-                  onClick={() => window.open(message.attachment_url!, "_blank")}
-                  onError={(e) => {
-                    // Fallback to link if image fails to load
-                    e.currentTarget.style.display = "none";
-                    e.currentTarget.nextElementSibling?.classList.remove(
-                      "hidden"
-                    );
-                  }}
-                />
-                <a
-                  href={message.attachment_url!}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hidden inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium"
-                >
-                  <span className="truncate max-w-[200px]">Image</span>
-                  <span className="text-[10px] text-white/60">Open</span>
-                </a>
-              </div>
-            ) : (
-              <a
-                href={message.attachment_url!}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/15 border border-white/20 text-xs font-medium hover:bg-white/25 transition-colors"
-              >
-                <span className="truncate max-w-[200px]">Attachment</span>
-                <span className="text-[10px] text-white/60">Open</span>
-              </a>
-            )}
+            <MessageAttachment url={message.attachment_url!} />
           </div>
         )}
 

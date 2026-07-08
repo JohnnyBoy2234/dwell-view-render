@@ -112,11 +112,24 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
       };
     }
 
+    let propertyPrefill: Partial<LeaseWizardData> = {};
+    if (propertyId) {
+      const { data: property } = await supabase
+        .from('properties')
+        .select('location')
+        .eq('id', propertyId)
+        .maybeSingle();
+      if (property?.location) {
+        propertyPrefill = { propertyAddress: property.location };
+      }
+    }
+
     setData(prev => ({
       ...prev,
       landlordEmail: user.email || '',
       landlordFullName: user.user_metadata?.full_name || '',
       ...tenantPrefill,
+      ...propertyPrefill,
     }));
   };
 
