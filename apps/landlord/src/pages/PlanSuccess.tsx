@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { CheckCircle2, Loader2 } from 'lucide-react';
+import { CheckCircle2, Clock, Loader2 } from 'lucide-react';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 
 export default function PlanSuccess() {
@@ -34,8 +34,8 @@ export default function PlanSuccess() {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 flex items-center justify-center p-4">
       <div className="bg-card rounded-3xl shadow-xl border border-border p-6 max-w-md w-full text-center">
         <div className="mx-auto w-16 h-16 rounded-full bg-success/10 flex items-center justify-center mb-4">
-          {done
-            ? <CheckCircle2 className="w-8 h-8 text-success" />
+          {done ? <CheckCircle2 className="w-8 h-8 text-success" />
+            : timedOut ? <Clock className="w-8 h-8 text-muted-foreground" />
             : <Loader2 className="w-8 h-8 text-success animate-spin" />}
         </div>
         <h1 className="text-xl font-bold mb-1">
