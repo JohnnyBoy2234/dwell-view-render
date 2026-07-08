@@ -9,10 +9,15 @@ interface PublishPaywallSheetProps {
 }
 
 export function PublishPaywallSheet({ open, onOpenChange, propertyId }: PublishPaywallSheetProps) {
-  const { startCheckout, starting, error } = usePlanCheckout();
+  const { startCheckout, starting, error, reset } = usePlanCheckout();
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent side="bottom" className="rounded-t-3xl max-w-lg mx-auto">
         <SheetHeader className="text-left">
           <SheetTitle>Publish your listing</SheetTitle>

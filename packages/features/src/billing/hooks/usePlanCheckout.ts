@@ -14,7 +14,12 @@ export function usePlanCheckout() {
       const { data, error: fnErr } = await supabase.functions.invoke('initialize-plan-checkout', {
         body: { purpose, property_id: propertyId },
       });
-      if (fnErr) throw fnErr;
+      if (fnErr) {
+        // On non-2xx responses fnErr.message is a generic status message; the
+        // real reason (e.g. "This listing is already paid for") is in the body.
+        const body = await (fnErr as any).context?.json?.().catch(() => null);
+        throw new Error(body?.error || fnErr.message);
+      }
       if (!data?.success || !data?.authorization_url) {
         throw new Error(data?.error || 'Could not start checkout');
       }
@@ -25,5 +30,10 @@ export function usePlanCheckout() {
     }
   };
 
-  return { startCheckout, starting, error };
+  const reset = () => {
+    setError(null);
+    setStarting(false);
+  };
+
+  return { startCheckout, starting, error, reset };
 }
