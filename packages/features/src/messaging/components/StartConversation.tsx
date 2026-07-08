@@ -67,6 +67,9 @@ export default function StartConversation({
     setCheckingConversation(true);
     try {
       // Free (pay-per-listing) landlords receive leads, not messaging threads.
+      // If this RPC fails we fall through to messaging, which the restrictive
+      // subscriber_landlord_new_conversations RLS policy blocks for
+      // non-subscriber landlords anyway — harmless degradation.
       // RPC is not yet in the generated Database types; cast to keep typecheck green.
       const { data: contactMode } = await (supabase.rpc as any)('get_property_contact_mode', {
         _property_id: propertyId,

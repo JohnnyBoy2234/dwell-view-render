@@ -20,6 +20,18 @@ export function LeadContactDialog({ open, onOpenChange, propertyId, propertyTitl
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Reset on close so a reopened dialog starts fresh (same pattern as PublishPaywallSheet).
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setSent(false);
+      setError(null);
+      setSending(false);
+      setMessage('');
+      setPhone('');
+    }
+    onOpenChange(next);
+  };
+
   const submit = async () => {
     setSending(true);
     setError(null);
@@ -27,7 +39,12 @@ export function LeadContactDialog({ open, onOpenChange, propertyId, propertyTitl
       const { data, error: fnErr } = await supabase.functions.invoke('submit-property-lead', {
         body: { property_id: propertyId, message: message.trim() || undefined, phone: phone.trim() || undefined },
       });
-      if (fnErr) throw fnErr;
+      if (fnErr) {
+        // On non-2xx responses fnErr.message is a generic status message; the
+        // real reason (e.g. "This landlord uses in-app messaging") is in the body.
+        const body = await (fnErr as any).context?.json?.().catch(() => null);
+        throw new Error(body?.error || fnErr.message);
+      }
       if (!data?.success) throw new Error(data?.error || 'Could not send your enquiry');
       setSent(true);
     } catch (e: any) {
@@ -38,7 +55,7 @@ export function LeadContactDialog({ open, onOpenChange, propertyId, propertyTitl
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm rounded-3xl">
         {sent ? (
           <div className="text-center py-4">
@@ -49,7 +66,7 @@ export function LeadContactDialog({ open, onOpenChange, propertyId, propertyTitl
             <p className="text-sm text-muted-foreground mb-4">
               The landlord has your details and will contact you directly.
             </p>
-            <Button className="w-full rounded-xl" onClick={() => onOpenChange(false)}>Done</Button>
+            <Button className="w-full rounded-xl" onClick={() => handleOpenChange(false)}>Done</Button>
           </div>
         ) : (
           <>
