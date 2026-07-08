@@ -428,7 +428,15 @@ export default function ListSale() {
         {/* Publish Paywall */}
         <PublishPaywallSheet
           open={showPaywall}
-          onOpenChange={setShowPaywall}
+          onOpenChange={(open) => {
+            setShowPaywall(open);
+            if (!open) {
+              // Property is already saved as an unlisted draft; leave the wizard
+              // so re-submitting can't create a duplicate.
+              setPaywallPropertyId(null);
+              navigate('/enhancedlandlorddashboard');
+            }
+          }}
           propertyId={paywallPropertyId}
         />
       </div>
