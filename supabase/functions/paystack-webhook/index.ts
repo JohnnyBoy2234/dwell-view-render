@@ -6,6 +6,48 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Lightweight structured logger for the monetization branches (mirrors the
+// file's existing console.* logging; never throws).
+function logStep(message: string, details?: Record<string, unknown>) {
+  console.log(`[paystack-webhook] ${message}`, details ? JSON.stringify(details) : '');
+}
+
+// Mark a landlord as an active subscriber and mirror into billing_subscriptions.
+async function activateSubscription(
+  supabase: any,
+  userId: string,
+  fields: { customerCode?: string; subscriptionCode?: string; periodEnd?: string | null },
+) {
+  const periodEnd = fields.periodEnd
+    ?? new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString(); // fallback: paid_at + 35d
+  await supabase.from("billing_subscriptions").upsert({
+    user_id: userId,
+    plan_code: "subscriber",
+    status: "active",
+    provider: "paystack",
+    current_period_end: periodEnd,
+    ...(fields.customerCode ? { paystack_customer_code: fields.customerCode } : {}),
+    ...(fields.subscriptionCode ? { paystack_subscription_code: fields.subscriptionCode } : {}),
+  }, { onConflict: "user_id" });
+  // The DB trigger on billing_subscriptions syncs profiles.plan; update directly too
+  // in case the trigger is ever disabled.
+  await supabase.from("profiles").update({
+    plan: "subscriber",
+    plan_status: "active",
+    plan_expires_at: periodEnd,
+    plan_last_synced: new Date().toISOString(),
+  }).eq("user_id", userId);
+}
+
+async function resolveUserByCustomerCode(supabase: any, customerCode: string): Promise<string | null> {
+  const { data } = await supabase
+    .from("billing_subscriptions")
+    .select("user_id")
+    .eq("paystack_customer_code", customerCode)
+    .maybeSingle();
+  return data?.user_id ?? null;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -131,84 +173,180 @@ serve(async (req) => {
         }
 
         return new Response('Bill payment processed', { status: 200, headers: corsHeaders });
-      }
+      } else if (reference?.startsWith('LISTING_')) {
+        const propertyId = event.data?.metadata?.property_id
+          ?? reference.split("_")[1] ?? null;
+        const landlordId = event.data?.metadata?.landlord_id ?? null;
+        if (!propertyId || !landlordId) {
+          logStep("LISTING_ missing metadata", { reference });
+        } else if (amount !== 9900) {
+          logStep("LISTING_ amount mismatch", { reference, amount });
+        } else {
+          // 1) Record the payment (idempotent), 2) publish — order matters: the
+          // publish trigger checks listing_payments.
+          await supabase.from("listing_payments").upsert({
+            property_id: propertyId,
+            landlord_id: landlordId,
+            amount: amount / 100,
+            paystack_reference: reference,
+          }, { onConflict: "property_id", ignoreDuplicates: true });
+          const { error: pubErr } = await supabase
+            .from("properties")
+            .update({ is_listed: true })
+            .eq("id", propertyId);
+          if (pubErr) logStep("LISTING_ publish failed", { propertyId, error: pubErr.message });
+          await supabase.rpc("create_notification", {
+            _user_id: landlordId,
+            _message: "Payment received — your listing is now live on MzanziHomes.",
+            _link_url: "/enhancedlandlorddashboard",
+            _type: "billing",
+            _metadata: { property_id: propertyId, reference },
+          });
+        }
+      } else if (reference?.startsWith('SUB_') || event.data?.plan?.plan_code) {
+        const landlordId = event.data?.metadata?.landlord_id
+          ?? (event.data?.customer?.customer_code
+              ? await resolveUserByCustomerCode(supabase, event.data.customer.customer_code)
+              : null);
+        if (!landlordId) {
+          logStep("SUB charge: could not resolve user", { reference });
+        } else {
+          await activateSubscription(supabase, landlordId, {
+            customerCode: event.data?.customer?.customer_code,
+            periodEnd: null, // paid_at + 35d fallback; subscription.create refines it
+          });
+          // Optional auto-publish when the subscription was bought from the publish paywall.
+          const propertyId = event.data?.metadata?.property_id;
+          if (propertyId) {
+            const { error: pubErr } = await supabase
+              .from("properties").update({ is_listed: true }).eq("id", propertyId);
+            if (pubErr) logStep("SUB publish failed", { propertyId, error: pubErr.message });
+          }
+          await supabase.rpc("create_notification", {
+            _user_id: landlordId,
+            _message: "Your MzanziHomes subscription is active. All landlord tools are unlocked.",
+            _link_url: "/enhancedlandlorddashboard",
+            _type: "billing",
+            _metadata: { reference },
+          });
+        }
+      } else {
+        // Legacy rent-payment fallback: resolve by reference in the payments table.
+        const { data: payment } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('paystack_reference', reference)
+          .single();
 
-      // Find payment by reference
-      const { data: payment } = await supabase
-        .from('payments')
-        .select('*')
-        .eq('paystack_reference', reference)
-        .single();
+        if (!payment) {
+          console.error('Payment not found for reference:', reference);
+          return new Response('Payment not found', { status: 404 });
+        }
 
-      if (!payment) {
-        console.error('Payment not found for reference:', reference);
-        return new Response('Payment not found', { status: 404 });
-      }
-
-      // Update payment
-      await supabase
-        .from('payments')
-        .update({
-          status: 'verified',
-          paid_amount_cents: amount,
-          paid_at: paid_at,
-          gateway_tx_id: transaction,
-          verification_confidence: 1.0,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', payment.id);
-
-      // Award star for on-time/early payment
-      const dueDate = new Date(payment.due_date);
-      const paidDate = new Date(paid_at);
-      const daysEarly = Math.floor((dueDate.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
-      
-      if (daysEarly >= 0) {
-        const year = paidDate.getFullYear();
-        const month = paidDate.getMonth() + 1;
-
+        // Update payment
         await supabase
-          .from('tenant_payment_stars')
+          .from('payments')
+          .update({
+            status: 'verified',
+            paid_amount_cents: amount,
+            paid_at: paid_at,
+            gateway_tx_id: transaction,
+            verification_confidence: 1.0,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', payment.id);
+
+        // Award star for on-time/early payment
+        const dueDate = new Date(payment.due_date);
+        const paidDate = new Date(paid_at);
+        const daysEarly = Math.floor((dueDate.getTime() - paidDate.getTime()) / (1000 * 60 * 60 * 24));
+
+        if (daysEarly >= 0) {
+          const year = paidDate.getFullYear();
+          const month = paidDate.getMonth() + 1;
+
+          await supabase
+            .from('tenant_payment_stars')
+            .insert({
+              tenant_id: payment.tenant_id,
+              payment_id: payment.id,
+              year,
+              month,
+              payment_date: paid_at,
+              was_early: daysEarly > 0,
+              days_early: Math.max(0, daysEarly)
+            });
+        }
+
+        // Notify both parties
+        await supabase.rpc('create_notification', {
+          _user_id: payment.tenant_id,
+          _message: `Payment confirmed for ${payment.due_period_yyyymm}`,
+          _link_url: '/enhancedtenantdashboard?tab=payments',
+          _type: 'payment',
+          _metadata: { payment_id: payment.id, star_awarded: daysEarly >= 0 }
+        });
+
+        await supabase.rpc('create_notification', {
+          _user_id: payment.landlord_id,
+          _message: `Payment received from tenant for ${payment.due_period_yyyymm}`,
+          _link_url: '/enhancedlandlorddashboard?tab=payments',
+          _type: 'payment',
+          _metadata: { payment_id: payment.id }
+        });
+
+        // Log audit
+        await supabase
+          .from('payment_audit_logs')
           .insert({
-            tenant_id: payment.tenant_id,
             payment_id: payment.id,
-            year,
-            month,
-            payment_date: paid_at,
-            was_early: daysEarly > 0,
-            days_early: Math.max(0, daysEarly)
+            action: 'paystack_webhook',
+            new_status: 'verified',
+            payload: event.data
           });
       }
-
-      // Notify both parties
-      await supabase.rpc('create_notification', {
-        _user_id: payment.tenant_id,
-        _message: `Payment confirmed for ${payment.due_period_yyyymm}`,
-        _link_url: '/enhancedtenantdashboard?tab=payments',
-        _type: 'payment',
-        _metadata: { payment_id: payment.id, star_awarded: daysEarly >= 0 }
-      });
-
-      await supabase.rpc('create_notification', {
-        _user_id: payment.landlord_id,
-        _message: `Payment received from tenant for ${payment.due_period_yyyymm}`,
-        _link_url: '/enhancedlandlorddashboard?tab=payments',
-        _type: 'payment',
-        _metadata: { payment_id: payment.id }
-      });
-
-      // Log audit
-      await supabase
-        .from('payment_audit_logs')
-        .insert({
-          payment_id: payment.id,
-          action: 'paystack_webhook',
-          new_status: 'verified',
-          payload: event.data
-        });
+    } else if (event.event === "subscription.create") {
+      const customerCode = event.data?.customer?.customer_code;
+      const userId = customerCode ? await resolveUserByCustomerCode(supabase, customerCode) : null;
+      if (userId) {
+        await supabase.from("billing_subscriptions").update({
+          paystack_subscription_code: event.data?.subscription_code,
+          current_period_end: event.data?.next_payment_date ?? undefined,
+        }).eq("user_id", userId);
+        if (event.data?.next_payment_date) {
+          await supabase.from("profiles").update({
+            plan_expires_at: event.data.next_payment_date,
+            plan_last_synced: new Date().toISOString(),
+          }).eq("user_id", userId);
+        }
+      } else {
+        logStep("subscription.create: unknown customer", { customerCode });
+      }
+    } else if (event.event === "subscription.not_renew") {
+      const customerCode = event.data?.customer?.customer_code;
+      const userId = customerCode ? await resolveUserByCustomerCode(supabase, customerCode) : null;
+      if (userId) {
+        await supabase.from("billing_subscriptions").update({ status: "non-renewing" }).eq("user_id", userId);
+        await supabase.from("profiles").update({
+          plan_status: "non-renewing",
+          plan_last_synced: new Date().toISOString(),
+        }).eq("user_id", userId);
+      }
+    } else if (event.event === "subscription.disable") {
+      const customerCode = event.data?.customer?.customer_code;
+      const userId = customerCode ? await resolveUserByCustomerCode(supabase, customerCode) : null;
+      if (userId) {
+        await supabase.from("billing_subscriptions").update({ status: "cancelled" }).eq("user_id", userId);
+        await supabase.from("profiles").update({
+          plan: "free",
+          plan_status: "cancelled",
+          plan_last_synced: new Date().toISOString(),
+        }).eq("user_id", userId);
+        // Paid R99 listings stay live: we never touch is_listed here.
+      }
     }
 
-    return new Response('Webhook processed', { 
+    return new Response('Webhook processed', {
       status: 200,
       headers: corsHeaders 
     });
