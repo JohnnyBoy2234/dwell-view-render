@@ -166,6 +166,9 @@ export default function EnhancedLandlordDashboard() {
   const [showRentCollectionModal, setShowRentCollectionModal] = useState(false);
   const [invitedPropertyIds, setInvitedPropertyIds] = useState<Set<string>>(new Set());
 
+  // Celebratory popup when a tenant pays rent (realtime notifications INSERT).
+  const [rentPaidPopup, setRentPaidPopup] = useState<string | null>(null);
+
   const handleAddPropertyByAddress = async () => {
     if (!addressInput.trim() || !user) return;
     setAddingProperty(true);
@@ -329,6 +332,32 @@ export default function EnhancedLandlordDashboard() {
       fetchProperties();
       fetchTenants();
     }
+  }, [user]);
+
+  // Celebrate in real time when a tenant pays rent. generate-rent-receipt (fired
+  // by both the webhook and verify-bill-payment) inserts a type='payment'
+  // notification for the landlord — we surface it as a popup here.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`landlord-payment-popup-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          const n = payload?.new;
+          if (n?.type === 'payment' && n?.message) {
+            setRentPaidPopup(n.message);
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   const fetchProperties = async () => {
@@ -2715,6 +2744,28 @@ const renderReportsTab = () => (
               <DialogDescription>Set up where rent gets paid out so tenants can pay in-app.</DialogDescription>
             </DialogHeader>
             {showRentCollectionModal && <RentCollectionCard />}
+          </DialogContent>
+        </Dialog>
+
+        {/* Celebratory popup when a tenant pays rent */}
+        <Dialog open={!!rentPaidPopup} onOpenChange={(open) => { if (!open) setRentPaidPopup(null); }}>
+          <DialogContent className="max-w-sm text-center">
+            <DialogHeader>
+              <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+                <Check className="h-8 w-8 text-green-600" />
+              </div>
+              <DialogTitle className="text-green-800">💰 Rent paid!</DialogTitle>
+              <DialogDescription>{rentPaidPopup}</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center gap-2 pt-1">
+              <Button
+                variant="outline"
+                onClick={() => { setRentPaidPopup(null); navigate('/enhancedlandlorddashboard/payments'); }}
+              >
+                View payments
+              </Button>
+              <Button onClick={() => setRentPaidPopup(null)}>Nice!</Button>
+            </div>
           </DialogContent>
         </Dialog>
       </SidebarProvider>

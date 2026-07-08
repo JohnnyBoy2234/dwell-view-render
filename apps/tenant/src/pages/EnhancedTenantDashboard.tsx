@@ -17,6 +17,7 @@ import {
   FileText, Eye, Settings, Building, User,
   Receipt, Clipboard, HelpCircle, MapPin,
   Calendar, AlertCircle, Clock,
+  CreditCard, MessageCircle, Wrench, Bell, Link2,
 } from 'lucide-react';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
@@ -57,7 +58,7 @@ export default function EnhancedTenantDashboard() {
   const { unreadCount } = useUnreadMessages();
 
   const [currentTab, setCurrentTab] = useState('/enhancedtenantdashboard');
-  const { loading, rentDue, tenantProperty, recentMaintenance, upcomingViewings } =
+  const { loading, rentDue, tenantProperty, hasSignedLease, recentMaintenance, upcomingViewings } =
     useTenantDashboard();
 
   // First-time welcome, shown right after a tenant joins via an invite.
@@ -165,9 +166,19 @@ export default function EnhancedTenantDashboard() {
                     <span className="truncate">{tenantProperty.location}</span>
                   </div>
                 </div>
-                <Badge variant="secondary" className="shrink-0 text-xs">Active Lease</Badge>
+                <Badge variant="secondary" className="shrink-0 text-xs">
+                  {hasSignedLease ? 'Active Lease' : 'Connected'}
+                </Badge>
               </div>
-              {tenantProperty.leaseEndDate && (
+              {!hasSignedLease && (
+                <div className="flex items-center gap-1.5 mt-2.5 text-xs text-muted-foreground">
+                  <Link2 className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">
+                    You have been connected to {tenantProperty.location || tenantProperty.title}
+                  </span>
+                </div>
+              )}
+              {hasSignedLease && tenantProperty.leaseEndDate && (
                 <div className="flex items-center gap-1.5 mt-2.5 text-xs text-muted-foreground">
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
                   <span>
@@ -322,23 +333,42 @@ export default function EnhancedTenantDashboard() {
           </div>
         </div>
 
-        {/* First-time welcome after joining via an invite */}
+        {/* First-time "Your benefits" popup after joining via an invite */}
         <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle>Welcome to your dashboard 👋</DialogTitle>
+              <DialogTitle>Your benefits</DialogTitle>
               <DialogDescription>
-                This is your home base as a tenant — everything about your rental lives here:
+                You're all connected. Here's everything you can now do from your dashboard:
               </DialogDescription>
             </DialogHeader>
-            <ul className="space-y-2 text-sm">
-              <li className="flex items-start gap-2"><span>💳</span><span>Pay your rent and see what's due</span></li>
-              <li className="flex items-start gap-2"><span>💬</span><span>Message your landlord anytime</span></li>
-              <li className="flex items-start gap-2"><span>📄</span><span>View your lease and documents</span></li>
-              <li className="flex items-start gap-2"><span>🔧</span><span>Log maintenance requests</span></li>
-              <li className="flex items-start gap-2"><span>📅</span><span>Track viewings and reminders</span></li>
+            <ul className="space-y-3 text-sm">
+              <li className="flex items-start gap-3">
+                <CreditCard className="h-5 w-5 shrink-0 text-emerald-600" />
+                <span>Pay rent securely in-app with Paystack</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Receipt className="h-5 w-5 shrink-0 text-emerald-600" />
+                <span>Receipts saved automatically in your POP section</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <MessageCircle className="h-5 w-5 shrink-0 text-blue-600" />
+                <span>Message your landlord anytime</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Wrench className="h-5 w-5 shrink-0 text-orange-500" />
+                <span>Submit maintenance requests</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <FileText className="h-5 w-5 shrink-0 text-indigo-600" />
+                <span>View your lease &amp; documents</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <Bell className="h-5 w-5 shrink-0 text-amber-600" />
+                <span>Get notified when rent is due</span>
+              </li>
             </ul>
-            <Button className="w-full mt-2" onClick={() => setShowWelcome(false)}>Got it, let's go</Button>
+            <Button className="w-full mt-2" onClick={() => setShowWelcome(false)}>Got it</Button>
           </DialogContent>
         </Dialog>
       </SidebarProvider>
