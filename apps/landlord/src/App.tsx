@@ -51,6 +51,7 @@ import CreateInspection from "@mzanzihomes/ui/components/pages/CreateInspection"
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import PaymentSuccess from "@mzanzihomes/ui/components/pages/PaymentSuccess";
 import PaymentFailed from "@mzanzihomes/ui/components/pages/PaymentFailed";
+import PlanSuccess from "@/pages/PlanSuccess";
 import AccountingDashboard from "@/pages/accounting/AccountingDashboard";
 import AddTransactionPage from "@/pages/accounting/AddTransactionPage";
 import TransactionsPage from "@/pages/accounting/TransactionsPage";
@@ -340,6 +341,7 @@ function AppRoutes() {
         {/* Payments */}
         <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
         <Route path="/payment-failed" element={<RouteGuard><PaymentFailed /></RouteGuard>} />
+        <Route path="/plan-success" element={<PlanSuccess />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>
