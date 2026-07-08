@@ -15,11 +15,8 @@ const plusOneYear = (isoDate: string) => {
 // Celebratory full-screen backdrop shared by every state.
 function Backdrop({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-gradient-to-br from-background via-background to-muted/20"
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center p-4 bg-primary"
       style={{ minHeight: '100dvh' }}>
-      {/* Soft floating glow blobs */}
-      <div className="pointer-events-none absolute -top-28 -left-24 w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-pulse" />
-      <div className="pointer-events-none absolute -bottom-28 -right-20 w-80 h-80 rounded-full bg-success/10 blur-3xl animate-pulse" style={{ animationDelay: '0.6s' }} />
       <div className="relative w-full max-w-md animate-in fade-in zoom-in-95 duration-500">
         <div className="bg-card rounded-3xl shadow-xl border border-border p-6 sm:p-7">
           {children}
