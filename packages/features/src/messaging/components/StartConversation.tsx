@@ -8,6 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { formatPreScreeningMessage, type PreScreeningData } from '@mzanzihomes/common/types/message';
+import { LeadContactDialog } from './LeadContactDialog';
 
 interface StartConversationProps {
   propertyId: string;
@@ -41,6 +42,7 @@ export default function StartConversation({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [showPreScreening, setShowPreScreening] = useState(false);
+  const [showLeadDialog, setShowLeadDialog] = useState(false);
   const [checkingConversation, setCheckingConversation] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -64,6 +66,17 @@ export default function StartConversation({
     // race ahead of the result and land on the wrong dialog.
     setCheckingConversation(true);
     try {
+      // Free (pay-per-listing) landlords receive leads, not messaging threads.
+      // RPC is not yet in the generated Database types; cast to keep typecheck green.
+      const { data: contactMode } = await (supabase.rpc as any)('get_property_contact_mode', {
+        _property_id: propertyId,
+      });
+      if (contactMode === 'lead') {
+        setShowLeadDialog(true);
+        return;
+      }
+      // existing flow (pre-screening / direct dialog) continues unchanged
+
       const { data, error } = await supabase
         .from('conversations')
         .select('id')
@@ -247,6 +260,13 @@ export default function StartConversation({
         loading,
         propertyTitle,
       })}
+
+      <LeadContactDialog
+        open={showLeadDialog}
+        onOpenChange={setShowLeadDialog}
+        propertyId={propertyId}
+        propertyTitle={propertyTitle}
+      />
     </>
   );
 }
