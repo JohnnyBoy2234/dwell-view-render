@@ -3,7 +3,11 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { normalizePlan, isActiveSubscriber, type NormalizedPlan } from '@mzanzihomes/common/utils/planAccess';
 
-/** @deprecated legacy tier names — normalized to 'free' | 'subscriber' internally */
+/**
+ * Plan identifier accepted by plan gating (e.g. PlanGuard's `requiredPlan`).
+ * The legacy 'pro' / 'premium' values are still accepted and both mean
+ * "subscriber" — plans are normalized to 'free' | 'subscriber' internally.
+ */
 export type PlanType = 'free' | 'pro' | 'premium' | 'subscriber';
 
 export function useSubscription() {

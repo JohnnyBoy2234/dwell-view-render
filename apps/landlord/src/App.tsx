@@ -187,11 +187,9 @@ function AppRoutes() {
         } />
         <Route path="/enhancedlandlorddashboard/support" element={
           <AuthenticatedRoute>
-            <PlanGuard requiredPlan="pro" featureName="Support">
-              <DashboardShell title="Support" currentTab="/enhancedlandlorddashboard/support">
-                <LandlordSupport />
-              </DashboardShell>
-            </PlanGuard>
+            <DashboardShell title="Support" currentTab="/enhancedlandlorddashboard/support">
+              <LandlordSupport />
+            </DashboardShell>
           </AuthenticatedRoute>
         } />
         <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
