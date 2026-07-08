@@ -160,10 +160,5 @@ export function useSubscription() {
     planLastSyncedAt,
     loading,
     refresh,
-    // ── deprecated aliases (keep names until all consumers migrate) ──
-    isFreePlan: !isSubscriber,
-    isProPlan: isSubscriber,
-    isPremiumPlan: isSubscriber,
-    hasAccess: (_required: PlanType) => _required === 'free' || isSubscriber,
   };
 }

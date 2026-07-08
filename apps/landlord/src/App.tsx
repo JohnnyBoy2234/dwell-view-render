@@ -168,9 +168,7 @@ function AppRoutes() {
         {/* Landlord dashboard */}
         <Route path="/enhancedlandlorddashboard/*" element={
           <AuthenticatedRoute>
-            <PlanGuard requiredPlan="pro" featureName="Landlord Dashboard">
-              <EnhancedLandlordDashboard />
-            </PlanGuard>
+            <EnhancedLandlordDashboard />
           </AuthenticatedRoute>
         } />
         <Route path="/enhancedlandlorddashboard/inspection" element={
