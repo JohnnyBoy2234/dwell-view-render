@@ -25,6 +25,7 @@ import Contact from "@/pages/Contact";
 import Blog from "@/pages/Blog";
 import BlogPost from "@/pages/BlogPost";
 import Pricing from "@/pages/Pricing";
+import PlanSuccess from "@/pages/PlanSuccess";
 import SafeRenting from "@/pages/SafeRenting";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
@@ -112,6 +113,7 @@ function AppRoutes() {
       <Route path="/terms" element={<TermsOfService />} />
 
       <Route path="/auth" element={<Auth />} />
+      <Route path="/plan-success" element={<PlanSuccess />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />

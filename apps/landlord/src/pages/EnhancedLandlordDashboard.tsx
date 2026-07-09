@@ -41,6 +41,9 @@ import { MetricsGrid } from '@mzanzihomes/ui/components/dashboard/landlord/Metri
 import { ToolGrid } from '@mzanzihomes/ui/components/dashboard/landlord/ToolGrid';
 import { TenantInviteSection } from '@mzanzihomes/features/property';
 import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/InventoryDetailModal';
+import { PlanPromptSheet } from '@/components/PlanPromptSheet';
+import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
+import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -53,6 +56,9 @@ const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: s
   'Inspection':   { bg: 'bg-amber-100',   icon: 'text-amber-600',   border: 'group-hover:border-amber-200'   },
   'Support':      { bg: 'bg-slate-100',   icon: 'text-slate-500',   border: 'group-hover:border-slate-200'   },
 };
+
+// Tiles anyone can use without a subscription.
+const FREE_TOOLS = new Set(['List Property', 'My Profile', 'Support']);
 
 interface PropertyWithTenant {
   id: string;
@@ -157,6 +163,20 @@ export default function EnhancedLandlordDashboard() {
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications(selectedPropertyId || undefined);
   const { pendingSignatures } = useLandlordNotifications();
   const { unreadCount: unreadMessages } = useUnreadMessages();
+
+  // Monetization plan state
+  const { isSubscriber, loading: planLoading } = useSubscription();
+  const [showPlanPrompt, setShowPlanPrompt] = useState(false);
+  const [gatedFeature, setGatedFeature] = useState<string | null>(null);
+
+  // Prompt the plans once per session after sign-in (free landlords only).
+  useEffect(() => {
+    if (authLoading || planLoading || !user || !isLandlord) return;
+    if (isSubscriber) return;
+    if (sessionStorage.getItem('planPromptShown')) return;
+    sessionStorage.setItem('planPromptShown', '1');
+    setShowPlanPrompt(true);
+  }, [authLoading, planLoading, user, isLandlord, isSubscriber]);
 
   // Inline "add property by address" state
   const [addressInput, setAddressInput] = useState('');
@@ -2476,6 +2496,10 @@ const renderReportsTab = () => (
           tools={tools}
           onToolClick={(tool) => {
             if (!user) { navigate('/auth'); return; }
+            if (!FREE_TOOLS.has(tool.title) && !isSubscriber) {
+              setGatedFeature(tool.title);
+              return;
+            }
             if (tool.action) tool.action();
             else if (tool.tab) handleTabChange(tool.tab);
             else if (tool.path) navigate(tool.path);
@@ -2768,6 +2792,9 @@ const renderReportsTab = () => (
             </div>
           </DialogContent>
         </Dialog>
+
+        <PlanPromptSheet open={showPlanPrompt} onOpenChange={setShowPlanPrompt} />
+        <SubscribeGateDialog featureName={gatedFeature} onClose={() => setGatedFeature(null)} />
       </SidebarProvider>
     </VerificationGate>
   );

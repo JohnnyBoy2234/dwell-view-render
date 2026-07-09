@@ -1,9 +1,6 @@
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode } from 'react';
 import { useSubscription, PlanType } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { UpgradePrompt } from './subscription/UpgradePrompt';
-import { Loader2, Lock } from 'lucide-react';
-import { Button } from '@mzanzihomes/ui/components/button';
-import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 
 interface PlanGuardProps {
   children: ReactNode;
@@ -12,6 +9,10 @@ interface PlanGuardProps {
 }
 
 export function PlanGuard({ children, requiredPlan, featureName }: PlanGuardProps) {
-  // Temporary bypass: always render children while plan gating is disabled
-  return <>{children}</>;
+  const { isSubscriber, loading } = useSubscription();
+
+  if (requiredPlan === 'free') return <>{children}</>;
+  if (loading) return null; // avoid flashing the prompt while plan state loads
+  if (isSubscriber) return <>{children}</>;
+  return <UpgradePrompt featureName={featureName} />;
 }

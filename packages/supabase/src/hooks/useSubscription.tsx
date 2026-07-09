@@ -1,40 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { normalizePlan, isActiveSubscriber, type NormalizedPlan } from '@mzanzihomes/common/utils/planAccess';
 
-export type PlanType = 'free' | 'pro' | 'premium';
+/**
+ * Plan identifier accepted by plan gating (e.g. PlanGuard's `requiredPlan`).
+ * The legacy 'pro' / 'premium' values are still accepted and both mean
+ * "subscriber" — plans are normalized to 'free' | 'subscriber' internally.
+ */
+export type PlanType = 'free' | 'pro' | 'premium' | 'subscriber';
 
-interface Subscription {
-  plan: PlanType;
-  planStatus: string | null;
-  planExpiresAt: string | null;
-  planLastSyncedAt: string | null;
-  loading: boolean;
-  isFreePlan: boolean;
-  isProPlan: boolean;
-  isPremiumPlan: boolean;
-  hasAccess: (requiredPlan: PlanType) => boolean;
-  refresh: () => Promise<void>;
-}
-
-const PLAN_HIERARCHY: Record<PlanType, number> = {
-  free: 0,
-  pro: 1,
-  premium: 2,
-};
-
-const ACTIVE_STATUSES = new Set(['active', 'trialing', 'past_due']);
-
-const normalizePlanCode = (code?: string | null): PlanType => {
-  const value = (code ?? '').toLowerCase();
-  if (value.includes('premium')) return 'premium';
-  if (value.includes('pro')) return 'pro';
-  return 'free';
-};
-
-export function useSubscription(): Subscription {
+export function useSubscription() {
   const { user } = useAuth();
-  const [plan, setPlan] = useState<PlanType>('free');
+  // Raw plan code as stored in the DB (may be legacy 'pro'/'premium'); normalized on return.
+  const [rawPlan, setRawPlan] = useState<string | null>('free');
   const [loading, setLoading] = useState(true);
   const [planStatus, setPlanStatus] = useState<string | null>(null);
   const [planExpiresAt, setPlanExpiresAt] = useState<string | null>(null);
@@ -42,7 +21,7 @@ export function useSubscription(): Subscription {
 
   const loadSubscription = useCallback(async (showSpinner = false) => {
     if (!user) {
-      setPlan('free');
+      setRawPlan('free');
       setPlanStatus('inactive');
       setPlanExpiresAt(null);
       setPlanLastSyncedAt(null);
@@ -62,15 +41,16 @@ export function useSubscription(): Subscription {
         .maybeSingle();
 
       if (!profileError && profile) {
-        const normalizedPlan = normalizePlanCode((profile as any).plan);
+        const rawPlanCode = ((profile as any).plan ?? 'free') as string;
         const status = ((profile as any).plan_status ?? 'inactive').toLowerCase();
+        const expiresAt = (profile as any).plan_expires_at ?? null;
 
         setPlanStatus(status);
-        setPlanExpiresAt((profile as any).plan_expires_at ?? null);
+        setPlanExpiresAt(expiresAt);
         setPlanLastSyncedAt((profile as any).plan_last_synced ?? null);
 
-        if (ACTIVE_STATUSES.has(status)) {
-          setPlan(normalizedPlan);
+        if (isActiveSubscriber({ plan: rawPlanCode, planStatus: status, planExpiresAt: expiresAt })) {
+          setRawPlan(rawPlanCode);
           return;
         }
       }
@@ -85,7 +65,7 @@ export function useSubscription(): Subscription {
 
       if (error || !data) {
         console.log('[useSubscription] No active subscription found, setting to free plan');
-        setPlan('free');
+        setRawPlan('free');
         setPlanStatus('inactive');
         setPlanExpiresAt(null);
         setPlanLastSyncedAt(null);
@@ -97,14 +77,14 @@ export function useSubscription(): Subscription {
           user_id: data.user_id
         });
 
-        setPlan(normalizePlanCode(planCode));
+        setRawPlan(planCode);
         setPlanStatus((data.status as string) ?? 'active');
         setPlanExpiresAt((data.current_period_end as string) ?? null);
         setPlanLastSyncedAt((data.updated_at as string) ?? null);
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);
-      setPlan('free');
+      setRawPlan('free');
       setPlanStatus('inactive');
       setPlanExpiresAt(null);
       setPlanLastSyncedAt(null);
@@ -117,7 +97,7 @@ export function useSubscription(): Subscription {
 
   useEffect(() => {
     if (!user) {
-      setPlan('free');
+      setRawPlan('free');
       setPlanStatus('inactive');
       setPlanExpiresAt(null);
       setPlanLastSyncedAt(null);
@@ -165,25 +145,24 @@ export function useSubscription(): Subscription {
     };
   }, [user, loadSubscription]);
 
-  const hasAccess = (requiredPlan: PlanType): boolean => {
-    return PLAN_HIERARCHY[plan] >= PLAN_HIERARCHY[requiredPlan];
-  };
-
   const refresh = useCallback(async () => {
     await loadSubscription(true);
   }, [loadSubscription]);
 
-  return {
-    plan,
+  const plan: NormalizedPlan = normalizePlan(rawPlan);
+  const isSubscriber = isActiveSubscriber({
+    plan: rawPlan,
     planStatus,
     planExpiresAt,
+  });
+
+  return {
+    plan,                 // 'free' | 'subscriber'
+    isSubscriber,         // the one flag the app should use
+    planStatus: planStatus ?? null,
+    planExpiresAt: planExpiresAt ?? null,
     planLastSyncedAt,
     loading,
-    isFreePlan: plan === 'free',
-    isProPlan: plan === 'pro',
-    isPremiumPlan: plan === 'premium',
-    hasAccess,
     refresh,
   };
 }
-

@@ -17,6 +17,7 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
+import { PublishPaywallSheet } from '@mzanzihomes/features/billing';
 
 // Import step components
 import { PropertyTypeStep } from '@mzanzihomes/features/listing';
@@ -44,6 +45,8 @@ export default function ListProperty() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { propertyId, property: existingProperty } = useExistingProperty();
@@ -225,18 +228,40 @@ export default function ListProperty() {
         amenities: data.amenities,
       };
 
-      // Continuing an existing (e.g. previously-unlisted) property publishes
-      // that same row instead of inserting a duplicate.
-      const { error } = propertyId
+      // Continuing an existing (e.g. previously-unlisted) property updates that
+      // same row instead of inserting a duplicate; new properties are inserted
+      // unlisted. Publishing happens below so the paywall can intercept it.
+      const { data: newProperty, error } = propertyId
         ? await supabase
             .from('properties')
-            .update({ ...propertyFields, is_listed: true })
+            .update(propertyFields)
             .eq('id', propertyId)
+            .select('id')
+            .single()
         : await supabase
             .from('properties')
-            .insert({ ...propertyFields, landlord_id: user.id });
+            .insert({ ...propertyFields, landlord_id: user.id, is_listed: false })
+            .select('id')
+            .single();
 
       if (error) throw error;
+
+      // Attempt to publish the newly created draft property
+      const { error: publishErr } = await supabase
+        .from('properties')
+        .update({ is_listed: true })
+        .eq('id', newProperty.id);
+      if (publishErr) {
+        if (publishErr.message?.includes('PUBLISH_PAYWALL')) {
+          try {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+          } catch {}
+          setPaywallPropertyId(newProperty.id);
+          setShowPaywall(true);
+          return; // draft saved; success dialog is skipped
+        }
+        throw publishErr;
+      }
 
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -401,6 +426,21 @@ export default function ListProperty() {
             }
           }}
           showConfetti={true}
+        />
+
+        {/* Publish Paywall */}
+        <PublishPaywallSheet
+          open={showPaywall}
+          onOpenChange={(open) => {
+            setShowPaywall(open);
+            if (!open) {
+              // Property is already saved as an unlisted draft; leave the wizard
+              // so re-submitting can't create a duplicate.
+              setPaywallPropertyId(null);
+              navigate('/enhancedlandlorddashboard');
+            }
+          }}
+          propertyId={paywallPropertyId}
         />
       </div>
     </div>
