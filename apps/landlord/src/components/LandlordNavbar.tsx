@@ -1,14 +1,18 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { Home } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { Link, useNavigate } from "react-router-dom";
+import { Home } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface LandlordNavbarProps {
-  mode?: 'rent' | 'buy';
+  mode?: "rent" | "buy";
   hideLandlordActions?: boolean;
   transparent?: boolean;
 }
 
-export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, transparent = false }: LandlordNavbarProps) {
+export function LandlordNavbar({
+  mode = "rent",
+  hideLandlordActions = false,
+  transparent = false,
+}: LandlordNavbarProps) {
   const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
   const navigate = useNavigate();
   // Transparent pages (the hero landing) stay transparent — no white-on-scroll
@@ -16,43 +20,47 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
   const scrolled = !transparent;
 
   const dashboardPath = isAdmin
-    ? '/admin/dashboard'
+    ? "/admin/dashboard"
     : isLandlord
-    ? '/enhancedlandlorddashboard'
-    : '/tenant-dashboard';
+      ? "/enhancedlandlorddashboard"
+      : "/tenant-dashboard";
 
   const navLinks = [
-    { label: 'Properties', to: '/properties' },
-    { label: 'About',      to: '/about' },
-    { label: 'Landlords',  to: '/about/landlord' },
-    { label: 'Tenants',    to: '/about/tenant' },
-    { label: 'Pricing',    to: '/pricing' },
+    { label: "Properties", to: "/properties" },
+    { label: "About", to: "/about" },
+    { label: "Landlords", to: "/about/landlord" },
+    { label: "Tenants", to: "/about/tenant" },
+    { label: "Pricing", to: "/pricing" },
   ];
 
   return (
     <header
       className="fixed z-50 top-0 left-0 right-0 flex items-end px-4 md:px-8"
       style={{
-        paddingTop: 'env(safe-area-inset-top)',
-        height: 'calc(68px + env(safe-area-inset-top))',
-        transition: 'background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease',
-        background: scrolled ? 'rgba(255,255,255,0.97)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrolled ? 'blur(20px)' : 'none',
-        borderBottom: `1px solid ${scrolled ? 'rgba(0,0,0,0.07)' : 'transparent'}`,
-        boxShadow: scrolled ? '0 1px 16px rgba(0,0,0,0.06)' : 'none',
+        paddingTop: "env(safe-area-inset-top)",
+        height: "calc(68px + env(safe-area-inset-top))",
+        transition:
+          "background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease",
+        background: scrolled ? "rgba(255,255,255,0.97)" : "transparent",
+        backdropFilter: scrolled ? "blur(20px)" : "none",
+        WebkitBackdropFilter: scrolled ? "blur(20px)" : "none",
+        borderBottom: `1px solid ${scrolled ? "rgba(0,0,0,0.07)" : "transparent"}`,
+        boxShadow: scrolled ? "0 1px 16px rgba(0,0,0,0.06)" : "none",
       }}
     >
       {/* Logo */}
       <Link to="/" className="flex items-center gap-3 shrink-0">
-        <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%)' }}>
+        <div
+          className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0"
+          style={{ background: "hsl(214,100%,59%)" }}
+        >
           <Home className="w-8 h-8 text-white" />
         </div>
         <span
           className="font-bold text-2xl tracking-tight whitespace-nowrap"
           style={{
-            color: scrolled ? 'hsl(222,84%,5%)' : '#fff',
-            transition: 'color 0.3s ease',
+            color: scrolled ? "hsl(222,84%,5%)" : "#fff",
+            transition: "color 0.3s ease",
           }}
         >
           MzanziHomes
@@ -66,7 +74,9 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
             key={link.to}
             to={link.to}
             className="text-sm font-medium transition-colors duration-200"
-            style={{ color: scrolled ? 'hsl(220,9%,46%)' : 'rgba(255,255,255,0.80)' }}
+            style={{
+              color: scrolled ? "hsl(220,9%,46%)" : "rgba(255,255,255,0.80)",
+            }}
           >
             {link.label}
           </Link>
@@ -81,7 +91,10 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
             <Link
               to="/listing-type"
               className="px-5 py-2.5 text-sm font-semibold rounded-full text-white whitespace-nowrap"
-              style={{ background: 'hsl(214,100%,59%)', boxShadow: '0 2px 12px rgba(37,99,235,0.35)' }}
+              style={{
+                background: "hsl(214,100%,59%)",
+                boxShadow: "0 2px 12px rgba(37,99,235,0.35)",
+              }}
             >
               + Add
             </Link>
@@ -97,8 +110,12 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
                   onClick={() => navigate(dashboardPath)}
                   className="px-4 py-2 text-sm font-medium rounded-full border transition-all duration-200"
                   style={{
-                    color: scrolled ? 'hsl(220,9%,40%)' : 'rgba(255,255,255,0.82)',
-                    borderColor: scrolled ? 'hsl(220,13%,88%)' : 'rgba(255,255,255,0.24)',
+                    color: scrolled
+                      ? "hsl(220,9%,40%)"
+                      : "rgba(255,255,255,0.82)",
+                    borderColor: scrolled
+                      ? "hsl(220,13%,88%)"
+                      : "rgba(255,255,255,0.24)",
                   }}
                 >
                   Dashboard
@@ -107,8 +124,8 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
                   onClick={() => signOut()}
                   className="px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200"
                   style={{
-                    background: scrolled ? 'hsl(222,84%,5%)' : '#fff',
-                    color: scrolled ? '#fff' : 'hsl(222,84%,5%)',
+                    background: scrolled ? "hsl(222,84%,5%)" : "#fff",
+                    color: scrolled ? "#fff" : "hsl(222,84%,5%)",
                   }}
                 >
                   Sign Out
@@ -119,14 +136,18 @@ export function LandlordNavbar({ mode = 'rent', hideLandlordActions = false, tra
                 <Link
                   to="/auth"
                   className="px-4 py-2 text-sm font-medium transition-colors duration-200"
-                  style={{ color: scrolled ? 'hsl(220,9%,40%)' : 'rgba(255,255,255,0.82)' }}
+                  style={{
+                    color: scrolled
+                      ? "hsl(220,9%,40%)"
+                      : "rgba(255,255,255,0.82)",
+                  }}
                 >
                   Log In
                 </Link>
                 <Link
                   to="/auth"
                   className="px-4 py-2 text-sm font-semibold rounded-full text-white"
-                  style={{ background: 'hsl(214,100%,59%)' }}
+                  style={{ background: "hsl(214,100%,59%)" }}
                 >
                   Sign Up
                 </Link>

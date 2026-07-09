@@ -4,17 +4,12 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { ScrollArea } from '@mzanzihomes/ui/components/scroll-area';
-import { Separator } from '@mzanzihomes/ui/components/separator';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { 
-  MapPin, 
-  Calendar, 
-  User, 
-  Home, 
-  Camera, 
-  Mic, 
-  FileText, 
-  Download,
+import {
+  MapPin,
+  Calendar,
+  Camera,
+  Mic,
   X,
   CheckCircle,
   Clock,
@@ -145,14 +140,12 @@ interface InventoryDetailModalProps {
   record: InventoryRecordWithDetails | null;
   isOpen: boolean;
   onClose: () => void;
-  onDownloadReport: (recordId: string) => void;
 }
 
-export function InventoryDetailModal({ 
-  record, 
-  isOpen, 
-  onClose, 
-  onDownloadReport 
+export function InventoryDetailModal({
+  record,
+  isOpen,
+  onClose
 }: InventoryDetailModalProps) {
   if (!record) return null;
 
@@ -227,8 +220,8 @@ export function InventoryDetailModal({
                     <div className="text-2xl font-bold text-purple-600">{record.voice_notes_count}</div>
                     <div className="text-sm text-muted-foreground">Voice Notes</div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-orange-600">{record.country}</div>
+                  <div className="text-center min-w-0">
+                    <div className="text-base font-bold text-orange-600 truncate">{record.country}</div>
                     <div className="text-sm text-muted-foreground">Country</div>
                   </div>
                 </div>
@@ -344,60 +337,18 @@ export function InventoryDetailModal({
               </Card>
             )}
 
-            {/* Reports */}
-            {record.reports && record.reports.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Generated Reports</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {record.reports.map((report) => (
-                      <div key={report.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          <span className="font-medium capitalize">{report.report_type.replace('_', ' ')} Report</span>
-                          <span className="text-sm text-muted-foreground">
-                            - {new Date(report.generated_at).toLocaleDateString()}
-                          </span>
-                        </div>
-                        {report.pdf_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(report.pdf_url, '_blank')}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </ScrollArea>
 
         {/* Footer Actions */}
-        <div className="flex items-center justify-between pt-4 border-t">
-          <div className="text-sm text-muted-foreground">
+        <div className="flex items-center justify-between gap-2 pt-4 border-t">
+          <div className="text-sm text-muted-foreground truncate min-w-0">
             Record ID: {record.id}
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={onClose}>
-              <X className="h-4 w-4 mr-2" />
-              Close
-            </Button>
-            <Button 
-              onClick={() => onDownloadReport(record.id)}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download Report
-            </Button>
-          </div>
+          <Button variant="outline" onClick={onClose} className="shrink-0">
+            <X className="h-4 w-4 mr-2" />
+            Close
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { Plus, Eye, Download } from 'lucide-react';
+import { Plus, Eye, Download, Image } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInspection } from '@mzanzihomes/features/inspection';
 import { InspectionRecordWithDetails } from '@mzanzihomes/common/types/inspection';

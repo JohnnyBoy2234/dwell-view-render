@@ -1,6 +1,6 @@
 # MzanziHomes
 
-Rental-property platform connecting landlords and tenants: listing properties, screening and applying, signing leases, and managing the ongoing tenancy (rent, maintenance, inspections). Delivered as two native apps (tenant, landlord) plus web and admin surfaces over one shared codebase.
+Rental-property platform connecting landlords and tenants: listing properties, screening and applying, signing leases, and managing the ongoing tenancy (rent, maintenance, condition records). Delivered as two native apps (tenant, landlord) plus web and admin surfaces over one shared codebase.
 
 This glossary pins the domain vocabulary. Several concepts currently map to more than one table in the database — where that's true, the canonical term is defined here and the dead or competing synonyms are listed under `_Avoid_`. Collapsing the schema onto these terms is tracked separately; the words are settled here.
 
@@ -32,7 +32,7 @@ _Avoid_: Lead, enquiry, message
 
 **Viewing**:
 A scheduled visit for a prospective Tenant to see a Property in person.
-_Avoid_: Showing, appointment, inspection (an Inspection is a different thing — see below)
+_Avoid_: Showing, appointment, inspection (condition assessment is a Condition Record — see below)
 
 **Application**:
 A Tenant's formal request to rent a specific Property, carrying their screening information.
@@ -55,8 +55,12 @@ A party's e-signature applied to a Lease Agreement, with its audit trail. Canoni
 _Avoid_: lease_signatures (dead), sign-off
 
 **Tenancy**:
-The active rental relationship that exists once a Lease Agreement is executed — the basis for rent, maintenance, and inspections. Canonical record: `tenancies`.
+The active rental relationship that exists once a Lease Agreement is executed — the basis for rent, maintenance, and Condition Records. Canonical record: `tenancies`.
 _Avoid_: Lease (when you mean the ongoing relationship rather than the document), rental, agreement
+
+**Condition Report**:
+The Annexure A legal document — the Landlord's disclosure of known defects, made under the Property Practitioners Act as part of the Lease Agreement. Not the photographic Condition Record.
+_Avoid_: Condition Record (that is the photographic artifact — see Operations), disclosure (unqualified)
 
 ### Operations
 
@@ -64,13 +68,13 @@ _Avoid_: Lease (when you mean the ongoing relationship rather than the document)
 A Tenant-reported issue with a Property that the Landlord is expected to action.
 _Avoid_: Ticket, maintenance_ticket, work order, issue
 
-**Inspection**:
-A recorded assessment of a Property's condition, typically at move-in or move-out.
-_Avoid_: Viewing, survey, walkthrough
+**Condition Record**:
+The photographic record of a Property's condition at move-in or move-out, captured by both parties of a Tenancy and locked by mutual Attestation. One per Tenancy per event.
+_Avoid_: Inspection (retired), Inventory (retired), Condition Report (that is the Annexure A legal disclosure — see Leasing), survey, walkthrough
 
-**Inventory**:
-The itemised record of a Property's contents and their condition, attached to an Inspection.
-_Avoid_: Stock, contents list, manifest
+**Attestation**:
+A party's agreement that a Condition Record's photographs fairly represent the Property's condition, timestamped per party. Both parties' Attestations lock the record permanently.
+_Avoid_: Approval, sign-off, disclosure
 
 ### Compliance
 

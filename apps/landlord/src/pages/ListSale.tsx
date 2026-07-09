@@ -17,6 +17,16 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@mzanzihomes/ui/components/alert-dialog';
 
 // Import step components (reuse from rental listing)
 import { PropertyTypeStep } from '@mzanzihomes/features/listing';
@@ -30,6 +40,24 @@ import { SellerDocumentsStep } from '@mzanzihomes/features/listing';
 import { useExistingProperty } from '@mzanzihomes/features/listing';
 
 import type { SaleListingFormData } from '@mzanzihomes/features/listing';
+
+const DEFAULT_FORM_VALUES: SaleListingFormData = {
+  property_type: '',
+  location: '',
+  description: '',
+  bedrooms: undefined,
+  bathrooms: undefined,
+  parking_spaces: undefined,
+  furnished: false,
+  pets_allowed: false,
+  amenities: [],
+  price: undefined,
+  images: [],
+  contact_name: '',
+  contact_phone: '',
+  contact_email: '',
+  preferred_contact_method: 'both',
+};
 
 const steps = [
   { id: 1, title: 'Property Type', icon: Home, description: 'What are you selling?' },
@@ -52,24 +80,10 @@ export default function ListSale() {
   const { toast } = useToast();
   const { propertyId, property: existingProperty } = useExistingProperty();
 
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+
   const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<SaleListingFormData>({
-    defaultValues: {
-      property_type: '',
-      location: '',
-      description: '',
-      bedrooms: undefined,
-      bathrooms: undefined,
-      parking_spaces: undefined,
-      furnished: false,
-      pets_allowed: false,
-      amenities: [],
-      price: undefined,
-      images: [],
-      contact_name: '',
-      contact_phone: '',
-      contact_email: '',
-      preferred_contact_method: 'both',
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
     mode: 'onChange'
   });
 
@@ -92,16 +106,31 @@ export default function ListSale() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed.currentStep) {
-          setCurrentStep(parsed.currentStep);
+          // Clamp: a draft saved under an older step layout must not land
+          // outside the current wizard's range (renders empty content).
+          setCurrentStep(Math.min(Math.max(1, Number(parsed.currentStep) || 1), steps.length));
         }
         if (parsed.formData) {
           reset(parsed.formData);
+        }
+        // Only worth asking if there's actually progress to lose
+        if (parsed.currentStep > 1 || parsed.formData?.property_type) {
+          setShowDraftPrompt(true);
         }
       }
     } catch (error) {
       console.warn('Failed to restore draft listing', error);
     }
   }, [reset, propertyId]);
+
+  const handleStartOver = () => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {}
+    reset(DEFAULT_FORM_VALUES);
+    setCurrentStep(1);
+    setShowDraftPrompt(false);
+  };
 
   useEffect(() => {
     if (!existingProperty) return;
@@ -127,6 +156,9 @@ export default function ListSale() {
   }, [existingProperty, reset]);
 
   useEffect(() => {
+    // Editing an existing property must not overwrite the new-listing draft
+    // slot, or its data would leak into the next blank listing.
+    if (propertyId) return;
     const payload = {
       currentStep,
       formData: {
@@ -139,7 +171,7 @@ export default function ListSale() {
     } catch (error) {
       console.warn('Failed to persist draft listing', error);
     }
-  }, [formData, currentStep]);
+  }, [formData, currentStep, propertyId]);
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof SaleListingFormData)[] = [];
@@ -246,16 +278,24 @@ export default function ListSale() {
 
       // Continuing an existing (e.g. previously-unlisted) property publishes
       // that same row instead of inserting a duplicate.
-      const { error } = propertyId
-        ? await supabase
-            .from('properties')
-            .update({ ...propertyFields, is_listed: true })
-            .eq('id', propertyId)
-        : await supabase
-            .from('properties')
-            .insert({ ...propertyFields, landlord_id: user.id });
-
-      if (error) throw error;
+      if (propertyId) {
+        const { data: updated, error } = await supabase
+          .from('properties')
+          .update({ ...propertyFields, is_listed: true })
+          .eq('id', propertyId)
+          .select('id');
+        if (error) throw error;
+        // update().eq() on a missing/foreign row matches 0 rows without
+        // erroring -- don't show success for a publish that saved nothing.
+        if (!updated || updated.length === 0) {
+          throw new Error('This property could not be found. It may have been deleted.');
+        }
+      } else {
+        const { error } = await supabase
+          .from('properties')
+          .insert({ ...propertyFields, landlord_id: user.id });
+        if (error) throw error;
+      }
 
       try {
         localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -395,6 +435,23 @@ export default function ListSale() {
             </Button>
           )}
         </div>
+
+        {/* Resume-draft prompt */}
+        <AlertDialog open={showDraftPrompt} onOpenChange={setShowDraftPrompt}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Continue where you left off?</AlertDialogTitle>
+              <AlertDialogDescription>
+                We saved your unfinished listing. You can pick up from where you
+                stopped, or start over with a blank form.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={handleStartOver}>Start over</AlertDialogCancel>
+              <AlertDialogAction onClick={() => setShowDraftPrompt(false)}>Continue draft</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Success Dialog */}
         <SuccessDialog

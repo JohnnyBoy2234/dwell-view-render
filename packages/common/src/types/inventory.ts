@@ -28,15 +28,6 @@ export interface InventoryItem {
   updated_at: string;
 }
 
-export interface InventoryReport {
-  id: string;
-  inventory_record_id: string;
-  report_type: 'move_in' | 'move_out' | 'periodic';
-  pdf_url?: string;
-  generated_at: string;
-  created_at: string;
-}
-
 export interface InventoryRecordWithDetails extends InventoryRecord {
   property?: {
     id: string;
@@ -44,7 +35,6 @@ export interface InventoryRecordWithDetails extends InventoryRecord {
     location: string;
   };
   items?: InventoryItem[];
-  reports?: InventoryReport[];
 }
 
 export interface CreateInventoryRecordData {

@@ -61,7 +61,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxNoteId, setLightboxNoteId] = useState<string | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState(0);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const handleSaveRef = useRef<() => Promise<void>>();
 
@@ -103,8 +103,10 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           await handleSaveRef.current();
           setAutoSaveStatus('saved');
           setTimeout(() => setAutoSaveStatus('idle'), 2000);
-        } catch {
-          setAutoSaveStatus('idle');
+        } catch (e) {
+          // Never fail silently -- the user thinks their recording is safe.
+          console.error('Inventory auto-save failed:', e);
+          setAutoSaveStatus('error');
         }
       }
     }, 30000); // 30 seconds
@@ -238,32 +240,48 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
       if (propErr) throw propErr;
       if (!prop) throw new Error('Property not found');
 
-      // Find or create inventory record for this property and tenant
-      const { data: existingRecords, error: findErr } = await (supabase
-        .from('inventory_records' as any)
-        .select('id, photos_count, voice_notes_count, rooms_recorded')
-        .eq('property_id', propertyId as any)
-        .eq('tenant_id', user.id as any)
-        .limit(1) as any);
-      if (findErr) throw findErr;
+      if (!(prop as any).landlord_id) {
+        throw new Error('This property has no landlord on record, so the inventory cannot be saved yet.');
+      }
 
-      let recordId: string;
-      if (!existingRecords || existingRecords.length === 0) {
+      // Find or create the inventory record. The table is UNIQUE(property_id,
+      // country) -- NOT per tenant -- so look up by the actual constraint key,
+      // and treat an insert race's unique-violation as "someone else created
+      // it, re-fetch" instead of aborting the whole save (which used to drop
+      // the photos AND the voice-note audio on the floor).
+      const COUNTRY = 'South Africa';
+      const findRecord = async () => {
+        const { data, error } = await (supabase
+          .from('inventory_records' as any)
+          .select('id')
+          .eq('property_id', propertyId as any)
+          .eq('country', COUNTRY as any)
+          .limit(1) as any);
+        if (error) throw error;
+        return data && data.length > 0 ? (data[0] as any).id : null;
+      };
+
+      let recordId: string | null = await findRecord();
+      if (!recordId) {
         const { data: created, error: insertErr } = await (supabase
           .from('inventory_records' as any)
           .insert({
             property_id: propertyId,
             tenant_id: user.id,
             landlord_id: (prop as any).landlord_id,
-            country: 'South Africa',
+            country: COUNTRY,
             status: 'in_progress',
           } as any)
           .select('id')
           .single() as any);
-        if (insertErr) throw insertErr;
-        recordId = (created as any).id;
-      } else {
-        recordId = (existingRecords[0] as any).id;
+        if (insertErr) {
+          if (insertErr.code === '23505') {
+            recordId = await findRecord();
+          }
+          if (!recordId) throw insertErr;
+        } else {
+          recordId = (created as any).id;
+        }
       }
 
       // Mark unsaved notes as saving in progress
@@ -558,7 +576,7 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
               <li>Save and move to the next room; submit later for sign-off.</li>
             </ol>
             <p className="text-xs text-muted-foreground">
-              Voice notes are stored locally for now; no server upload yet.
+              Notes upload to the server when you tap Save (or via auto-save after 30 seconds).
             </p>
           </CardContent>
         </Card>
@@ -615,6 +633,9 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
           {autoSaveStatus === 'saved' && (
             <span className="text-xs text-success-green">✓ Auto-saved</span>
           )}
+          {autoSaveStatus === 'error' && (
+            <span className="text-xs text-destructive">Auto-save failed — tap Save to retry</span>
+          )}
         </div>
         <div className="flex items-center gap-2 flex-wrap">
         <Button
@@ -648,19 +669,20 @@ export function InventoryStartPanel({ propertyId }: InventoryStartPanelProps) {
               note.savingInProgress ? 'bg-primary/5 border-primary/20' : 
               'bg-background'
             }`}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-1">
-                  {note.audioUrl && <audio controls src={note.audioUrl} className="flex-1" />}
-                  {!note.audioUrl && <span className="text-muted-foreground italic">Photo-only note</span>}
-                  {note.saved && <span className="text-xs text-success-green font-medium">✓ Saved</span>}
-                  {note.savingInProgress && <span className="text-xs text-primary font-medium">💾 Saving...</span>}
-                  {!note.saved && !note.savingInProgress && <span className="text-xs text-earth-warm font-medium">• Unsaved</span>}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 flex-1 min-w-0 flex-wrap">
+                  {note.audioUrl && <audio controls src={note.audioUrl} className="w-full sm:flex-1 sm:w-auto min-w-0" />}
+                  {!note.audioUrl && <span className="text-muted-foreground italic truncate">Photo-only note</span>}
+                  {note.saved && <span className="text-xs text-success-green font-medium whitespace-nowrap">✓ Saved</span>}
+                  {note.savingInProgress && <span className="text-xs text-primary font-medium whitespace-nowrap">💾 Saving...</span>}
+                  {!note.saved && !note.savingInProgress && <span className="text-xs text-earth-warm font-medium whitespace-nowrap">• Unsaved</span>}
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => deleteNote(note.id)}
                   aria-label="Delete note"
+                  className="shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

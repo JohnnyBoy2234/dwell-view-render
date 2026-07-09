@@ -10,6 +10,16 @@ import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } fr
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@mzanzihomes/ui/components/alert-dialog';
 import { PropertyTypeStep } from '@mzanzihomes/features/listing';
 import { LocationStep } from '@mzanzihomes/features/listing';
 import { DetailsStep } from '@mzanzihomes/features/listing';
@@ -27,29 +37,32 @@ const steps = [
 
 const LOCAL_STORAGE_KEY = 'add_unlisted_property_draft';
 
+const DEFAULT_FORM_VALUES: ListingFormData = {
+  property_type: '',
+  location: '',
+  description: '',
+  bedrooms: undefined,
+  bathrooms: undefined,
+  parking_spaces: undefined,
+  furnished: false,
+  pets_allowed: false,
+  amenities: [],
+  price: 0,
+  images: [],
+};
+
 export default function AddPropertyUnlisted() {
   const { user, isLandlord } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
   const [newPropertyId, setNewPropertyId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<ListingFormData>({
-    defaultValues: {
-      property_type: '',
-      location: '',
-      description: '',
-      bedrooms: undefined,
-      bathrooms: undefined,
-      parking_spaces: undefined,
-      furnished: false,
-      pets_allowed: false,
-      amenities: [],
-      price: 0,
-      images: [],
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
     mode: 'onChange',
   });
 
@@ -66,13 +79,30 @@ export default function AddPropertyUnlisted() {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.currentStep) setCurrentStep(parsed.currentStep);
+        if (parsed.currentStep) {
+          // Clamp: a draft saved under an older step layout must not land
+          // outside the current wizard's range (renders empty content).
+          setCurrentStep(Math.min(Math.max(1, Number(parsed.currentStep) || 1), steps.length));
+        }
         if (parsed.formData) reset(parsed.formData);
+        // Only worth asking if there's actually progress to lose
+        if (parsed.currentStep > 1 || parsed.formData?.property_type) {
+          setShowDraftPrompt(true);
+        }
       }
     } catch (error) {
       console.warn('Failed to restore unlisted property draft', error);
     }
   }, [reset]);
+
+  const handleStartOver = () => {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+    } catch {}
+    reset(DEFAULT_FORM_VALUES);
+    setCurrentStep(1);
+    setShowDraftPrompt(false);
+  };
 
   useEffect(() => {
     try {
@@ -329,6 +359,23 @@ export default function AddPropertyUnlisted() {
           )}
         </div>
       </div>
+
+      {/* Resume-draft prompt */}
+      <AlertDialog open={showDraftPrompt} onOpenChange={setShowDraftPrompt}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Continue where you left off?</AlertDialogTitle>
+            <AlertDialogDescription>
+              We saved your unfinished property. You can pick up from where you
+              stopped, or start over with a blank form.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleStartOver}>Start over</AlertDialogCancel>
+            <AlertDialogAction onClick={() => setShowDraftPrompt(false)}>Continue draft</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Success Dialog */}
       <SuccessDialog

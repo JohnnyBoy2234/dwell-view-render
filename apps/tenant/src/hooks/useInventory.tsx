@@ -140,21 +140,13 @@ export function useInventory() {
         condition: data.condition,
         description: data.description,
         photos: data.photos || [],
+        voice_note_url: data.voice_note_url,
       })
       .select('*')
       .single();
     if (err) throw err;
     await fetchInventoryRecords();
     return created as InventoryItem;
-  };
-
-  const generateInventoryReport = async (_inventoryRecordId: string, _reportType: 'move_in' | 'move_out' | 'periodic' = 'move_in'): Promise<string | null> => {
-    // Placeholder for future function
-    return null;
-  };
-
-  const downloadInventoryReport = async (_inventoryRecordId: string): Promise<void> => {
-    // Placeholder for future download/report generation
   };
 
   const viewInventoryRecord = async (_inventoryRecordId: string): Promise<void> => {
@@ -174,8 +166,6 @@ export function useInventory() {
     createInventoryRecord,
     updateInventoryRecord,
     createInventoryItem,
-    generateInventoryReport,
-    downloadInventoryReport,
     viewInventoryRecord,
   };
 }

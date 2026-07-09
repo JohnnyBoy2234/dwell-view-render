@@ -5,7 +5,12 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Upload, X, Camera, AlertCircle } from 'lucide-react';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { ListingFormData } from '../types';
+
+const MAX_IMAGES = 15;
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // the "max 10MB each" the copy below promises
+const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 interface PhotosStepProps {
   setValue: UseFormSetValue<ListingFormData>;
@@ -14,12 +19,32 @@ interface PhotosStepProps {
 
 export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
   const images = formData.images || [];
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      const newImages = [...images, ...files].slice(0, 15); // Max 15 images
+      const rejected = files.filter(
+        (f) => !ACCEPTED_TYPES.includes(f.type) || f.size > MAX_IMAGE_BYTES
+      );
+      const accepted = files.filter(
+        (f) => ACCEPTED_TYPES.includes(f.type) && f.size <= MAX_IMAGE_BYTES
+      );
+      if (rejected.length > 0) {
+        toast({
+          variant: 'destructive',
+          title: `${rejected.length} photo${rejected.length > 1 ? 's' : ''} skipped`,
+          description: 'Photos must be JPG, PNG or WebP and no larger than 10MB each.',
+        });
+      }
+      const newImages = [...images, ...accepted].slice(0, MAX_IMAGES);
+      if (images.length + accepted.length > MAX_IMAGES) {
+        toast({
+          title: 'Photo limit reached',
+          description: `Only the first ${MAX_IMAGES} photos are kept.`,
+        });
+      }
       setValue('images', newImages);
     }
   };
@@ -62,7 +87,7 @@ export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={handleImageChange}
               className="sr-only"
               id="image-upload"
@@ -73,7 +98,7 @@ export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
               variant="outline"
               onClick={() => fileInputRef.current?.click()}
               className="flex items-center gap-2"
-              disabled={images.length >= 15}
+              disabled={images.length >= MAX_IMAGES}
             >
               <Upload className="h-4 w-4" />
               {images.length === 0 ? 'Choose Photos' : 'Add More Photos'}
@@ -90,7 +115,7 @@ export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
       {images.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold">Uploaded Photos ({images.length}/15)</h3>
+            <h3 className="text-lg font-semibold">Uploaded Photos ({images.length}/{MAX_IMAGES})</h3>
             <p className="text-sm text-muted-foreground">Drag to reorder</p>
           </div>
           

@@ -49,7 +49,7 @@ export default function ReviewStep({ formData, isSale }: ReviewStepProps) {
         <div className="aspect-video bg-muted relative">
           {images && images.length > 0 ? (
             <img
-              src={URL.createObjectURL(images[0])}
+              src={typeof images[0] === 'string' ? images[0] : URL.createObjectURL(images[0])}
               alt="Property main"
               className="w-full h-full object-cover"
             />

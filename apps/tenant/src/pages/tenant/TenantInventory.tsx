@@ -7,14 +7,12 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { Home, FileText, Camera, Mic, Download, Eye } from 'lucide-react';
+import { Home, FileText, Camera, Mic, Eye } from 'lucide-react';
 import { InventoryRecordWithDetails } from '@mzanzihomes/common/types/inventory';
 
 export default function TenantInventory() {
   const { tenantProperty, loading } = useTenantDashboard();
   const { user } = useAuth();
-  const { toast } = useToast();
   const {
     inventoryRecords,
     loading: inventoryLoading,
@@ -41,15 +39,6 @@ export default function TenantInventory() {
   const handleViewInventory = (record: InventoryRecordWithDetails) => {
     setSelectedRecord(record);
     setIsDetailModalOpen(true);
-  };
-
-  const handleDownloadReport = async (_recordId: string) => {
-    // Report generation/export isn't implemented yet - be honest instead of
-    // claiming success for something that didn't happen.
-    toast({
-      title: "Not available yet",
-      description: "Inventory report generation is coming soon.",
-    });
   };
 
   const handleStartNewInventory = () => {
@@ -133,16 +122,16 @@ export default function TenantInventory() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-lg">{tenantProperty.title}</h3>
-                <p className="text-muted-foreground">{tenantProperty.location}</p>
-                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-lg break-words">{tenantProperty.title}</h3>
+                <p className="text-muted-foreground break-words">{tenantProperty.location}</p>
+                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
                   <span>Move-in: Available</span>
                   <span>Monthly Rent: R{tenantProperty.monthlyRent.toLocaleString()}</span>
                 </div>
               </div>
-              <Button onClick={handleStartNewInventory} className="bg-ocean-blue hover:bg-ocean-blue-dark">
+              <Button onClick={handleStartNewInventory} className="bg-ocean-blue hover:bg-ocean-blue-dark shrink-0 self-start">
                 <Camera className="h-4 w-4 mr-2" />
                 Start Inventory
               </Button>
@@ -211,29 +200,20 @@ export default function TenantInventory() {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Mic className="h-4 w-4" />
-                      <span>Audio recordings & photos available</span>
+                  <div className="flex items-center justify-between gap-2 flex-wrap pt-4 border-t">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
+                      <Mic className="h-4 w-4 shrink-0" />
+                      <span className="truncate">Audio recordings & photos available</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewInventory(record)}
-                      >
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDownloadReport(record.id)}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        Download Report
-                      </Button>
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0"
+                      onClick={() => handleViewInventory(record)}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -279,7 +259,6 @@ export default function TenantInventory() {
           setIsDetailModalOpen(false);
           setSelectedRecord(null);
         }}
-        onDownloadReport={handleDownloadReport}
       />
     </div>
   );

@@ -79,7 +79,11 @@
       "Bash(grep -rn *)",
       "Bash(echo \"exit: $?\")",
       "Bash(awk -F'|' 'NR>2 {gsub\\(/ /,\"\",$1\\); gsub\\(/ /,\"\",$2\\); if \\($1!=\"\" && $2==\"\"\\) print}' /tmp/claude-1000/-home-caleb-Projects-dwell-view-render/19cab53e-a52d-4b88-88bf-3aed6406f002/scratchpad/migration_list.txt)",
-      "Bash(supabase --help)"
+      "Bash(supabase --help)",
+      "Bash(grep *)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "WebSearch"
     ]
   },
   "enabledMcpjsonServers": [
