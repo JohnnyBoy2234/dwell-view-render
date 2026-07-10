@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -9,6 +10,8 @@ const corsHeaders = {
 const logStep = (step: string, details?: unknown) => {
   console.log(`[SEND-MONTHLY-BILL] ${step}${details ? ` - ${JSON.stringify(details)}` : ''}`);
 };
+
+const fmtR = (n: number) => `R${Number(n).toFixed(2)}`;
 
 interface LineItemInput {
   category: 'water' | 'sewage' | 'electricity' | 'refuse' | 'other';
@@ -39,7 +42,7 @@ serve(async (req) => {
 
     const { data: bill, error: billError } = await supabase
       .from('monthly_bills')
-      .select('*')
+      .select('*, properties(title, location)')
       .eq('id', billId)
       .eq('landlord_id', user.id)
       .single();
@@ -97,6 +100,64 @@ serve(async (req) => {
         }))
       );
       if (itemsError) throw itemsError;
+    }
+
+    // ---- Invoice PDF (best effort — the bill is already sent, so a PDF
+    // failure must never fail the send; the tenant can still pay) ----
+    try {
+      const { data: landlordProfile } = await supabase
+        .from('profiles').select('display_name').eq('user_id', bill.landlord_id).single();
+      const { data: tenantProfile } = await supabase
+        .from('profiles').select('display_name').eq('user_id', bill.tenant_id).single();
+
+      const pdf = await PDFDocument.create();
+      const page = pdf.addPage([595, 842]); // A4
+      const font = await pdf.embedFont(StandardFonts.Helvetica);
+      const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+      const propertyName = bill.properties?.title || bill.properties?.location || 'Property';
+      let y = 780;
+      const draw = (text: string, opts: { x?: number; size?: number; isBold?: boolean } = {}) => {
+        page.drawText(text, {
+          x: opts.x ?? 60, y, size: opts.size ?? 11,
+          font: opts.isBold ? bold : font, color: rgb(0.1, 0.1, 0.15),
+        });
+      };
+
+      draw('MzanziHomes — Rent Invoice', { size: 18, isBold: true }); y -= 20;
+      draw(`Invoice #: ${bill.id.slice(0, 8).toUpperCase()}-${bill.period}`, { size: 10 }); y -= 14;
+      draw(`Issued: ${new Date().toLocaleDateString('en-ZA')}`, { size: 10 }); y -= 28;
+      draw(`Property: ${propertyName}`, { isBold: true }); y -= 16;
+      draw(`Period: ${bill.period}`); y -= 16;
+      draw(`Tenant: ${tenantProfile?.display_name ?? ''}`); y -= 16;
+      draw(`Landlord: ${landlordProfile?.display_name ?? ''}`); y -= 30;
+
+      draw('Item', { isBold: true }); draw('Amount', { x: 440, isBold: true }); y -= 18;
+      draw('Rent'); draw(fmtR(Number(bill.rent_amount)), { x: 440 }); y -= 16;
+      for (const li of items) {
+        const label = li.label?.trim() || li.category.charAt(0).toUpperCase() + li.category.slice(1);
+        draw(label); draw(fmtR(li.amount), { x: 440 }); y -= 16;
+      }
+      y -= 8;
+      draw('Total due', { isBold: true }); draw(fmtR(total), { x: 440, isBold: true });
+
+      const pdfBytes = await pdf.save();
+      const fileName = `${bill.landlord_id}/${bill.id}_invoice.pdf`;
+      const { error: uploadError } = await supabase.storage
+        .from('rent-receipts')
+        .upload(fileName, pdfBytes, { contentType: 'application/pdf', upsert: true });
+      if (uploadError) throw uploadError;
+
+      const { error: pathError } = await supabase
+        .from('monthly_bills')
+        .update({ invoice_pdf_path: fileName })
+        .eq('id', billId);
+      if (pathError) throw pathError;
+      logStep('Invoice generated', { billId, fileName });
+    } catch (invoiceError) {
+      logStep('Invoice generation failed (non-fatal)', {
+        billId,
+        error: invoiceError instanceof Error ? invoiceError.message : String(invoiceError),
+      });
     }
 
     // No tenant notification here by design — the persistent rent-due banner

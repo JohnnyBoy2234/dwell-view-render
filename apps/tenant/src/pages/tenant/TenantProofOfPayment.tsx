@@ -189,13 +189,20 @@ export default function TenantProofOfPayment() {
                       Paid {bill.paid_at ? new Date(bill.paid_at).toLocaleDateString('en-ZA') : ''}
                     </p>
                   </div>
-                  {bill.receipt_pdf_path ? (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Receipt generating…</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {bill.invoice_pdf_path ? (
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={receiptUrl(bill.invoice_pdf_path)} target="_blank" rel="noreferrer">Invoice</a>
+                      </Button>
+                    ) : null}
+                    {bill.receipt_pdf_path ? (
+                      <Button variant="outline" size="sm" asChild>
+                        <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Receipt generating…</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </>

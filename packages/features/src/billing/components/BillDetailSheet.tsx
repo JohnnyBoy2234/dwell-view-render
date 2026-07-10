@@ -69,6 +69,16 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
           <div className="flex justify-between border-t pt-2 font-bold">
             <span>Total</span><span>{fmtR(Number(bill.total_amount))}</span>
           </div>
+          {bill.invoice_pdf_path ? (
+            <a
+              className="block pt-1 text-sm text-primary underline underline-offset-4"
+              href={supabase.storage.from('rent-receipts').getPublicUrl(bill.invoice_pdf_path).data.publicUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              View invoice (PDF)
+            </a>
+          ) : null}
         </div>
         <Button className="w-full" size="lg" disabled={paying} onClick={startPayment}>
           {paying ? 'Opening secure checkout…' : `Pay ${fmtR(Number(bill.total_amount))}`}
