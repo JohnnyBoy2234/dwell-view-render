@@ -1449,7 +1449,7 @@ Route path everywhere: `condition-records`. **The landlord `PlanGuard requiredPl
 
 > **SCOPE CHANGE 2026-07-10 (ADR-0004 amendment): Inventory is KEPT** as the furnished-property stock list. Only Inspection is replaced by Condition Records. Everywhere below, inventory routes/nav/config/notification entries stay untouched; only inspection entries are replaced.
 
-- [ ] **Step 1: Tenant routes**
+- [x] **Step 1: Tenant routes**
 
 In `TenantDashboardRoutes.tsx`, replace the `inspection` route only (keep the `inventory` route; swap the `TenantInspection` import for the new import, keep `TenantInventory`):
 
@@ -1467,7 +1467,7 @@ import { ConditionRecordsPage } from '@mzanzihomes/features/condition-record';
 
 If `@mzanzihomes/features/condition-record` isn't resolvable as a subpath, check how `@mzanzihomes/features/pages` is set up in `packages/features/package.json` `exports` and mirror that pattern for `./condition-record`.
 
-- [ ] **Step 2: Landlord routes**
+- [x] **Step 2: Landlord routes**
 
 In `LandlordDashboardRoutes.tsx`, replace the `inspection` and `inspection/start` routes (lines ~121–133) with:
 
@@ -1491,7 +1491,7 @@ In `apps/landlord/src/App.tsx`, replace the `/enhancedlandlorddashboard/inspecti
 
 Update imports accordingly (remove `LandlordInspection`; other old imports are removed in Task 8 when their routes go).
 
-- [ ] **Step 3: Sidebar and page config**
+- [x] **Step 3: Sidebar and page config**
 
 `EnhancedSidebar.tsx`: keep the tenant `Inventory` item; replace only the tenant `Inspection` item (`/tenant/inspection`) — keep whichever base path prefix the surrounding tenant items use:
 
@@ -1525,7 +1525,7 @@ Replace the landlord `Inspection` item (~line 93) with:
   },
 ```
 
-- [ ] **Step 4: Notification routing**
+- [x] **Step 4: Notification routing**
 
 `packages/ui/src/utils/notificationRoutes.ts` (inventory entries all STAY; add condition_record alongside):
 - In the type-sniffing chain (~line 93), ADD a `t.includes('condition') ? 'condition_record'` branch (keep the `t.includes('inventory')` branch).
@@ -1550,7 +1550,7 @@ Replace the landlord `Inspection` item (~line 93) with:
 
 (`NotificationUrls.inventory` and its `notificationService.ts` call sites stay — inventory is kept.)
 
-- [ ] **Step 5: Build and eyeball**
+- [x] **Step 5: Build and eyeball**
 
 ```bash
 npm run build
@@ -1558,7 +1558,7 @@ npm run build
 
 Expected: success. Then `npm run dev`, open the tenant app → sidebar shows "Condition Records", page loads (empty state) with no console errors; same for landlord app.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add apps/tenant apps/landlord packages/ui packages/common
