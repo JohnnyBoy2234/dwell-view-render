@@ -29,6 +29,7 @@ import JoinProperty from "@/pages/JoinProperty";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
+import DocumentViewer from "@/pages/DocumentViewer";
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
 import ApplicationDetail from "@mzanzihomes/ui/components/pages/ApplicationDetail";
 import { RentalApplication } from '@mzanzihomes/features/pages';
@@ -153,6 +154,7 @@ function AppRoutes() {
 
         {/* Notifications & settings */}
         <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
+        <Route path="/document" element={<AuthenticatedRoute><DocumentViewer /></AuthenticatedRoute>} />
         <Route path="/settings" element={
           <RouteGuard>
             <EnhancedDashboardLayout title="Account Settings">

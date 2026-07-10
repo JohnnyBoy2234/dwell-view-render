@@ -21,7 +21,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@mzanzihomes/ui/components/pagination';
-import { X } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -218,13 +218,23 @@ export default function Properties() {
 
         {/* ── Page heading ──────────────────────────────────── */}
         <div className="flex items-baseline justify-between mb-5 animate-in fade-in duration-300">
-          <div>
-            <h1 className="text-xl font-bold text-foreground tracking-tight">Properties</h1>
-            {searchTerm && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                in <span className="font-medium text-foreground">{searchTerm}</span>
-              </p>
-            )}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+              aria-label="Back"
+              className="w-8 h-8 -ml-1 rounded-full flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-black/[0.05] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-foreground tracking-tight">Properties</h1>
+              {searchTerm && (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  in <span className="font-medium text-foreground">{searchTerm}</span>
+                </p>
+              )}
+            </div>
           </div>
           <span className="text-xs text-muted-foreground tabular-nums">
             {filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''}

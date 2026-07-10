@@ -70,6 +70,12 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
 
       navigate('/enhancedlandlorddashboard');
     } else {
+      // Tenants: behave like a browser back button — return to wherever they
+      // came from, falling back to the configured hub on a fresh session.
+      if (window.history.length > 1) {
+        navigate(-1);
+        return;
+      }
       const backPath = pageConfig.backPath || basePath;
       onTabChange?.(backPath);
       navigate(backPath);
@@ -86,8 +92,10 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
     >
       {/* Header — dark glass, matching home page navbar */}
       <header
-        className="h-16 flex items-center border-b border-white/10 sticky top-0 z-40 px-3 sm:px-4 lg:px-6 backdrop-blur-md shrink-0"
+        className="h-16 flex items-center border-b border-white/10 sticky z-40 px-3 sm:px-4 lg:px-6 backdrop-blur-md shrink-0"
         style={{
+          // Sits below the tenant rent-due banner when it's visible (var is 0px otherwise)
+          top: 'var(--rent-banner-h, 0px)',
           background: 'rgba(10,10,20,0.78)',
           boxShadow: '0 2px 24px rgba(37,99,235,0.14), inset 0 1px 0 rgba(255,255,255,0.06)',
           willChange: 'transform',
