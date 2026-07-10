@@ -699,7 +699,7 @@ git commit -m "feat(db): cron jobs for move-out condition records and attestatio
 **Interfaces:**
 - Consumes: `public.condition_records` (Task 2), existing `create_notification` RPC. The function already runs with the service role, so RLS is bypassed and the unique constraint is the only duplicate guard needed.
 
-- [ ] **Step 1: Modify the tenancy-creation block**
+- [x] **Step 1: Modify the tenancy-creation block**
 
 In `supabase/functions/sign-lease-contract/index.ts`, the existing code inside `if (updateData.status === 'signed')` inserts the tenancy without reading the result:
 
@@ -765,7 +765,7 @@ Replace that statement with:
 
 This stays inside the existing `try { ... } catch (e) { console.error('Tenancy creation on full-sign failed:', e); }` so a condition-record failure never blocks contract signing.
 
-- [ ] **Step 2: Verify locally**
+- [x] **Step 2: Verify locally**
 
 ```bash
 npm run supabase -- functions serve sign-lease-contract
@@ -773,7 +773,7 @@ npm run supabase -- functions serve sign-lease-contract
 
 Expected: the function serves without a Deno syntax/compile error (Ctrl-C after it reports listening). Full end-to-end (sign a lease → record appears) happens in Task 9's verification pass.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add supabase/functions/sign-lease-contract/index.ts
