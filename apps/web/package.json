@@ -12,10 +12,11 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@mzanzihomes/ui": "*",
-    "@mzanzihomes/supabase": "*",
-    "@mzanzihomes/common": "*",
     "@hookform/resolvers": "^3.9.0",
+    "@mzanzihomes/common": "*",
+    "@mzanzihomes/features": "*",
+    "@mzanzihomes/supabase": "*",
+    "@mzanzihomes/ui": "*",
     "@supabase/supabase-js": "^2.55.0",
     "@tanstack/react-query": "^5.56.2",
     "@vercel/analytics": "^1.5.0",
