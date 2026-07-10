@@ -42,7 +42,7 @@ export function ConditionRecordsPage() {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-4 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
       {list.loading && <p className="text-muted-foreground">Loading condition records…</p>}
       {list.error && <p className="text-destructive">{list.error}</p>}
       {!list.loading && list.records.length === 0 && (
@@ -61,11 +61,13 @@ function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: (
   return (
     <Card className="cursor-pointer hover:bg-accent/50" onClick={onOpen}>
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center justify-between text-base">
-          <span>
+        <CardTitle className="flex items-start justify-between gap-2 text-base">
+          <span className="min-w-0">
             {item.propertyTitle} — {EVENT_LABEL[item.record.event_type]}
           </span>
-          <Badge variant={state === 'locked' ? 'default' : 'secondary'}>{STATE_LABEL[state]}</Badge>
+          <Badge className="shrink-0 text-center" variant={state === 'locked' ? 'default' : 'secondary'}>
+            {STATE_LABEL[state]}
+          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent className="text-sm text-muted-foreground">
@@ -146,8 +148,8 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
   };
 
   return (
-    <div className="space-y-6 p-4">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
+      <div className="flex items-center justify-between gap-2">
         <Button variant="ghost" onClick={onBack}>← Back</Button>
         <Badge variant={locked ? 'default' : 'secondary'}>{STATE_LABEL[state]}</Badge>
       </div>
@@ -172,6 +174,7 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
               accept="image/*"
               multiple
               disabled={uploading}
+              className="min-w-0 max-w-full"
               onChange={(e) => onFiles(e.target.files)}
             />
             {uploading && <span className="text-sm text-muted-foreground">Uploading…</span>}
