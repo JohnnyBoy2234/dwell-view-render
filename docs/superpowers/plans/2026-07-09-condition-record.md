@@ -821,7 +821,7 @@ git commit -m "feat(lease): auto-create move-in condition record when tenancy st
 
 **Note on tables missing from generated types:** `packages/supabase/src/types.ts` will not know the new tables until types are regenerated (Task 8). Follow the codebase's existing pattern for this situation (see `apps/tenant/src/hooks/useInventory.tsx`): `const db = supabase as any;` at the top of each hook, with a `// ponytail: untyped until supabase types regen (Task 8)` comment.
 
-- [ ] **Step 1: Write the list hook**
+- [x] **Step 1: Write the list hook**
 
 `packages/features/src/condition-record/hooks/useConditionRecords.ts`:
 
@@ -931,7 +931,7 @@ export function useConditionRecords() {
 }
 ```
 
-- [ ] **Step 2: Write the detail hook**
+- [x] **Step 2: Write the detail hook**
 
 `packages/features/src/condition-record/hooks/useConditionRecordDetail.ts`:
 
@@ -1088,7 +1088,7 @@ export function useConditionRecordDetail(recordId: string | null) {
 }
 ```
 
-- [ ] **Step 3: Write the slice barrel**
+- [x] **Step 3: Write the slice barrel**
 
 `packages/features/src/condition-record/index.ts`:
 
@@ -1101,12 +1101,12 @@ export type { PhotoWithUrl } from './hooks/useConditionRecordDetail';
 
 (The page component is added to this barrel in Task 6.)
 
-- [ ] **Step 4: Typecheck**
+- [x] **Step 4: Typecheck**
 
 Run from the repo root: `npx tsc --noEmit -p packages/features` (if the package has no own tsconfig for this, `npm run build` at root and confirm no new errors mention `condition-record`).
 Expected: no errors in `packages/features/src/condition-record/`.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/features/src/condition-record/
