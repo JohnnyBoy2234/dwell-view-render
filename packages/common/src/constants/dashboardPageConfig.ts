@@ -4,8 +4,7 @@ import {
   Inbox, 
   FileText, 
   Users, 
-  Wrench, 
-  ClipboardList, 
+  Wrench,
   BarChart3,
   Camera,
   LucideIcon,
@@ -152,9 +151,9 @@ const TENANT_DASHBOARD_ROUTE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/tenant-dashboard',
   },
-  '/inspection': {
-    title: 'Property Inspection',
-    icon: ClipboardList,
+  '/condition-records': {
+    title: 'Condition Records',
+    icon: Camera,
     showSidebar: false,
     showBackButton: true,
     backPath: '/tenant-dashboard',
@@ -257,9 +256,9 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
   },
-  '/enhancedlandlorddashboard/inspection': {
-    title: 'Inspection',
-    icon: ClipboardList,
+  '/enhancedlandlorddashboard/condition-records': {
+    title: 'Condition Records',
+    icon: Camera,
     showSidebar: false,
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',

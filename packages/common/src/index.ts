@@ -25,7 +25,6 @@ export * from './constants/benefitsConstants';
 export * from './constants/dashboardConstants';
 export * from './constants/dashboardPageConfig';
 export * from './constants/footerConstants';
-export * from './constants/howItWorksConstants';
 export * from './constants/kycConstants';
 export * from './constants/maintenanceConstants';
 export * from './constants/messageConstants';

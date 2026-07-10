@@ -26,7 +26,7 @@ import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
-import LandlordInspection from "@/pages/LandlordInspection";
+import { ConditionRecordsPage } from "@mzanzihomes/features/condition-record";
 import LandlordMaintenance from "@/pages/LandlordMaintenance";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
@@ -172,19 +172,11 @@ function AppRoutes() {
             </PlanGuard>
           </AuthenticatedRoute>
         } />
-        <Route path="/enhancedlandlorddashboard/inspection" element={
-          <PlanGuard requiredPlan="pro" featureName="Property Inspections">
-            <DashboardShell title="Property Inspection" currentTab="/enhancedlandlorddashboard/inspection">
-              <LandlordInspection />
-            </DashboardShell>
-          </PlanGuard>
-        } />
-        <Route path="/enhancedlandlorddashboard/inspection/start" element={
-          <PlanGuard requiredPlan="pro" featureName="Property Inspections">
-            <DashboardShell title="Start Inspection" currentTab="/enhancedlandlorddashboard/inspection">
-              <InventoryStart />
-            </DashboardShell>
-          </PlanGuard>
+        {/* No PlanGuard: the record needs both parties regardless of plan (see plan Task 7). */}
+        <Route path="/enhancedlandlorddashboard/condition-records" element={
+          <DashboardShell title="Condition Records" currentTab="/enhancedlandlorddashboard/condition-records">
+            <ConditionRecordsPage />
+          </DashboardShell>
         } />
         <Route path="/enhancedlandlorddashboard/support" element={
           <AuthenticatedRoute>

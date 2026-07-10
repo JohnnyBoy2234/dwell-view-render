@@ -90,6 +90,7 @@ export const getNotificationTargetUrl = (
     : t.includes('viewing') ? 'viewing'
     : t.includes('maintenance') ? 'maintenance'
     : (t.includes('payment') || t.includes('billing')) ? 'payment'
+    : t.includes('condition') ? 'condition_record'
     : t.includes('inventory') ? 'inventory'
     : t.includes('kyc') ? 'kyc'
     : 'other';
@@ -120,6 +121,11 @@ export const getNotificationTargetUrl = (
     case 'payment':
       // Tenant payments live under proof-of-payment; there is no /payments route.
       return isLandlord ? landlordPath(`${landlordBase}/payments`) : `${tenantBase}/proof-of-payment`;
+
+    case 'condition_record':
+      return isLandlord
+        ? landlordPath(`${landlordBase}/condition-records`)
+        : `${tenantBase}/condition-records`;
 
     case 'inventory':
       if (isLandlord) return landlordPath(`${landlordBase}/inventory`, inventoryId ? `id=${inventoryId}` : undefined);
@@ -158,11 +164,11 @@ function isValidRoute(url: string, isLandlord: boolean): boolean {
   if (shared.some(p => p.test(path))) return true;
 
   if (isLandlord) {
-    return /^\/enhancedlandlorddashboard(\/(applications|maintenance|payments|leases|inventory|properties|profile|inspection|swiftbooks|notifications))?$/.test(path);
+    return /^\/enhancedlandlorddashboard(\/(applications|maintenance|payments|leases|inventory|properties|profile|condition-records|swiftbooks|notifications))?$/.test(path);
   }
   // Tenant dashboard base + its real sub-routes (note: proof-of-payment, not payments)
   return /^\/(tenant-dashboard|enhancedtenantdashboard)$/.test(path)
-    || /^\/tenant-dashboard\/(leases|maintenance|viewings|inventory|applications|proof-of-payment|profile|inspection|contracts)$/.test(path);
+    || /^\/tenant-dashboard\/(leases|maintenance|viewings|inventory|applications|proof-of-payment|profile|condition-records|contracts)$/.test(path);
 }
 
 /** Canonical URL builders — use these when creating notifications */
@@ -194,6 +200,11 @@ export const NotificationUrls = {
     isLandlord
       ? `/enhancedlandlorddashboard/inventory?id=${inventoryId}`
       : `/tenant-dashboard/inventory?id=${inventoryId}`,
+
+  conditionRecord: (isLandlord: boolean) =>
+    isLandlord
+      ? '/enhancedlandlorddashboard/condition-records'
+      : '/tenant-dashboard/condition-records',
 
   payment: (isLandlord: boolean) =>
     isLandlord

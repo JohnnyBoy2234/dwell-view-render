@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { CSSProperties } from 'react';
-import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Clipboard, Lock, type LucideIcon } from 'lucide-react';
+import { Home, BarChart3, Eye, Plus, User, Settings, FileText, Calendar, Users, Building, Wrench, Inbox, Receipt, Camera, Lock, type LucideIcon } from 'lucide-react';
 import { RIcon } from '@mzanzihomes/ui/components/icons/RIcon';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
@@ -38,7 +38,7 @@ const tenantItems: SidebarItem[] = [
   { title: 'Overview', url: '/enhancedtenantdashboard', icon: Home },
   { title: 'Property Viewings', url: '/tenant/viewings', icon: Eye },
   { title: 'Inventory', url: '/tenant/inventory', icon: FileText },
-  { title: 'Inspection', url: '/tenant/inspection', icon: Clipboard },
+  { title: 'Condition Records', url: '/tenant/condition-records', icon: Camera },
   { title: 'Maintenance', url: '/tenant/maintenance', icon: Settings },
   { title: 'Proof of Payment', url: '/tenant/proof-of-payment', icon: Inbox },
   { title: 'Lease Contracts', url: '/enhancedtenantdashboard/leases', icon: FileText },
@@ -89,12 +89,12 @@ const landlordItems: SidebarItem[] = [
     description: 'Handle maintenance requests',
     requiredPlan: 'premium'
   },
-  { 
-    title: 'Inspection', 
-    url: '/enhancedlandlorddashboard/inspection', 
-    icon: Clipboard,
-    description: 'Schedule and track property inspections',
-    requiredPlan: 'pro'
+  {
+    title: 'Condition Records',
+    url: '/enhancedlandlorddashboard/condition-records',
+    icon: Camera,
+    description: 'Photograph and attest property condition at move-in and move-out',
+    requiredPlan: 'free'
   },
   { 
     title: 'SwiftBooks', 

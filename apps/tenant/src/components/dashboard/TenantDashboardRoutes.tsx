@@ -3,7 +3,7 @@ import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/En
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
-import TenantInspection from '@/pages/tenant/TenantInspection';
+import { ConditionRecordsPage } from '@mzanzihomes/features/condition-record';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import TenantLeaseDocuments from '@/pages/tenant/TenantLeaseDocuments';
 import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
@@ -43,9 +43,9 @@ export default function TenantDashboardRoutes() {
           <TenantInventory />
         </EnhancedDashboardLayout>
       } />
-      <Route path="inspection" element={
-        <EnhancedDashboardLayout title="Property Inspection">
-          <TenantInspection />
+      <Route path="condition-records" element={
+        <EnhancedDashboardLayout title="Condition Records">
+          <ConditionRecordsPage />
         </EnhancedDashboardLayout>
       } />
       <Route path="proof-of-payment" element={

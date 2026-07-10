@@ -3,8 +3,7 @@ import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/En
 import { Messages } from '@mzanzihomes/features/pages';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
-import LandlordInspection from '@/pages/LandlordInspection';
-import { InventoryStart } from '@mzanzihomes/features/pages';
+import { ConditionRecordsPage } from '@mzanzihomes/features/condition-record';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { MzanziHomesSupport } from '@mzanzihomes/features/support';
 import { PlanGuard } from '@mzanzihomes/ui/components/PlanGuard';
@@ -118,19 +117,11 @@ export default function LandlordDashboardRoutes() {
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
-      <Route path="inspection" element={
-        <PlanGuard requiredPlan="pro" featureName="Property Inspections">
-          <EnhancedDashboardLayout title="Property Inspection">
-            <LandlordInspection />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
-      } />
-      <Route path="inspection/start" element={
-        <PlanGuard requiredPlan="pro" featureName="Property Inspections">
-          <EnhancedDashboardLayout title="Start Inspection">
-            <InventoryStart />
-          </EnhancedDashboardLayout>
-        </PlanGuard>
+      {/* No PlanGuard: the record needs both parties regardless of plan (see plan Task 7). */}
+      <Route path="condition-records" element={
+        <EnhancedDashboardLayout title="Condition Records">
+          <ConditionRecordsPage />
+        </EnhancedDashboardLayout>
       } />
       <Route path="maintenance/:ticketId" element={
         <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
