@@ -1129,7 +1129,7 @@ One page component serves both apps; the party-specific behaviour all derives fr
 
 **Import-path check before writing:** open `packages/features/src/property/components/InventoryStartPanel.tsx` and copy its exact import specifiers for Button/Card/Badge/toast (e.g. `@mzanzihomes/ui/components/ui/button`). Use those same specifiers below — the paths in this plan assume that convention; adjust if the real one differs.
 
-- [ ] **Step 1: Write the page component**
+- [x] **Step 1: Write the page component**
 
 `packages/features/src/condition-record/components/ConditionRecordsPage.tsx`:
 
@@ -1413,7 +1413,7 @@ function AttestationStatus({ label, at }: { label: string; at: string | null }) 
 }
 ```
 
-- [ ] **Step 2: Export from the slice barrel**
+- [x] **Step 2: Export from the slice barrel**
 
 Append to `packages/features/src/condition-record/index.ts`:
 
@@ -1421,12 +1421,12 @@ Append to `packages/features/src/condition-record/index.ts`:
 export { ConditionRecordsPage } from './components/ConditionRecordsPage';
 ```
 
-- [ ] **Step 3: Typecheck / build**
+- [x] **Step 3: Typecheck / build**
 
 Run: `npm run build` from the repo root.
 Expected: no new errors referencing `condition-record` files (fix any import-specifier mismatch against the convention found in `InventoryStartPanel.tsx`).
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add packages/features/src/condition-record/
