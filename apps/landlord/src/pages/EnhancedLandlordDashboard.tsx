@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@mzan
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark, CreditCard, LogOut, Loader2 } from "lucide-react";
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
@@ -23,7 +23,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
-import { RentCollectionCard } from '@mzanzihomes/features/billing';
+import { RentCollectionCard, usePlanCheckout } from '@mzanzihomes/features/billing';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
@@ -148,7 +148,7 @@ function InventoryPhotoThumb({ path }: { path: string }) {
 }
 
 export default function EnhancedLandlordDashboard() {
-  const { user, isLandlord, loading: authLoading } = useAuth();
+  const { user, isLandlord, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -165,9 +165,33 @@ export default function EnhancedLandlordDashboard() {
   const { unreadCount: unreadMessages } = useUnreadMessages();
 
   // Monetization plan state
-  const { isSubscriber, loading: planLoading } = useSubscription();
+  const { isSubscriber, loading: planLoading, planStatus, planExpiresAt, refresh: refreshSubscription } = useSubscription();
   const [showPlanPrompt, setShowPlanPrompt] = useState(false);
   const [gatedFeature, setGatedFeature] = useState<string | null>(null);
+
+  // Profile tab: cancel-subscription flow
+  const [showCancelSubDialog, setShowCancelSubDialog] = useState(false);
+  const [cancellingSub, setCancellingSub] = useState(false);
+  const { startCheckout: startPlanCheckout, starting: startingPlanCheckout } = usePlanCheckout();
+
+  const handleCancelSubscription = async () => {
+    setCancellingSub(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cancel-subscription', { body: {} });
+      if (error) {
+        const body = await (error as any).context?.json?.().catch(() => null);
+        throw new Error(body?.error || error.message);
+      }
+      if (!data?.success) throw new Error(data?.error || 'Could not cancel subscription');
+      setShowCancelSubDialog(false);
+      await refreshSubscription();
+      toast({ title: 'Subscription cancelled', description: 'You will not be billed again.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Cancellation failed', description: e?.message || 'Please try again.' });
+    } finally {
+      setCancellingSub(false);
+    }
+  };
 
   // Prompt the plans once per session after sign-in (free landlords only).
   useEffect(() => {
@@ -944,6 +968,151 @@ export default function EnhancedLandlordDashboard() {
 
   const isBaseTab = currentTab === '/enhancedlandlorddashboard';
 
+  const renderProfileTab = () => {
+    const displayName =
+      landlordDetails.name ||
+      (user?.user_metadata?.display_name as string | undefined) ||
+      (user?.user_metadata?.full_name as string | undefined) ||
+      '—';
+    const expiryDate = planExpiresAt
+      ? new Date(planExpiresAt).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' })
+      : null;
+    const nonRenewing = planStatus === 'non-renewing';
+
+    return (
+      <div
+        className="p-4 space-y-4 max-w-2xl mx-auto w-full"
+        style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
+      >
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <User className="w-4 h-4" style={{ color: 'hsl(214,100%,59%)' }} />
+              Account
+            </CardTitle>
+            <CardDescription>Your MzanziHomes landlord account</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">Name</span>
+              <span className="text-sm font-medium text-right">{displayName}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm font-medium text-right break-all">{user?.email || '—'}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm text-muted-foreground">Role</span>
+              <Badge variant="secondary">Landlord</Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-2xl">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CreditCard className="w-4 h-4" style={{ color: 'hsl(142,72%,44%)' }} />
+              Subscription
+            </CardTitle>
+            <CardDescription>Manage your MzanziHomes plan</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {planLoading ? (
+              <Skeleton className="h-16 w-full rounded-xl" />
+            ) : isSubscriber ? (
+              <>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-sm">Landlord Subscription</p>
+                    <p className="text-xs text-muted-foreground">
+                      {nonRenewing
+                        ? expiryDate
+                          ? `Cancelled — access until ${expiryDate}`
+                          : 'Cancelled — will not renew'
+                        : expiryDate
+                          ? `Renews on ${expiryDate}`
+                          : 'Billed monthly'}
+                    </p>
+                  </div>
+                  <Badge className={nonRenewing
+                    ? 'bg-amber-100 text-amber-700 border-amber-200'
+                    : 'bg-green-100 text-green-700 border-green-200'}>
+                    {nonRenewing ? 'Ending' : 'Active'}
+                  </Badge>
+                </div>
+                {!nonRenewing && (
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
+                    onClick={() => setShowCancelSubDialog(true)}
+                  >
+                    Cancel subscription
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium text-sm">Free plan</p>
+                    <p className="text-xs text-muted-foreground">Subscribe to unlock all landlord tools</p>
+                  </div>
+                  <Badge variant="secondary">Free</Badge>
+                </div>
+                <Button
+                  className="w-full rounded-xl"
+                  style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+                  disabled={startingPlanCheckout}
+                  onClick={() => startPlanCheckout('subscription')}
+                >
+                  {startingPlanCheckout ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Subscribe'}
+                </Button>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Button
+          variant="outline"
+          className="w-full rounded-xl gap-2"
+          onClick={async () => { await signOut(); navigate('/auth'); }}
+        >
+          <LogOut className="w-4 h-4" /> Sign out
+        </Button>
+
+        <Dialog open={showCancelSubDialog} onOpenChange={(open) => { if (!cancellingSub) setShowCancelSubDialog(open); }}>
+          <DialogContent className="max-w-sm rounded-2xl">
+            <DialogHeader>
+              <DialogTitle>Cancel subscription?</DialogTitle>
+              <DialogDescription>
+                Your subscription will stop and you won't be billed again. Subscriber-only
+                tools will be locked until you subscribe again.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                className="flex-1 rounded-xl"
+                disabled={cancellingSub}
+                onClick={() => setShowCancelSubDialog(false)}
+              >
+                Keep subscription
+              </Button>
+              <Button
+                variant="destructive"
+                className="flex-1 rounded-xl"
+                disabled={cancellingSub}
+                onClick={handleCancelSubscription}
+              >
+                {cancellingSub ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cancel it'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  };
+
   const renderTabContent = () => {
     console.log('[Dashboard] Rendering tab content for:', currentTab);
 
@@ -981,6 +1150,9 @@ export default function EnhancedLandlordDashboard() {
       case '/enhancedlandlorddashboard/maintenance':
         console.log('[Dashboard] Rendering maintenance tab');
         return renderMaintenanceTab();
+      case '/enhancedlandlorddashboard/profile':
+        console.log('[Dashboard] Rendering profile tab');
+        return renderProfileTab();
       default:
         console.log('[Dashboard] Rendering default dashboard content');
         return renderDashboardContent();
