@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - Dependency lattice (lint-enforced, ADR-0003): `common` depends on nothing; `ui`, `supabase` → `common`; `features` → `ui`+`supabase`+`common`; `apps` → all. Only slice hooks may call `.from`/`.rpc`/`.functions.invoke`/`.storage`.
-- Vocabulary (CONTEXT.md): **Condition Record**, **Attestation**. Never "inventory", "inspection", or "Condition Report" (that's the Annexure A lease document — untouched by this plan).
+- Vocabulary (CONTEXT.md): **Condition Record**, **Attestation**. Never "inspection" or "Condition Report" (that's the Annexure A lease document — untouched by this plan). "Inventory" is a separate KEPT feature (furnished-property stock list — ADR-0004 as amended 2026-07-10), not a synonym for Condition Record.
 - Domain rules (ADR-0004): one record per tenancy per event (`move_in`,`move_out`); any photo add/delete clears **all** attestations; both attested = permanently locked (no photo changes, no note edits, no unlock); each party deletes only their own photos; both parties see all photos immediately.
 - Canonical attestation text (verbatim, single source = DB column default):
   `Both parties confirm that the photographs in this record fairly represent the condition of the property as at the date of their agreement.`
@@ -1447,9 +1447,11 @@ git commit -m "feat(condition-record): shared page with grouped gallery and atte
 
 Route path everywhere: `condition-records`. **The landlord `PlanGuard requiredPlan="pro"` gate is dropped**: the record needs both parties, and the tenant can create it regardless — gating the landlord out of evidence they must attest breaks the feature.
 
+> **SCOPE CHANGE 2026-07-10 (ADR-0004 amendment): Inventory is KEPT** as the furnished-property stock list. Only Inspection is replaced by Condition Records. Everywhere below, inventory routes/nav/config/notification entries stay untouched; only inspection entries are replaced.
+
 - [ ] **Step 1: Tenant routes**
 
-In `TenantDashboardRoutes.tsx`, replace the `inventory` and `inspection` routes (lines ~41–49) with one route (and swap the imports of `TenantInventory`/`TenantInspection` for the new import):
+In `TenantDashboardRoutes.tsx`, replace the `inspection` route only (keep the `inventory` route; swap the `TenantInspection` import for the new import, keep `TenantInventory`):
 
 ```tsx
 import { ConditionRecordsPage } from '@mzanzihomes/features/condition-record';
@@ -1491,7 +1493,7 @@ Update imports accordingly (remove `LandlordInspection`; other old imports are r
 
 - [ ] **Step 3: Sidebar and page config**
 
-`EnhancedSidebar.tsx`: replace the two tenant items (`Inventory` `/tenant/inventory`, `Inspection` `/tenant/inspection`) with one — keep whichever base path prefix the surrounding tenant items use:
+`EnhancedSidebar.tsx`: keep the tenant `Inventory` item; replace only the tenant `Inspection` item (`/tenant/inspection`) — keep whichever base path prefix the surrounding tenant items use:
 
 ```ts
   { title: 'Condition Records', url: '/tenant/condition-records', icon: Camera },
@@ -1510,7 +1512,7 @@ Replace the landlord `Inspection` item (~line 93) with:
 
 (`Camera` from `lucide-react`; drop the now-unused `Clipboard`/`FileText` imports if nothing else uses them.)
 
-`dashboardPageConfig.ts`: delete the entries keyed `/enhancedtenantdashboard/inventory`, `/inventory`, `/inspection`, `/enhancedlandlorddashboard/inventory`, `/enhancedlandlorddashboard/inspection`; add, mirroring the exact shape of a neighbouring entry:
+`dashboardPageConfig.ts`: KEEP all inventory-keyed entries; delete only the inspection-keyed entries (`/inspection`, `/enhancedlandlorddashboard/inspection`); add, mirroring the exact shape of a neighbouring entry:
 
 ```ts
   '/enhancedtenantdashboard/condition-records': {
@@ -1525,9 +1527,9 @@ Replace the landlord `Inspection` item (~line 93) with:
 
 - [ ] **Step 4: Notification routing**
 
-`packages/ui/src/utils/notificationRoutes.ts`:
-- In the type-sniffing chain (~line 93), replace the `t.includes('inventory')` branch with `t.includes('condition') ? 'condition_record'`.
-- Replace the `case 'inventory':` block (~lines 124–126) with:
+`packages/ui/src/utils/notificationRoutes.ts` (inventory entries all STAY; add condition_record alongside):
+- In the type-sniffing chain (~line 93), ADD a `t.includes('condition') ? 'condition_record'` branch (keep the `t.includes('inventory')` branch).
+- ADD a case block (keep `case 'inventory':`):
 
 ```ts
     case 'condition_record':
@@ -1536,8 +1538,8 @@ Replace the landlord `Inspection` item (~line 93) with:
         : `${tenantBase}/condition-records`;
 ```
 
-- In the two path-validation regexes (~lines 161, 165), replace `inventory` and `inspection` alternatives with `condition-records`.
-- Replace the `inventory:` entry in the URL-builder map (~line 193) with:
+- In the two path-validation regexes (~lines 161, 165), replace the `inspection` alternative with `condition-records` (keep `inventory`).
+- ADD to the URL-builder map (~line 193), keeping the `inventory:` entry:
 
 ```ts
   conditionRecord: (isLandlord: boolean) =>
@@ -1546,7 +1548,7 @@ Replace the landlord `Inspection` item (~line 93) with:
       : '/tenant-dashboard/condition-records',
 ```
 
-Fix any call sites of the old `NotificationUrls.inventory` (grep `NotificationUrls.inventory` — expected in `notificationService.ts`, which Task 8 deletes those methods from anyway).
+(`NotificationUrls.inventory` and its `notificationService.ts` call sites stay — inventory is kept.)
 
 - [ ] **Step 5: Build and eyeball**
 
@@ -1567,29 +1569,20 @@ git commit -m "feat(apps): route condition records in tenant and landlord apps, 
 
 ### Task 8: Delete the old inventory/inspection feature + drop tables
 
-**Files (delete):**
-- `apps/tenant/src/pages/tenant/TenantInventory.tsx`
+> **SCOPE CHANGE 2026-07-10 (ADR-0004 amendment): Inventory is KEPT.** This task now deletes the Inspection feature only. All inventory files, routes, tables, storage policies, and notification helpers stay.
+
+**Files (delete — inspection only):**
 - `apps/tenant/src/pages/tenant/TenantInspection.tsx`
-- `apps/tenant/src/hooks/useInventory.tsx`
 - `apps/landlord/src/pages/LandlordInspection.tsx`
-- `packages/features/src/inspection/` (entire slice)
-- `packages/features/src/pages/InventoryStart.tsx`
-- `packages/features/src/property/components/InventoryStartPanel.tsx`
-- `packages/ui/src/components/inventory/` (entire dir, contains `InventoryDetailModal.tsx`)
+- `packages/features/src/inspection/` (entire slice — first verify nothing kept, e.g. inventory code, imports from it; `packages/ui/src/components/inspection/` STAYS: `InventoryStartPanel.tsx` imports `PhotoGallery`/`PhotoLightbox` from it)
 - `packages/ui/src/components/pages/CreateInspection.tsx`
-- `packages/common/src/types/inventory.ts`
 - `packages/common/src/types/inspection.ts`
 
 **Files (modify):**
-- `packages/common/src/index.ts` — remove the `./types/inspection` and `./types/inventory` export lines
-- `packages/features/src/pages/index.ts` — remove `InventoryStart` export
-- `packages/features/src/property/index.ts` — remove `InventoryStartPanel` export
-- `apps/tenant/src/App.tsx` — remove `/inventory/start` + `/inspections/new` routes and the `InventoryStart`/`CreateInspection` imports
-- `apps/landlord/src/App.tsx` — remove `/inspections/new`, `/inventory/start` routes and leftover imports
-- `packages/features/src/property/components/PropertyOperations.tsx` — remove the `Inventory Items` stat (~line 98) and the `Property Inventory` action (~lines 127–131)
-- `packages/supabase/src/services/notificationService.ts` — delete `notifyInventoryCompleted` and `notifyInventoryApproved` (~lines 342–360)
-- `packages/ui/src/components/subscription/UpgradePrompt.tsx` — remove the `'Inventory tracker'` feature bullet (~line 20)
-- `packages/supabase/src/types.ts` — regenerate: `npm run supabase -- gen types typescript --local > packages/supabase/src/types.ts` (picks up the new tables and loses the dropped ones); if the file turns out to be hand-maintained (check git history first: `git log --oneline -3 packages/supabase/src/types.ts`), hand-remove the five old table blocks and hand-add `condition_records`/`condition_photos` in the same shape
+- `packages/common/src/index.ts` — remove the `./types/inspection` export line (keep `./types/inventory`)
+- `apps/tenant/src/App.tsx` — remove `/inspections/new` route and the `CreateInspection` import (keep `/inventory/start` + `InventoryStart`)
+- `apps/landlord/src/App.tsx` — remove `/inspections/new` route and leftover imports (keep `/inventory/start`)
+- `packages/supabase/src/types.ts` — regenerate: `npm run supabase -- gen types typescript --local > packages/supabase/src/types.ts` (picks up condition_records/condition_photos, keeps inventory tables, loses the dropped inspection ones); if the file turns out to be hand-maintained (check git history first: `git log --oneline -3 packages/supabase/src/types.ts`), hand-remove the two inspection table blocks and hand-add `condition_records`/`condition_photos` in the same shape
 - Create: `supabase/migrations/20260709102000_drop_inventory_inspection.sql`
 
 - [ ] **Step 1: Write the drop migration**
@@ -1597,33 +1590,22 @@ git commit -m "feat(apps): route condition records in tenant and landlord apps, 
 `supabase/migrations/20260709102000_drop_inventory_inspection.sql`:
 
 ```sql
--- Inventory + Inspection are replaced by Condition Records (ADR-0004). Clean drop,
--- no data migration — confirmed no production data worth keeping.
+-- Inspection is replaced by Condition Records (ADR-0004, as amended 2026-07-10:
+-- Inventory is KEPT as the furnished-property stock list). Clean drop of the
+-- inspection tables only, no data migration — confirmed no production data worth keeping.
 
-DROP TABLE IF EXISTS public.inventory_reports CASCADE;
-DROP TABLE IF EXISTS public.inventory_items CASCADE;
-DROP TABLE IF EXISTS public.inventory_records CASCADE;
 DROP TABLE IF EXISTS public.inspection_items CASCADE;
 DROP TABLE IF EXISTS public.inspection_records CASCADE;
-
--- Orphaned by the table drops
-DROP FUNCTION IF EXISTS public.notify_on_inventory_status_change();
-
--- The kyc-uploads inventory-prefix workaround policy (see 20260703000000)
-DROP POLICY IF EXISTS "Landlords can view their properties' inventory uploads" ON storage.objects;
 ```
 
-Note: `admin_delete_property_function` guards every inventory/inspection delete with `IF EXISTS (information_schema.tables ...)`, so it survives the drop unchanged. Old photo objects under `kyc-uploads/inventory/` become unreachable dead weight; purging them is an optional manual cleanup, not part of this migration.
+Note: `admin_delete_property_function` guards every inspection delete with `IF EXISTS (information_schema.tables ...)`, so it survives the drop unchanged. The inventory tables, `notify_on_inventory_status_change`, and the kyc-uploads inventory-prefix storage policy all STAY.
 
 - [ ] **Step 2: Delete files and apply the modifications listed above**
 
 ```bash
-git rm apps/tenant/src/pages/tenant/TenantInventory.tsx apps/tenant/src/pages/tenant/TenantInspection.tsx \
-  apps/tenant/src/hooks/useInventory.tsx apps/landlord/src/pages/LandlordInspection.tsx \
-  packages/features/src/pages/InventoryStart.tsx packages/features/src/property/components/InventoryStartPanel.tsx \
-  packages/ui/src/components/pages/CreateInspection.tsx \
-  packages/common/src/types/inventory.ts packages/common/src/types/inspection.ts
-git rm -r packages/features/src/inspection packages/ui/src/components/inventory
+git rm apps/tenant/src/pages/tenant/TenantInspection.tsx apps/landlord/src/pages/LandlordInspection.tsx \
+  packages/ui/src/components/pages/CreateInspection.tsx packages/common/src/types/inspection.ts
+git rm -r packages/features/src/inspection
 ```
 
 Then make the listed modifications (removing exports, routes, imports, dead UI references).
@@ -1631,10 +1613,10 @@ Then make the listed modifications (removing exports, routes, imports, dead UI r
 - [ ] **Step 3: Hunt stragglers**
 
 ```bash
-grep -rni "inventory\|inspection" apps packages --include='*.ts' --include='*.tsx' -l | grep -v node_modules
+grep -rni "inspection" apps packages --include='*.ts' --include='*.tsx' -l | grep -v node_modules
 ```
 
-Expected survivors (leave untouched): `packages/features/src/lease/templates/masterLeaseTemplate.ts` and `conditionReportTemplate.ts` (legal document wording), `packages/features/src/viewing/**` if the word appears in copy about viewings. Anything else — dashboards (`EnhancedTenantDashboard.tsx`, `EnhancedLandlordDashboard.tsx`), `TenantSupport.tsx`, `ToolGrid.tsx` styles map, notification types — remove or reword the reference. Also check `supabase/functions/generate-lease-pdf/index.ts`: if its hit is template prose, leave it; if it queries dropped tables, remove that query.
+Expected survivors (leave untouched): ALL inventory code (kept feature); `packages/ui/src/components/inspection/` (PhotoGallery/PhotoLightbox — used by inventory; optionally rename the dir later); `packages/features/src/lease/templates/masterLeaseTemplate.ts` and `conditionReportTemplate.ts` (legal document wording); `packages/features/src/viewing/**` if the word appears in copy about viewings. Anything else referencing the deleted Inspection FEATURE — dashboards (`EnhancedTenantDashboard.tsx`, `EnhancedLandlordDashboard.tsx`), `TenantSupport.tsx`, `ToolGrid.tsx` styles map, notification types — remove or reword. Also check `supabase/functions/generate-lease-pdf/index.ts`: if its hit is template prose, leave it; if it queries dropped inspection tables, remove that query.
 
 - [ ] **Step 4: Verify everything still builds and migrations apply**
 
@@ -1652,7 +1634,7 @@ Expected: all pass; smoke test still prints ALL PASS after the drop migration.
 
 ```bash
 git add -A
-git commit -m "feat!: drop inventory and inspection, replaced by condition records"
+git commit -m "feat!: drop inspection, replaced by condition records (inventory kept as stock list)"
 ```
 
 ---
@@ -1688,5 +1670,4 @@ Report actual observed results per item — anything that failed, say so plainly
 - PDF export of a locked record — pure read, additive later.
 - Periodic mid-tenancy records — additive `event_type` later.
 - "Other party attested" instant notification — weekly reminder covers it; add if users ask.
-- Purge of orphaned `kyc-uploads/inventory/*` objects — optional manual cleanup.
 - `property_inspections` zombie table (touched only by `20251121120000_add_subscription_rls_policies.sql`, unused by app code) — out of scope; candidate for the post-review mass-change batch.

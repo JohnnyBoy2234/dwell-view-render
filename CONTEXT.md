@@ -70,7 +70,11 @@ _Avoid_: Ticket, maintenance_ticket, work order, issue
 
 **Condition Record**:
 The photographic record of a Property's condition at move-in or move-out, captured by both parties of a Tenancy and locked by mutual Attestation. One per Tenancy per event.
-_Avoid_: Inspection (retired), Inventory (retired), Condition Report (that is the Annexure A legal disclosure — see Leasing), survey, walkthrough
+_Avoid_: Inspection (retired), Condition Report (that is the Annexure A legal disclosure — see Leasing), survey, walkthrough
+
+**Inventory**:
+The stock list of furniture and contents for a furnished Property — what items exist, not what condition they are in (condition evidence is the Condition Record's job).
+_Avoid_: Inspection (retired), checklist (unqualified), condition rating
 
 **Attestation**:
 A party's agreement that a Condition Record's photographs fairly represent the Property's condition, timestamped per party. Both parties' Attestations lock the record permanently.

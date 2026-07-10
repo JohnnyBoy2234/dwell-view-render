@@ -1,9 +1,10 @@
 -- No-op: original body created public.inventory_records / inventory_items / inventory_reports.
 -- (a) That schema already exists remotely (this repo's migration history only tracks
 --     20260707144339+ remotely; this file is a local-only record of pre-existing schema).
--- (b) The inventory feature is retired on this branch (dropped by a later migration;
---     see CONTEXT.md "Condition Record" glossary entry noting Inventory is retired).
--- (c) The original body referenced public.properties before that table existed
+-- (b) The original body referenced public.properties before that table existed
 --     (properties is created in 20250804103254_*.sql), which broke fresh local
 --     `supabase db reset` replay.
--- Body removed so reset applies cleanly. A no-op migration is valid.
+-- The schema is recreated for local replay by 20260710090000_restore_inventory_tables_local.sql,
+-- after its dependencies exist. (An earlier rationale — inventory being retired — was
+-- reversed on 2026-07-10; see the ADR-0004 amendment. Inventory is kept as the
+-- furnished-property stock list.)
