@@ -228,7 +228,9 @@ export default function EnhancedLandlordDashboard() {
   
   const [properties, setProperties] = useState<PropertyWithTenant[]>([]);
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  // Starts true so the first paint is the skeleton, never a flash of empty
+  // state. Only fetchProperties clears it; refetches update silently.
+  const [loading, setLoading] = useState(true);
   
   // Invoice costs state
   const [additionalCosts, setAdditionalCosts] = useState<AdditionalCost[]>([]);
@@ -305,6 +307,9 @@ export default function EnhancedLandlordDashboard() {
       fetchAdditionalCosts();
       fetchInvoiceScheduleSettings();
       fetchGlobalApplicationLeads(selectedPropertyId || undefined);
+    } else {
+      // Signed-out visitors have nothing to fetch — don't leave the skeleton up.
+      setLoading(false);
     }
   }, [authLoading, user, isLandlord, navigate, location.pathname, selectedPropertyId]);
 
@@ -383,14 +388,21 @@ export default function EnhancedLandlordDashboard() {
   const fetchProperties = async () => {
     if (!user) return;
 
-    setLoading(true);
     try {
-      // Fetch real properties from Supabase
-      const { data: propertiesData, error: propertiesError } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('landlord_id', user.id)
-        .order('created_at', { ascending: false });
+      // Fetch properties and their invites together and commit them in one
+      // state update — setting properties before invites resolve makes the
+      // Invite Tenant prompt flash for properties that were already invited.
+      const [{ data: propertiesData, error: propertiesError }, { data: invitesData }] = await Promise.all([
+        supabase
+          .from('properties')
+          .select('*')
+          .eq('landlord_id', user.id)
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('property_invites')
+          .select('property_id')
+          .eq('landlord_id', user.id),
+      ]);
 
       if (propertiesError) {
         console.error('Error fetching properties:', propertiesError);
@@ -407,13 +419,8 @@ export default function EnhancedLandlordDashboard() {
           listing_type: prop.listing_type,
         }));
         setProperties(transformedProperties);
-
         // Track which properties already have an invite, so the Invite Tenant
         // entry hides once every added property has been invited.
-        const { data: invitesData } = await supabase
-          .from('property_invites')
-          .select('property_id')
-          .eq('landlord_id', user.id);
         setInvitedPropertyIds(new Set((invitesData || []).map((i: any) => i.property_id)));
       }
     } catch (error) {
@@ -474,8 +481,6 @@ export default function EnhancedLandlordDashboard() {
         description: "Failed to load dashboard data",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
