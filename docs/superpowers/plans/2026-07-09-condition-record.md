@@ -693,6 +693,8 @@ git commit -m "feat(db): cron jobs for move-out condition records and attestatio
 
 ### Task 4: Move-in auto-create in the sign-lease-contract edge function
 
+> **CORRECTED during Task 9 verification (2026-07-10):** this task's premise was stale — `20260708150000` (merged the day before this plan) had already moved tenancy creation out of the edge function into the `trg_create_tenancy_from_signed_lease` DB trigger, making the function's tenancy block dead code. The edge-function change below was reverted and replaced by `20260710110000_move_in_condition_record_trigger.sql`: an AFTER INSERT trigger on `tenancies` that creates the move-in record + both notifications for every tenancy-creation path. Verified end-to-end through the real signing flow.
+
 **Files:**
 - Modify: `supabase/functions/sign-lease-contract/index.ts` (the tenancy-creation block, around lines 128–160)
 

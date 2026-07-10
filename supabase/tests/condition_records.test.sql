@@ -24,9 +24,12 @@ BEGIN
     VALUES (v_property, v_tenant, v_landlord, current_date, current_date + 365, 1000, 'active')
     RETURNING id INTO v_tenancy;
 
-    INSERT INTO public.condition_records (tenancy_id, event_type)
-    VALUES (v_tenancy, 'move_in')
-    RETURNING id INTO v_record;
+    -- 0. active tenancy insert auto-creates the move-in record (AFTER INSERT trigger)
+    SELECT id INTO v_record FROM public.condition_records
+    WHERE tenancy_id = v_tenancy AND event_type = 'move_in';
+    IF v_record IS NULL THEN
+        RAISE EXCEPTION 'TEST FAIL: move-in record not auto-created with tenancy';
+    END IF;
 
     -- 1. duplicate event for same tenancy is rejected
     BEGIN

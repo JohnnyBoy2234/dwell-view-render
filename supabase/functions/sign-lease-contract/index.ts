@@ -141,48 +141,16 @@ serve(async (req) => {
             const start = cd.leaseStartDate || now.slice(0, 10);
             const end = cd.leaseEndDate ||
               new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-            const { data: newTenancy } = await supabase
-              .from('tenancies')
-              .insert({
-                property_id: contract.property_id,
-                tenant_id: contract.tenant_id,
-                landlord_id: contract.landlord_id,
-                start_date: start,
-                end_date: end,
-                monthly_rent: Number(cd.rentAmount) || 0,
-                security_deposit: Number(cd.depositAmount) || 0,
-                status: 'active',
-              })
-              .select('id')
-              .single();
-
-            // Move-in condition record starts automatically with the tenancy
-            // (ADR-0004); unique (tenancy_id, event_type) makes this idempotent.
-            if (newTenancy) {
-              const { error: crError } = await supabase
-                .from('condition_records')
-                .insert({ tenancy_id: newTenancy.id, event_type: 'move_in' });
-              if (crError && crError.code !== '23505') {
-                console.error('Move-in condition record creation failed:', crError);
-              } else if (!crError) {
-                const msg =
-                  'Your move-in condition record has been started. Photograph the property at handover.';
-                await supabase.rpc('create_notification', {
-                  _user_id: contract.tenant_id,
-                  _message: msg,
-                  _link_url: '/tenant-dashboard/condition-records',
-                  _type: 'condition_record',
-                  _metadata: { tenancy_id: newTenancy.id },
-                });
-                await supabase.rpc('create_notification', {
-                  _user_id: contract.landlord_id,
-                  _message: msg,
-                  _link_url: '/enhancedlandlorddashboard/condition-records',
-                  _type: 'condition_record',
-                  _metadata: { tenancy_id: newTenancy.id },
-                });
-              }
-            }
+            await supabase.from('tenancies').insert({
+              property_id: contract.property_id,
+              tenant_id: contract.tenant_id,
+              landlord_id: contract.landlord_id,
+              start_date: start,
+              end_date: end,
+              monthly_rent: Number(cd.rentAmount) || 0,
+              security_deposit: Number(cd.depositAmount) || 0,
+              status: 'active',
+            });
           }
         }
       } catch (e) {
