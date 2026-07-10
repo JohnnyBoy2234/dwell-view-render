@@ -58,7 +58,7 @@ const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: s
 };
 
 // Tiles anyone can use without a subscription.
-const FREE_TOOLS = new Set(['List Property', 'My Profile', 'Support']);
+const FREE_TOOLS = new Set(['List Property', 'Support']);
 
 interface PropertyWithTenant {
   id: string;
@@ -2574,8 +2574,7 @@ const renderReportsTab = () => (
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
       { title: 'Condition Records', subtitle: 'Photograph & attest',             icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
-      { title: 'My Profile',     subtitle: 'Account & settings',                 icon: User,          tab: '/enhancedlandlorddashboard/profile' },
-      { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/landlord/support' },
+      { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/enhancedlandlorddashboard/support' },
     ];
 
     return (

@@ -42,6 +42,7 @@ import ApplicationDetail from "@mzanzihomes/ui/components/pages/ApplicationDetai
 import { RentalApplication } from '@mzanzihomes/features/pages';
 import { Messages } from '@mzanzihomes/features/pages';
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
+import { PrivacyPolicyScreen, TermsOfServiceScreen } from "@mzanzihomes/ui/components/pages/legal/LegalScreens";
 import SettingsPage from "@mzanzihomes/ui/components/pages/SettingsPage";
 import KycCapture from "@mzanzihomes/ui/components/pages/KycCapture";
 import { VerifyId } from '@mzanzihomes/features/pages';
@@ -304,6 +305,10 @@ function AppRoutes() {
           </AuthenticatedRoute>
         } />
         <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
+
+        {/* Legal */}
+        <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
+        <Route path="/terms" element={<TermsOfServiceScreen />} />
 
         {/* Settings & identity */}
         <Route path="/settings" element={

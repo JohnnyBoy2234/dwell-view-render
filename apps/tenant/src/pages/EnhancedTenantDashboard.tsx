@@ -35,7 +35,6 @@ const FEATURE_BLOCKS = [
   { title: 'Lease Contracts',  icon: FileText,  path: '/enhancedtenantdashboard/leases' },
   { title: 'Applications',     icon: Building,  path: '/tenant/applications' },
   { title: 'Support',          icon: HelpCircle,path: '/tenant/support' },
-  { title: 'Settings',         icon: User,      path: '/tenant/profile' },
 ] as const;
 
 // Per-feature color palette — each tile gets its own tinted icon bg
@@ -48,7 +47,6 @@ const FEATURE_ICON_COLORS: Record<string, { bg: string; icon: string; border: st
   'Lease Contracts':  { bg: 'bg-indigo-100',  icon: 'text-indigo-600',  border: 'group-hover:border-indigo-200'  },
   'Applications':     { bg: 'bg-pink-100',    icon: 'text-pink-600',    border: 'group-hover:border-pink-200'    },
   'Support':          { bg: 'bg-amber-100',   icon: 'text-amber-600',   border: 'group-hover:border-amber-200'   },
-  'Settings':         { bg: 'bg-slate-100',   icon: 'text-slate-500',   border: 'group-hover:border-slate-200'   },
 };
 
 export default function EnhancedTenantDashboard() {

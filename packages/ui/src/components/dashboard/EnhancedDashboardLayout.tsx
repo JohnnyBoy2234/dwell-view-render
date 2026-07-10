@@ -1,9 +1,10 @@
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { LogOut, AlertTriangle, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NotificationBell } from '@mzanzihomes/ui/components/notifications/NotificationBell';
+import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { getPageConfig } from '@mzanzihomes/common/constants/dashboardPageConfig';
 
 interface EnhancedDashboardLayoutProps {
@@ -36,7 +37,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 }
 
 export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties }: EnhancedDashboardLayoutProps) {
-  const { signOut, isLandlord } = useAuth();
+  const { isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
 
@@ -125,13 +126,7 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
         <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
           {/* Notification bell removed — notifications surface via the tile badge in management tools */}
           {actions}
-          <button
-            onClick={signOut}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-white/15 bg-white/5 text-gray-300 hover:border-white/35 hover:text-white transition-all duration-200"
-          >
-            <LogOut className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Sign Out</span>
-          </button>
+          <UserMenu />
         </div>
       </header>
 

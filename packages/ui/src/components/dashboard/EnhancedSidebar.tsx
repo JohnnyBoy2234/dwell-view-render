@@ -43,7 +43,6 @@ const tenantItems: SidebarItem[] = [
   { title: 'Proof of Payment', url: '/tenant/proof-of-payment', icon: Inbox },
   { title: 'Lease Contracts', url: '/enhancedtenantdashboard/leases', icon: FileText },
   { title: 'Applications', url: '/tenant/applications', icon: Building },
-  { title: 'Settings', url: '/tenant/profile', icon: User },
 ];
 
 const landlordItems: SidebarItem[] = [

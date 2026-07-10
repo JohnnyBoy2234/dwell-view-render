@@ -31,6 +31,7 @@ import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
 import DocumentViewer from "@/pages/DocumentViewer";
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
+import { PrivacyPolicyScreen, TermsOfServiceScreen } from "@mzanzihomes/ui/components/pages/legal/LegalScreens";
 import ApplicationDetail from "@mzanzihomes/ui/components/pages/ApplicationDetail";
 import { RentalApplication } from '@mzanzihomes/features/pages';
 import { LeaseSignature } from '@mzanzihomes/features/pages';
@@ -161,6 +162,10 @@ function AppRoutes() {
             </EnhancedDashboardLayout>
           </RouteGuard>
         } />
+
+        {/* Legal */}
+        <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
+        <Route path="/terms" element={<TermsOfServiceScreen />} />
 
         {/* KYC & identity */}
         <Route path="/verify-id" element={<RouteGuard><VerifyId /></RouteGuard>} />
