@@ -1645,7 +1645,7 @@ git commit -m "feat!: drop inspection, replaced by condition records (inventory 
 
 No new files — drive the real flow against the local stack (use the `verify` skill if available).
 
-- [ ] **Step 1: Full flow, two browsers**
+- [x] **Step 1: Full flow, two browsers**
 
 Run `npm run supabase -- db reset && npm run dev`. Seed or reuse a landlord+tenant pair with an active tenancy (fastest local path: insert a tenancy row directly via psql for two existing test users, then use the manual "Start move-in record" button).
 
@@ -1656,12 +1656,12 @@ Verify, as tenant in one browser and landlord in another:
 4. Both attest → "Locked", upload controls gone; direct API attempt to add a photo fails (verify via the smoke test already covering this at DB level).
 5. Notes: each party saves notes; other party sees them read-only; notes refused after lock.
 
-- [ ] **Step 2: Auto-creation paths**
+- [x] **Step 2: Auto-creation paths**
 
 - Move-in: sign a lease end-to-end locally (or invoke `sign-lease-contract` with a test contract) → tenancy + move-in condition record + two notifications exist.
 - Move-out: set a tenancy's `end_date` to `current_date + 7` via psql, run the cron body manually (command from Task 3 Step 2) → move-out record + notifications created; run again → no duplicates.
 
-- [ ] **Step 3: Report**
+- [x] **Step 3: Report**
 
 Report actual observed results per item — anything that failed, say so plainly with the output.
 
