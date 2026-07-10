@@ -22,7 +22,6 @@ import { RentDueBanner } from "@mzanzihomes/features/billing";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
-import { PlanGuard } from "@mzanzihomes/ui/components/PlanGuard";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
 import Auth from "@/pages/Auth";
@@ -30,6 +29,7 @@ import JoinProperty from "@/pages/JoinProperty";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
+import DocumentViewer from "@/pages/DocumentViewer";
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
 import ApplicationDetail from "@mzanzihomes/ui/components/pages/ApplicationDetail";
 import { RentalApplication } from '@mzanzihomes/features/pages';
@@ -125,25 +125,19 @@ function AppRoutes() {
         {/* Lease signing — tenant side only */}
         <Route path="/lease/sign/:contractId" element={
           <AuthenticatedRoute>
-            <PlanGuard requiredPlan="pro" featureName="Lease Management">
-              <LeaseSignature />
-            </PlanGuard>
+            <LeaseSignature />
           </AuthenticatedRoute>
         } />
 
         {/* Applications */}
         <Route path="/application/:id" element={
           <RouteGuard>
-            <PlanGuard requiredPlan="pro" featureName="Tenant Applications">
-              <ApplicationDetail />
-            </PlanGuard>
+            <ApplicationDetail />
           </RouteGuard>
         } />
         <Route path="/rental-application/:propertyId" element={
           <RouteGuard>
-            <PlanGuard requiredPlan="pro" featureName="Tenant Applications">
-              <RentalApplication />
-            </PlanGuard>
+            <RentalApplication />
           </RouteGuard>
         } />
 
@@ -151,16 +145,15 @@ function AppRoutes() {
         <Route path="/tenant/messages" element={<RouteGuard><TenantMessages /></RouteGuard>} />
         <Route path="/messages" element={
           <AuthenticatedRoute requireVerification={false}>
-            <PlanGuard requiredPlan="pro" featureName="In-Platform Messaging">
-              <VerificationGate requireVerification={true}>
-                <Messages />
-              </VerificationGate>
-            </PlanGuard>
+            <VerificationGate requireVerification={true}>
+              <Messages />
+            </VerificationGate>
           </AuthenticatedRoute>
         } />
 
         {/* Notifications & settings */}
         <Route path="/notifications" element={<AuthenticatedRoute><Notifications /></AuthenticatedRoute>} />
+        <Route path="/document" element={<AuthenticatedRoute><DocumentViewer /></AuthenticatedRoute>} />
         <Route path="/settings" element={
           <RouteGuard>
             <EnhancedDashboardLayout title="Account Settings">
@@ -181,9 +174,7 @@ function AppRoutes() {
         {/* Maintenance ticket detail */}
         <Route path="/maintenance/:ticketId" element={
           <RouteGuard>
-            <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
-              <MaintenanceTicketDetails />
-            </PlanGuard>
+            <MaintenanceTicketDetails />
           </RouteGuard>
         } />
 

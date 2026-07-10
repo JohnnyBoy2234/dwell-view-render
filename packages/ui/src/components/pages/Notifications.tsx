@@ -3,6 +3,7 @@ import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
 import { Button } from '@mzanzihomes/ui/components/button';
 import {
+  ArrowLeft,
   Bell,
   MessageCircle,
   FileText,
@@ -205,8 +206,9 @@ export default function Notifications() {
     <div className="min-h-screen bg-background pb-28">
       {/* Sticky glass header */}
       <div
-        className="sticky top-0 z-10 border-b border-border/40"
+        className="sticky z-10 border-b border-border/40"
         style={{
+          top: 'var(--rent-banner-h, 0px)',
           background: 'rgba(255,255,255,0.92)',
           backdropFilter: 'blur(20px) saturate(180%)',
           WebkitBackdropFilter: 'blur(20px) saturate(180%)',
@@ -214,11 +216,25 @@ export default function Notifications() {
       >
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-start justify-between mb-3">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">Alerts</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
-              </p>
+            <div className="flex items-start gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  window.history.length > 1
+                    ? navigate(-1)
+                    : navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')
+                }
+                aria-label="Back"
+                className="mt-0.5 w-9 h-9 rounded-full flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground tracking-tight">Alerts</h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {unreadCount > 0 ? `${unreadCount} unread` : 'All caught up'}
+                </p>
+              </div>
             </div>
             {unreadCount > 0 && (
               <Button

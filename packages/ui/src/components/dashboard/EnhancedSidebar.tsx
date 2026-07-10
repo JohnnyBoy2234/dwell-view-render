@@ -144,9 +144,10 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
   const itemsWithBadges = items.map((item) => {
     // Determine if feature is locked based on user's current plan
     let isLocked = false;
+    // Two-tier model: 'subscriber' (formerly pro/premium) unlocks all gated features.
     if (item.requiredPlan === 'pro' && plan === 'free') {
       isLocked = true;
-    } else if (item.requiredPlan === 'premium' && (plan === 'free' || plan === 'pro')) {
+    } else if (item.requiredPlan === 'premium' && plan === 'free') {
       isLocked = true;
     }
     

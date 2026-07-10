@@ -12,6 +12,7 @@ import { BillDetailSheet } from '@mzanzihomes/features/billing';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 
 export default function TenantProofOfPayment() {
   const {
@@ -41,9 +42,6 @@ export default function TenantProofOfPayment() {
 
   const sentBills = bills.filter(b => b.status === 'sent');
   const paidBills = bills.filter(b => b.status === 'paid');
-
-  const receiptUrl = (path: string) =>
-    supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl;
 
   useEffect(() => {
     loadActiveTenancy();
@@ -189,13 +187,20 @@ export default function TenantProofOfPayment() {
                       Paid {bill.paid_at ? new Date(bill.paid_at).toLocaleDateString('en-ZA') : ''}
                     </p>
                   </div>
-                  {bill.receipt_pdf_path ? (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
-                    </Button>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">Receipt generating…</span>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {bill.invoice_pdf_path ? (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${bill.period}`)}`}>Invoice</Link>
+                      </Button>
+                    ) : null}
+                    {bill.receipt_pdf_path ? (
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/document?path=${encodeURIComponent(bill.receipt_pdf_path)}&title=${encodeURIComponent(`Receipt — ${bill.period}`)}`}>Receipt</Link>
+                      </Button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Receipt generating…</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </>

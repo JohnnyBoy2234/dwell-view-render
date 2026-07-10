@@ -6,4 +6,4 @@ export { useApplications } from './hooks/useApplications';
 export { useTenantApplications } from './hooks/useTenantApplications';
 export { useApplicationInvites } from './hooks/useApplicationInvites';
 export { useApplicationForm } from './hooks/useApplicationForm';
-export { useLandlordApplications } from './hooks/useLandlordApplications';
+export { useLandlordApplications, type ApplicationWithTenant } from './hooks/useLandlordApplications';

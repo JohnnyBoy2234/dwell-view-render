@@ -79,12 +79,15 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transpa
                   sm:w-auto sm:min-w-[960px] sm:rounded-full
                   sm:bg-[rgba(0,0,0,0.78)] sm:border-white/10
                   transition-all duration-300 ${shapeClass} ${mobileBg}`}
-      style={scrolled
-        ? { boxShadow: '0 2px 16px rgba(0,0,0,0.08)' }
-        : transparent && !isOpen && !scrolled
-        ? {}
-        : { boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)' }
-      }
+      style={{
+        // Drops below the tenant rent-due banner while it's visible (var is 0px otherwise)
+        marginTop: 'var(--rent-banner-h, 0px)',
+        ...(scrolled
+          ? { boxShadow: '0 2px 16px rgba(0,0,0,0.08)' }
+          : transparent && !isOpen && !scrolled
+          ? {}
+          : { boxShadow: '0 8px 40px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.07)' }),
+      }}
     >
       {/* ── Main row ── */}
       <div className="flex items-center gap-3 w-full">

@@ -106,13 +106,71 @@ serve(async (req) => {
       .eq('id', billId);
     if (pathError) throw pathError;
 
+    // ---- Invoice backfill (best effort) ----
+    // Bills sent before invoice generation existed in send-monthly-bill have no
+    // invoice yet; create one now so the paid bill shows Invoice + Receipt together.
+    let invoicePath: string | null = bill.invoice_pdf_path ?? null;
+    if (!bill.invoice_pdf_path) {
+      try {
+        const invoicePdf = await PDFDocument.create();
+        const invoicePage = invoicePdf.addPage([595, 842]); // A4
+        const iFont = await invoicePdf.embedFont(StandardFonts.Helvetica);
+        const iBold = await invoicePdf.embedFont(StandardFonts.HelveticaBold);
+        let iy = 780;
+        const idraw = (text: string, opts: { x?: number; size?: number; isBold?: boolean } = {}) => {
+          invoicePage.drawText(text, {
+            x: opts.x ?? 60, y: iy, size: opts.size ?? 11,
+            font: opts.isBold ? iBold : iFont, color: rgb(0.1, 0.1, 0.15),
+          });
+        };
+
+        idraw('MzanziHomes — Rent Invoice', { size: 18, isBold: true }); iy -= 20;
+        idraw(`Invoice #: ${bill.id.slice(0, 8).toUpperCase()}-${bill.period}`, { size: 10 }); iy -= 14;
+        idraw(`Issued: ${new Date(bill.sent_at ?? bill.created_at).toLocaleDateString('en-ZA')}`, { size: 10 }); iy -= 28;
+        idraw(`Property: ${propertyName}`, { isBold: true }); iy -= 16;
+        idraw(`Period: ${bill.period}`); iy -= 16;
+        idraw(`Tenant: ${tenantProfile?.display_name ?? ''}`); iy -= 16;
+        idraw(`Landlord: ${landlordProfile?.display_name ?? ''}`); iy -= 30;
+
+        idraw('Item', { isBold: true }); idraw('Amount', { x: 440, isBold: true }); iy -= 18;
+        idraw('Rent'); idraw(fmtR(bill.rent_amount), { x: 440 }); iy -= 16;
+        for (const li of bill.bill_line_items ?? []) {
+          idraw(li.label); idraw(fmtR(li.amount), { x: 440 }); iy -= 16;
+        }
+        iy -= 8;
+        idraw('Total due', { isBold: true }); idraw(fmtR(bill.total_amount), { x: 440, isBold: true });
+
+        const invoiceBytes = await invoicePdf.save();
+        const invoiceFileName = `${bill.landlord_id}/${bill.id}_invoice.pdf`;
+        const { error: invoiceUploadError } = await supabase.storage
+          .from('rent-receipts')
+          .upload(invoiceFileName, invoiceBytes, { contentType: 'application/pdf', upsert: true });
+        if (invoiceUploadError) throw invoiceUploadError;
+        const { error: invoicePathError } = await supabase
+          .from('monthly_bills')
+          .update({ invoice_pdf_path: invoiceFileName })
+          .eq('id', billId);
+        if (invoicePathError) throw invoicePathError;
+        invoicePath = invoiceFileName;
+        logStep('Invoice backfilled', { billId, invoiceFileName });
+      } catch (invoiceError) {
+        logStep('Invoice backfill failed (non-fatal)', {
+          billId,
+          error: invoiceError instanceof Error ? invoiceError.message : String(invoiceError),
+        });
+      }
+    }
+
     // ---- Email both parties (best effort — never throw past this point) ----
     const resendKey = Deno.env.get('RESEND_API_KEY');
     if (resendKey) {
       const resend = new Resend(resendKey);
       const from = `MzanziHomes <${Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@MzanziHomes.co'}>`;
       const subject = `Rent receipt — ${propertyName}, ${bill.period}`;
-      const html = `<p>Payment of <strong>${fmtR(bill.total_amount)}</strong> for ${propertyName} (${bill.period}) has been received.</p><p><a href="${urlData.publicUrl}">Download receipt (PDF)</a></p>`;
+      const invoiceUrl = invoicePath
+        ? supabase.storage.from('rent-receipts').getPublicUrl(invoicePath).data.publicUrl
+        : null;
+      const html = `<p>Payment of <strong>${fmtR(bill.total_amount)}</strong> for ${propertyName} (${bill.period}) has been received.</p><p><a href="${urlData.publicUrl}">Download receipt (PDF)</a></p>${invoiceUrl ? `<p><a href="${invoiceUrl}">Download invoice (PDF)</a></p>` : ''}`;
       for (const to of [tenantEmail, landlordEmail]) {
         if (!to) continue;
         const { error: emailError } = await resend.emails.send({ from, to: [to], subject, html });

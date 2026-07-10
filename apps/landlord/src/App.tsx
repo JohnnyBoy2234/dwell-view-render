@@ -50,6 +50,7 @@ import { InventoryStart } from '@mzanzihomes/features/pages';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import PaymentSuccess from "@mzanzihomes/ui/components/pages/PaymentSuccess";
 import PaymentFailed from "@mzanzihomes/ui/components/pages/PaymentFailed";
+import PlanSuccess from "@/pages/PlanSuccess";
 import AccountingDashboard from "@/pages/accounting/AccountingDashboard";
 import AddTransactionPage from "@/pages/accounting/AddTransactionPage";
 import TransactionsPage from "@/pages/accounting/TransactionsPage";
@@ -166,9 +167,7 @@ function AppRoutes() {
         {/* Landlord dashboard */}
         <Route path="/enhancedlandlorddashboard/*" element={
           <AuthenticatedRoute>
-            <PlanGuard requiredPlan="pro" featureName="Landlord Dashboard">
-              <EnhancedLandlordDashboard />
-            </PlanGuard>
+            <EnhancedLandlordDashboard />
           </AuthenticatedRoute>
         } />
         {/* No PlanGuard: the record needs both parties regardless of plan (see plan Task 7). */}
@@ -179,11 +178,9 @@ function AppRoutes() {
         } />
         <Route path="/enhancedlandlorddashboard/support" element={
           <AuthenticatedRoute>
-            <PlanGuard requiredPlan="pro" featureName="Support">
-              <DashboardShell title="Support" currentTab="/enhancedlandlorddashboard/support">
-                <LandlordSupport />
-              </DashboardShell>
-            </PlanGuard>
+            <DashboardShell title="Support" currentTab="/enhancedlandlorddashboard/support">
+              <LandlordSupport />
+            </DashboardShell>
           </AuthenticatedRoute>
         } />
         <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
@@ -324,6 +321,7 @@ function AppRoutes() {
         {/* Payments */}
         <Route path="/payment-success" element={<RouteGuard><PaymentSuccess /></RouteGuard>} />
         <Route path="/payment-failed" element={<RouteGuard><PaymentFailed /></RouteGuard>} />
+        <Route path="/plan-success" element={<PlanSuccess />} />
 
         <Route path="*" element={<NotFound />} />
       </Routes>

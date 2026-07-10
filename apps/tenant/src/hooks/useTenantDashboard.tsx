@@ -33,6 +33,9 @@ export function useTenantDashboard() {
   const [loading, setLoading] = useState(true);
   const [rentDue, setRentDue] = useState<RentDue | null>(null);
   const [tenantProperty, setTenantProperty] = useState<TenantProperty | null>(null);
+  // True when the tenant has an active tenancy with a fully-signed lease document.
+  // False (but with tenantProperty set) means they're connected via invite only.
+  const [hasSignedLease, setHasSignedLease] = useState(false);
   const [recentMaintenance, setRecentMaintenance] = useState<MaintenanceRequest[]>([]);
   const [upcomingViewings, setUpcomingViewings] = useState<any[]>([]);
 
@@ -51,6 +54,8 @@ export function useTenantDashboard() {
           end_date,
           security_deposit,
           property_id,
+          lease_document_path,
+          tenant_signed_at,
           properties (
             id,
             title,
@@ -70,6 +75,8 @@ export function useTenantDashboard() {
       }
 
       if (tenancyData) {
+        // A signed lease means we have a stored lease document or the tenant has signed.
+        setHasSignedLease(Boolean(tenancyData.lease_document_path || tenancyData.tenant_signed_at));
         // Ensure we have property details even if FK relationship isn't cached
         let prop = tenancyData.properties as any;
         if (!prop) {
@@ -138,6 +145,8 @@ export function useTenantDashboard() {
             .maybeSingle();
           
           if (prop) {
+            // Reached via a signed/pending lease contract — treat as leased.
+            setHasSignedLease(true);
             const contractData = leaseData.contract_data as any;
             setTenantProperty({
               id: prop.id,
@@ -202,6 +211,7 @@ export function useTenantDashboard() {
     loading,
     rentDue,
     tenantProperty,
+    hasSignedLease,
     recentMaintenance,
     upcomingViewings,
     refetch: fetchTenantData,

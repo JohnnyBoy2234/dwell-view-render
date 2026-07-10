@@ -1,5 +1,6 @@
 // @ts-nocheck
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@mzanzihomes/ui/components/sheet';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
@@ -20,6 +21,7 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
   const [paying, setPaying] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const startPayment = async () => {
     setPaying(true);
@@ -69,6 +71,18 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
           <div className="flex justify-between border-t pt-2 font-bold">
             <span>Total</span><span>{fmtR(Number(bill.total_amount))}</span>
           </div>
+          {bill.invoice_pdf_path ? (
+            <button
+              type="button"
+              className="block pt-1 text-sm text-primary underline underline-offset-4"
+              onClick={() => {
+                onOpenChange(false);
+                navigate(`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${bill.period}`)}`);
+              }}
+            >
+              View invoice (PDF)
+            </button>
+          ) : null}
         </div>
         <Button className="w-full" size="lg" disabled={paying} onClick={startPayment}>
           {paying ? 'Opening secure checkout…' : `Pay ${fmtR(Number(bill.total_amount))}`}
