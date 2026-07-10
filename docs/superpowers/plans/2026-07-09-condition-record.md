@@ -591,7 +591,7 @@ git commit -m "feat(db): condition_records + condition_photos with attestation l
 - Consumes: `public.condition_records` (Task 2), `public.create_notification(_user_id, _message, _link_url, _type, _metadata)` (existing SECURITY DEFINER helper), pg_cron (already enabled by `20260706110000_schedule_billing_cycle.sql`).
 - Produces: cron jobs `condition-record-move-out-daily`, `condition-record-reminders-weekly`. Notification `type` value used everywhere: `condition_record`.
 
-- [ ] **Step 1: Write the migration**
+- [x] **Step 1: Write the migration**
 
 `supabase/migrations/20260709101000_condition_record_jobs.sql`:
 
@@ -663,7 +663,7 @@ SELECT cron.schedule(
 );
 ```
 
-- [ ] **Step 2: Apply and verify the jobs exist and their SQL runs**
+- [x] **Step 2: Apply and verify the jobs exist and their SQL runs**
 
 ```bash
 npm run supabase -- db reset
@@ -682,7 +682,7 @@ psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 
 
 Expected: completes without error.
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add supabase/migrations/20260709101000_condition_record_jobs.sql
