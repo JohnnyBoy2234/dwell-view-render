@@ -1,29 +1,37 @@
 -- Function to check if tenant has active booking for a property
-CREATE OR REPLACE FUNCTION public.has_active_booking(property_uuid uuid, tenant_uuid uuid)
-RETURNS TABLE(
-  has_booking boolean,
-  slot_id uuid,
-  start_time timestamp with time zone,
-  end_time timestamp with time zone
-)
-LANGUAGE sql
-STABLE SECURITY DEFINER
-SET search_path TO 'public'
-AS $function$
-  SELECT 
-    COUNT(*) > 0 as has_booking,
-    vs.id as slot_id,
-    vs.start_time,
-    vs.end_time
-  FROM viewing_slots vs
-  WHERE vs.property_id = property_uuid
-    AND vs.booked_by_tenant_id = tenant_uuid
-    AND vs.status = 'booked'
-    AND vs.start_time > now() -- Only future bookings
-  GROUP BY vs.id, vs.start_time, vs.end_time
-  ORDER BY vs.start_time ASC
-  LIMIT 1;
-$function$;
+-- guarded: viewing_slots absent at this point on fresh local replay (created later, in 20250908173351; the
+-- table did not exist yet at this timestamp) — sql-language function bodies are validated
+-- at creation, so this fails without the table
+DO $$
+BEGIN
+  IF to_regclass('public.viewing_slots') IS NOT NULL THEN
+    CREATE OR REPLACE FUNCTION public.has_active_booking(property_uuid uuid, tenant_uuid uuid)
+    RETURNS TABLE(
+      has_booking boolean,
+      slot_id uuid,
+      start_time timestamp with time zone,
+      end_time timestamp with time zone
+    )
+    LANGUAGE sql
+    STABLE SECURITY DEFINER
+    SET search_path TO 'public'
+    AS $function$
+      SELECT
+        COUNT(*) > 0 as has_booking,
+        vs.id as slot_id,
+        vs.start_time,
+        vs.end_time
+      FROM viewing_slots vs
+      WHERE vs.property_id = property_uuid
+        AND vs.booked_by_tenant_id = tenant_uuid
+        AND vs.status = 'booked'
+        AND vs.start_time > now() -- Only future bookings
+      GROUP BY vs.id, vs.start_time, vs.end_time
+      ORDER BY vs.start_time ASC
+      LIMIT 1;
+    $function$;
+  END IF;
+END $$;
 
 -- Function to cancel a viewing booking
 CREATE OR REPLACE FUNCTION public.cancel_viewing_booking(slot_uuid uuid, tenant_uuid uuid)
@@ -104,40 +112,46 @@ END;
 $function$;
 
 -- Enhanced RLS policy to prevent multiple active bookings
-DROP POLICY IF EXISTS "Tenants can book available slots" ON viewing_slots;
+-- guarded: viewing_slots absent at this point on fresh local replay (created later, in 20250908173351)
+DO $$
+BEGIN
+  IF to_regclass('public.viewing_slots') IS NOT NULL THEN
+    DROP POLICY IF EXISTS "Tenants can book available slots" ON viewing_slots;
 
-CREATE POLICY "Tenants can book available slots with restrictions"
-ON viewing_slots
-FOR UPDATE
-USING (
-  status = 'available' 
-  AND start_time > now()
-  AND NOT EXISTS (
-    -- Prevent booking if tenant already has an active booking for this property
-    SELECT 1 FROM viewing_slots existing
-    WHERE existing.property_id = viewing_slots.property_id
-      AND existing.booked_by_tenant_id = auth.uid()
-      AND existing.status = 'booked'
-      AND existing.start_time > now()
-      AND existing.id != viewing_slots.id
-  )
-)
-WITH CHECK (
-  status = 'booked' 
-  AND booked_by_tenant_id = auth.uid()
-  AND start_time > now()
-);
+    CREATE POLICY "Tenants can book available slots with restrictions"
+    ON viewing_slots
+    FOR UPDATE
+    USING (
+      status = 'available'
+      AND start_time > now()
+      AND NOT EXISTS (
+        -- Prevent booking if tenant already has an active booking for this property
+        SELECT 1 FROM viewing_slots existing
+        WHERE existing.property_id = viewing_slots.property_id
+          AND existing.booked_by_tenant_id = auth.uid()
+          AND existing.status = 'booked'
+          AND existing.start_time > now()
+          AND existing.id != viewing_slots.id
+      )
+    )
+    WITH CHECK (
+      status = 'booked'
+      AND booked_by_tenant_id = auth.uid()
+      AND start_time > now()
+    );
 
--- Policy for cancelling bookings
-CREATE POLICY "Tenants can cancel their own future bookings"
-ON viewing_slots
-FOR UPDATE
-USING (
-  booked_by_tenant_id = auth.uid() 
-  AND status = 'booked' 
-  AND start_time > now()
-)
-WITH CHECK (
-  (status = 'available' AND booked_by_tenant_id IS NULL) OR
-  (status = 'booked' AND booked_by_tenant_id = auth.uid())
-);
+    -- Policy for cancelling bookings
+    CREATE POLICY "Tenants can cancel their own future bookings"
+    ON viewing_slots
+    FOR UPDATE
+    USING (
+      booked_by_tenant_id = auth.uid()
+      AND status = 'booked'
+      AND start_time > now()
+    )
+    WITH CHECK (
+      (status = 'available' AND booked_by_tenant_id IS NULL) OR
+      (status = 'booked' AND booked_by_tenant_id = auth.uid())
+    );
+  END IF;
+END $$;

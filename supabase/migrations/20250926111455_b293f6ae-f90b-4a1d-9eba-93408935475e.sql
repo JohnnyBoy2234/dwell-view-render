@@ -267,11 +267,17 @@ CREATE TRIGGER notify_kyc_status
   FOR EACH ROW
   EXECUTE FUNCTION public.notify_on_kyc_status_change();
 
-DROP TRIGGER IF EXISTS notify_inventory_status ON public.inventory_records;
-CREATE TRIGGER notify_inventory_status
-  AFTER UPDATE ON public.inventory_records
-  FOR EACH ROW
-  EXECUTE FUNCTION public.notify_on_inventory_status_change();
+-- Guarded: inventory_records creation is a no-op locally (inventory feature
+-- retired; see 20250115000000), so fresh local replay lacks the table.
+DO $do$ BEGIN
+IF to_regclass('public.inventory_records') IS NOT NULL THEN
+  DROP TRIGGER IF EXISTS notify_inventory_status ON public.inventory_records;
+  CREATE TRIGGER notify_inventory_status
+    AFTER UPDATE ON public.inventory_records
+    FOR EACH ROW
+    EXECUTE FUNCTION public.notify_on_inventory_status_change();
+END IF;
+END $do$;
 
 DROP TRIGGER IF EXISTS notify_offer_update ON public.offers;
 CREATE TRIGGER notify_offer_update

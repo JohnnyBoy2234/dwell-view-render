@@ -7,6 +7,7 @@ DROP POLICY IF EXISTS "Restricted inquiry viewing" ON public.inquiries;
 -- Create more secure and explicit policies for viewing inquiries
 
 -- Policy 1: Property owners can view inquiries for their properties
+DROP POLICY IF EXISTS "Property owners can view inquiries for their properties" ON public.inquiries; -- dedup for local replay
 CREATE POLICY "Property owners can view inquiries for their properties" 
 ON public.inquiries 
 FOR SELECT 

@@ -1,11 +1,13 @@
 -- Add lease document fields to tenancies table
-ALTER TABLE public.tenancies 
-ADD COLUMN lease_status text DEFAULT 'draft' CHECK (lease_status IN ('draft', 'generated', 'landlord_signed', 'tenant_signed', 'completed')),
-ADD COLUMN lease_document_url text,
-ADD COLUMN landlord_signature_url text,
-ADD COLUMN tenant_signature_url text,
-ADD COLUMN landlord_signed_at timestamp with time zone,
-ADD COLUMN tenant_signed_at timestamp with time zone;
+-- guarded: IF NOT EXISTS added — lease_document_url is already created with the table
+-- in 20250805070258, which broke fresh local replay (duplicate column)
+ALTER TABLE public.tenancies
+ADD COLUMN IF NOT EXISTS lease_status text DEFAULT 'draft' CHECK (lease_status IN ('draft', 'generated', 'landlord_signed', 'tenant_signed', 'completed')),
+ADD COLUMN IF NOT EXISTS lease_document_url text,
+ADD COLUMN IF NOT EXISTS landlord_signature_url text,
+ADD COLUMN IF NOT EXISTS tenant_signature_url text,
+ADD COLUMN IF NOT EXISTS landlord_signed_at timestamp with time zone,
+ADD COLUMN IF NOT EXISTS tenant_signed_at timestamp with time zone;
 
 -- Create lease_templates table for customizable lease templates
 CREATE TABLE public.lease_templates (

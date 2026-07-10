@@ -77,6 +77,7 @@ create policy "Landlords can cancel proposals"
   with check (status = 'cancelled');
 
 -- RLS policies for viewing_reminders
+DROP POLICY IF EXISTS "System can manage reminders" ON public.viewing_reminders; -- dedup for local replay
 create policy "System can manage reminders"
   on public.viewing_reminders for all
   using (true);
@@ -88,4 +89,4 @@ create trigger update_viewing_proposals_updated_at
 
 -- Enable realtime for new tables
 alter publication supabase_realtime add table public.viewing_proposals;
-alter publication supabase_realtime add table public.viewing_reminders;
+-- viewing_reminders already added to the publication by 20250908173443 (dedup for local replay)

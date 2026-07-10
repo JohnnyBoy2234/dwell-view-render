@@ -21,16 +21,28 @@ CREATE TABLE IF NOT EXISTS public.lease_templates (
 ALTER TABLE public.lease_templates ENABLE ROW LEVEL SECURITY;
 
 -- Create policies for lease_templates
-CREATE POLICY "Landlords can manage their lease templates" 
-ON public.lease_templates 
-FOR ALL
-USING (auth.uid() = landlord_id);
+-- guarded: identical policy already created by 20250805072647 on fresh local replay
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'public' AND tablename = 'lease_templates' AND policyname = 'Landlords can manage their lease templates') THEN
+    CREATE POLICY "Landlords can manage their lease templates"
+    ON public.lease_templates
+    FOR ALL
+    USING (auth.uid() = landlord_id);
+  END IF;
+END $$;
 
 -- Add trigger for lease_templates updated_at
-CREATE TRIGGER update_lease_templates_updated_at
-BEFORE UPDATE ON public.lease_templates
-FOR EACH ROW
-EXECUTE FUNCTION public.update_updated_at_column();
+-- guarded: identical trigger already created by 20250805072647 on fresh local replay
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_lease_templates_updated_at' AND tgrelid = 'public.lease_templates'::regclass) THEN
+    CREATE TRIGGER update_lease_templates_updated_at
+    BEFORE UPDATE ON public.lease_templates
+    FOR EACH ROW
+    EXECUTE FUNCTION public.update_updated_at_column();
+  END IF;
+END $$;
 
 -- Create storage bucket for lease documents and signatures (if not exists)
 INSERT INTO storage.buckets (id, name, public) 
@@ -38,48 +50,58 @@ VALUES ('lease-documents', 'lease-documents', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- Create policies for lease documents storage
-CREATE POLICY "Users can view their lease documents" 
-ON storage.objects 
-FOR SELECT 
-USING (
-  bucket_id = 'lease-documents' AND 
-  (
-    auth.uid()::text = (storage.foldername(name))[1] OR
-    auth.uid() IN (
-      SELECT t.landlord_id FROM public.tenancies t 
-      WHERE t.id::text = (storage.foldername(name))[2]
-    ) OR
-    auth.uid() IN (
-      SELECT t.tenant_id FROM public.tenancies t 
-      WHERE t.id::text = (storage.foldername(name))[2]
-    )
-  )
-);
+-- guarded: identical policies already created by 20250805072647 on fresh local replay
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Users can view their lease documents') THEN
+    CREATE POLICY "Users can view their lease documents"
+    ON storage.objects
+    FOR SELECT
+    USING (
+      bucket_id = 'lease-documents' AND
+      (
+        auth.uid()::text = (storage.foldername(name))[1] OR
+        auth.uid() IN (
+          SELECT t.landlord_id FROM public.tenancies t
+          WHERE t.id::text = (storage.foldername(name))[2]
+        ) OR
+        auth.uid() IN (
+          SELECT t.tenant_id FROM public.tenancies t
+          WHERE t.id::text = (storage.foldername(name))[2]
+        )
+      )
+    );
+  END IF;
 
-CREATE POLICY "Landlords can upload lease documents" 
-ON storage.objects 
-FOR INSERT 
-WITH CHECK (
-  bucket_id = 'lease-documents' AND 
-  auth.uid() IN (
-    SELECT t.landlord_id FROM public.tenancies t 
-    WHERE t.id::text = (storage.foldername(name))[2]
-  )
-);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Landlords can upload lease documents') THEN
+    CREATE POLICY "Landlords can upload lease documents"
+    ON storage.objects
+    FOR INSERT
+    WITH CHECK (
+      bucket_id = 'lease-documents' AND
+      auth.uid() IN (
+        SELECT t.landlord_id FROM public.tenancies t
+        WHERE t.id::text = (storage.foldername(name))[2]
+      )
+    );
+  END IF;
 
-CREATE POLICY "Users can update their lease documents" 
-ON storage.objects 
-FOR UPDATE 
-USING (
-  bucket_id = 'lease-documents' AND 
-  (
-    auth.uid() IN (
-      SELECT t.landlord_id FROM public.tenancies t 
-      WHERE t.id::text = (storage.foldername(name))[2]
-    ) OR
-    auth.uid() IN (
-      SELECT t.tenant_id FROM public.tenancies t 
-      WHERE t.id::text = (storage.foldername(name))[2]
-    )
-  )
-);
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Users can update their lease documents') THEN
+    CREATE POLICY "Users can update their lease documents"
+    ON storage.objects
+    FOR UPDATE
+    USING (
+      bucket_id = 'lease-documents' AND
+      (
+        auth.uid() IN (
+          SELECT t.landlord_id FROM public.tenancies t
+          WHERE t.id::text = (storage.foldername(name))[2]
+        ) OR
+        auth.uid() IN (
+          SELECT t.tenant_id FROM public.tenancies t
+          WHERE t.id::text = (storage.foldername(name))[2]
+        )
+      )
+    );
+  END IF;
+END $$;

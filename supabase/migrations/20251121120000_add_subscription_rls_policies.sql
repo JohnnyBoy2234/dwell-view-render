@@ -55,13 +55,20 @@ BEGIN
 END;
 $$;
 
--- Enable RLS on relevant tables if not already enabled
+-- Enable RLS on relevant tables if not already enabled.
+-- Guards added: all tables except maintenance_requests exist only remotely,
+-- created outside migrations (remote history only tracks 20260707144339+), so
+-- fresh local `supabase db reset` replay lacks them.
 ALTER TABLE maintenance_requests ENABLE ROW LEVEL SECURITY;
-ALTER TABLE maintenance_responses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE leases ENABLE ROW LEVEL SECURITY;
-ALTER TABLE lease_documents ENABLE ROW LEVEL SECURITY;
-ALTER TABLE property_inspections ENABLE ROW LEVEL SECURITY;
-ALTER TABLE rental_applications ENABLE ROW LEVEL SECURITY;
+DO $do$
+DECLARE tbl text;
+BEGIN
+FOREACH tbl IN ARRAY ARRAY['maintenance_responses','leases','lease_documents','property_inspections','rental_applications'] LOOP
+  IF to_regclass('public.' || tbl) IS NOT NULL THEN
+    EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', tbl);
+  END IF;
+END LOOP;
+END $do$;
 
 -- Maintenance Requests Policies
 CREATE POLICY "Enable read access for users with premium subscription"
@@ -82,64 +89,84 @@ CREATE POLICY "Enable insert for tenants with premium subscription"
     public.has_subscription_access(auth.uid(), 'premium')
   );
 
--- Maintenance Responses Policies
-CREATE POLICY "Enable read access for related users with premium subscription"
-  ON public.maintenance_responses
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM maintenance_requests mr 
-      WHERE mr.id = maintenance_responses.request_id 
-      AND (mr.tenant_id = auth.uid() OR 
-           mr.landlord_id = auth.uid())
-    ) AND
-    public.has_subscription_access(auth.uid(), 'premium')
-  );
+-- Maintenance Responses Policies (guarded: remote-only table, see note above)
+DO $do$ BEGIN
+IF to_regclass('public.maintenance_responses') IS NOT NULL THEN
+  CREATE POLICY "Enable read access for related users with premium subscription"
+    ON public.maintenance_responses
+    FOR SELECT
+    USING (
+      EXISTS (
+        SELECT 1 FROM maintenance_requests mr 
+        WHERE mr.id = maintenance_responses.request_id 
+        AND (mr.tenant_id = auth.uid() OR 
+             mr.landlord_id = auth.uid())
+      ) AND
+      public.has_subscription_access(auth.uid(), 'premium')
+    );
+END IF;
+END $do$;
 
--- Leases Policies
-CREATE POLICY "Enable read access for related users with pro subscription"
-  ON public.leases
-  FOR SELECT
-  USING (
-    (tenant_id = auth.uid() OR landlord_id = auth.uid()) AND
-    public.has_subscription_access(auth.uid(), 'pro')
-  );
+-- Leases Policies (guarded: remote-only table, see note above)
+DO $do$ BEGIN
+IF to_regclass('public.leases') IS NOT NULL THEN
+  CREATE POLICY "Enable read access for related users with pro subscription"
+    ON public.leases
+    FOR SELECT
+    USING (
+      (tenant_id = auth.uid() OR landlord_id = auth.uid()) AND
+      public.has_subscription_access(auth.uid(), 'pro')
+    );
+END IF;
+END $do$;
 
--- Lease Documents Policies
-CREATE POLICY "Enable read access for related users with pro subscription"
-  ON public.lease_documents
-  FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM leases l 
-      WHERE l.id = lease_documents.lease_id 
-      AND (l.tenant_id = auth.uid() OR l.landlord_id = auth.uid())
-    ) AND
-    public.has_subscription_access(auth.uid(), 'pro')
-  );
+-- Lease Documents Policies (guarded: remote-only tables, see note above)
+DO $do$ BEGIN
+IF to_regclass('public.lease_documents') IS NOT NULL AND to_regclass('public.leases') IS NOT NULL THEN
+  CREATE POLICY "Enable read access for related users with pro subscription"
+    ON public.lease_documents
+    FOR SELECT
+    USING (
+      EXISTS (
+        SELECT 1 FROM leases l 
+        WHERE l.id = lease_documents.lease_id 
+        AND (l.tenant_id = auth.uid() OR l.landlord_id = auth.uid())
+      ) AND
+      public.has_subscription_access(auth.uid(), 'pro')
+    );
+END IF;
+END $do$;
 
--- Property Inspections Policies
-CREATE POLICY "Enable read access for related users with pro subscription"
-  ON public.property_inspections
-  FOR SELECT
-  USING (
-    (inspector_id = auth.uid() OR 
-     property_id IN (SELECT id FROM properties WHERE landlord_id = auth.uid()) OR
-     property_id IN (SELECT property_id FROM leases WHERE tenant_id = auth.uid() AND status = 'active')
-    ) AND
-    public.has_subscription_access(auth.uid(), 'pro')
-  );
+-- Property Inspections Policies (guarded: remote-only tables, see note above)
+DO $do$ BEGIN
+IF to_regclass('public.property_inspections') IS NOT NULL AND to_regclass('public.leases') IS NOT NULL THEN
+  CREATE POLICY "Enable read access for related users with pro subscription"
+    ON public.property_inspections
+    FOR SELECT
+    USING (
+      (inspector_id = auth.uid() OR 
+       property_id IN (SELECT id FROM properties WHERE landlord_id = auth.uid()) OR
+       property_id IN (SELECT property_id FROM leases WHERE tenant_id = auth.uid() AND status = 'active')
+      ) AND
+      public.has_subscription_access(auth.uid(), 'pro')
+    );
+END IF;
+END $do$;
 
--- Rental Applications Policies
-CREATE POLICY "Enable read access for related users with pro subscription"
-  ON public.rental_applications
-  FOR SELECT
-  USING (
-    (applicant_id = auth.uid() OR 
-     property_id IN (SELECT id FROM properties WHERE landlord_id = auth.uid())
-    ) AND
-    public.has_subscription_access(auth.uid(), 'pro')
-  );
+-- Rental Applications Policies (guarded: remote-only table, see note above)
+DO $do$ BEGIN
+IF to_regclass('public.rental_applications') IS NOT NULL THEN
+  CREATE POLICY "Enable read access for related users with pro subscription"
+    ON public.rental_applications
+    FOR SELECT
+    USING (
+      (applicant_id = auth.uid() OR 
+       property_id IN (SELECT id FROM properties WHERE landlord_id = auth.uid())
+      ) AND
+      public.has_subscription_access(auth.uid(), 'pro')
+    );
+END IF;
+END $do$;
 
 -- Create a function to check subscription access for RLS
 CREATE OR REPLACE FUNCTION public.check_subscription_access(required_plan text)
@@ -177,6 +204,7 @@ CREATE POLICY "Users can view their own profile"
   FOR SELECT
   USING (id = auth.uid());
 
+DROP POLICY IF EXISTS "Users can update their own profile" ON public.profiles; -- dedup for local replay
 CREATE POLICY "Users can update their own profile"
   ON public.profiles
   FOR UPDATE
@@ -185,21 +213,28 @@ CREATE POLICY "Users can update their own profile"
 -- Create a policy to restrict access to the properties table
 ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view properties they own or are tenants of"
-  ON public.properties
-  FOR SELECT
-  USING (
-    landlord_id = auth.uid() OR
-    id IN (SELECT property_id FROM leases WHERE tenant_id = auth.uid() AND status = 'active')
-  );
+-- Guarded on leases (remote-only, see note above). Skipping is safe locally:
+-- properties already has the permissive "Anyone can view available properties"
+-- SELECT policy from 20250804103254, and policies are OR'd.
+DO $do$ BEGIN
+IF to_regclass('public.leases') IS NOT NULL THEN
+  CREATE POLICY "Users can view properties they own or are tenants of"
+    ON public.properties
+    FOR SELECT
+    USING (
+      landlord_id = auth.uid() OR
+      id IN (SELECT property_id FROM leases WHERE tenant_id = auth.uid() AND status = 'active')
+    );
+END IF;
+END $do$;
 
 -- Create a policy to restrict access to the messages table
 ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view their own messages with pro subscription"
-  ON public.messages
-  FOR SELECT
-  USING (
-    (sender_id = auth.uid() OR recipient_id = auth.uid()) AND
-    public.has_subscription_access(auth.uid(), 'pro')
-  );
+-- Removed: messages has no recipient_id column anywhere (local migrations and
+-- the generated remote types agree), so this CREATE POLICY could never have
+-- applied. Kept as a record only.
+-- CREATE POLICY "Users can view their own messages with pro subscription"
+--   ON public.messages FOR SELECT
+--   USING ((sender_id = auth.uid() OR recipient_id = auth.uid()) AND
+--          public.has_subscription_access(auth.uid(), 'pro'));

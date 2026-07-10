@@ -5,6 +5,7 @@ VALUES ('kyc-uploads', 'kyc-uploads', false)
 ON CONFLICT (id) DO NOTHING;
 
 -- Create proper RLS policies for kyc-uploads bucket
+DROP POLICY IF EXISTS "Users can upload their own KYC documents" ON storage.objects; -- dedup for local replay
 CREATE POLICY "Users can upload their own KYC documents"
 ON storage.objects 
 FOR INSERT 
@@ -13,6 +14,7 @@ WITH CHECK (
   AND auth.uid()::text = (string_to_array(name, '/'))[2]
 );
 
+DROP POLICY IF EXISTS "Users can view their own KYC documents" ON storage.objects; -- dedup for local replay
 CREATE POLICY "Users can view their own KYC documents"
 ON storage.objects 
 FOR SELECT 
@@ -25,6 +27,7 @@ USING (
   )
 );
 
+DROP POLICY IF EXISTS "Admins can view all KYC documents" ON storage.objects; -- dedup for local replay
 CREATE POLICY "Admins can view all KYC documents"
 ON storage.objects 
 FOR SELECT 

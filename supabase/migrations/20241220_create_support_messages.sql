@@ -34,25 +34,31 @@ CREATE POLICY "Users can create support messages" ON support_messages
 CREATE POLICY "Users can update their own support messages" ON support_messages
   FOR UPDATE USING (auth.uid() = user_id AND admin_response IS NULL);
 
--- Admins can view all support messages
-CREATE POLICY "Admins can view all support messages" ON support_messages
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE profiles.user_id = auth.uid() 
-      AND profiles.role = 'admin'
-    )
-  );
+-- guarded: profiles absent on fresh local replay (created in 20250804103254, after this file's timestamp)
+DO $$
+BEGIN
+  IF to_regclass('public.profiles') IS NOT NULL THEN
+    -- Admins can view all support messages
+    CREATE POLICY "Admins can view all support messages" ON support_messages
+      FOR SELECT USING (
+        EXISTS (
+          SELECT 1 FROM profiles
+          WHERE profiles.user_id = auth.uid()
+          AND profiles.role = 'admin'
+        )
+      );
 
--- Admins can update all support messages
-CREATE POLICY "Admins can update all support messages" ON support_messages
-  FOR UPDATE USING (
-    EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE profiles.user_id = auth.uid() 
-      AND profiles.role = 'admin'
-    )
-  );
+    -- Admins can update all support messages
+    CREATE POLICY "Admins can update all support messages" ON support_messages
+      FOR UPDATE USING (
+        EXISTS (
+          SELECT 1 FROM profiles
+          WHERE profiles.user_id = auth.uid()
+          AND profiles.role = 'admin'
+        )
+      );
+  END IF;
+END $$;
 
 -- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_support_messages_updated_at()

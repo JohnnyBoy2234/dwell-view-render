@@ -163,10 +163,16 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_notify_on_viewing_slot_update ON public.viewing_slots;
-CREATE TRIGGER trg_notify_on_viewing_slot_update
-AFTER UPDATE ON public.viewing_slots
-FOR EACH ROW EXECUTE FUNCTION public.notify_on_viewing_slot_update();
+-- guarded: viewing_slots absent at this point on fresh local replay (created later, in 20250908173351)
+DO $$
+BEGIN
+  IF to_regclass('public.viewing_slots') IS NOT NULL THEN
+    DROP TRIGGER IF EXISTS trg_notify_on_viewing_slot_update ON public.viewing_slots;
+    CREATE TRIGGER trg_notify_on_viewing_slot_update
+    AFTER UPDATE ON public.viewing_slots
+    FOR EACH ROW EXECUTE FUNCTION public.notify_on_viewing_slot_update();
+  END IF;
+END $$;
 
 -- Application invite sent -> tenant
 CREATE OR REPLACE FUNCTION public.notify_on_application_invite()

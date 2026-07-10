@@ -39,11 +39,13 @@ CREATE TRIGGER update_lease_agreements_updated_at
 ALTER TABLE public.lease_agreements ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS "Landlords can manage their lease agreements" ON public.lease_agreements; -- dedup for local replay
 CREATE POLICY "Landlords can manage their lease agreements"
   ON public.lease_agreements
   FOR ALL
   USING (auth.uid() = landlord_id);
 
+DROP POLICY IF EXISTS "Tenants can view and update their lease agreements" ON public.lease_agreements; -- dedup for local replay
 CREATE POLICY "Tenants can view and update their lease agreements"
   ON public.lease_agreements
   FOR ALL
@@ -75,6 +77,7 @@ CREATE INDEX idx_lease_signatures_signer ON public.lease_signatures(signer_id);
 ALTER TABLE public.lease_signatures ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies for signatures
+DROP POLICY IF EXISTS "Users can view signatures for their lease agreements" ON public.lease_signatures; -- dedup for local replay
 CREATE POLICY "Users can view signatures for their lease agreements"
   ON public.lease_signatures
   FOR SELECT
@@ -86,6 +89,7 @@ CREATE POLICY "Users can view signatures for their lease agreements"
     )
   );
 
+DROP POLICY IF EXISTS "Users can create their own signatures" ON public.lease_signatures; -- dedup for local replay
 CREATE POLICY "Users can create their own signatures"
   ON public.lease_signatures
   FOR INSERT

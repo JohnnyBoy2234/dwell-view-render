@@ -1,6 +1,8 @@
 -- Add warning_count and is_banned columns to profiles table if they don't exist
+-- guarded: table absent on fresh local replay (profiles is created in 20250804103254, after this file's timestamp)
 DO $$
 BEGIN
+    IF to_regclass('public.profiles') IS NOT NULL THEN
     -- Add warning_count column if it doesn't exist
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                   WHERE table_name = 'profiles' AND column_name = 'warning_count') THEN
@@ -17,6 +19,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
                   WHERE table_name = 'profiles' AND column_name = 'banned_at') THEN
         ALTER TABLE public.profiles ADD COLUMN banned_at TIMESTAMPTZ;
+    END IF;
     END IF;
 END $$;
 

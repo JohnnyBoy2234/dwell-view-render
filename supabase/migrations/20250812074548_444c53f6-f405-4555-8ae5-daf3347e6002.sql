@@ -9,15 +9,21 @@ IF NOT EXISTS (
 END IF;
 END $$;
 
--- Allow landlords to view documents for their applicants
-DROP POLICY IF EXISTS "Landlords can view applicant documents" ON public.documents;
-CREATE POLICY "Landlords can view applicant documents"
-ON public.documents
-FOR SELECT
-USING (
-  EXISTS (
-    SELECT 1 FROM public.applications a
-    WHERE a.tenant_id = user_id
-      AND a.landlord_id = auth.uid()
-  )
-);
+-- Allow landlords to view documents for their applicants.
+-- Guarded: public.documents exists remotely but was created outside migrations
+-- (remote history only tracks 20260707144339+), so fresh local replay lacks it.
+DO $$ BEGIN
+IF to_regclass('public.documents') IS NOT NULL THEN
+  DROP POLICY IF EXISTS "Landlords can view applicant documents" ON public.documents;
+  CREATE POLICY "Landlords can view applicant documents"
+  ON public.documents
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.applications a
+      WHERE a.tenant_id = user_id
+        AND a.landlord_id = auth.uid()
+    )
+  );
+END IF;
+END $$;
