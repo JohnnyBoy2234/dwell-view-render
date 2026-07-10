@@ -31,7 +31,7 @@
 **Interfaces:**
 - Produces (later tasks rely on these exact names): types `ConditionRecord`, `ConditionPhoto`, `ConditionEventType`, `ConditionParty`, `ConditionRecordState`; constants `LOCATION_TAGS`, `ATTESTATION_TEXT`; functions `conditionRecordState(record): ConditionRecordState`, `groupPhotosByLocation(photos): { location: string; photos: ConditionPhoto[] }[]`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 `packages/common/src/types/conditionRecord.test.ts`:
 
@@ -119,12 +119,12 @@ describe('groupPhotosByLocation', () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+- [x] **Step 2: Run test to verify it fails**
 
 Run: `npx vitest run src/types/conditionRecord.test.ts` from `packages/common/`
 Expected: FAIL — cannot resolve `./conditionRecord`
 
-- [ ] **Step 3: Write the implementation**
+- [x] **Step 3: Write the implementation**
 
 `packages/common/src/types/conditionRecord.ts`:
 
@@ -210,12 +210,12 @@ Add to `packages/common/src/index.ts` (next to the existing type exports):
 export * from './types/conditionRecord';
 ```
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
 
 Run: `npx vitest run src/types/conditionRecord.test.ts` from `packages/common/`
 Expected: PASS (7 tests)
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add packages/common/src/types/conditionRecord.ts packages/common/src/types/conditionRecord.test.ts packages/common/src/index.ts
@@ -234,7 +234,7 @@ git commit -m "feat(common): condition record types, tags, and state helpers"
 - Produces: tables `public.condition_records` (with generated `locked` column), `public.condition_photos`; RPCs `attest_condition_record(p_record_id uuid)`, `set_condition_notes(p_record_id uuid, p_notes text)`; helper `is_condition_record_party(p_record_id uuid)`; private storage bucket `condition-photos` with paths `{record_id}/{filename}`.
 - Consumes: existing `public.tenancies`, `update_updated_at_column()` trigger function, `supabase_realtime` publication.
 
-- [ ] **Step 1: Write the migration**
+- [x] **Step 1: Write the migration**
 
 `supabase/migrations/20260709100000_condition_records.sql`:
 
@@ -460,7 +460,7 @@ USING (
 );
 ```
 
-- [ ] **Step 2: Write the SQL smoke test**
+- [x] **Step 2: Write the SQL smoke test**
 
 `supabase/tests/condition_records.test.sql` (runs as postgres superuser against the local stack; uses `set_config('request.jwt.claims', ...)` so `auth.uid()` resolves inside the SECURITY DEFINER RPCs; everything in one rolled-back transaction):
 
@@ -564,7 +564,7 @@ END $$;
 ROLLBACK;
 ```
 
-- [ ] **Step 3: Apply migrations and run the smoke test**
+- [x] **Step 3: Apply migrations and run the smoke test**
 
 ```bash
 npm run supabase -- db reset   # applies all migrations to the local stack (starts it if needed: npm run supabase -- start)
@@ -573,7 +573,7 @@ psql postgresql://postgres:postgres@127.0.0.1:54322/postgres -v ON_ERROR_STOP=1 
 
 Expected: `db reset` completes without error; psql prints `NOTICE:  condition_records smoke test: ALL PASS` and exits 0. If `auth.users` insert fails on a NOT NULL column locally, add the minimum columns the error names (commonly `instance_id, aud, role`) to the two insert statements.
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add supabase/migrations/20260709100000_condition_records.sql supabase/tests/condition_records.test.sql
