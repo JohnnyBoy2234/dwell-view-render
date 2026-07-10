@@ -1585,7 +1585,7 @@ git commit -m "feat(apps): route condition records in tenant and landlord apps, 
 - `packages/supabase/src/types.ts` — regenerate: `npm run supabase -- gen types typescript --local > packages/supabase/src/types.ts` (picks up condition_records/condition_photos, keeps inventory tables, loses the dropped inspection ones); if the file turns out to be hand-maintained (check git history first: `git log --oneline -3 packages/supabase/src/types.ts`), hand-remove the two inspection table blocks and hand-add `condition_records`/`condition_photos` in the same shape
 - Create: `supabase/migrations/20260709102000_drop_inventory_inspection.sql`
 
-- [ ] **Step 1: Write the drop migration**
+- [x] **Step 1: Write the drop migration**
 
 `supabase/migrations/20260709102000_drop_inventory_inspection.sql`:
 
@@ -1600,7 +1600,7 @@ DROP TABLE IF EXISTS public.inspection_records CASCADE;
 
 Note: `admin_delete_property_function` guards every inspection delete with `IF EXISTS (information_schema.tables ...)`, so it survives the drop unchanged. The inventory tables, `notify_on_inventory_status_change`, and the kyc-uploads inventory-prefix storage policy all STAY.
 
-- [ ] **Step 2: Delete files and apply the modifications listed above**
+- [x] **Step 2: Delete files and apply the modifications listed above**
 
 ```bash
 git rm apps/tenant/src/pages/tenant/TenantInspection.tsx apps/landlord/src/pages/LandlordInspection.tsx \
@@ -1610,7 +1610,7 @@ git rm -r packages/features/src/inspection
 
 Then make the listed modifications (removing exports, routes, imports, dead UI references).
 
-- [ ] **Step 3: Hunt stragglers**
+- [x] **Step 3: Hunt stragglers**
 
 ```bash
 grep -rni "inspection" apps packages --include='*.ts' --include='*.tsx' -l | grep -v node_modules
@@ -1618,7 +1618,7 @@ grep -rni "inspection" apps packages --include='*.ts' --include='*.tsx' -l | gre
 
 Expected survivors (leave untouched): ALL inventory code (kept feature); `packages/ui/src/components/inspection/` (PhotoGallery/PhotoLightbox — used by inventory; optionally rename the dir later); `packages/features/src/lease/templates/masterLeaseTemplate.ts` and `conditionReportTemplate.ts` (legal document wording); `packages/features/src/viewing/**` if the word appears in copy about viewings. Anything else referencing the deleted Inspection FEATURE — dashboards (`EnhancedTenantDashboard.tsx`, `EnhancedLandlordDashboard.tsx`), `TenantSupport.tsx`, `ToolGrid.tsx` styles map, notification types — remove or reword. Also check `supabase/functions/generate-lease-pdf/index.ts`: if its hit is template prose, leave it; if it queries dropped inspection tables, remove that query.
 
-- [ ] **Step 4: Verify everything still builds and migrations apply**
+- [x] **Step 4: Verify everything still builds and migrations apply**
 
 ```bash
 npm run supabase -- db reset
@@ -1630,7 +1630,7 @@ npm run lint:boundaries
 
 Expected: all pass; smoke test still prints ALL PASS after the drop migration.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
