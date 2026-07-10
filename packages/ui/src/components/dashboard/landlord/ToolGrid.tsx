@@ -19,7 +19,7 @@ const TOOL_COLORS: Record<string, { bg: string; iconColor: string; glow: string 
   SwiftBooks:   { bg: 'hsl(275 84% 67% / 0.12)', iconColor: 'hsl(275 84% 52%)',  glow: 'hsl(275 84% 67% / 0.22)' },
   Leases:       { bg: 'hsl(214 100% 59% / 0.12)', iconColor: 'hsl(214 100% 44%)', glow: 'hsl(214 100% 59% / 0.22)' },
   Inventory:    { bg: 'hsl(174 72% 56% / 0.12)', iconColor: 'hsl(174 72% 36%)',  glow: 'hsl(174 72% 56% / 0.22)' },
-  Inspection:   { bg: 'hsl(38 95% 52% / 0.12)',  iconColor: 'hsl(38 95% 38%)',   glow: 'hsl(38 95% 52% / 0.25)' },
+  'Condition Records': { bg: 'hsl(38 95% 52% / 0.12)', iconColor: 'hsl(38 95% 38%)', glow: 'hsl(38 95% 52% / 0.25)' },
   Support:        { bg: 'hsl(220 9% 46% / 0.09)',  iconColor: 'hsl(220 9% 34%)',   glow: 'hsl(220 9% 46% / 0.18)' },
   'Invite Tenant':{ bg: 'hsl(214 100% 59% / 0.12)', iconColor: 'hsl(214 100% 44%)', glow: 'hsl(214 100% 59% / 0.22)' },
   'List Property':{ bg: 'hsl(270 80% 60% / 0.12)', iconColor: 'hsl(270 80% 44%)',  glow: 'hsl(270 80% 60% / 0.22)' },

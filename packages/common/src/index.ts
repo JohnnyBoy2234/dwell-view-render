@@ -11,7 +11,6 @@ export * from './types/conditionRecord';
 export * from './types/dashboard';
 export * from './types/filters';
 // google-maps.d.ts is an ambient declaration, not included in barrel
-export * from './types/inspection';
 export * from './types/inventory';
 export * from './types/kyc';
 export * from './types/lease';

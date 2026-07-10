@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@mzan
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, Clipboard, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark } from "lucide-react";
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
@@ -50,7 +50,7 @@ const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: s
   'SwiftBooks':   { bg: 'bg-violet-100',  icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
   'Leases':       { bg: 'bg-blue-100',    icon: 'text-blue-600',    border: 'group-hover:border-blue-200'    },
   'Inventory':    { bg: 'bg-teal-100',    icon: 'text-teal-600',    border: 'group-hover:border-teal-200'    },
-  'Inspection':   { bg: 'bg-amber-100',   icon: 'text-amber-600',   border: 'group-hover:border-amber-200'   },
+  'Condition Records': { bg: 'bg-amber-100', icon: 'text-amber-600', border: 'group-hover:border-amber-200'   },
   'Support':      { bg: 'bg-slate-100',   icon: 'text-slate-500',   border: 'group-hover:border-slate-200'   },
 };
 
@@ -2347,7 +2347,7 @@ const renderReportsTab = () => (
       { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
-      { title: 'Inspection',     subtitle: 'View & start',                       icon: Clipboard,     tab: '/enhancedlandlorddashboard/inspection' },
+      { title: 'Condition Records', subtitle: 'Photograph & attest',             icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
       { title: 'My Profile',     subtitle: 'Account & settings',                 icon: User,          tab: '/enhancedlandlorddashboard/profile' },
       { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/landlord/support' },
     ];

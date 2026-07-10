@@ -23,7 +23,7 @@ const faqItems = [
   {
     id: '3',
     question: 'Where can I find my lease agreement?',
-    answer: 'All your lease documents are available in the Lease Documents section. You can view and download your signed lease agreement, move-in inspection report, and other related documents.',
+    answer: 'All your lease documents are available in the Lease Documents section. You can view and download your signed lease agreement, move-in condition record, and other related documents.',
   },
   {
     id: '4',

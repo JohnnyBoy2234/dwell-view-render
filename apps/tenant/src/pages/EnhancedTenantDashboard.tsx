@@ -15,7 +15,7 @@ import { Separator } from '@mzanzihomes/ui/components/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@mzanzihomes/ui/components/dialog';
 import {
   FileText, Eye, Settings, Building, User,
-  Receipt, Clipboard, HelpCircle, MapPin,
+  Receipt, Camera, HelpCircle, MapPin,
   Calendar, AlertCircle, Clock,
 } from 'lucide-react';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
@@ -29,7 +29,7 @@ const FEATURE_BLOCKS = [
   { title: 'Viewings',         icon: Eye,       path: '/tenant/viewings',                  countKey: 'viewings'     as const },
   { title: 'Maintenance',      icon: Settings,  path: '/tenant/maintenance',               countKey: 'maintenance'  as const },
   { title: 'Inventory',        icon: FileText,  path: '/tenant/inventory' },
-  { title: 'Inspection',       icon: Clipboard, path: '/tenant/inspection' },
+  { title: 'Condition Records', icon: Camera,   path: '/tenant/condition-records' },
   { title: 'Proof of Payment', icon: Receipt,   path: '/tenant/proof-of-payment' },
   { title: 'Lease Contracts',  icon: FileText,  path: '/enhancedtenantdashboard/leases' },
   { title: 'Applications',     icon: Building,  path: '/tenant/applications' },
@@ -42,7 +42,7 @@ const FEATURE_ICON_COLORS: Record<string, { bg: string; icon: string; border: st
   'Viewings':         { bg: 'bg-blue-100',    icon: 'text-blue-600',    border: 'group-hover:border-blue-200'    },
   'Maintenance':      { bg: 'bg-orange-100',  icon: 'text-orange-500',  border: 'group-hover:border-orange-200'  },
   'Inventory':        { bg: 'bg-teal-100',    icon: 'text-teal-600',    border: 'group-hover:border-teal-200'    },
-  'Inspection':       { bg: 'bg-violet-100',  icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
+  'Condition Records': { bg: 'bg-violet-100', icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
   'Proof of Payment': { bg: 'bg-emerald-100', icon: 'text-emerald-600', border: 'group-hover:border-emerald-200' },
   'Lease Contracts':  { bg: 'bg-indigo-100',  icon: 'text-indigo-600',  border: 'group-hover:border-indigo-200'  },
   'Applications':     { bg: 'bg-pink-100',    icon: 'text-pink-600',    border: 'group-hover:border-pink-200'    },

@@ -18,7 +18,6 @@ const PLAN_FEATURES = {
     'In-platform messaging',
     'Tenant applications',
     'Inventory tracker',
-    'Property inspections',
     'Lease management & signatures',
   ],
   premium: [

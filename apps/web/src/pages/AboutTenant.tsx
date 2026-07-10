@@ -74,7 +74,7 @@ const AboutTenant = () => {
     },
     {
       icon: Eye,
-      title: "Property Inspections",
+      title: "Condition Records",
       description: "Document property condition with photos and notes. Protect yourself with detailed move-in and move-out records.",
       color: "text-ocean-blue"
     },
@@ -145,7 +145,7 @@ const AboutTenant = () => {
     "Digital lease agreements",
     "Secure rent payment system",
     "Maintenance request management",
-    "Property inspection tools",
+    "Condition record tools",
     "Mobile-friendly dashboard",
     "24/7 access to your rental information"
   ];

@@ -47,7 +47,6 @@ import KycCapture from "@mzanzihomes/ui/components/pages/KycCapture";
 import { VerifyId } from '@mzanzihomes/features/pages';
 import { MobileCapture } from '@mzanzihomes/features/pages';
 import { InventoryStart } from '@mzanzihomes/features/pages';
-import CreateInspection from "@mzanzihomes/ui/components/pages/CreateInspection";
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import PaymentSuccess from "@mzanzihomes/ui/components/pages/PaymentSuccess";
 import PaymentFailed from "@mzanzihomes/ui/components/pages/PaymentFailed";
@@ -190,14 +189,7 @@ function AppRoutes() {
         <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
         <Route path="/landlord-dashboard/*" element={<LandlordDashboardRoutes />} />
 
-        {/* Inspections */}
-        <Route path="/inspections/new" element={
-          <AuthenticatedRoute>
-            <EnhancedDashboardLayout title="New Inspection">
-              <CreateInspection />
-            </EnhancedDashboardLayout>
-          </AuthenticatedRoute>
-        } />
+        {/* Inventory */}
         <Route path="/inventory/start" element={<InventoryStart />} />
 
         {/* Lease system */}

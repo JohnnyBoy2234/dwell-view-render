@@ -225,6 +225,92 @@ export type Database = {
         }
         Relationships: []
       }
+      condition_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          location_tag: string
+          record_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          location_tag: string
+          record_id: string
+          storage_path: string
+          uploaded_by: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          location_tag?: string
+          record_id?: string
+          storage_path?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condition_photos_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "condition_records"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      condition_records: {
+        Row: {
+          attestation_text: string
+          created_at: string
+          event_type: string
+          id: string
+          landlord_attested_at: string | null
+          landlord_notes: string | null
+          locked: boolean
+          tenancy_id: string
+          tenant_attested_at: string | null
+          tenant_notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          attestation_text?: string
+          created_at?: string
+          event_type: string
+          id?: string
+          landlord_attested_at?: string | null
+          landlord_notes?: string | null
+          tenancy_id: string
+          tenant_attested_at?: string | null
+          tenant_notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attestation_text?: string
+          created_at?: string
+          event_type?: string
+          id?: string
+          landlord_attested_at?: string | null
+          landlord_notes?: string | null
+          tenancy_id?: string
+          tenant_attested_at?: string | null
+          tenant_notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "condition_records_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string
@@ -421,91 +507,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "inquiries_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inspection_items: {
-        Row: {
-          condition: string
-          created_at: string | null
-          description: string | null
-          id: string
-          inspection_id: string
-          item_name: string
-          photos: string[] | null
-          room_name: string
-          updated_at: string | null
-        }
-        Insert: {
-          condition: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          inspection_id: string
-          item_name: string
-          photos?: string[] | null
-          room_name: string
-          updated_at?: string | null
-        }
-        Update: {
-          condition?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          inspection_id?: string
-          item_name?: string
-          photos?: string[] | null
-          room_name?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inspection_items_inspection_id_fkey"
-            columns: ["inspection_id"]
-            isOneToOne: false
-            referencedRelation: "inspection_records"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      inspection_records: {
-        Row: {
-          completed_date: string | null
-          created_at: string | null
-          id: string
-          notes: string | null
-          property_id: string
-          scheduled_date: string | null
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          completed_date?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          property_id: string
-          scheduled_date?: string | null
-          status?: string
-          updated_at?: string | null
-        }
-        Update: {
-          completed_date?: string | null
-          created_at?: string | null
-          id?: string
-          notes?: string | null
-          property_id?: string
-          scheduled_date?: string | null
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "inspection_records_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"

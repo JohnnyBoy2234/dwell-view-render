@@ -43,7 +43,6 @@ import { MobileCapture } from '@mzanzihomes/features/pages';
 import { InventoryStart } from '@mzanzihomes/features/pages';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import SettingsPage from "@mzanzihomes/ui/components/pages/SettingsPage";
-import CreateInspection from "@mzanzihomes/ui/components/pages/CreateInspection";
 import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -176,15 +175,8 @@ function AppRoutes() {
         <Route path="/kyc/test" element={<KycCapture />} />
         <Route path="/mobile-capture" element={<MobileCapture />} />
 
-        {/* Inventory & inspections */}
+        {/* Inventory */}
         <Route path="/inventory/start" element={<InventoryStart />} />
-        <Route path="/inspections/new" element={
-          <AuthenticatedRoute>
-            <EnhancedDashboardLayout title="New Inspection">
-              <CreateInspection />
-            </EnhancedDashboardLayout>
-          </AuthenticatedRoute>
-        } />
 
         {/* Maintenance ticket detail */}
         <Route path="/maintenance/:ticketId" element={
