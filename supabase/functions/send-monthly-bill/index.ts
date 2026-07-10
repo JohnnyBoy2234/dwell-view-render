@@ -39,7 +39,7 @@ serve(async (req) => {
 
     const { data: bill, error: billError } = await supabase
       .from('monthly_bills')
-      .select('*, properties(title, location)')
+      .select('*')
       .eq('id', billId)
       .eq('landlord_id', user.id)
       .single();
@@ -99,16 +99,8 @@ serve(async (req) => {
       if (itemsError) throw itemsError;
     }
 
-    const propertyName = bill.properties?.title || bill.properties?.location || 'your home';
-    const { error: notifyError } = await supabase.rpc('create_notification', {
-      _user_id: bill.tenant_id,
-      _message: `Your ${bill.period} bill for ${propertyName} is ready — R${total.toFixed(2)} due.`,
-      _link_url: '/enhancedtenantdashboard/payments',
-      _type: 'billing',
-      _metadata: { bill_id: billId, period: bill.period, total },
-    });
-    if (notifyError) logStep('Notification failed', { billId, error: notifyError.message });
-
+    // No tenant notification here by design — the persistent rent-due banner
+    // (driven by the bill row itself) is the tenant's prompt to pay.
     logStep('Bill sent', { billId, total });
     return new Response(JSON.stringify({ success: true, total }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
