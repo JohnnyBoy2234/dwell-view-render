@@ -9,6 +9,8 @@ export interface ConditionRecord {
   attestation_text: string;
   tenant_attested_at: string | null;
   landlord_attested_at: string | null;
+  tenant_attested_by: string | null;
+  landlord_attested_by: string | null;
   tenant_notes: string | null;
   landlord_notes: string | null;
   locked: boolean;
@@ -26,8 +28,12 @@ export interface ConditionPhoto {
   created_at: string;
 }
 
+// Fallback when the property row is unreadable or incomplete.
 export const LOCATION_TAGS = [
+  'Entrance',
+  'Passage',
   'Kitchen',
+  'Lounge',
   'Living Room',
   'Dining Room',
   'Bedroom 1',
@@ -37,10 +43,36 @@ export const LOCATION_TAGS = [
   'Bathroom 1',
   'Bathroom 2',
   'Garage',
-  'Exterior',
   'Garden',
+  'Balcony',
+  'Exterior',
   'Other',
 ] as const;
+
+export interface PropertyRoomInfo {
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  parking_spaces?: number | null;
+  amenities?: string[] | null;
+}
+
+// Amenities that are photographable locations (subset of the listing amenity vocabulary).
+const AMENITY_LOCATIONS = ['Garden', 'Balcony', 'Swimming Pool', 'Braai Area'];
+
+export function locationTagsForProperty(property?: PropertyRoomInfo | null): string[] {
+  if (!property) return [...LOCATION_TAGS];
+  const tags = ['Entrance', 'Passage', 'Kitchen', 'Lounge', 'Dining Room'];
+  const count = (n: number | null | undefined) =>
+    Number.isFinite(n) ? Math.min(Math.max(Math.floor(n!), 0), 20) : 0;
+  for (let i = 1; i <= count(property.bedrooms); i++) tags.push(`Bedroom ${i}`);
+  for (let i = 1; i <= count(property.bathrooms); i++) tags.push(`Bathroom ${i}`);
+  if (count(property.parking_spaces) > 0) tags.push('Garage');
+  for (const a of AMENITY_LOCATIONS) {
+    if (property.amenities?.includes(a)) tags.push(a);
+  }
+  tags.push('Exterior', 'Other');
+  return [...new Set(tags)];
+}
 
 // Must match the DB column default in the condition_records migration verbatim.
 export const ATTESTATION_TEXT =
@@ -55,6 +87,7 @@ export function conditionRecordState(r: ConditionRecord): ConditionRecordState {
 
 export function groupPhotosByLocation(
   photos: ConditionPhoto[],
+  tagOrder: readonly string[] = LOCATION_TAGS,
 ): { location: string; photos: ConditionPhoto[] }[] {
   const byTag = new Map<string, ConditionPhoto[]>();
   for (const p of photos) {
@@ -62,10 +95,10 @@ export function groupPhotosByLocation(
     list.push(p);
     byTag.set(p.location_tag, list);
   }
-  const known = LOCATION_TAGS.filter((t) => byTag.has(t)) as string[];
-  const unknown = [...byTag.keys()]
-    .filter((t) => !(LOCATION_TAGS as readonly string[]).includes(t))
-    .sort();
+  // Tags outside the current order (e.g. photos taken before the property
+  // details changed) still group and display — they sort after known tags.
+  const known = tagOrder.filter((t) => byTag.has(t));
+  const unknown = [...byTag.keys()].filter((t) => !tagOrder.includes(t)).sort();
   return [...known, ...unknown].map((location) => ({
     location,
     photos: [...byTag.get(location)!].sort((a, b) => a.created_at.localeCompare(b.created_at)),
