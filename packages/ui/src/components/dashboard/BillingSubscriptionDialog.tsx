@@ -131,7 +131,7 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
                 !nonRenewing && (
                   <Button
                     variant="outline"
-                    className="w-full rounded-xl text-destructive border-destructive/30 hover:bg-destructive/5 hover:text-destructive"
+                    className="w-full rounded-xl text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 hover:border-red-400"
                     onClick={() => setConfirmOpen(true)}
                   >
                     Close Your Digital Property Office
@@ -155,7 +155,7 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
       </Dialog>
 
       <Dialog open={confirmOpen} onOpenChange={(v) => { if (!closing) setConfirmOpen(v); }}>
-        <DialogContent className="max-w-md rounded-2xl max-h-[85dvh] overflow-y-auto">
+        <DialogContent className="max-w-md rounded-2xl max-h-[85dvh] overflow-y-auto border-2 border-red-500">
           <DialogHeader>
             <DialogTitle>Close Your Digital Property Office?</DialogTitle>
             <DialogDescription>
@@ -209,7 +209,7 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
             </Button>
             <Button
               variant="destructive"
-              className="flex-1 rounded-xl"
+              className="flex-1 rounded-xl bg-red-600 hover:bg-red-700 text-white"
               disabled={closing}
               onClick={handleCloseOffice}
             >
