@@ -37,6 +37,9 @@ import { PricingStep } from '@mzanzihomes/features/listing';
 import { PhotosStep } from '@mzanzihomes/features/listing';
 import { ReviewStep } from '@mzanzihomes/features/listing';
 import { useExistingProperty } from '@mzanzihomes/features/listing';
+import { useListingDraft, SaveStatusIndicator, deriveResumeStep } from '@mzanzihomes/features/listing';
+import { composeLocation, buildPublishChecklist, MIN_PHOTOS } from '@mzanzihomes/features/listing';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { ListingFormData } from '@mzanzihomes/features/listing';
 
@@ -51,8 +54,60 @@ const DEFAULT_FORM_VALUES: ListingFormData = {
   pets_allowed: false,
   amenities: [],
   price: undefined,
-  images: []
+  images: [],
+  street_address: '',
+  suburb: '',
+  city: '',
+  province: '',
+  postal_code: '',
+  bathrooms_confirmed: false,
 };
+
+// Form → properties-row mapping used for autosave and publish.
+const toRow = (d) => ({
+  property_type: d.property_type || '',
+  street_address: d.street_address?.trim() || null,
+  suburb: d.suburb?.trim() || null,
+  city: d.city?.trim() || null,
+  province: d.province || null,
+  postal_code: d.postal_code?.trim() || null,
+  location: composeLocation(d),
+  title: d.property_type ? `${d.property_type} in ${d.suburb || d.city || composeLocation(d) || 'South Africa'}` : '',
+  description: d.description || '',
+  bedrooms: Number(d.bedrooms) || 0,
+  bathrooms: Number(d.bathrooms) || 0,
+  parking_spaces: Number(d.parking_spaces) || 0,
+  size_sqm: d.size_sqm ? Number(d.size_sqm) : null,
+  furnished: !!d.furnished,
+  pets_allowed: !!d.pets_allowed,
+  amenities: d.amenities || [],
+  price: Number(d.price) || 0,
+  available_from: d.available_from || null,
+  images: (d.images || []).filter((i) => typeof i === 'string'),
+});
+
+// properties row → form values, used by existing-property load and resume.
+const rowToForm = (p) => ({
+  property_type: p.property_type || '',
+  location: p.location || '',
+  description: p.description || '',
+  bedrooms: p.bedrooms ?? undefined,
+  bathrooms: p.bathrooms > 0 ? p.bathrooms : undefined,
+  parking_spaces: p.parking_spaces ?? undefined,
+  size_sqm: p.size_sqm ?? undefined,
+  furnished: !!p.furnished,
+  pets_allowed: !!p.pets_allowed,
+  amenities: p.amenities || [],
+  price: p.price > 0 ? p.price : undefined,
+  available_from: p.available_from ?? undefined,
+  images: p.images || [],
+  street_address: p.street_address || '',
+  suburb: p.suburb || '',
+  city: p.city || '',
+  province: p.province || '',
+  postal_code: p.postal_code || '',
+  bathrooms_confirmed: false,
+});
 
 const steps = [
   { id: 1, title: 'Property Type', icon: Home, description: 'What are you listing?' },
@@ -67,15 +122,36 @@ export default function ListProperty() {
   const { user, isLandlord } = useAuth();
   const { plan, planStatus } = useSubscription();
   const [currentStep, setCurrentStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [publishStage, setPublishStage] = useState<'verifying' | 'finalising' | 'publishing' | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
+  const [returnToReview, setReturnToReview] = useState(false);
+  const [declarationChecked, setDeclarationChecked] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { propertyId, property: existingProperty } = useExistingProperty();
+  const draft = useListingDraft({ userId: user?.id, existingPropertyId: propertyId });
 
-  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  const queryClient = useQueryClient();
+  const { data: profile } = useQuery({
+    queryKey: ['listing-profile-phone', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('phone').eq('user_id', user!.id).maybeSingle();
+      return data;
+    },
+  });
+  const [savingPhone, setSavingPhone] = useState(false);
+  const savePhone = async (phone: string) => {
+    setSavingPhone(true);
+    try {
+      await supabase.from('profiles').update({ phone }).eq('user_id', user!.id);
+      await queryClient.invalidateQueries({ queryKey: ['listing-profile-phone', user!.id] });
+    } finally {
+      setSavingPhone(false);
+    }
+  };
 
   const { control, handleSubmit, watch, setValue, reset, formState: { errors }, trigger } = useForm<ListingFormData>({
     defaultValues: DEFAULT_FORM_VALUES,
@@ -89,90 +165,65 @@ export default function ListProperty() {
     return null;
   }
 
-  const LOCAL_STORAGE_KEY = 'listing_form_draft';
   const progress = (currentStep / steps.length) * 100;
+  const checklist = buildPublishChecklist(formData, profile?.phone ?? null);
 
+  const stageLabel = {
+    verifying: 'Verifying information…',
+    finalising: 'Finalising listing…',
+    publishing: 'Publishing to MzanziHomes…',
+  };
+
+  // Clear the legacy localStorage draft slot once — server drafts replace it.
   useEffect(() => {
-    // Continuing a specific existing property (e.g. "Publish" on an unlisted
-    // draft) takes priority over any unrelated leftover localStorage draft.
-    if (propertyId) return;
     try {
-      const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.currentStep) {
-          // Clamp: a draft saved under an older step layout must not land
-          // outside the current wizard's range (renders empty content).
-          setCurrentStep(Math.min(Math.max(1, Number(parsed.currentStep) || 1), steps.length));
-        }
-        if (parsed.formData) {
-          reset(parsed.formData);
-        }
-        // Only worth asking if there's actually progress to lose
-        if (parsed.currentStep > 1 || parsed.formData?.property_type) {
-          setShowDraftPrompt(true);
-        }
-      }
-    } catch (error) {
-      console.warn('Failed to restore draft listing', error);
-    }
-  }, [reset, propertyId]);
+      localStorage.removeItem('listing_form_draft');
+    } catch {}
+  }, []);
 
   const handleStartOver = () => {
-    try {
-      localStorage.removeItem(LOCAL_STORAGE_KEY);
-    } catch {}
     reset(DEFAULT_FORM_VALUES);
     setCurrentStep(1);
-    setShowDraftPrompt(false);
+    draft.dismissResume();
   };
 
   useEffect(() => {
     if (!existingProperty) return;
-    reset({
-      property_type: existingProperty.property_type || '',
-      location: existingProperty.location || '',
-      description: existingProperty.description || '',
-      bedrooms: existingProperty.bedrooms ?? undefined,
-      bathrooms: existingProperty.bathrooms ?? undefined,
-      parking_spaces: existingProperty.parking_spaces ?? undefined,
-      size_sqm: existingProperty.size_sqm ?? undefined,
-      furnished: !!existingProperty.furnished,
-      pets_allowed: !!existingProperty.pets_allowed,
-      amenities: existingProperty.amenities || [],
-      price: existingProperty.price > 0 ? existingProperty.price : undefined,
-      available_from: existingProperty.available_from ?? undefined,
-      images: existingProperty.images || [],
-    });
+    reset(rowToForm(existingProperty));
   }, [existingProperty, reset]);
 
+  // Autosave: debounced by the hook, only once a draft row exists.
   useEffect(() => {
-    // Editing an existing property must not overwrite the new-listing draft
-    // slot, or its data would leak into the next blank listing.
-    if (propertyId) return;
-    const payload = {
-      currentStep,
-      formData: {
-        ...formData,
-        images: []
-      }
-    };
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload));
-    } catch (error) {
-      console.warn('Failed to persist draft listing', error);
+    const sub = watch((value) => {
+      if (draft.draftId) draft.save(toRow(value));
+    });
+    return () => sub.unsubscribe();
+  }, [watch, draft.draftId, draft.save]);
+
+  // Persist the current step position per draft, so a resume lands correctly.
+  useEffect(() => {
+    if (draft.draftId) {
+      try { localStorage.setItem(`listing_step_${draft.draftId}`, String(currentStep)); } catch {}
     }
-  }, [formData, currentStep, propertyId]);
+  }, [currentStep, draft.draftId]);
+
+  const handleResume = () => {
+    const row = draft.resumeDraft;
+    draft.adoptDraft(row);
+    reset(rowToForm(row));
+    const stored = Number(localStorage.getItem(`listing_step_${row.id}`) || 0);
+    setCurrentStep(Math.min(Math.max(deriveResumeStep(row), stored || 1), steps.length));
+  };
 
   const nextStep = async () => {
     let fieldsToValidate: (keyof ListingFormData)[] = [];
-    
+
     switch (currentStep) {
       case 1:
         fieldsToValidate = ['property_type'];
         break;
       case 2:
-        fieldsToValidate = ['location', 'description'];
+        fieldsToValidate = ['suburb', 'city', 'province', 'postal_code', 'description'];
         break;
       case 3:
         fieldsToValidate = ['bedrooms', 'bathrooms'];
@@ -183,11 +234,35 @@ export default function ListProperty() {
     }
 
     const isValid = await trigger(fieldsToValidate);
-    
-    if (isValid && currentStep < steps.length) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!isValid) return;
+
+    if (currentStep === 1) {
+      const id = await draft.ensureDraft(toRow(watch()));
+      if (!id) {
+        toast({
+          variant: 'destructive',
+          title: "Couldn't save your draft",
+          description: 'Please check your connection and try again.',
+        });
+        return;
+      }
+    } else {
+      draft.save(toRow(watch()));
     }
+
+    if (returnToReview && currentStep < steps.length) {
+      setReturnToReview(false);
+      setCurrentStep(steps.length);
+    } else if (currentStep < steps.length) {
+      setCurrentStep(currentStep + 1);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const editFromReview = (step: number) => {
+    setReturnToReview(true);
+    setCurrentStep(step);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const prevStep = () => {
@@ -197,34 +272,9 @@ export default function ListProperty() {
     }
   };
 
-  const uploadImages = async (images: File[]) => {
-    const uploadedUrls: string[] = [];
-
-    for (const image of images) {
-      const fileExt = image.name.split('.').pop();
-      const fileName = `${crypto.randomUUID()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('property-images')
-        .upload(filePath, image);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const { data } = supabase.storage
-        .from('property-images')
-        .getPublicUrl(filePath);
-
-      uploadedUrls.push(data.publicUrl);
-    }
-
-    return uploadedUrls;
-  };
-
   const onSubmit = async (data: ListingFormData) => {
-    setIsSubmitting(true);
+    if (!declarationChecked || checklist.blockers.length > 0) return;
+    setPublishStage('verifying');
 
     try {
       // Ensure user has landlord role before creating property
@@ -236,71 +286,36 @@ export default function ListProperty() {
         }
       }
 
-      // Existing (already-uploaded) photos are URL strings; only upload the new File ones.
-      const existingImageUrls = data.images.filter((img): img is string => typeof img === 'string');
-      const newFiles = data.images.filter((img): img is File => img instanceof File);
-      const uploadedUrls = newFiles.length > 0 ? await uploadImages(newFiles) : [];
-      const imageUrls = [...existingImageUrls, ...uploadedUrls];
+      const row = toRow(data);
+      if (row.images.length < MIN_PHOTOS) throw new Error(`Add at least ${MIN_PHOTOS} photos before publishing.`);
 
-      // Keep price as the exact number without any conversion that could cause precision loss
-      const propertyFields = {
-        title: `${data.property_type} in ${data.location}`, // Generate title from property type and location
-        description: data.description,
-        location: data.location,
-        property_type: data.property_type,
-        price: data.price, // Use the exact price value without Number() conversion
-        bedrooms: Number(data.bedrooms) || 1,
-        bathrooms: Number(data.bathrooms) || 1,
-        parking_spaces: Number(data.parking_spaces) || 0,
-        size_sqm: data.size_sqm ? Number(data.size_sqm) : null,
-        furnished: data.furnished,
-        pets_allowed: data.pets_allowed,
-        available_from: data.available_from || null,
-        images: imageUrls,
-        amenities: data.amenities,
-      };
+      setPublishStage('finalising');
+      let id = draft.draftId;
+      if (id) {
+        const { error } = await supabase.from('properties').update(row).eq('id', id);
+        if (error) throw error;
+      } else {
+        const { data: created, error } = await supabase
+          .from('properties')
+          .insert({ ...row, landlord_id: user.id, is_listed: false })
+          .select('id')
+          .single();
+        if (error) throw error;
+        id = created.id;
+      }
 
-      // Continuing an existing (e.g. previously-unlisted) property updates that
-      // same row instead of inserting a duplicate; new properties are inserted
-      // unlisted. Publishing happens below so the paywall can intercept it.
-      // (.single() also errors on a 0-row update, so a deleted/foreign row
-      // cannot show a false success.)
-      const { data: newProperty, error } = propertyId
-        ? await supabase
-            .from('properties')
-            .update(propertyFields)
-            .eq('id', propertyId)
-            .select('id')
-            .single()
-        : await supabase
-            .from('properties')
-            .insert({ ...propertyFields, landlord_id: user.id, is_listed: false })
-            .select('id')
-            .single();
-
-      if (error) throw error;
-
-      // Attempt to publish the newly created draft property
-      const { error: publishErr } = await supabase
-        .from('properties')
-        .update({ is_listed: true })
-        .eq('id', newProperty.id);
+      setPublishStage('publishing');
+      const { error: publishErr } = await supabase.from('properties').update({ is_listed: true }).eq('id', id);
       if (publishErr) {
         if (publishErr.message?.includes('PUBLISH_PAYWALL')) {
-          try {
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-          } catch {}
-          setPaywallPropertyId(newProperty.id);
+          setPaywallPropertyId(id);
           setShowPaywall(true);
           return; // draft saved; success dialog is skipped
         }
         throw publishErr;
       }
 
-      try {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
-      } catch {}
-
+      try { localStorage.removeItem(`listing_step_${id}`); } catch {}
       setShowSuccessDialog(true);
     } catch (error: any) {
       toast({
@@ -309,7 +324,7 @@ export default function ListProperty() {
         description: error.message
       });
     } finally {
-      setIsSubmitting(false);
+      setPublishStage(null);
     }
   };
 
@@ -318,15 +333,29 @@ export default function ListProperty() {
       case 1:
         return <PropertyTypeStep control={control} errors={errors} />;
       case 2:
-        return <LocationStep control={control} errors={errors} watch={watch} setValue={setValue} />;
+        return <LocationStep control={control} errors={errors} watch={watch} setValue={setValue} structuredAddress />;
       case 3:
         return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} trigger={trigger} />;
       case 4:
         return <PricingStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 5:
-        return <PhotosStep setValue={setValue} formData={formData} />;
+        return (
+          <PhotosStep
+            setValue={setValue}
+            formData={formData}
+            upload={{ userId: user.id, onSaved: (urls) => { if (draft.draftId) draft.save({ images: urls }); } }}
+          />
+        );
       case 6:
-        return <ReviewStep formData={formData} />;
+        return (
+          <ReviewStep
+            formData={formData}
+            onEdit={editFromReview}
+            checklist={checklist}
+            declaration={{ checked: declarationChecked, onChange: setDeclarationChecked }}
+            contact={{ phone: profile?.phone ?? null, saving: savingPhone, onSavePhone: savePhone }}
+          />
+        );
       default:
         return null;
     }
@@ -346,8 +375,9 @@ export default function ListProperty() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
-          <div>
+          <div className="flex items-center gap-3">
             <h1 className="text-2xl sm:text-3xl font-bold text-primary">List Your Property</h1>
+            <SaveStatusIndicator state={draft.saveState} lastSavedAt={draft.lastSavedAt} />
           </div>
         </div>
 
@@ -421,28 +451,29 @@ export default function ListProperty() {
           ) : (
             <Button
               onClick={handlePublishClick}
-              disabled={isSubmitting}
+              disabled={publishStage !== null || !declarationChecked || checklist.blockers.length > 0}
               className="flex items-center gap-2"
             >
-              {isSubmitting ? 'Publishing...' : 'Publish Property'}
+              {publishStage ? stageLabel[publishStage] : 'Publish Property'}
               <CheckCircle className="h-4 w-4" />
             </Button>
           )}
         </div>
 
         {/* Resume-draft prompt */}
-        <AlertDialog open={showDraftPrompt} onOpenChange={setShowDraftPrompt}>
+        <AlertDialog open={!!draft.resumeDraft} onOpenChange={(o) => { if (!o) draft.dismissResume(); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Continue where you left off?</AlertDialogTitle>
               <AlertDialogDescription>
-                We saved your unfinished listing. You can pick up from where you
-                stopped, or start over with a blank form.
+                You have an unfinished {draft.resumeDraft?.property_type || 'property'} listing
+                {draft.resumeDraft?.suburb ? ` in ${draft.resumeDraft.suburb}` : ''}. Pick up where you
+                stopped, or start a new listing — your draft stays saved either way.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel onClick={handleStartOver}>Start over</AlertDialogCancel>
-              <AlertDialogAction onClick={() => setShowDraftPrompt(false)}>Continue draft</AlertDialogAction>
+              <AlertDialogCancel onClick={draft.dismissResume}>Start a new listing</AlertDialogCancel>
+              <AlertDialogAction onClick={handleResume}>Continue where you left off</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -24,6 +24,9 @@ export function useListingDraft({ userId, existingPropertyId }: Options) {
   const attempt = useRef(0);
   const draftIdRef = useRef<string | null>(existingPropertyId);
   draftIdRef.current = draftId ?? draftIdRef.current;
+  // Holds the in-flight insert so a concurrent ensureDraft (e.g. a double-click
+  // on Continue at step 1) joins the same insert instead of creating a duplicate.
+  const creatingRef = useRef<Promise<string | null> | null>(null);
 
   // Discover the most recent incomplete unlisted draft to offer a resume.
   useEffect(() => {
@@ -85,29 +88,38 @@ export function useListingDraft({ userId, existingPropertyId }: Options) {
         return draftIdRef.current;
       }
       if (!userId) return null;
-      setSaveState('saving');
-      const { data, error } = await supabase
-        .from('properties')
-        .insert({
-          landlord_id: userId,
-          is_listed: false,
-          title: '',
-          description: '',
-          location: '',
-          price: 0,
-          ...fields,
-        })
-        .select('id')
-        .single();
-      if (error || !data) {
-        setSaveState('error');
-        return null;
+      // Concurrent call joins the same insert rather than firing a second one.
+      if (creatingRef.current) return creatingRef.current;
+      creatingRef.current = (async () => {
+        setSaveState('saving');
+        const { data, error } = await supabase
+          .from('properties')
+          .insert({
+            landlord_id: userId,
+            is_listed: false,
+            title: '',
+            description: '',
+            location: '',
+            price: 0,
+            ...fields,
+          })
+          .select('id')
+          .single();
+        if (error || !data) {
+          setSaveState('error');
+          return null;
+        }
+        draftIdRef.current = data.id;
+        setDraftId(data.id);
+        setSaveState('saved');
+        setLastSavedAt(Date.now());
+        return data.id;
+      })();
+      try {
+        return await creatingRef.current;
+      } finally {
+        creatingRef.current = null;
       }
-      draftIdRef.current = data.id;
-      setDraftId(data.id);
-      setSaveState('saved');
-      setLastSavedAt(Date.now());
-      return data.id;
     },
     [userId, save]
   );
