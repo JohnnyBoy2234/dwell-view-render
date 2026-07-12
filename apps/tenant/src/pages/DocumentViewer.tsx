@@ -13,9 +13,12 @@ export default function DocumentViewer() {
 
   const path = searchParams.get('path') || '';
   const title = searchParams.get('title') || 'Document';
+  // PDFs are upserted at stable paths — the `v` param (bill.updated_at) keeps
+  // browsers/CDN from serving a stale copy after a regeneration.
+  const version = searchParams.get('v') || '';
 
   const url = path
-    ? supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl
+    ? `${supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl}${version ? `?v=${encodeURIComponent(version)}` : ''}`
     : null;
 
   // Android WebViews can't render PDFs inline; Google's viewer wraps the

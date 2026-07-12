@@ -77,7 +77,7 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
               className="block pt-1 text-sm text-primary underline underline-offset-4"
               onClick={() => {
                 onOpenChange(false);
-                navigate(`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${bill.period}`)}`);
+                navigate(`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${bill.period}`)}&v=${encodeURIComponent(bill.updated_at ?? '')}`);
               }}
             >
               View invoice (PDF)

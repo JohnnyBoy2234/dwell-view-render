@@ -35,8 +35,10 @@ export function LandlordBillingPanel() {
 
   const propertyName = (b: any) => b.properties?.title || b.properties?.location || 'Property';
 
-  const receiptUrl = (path: string) =>
-    supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl;
+  // PDFs are upserted at stable paths, so a regenerated file keeps the same
+  // URL — version by updated_at so browsers/CDN don't serve a stale copy.
+  const receiptUrl = (path: string, bill: any) =>
+    `${supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl}?v=${encodeURIComponent(bill?.updated_at ?? '')}`;
 
   return (
     <div className="space-y-6">
@@ -85,13 +87,13 @@ export function LandlordBillingPanel() {
                   : <Badge variant="secondary">Sent — awaiting payment</Badge>}
                 {bill.invoice_pdf_path ? (
                   <Button variant="outline" size="sm" asChild>
-                    <a href={receiptUrl(bill.invoice_pdf_path)} target="_blank" rel="noreferrer">Invoice</a>
+                    <a href={receiptUrl(bill.invoice_pdf_path, bill)} target="_blank" rel="noreferrer">Invoice</a>
                   </Button>
                 ) : null}
                 {bill.status === 'paid' ? (
                   bill.receipt_pdf_path ? (
                     <Button variant="outline" size="sm" asChild>
-                      <a href={receiptUrl(bill.receipt_pdf_path)} target="_blank" rel="noreferrer">Receipt</a>
+                      <a href={receiptUrl(bill.receipt_pdf_path, bill)} target="_blank" rel="noreferrer">Receipt</a>
                     </Button>
                   ) : (
                     <span className="text-xs text-muted-foreground">Receipt generating…</span>
