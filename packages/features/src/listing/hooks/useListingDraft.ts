@@ -135,8 +135,14 @@ export function useListingDraft({ userId, existingPropertyId }: Options) {
   useEffect(
     () => () => {
       if (timer.current) clearTimeout(timer.current);
+      // Don't drop edits still sitting in the debounce window when the user
+      // navigates away — fire-and-forget flush. (Post-unmount setState is a
+      // warning-free no-op in React 18, so voiding it is safe.)
+      if (draftIdRef.current && Object.keys(pending.current).length > 0) {
+        void flush();
+      }
     },
-    []
+    [flush]
   );
 
   return {

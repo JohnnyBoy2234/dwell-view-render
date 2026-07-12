@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -109,6 +109,12 @@ const rowToForm = (p) => ({
   bathrooms_confirmed: false,
 });
 
+const stageLabel = {
+  verifying: 'Verifying information…',
+  finalising: 'Finalising listing…',
+  publishing: 'Publishing to MzanziHomes…',
+};
+
 const steps = [
   { id: 1, title: 'Property Type', icon: Home, description: 'What are you listing?' },
   { id: 2, title: 'Location', icon: MapPin, description: 'Where is your property?' },
@@ -128,6 +134,10 @@ export default function ListProperty() {
   const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
   const [returnToReview, setReturnToReview] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
+  // Synchronous re-entrancy guard: handleSubmit runs async validation before
+  // onSubmit sets publishStage, so the button's disabled state alone leaves a
+  // window where a double-click/Enter-repeat could fire onSubmit twice.
+  const submittingRef = useRef(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { propertyId, property: existingProperty } = useExistingProperty();
@@ -168,12 +178,6 @@ export default function ListProperty() {
   const progress = (currentStep / steps.length) * 100;
   const checklist = buildPublishChecklist(formData, profile?.phone ?? null);
 
-  const stageLabel = {
-    verifying: 'Verifying information…',
-    finalising: 'Finalising listing…',
-    publishing: 'Publishing to MzanziHomes…',
-  };
-
   // Clear the legacy localStorage draft slot once — server drafts replace it.
   useEffect(() => {
     try {
@@ -193,6 +197,7 @@ export default function ListProperty() {
   }, [existingProperty, reset]);
 
   // Autosave: debounced by the hook, only once a draft row exists.
+  // Edits still pending in the debounce window are flushed by the hook on unmount.
   useEffect(() => {
     const sub = watch((value) => {
       if (draft.draftId) draft.save(toRow(value));
@@ -212,6 +217,8 @@ export default function ListProperty() {
     draft.adoptDraft(row);
     reset(rowToForm(row));
     const stored = Number(localStorage.getItem(`listing_step_${row.id}`) || 0);
+    // Land on the furthest of data-completeness (deriveResumeStep) vs the
+    // last-visited step, clamped to the wizard's range.
     setCurrentStep(Math.min(Math.max(deriveResumeStep(row), stored || 1), steps.length));
   };
 
@@ -273,7 +280,12 @@ export default function ListProperty() {
   };
 
   const onSubmit = async (data: ListingFormData) => {
-    if (!declarationChecked || checklist.blockers.length > 0) return;
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    if (!declarationChecked || checklist.blockers.length > 0) {
+      submittingRef.current = false;
+      return;
+    }
     setPublishStage('verifying');
 
     try {
@@ -287,7 +299,11 @@ export default function ListProperty() {
       }
 
       const row = toRow(data);
-      if (row.images.length < MIN_PHOTOS) throw new Error(`Add at least ${MIN_PHOTOS} photos before publishing.`);
+      if (row.images.length < MIN_PHOTOS) {
+        // userFacing marks messages written for the landlord; anything else
+        // (raw Postgres/Supabase text) gets a friendly fallback in the catch.
+        throw Object.assign(new Error(`Add at least ${MIN_PHOTOS} photos before publishing.`), { userFacing: true });
+      }
 
       setPublishStage('finalising');
       let id = draft.draftId;
@@ -318,12 +334,16 @@ export default function ListProperty() {
       try { localStorage.removeItem(`listing_step_${id}`); } catch {}
       setShowSuccessDialog(true);
     } catch (error: any) {
+      console.error('Error listing property:', error);
       toast({
         variant: "destructive",
         title: "Error listing property",
-        description: error.message
+        description: error?.userFacing
+          ? error.message
+          : 'Something went wrong while publishing. Please try again.'
       });
     } finally {
+      submittingRef.current = false;
       setPublishStage(null);
     }
   };
