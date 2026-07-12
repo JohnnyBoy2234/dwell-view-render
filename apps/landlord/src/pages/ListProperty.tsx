@@ -320,9 +320,9 @@ export default function ListProperty() {
       case 2:
         return <LocationStep control={control} errors={errors} watch={watch} setValue={setValue} />;
       case 3:
-        return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
+        return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} trigger={trigger} />;
       case 4:
-        return <PricingStep control={control} errors={errors} setValue={setValue} />;
+        return <PricingStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 5:
         return <PhotosStep setValue={setValue} formData={formData} />;
       case 6:

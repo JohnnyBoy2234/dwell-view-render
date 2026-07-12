@@ -22,6 +22,8 @@ interface PricingStepProps {
 }
 
 export default function PricingStep({ control, errors, watch }: PricingStepProps) {
+  const warning = watch ? priceWarning(watch('price')) : null;
+
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -65,8 +67,8 @@ export default function PricingStep({ control, errors, watch }: PricingStepProps
             {errors.price && (
               <p className="text-sm text-destructive">{errors.price.message}</p>
             )}
-            {!errors.price && watch && priceWarning(watch('price')) && (
-              <p className="text-sm text-amber-600">{priceWarning(watch('price'))}</p>
+            {!errors.price && warning && (
+              <p className="text-sm text-amber-600">{warning}</p>
             )}
             <p className="text-sm text-muted-foreground">
               Research similar properties in your area to set a competitive price

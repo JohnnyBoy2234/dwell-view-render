@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue, UseFormWatch, UseFormTrigger } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
@@ -15,6 +15,7 @@ interface DetailsStepProps {
   errors: FieldErrors<ListingFormData>;
   setValue: UseFormSetValue<ListingFormData>;
   watch: UseFormWatch<ListingFormData>;
+  trigger?: UseFormTrigger<ListingFormData>;
 }
 
 const amenitiesList = [
@@ -23,16 +24,10 @@ const amenitiesList = [
   'Fiber Internet', 'Balcony', 'Parking Bay', 'Storage Space'
 ];
 
-export default function DetailsStep({ control, errors, setValue, watch }: DetailsStepProps) {
+export default function DetailsStep({ control, errors, setValue, watch, trigger }: DetailsStepProps) {
   const selectedAmenities = watch('amenities') || [];
   const furnished = watch('furnished');
   const petsAllowed = watch('pets_allowed');
-
-  const beds = watch('bedrooms');
-  const baths = watch('bathrooms');
-  React.useEffect(() => {
-    setValue('bathrooms_confirmed', false);
-  }, [beds, baths, setValue]);
 
   const toggleAmenity = (amenity: string) => {
     const currentAmenities = selectedAmenities;
@@ -63,7 +58,12 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
               required: 'Bedrooms is required',
               min: { value: 0, message: 'Minimum 0 bedrooms' },
               max: { value: MAX_ROOMS, message: `Maximum ${MAX_ROOMS} bedrooms` },
-              validate: (v) => Number.isInteger(Number(v)) || 'Whole numbers only',
+              validate: (v) => {
+                // Runtime value can be '' (empty input) even though the type says number.
+                const raw = v as number | '' | null | undefined;
+                if (raw === '' || raw == null) return true;
+                return Number.isInteger(Number(raw)) || 'Whole numbers only';
+              },
             }}
             render={({ field }) => (
               <Input
@@ -71,7 +71,11 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
                 type="number"
                 min="0"
                 className="text-base"
-                onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                onChange={(e) => {
+                  field.onChange(e.target.value === '' ? '' : Number(e.target.value));
+                  setValue('bathrooms_confirmed', false);
+                  if (errors.bathrooms) trigger?.('bathrooms');
+                }}
               />
             )}
           />
@@ -93,8 +97,11 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
               min: { value: 1, message: 'Minimum 1 bathroom' },
               max: { value: MAX_ROOMS, message: `Maximum ${MAX_ROOMS} bathrooms` },
               validate: (v) => {
-                if (!Number.isInteger(Number(v))) return 'Whole numbers only';
-                if (needsBathroomConfirm(watch('bedrooms'), Number(v)) && !watch('bathrooms_confirmed')) {
+                // Runtime value can be '' (empty input) even though the type says number.
+                const raw = v as number | '' | null | undefined;
+                if (raw === '' || raw == null) return true;
+                if (!Number.isInteger(Number(raw))) return 'Whole numbers only';
+                if (needsBathroomConfirm(watch('bedrooms'), Number(raw)) && !watch('bathrooms_confirmed')) {
                   return 'Please tick the confirmation below';
                 }
                 return true;
@@ -106,7 +113,10 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
                 type="number"
                 min="1"
                 className="text-base"
-                onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
+                onChange={(e) => {
+                  field.onChange(e.target.value === '' ? '' : Number(e.target.value));
+                  setValue('bathrooms_confirmed', false);
+                }}
               />
             )}
           />
@@ -162,7 +172,10 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
           <Checkbox
             id="bathrooms_confirmed"
             checked={!!watch('bathrooms_confirmed')}
-            onCheckedChange={(v) => setValue('bathrooms_confirmed', !!v, { shouldValidate: true })}
+            onCheckedChange={(v) => {
+              setValue('bathrooms_confirmed', !!v, { shouldValidate: true });
+              if (errors.bathrooms) trigger?.('bathrooms');
+            }}
             className="mt-0.5"
           />
           <Label htmlFor="bathrooms_confirmed" className="text-sm text-amber-800 dark:text-amber-200 font-normal cursor-pointer">
