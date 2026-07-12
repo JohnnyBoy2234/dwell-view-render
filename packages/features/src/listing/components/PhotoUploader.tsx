@@ -19,6 +19,7 @@ interface PhotoItem {
   id: string;
   url?: string; // set when uploaded
   file?: File; // set while uploading / on error (for retry)
+  preview?: string; // object URL for local preview; revoked once uploaded/removed
   status: 'uploading' | 'done' | 'error';
 }
 
@@ -56,7 +57,7 @@ function SortableTile({
     transition,
     zIndex: isDragging ? 10 : undefined,
   };
-  const src = item.url ?? (item.file ? URL.createObjectURL(item.file) : '');
+  const src = item.url ?? item.preview ?? '';
 
   return (
     <div ref={setNodeRef} style={style} className="relative group touch-none" {...attributes} {...listeners}>
@@ -124,7 +125,19 @@ export default function PhotoUploader({ userId, images, onImagesChange }: PhotoU
   const itemsRef = useRef(items);
   itemsRef.current = items;
 
+  // Safety net: release any remaining blob previews on unmount.
+  React.useEffect(
+    () => () => {
+      itemsRef.current.forEach((i) => i.preview && URL.revokeObjectURL(i.preview));
+    },
+    []
+  );
+
   const emit = (next: PhotoItem[]) => {
+    // Update the ref synchronously so concurrent async completions (which all
+    // read itemsRef.current after their awaits) compose instead of clobbering
+    // each other's just-committed state before React re-renders.
+    itemsRef.current = next;
     setItems(next);
     onImagesChange(next.filter((i) => i.status === 'done' && i.url).map((i) => i.url!));
   };
@@ -132,15 +145,29 @@ export default function PhotoUploader({ userId, images, onImagesChange }: PhotoU
   const uploadItem = async (id: string, file: File) => {
     const ext = file.name.split('.').pop() || 'jpg';
     const path = `${userId}/${crypto.randomUUID()}.${ext}`;
-    const { error } = await supabase.storage.from('property-images').upload(path, file);
+    let error: unknown;
+    try {
+      ({ error } = await supabase.storage.from('property-images').upload(path, file));
+    } catch (thrown) {
+      // Treat an unexpected throw (e.g. network failure) like an upload error
+      // so the tile never spins forever.
+      error = thrown;
+    }
     const current = itemsRef.current;
-    if (!current.some((i) => i.id === id)) return; // removed while uploading
+    const item = current.find((i) => i.id === id);
+    if (!item) return; // removed while uploading
     if (error) {
       emit(current.map((i) => (i.id === id ? { ...i, status: 'error' } : i)));
       return;
     }
     const { data } = supabase.storage.from('property-images').getPublicUrl(path);
-    emit(current.map((i) => (i.id === id ? { ...i, url: data.publicUrl, status: 'done' } : i)));
+    emit(
+      current.map((i) =>
+        i.id === id ? { ...i, url: data.publicUrl, preview: undefined, status: 'done' } : i
+      )
+    );
+    // The remote URL now backs the tile; release the local blob preview.
+    if (item.preview) URL.revokeObjectURL(item.preview);
   };
 
   const addFiles = (files: File[]) => {
@@ -162,6 +189,7 @@ export default function PhotoUploader({ userId, images, onImagesChange }: PhotoU
     const newItems: PhotoItem[] = accepted.map((file) => ({
       id: crypto.randomUUID(),
       file,
+      preview: URL.createObjectURL(file),
       status: 'uploading' as const,
     }));
     emit([...itemsRef.current, ...newItems]);
@@ -171,6 +199,7 @@ export default function PhotoUploader({ userId, images, onImagesChange }: PhotoU
   const removeItem = (id: string) => {
     const item = itemsRef.current.find((i) => i.id === id);
     emit(itemsRef.current.filter((i) => i.id !== id));
+    if (item?.preview) URL.revokeObjectURL(item.preview);
     // Best-effort storage cleanup for uploaded photos.
     if (item?.url) {
       const path = storagePathFromUrl(item.url);
