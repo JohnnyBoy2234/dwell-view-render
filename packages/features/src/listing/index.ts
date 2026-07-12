@@ -10,3 +10,4 @@ export { default as SellerDocumentsStep } from './components/SellerDocumentsStep
 
 export type { ListingFormData, SaleListingFormData } from './types';
 export { useExistingProperty } from './hooks/useExistingProperty';
+export * from './validation';

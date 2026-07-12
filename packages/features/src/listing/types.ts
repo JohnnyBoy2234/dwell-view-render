@@ -13,6 +13,14 @@ export interface ListingFormData {
   available_from?: string;
   // Existing (already-uploaded) photos are kept as URL strings; new photos are File objects.
   images: (File | string)[];
+  // Structured address (rent flow). Optional so the sale flow keeps compiling.
+  street_address?: string;
+  suburb?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  // Transient: bathroom sanity confirmation (never persisted).
+  bathrooms_confirmed?: boolean;
 }
 
 export interface SaleListingFormData extends ListingFormData {
