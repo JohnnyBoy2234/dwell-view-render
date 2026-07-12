@@ -7,17 +7,23 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Upload, X, Camera, AlertCircle } from 'lucide-react';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { ListingFormData } from '../types';
+import PhotoUploader from './PhotoUploader';
+import { RECOMMENDED_PHOTOS } from '../validation';
 
 const MAX_IMAGES = 15;
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // the "max 10MB each" the copy below promises
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
+const RECOMMENDED_SHOTS = ['Front exterior', 'Living room', 'Kitchen', 'Main bedroom', 'Bathroom'];
+
 interface PhotosStepProps {
   setValue: UseFormSetValue<ListingFormData>;
   formData: ListingFormData;
+  // Rent wizard: photos upload immediately and are autosaved to the draft.
+  upload?: { userId: string; onSaved: (urls: string[]) => void };
 }
 
-export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
+export default function PhotosStep({ setValue, formData, upload }: PhotosStepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   const images = formData.images || [];
@@ -61,6 +67,57 @@ export default function PhotosStep({ setValue, formData }: PhotosStepProps) {
     setValue('images', newImages);
   };
 
+  if (upload) {
+    const urls = (formData.images || []).filter((i): i is string => typeof i === 'string');
+    return (
+      <div className="space-y-8">
+        <div className="text-center">
+          <h2 className="text-2xl font-semibold mb-2">Add photos of your property</h2>
+          <p className="text-muted-foreground">
+            Listings with more quality photos receive significantly more tenant enquiries.
+          </p>
+        </div>
+
+        {/* Quality tips — read before uploading */}
+        <Card className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+          <CardContent className="p-5">
+            <div className="flex gap-3">
+              <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h3 className="font-semibold mb-2 text-blue-800 dark:text-blue-200">📸 Photo tips</h3>
+                <ul className="space-y-1 text-sm text-blue-700 dark:text-blue-300">
+                  <li>• Shoot during the day with good natural light</li>
+                  <li>• Clean and declutter each room first</li>
+                  <li>• Use landscape orientation</li>
+                </ul>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recommended shots */}
+        <div className="flex flex-wrap items-center gap-2 justify-center">
+          <span className="text-sm text-muted-foreground">Recommended shots:</span>
+          {RECOMMENDED_SHOTS.map((shot) => (
+            <span key={shot} className="text-xs bg-muted text-muted-foreground rounded-full px-3 py-1">
+              {shot}
+            </span>
+          ))}
+        </div>
+
+        <PhotoUploader
+          userId={upload.userId}
+          images={urls}
+          onImagesChange={(next) => {
+            setValue('images', next, { shouldDirty: true });
+            upload.onSaved(next);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Legacy deferred-upload behaviour (sale flow) — existing JSX unchanged below.
   return (
     <div className="space-y-8">
       <div className="text-center">

@@ -15,3 +15,4 @@ export { useListingDraft } from './hooks/useListingDraft';
 export type { SaveState } from './hooks/useListingDraft';
 export { deriveResumeStep } from './hooks/draftLogic';
 export { SaveStatusIndicator } from './components/SaveStatusIndicator';
+export { default as PhotoUploader } from './components/PhotoUploader';
