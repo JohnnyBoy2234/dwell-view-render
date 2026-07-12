@@ -10,7 +10,7 @@ import { cn } from '@mzanzihomes/common/lib/utils';
 
 interface NavItem {
   path: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   label: string;
   badge?: number;
 }
@@ -91,20 +91,20 @@ export function MobileBottomBar() {
   if (isInConversation || isSigningPage || isJoinPage) return null;
 
   return (
+    // Docked iOS-style tab bar — light frosted glass that blends with the
+    // app's light pages (hsl(214 60% 97%)) instead of floating over them.
     <nav
       className="fixed bottom-0 left-0 right-0 z-40 md:hidden"
-      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{
+        paddingBottom: 'env(safe-area-inset-bottom)',
+        background: 'rgba(255, 255, 255, 0.88)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+        borderTop: '1px solid hsl(214 60% 90%)',
+        boxShadow: '0 -8px 24px rgba(37, 99, 235, 0.06)',
+      }}
     >
-      <div
-        className="mx-2.5 mb-2.5 overflow-hidden rounded-2xl border border-white/10"
-        style={{
-          background: 'rgba(8, 10, 20, 0.82)',
-          backdropFilter: 'blur(28px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(28px) saturate(180%)',
-          boxShadow:
-            'inset 0 1px 0 rgba(255,255,255,0.08), 0 8px 40px rgba(0,0,0,0.5), 0 2px 12px rgba(0,0,0,0.3)',
-        }}
-      >
+      <div>
         <div className="relative flex items-stretch h-[60px]">
           {/* Sliding pill indicator */}
           {activeIndex >= 0 && (
@@ -114,8 +114,7 @@ export function MobileBottomBar() {
               style={{
                 left: `calc(${activeIndex * pillWidth}% + 5px)`,
                 width: `calc(${pillWidth}% - 10px)`,
-                background: 'rgba(255,255,255,0.10)',
-                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'hsl(214 100% 59% / 0.10)',
                 transition: 'left 0.38s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 willChange: 'left',
               }}
@@ -132,11 +131,7 @@ export function MobileBottomBar() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={cn(
-                  'relative flex flex-col items-center justify-center gap-[3px] flex-1 py-1.5 select-none',
-                  'transition-opacity duration-150',
-                  active ? 'opacity-100' : 'opacity-50 hover:opacity-75 active:opacity-90'
-                )}
+                className="relative flex flex-col items-center justify-center gap-[3px] flex-1 py-1.5 select-none transition-colors duration-150"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
                 {/* Icon + badge */}
@@ -144,13 +139,14 @@ export function MobileBottomBar() {
                   <IconComponent
                     className={cn(
                       'h-[22px] w-[22px] transition-all duration-200',
-                      active ? 'text-white scale-110' : 'text-white/80'
+                      active ? 'scale-110' : ''
                     )}
+                    style={{ color: active ? 'hsl(214 100% 50%)' : 'hsl(215 16% 57%)' }}
                   />
                   {hasBadge && (
                     <span
                       className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-[3px] rounded-full text-[9px] font-bold bg-red-500 text-white flex items-center justify-center leading-none animate-badge-pop"
-                      style={{ boxShadow: '0 0 0 1.5px rgba(8,10,20,0.82)' }}
+                      style={{ boxShadow: '0 0 0 1.5px rgba(255,255,255,0.9)' }}
                     >
                       {(item.badge ?? 0) > 99 ? '99+' : item.badge}
                     </span>
@@ -159,20 +155,11 @@ export function MobileBottomBar() {
 
                 {/* Label */}
                 <span
-                  className={cn(
-                    'text-[10px] font-semibold tracking-tight transition-all duration-200',
-                    active ? 'text-white' : 'text-white/50'
-                  )}
+                  className="text-[10px] font-semibold tracking-tight transition-all duration-200"
+                  style={{ color: active ? 'hsl(214 100% 50%)' : 'hsl(215 16% 57%)' }}
                 >
                   {item.label}
                 </span>
-
-                {/* Active dot */}
-                {active && (
-                  <span
-                    className="absolute bottom-1 left-1/2 -translate-x-1/2 h-[3px] w-[3px] rounded-full bg-white animate-badge-pop"
-                  />
-                )}
               </Link>
             );
           })}
