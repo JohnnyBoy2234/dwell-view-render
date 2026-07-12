@@ -23,7 +23,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
-import { RentCollectionCard, usePlanCheckout } from '@mzanzihomes/features/billing';
+import { RentCollectionCard, usePlanCheckout, LandlordBillingPanel } from '@mzanzihomes/features/billing';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
@@ -1574,6 +1574,8 @@ export default function EnhancedLandlordDashboard() {
   const renderPaymentsTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+        {/* Monthly billing: draft bills awaiting expenses (the banner lands here) + sent/paid history */}
+        <LandlordBillingPanel />
         {tenants.length === 0 ? (
           <Card className="border-dashed shadow-md bg-white/90 backdrop-blur-sm">
           <CardContent className="p-12 text-center">

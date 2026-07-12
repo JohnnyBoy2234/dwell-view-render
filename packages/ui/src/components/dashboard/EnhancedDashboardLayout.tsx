@@ -88,7 +88,10 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
 
   return (
     <div
-      className="flex flex-col min-h-screen w-full overflow-hidden"
+      // overflow-x-clip (not overflow-hidden) so this div is not a scroll container:
+      // the sticky header must track the viewport, or its top offset (rent-banner-h)
+      // is applied immediately and opens a banner-sized gap above the header.
+      className="flex flex-col min-h-screen w-full overflow-x-clip"
       style={{ minHeight: '100dvh', background: 'hsl(214, 60%, 97%)' }}
     >
       {/* Header — dark glass, matching home page navbar */}
