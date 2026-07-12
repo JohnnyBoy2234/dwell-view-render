@@ -50,6 +50,45 @@ export type Database = {
         }
         Relationships: []
       }
+      application_drafts: {
+        Row: {
+          completed_steps: number[]
+          created_at: string
+          current_step: number
+          form_data: Json
+          id: string
+          invite_id: string | null
+          landlord_id: string
+          property_id: string
+          tenant_id: string
+          updated_at: string
+        }
+        Insert: {
+          completed_steps?: number[]
+          created_at?: string
+          current_step?: number
+          form_data?: Json
+          id?: string
+          invite_id?: string | null
+          landlord_id: string
+          property_id: string
+          tenant_id: string
+          updated_at?: string
+        }
+        Update: {
+          completed_steps?: number[]
+          created_at?: string
+          current_step?: number
+          form_data?: Json
+          id?: string
+          invite_id?: string | null
+          landlord_id?: string
+          property_id?: string
+          tenant_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       application_requests: {
         Row: {
           created_at: string | null
@@ -104,6 +143,9 @@ export type Database = {
       }
       applications: {
         Row: {
+          snapshot: Json | null
+          submitted_at: string | null
+          version: number
           created_at: string
           id: string
           landlord_id: string
@@ -114,6 +156,9 @@ export type Database = {
           viewing_id: string | null
         }
         Insert: {
+          snapshot?: Json | null
+          submitted_at?: string | null
+          version?: number
           created_at?: string
           id?: string
           landlord_id: string
@@ -124,6 +169,9 @@ export type Database = {
           viewing_id?: string | null
         }
         Update: {
+          snapshot?: Json | null
+          submitted_at?: string | null
+          version?: number
           created_at?: string
           id?: string
           landlord_id?: string
@@ -358,6 +406,53 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_check_consents: {
+        Row: {
+          application_id: string
+          consent_text_snapshot: string
+          consent_version: string
+          consented: boolean
+          consented_at: string
+          id: string
+          privacy_policy_version: string | null
+          tenant_id: string
+          terms_version: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          application_id: string
+          consent_text_snapshot: string
+          consent_version: string
+          consented: boolean
+          consented_at?: string
+          id?: string
+          privacy_policy_version?: string | null
+          tenant_id: string
+          terms_version?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          application_id?: string
+          consent_text_snapshot?: string
+          consent_version?: string
+          consented?: boolean
+          consented_at?: string
+          id?: string
+          privacy_policy_version?: string | null
+          tenant_id?: string
+          terms_version?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_check_consents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
             referencedColumns: ["id"]
           },
         ]
@@ -1827,6 +1922,13 @@ export type Database = {
       }
       screening_details: {
         Row: {
+          address: Json | null
+          date_of_birth: string | null
+          employment: Json | null
+          gross_monthly_income: number | null
+          id_expiry_date: string | null
+          id_type: string | null
+          nationality: string | null
           company_name: string | null
           consent_given: boolean
           created_at: string
@@ -1845,6 +1947,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address?: Json | null
+          date_of_birth?: string | null
+          employment?: Json | null
+          gross_monthly_income?: number | null
+          id_expiry_date?: string | null
+          id_type?: string | null
+          nationality?: string | null
           company_name?: string | null
           consent_given?: boolean
           created_at?: string
@@ -1863,6 +1972,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address?: Json | null
+          date_of_birth?: string | null
+          employment?: Json | null
+          gross_monthly_income?: number | null
+          id_expiry_date?: string | null
+          id_type?: string | null
+          nationality?: string | null
           company_name?: string | null
           consent_given?: boolean
           created_at?: string
@@ -1884,6 +2000,9 @@ export type Database = {
       }
       screening_profiles: {
         Row: {
+          household: Json | null
+          pets: Json
+          risk_answers: Json | null
           created_at: string
           documents: Json | null
           first_name: string
@@ -1902,6 +2021,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          household?: Json | null
+          pets?: Json
+          risk_answers?: Json | null
           created_at?: string
           documents?: Json | null
           first_name: string
@@ -1920,6 +2042,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          household?: Json | null
+          pets?: Json
+          risk_answers?: Json | null
           created_at?: string
           documents?: Json | null
           first_name?: string
