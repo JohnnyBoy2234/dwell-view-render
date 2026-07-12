@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Control, FieldErrors, UseFormSetValue } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
@@ -12,14 +12,16 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { ListingFormData } from '../types';
+import { PRICE_MIN, PRICE_MAX, priceWarning } from '../validation';
 
 interface PricingStepProps {
   control: Control<ListingFormData>;
   errors: FieldErrors<ListingFormData>;
   setValue: UseFormSetValue<ListingFormData>;
+  watch?: UseFormWatch<ListingFormData>;
 }
 
-export default function PricingStep({ control, errors }: PricingStepProps) {
+export default function PricingStep({ control, errors, watch }: PricingStepProps) {
   return (
     <div className="space-y-8">
       <div className="text-center">
@@ -42,17 +44,17 @@ export default function PricingStep({ control, errors }: PricingStepProps) {
               <Controller
                 name="price"
                 control={control}
-                rules={{ 
+                rules={{
                   required: 'Monthly rent is required',
-                  min: { value: 1000, message: 'Minimum rent is R1,000' },
-                  max: { value: 100000, message: 'Maximum rent is R100,000' }
+                  min: { value: PRICE_MIN, message: `Minimum rent is R${PRICE_MIN.toLocaleString()}` },
+                  max: { value: PRICE_MAX, message: `Maximum rent is R${PRICE_MAX.toLocaleString()}` },
                 }}
                 render={({ field }) => (
                   <Input
                     {...field}
                     type="number"
-                    min="1000"
-                    max="100000"
+                    min={PRICE_MIN}
+                    max={PRICE_MAX}
                     placeholder="12,000"
                     className="pl-8 text-lg h-12"
                     onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
@@ -62,6 +64,9 @@ export default function PricingStep({ control, errors }: PricingStepProps) {
             </div>
             {errors.price && (
               <p className="text-sm text-destructive">{errors.price.message}</p>
+            )}
+            {!errors.price && watch && priceWarning(watch('price')) && (
+              <p className="text-sm text-amber-600">{priceWarning(watch('price'))}</p>
             )}
             <p className="text-sm text-muted-foreground">
               Research similar properties in your area to set a competitive price

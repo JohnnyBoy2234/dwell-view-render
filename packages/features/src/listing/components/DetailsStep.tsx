@@ -4,9 +4,11 @@ import { Controller } from 'react-hook-form';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Switch } from '@mzanzihomes/ui/components/switch';
+import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Bed, Bath, Car, Ruler, Sofa, Heart } from 'lucide-react';
 import { ListingFormData } from '../types';
+import { MAX_ROOMS, needsBathroomConfirm } from '../validation';
 
 interface DetailsStepProps {
   control: Control<ListingFormData>;
@@ -25,6 +27,12 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
   const selectedAmenities = watch('amenities') || [];
   const furnished = watch('furnished');
   const petsAllowed = watch('pets_allowed');
+
+  const beds = watch('bedrooms');
+  const baths = watch('bathrooms');
+  React.useEffect(() => {
+    setValue('bathrooms_confirmed', false);
+  }, [beds, baths, setValue]);
 
   const toggleAmenity = (amenity: string) => {
     const currentAmenities = selectedAmenities;
@@ -51,9 +59,11 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
           <Controller
             name="bedrooms"
             control={control}
-            rules={{ 
-              required: 'Bedrooms is required', 
-              min: { value: 0, message: 'Minimum 0 bedrooms' }
+            rules={{
+              required: 'Bedrooms is required',
+              min: { value: 0, message: 'Minimum 0 bedrooms' },
+              max: { value: MAX_ROOMS, message: `Maximum ${MAX_ROOMS} bedrooms` },
+              validate: (v) => Number.isInteger(Number(v)) || 'Whole numbers only',
             }}
             render={({ field }) => (
               <Input
@@ -78,9 +88,17 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
           <Controller
             name="bathrooms"
             control={control}
-            rules={{ 
-              required: 'Bathrooms is required', 
-              min: { value: 1, message: 'Minimum 1 bathroom' }
+            rules={{
+              required: 'Bathrooms is required',
+              min: { value: 1, message: 'Minimum 1 bathroom' },
+              max: { value: MAX_ROOMS, message: `Maximum ${MAX_ROOMS} bathrooms` },
+              validate: (v) => {
+                if (!Number.isInteger(Number(v))) return 'Whole numbers only';
+                if (needsBathroomConfirm(watch('bedrooms'), Number(v)) && !watch('bathrooms_confirmed')) {
+                  return 'Please tick the confirmation below';
+                }
+                return true;
+              },
             }}
             render={({ field }) => (
               <Input
@@ -138,6 +156,20 @@ export default function DetailsStep({ control, errors, setValue, watch }: Detail
           />
         </div>
       </div>
+
+      {needsBathroomConfirm(watch('bedrooms'), watch('bathrooms')) && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-800 p-4 flex items-start gap-3">
+          <Checkbox
+            id="bathrooms_confirmed"
+            checked={!!watch('bathrooms_confirmed')}
+            onCheckedChange={(v) => setValue('bathrooms_confirmed', !!v, { shouldValidate: true })}
+            className="mt-0.5"
+          />
+          <Label htmlFor="bathrooms_confirmed" className="text-sm text-amber-800 dark:text-amber-200 font-normal cursor-pointer">
+            {watch('bathrooms')} bathrooms for {watch('bedrooms')} bedroom{Number(watch('bedrooms')) === 1 ? '' : 's'} — is that right? Tick to confirm.
+          </Label>
+        </div>
+      )}
 
       {/* Property Features */}
       <div className="space-y-4">
