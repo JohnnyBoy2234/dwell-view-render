@@ -27,6 +27,15 @@ interface LocationStepProps {
   structuredAddress?: boolean;
 }
 
+// Google's province names can differ from our canonical list in case or
+// hyphenation (e.g. "Kwazulu-Natal" vs "KwaZulu-Natal"). Match case- and
+// punctuation-insensitively and return the canonical entry, or '' if no match.
+const normalizeProvince = (raw: string): string => {
+  const key = raw.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (!key) return '';
+  return SA_PROVINCES.find((p) => p.toLowerCase().replace(/[^a-z0-9]/g, '') === key) || '';
+};
+
 // Google Places returns address_components; map them to our fields.
 const parsePlace = (place: any) => {
   const comps: any[] = place?.address_components || [];
@@ -37,7 +46,7 @@ const parsePlace = (place: any) => {
     street_address: [streetNumber, route].filter(Boolean).join(' '),
     suburb: get('sublocality_level_1') || get('sublocality') || get('neighborhood'),
     city: get('locality') || get('administrative_area_level_2'),
-    province: get('administrative_area_level_1'),
+    province: normalizeProvince(get('administrative_area_level_1')),
     postal_code: get('postal_code'),
   };
 };
@@ -101,7 +110,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
               </Label>
               <AddressAutocomplete
                 value={watch?.('location') || ''}
-                onChange={(v) => setValue?.('location', v)}
+                onChange={(v) => setValue?.('location', v, { shouldDirty: true })}
                 onPlaceSelect={(place) => {
                   const parsed = parsePlace(place);
                   (Object.entries(parsed) as [any, string][]).forEach(([k, v]) => {

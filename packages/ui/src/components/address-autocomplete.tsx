@@ -85,7 +85,7 @@ export function AddressAutocomplete({
         {
           types: ['address'],
           componentRestrictions: { country: 'za' }, // Restrict to South Africa
-          fields: ['formatted_address', 'geometry', 'name', 'place_id']
+          fields: ['formatted_address', 'geometry', 'name', 'place_id', 'address_components']
         }
       );
 
