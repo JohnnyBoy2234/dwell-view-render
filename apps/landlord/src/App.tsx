@@ -13,6 +13,7 @@ import { ErrorBoundary } from "@mzanzihomes/ui/components/ErrorBoundary";
 import { MobileBottomBar } from "@mzanzihomes/ui/components/MobileBottomBar";
 import { MobileNetworkStatus } from "@mzanzihomes/ui/components/mobile/MobileNetworkStatus";
 import { AISupportChat } from "@mzanzihomes/features/support";
+import { BillingDueBanner } from "@mzanzihomes/features/billing";
 import { PaymentRedirectHandler } from "@mzanzihomes/features/payments";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout";
@@ -346,6 +347,7 @@ const App = () => {
               <ScrollToTop />
               <ErrorBoundary>
                 <MobileNetworkStatus />
+                <BillingDueBanner />
                 <AISupportChat />
                 <LandlordRoleGuard>
                   <AppRoutes />
