@@ -29,6 +29,7 @@ export const useTenantApplications = () => {
   const { user } = useAuth();
   const [applications, setApplications] = useState<TenantApplication[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const isMountedRef = useRef(true);
 
   useEffect(() => {
@@ -99,17 +100,20 @@ export const useTenantApplications = () => {
         console.log('Final enriched applications:', enrichedApplications);
         if (isMountedRef.current) {
           setApplications(enrichedApplications);
+          setError(false);
         }
       } else {
         console.log('No applications found');
         if (isMountedRef.current) {
           setApplications([]);
+          setError(false);
         }
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
+      // keep any previously loaded applications; the UI shows a retry warning
       if (isMountedRef.current) {
-        setApplications([]);
+        setError(true);
       }
     } finally {
       if (isMountedRef.current) {
@@ -134,6 +138,7 @@ export const useTenantApplications = () => {
   return {
     applications,
     loading,
+    error,
     getApplicationForProperty,
     hasApplicationForProperty,
     getApplicationStatus,

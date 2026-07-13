@@ -11,6 +11,7 @@ export interface ApplicationInvite {
   tenant_id: string;
   status: string;
   created_at: string;
+  expires_at?: string | null;
   used_at?: string | null;
 }
 
@@ -20,6 +21,7 @@ export interface InviteWithDetails extends ApplicationInvite {
     title: string;
     location: string;
     images: string[] | null;
+    price?: number | null;
   } | null;
   landlord?: {
     user_id: string;
@@ -31,6 +33,7 @@ export const useApplicationInvites = () => {
   const { user } = useAuth();
   const [invites, setInvites] = useState<InviteWithDetails[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     if (user) fetchInvites();
@@ -54,6 +57,7 @@ export const useApplicationInvites = () => {
 
       if (list.length === 0) {
         setInvites([]);
+        setError(false);
         return;
       }
 
@@ -63,7 +67,7 @@ export const useApplicationInvites = () => {
       // 2) Load properties
       const { data: propsData, error: propsError } = await supabase
         .from("properties")
-        .select("id, title, location, images")
+        .select("id, title, location, images, price")
         .in("id", propertyIds);
       if (propsError) throw propsError;
 
@@ -84,13 +88,15 @@ export const useApplicationInvites = () => {
       }));
 
       setInvites(enriched);
+      setError(false);
     } catch (e) {
       console.error("Failed to fetch application invites", e);
-      setInvites([]);
+      // keep any previously loaded invites; the UI shows a retry warning
+      setError(true);
     } finally {
       setLoading(false);
     }
   };
 
-  return { invites, loading, refresh: fetchInvites };
+  return { invites, loading, error, refresh: fetchInvites };
 };

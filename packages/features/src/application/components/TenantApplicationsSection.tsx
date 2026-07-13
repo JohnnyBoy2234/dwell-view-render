@@ -1,270 +1,472 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mzanzihomes/ui/components/card";
-import { Badge } from "@mzanzihomes/ui/components/badge";
-import { Button } from "@mzanzihomes/ui/components/button";
-import { useApplicationInvites } from "@mzanzihomes/features/application";
-import { useTenantApplications } from "@mzanzihomes/features/application";
-import { useNavigate } from "react-router-dom";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@mzanzihomes/ui/components/tabs";
-import { CheckCircle, FileText, Clock, Plus } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { Input } from '@mzanzihomes/ui/components/input';
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { Progress } from '@mzanzihomes/ui/components/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
+import { AlertCircle, Mail, Plus, RefreshCw } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useApplications } from '../hooks/useApplications';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
-import { createApplicationRequest } from '../services/applicationRequestService';
-import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
+import { useApplicationInvites, type InviteWithDetails } from '../hooks/useApplicationInvites';
+import { useTenantApplications, type TenantApplication } from '../hooks/useTenantApplications';
+import { useApplicationDrafts, type ApplicationDraftSummary } from '../hooks/useApplicationDrafts';
+import {
+  applicationStatusPresentation,
+  DRAFT_PRESENTATION,
+  EXPIRED_INVITE_PRESENTATION,
+  INVITE_PRESENTATION,
+  isInviteExpired,
+  trackApplicationsEvent,
+  type StatusPresentation
+} from '../applicationPresentation';
+import { PropertyThumbnail } from './PropertyThumbnail';
+import { RequestApplicationSheet } from './RequestApplicationSheet';
+
+const longDate = (value: string) =>
+  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+
+/** One invitation to apply, regardless of which table it came from: a token
+ * invite (application_invites) or a landlord-created applications row with
+ * status 'invited'. */
+interface InvitationItem {
+  key: string;
+  propertyId: string;
+  propertyTitle: string;
+  location: string | null;
+  price: number | null;
+  image: string | null;
+  landlordName: string | null;
+  invitedOn: string;
+  expiresAt: string | null;
+  expired: boolean;
+  startPath: string;
+}
+
+interface CardShellProps {
+  presentation: StatusPresentation;
+  propertyTitle: string;
+  location: string | null;
+  price: number | null;
+  image: string | null;
+  landlordName: string | null;
+  dateLine: string;
+  extra?: React.ReactNode;
+  ctaLabel?: string | null;
+  onCta?: () => void;
+  onImageFailed: () => void;
+}
+
+/** Shared card layout for invitations, drafts, and applications: compact
+ * thumbnail row on mobile, one dominant full-width action. */
+function RecordCard({
+  presentation,
+  propertyTitle,
+  location,
+  price,
+  image,
+  landlordName,
+  dateLine,
+  extra,
+  ctaLabel,
+  onCta,
+  onImageFailed
+}: CardShellProps) {
+  return (
+    <Card className="overflow-hidden">
+      <CardContent className="p-4 space-y-3">
+        <div className="flex gap-3">
+          <PropertyThumbnail
+            src={image}
+            propertyTitle={propertyTitle}
+            className="h-20 w-24 shrink-0 rounded-lg"
+            onLoadFailed={onImageFailed}
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-base font-semibold leading-snug break-words">{propertyTitle}</h3>
+              <Badge variant={presentation.badgeVariant} className={`shrink-0 ${presentation.badgeClassName ?? ''}`}>
+                {presentation.label}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground truncate">
+              {[location, price ? `R${price.toLocaleString()}/month` : null].filter(Boolean).join(' • ')}
+            </p>
+            {landlordName && <p className="text-sm text-muted-foreground truncate">Landlord: {landlordName}</p>}
+          </div>
+        </div>
+
+        <p className="text-sm text-muted-foreground">{presentation.description}</p>
+        {extra}
+        <p className="text-xs text-muted-foreground">{dateLine}</p>
+
+        {ctaLabel && onCta && (
+          <Button className="w-full sm:w-auto min-h-[44px]" onClick={onCta}>
+            {ctaLabel}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+const CardSkeleton = () => (
+  <Card aria-hidden="true">
+    <CardContent className="p-4 space-y-3">
+      <div className="flex gap-3">
+        <div className="h-20 w-24 shrink-0 rounded-lg bg-muted animate-pulse" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
+          <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+          <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
+        </div>
+      </div>
+      <div className="h-10 w-full rounded bg-muted animate-pulse" />
+    </CardContent>
+  </Card>
+);
+
+function EmptyState({
+  title,
+  description,
+  action
+}: {
+  title: string;
+  description: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <Card>
+      <CardContent className="py-10 text-center space-y-3">
+        <Mail className="h-8 w-8 mx-auto text-muted-foreground" aria-hidden="true" />
+        <div>
+          <p className="font-medium">{title}</p>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
+        </div>
+        {action}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ErrorBanner({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div
+      role="alert"
+      className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3"
+    >
+      <span className="flex items-center gap-2 text-sm">
+        <AlertCircle className="h-4 w-4 text-destructive shrink-0" aria-hidden="true" />
+        {message}
+      </span>
+      <Button type="button" variant="outline" size="sm" onClick={onRetry}>
+        <RefreshCw className="h-4 w-4 mr-1" aria-hidden="true" /> Try again
+      </Button>
+    </div>
+  );
+}
 
 export const TenantApplicationsSection = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
-  const { invites, loading: invitesLoading } = useApplicationInvites();
-  const { applications, loading: applicationsLoading } = useTenantApplications();
-  const { requestApplication } = useApplications();
   const navigate = useNavigate();
-  const [openRequest, setOpenRequest] = useState(false);
-  const [leadOptions, setLeadOptions] = useState<Array<{ conversation_id: string; property_id: string; landlord_id: string; title: string }>>([]);
-  const [selectedLead, setSelectedLead] = useState<string>('');
-  const [submitting, setSubmitting] = useState(false);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'invited':
-        return <Badge variant="secondary">Invited</Badge>;
-      case 'submitted':
-        return <Badge variant="outline">Under Review</Badge>;
-      case 'accepted':
-        return <Badge className="bg-green-100 text-green-800">Accepted</Badge>;
-      case 'declined':
-        return <Badge variant="destructive">Declined</Badge>;
-      case 'pending':
-        return <Badge variant="secondary">Pending</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
-  };
+  const { invites, loading: invitesLoading, error: invitesError, refresh: refreshInvites } = useApplicationInvites();
+  const {
+    applications,
+    loading: applicationsLoading,
+    error: applicationsError,
+    refresh: refreshApplications
+  } = useTenantApplications();
+  const { drafts, loading: draftsLoading, refresh: refreshDrafts } = useApplicationDrafts();
 
-  const loading = invitesLoading || applicationsLoading;
+  const [tab, setTab] = useState<'invitations' | 'applications'>('invitations');
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [pendingRequestPropertyIds, setPendingRequestPropertyIds] = useState<string[]>([]);
 
   useEffect(() => {
-    const loadLeads = async () => {
-      // Get recent conversations the tenant has (landlord/property pairs)
-      const { data: convs } = await supabase
-        .from('conversations')
-        .select('id, property_id, landlord_id, properties ( title )')
-        .order('last_message_at', { ascending: false })
-        .limit(20);
-      const mapped = ((convs as any) || []).map((c: any) => ({
-        conversation_id: (c as any).id,
-        property_id: (c as any).property_id,
-        landlord_id: (c as any).landlord_id,
-        title: (c as any).properties?.title || 'Property'
-      }));
-      setLeadOptions(mapped);
-    };
-    loadLeads();
-  }, []);
+    trackApplicationsEvent(user?.id, 'applications_page_viewed', {});
+  }, [user?.id]);
 
-  const handleRequest = async () => {
-    if (!selectedLead || !user) return;
-    const lead = leadOptions.find(l => l.conversation_id === selectedLead);
-    if (!lead) return;
-    setSubmitting(true);
-    try {
-      await createApplicationRequest({
-        property_id: lead.property_id,
-        tenant_id: user.id,
-        landlord_id: lead.landlord_id
-      });
-      toast({
-        title: "Application requested",
-        description: "Your request has been sent to the landlord."
-      });
-      setOpenRequest(false);
-      setSelectedLead('');
-    } catch (error: any) {
-      console.error('Error requesting application:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error?.message || "Failed to request application. Please try again."
-      });
-    } finally {
-      setSubmitting(false);
-    }
-  };
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await (supabase.from('application_requests') as any)
+        .select('property_id')
+        .eq('tenant_id', user.id)
+        .eq('status', 'pending');
+      setPendingRequestPropertyIds(((data ?? []) as any[]).map((r) => r.property_id));
+    })();
+  }, [user?.id, requestOpen]);
+
+  const draftByPropertyId = useMemo(
+    () => new Map(drafts.map((d) => [d.property_id, d])),
+    [drafts]
+  );
+
+  // Invitations come from two sources; token invites win when both exist for
+  // a property. Expired ones stay visible but are not actionable.
+  const invitationItems = useMemo<InvitationItem[]>(() => {
+    const fromTokens: InvitationItem[] = invites.map((inv: InviteWithDetails) => ({
+      key: `invite-${inv.id}`,
+      propertyId: inv.property_id,
+      propertyTitle: inv.property?.title ?? 'Property',
+      location: inv.property?.location ?? null,
+      price: inv.property?.price ?? null,
+      image: inv.property?.images?.[0] ?? null,
+      landlordName: inv.landlord?.display_name ?? null,
+      invitedOn: inv.created_at,
+      expiresAt: inv.expires_at ?? null,
+      expired: isInviteExpired(inv),
+      startPath: `/apply/invite/${inv.token}`
+    }));
+    const tokenPropertyIds = new Set(fromTokens.map((i) => i.propertyId));
+
+    const fromApplications: InvitationItem[] = applications
+      .filter((app) => app.status === 'invited' && !tokenPropertyIds.has(app.property_id))
+      .map((app: TenantApplication) => ({
+        key: `application-${app.id}`,
+        propertyId: app.property_id,
+        propertyTitle: app.property?.title ?? 'Property',
+        location: app.property?.location ?? null,
+        price: app.property?.price ?? null,
+        image: app.property?.images?.[0] ?? null,
+        landlordName: app.landlord?.display_name ?? null,
+        invitedOn: app.created_at,
+        expiresAt: null,
+        expired: false,
+        startPath: `/rental-application/${app.property_id}?landlord=${app.landlord_id}`
+      }));
+
+    return [...fromTokens, ...fromApplications];
+  }, [invites, applications]);
+
+  const applicationRecords = useMemo(
+    () => applications.filter((app) => app.status !== 'invited'),
+    [applications]
+  );
+  // A draft becomes a submitted application on the same property; don't show both.
+  const applicationPropertyIds = useMemo(
+    () => new Set(applicationRecords.map((a) => a.property_id)),
+    [applicationRecords]
+  );
+  const draftRecords = useMemo(
+    () => drafts.filter((d) => !applicationPropertyIds.has(d.property_id)),
+    [drafts, applicationPropertyIds]
+  );
+
+  const activeInvitationCount = invitationItems.filter((i) => !i.expired).length;
+  const applicationCount = applicationRecords.length + draftRecords.length;
+
+  const loading = invitesLoading || applicationsLoading || draftsLoading;
+
+  const requestButton = (
+    <Button type="button" variant="outline" size="sm" onClick={() => {
+      trackApplicationsEvent(user?.id, 'manual_application_request_opened', {});
+      setRequestOpen(true);
+    }}>
+      <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Request an application
+    </Button>
+  );
+
+  const onThumbnailFailed = () => trackApplicationsEvent(user?.id, 'property_thumbnail_failed', {});
+
+  const continueDraft = (draft: ApplicationDraftSummary) =>
+    navigate(`/rental-application/${draft.property_id}?landlord=${draft.landlord_id}`);
 
   return (
-    <div className="mb-8">
-      <h2 className="text-xl font-semibold mb-4">My Applications</h2>
-      <div className="flex justify-end mb-3">
-        <Dialog open={openRequest} onOpenChange={setOpenRequest}>
-          <DialogTrigger asChild>
-            <Button size="sm" variant="outline">
-              <Plus className="h-4 w-4 mr-2" /> Request Application
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Request an Application</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-3">
-              <label className="text-sm font-medium">Choose a recent chat/property</label>
-              <select
-                className="w-full border rounded-md p-2"
-                value={selectedLead}
-                onChange={(e) => setSelectedLead(e.target.value)}
-              >
-                <option value="">Select a property</option>
-                {leadOptions.map((l) => (
-                  <option key={l.conversation_id} value={l.conversation_id}>
-                    {l.title}
-                  </option>
-                ))}
-              </select>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setOpenRequest(false)}>Cancel</Button>
-                <Button onClick={handleRequest} disabled={!selectedLead || submitting}>
-                  {submitting ? 'Requesting...' : 'Request'}
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+    // pb-24 keeps the last card's action clear of the mobile bottom navigation
+    <section className="mb-8 pb-24 md:pb-0" aria-label="Your applications">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
+        <div>
+          <h2 className="text-xl font-semibold">Your applications</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            View landlord invitations and track your rental applications.
+          </p>
+        </div>
+        <div className="shrink-0">{requestButton}</div>
       </div>
-      
-      <Tabs defaultValue="invites" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="invites" className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4" />
-            Invitations {invites.length > 0 && `(${invites.length})`}
+
+      <Tabs
+        value={tab}
+        onValueChange={(value) => {
+          setTab(value as 'invitations' | 'applications');
+          trackApplicationsEvent(user?.id, 'applications_tab_changed', { tab: value });
+        }}
+        className="w-full"
+      >
+        <TabsList className="grid w-full grid-cols-2 h-11">
+          <TabsTrigger
+            value="invitations"
+            className="data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-border"
+          >
+            Invitations{activeInvitationCount > 0 && ` (${activeInvitationCount})`}
           </TabsTrigger>
-          <TabsTrigger value="applications" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Active Applications {applications.length > 0 && `(${applications.length})`}
+          <TabsTrigger
+            value="applications"
+            className="data-[state=active]:font-semibold data-[state=active]:border data-[state=active]:border-border"
+          >
+            Applications{applicationCount > 0 && ` (${applicationCount})`}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="invites" className="mt-4">
-          {invitesLoading ? (
-            <Card>
-              <CardContent className="py-8 text-sm text-muted-foreground">Loading invitations…</CardContent>
-            </Card>
-          ) : invites.length === 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Invitations Yet</CardTitle>
-                <CardDescription>When a landlord invites you to apply, it will appear here.</CardDescription>
-              </CardHeader>
-            </Card>
+        <TabsContent value="invitations" className="mt-4 space-y-3">
+          {invitesError && (
+            <ErrorBanner message="We could not load your invitations." onRetry={refreshInvites} />
+          )}
+          {invitesLoading && invitationItems.length === 0 ? (
+            <div className="space-y-3" aria-busy="true" aria-label="Loading invitations">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          ) : invitationItems.length === 0 && !invitesError ? (
+            <EmptyState
+              title="No invitations yet"
+              description="When a landlord invites you to apply, the invitation will appear here. Use the request option if you have already spoken to a landlord."
+              action={requestButton}
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {invites.map((inv) => {
-                const photo = inv.property?.images?.[0] || "/placeholder.svg";
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {invitationItems.map((item) => {
+                const draft = draftByPropertyId.get(item.propertyId);
+                const presentation = item.expired ? EXPIRED_INVITE_PRESENTATION : INVITE_PRESENTATION;
+                const ctaLabel = item.expired ? null : draft ? 'Continue application' : 'Start application';
+                const dateLine = [
+                  `Invited on ${longDate(item.invitedOn)}`,
+                  !item.expired && item.expiresAt ? `Invitation expires ${longDate(item.expiresAt)}` : null
+                ]
+                  .filter(Boolean)
+                  .join(' • ');
                 return (
-                  <Card key={inv.id} className="overflow-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-3">
-                      <div className="md:col-span-1 h-40 md:h-full">
-                        <img
-                          src={photo}
-                          alt={`Primary photo of ${inv.property?.title || 'property'}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <CardTitle className="text-lg">{inv.property?.title || 'Property'}</CardTitle>
-                              <CardDescription>{inv.property?.location}</CardDescription>
-                              <div className="mt-2">
-                                <span className="text-sm text-muted-foreground">Landlord:</span>{' '}
-                                <span className="text-sm font-medium">{inv.landlord?.display_name || 'Landlord'}</span>
-                              </div>
-                            </div>
-                            <Badge variant="secondary">Invitation Received</Badge>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">Invitation available</p>
-                            <Button onClick={() => navigate(`/apply/invite/${inv.token}`)}>Start Application</Button>
-                          </div>
-                        </CardContent>
-                      </div>
-                    </div>
-                  </Card>
+                  <RecordCard
+                    key={item.key}
+                    presentation={presentation}
+                    propertyTitle={item.propertyTitle}
+                    location={item.location}
+                    price={item.price}
+                    image={item.image}
+                    landlordName={item.landlordName}
+                    dateLine={dateLine}
+                    ctaLabel={ctaLabel}
+                    onCta={() => {
+                      trackApplicationsEvent(user?.id, draft ? 'application_continue_clicked' : 'application_start_clicked', {
+                        source: 'invitation'
+                      });
+                      navigate(draft ? `/rental-application/${item.propertyId}?landlord=${draft.landlord_id}` : item.startPath);
+                    }}
+                    onImageFailed={onThumbnailFailed}
+                  />
                 );
               })}
             </div>
           )}
         </TabsContent>
 
-        <TabsContent value="applications" className="mt-4">
-          {applicationsLoading ? (
-            <Card>
-              <CardContent className="py-8 text-sm text-muted-foreground">Loading applications…</CardContent>
-            </Card>
-          ) : applications.length === 0 ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Active Applications</CardTitle>
-                <CardDescription>Your submitted applications will appear here.</CardDescription>
-              </CardHeader>
-            </Card>
+        <TabsContent value="applications" className="mt-4 space-y-3">
+          {applicationsError && (
+            <ErrorBanner message="We could not load your applications." onRetry={refreshApplications} />
+          )}
+          {loading && applicationCount === 0 ? (
+            <div className="space-y-3" aria-busy="true" aria-label="Loading applications">
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+          ) : applicationCount === 0 && !applicationsError ? (
+            <EmptyState
+              title="No applications yet"
+              description="Applications you start or submit will appear here."
+              action={
+                activeInvitationCount > 0 ? (
+                  <Button type="button" variant="outline" size="sm" onClick={() => setTab('invitations')}>
+                    View invitations
+                  </Button>
+                ) : undefined
+              }
+            />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {applications.map((app) => {
-                const photo = app.property?.images?.[0] || "/placeholder.svg";
-                return (
-                  <Card key={app.id} className="overflow-hidden">
-                    <div className="grid grid-cols-1 md:grid-cols-3">
-                      <div className="md:col-span-1 h-40 md:h-full">
-                        <img
-                          src={photo}
-                          alt={`Primary photo of ${app.property?.title || 'property'}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className="md:col-span-2">
-                        <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <CardTitle className="text-lg">{app.property?.title || 'Property'}</CardTitle>
-                              <CardDescription>R{app.property?.price?.toLocaleString()}/month • {app.property?.location}</CardDescription>
-                              <div className="mt-2">
-                                <span className="text-sm text-muted-foreground">Landlord:</span>{' '}
-                                <span className="text-sm font-medium">{app.landlord?.display_name || 'Landlord'}</span>
-                              </div>
-                            </div>
-                            {getStatusBadge(app.status)}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                              Applied on {new Date(app.created_at).toLocaleDateString()}
-                            </p>
-                            <Button 
-                              variant="outline" 
-                              onClick={() => navigate(`/application/${app.id}`)}
-                            >
-                              <FileText className="h-4 w-4 mr-2" />
-                              View Application
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {draftRecords.map((draft) => (
+                <RecordCard
+                  key={`draft-${draft.id}`}
+                  presentation={DRAFT_PRESENTATION}
+                  propertyTitle={draft.property?.title ?? 'Property'}
+                  location={draft.property?.location ?? null}
+                  price={draft.property?.price ?? null}
+                  image={draft.property?.images?.[0] ?? null}
+                  landlordName={null}
+                  dateLine={`Updated ${longDate(draft.updated_at)}`}
+                  extra={
+                    <div className="space-y-1">
+                      <Progress value={draft.completionPercentage} aria-label="Application progress" />
+                      <p className="text-xs text-muted-foreground">{draft.completionPercentage}% complete</p>
                     </div>
-                  </Card>
+                  }
+                  ctaLabel="Continue application"
+                  onCta={() => {
+                    trackApplicationsEvent(user?.id, 'application_continue_clicked', { source: 'draft' });
+                    continueDraft(draft);
+                  }}
+                  onImageFailed={onThumbnailFailed}
+                />
+              ))}
+              {applicationRecords.map((app) => {
+                const presentation = applicationStatusPresentation(app.status);
+                const dateLine =
+                  app.status === 'pending' || app.status === 'submitted'
+                    ? `Submitted on ${longDate(app.created_at)}`
+                    : `Updated ${longDate(app.updated_at ?? app.created_at)}`;
+                return (
+                  <RecordCard
+                    key={app.id}
+                    presentation={presentation}
+                    propertyTitle={app.property?.title ?? 'Property'}
+                    location={app.property?.location ?? null}
+                    price={app.property?.price ?? null}
+                    image={app.property?.images?.[0] ?? null}
+                    landlordName={app.landlord?.display_name ?? null}
+                    dateLine={dateLine}
+                    ctaLabel={presentation.cta}
+                    onCta={() => {
+                      trackApplicationsEvent(user?.id, 'application_status_viewed', { status: app.status });
+                      navigate(`/application/${app.id}`);
+                    }}
+                    onImageFailed={onThumbnailFailed}
+                  />
                 );
               })}
             </div>
           )}
         </TabsContent>
       </Tabs>
-    </div>
+
+      {user && (
+        <RequestApplicationSheet
+          open={requestOpen}
+          onOpenChange={setRequestOpen}
+          userId={user.id}
+          duplicateContext={{
+            activeInvitePropertyIds: invitationItems.filter((i) => !i.expired).map((i) => i.propertyId),
+            applications: applications.map((a) => ({ property_id: a.property_id, status: a.status })),
+            draftPropertyIds: drafts.map((d) => d.property_id),
+            pendingRequestPropertyIds
+          }}
+          onDuplicateAction={(action, propertyId) => {
+            if (action === 'view-invitation') {
+              setTab('invitations');
+            } else if (action === 'continue-application') {
+              const draft = draftByPropertyId.get(propertyId);
+              if (draft) continueDraft(draft);
+            } else {
+              const app = applications.find((a) => a.property_id === propertyId);
+              if (app) navigate(`/application/${app.id}`);
+            }
+          }}
+          onRequestSent={() => {
+            void refreshApplications();
+            void refreshInvites();
+            void refreshDrafts();
+          }}
+        />
+      )}
+    </section>
   );
 };

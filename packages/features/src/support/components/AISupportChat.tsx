@@ -6,12 +6,19 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import SupportTicketForm from './SupportTicketForm';
 
-// Routes where the chat bubble should be hidden
+// Routes where the chat bubble should be hidden. Application routes are
+// included because the launcher's corner position overlaps card CTAs and the
+// wizard's Next/Submit buttons; support stays reachable via the Support page.
 const HIDDEN_ROUTE_PREFIXES = [
   '/messages',
   '/tenant/messages',
   '/admin',
   '/MzanziHomes-lease/',
+  '/rental-application',
+  '/apply/invite',
+  '/application/',
+  '/tenant/applications',
+  '/tenant-dashboard/applications',
 ];
 const HIDDEN_ROUTE_PATTERNS = [
   /\/leases\/.+\/sign/,

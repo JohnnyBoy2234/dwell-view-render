@@ -14,7 +14,6 @@ import { Messages } from '@mzanzihomes/features/pages';
 import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
-import { FileText } from 'lucide-react';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
 
 export default function TenantDashboardRoutes() {
@@ -55,13 +54,7 @@ export default function TenantDashboardRoutes() {
       } />
       <Route path="applications" element={
         <EnhancedDashboardLayout title="Applications">
-          <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <FileText className="h-6 w-6 text-ocean-blue" />
-              <h2 className="text-xl font-bold">Applications</h2>
-            </div>
-            <TenantApplicationsSection />
-          </div>
+          <TenantApplicationsSection />
         </EnhancedDashboardLayout>
       } />
       <Route path="profile" element={
