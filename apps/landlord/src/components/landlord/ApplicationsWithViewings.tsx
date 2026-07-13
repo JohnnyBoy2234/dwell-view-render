@@ -1,19 +1,21 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { CheckCircle, Clock, User, Mail, Building, FileText, Download } from 'lucide-react';
+import { Mail, Building, FileText, Download } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useViewings } from '@mzanzihomes/features/viewing';
 import { useLandlordApplications, type ApplicationWithTenant } from '@mzanzihomes/features/application';
 import { ViewingWorkflow } from '@mzanzihomes/features/viewing';
-import { format } from 'date-fns';
+const shortDate = (value: string) =>
+  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 interface ApplicationsWithViewingsProps {
   propertyId: string;
@@ -133,50 +135,17 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
               const hasCompletedViewing = canSendApplication(application.tenant_id);
 
               return (
-                <Card key={application.id}>
-                  <CardHeader>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 shrink-0 bg-primary rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-white" />
-                        </div>
-                        <div className="min-w-0">
-                          <CardTitle className="text-base truncate">
-                            {[application.screening_profile?.first_name, application.screening_profile?.last_name]
-                              .filter(Boolean)
-                              .join(' ') || application.tenant_profile?.display_name || 'Applicant'}
-                          </CardTitle>
-                          <p className="text-sm text-muted-foreground">
-                            Applied {format(new Date(application.created_at), 'PP')}
-                          </p>
-                        </div>
-                      </div>
-                      <Badge className={statusInfo.color}>
-                        {statusInfo.label}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-
-                  <CardContent>
-                    <div className="space-y-4">
-                      {/* Viewing Status */}
-                      <div className="flex items-center gap-2 text-sm">
-                        {hasCompletedViewing ? (
-                          <>
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                            <span className="text-green-600">Viewing completed</span>
-                          </>
-                        ) : (
-                          <>
-                            <Clock className="h-4 w-4 text-yellow-600" />
-                            <span className="text-yellow-600">Viewing required</span>
-                          </>
-                        )}
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-wrap items-center gap-2 pt-2">
-                        <Dialog>
+                <RecordCard
+                  key={application.id}
+                  title={[application.screening_profile?.first_name, application.screening_profile?.last_name]
+                    .filter(Boolean)
+                    .join(' ') || application.tenant_profile?.display_name || 'Applicant'}
+                  dateLine={`Applied ${shortDate(application.created_at)}`}
+                  badge={{ label: statusInfo.label, className: statusInfo.color }}
+                  details={[{ label: 'Viewing', value: hasCompletedViewing ? 'Completed' : 'Required' }]}
+                  actions={
+                    <>
+                      <Dialog>
                           <DialogTrigger asChild>
                             <Button 
                               variant="outline" 
@@ -292,10 +261,9 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                             Generate Lease
                           </Button>
                         )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </>
+                  }
+                />
               );
             })
           )}

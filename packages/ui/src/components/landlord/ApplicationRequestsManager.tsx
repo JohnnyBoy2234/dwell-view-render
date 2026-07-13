@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { Check, X, Clock, User, Home } from 'lucide-react';
+import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
+import { Check, X, Clock } from 'lucide-react';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -28,6 +29,9 @@ interface ApplicationRequest {
 interface ApplicationRequestsManagerProps {
   propertyId?: string;
 }
+
+const shortDate = (value: string) =>
+  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsManagerProps) {
   const { user } = useAuth();
@@ -228,61 +232,47 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
       </CardHeader>
       <CardContent className="space-y-3 px-3 sm:px-6">
         {requests.map((request) => (
-          <Card key={request.id} className="border shadow-sm overflow-hidden">
-            <CardContent className="p-3 sm:p-4">
-              <div className="space-y-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                    <p className="font-semibold text-sm sm:text-base truncate">
-                      {request.profiles?.display_name || 'Unknown Tenant'}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                    <Home className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                    <p className="truncate">{request.properties?.title || 'Unknown Property'}</p>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Requested {new Date(request.created_at).toLocaleDateString()}
-                  </p>
-                </div>
-
-                <div className="flex flex-col gap-2 pt-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleApprove(request)}
-                    disabled={processingId === request.id}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white h-10"
-                  >
-                    {processingId === request.id ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    ) : (
-                      <>
-                        <Check className="h-4 w-4 mr-1" />
-                        Approve
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDecline(request)}
-                    disabled={processingId === request.id}
-                    className="w-full h-10"
-                  >
-                    {processingId === request.id ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                    ) : (
-                      <>
-                        <X className="h-4 w-4 mr-1" />
-                        Decline
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <RecordCard
+            key={request.id}
+            title={request.profiles?.display_name || 'Unknown Tenant'}
+            dateLine={`Requested ${shortDate(request.created_at)}`}
+            badge={{ label: 'Pending', className: 'bg-blue-100 text-blue-800' }}
+            details={[{ label: 'Property', value: request.properties?.title || 'Unknown Property' }]}
+            actions={
+              <>
+                <Button
+                  size="sm"
+                  onClick={() => handleApprove(request)}
+                  disabled={processingId === request.id}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {processingId === request.id ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Approve
+                    </>
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => handleDecline(request)}
+                  disabled={processingId === request.id}
+                >
+                  {processingId === request.id ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                  ) : (
+                    <>
+                      <X className="h-4 w-4 mr-1" />
+                      Decline
+                    </>
+                  )}
+                </Button>
+              </>
+            }
+          />
         ))}
       </CardContent>
     </Card>
