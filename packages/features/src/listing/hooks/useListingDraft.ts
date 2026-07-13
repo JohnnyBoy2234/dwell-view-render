@@ -22,6 +22,7 @@ export function useListingDraft({ userId, existingPropertyId }: Options) {
   const pending = useRef<Record<string, any>>({});
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const attempt = useRef(0);
+  const disposed = useRef(false);
   const draftIdRef = useRef<string | null>(existingPropertyId);
   draftIdRef.current = draftId ?? draftIdRef.current;
   // Holds the in-flight insert so a concurrent ensureDraft (e.g. a double-click
@@ -62,7 +63,11 @@ export function useListingDraft({ userId, existingPropertyId }: Options) {
       pending.current = { ...fields, ...pending.current };
       setSaveState('error');
       attempt.current += 1;
-      timer.current = setTimeout(() => void flush(), nextRetryDelay(attempt.current));
+      // After unmount the cleanup can no longer cancel this timer, so an
+      // unbounded retry loop would run for the tab's lifetime — don't chain.
+      if (!disposed.current) {
+        timer.current = setTimeout(() => void flush(), nextRetryDelay(attempt.current));
+      }
       return;
     }
     attempt.current = 0;
@@ -134,6 +139,7 @@ export function useListingDraft({ userId, existingPropertyId }: Options) {
 
   useEffect(
     () => () => {
+      disposed.current = true;
       if (timer.current) clearTimeout(timer.current);
       // Don't drop edits still sitting in the debounce window when the user
       // navigates away — fire-and-forget flush. (Post-unmount setState is a

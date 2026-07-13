@@ -267,7 +267,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
             control={control}
             rules={{ 
               required: 'Description is required',
-              minLength: { value: 50, message: 'Description should be at least 50 characters' }
+              minLength: { value: DESCRIPTION_MIN, message: `Description should be at least ${DESCRIPTION_MIN} characters` }
             }}
             render={({ field }) => (
               <Textarea
