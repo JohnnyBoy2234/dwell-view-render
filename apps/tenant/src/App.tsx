@@ -33,7 +33,7 @@ import TenantMessages from "@/pages/TenantMessages";
 import DocumentViewer from "@/pages/DocumentViewer";
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
 import { PrivacyPolicyScreen, TermsOfServiceScreen } from "@mzanzihomes/ui/components/pages/legal/LegalScreens";
-import ApplicationDetail from "@mzanzihomes/ui/components/pages/ApplicationDetail";
+import { ApplicationDetail } from '@mzanzihomes/features/pages';
 import { RentalApplication } from '@mzanzihomes/features/pages';
 import { LeaseSignature } from '@mzanzihomes/features/pages';
 import KycCapture from "@mzanzihomes/ui/components/pages/KycCapture";
@@ -42,7 +42,6 @@ import PaymentSuccess from "@mzanzihomes/ui/components/pages/PaymentSuccess";
 import PaymentFailed from "@mzanzihomes/ui/components/pages/PaymentFailed";
 import { Messages } from '@mzanzihomes/features/pages';
 import { MobileCapture } from '@mzanzihomes/features/pages';
-import { InventoryStart } from '@mzanzihomes/features/pages';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import SettingsPage from "@mzanzihomes/ui/components/pages/SettingsPage";
 import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
@@ -174,9 +173,6 @@ function AppRoutes() {
         <Route path="/kyc/capture" element={<KycCapture />} />
         <Route path="/kyc/test" element={<KycCapture />} />
         <Route path="/mobile-capture" element={<MobileCapture />} />
-
-        {/* Inventory */}
-        <Route path="/inventory/start" element={<InventoryStart />} />
 
         {/* Maintenance ticket detail */}
         <Route path="/maintenance/:ticketId" element={

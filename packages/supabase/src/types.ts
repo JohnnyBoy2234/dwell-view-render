@@ -89,6 +89,123 @@ export type Database = {
         }
         Relationships: []
       }
+      application_events: {
+        Row: {
+          actor_id: string | null
+          application_id: string
+          created_at: string
+          detail: Json
+          event_type: string
+          id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          application_id: string
+          created_at?: string
+          detail?: Json
+          event_type: string
+          id?: string
+        }
+        Update: {
+          actor_id?: string | null
+          application_id?: string
+          created_at?: string
+          detail?: Json
+          event_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_info_requests: {
+        Row: {
+          application_id: string
+          created_at: string
+          due_date: string | null
+          id: string
+          item: string
+          landlord_id: string
+          message: string | null
+          responded_at: string | null
+          response: string | null
+          status: string
+          tenant_id: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          item: string
+          landlord_id: string
+          message?: string | null
+          responded_at?: string | null
+          response?: string | null
+          status?: string
+          tenant_id: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          due_date?: string | null
+          id?: string
+          item?: string
+          landlord_id?: string
+          message?: string | null
+          responded_at?: string | null
+          response?: string | null
+          status?: string
+          tenant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_info_requests_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_notes: {
+        Row: {
+          application_id: string
+          created_at: string
+          id: string
+          landlord_id: string
+          note: string
+        }
+        Insert: {
+          application_id: string
+          created_at?: string
+          id?: string
+          landlord_id: string
+          note: string
+        }
+        Update: {
+          application_id?: string
+          created_at?: string
+          id?: string
+          landlord_id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_notes_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_requests: {
         Row: {
           created_at: string | null
@@ -1919,6 +2036,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      property_inventory_items: {
+        Row: {
+          brand_model: string | null
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          note: string | null
+          property_id: string
+          quantity: number
+          room: string
+          serial_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          brand_model?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          note?: string | null
+          property_id: string
+          quantity?: number
+          room: string
+          serial_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          brand_model?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          note?: string | null
+          property_id?: string
+          quantity?: number
+          room?: string
+          serial_number?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "property_inventory_items_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       screening_details: {
         Row: {

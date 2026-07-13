@@ -33,8 +33,23 @@ describe('applicationStatusPresentation', () => {
 
   it('presents declined without labelling the tenant', () => {
     const p = applicationStatusPresentation('declined');
-    expect(p.label).toBe('Unsuccessful');
+    expect(p.label).toBe('Not approved');
+    expect(p.description).toContain('landlord decided');
     expect(p.cta).toBe('View decision');
+  });
+
+  it('keeps the more-info loop active with a provide-information CTA', () => {
+    const p = applicationStatusPresentation('more_info_requested');
+    expect(p.terminal).toBe(false);
+    expect(p.cta).toBe('Provide information');
+  });
+
+  it('treats withdrawn and expired as terminal states without actions', () => {
+    for (const status of ['withdrawn', 'expired']) {
+      const p = applicationStatusPresentation(status);
+      expect(p.terminal).toBe(true);
+      expect(p.cta).toBeNull();
+    }
   });
 
   it('falls back safely for unknown statuses', () => {

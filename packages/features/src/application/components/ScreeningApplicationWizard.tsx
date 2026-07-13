@@ -1,27 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
+} from '@mzanzihomes/ui/components/dialog';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
-import { AlertCircle, Check, Loader2 } from 'lucide-react';
-import { completionPercentage } from '../services/draftService';
-import { deleteDraft } from '../services/draftService';
+import { AlertCircle, Check, CheckCircle2, Loader2, WifiOff } from 'lucide-react';
+import { completionPercentage, deleteDraft } from '../services/draftService';
 import { submitApplication } from '../services/submitService';
 import { useApplicationDraft } from '../hooks/useApplicationDraft';
 import { emptyFormData, mergeDraft, type ApplicationFormData, type SectionKey } from '../types';
-import { validateSection, type FieldErrors } from '../validation';
+import { validateDocuments, validateSection, type FieldErrors } from '../validation';
 import { WelcomeBack } from './WelcomeBack';
-import { PersonalStep } from './steps/PersonalStep';
-import { IdentityStep } from './steps/IdentityStep';
-import { AddressStep } from './steps/AddressStep';
-import { CreditStep } from './steps/CreditStep';
-import { EmploymentStep } from './steps/EmploymentStep';
-import { HouseholdStep } from './steps/HouseholdStep';
-import { RiskStep } from './steps/RiskStep';
-import { ReviewStep } from './steps/ReviewStep';
+import { PropertyStep, type PropertySummary } from './steps/PropertyStep';
+import { YourDetailsStep } from './steps/YourDetailsStep';
+import { HouseholdIncomeStep } from './steps/HouseholdIncomeStep';
+import { ConsentStep } from './steps/ConsentStep';
+import { ReferencesDocumentsStep } from './steps/ReferencesDocumentsStep';
+import { ReviewSubmitStep } from './steps/ReviewSubmitStep';
 
 export interface ScreeningApplicationWizardProps {
   propertyId: string;
@@ -46,16 +45,27 @@ export function friendlySubmitError(error: any): string {
   return message || 'Something went wrong submitting your application. Please try again.';
 }
 
-const steps: { key: string; title: string; section: SectionKey | null }[] = [
-  { key: 'personal', title: 'Personal', section: 'personal' },
-  { key: 'identity', title: 'Identity', section: 'identity' },
-  { key: 'address', title: 'Address', section: 'address' },
-  { key: 'credit', title: 'Credit', section: 'credit' },
-  { key: 'employment', title: 'Employment', section: 'employment' },
-  { key: 'household', title: 'Household', section: 'household' },
-  { key: 'questions', title: 'Questions', section: 'risk' },
-  { key: 'review', title: 'Review', section: null }
+const steps: { key: string; title: string; sections: SectionKey[] }[] = [
+  { key: 'property', title: 'The property', sections: [] },
+  { key: 'details', title: 'Your details', sections: ['personal', 'identity', 'address'] },
+  { key: 'household', title: 'Household and income', sections: ['household', 'employment', 'support', 'risk'] },
+  { key: 'consent', title: 'Consent and checks', sections: ['credit'] },
+  { key: 'documents', title: 'References and documents', sections: ['references'] },
+  { key: 'review', title: 'Review and submit', sections: [] }
 ];
+
+const REVIEW_STEP = steps.length - 1;
+
+function validateStep(idx: number, data: ApplicationFormData): FieldErrors {
+  const errors: FieldErrors = {};
+  for (const section of steps[idx].sections) {
+    Object.assign(errors, validateSection(section, data));
+  }
+  if (steps[idx].key === 'documents') {
+    Object.assign(errors, validateDocuments(data));
+  }
+  return errors;
+}
 
 export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, onSubmissionComplete }: ScreeningApplicationWizardProps) {
   const { user } = useAuth();
@@ -65,15 +75,16 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [existingApplication, setExistingApplication] = useState<any>(null);
+  const [property, setProperty] = useState<PropertySummary | null>(null);
   const [formData, setFormData] = useState<ApplicationFormData>(emptyFormData());
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [confirmations, setConfirmationsState] = useState({ accurate: false, terms: false });
+  const [declared, setDeclared] = useState(false);
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [submittedId, setSubmittedId] = useState<string | null>(null);
   const [firstName, setFirstName] = useState<string | undefined>();
-  const stepChipRefs = useRef<(HTMLDivElement | null)[]>([]);
   const initialised = useRef(false);
 
   const { draft, loaded, saveStatus, scheduleSave, saveNow, clearLocal } = useApplicationDraft({
@@ -83,14 +94,23 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     inviteId
   });
 
-  // Keep the active step chip in view on mobile as the wizard advances
   useEffect(() => {
-    stepChipRefs.current[currentStep]?.scrollIntoView({
-      behavior: 'smooth',
-      inline: 'center',
-      block: 'nearest'
-    });
-  }, [currentStep]);
+    (async () => {
+      const { data } = await (supabase.from('properties') as any)
+        .select('id, title, location, price, images')
+        .eq('id', propertyId)
+        .maybeSingle();
+      if (data) {
+        setProperty({
+          id: data.id,
+          title: data.title,
+          location: data.location,
+          price: data.price ?? null,
+          image: Array.isArray(data.images) && data.images.length > 0 ? data.images[0] : null
+        });
+      }
+    })();
+  }, [propertyId]);
 
   // Resolve entry state once auth + draft are known: existing application,
   // returning draft, or a fresh form prefilled from the reusable profile.
@@ -106,15 +126,17 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           .eq('property_id', propertyId)
           .maybeSingle();
 
-        if (application && application.status !== 'invited') {
+        // 'invited' means "please apply"; 'withdrawn' may be replaced by a
+        // fresh application — anything else is already in flight or decided.
+        if (application && application.status !== 'invited' && application.status !== 'withdrawn') {
           setExistingApplication(application);
           return;
         }
 
         if (draft) {
           setFormData(draft.formData);
-          setCurrentStep(Math.min(Math.max(draft.currentStep, 0), steps.length - 1));
-          setCompletedSteps(draft.completedSteps);
+          setCurrentStep(Math.min(Math.max(draft.currentStep, 0), REVIEW_STEP));
+          setCompletedSteps(draft.completedSteps.filter((s) => s >= 0 && s <= REVIEW_STEP));
           setFirstName(draft.formData.personal.first_name || undefined);
           setShowWelcomeBack(draft.completedSteps.length > 0 || draft.currentStep > 0);
           return;
@@ -148,11 +170,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               id_expiry_date: details?.id_expiry_date || ''
             },
             address: {
-              ...(details?.address && typeof details.address === 'object' ? details.address : { line1: details?.current_address || '' }),
-              reason_for_moving: details?.reason_for_moving || '',
-              previous_landlord_name: details?.previous_landlord_name || '',
-              previous_landlord_contact: details?.previous_landlord_contact || '',
-              proof_document: null
+              ...(details?.address && typeof details.address === 'object' ? details.address : { line1: details?.current_address || '' })
             },
             employment: {
               ...(details?.employment && typeof details.employment === 'object' ? details.employment : {}),
@@ -160,10 +178,15 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               net_monthly_income: details?.net_monthly_income?.toString() || '',
               gross_monthly_income: details?.gross_monthly_income?.toString() || '',
               income_documents: []
+            },
+            references: {
+              rented_before: details?.previous_landlord_name ? 'yes' : '',
+              landlord_name: details?.previous_landlord_name || '',
+              landlord_phone: details?.previous_landlord_contact || ''
             }
           });
           // consent is per-application — never carried over
-          prefilled.credit.consent = false;
+          prefilled.credit.consent = '';
           setFormData(prefilled);
           setFirstName(prefilled.personal.first_name || undefined);
           toast({
@@ -205,24 +228,28 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   };
 
   const goNext = () => {
-    const section = steps[currentStep].section;
-    if (section) {
-      const sectionErrors = validateSection(section, formData);
-      if (Object.keys(sectionErrors).length > 0) {
-        setErrors(sectionErrors);
-        toast({
-          title: 'Missing information',
-          description: 'Please complete the highlighted fields before continuing.',
-          variant: 'destructive'
-        });
-        return;
-      }
+    let data = formData;
+    // Continuing the consent step without ticking the box records an explicit
+    // "no" — consent is never assumed either way.
+    if (steps[currentStep].key === 'consent' && data.credit.consent !== 'yes') {
+      data = { ...data, credit: { ...data.credit, consent: 'no' } };
+      setFormData(data);
+    }
+    const stepErrors = validateStep(currentStep, data);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      toast({
+        title: 'Missing information',
+        description: 'Please complete the highlighted fields before continuing.',
+        variant: 'destructive'
+      });
+      return;
     }
     const nextCompleted = completedSteps.includes(currentStep) ? completedSteps : [...completedSteps, currentStep];
     setCompletedSteps(nextCompleted);
-    const next = Math.min(currentStep + 1, steps.length - 1);
+    const next = Math.min(currentStep + 1, REVIEW_STEP);
     goToStep(next);
-    void saveNow(formData, next, nextCompleted);
+    void saveNow(data, next, nextCompleted);
   };
 
   const goBack = () => {
@@ -247,15 +274,13 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     }
   };
 
-  const handleSubmit = async () => {
-    if (!user) return;
-
+  const validateAll = (): boolean => {
     const allErrors: FieldErrors = {};
-    for (const step of steps) {
-      if (step.section) Object.assign(allErrors, validateSection(step.section, formData));
+    for (let i = 0; i < steps.length; i++) {
+      Object.assign(allErrors, validateStep(i, formData));
     }
-    if (!confirmations.accurate || !confirmations.terms) {
-      allErrors.confirmations = 'Please confirm the declarations above before submitting.';
+    if (!declared) {
+      allErrors.declaration = 'Please confirm the declaration above before submitting.';
     }
     if (Object.keys(allErrors).length > 0) {
       setErrors(allErrors);
@@ -264,16 +289,23 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         description: 'Some sections still need attention — use Edit on the incomplete sections.',
         variant: 'destructive'
       });
-      return;
+      return false;
     }
+    return true;
+  };
 
+  const handleSubmit = async () => {
+    if (!user || submitting) return;
     setSubmitting(true);
     try {
-      await submitApplication({ userId: user.id, propertyId, landlordId, inviteId, formData });
+      const id = await submitApplication({ userId: user.id, propertyId, landlordId, inviteId, formData });
       clearLocal();
-      setShowSuccessDialog(true);
+      setConfirmOpen(false);
+      setSubmittedId(id);
+      window.scrollTo({ top: 0 });
     } catch (error: any) {
       console.error('Submit application error', error);
+      setConfirmOpen(false);
       toast({
         title: 'Submission failed',
         description: friendlySubmitError(error),
@@ -292,28 +324,101 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     );
   }
 
-  // Once an application exists (anything past the "invited" state) it's already
-  // submitted — show its status instead of the form so it doesn't look like a to-do.
-  if (existingApplication && existingApplication.status !== 'invited') {
+  // Submission confirmation — the end of the rental-application flow. No
+  // lease, deposit or tenancy language belongs here.
+  if (submittedId) {
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardHeader className="text-center">
+          <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-2" aria-hidden="true" />
+          <CardTitle>Application submitted</CardTitle>
+          <CardDescription>
+            Your rental application has been sent to the landlord for review.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg border divide-y text-sm">
+            <div className="flex justify-between gap-2 p-3">
+              <span className="text-muted-foreground">Property</span>
+              <span className="font-medium text-right break-words">{property?.title ?? '—'}</span>
+            </div>
+            <div className="flex justify-between gap-2 p-3">
+              <span className="text-muted-foreground">Application reference</span>
+              <span className="font-medium uppercase">{submittedId.slice(0, 8)}</span>
+            </div>
+            <div className="flex justify-between gap-2 p-3">
+              <span className="text-muted-foreground">Submitted</span>
+              <span className="font-medium">{new Date().toLocaleDateString()}</span>
+            </div>
+            <div className="flex justify-between gap-2 p-3">
+              <span className="text-muted-foreground">Status</span>
+              <span className="font-medium">Submitted — under review</span>
+            </div>
+          </div>
+          <div>
+            <p className="text-sm font-medium mb-1">What happens next</p>
+            <p className="text-sm text-muted-foreground">
+              The landlord will review your application. They may ask for more information — we
+              will notify you if they do, and when a decision is made.
+            </p>
+          </div>
+          <Button
+            className="w-full"
+            onClick={() => {
+              if (onSubmissionComplete) onSubmissionComplete();
+              else navigate('/tenant/applications');
+            }}
+          >
+            Go to my applications
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Once an application exists it's already submitted — show its status
+  // instead of the form so it doesn't look like a to-do.
+  if (existingApplication) {
     const st = existingApplication.status;
-    const isReview = st === 'pending' || st === 'submitted';
+    const copy: Record<string, { title: string; body: string }> = {
+      accepted: {
+        title: 'Application approved',
+        body: 'The landlord has approved this rental application.'
+      },
+      declined: {
+        title: 'Application not approved',
+        body: 'The landlord has decided not to proceed with your rental application for this property.'
+      },
+      more_info_requested: {
+        title: 'More information requested',
+        body: 'The landlord needs something more from you before they can finish reviewing your application.'
+      },
+      expired: {
+        title: 'Application expired',
+        body: 'This application is no longer active.'
+      }
+    };
+    const c = copy[st] ?? {
+      title: 'Application submitted',
+      body: "The landlord is reviewing your application. We'll let you know as soon as there's an update."
+    };
     return (
       <Card className="max-w-2xl mx-auto">
         <CardHeader>
-          <CardTitle>{isReview ? 'Application submitted' : 'Application Status'}</CardTitle>
+          <CardTitle>{c.title}</CardTitle>
           <CardDescription>Your application for this property</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <p className="text-lg mb-2">
-              {isReview ? 'Thanks — your application is in! 🎉' : `Application ${st}`}
-            </p>
-            <p className="text-sm text-muted-foreground mb-4">
-              {isReview
-                ? "The landlord is reviewing it. We'll let you know as soon as there's an update."
-                : <>Status: <span className="capitalize font-medium">{st}</span></>}
-            </p>
-            <Button variant="outline" onClick={() => navigate('/tenant-dashboard')}>Go to Dashboard</Button>
+          <div className="text-center py-6 space-y-4">
+            <p className="text-sm text-muted-foreground">{c.body}</p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => navigate(`/application/${existingApplication.id}`)}>
+                View application
+              </Button>
+              <Button variant="outline" onClick={() => navigate('/tenant-dashboard')}>
+                Go to Dashboard
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -325,10 +430,15 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     return (
       <WelcomeBack
         firstName={firstName}
-        percentage={completionPercentage(draft.completedSteps)}
-        lastSectionTitle={lastCompleted !== null ? steps[lastCompleted].title : null}
+        percentage={completionPercentage(draft.completedSteps.filter((s) => s <= REVIEW_STEP))}
+        lastSectionTitle={lastCompleted !== null && lastCompleted <= REVIEW_STEP ? steps[lastCompleted].title : null}
         lastSavedAt={draft.updatedAt}
         onContinue={() => {
+          setShowWelcomeBack(false);
+          setLoading(false);
+        }}
+        onReview={() => {
+          setCurrentStep(REVIEW_STEP);
           setShowWelcomeBack(false);
           setLoading(false);
         }}
@@ -339,53 +449,25 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
 
   const SaveIndicator = () => {
     if (saveStatus === 'idle') return null;
-    const content = {
-      saving: { icon: <Loader2 className="h-3 w-3 animate-spin" />, text: 'Saving…' },
-      saved: { icon: <Check className="h-3 w-3" />, text: 'Saved' },
-      error: { icon: <AlertCircle className="h-3 w-3 text-destructive" />, text: 'Unable to save' }
-    }[saveStatus];
+    const offline = typeof navigator !== 'undefined' && !navigator.onLine;
+    const content =
+      saveStatus === 'error' && offline
+        ? { icon: <WifiOff className="h-3 w-3" />, text: 'Waiting for connection' }
+        : {
+            saving: { icon: <Loader2 className="h-3 w-3 animate-spin" />, text: 'Saving…' },
+            saved: { icon: <Check className="h-3 w-3" />, text: 'Saved' },
+            error: { icon: <AlertCircle className="h-3 w-3 text-destructive" />, text: "Couldn't save" }
+          }[saveStatus];
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground" role="status">
+      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0" role="status">
         {content.icon}
         {content.text}
       </span>
     );
   };
 
-  const StepIndicator = () => (
-    <div className="w-full">
-      {/* Desktop/Tablet progress bar */}
-      <div className="hidden sm:flex items-center justify-between gap-2">
-        {steps.map((s, idx) => (
-          <div key={s.key} className="flex-1">
-            <div className={`h-1 rounded-full ${idx <= currentStep ? 'bg-primary' : 'bg-muted'}`} />
-            <div className="mt-2 text-xs text-muted-foreground text-center">{s.title}</div>
-          </div>
-        ))}
-      </div>
-      {/* Mobile: always-visible step count + scrollable chips that auto-scroll into view */}
-      <div className="sm:hidden">
-        <div className="text-xs font-medium text-muted-foreground mb-2">
-          Step {currentStep + 1} of {steps.length}: {steps[currentStep].title}
-        </div>
-        <div className="-mx-2 px-2 overflow-x-auto pb-2">
-          <div className="flex gap-2 snap-x snap-mandatory">
-            {steps.map((s, idx) => (
-              <div
-                key={s.key}
-                ref={(el) => { stepChipRefs.current[idx] = el; }}
-                className={`shrink-0 snap-center px-3 py-1.5 rounded-full text-xs border ${idx === currentStep ? 'bg-primary text-primary-foreground border-primary' : 'bg-muted text-foreground border-muted'}`}
-              >
-                {s.title}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  const isReviewStep = currentStep === steps.length - 1;
+  const isReviewStep = currentStep === REVIEW_STEP;
+  const isConsentStep = steps[currentStep].key === 'consent';
   const stepProps = {
     data: formData,
     update,
@@ -393,6 +475,16 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     userId: user?.id ?? '',
     onUploadComplete
   };
+
+  const primaryLabel = isReviewStep
+    ? 'Submit application'
+    : isConsentStep
+      ? formData.credit.consent === 'yes'
+        ? 'Agree and continue'
+        : 'Continue without consent'
+      : steps[currentStep].key === 'documents'
+        ? 'Review application'
+        : 'Continue';
 
   return (
     <Card className="max-w-4xl mx-auto">
@@ -404,24 +496,32 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           </div>
           <SaveIndicator />
         </div>
+        {/* The one and only progress indicator */}
+        <div className="pt-2">
+          <p className="text-sm font-medium">
+            Step {currentStep + 1} of {steps.length} — {steps[currentStep].title}
+          </p>
+          <div className="h-1.5 bg-muted rounded-full mt-2" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={currentStep + 1}>
+            <div
+              className="h-1.5 bg-primary rounded-full transition-all"
+              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+            />
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-8">
-          <StepIndicator />
-
-          {currentStep === 0 && <PersonalStep {...stepProps} />}
-          {currentStep === 1 && <IdentityStep {...stepProps} />}
-          {currentStep === 2 && <AddressStep {...stepProps} />}
-          {currentStep === 3 && <CreditStep {...stepProps} />}
-          {currentStep === 4 && <EmploymentStep {...stepProps} />}
-          {currentStep === 5 && <HouseholdStep {...stepProps} />}
-          {currentStep === 6 && <RiskStep {...stepProps} />}
+          {currentStep === 0 && <PropertyStep property={property} />}
+          {currentStep === 1 && <YourDetailsStep {...stepProps} />}
+          {currentStep === 2 && <HouseholdIncomeStep {...stepProps} />}
+          {currentStep === 3 && <ConsentStep {...stepProps} />}
+          {currentStep === 4 && <ReferencesDocumentsStep {...stepProps} />}
           {isReviewStep && (
-            <ReviewStep
+            <ReviewSubmitStep
               {...stepProps}
               onEdit={goToStep}
-              confirmations={confirmations}
-              setConfirmations={(patch) => setConfirmationsState((prev) => ({ ...prev, ...patch }))}
+              declared={declared}
+              setDeclared={setDeclared}
             />
           )}
 
@@ -431,49 +531,46 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
                 Back
               </Button>
             )}
-            <div className="ml-auto flex gap-3">
-              {!isReviewStep && (
-                <Button type="button" onClick={goNext} disabled={submitting}>
-                  Next
-                </Button>
-              )}
-              {isReviewStep && (
-                <Button
-                  type="button"
-                  className="min-w-40"
-                  onClick={handleSubmit}
-                  disabled={submitting || !confirmations.accurate || !confirmations.terms}
-                >
-                  {submitting ? 'Submitting...' : 'Submit Application'}
-                </Button>
-              )}
+            <div className="ml-auto">
+              <Button
+                type="button"
+                className="min-w-40"
+                variant={isConsentStep && formData.credit.consent !== 'yes' ? 'outline' : 'default'}
+                disabled={submitting}
+                onClick={() => {
+                  if (isReviewStep) {
+                    if (validateAll()) setConfirmOpen(true);
+                  } else {
+                    goNext();
+                  }
+                }}
+              >
+                {primaryLabel}
+              </Button>
             </div>
           </div>
         </div>
       </CardContent>
 
-      <SuccessDialog
-        open={showSuccessDialog}
-        onClose={() => setShowSuccessDialog(false)}
-        icon="check"
-        title="Application Submitted!"
-        subtitle="Your rental application has been successfully submitted."
-        progress={{ current: 1, total: 3, label: 'Application Progress' }}
-        nextSteps={[
-          { title: 'Credit check in progress', description: "We're verifying your credit score automatically" },
-          { title: 'Landlord review', description: 'The landlord will review your complete application' },
-          { title: 'Decision notification', description: "You'll receive an email with the outcome" }
-        ]}
-        primaryAction={{
-          label: 'Go to Dashboard',
-          onClick: () => {
-            setShowSuccessDialog(false);
-            if (onSubmissionComplete) onSubmissionComplete();
-            else navigate('/enhancedtenantdashboard');
-          }
-        }}
-        showConfetti={true}
-      />
+      <Dialog open={confirmOpen} onOpenChange={(open) => !submitting && setConfirmOpen(open)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Submit your rental application?</DialogTitle>
+            <DialogDescription>
+              Your application will be sent to the landlord for review. Changes after submission
+              may require the landlord to request additional information.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setConfirmOpen(false)} disabled={submitting}>
+              Go back
+            </Button>
+            <Button onClick={handleSubmit} disabled={submitting}>
+              {submitting ? 'Submitting…' : 'Submit application'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }

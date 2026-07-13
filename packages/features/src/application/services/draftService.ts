@@ -9,7 +9,7 @@ export interface ApplicationDraft {
   updatedAt: string | null;
 }
 
-export const STEP_COUNT = 8;
+export const STEP_COUNT = 6;
 
 export const completionPercentage = (completedSteps: number[]): number =>
   Math.round((completedSteps.length / STEP_COUNT) * 100);

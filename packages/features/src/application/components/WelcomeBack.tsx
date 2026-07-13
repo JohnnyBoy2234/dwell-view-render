@@ -19,6 +19,7 @@ interface WelcomeBackProps {
   lastSectionTitle: string | null;
   lastSavedAt: string | null;
   onContinue: () => void;
+  onReview?: () => void;
   onStartOver: () => Promise<void>;
 }
 
@@ -28,6 +29,7 @@ export function WelcomeBack({
   lastSectionTitle,
   lastSavedAt,
   onContinue,
+  onReview,
   onStartOver
 }: WelcomeBackProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -38,8 +40,8 @@ export function WelcomeBack({
       <CardHeader>
         <CardTitle>Welcome back{firstName ? `, ${firstName}` : ''}</CardTitle>
         <CardDescription>
-          Your rental application is {percentage}% complete.
-          {lastSectionTitle ? ` You last completed the ${lastSectionTitle} section.` : ''}
+          We saved your rental-application progress — it is {percentage}% complete.
+          {lastSectionTitle ? ` You last completed the ${lastSectionTitle} step.` : ''}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -55,6 +57,11 @@ export function WelcomeBack({
           <Button className="flex-1" onClick={onContinue}>
             Continue where you left off
           </Button>
+          {onReview && (
+            <Button variant="outline" className="flex-1" onClick={onReview}>
+              Review details entered so far
+            </Button>
+          )}
           <Button variant="outline" className="flex-1" onClick={() => setConfirmOpen(true)}>
             Start over
           </Button>

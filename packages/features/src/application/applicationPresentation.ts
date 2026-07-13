@@ -73,6 +73,15 @@ const APPLICATION_STATUS_PRESENTATION: Record<string, StatusPresentation> = {
     tab: 'applications',
     terminal: false
   },
+  more_info_requested: {
+    label: 'More information requested',
+    description: 'The landlord has asked for more information before deciding.',
+    badgeVariant: 'default',
+    badgeClassName: 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+    cta: 'Provide information',
+    tab: 'applications',
+    terminal: false
+  },
   accepted: {
     label: 'Approved',
     description: 'The landlord has approved your application.',
@@ -83,10 +92,26 @@ const APPLICATION_STATUS_PRESENTATION: Record<string, StatusPresentation> = {
     terminal: true
   },
   declined: {
-    label: 'Unsuccessful',
-    description: 'The landlord did not take this application further.',
+    label: 'Not approved',
+    description: 'The landlord decided not to proceed with this application.',
     badgeVariant: 'destructive',
     cta: 'View decision',
+    tab: 'applications',
+    terminal: true
+  },
+  withdrawn: {
+    label: 'Withdrawn',
+    description: 'You withdrew this application.',
+    badgeVariant: 'outline',
+    cta: null,
+    tab: 'applications',
+    terminal: true
+  },
+  expired: {
+    label: 'Expired',
+    description: 'This application is no longer active.',
+    badgeVariant: 'outline',
+    cta: null,
     tab: 'applications',
     terminal: true
   }

@@ -2,10 +2,17 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { DOCUMENT_TYPES, MAX_DOCUMENT_SIZE } from '@mzanzihomes/common/constants/applicationConstants';
 import type { DocRef } from '../types';
 
+const INCOME_MIME = [
+  'application/pdf', 'image/jpeg', 'image/png',
+  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+];
+
 const BUCKET_BY_TYPE: Record<string, string> = {
   [DOCUMENT_TYPES.ID_DOCUMENT]: 'id-documents',
   [DOCUMENT_TYPES.PROOF_OF_ADDRESS]: 'id-documents',
   [DOCUMENT_TYPES.EXPERIAN_CREDIT_REPORT]: 'income-documents',
+  [DOCUMENT_TYPES.BANK_STATEMENT]: 'income-documents',
+  [DOCUMENT_TYPES.PAYSLIP]: 'income-documents',
   [DOCUMENT_TYPES.INCOME]: 'income-documents',
   [DOCUMENT_TYPES.PET_PHOTO]: 'income-documents'
 };
@@ -14,15 +21,17 @@ const ACCEPTED_MIME: Record<string, string[]> = {
   [DOCUMENT_TYPES.ID_DOCUMENT]: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
   [DOCUMENT_TYPES.PROOF_OF_ADDRESS]: ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'],
   [DOCUMENT_TYPES.EXPERIAN_CREDIT_REPORT]: ['application/pdf', 'image/jpeg', 'image/png'],
-  [DOCUMENT_TYPES.INCOME]: [
-    'application/pdf', 'image/jpeg', 'image/png',
-    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  ],
+  [DOCUMENT_TYPES.BANK_STATEMENT]: INCOME_MIME,
+  [DOCUMENT_TYPES.PAYSLIP]: INCOME_MIME,
+  [DOCUMENT_TYPES.INCOME]: INCOME_MIME,
   [DOCUMENT_TYPES.PET_PHOTO]: ['image/jpeg', 'image/png', 'image/webp']
 };
 
 /** Returns a user-readable problem with the file, or null if acceptable. */
 export function fileProblem(file: File, documentType: string): string | null {
+  if (file.size === 0) {
+    return 'The file is empty. Please choose a different file.';
+  }
   if (file.size > MAX_DOCUMENT_SIZE) {
     return `File is larger than ${Math.round(MAX_DOCUMENT_SIZE / 1024 / 1024)} MB. Please compress it and try again.`;
   }

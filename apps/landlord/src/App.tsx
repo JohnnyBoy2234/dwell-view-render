@@ -39,7 +39,7 @@ import AddPropertyUnlisted from "@/pages/AddPropertyUnlisted";
 import ListingTypePage from "@/pages/ListingTypePage";
 import SaleListings from "@mzanzihomes/ui/components/pages/SaleListings";
 import Applications from "@/pages/Applications";
-import ApplicationDetail from "@mzanzihomes/ui/components/pages/ApplicationDetail";
+import { ApplicationDetail } from '@mzanzihomes/features/pages';
 import { RentalApplication } from '@mzanzihomes/features/pages';
 import { Messages } from '@mzanzihomes/features/pages';
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";

@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,93 +10,46 @@ interface CreditCheckRequest {
   tenant_id: string;
 }
 
+/**
+ * INTEGRATION POINT: no credit-check provider is connected yet (Datanamix is
+ * planned). When one is, call it here and store the result for the landlord
+ * to review.
+ *
+ * This function must NEVER change the application status. The landlord makes
+ * the decision on an application — MzansiHomes provides the software and does
+ * not decide, and an unavailable provider must not decline anyone. (The
+ * previous demo stub randomly declined 30% of applicants.)
+ */
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
     const { application_id, tenant_id }: CreditCheckRequest = await req.json();
 
     if (!application_id || !tenant_id) {
       return new Response(
         JSON.stringify({ error: 'Missing required parameters' }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        }
+        { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
-    console.log(`Initiating credit check for application ${application_id}, tenant ${tenant_id}`);
-
-    // Update application status to pending_credit_check
-    const { error: updateError } = await supabase
-      .from('applications')
-      .update({ 
-        status: 'pending_credit_check',
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', application_id);
-
-    if (updateError) {
-      console.error('Error updating application status:', updateError);
-      throw updateError;
-    }
-
-    // Simulate credit check process
-    // In a real implementation, this would integrate with a credit check API
-    console.log('Credit check initiated successfully');
-    
-    // For demo purposes, we'll simulate a delayed credit check result
-    // In production, this would be handled by webhooks from credit check provider
-    setTimeout(async () => {
-      try {
-        // Simulate random credit check result for demo
-        const creditCheckPassed = Math.random() > 0.3; // 70% pass rate for demo
-        const newStatus = creditCheckPassed ? 'pending' : 'declined';
-        
-        await supabase
-          .from('applications')
-          .update({ 
-            status: newStatus,
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', application_id);
-          
-        console.log(`Credit check completed for application ${application_id}: ${newStatus}`);
-      } catch (error) {
-        console.error('Error completing credit check:', error);
-      }
-    }, 10000); // 10 second delay for demo
+    console.log(`Credit check requested for application ${application_id} — no provider connected, nothing to do`);
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Credit check initiated',
-        application_id,
-        status: 'pending_credit_check'
+      JSON.stringify({
+        success: true,
+        message: 'No credit-check provider is connected; the application stays under landlord review.',
+        application_id
       }),
-      {
-        status: 200,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      }
+      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
-
   } catch (error: any) {
     console.error('Error in trigger-credit-check function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json', ...corsHeaders },
-      }
+      { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }
 };

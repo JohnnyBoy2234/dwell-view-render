@@ -23,7 +23,6 @@ export function useApplicationDraft({ userId, propertyId, landlordId, inviteId }
   const [draft, setDraft] = useState<ApplicationDraft | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-  const skipNextSave = useRef(true);
 
   useEffect(() => {
     if (!userId) return;
@@ -89,10 +88,6 @@ export function useApplicationDraft({ userId, propertyId, landlordId, inviteId }
   /** Debounced autosave; call on every meaningful change. */
   const scheduleSave = useCallback(
     (formData: ApplicationFormData, currentStep: number, completedSteps: number[]) => {
-      if (skipNextSave.current) {
-        skipNextSave.current = false;
-        return;
-      }
       clearTimeout(debounceTimer.current);
       debounceTimer.current = setTimeout(() => persist(formData, currentStep, completedSteps), 800);
     },

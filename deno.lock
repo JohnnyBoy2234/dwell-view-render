@@ -5,6 +5,7 @@
     "https://esm.sh/@pdf-lib/upng@^1.0.1?target=denonext": "https://esm.sh/@pdf-lib/upng@1.0.1?target=denonext",
     "https://esm.sh/@supabase/supabase-js@2": "https://esm.sh/@supabase/supabase-js@2.110.1",
     "https://esm.sh/@types/pako@~1.0.7/index.d.ts": "https://esm.sh/@types/pako@1.0.7/index.d.ts",
+    "https://esm.sh/@types/react@~19.0.7/index.d.ts": "https://esm.sh/@types/react@19.0.14/index.d.ts",
     "https://esm.sh/pako@^1.0.10?target=denonext": "https://esm.sh/pako@1.0.11?target=denonext",
     "https://esm.sh/pako@^1.0.11?target=denonext": "https://esm.sh/pako@1.0.11?target=denonext",
     "https://esm.sh/pako@^1.0.6?target=denonext": "https://esm.sh/pako@1.0.11?target=denonext",
@@ -39,6 +40,7 @@
     "https://esm.sh/pdf-lib@1.17.1/denonext/es/utils.mjs": "cf96c5836fdd5f60eeccd53603c87b52c43c11c8b99e85f79f586be58a59f4d1",
     "https://esm.sh/pdf-lib@1.17.1/denonext/es/utils/index.mjs": "34773d399ffdacd2972f527377d293aa3bff9d3a0d31d48d956a00c9c0c32329",
     "https://esm.sh/pdf-lib@1.17.1/denonext/pdf-lib.mjs": "3be07aa3466e0e9eee79730a775211d6bb8547c0cb9d203c09dde6feca1dc559",
+    "https://esm.sh/resend@2.1.0": "000545a4ad4e8ed9cb1c4e9a4011e85b18e3710d992fb04f15b6eb4214bb4b04",
     "https://esm.sh/tslib@1.14.1/denonext/tslib.mjs": "748739307d67fbaa8ae634eed70715714dd1f54f04fe8635bcb7f72cb0aaed62",
     "https://esm.sh/tslib@1.14.1?target=denonext": "2982231d9e09e6f007540c7a24c12a7cccb0e84ca98df2ad86ff2bdca1c0fa35"
   },

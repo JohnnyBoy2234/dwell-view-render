@@ -25,17 +25,19 @@ export interface SubmitArgs {
  *  - updates the reusable tenant profile (screening_details / screening_profiles),
  *    keeping the legacy flat columns populated for the lease wizard and landlord views
  *  - creates the applications row with a versioned, timestamped snapshot
- *  - records the credit-check consent event with the exact wording shown
+ *  - records the screening consent event (given OR declined) with the exact wording shown
  *  - links uploaded documents to the application
+ * The submitted/audit events are written by database triggers.
  * Returns the new application id.
  */
 export async function submitApplication({ userId, propertyId, landlordId, inviteId, formData }: SubmitArgs): Promise<string | null> {
   const now = new Date().toISOString();
-  const { personal, identity, address, credit, employment, household, risk } = formData;
+  const { personal, identity, address, credit, employment, household, support, references, risk } = formData;
+  const consented = credit.consent === 'yes';
 
   const petSummary = household.has_pets
     ? household.pets
-        .map((p) => [p.count > 1 ? `${p.count}x` : '', p.type, p.breed, p.age && `age ${p.age}`].filter(Boolean).join(' '))
+        .map((p) => [p.count > 1 ? `${p.count}x` : '', p.type, p.breed, p.size].filter(Boolean).join(' '))
         .join('; ')
     : '';
 
@@ -50,14 +52,13 @@ export async function submitApplication({ userId, propertyId, landlordId, invite
         pet_details: petSummary,
         pets: household.pets,
         household: {
-          total_occupants: Number(household.total_occupants) || null,
           adults: Number(household.adults) || null,
           children: Number(household.children) || 0,
-          child_age_ranges: household.child_age_ranges
+          smoking: household.smoking,
+          guarantor: support.has_guarantor === 'yes' ? support : null
         },
-        occupants: household.occupants,
         risk_answers: risk.answers,
-        screening_consent: credit.consent,
+        screening_consent: consented,
         screening_consent_date: now,
         is_complete: true,
         // superseded by the documents table — clear stale public-URL entries
@@ -88,10 +89,9 @@ export async function submitApplication({ userId, propertyId, landlordId, invite
         employment,
         current_address: formatAddress(address),
         address,
-        reason_for_moving: address.reason_for_moving,
-        previous_landlord_name: address.previous_landlord_name,
-        previous_landlord_contact: address.previous_landlord_contact,
-        consent_given: credit.consent,
+        previous_landlord_name: references.landlord_name,
+        previous_landlord_contact: references.landlord_phone || references.landlord_email,
+        consent_given: consented,
         updated_at: now
       }
     ],
@@ -117,7 +117,7 @@ export async function submitApplication({ userId, propertyId, landlordId, invite
       landlord_id: landlordId,
       status: 'pending',
       submitted_at: now,
-      version: 1,
+      version: 2,
       snapshot: formData
     })
     .select()
@@ -127,10 +127,12 @@ export async function submitApplication({ userId, propertyId, landlordId, invite
   const applicationId: string | null = data?.id ?? null;
 
   if (applicationId) {
+    // Consent is recorded whether given or declined — it is never assumed,
+    // and the landlord sees the declined state explicitly.
     const { error: consentError } = await (supabase.from('credit_check_consents') as any).insert({
       application_id: applicationId,
       tenant_id: userId,
-      consented: credit.consent,
+      consented,
       consent_version: CREDIT_CONSENT_VERSION,
       consent_text_snapshot: CREDIT_CONSENT_TEXT,
       privacy_policy_version: PRIVACY_POLICY_VERSION,
@@ -151,12 +153,14 @@ export async function submitApplication({ userId, propertyId, landlordId, invite
         .eq('id', inviteId);
     }
 
-    try {
-      await supabase.functions.invoke('trigger-credit-check', {
-        body: { application_id: applicationId, tenant_id: userId }
-      });
-    } catch (err) {
-      console.warn('Credit check trigger failed', err);
+    if (consented) {
+      try {
+        await supabase.functions.invoke('trigger-credit-check', {
+          body: { application_id: applicationId, tenant_id: userId }
+        });
+      } catch (err) {
+        console.warn('Credit check trigger failed', err);
+      }
     }
   }
 

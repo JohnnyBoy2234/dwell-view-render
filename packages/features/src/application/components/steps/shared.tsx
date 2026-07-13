@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
+import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Camera, Eye, FileText, Loader2, Upload, X } from 'lucide-react';
 import {
@@ -196,6 +197,38 @@ export function useRemoveDocument() {
       toast({ title: 'Removal failed', description: 'Could not remove the document. Please try again.', variant: 'destructive' });
     }
   };
+}
+
+/** The recurring "Yes / No" radio question. */
+export function YesNoQuestion({
+  id,
+  label,
+  value,
+  onChange,
+  error
+}: {
+  id: string;
+  label: string;
+  value: 'yes' | 'no' | '';
+  onChange: (v: 'yes' | 'no') => void;
+  error?: string;
+}) {
+  return (
+    <div>
+      <Label className="text-sm leading-snug">{label}</Label>
+      <RadioGroup className="flex gap-6 mt-2" value={value} onValueChange={(v) => onChange(v as 'yes' | 'no')}>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="yes" id={`${id}_yes`} />
+          <Label htmlFor={`${id}_yes`}>Yes</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem value="no" id={`${id}_no`} />
+          <Label htmlFor={`${id}_no`}>No</Label>
+        </div>
+      </RadioGroup>
+      <FieldError error={error} />
+    </div>
+  );
 }
 
 export const textInput = (
