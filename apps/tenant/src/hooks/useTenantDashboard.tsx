@@ -180,21 +180,21 @@ export function useTenantDashboard() {
         })));
       }
 
-      // Fetch upcoming viewings (for viewing requests)
+      // Fetch upcoming viewings (production viewing_slots is the old
+      // booking-slot shape — see the note in TenantPropertyViewings.tsx)
       const { data: viewingData, error: viewingError } = await supabase
         .from('viewing_slots')
-        .select('id,start_at,status,property_id')
-        .eq('tenant_id', user.id)
-        .eq('status', 'confirmed')
-        .gt('start_at', new Date().toISOString())
-        .order('start_at', { ascending: true })
+        .select('id,start_time,end_time,status,property_id')
+        .eq('booked_by_tenant_id', user.id)
+        .eq('status', 'booked')
+        .gt('start_time', new Date().toISOString())
+        .order('start_time', { ascending: true })
         .limit(3);
 
       if (viewingError) {
         console.error('Error fetching viewing data:', viewingError);
       } else {
-        // Reminder helpers read start_time (UpcomingViewingLike)
-        setUpcomingViewings((viewingData || []).map(v => ({ ...v, start_time: v.start_at })));
+        setUpcomingViewings(viewingData || []);
       }
 
     } catch (error: any) {

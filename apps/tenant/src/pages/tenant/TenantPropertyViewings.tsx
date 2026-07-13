@@ -54,12 +54,16 @@ export default function TenantPropertyViewings() {
     
     setLoading(true);
     try {
-      // Fetch the tenant's viewing slots
+      // PRODUCTION SCHEMA WARNING: the deployed viewing_slots is the old
+      // booking-slot table (start_time/end_time/booked_by_tenant_id, status
+      // available|booked|completed) — the proposal-style table in
+      // 20250908173443 never applied remotely because of `if not exists`.
+      // Query the shape production actually has; see types.ts.
       const { data: viewingSlots, error } = await supabase
         .from('viewing_slots')
-        .select('id, conversation_id, property_id, landlord_id, start_at, duration_minutes, status')
-        .eq('tenant_id', user.id)
-        .order('start_at', { ascending: false });
+        .select('id, property_id, landlord_id, start_time, end_time, status')
+        .eq('booked_by_tenant_id', user.id)
+        .order('start_time', { ascending: false });
 
       if (error) throw error;
 
@@ -93,16 +97,13 @@ export default function TenantPropertyViewings() {
         const property = properties?.find(p => p.id === slot.property_id);
         const landlordProfile = landlordProfiles?.find(profile => profile.user_id === (slot.landlord_id || property?.landlord_id));
         
-        const start = new Date(slot.start_at);
-        const end = new Date(start.getTime() + (slot.duration_minutes ?? 20) * 60000);
-
         return {
           id: slot.id,
           property_id: slot.property_id,
-          start_time: slot.start_at,
-          end_time: end.toISOString(),
+          start_time: slot.start_time,
+          end_time: slot.end_time,
           status: slot.status,
-          conversation_id: slot.conversation_id,
+          conversation_id: undefined,
           property: property ? {
             id: property.id,
             title: property.title,
@@ -136,19 +137,21 @@ export default function TenantPropertyViewings() {
 
   const cancelViewing = async (viewingId: string) => {
     try {
-      // RLS only lets a tenant act on a slot while it is 'proposed', and only
-      // to confirm or decline it — declining is the tenant's cancel.
+      // Cancelling frees the slot for other tenants to book
       const { error } = await supabase
         .from('viewing_slots')
-        .update({ status: 'declined' })
+        .update({
+          status: 'available',
+          booked_by_tenant_id: null
+        })
         .eq('id', viewingId)
-        .eq('status', 'proposed');
+        .eq('status', 'booked');
 
       if (error) throw error;
 
       toast({
-        title: 'Viewing declined',
-        description: 'The landlord has been notified.'
+        title: 'Viewing cancelled',
+        description: 'The viewing has been cancelled successfully.'
       });
 
       fetchViewings(); // Refresh the list
@@ -163,16 +166,12 @@ export default function TenantPropertyViewings() {
 
   const statusBadge = (status: string) => {
     switch (status) {
-      case 'proposed':
-        return { label: 'Proposed', variant: 'outline' as const };
-      case 'confirmed':
-        return { label: 'Confirmed', className: 'bg-blue-500 text-white' };
-      case 'declined':
-        return { label: 'Declined', variant: 'destructive' as const };
+      case 'booked':
+        return { label: 'Upcoming', className: 'bg-blue-500 text-white' };
+      case 'completed':
+        return { label: 'Completed', className: 'bg-success-green text-white' };
       case 'cancelled':
         return { label: 'Cancelled', variant: 'destructive' as const };
-      case 'expired':
-        return { label: 'Expired', variant: 'outline' as const };
       default:
         return { label: status, variant: 'outline' as const };
     }
@@ -198,9 +197,7 @@ export default function TenantPropertyViewings() {
     return new Date(startTime) > new Date();
   };
 
-  const upcomingViewings = viewings.filter(
-    v => (v.status === 'proposed' || v.status === 'confirmed') && isUpcoming(v.start_time)
-  );
+  const upcomingViewings = viewings.filter(v => v.status === 'booked' && isUpcoming(v.start_time));
   const pastViewings = viewings.filter(v => !upcomingViewings.includes(v));
 
   if (loading) {
@@ -273,16 +270,14 @@ export default function TenantPropertyViewings() {
                         Message
                       </Button>
                     )}
-                    {viewing.status === 'proposed' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => cancelViewing(viewing.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        Decline
-                      </Button>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => cancelViewing(viewing.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      Cancel
+                    </Button>
                   </>
                 }
               />
