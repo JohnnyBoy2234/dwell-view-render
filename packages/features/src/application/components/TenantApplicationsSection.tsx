@@ -23,8 +23,8 @@ import {
 import { PropertyThumbnail } from './PropertyThumbnail';
 import { RequestApplicationSheet } from './RequestApplicationSheet';
 
-const longDate = (value: string) =>
-  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' });
+const shortDate = (value: string) =>
+  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 /** One invitation to apply, regardless of which table it came from: a token
  * invite (application_invites) or a landlord-created applications row with
@@ -36,7 +36,6 @@ interface InvitationItem {
   location: string | null;
   price: number | null;
   image: string | null;
-  landlordName: string | null;
   invitedOn: string;
   expiresAt: string | null;
   expired: boolean;
@@ -49,7 +48,6 @@ interface CardShellProps {
   location: string | null;
   price: number | null;
   image: string | null;
-  landlordName: string | null;
   dateLine: string;
   extra?: React.ReactNode;
   ctaLabel?: string | null;
@@ -57,15 +55,15 @@ interface CardShellProps {
   onImageFailed: () => void;
 }
 
-/** Shared card layout for invitations, drafts, and applications: compact
- * thumbnail row on mobile, one dominant full-width action. */
+/** Shared card layout for invitations, drafts, and applications. Kept sparse
+ * on purpose: title, location/price, one status row, one action — everything
+ * else lives on the detail screens. */
 function RecordCard({
   presentation,
   propertyTitle,
   location,
   price,
   image,
-  landlordName,
   dateLine,
   extra,
   ctaLabel,
@@ -79,26 +77,24 @@ function RecordCard({
           <PropertyThumbnail
             src={image}
             propertyTitle={propertyTitle}
-            className="h-20 w-24 shrink-0 rounded-lg"
+            className="h-16 w-20 shrink-0 rounded-lg"
             onLoadFailed={onImageFailed}
           />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="text-base font-semibold leading-snug break-words">{propertyTitle}</h3>
-              <Badge variant={presentation.badgeVariant} className={`shrink-0 ${presentation.badgeClassName ?? ''}`}>
+          <div className="min-w-0 flex-1 space-y-1">
+            <h3 className="text-base font-semibold leading-snug line-clamp-2">{propertyTitle}</h3>
+            <p className="text-sm text-muted-foreground truncate">
+              {[price ? `R${price.toLocaleString()}/m` : null, location].filter(Boolean).join(' • ')}
+            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant={presentation.badgeVariant} className={presentation.badgeClassName}>
                 {presentation.label}
               </Badge>
+              <span className="text-xs text-muted-foreground">{dateLine}</span>
             </div>
-            <p className="text-sm text-muted-foreground truncate">
-              {[location, price ? `R${price.toLocaleString()}/month` : null].filter(Boolean).join(' • ')}
-            </p>
-            {landlordName && <p className="text-sm text-muted-foreground truncate">Landlord: {landlordName}</p>}
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground">{presentation.description}</p>
         {extra}
-        <p className="text-xs text-muted-foreground">{dateLine}</p>
 
         {ctaLabel && onCta && (
           <Button className="w-full sm:w-auto min-h-[44px]" onClick={onCta}>
@@ -213,7 +209,6 @@ export const TenantApplicationsSection = () => {
       location: inv.property?.location ?? null,
       price: inv.property?.price ?? null,
       image: inv.property?.images?.[0] ?? null,
-      landlordName: inv.landlord?.display_name ?? null,
       invitedOn: inv.created_at,
       expiresAt: inv.expires_at ?? null,
       expired: isInviteExpired(inv),
@@ -230,7 +225,6 @@ export const TenantApplicationsSection = () => {
         location: app.property?.location ?? null,
         price: app.property?.price ?? null,
         image: app.property?.images?.[0] ?? null,
-        landlordName: app.landlord?.display_name ?? null,
         invitedOn: app.created_at,
         expiresAt: null,
         expired: false,
@@ -330,12 +324,9 @@ export const TenantApplicationsSection = () => {
                 const draft = draftByPropertyId.get(item.propertyId);
                 const presentation = item.expired ? EXPIRED_INVITE_PRESENTATION : INVITE_PRESENTATION;
                 const ctaLabel = item.expired ? null : draft ? 'Continue application' : 'Start application';
-                const dateLine = [
-                  `Invited on ${longDate(item.invitedOn)}`,
-                  !item.expired && item.expiresAt ? `Invitation expires ${longDate(item.expiresAt)}` : null
-                ]
-                  .filter(Boolean)
-                  .join(' • ');
+                const dateLine = item.expired
+                  ? `Expired ${item.expiresAt ? shortDate(item.expiresAt) : ''}`.trim()
+                  : `Invited ${shortDate(item.invitedOn)}`;
                 return (
                   <RecordCard
                     key={item.key}
@@ -344,7 +335,6 @@ export const TenantApplicationsSection = () => {
                     location={item.location}
                     price={item.price}
                     image={item.image}
-                    landlordName={item.landlordName}
                     dateLine={dateLine}
                     ctaLabel={ctaLabel}
                     onCta={() => {
@@ -392,8 +382,7 @@ export const TenantApplicationsSection = () => {
                   location={draft.property?.location ?? null}
                   price={draft.property?.price ?? null}
                   image={draft.property?.images?.[0] ?? null}
-                  landlordName={null}
-                  dateLine={`Updated ${longDate(draft.updated_at)}`}
+                  dateLine={`Updated ${shortDate(draft.updated_at)}`}
                   extra={
                     <div className="space-y-1">
                       <Progress value={draft.completionPercentage} aria-label="Application progress" />
@@ -412,8 +401,8 @@ export const TenantApplicationsSection = () => {
                 const presentation = applicationStatusPresentation(app.status);
                 const dateLine =
                   app.status === 'pending' || app.status === 'submitted'
-                    ? `Submitted on ${longDate(app.created_at)}`
-                    : `Updated ${longDate(app.updated_at ?? app.created_at)}`;
+                    ? `Submitted ${shortDate(app.created_at)}`
+                    : `Updated ${shortDate(app.updated_at ?? app.created_at)}`;
                 return (
                   <RecordCard
                     key={app.id}
@@ -422,7 +411,6 @@ export const TenantApplicationsSection = () => {
                     location={app.property?.location ?? null}
                     price={app.property?.price ?? null}
                     image={app.property?.images?.[0] ?? null}
-                    landlordName={app.landlord?.display_name ?? null}
                     dateLine={dateLine}
                     ctaLabel={presentation.cta}
                     onCta={() => {
