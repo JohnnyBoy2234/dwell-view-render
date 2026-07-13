@@ -61,6 +61,7 @@ const DEFAULT_FORM_VALUES: ListingFormData = {
   province: '',
   postal_code: '',
   bathrooms_confirmed: false,
+  ai_key_features: '',
 };
 
 // Form → properties-row mapping used for autosave and publish.
@@ -169,6 +170,42 @@ export default function ListProperty() {
   });
 
   const formData = watch();
+
+  // Rewrite the description on the Review step using everything we know by
+  // then — final details, amenities, price, landlord highlights and up to 6
+  // uploaded photos (the model can see them).
+  const [regenerating, setRegenerating] = useState(false);
+  const regenerateDescription = async () => {
+    const v = watch();
+    setRegenerating(true);
+    try {
+      const image_urls = (v.images || []).filter((i) => typeof i === 'string').slice(0, 6);
+      const { data, error } = await supabase.functions.invoke('generate-property-description', {
+        body: {
+          property_type: v.property_type,
+          location: composeLocation(v) || v.location,
+          bedrooms: v.bedrooms,
+          bathrooms: v.bathrooms,
+          parking_spaces: v.parking_spaces,
+          furnished: v.furnished,
+          pets_allowed: v.pets_allowed,
+          amenities: v.amenities,
+          price: v.price,
+          listing_type: 'rent',
+          key_features: v.ai_key_features,
+          image_urls,
+        },
+      });
+      if (error) throw error;
+      if (!data?.description) throw new Error(data?.error || 'No description was returned.');
+      setValue('description', data.description, { shouldValidate: true, shouldDirty: true });
+      toast({ title: 'Description rewritten ✨', description: 'Based on your details and photos. Tweak it if you like.' });
+    } catch (e) {
+      toast({ title: 'Could not generate', description: e?.message || 'Please try again in a moment.', variant: 'destructive' });
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   if (!user) {
     navigate('/auth');
@@ -374,6 +411,7 @@ export default function ListProperty() {
             checklist={checklist}
             declaration={{ checked: declarationChecked, onChange: setDeclarationChecked }}
             contact={{ phone: profile?.phone ?? null, saving: savingPhone, onSavePhone: savePhone }}
+            regenerate={{ onRegenerate: regenerateDescription, generating: regenerating }}
           />
         );
       default:

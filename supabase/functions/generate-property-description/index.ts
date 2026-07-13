@@ -10,6 +10,8 @@ const SYSTEM_PROMPT = `You write property listing descriptions for MzanziHomes, 
 RULES:
 - 90 to 140 words, in two short paragraphs.
 - Highlight the layout, standout features and the appeal of the surrounding area. You may mention typical conveniences for the given location (transport, shops, schools) in general terms, but do NOT invent specific named places or facts.
+- If the landlord listed highlights, treat them as true and weave them in naturally.
+- If photos are provided, you may describe what is clearly visible in them (finishes, light, garden, views, condition) — never claim anything you cannot see.
 - Use South African English and the Rand (R) where money is relevant.
 - Do NOT contradict or exaggerate the details provided, and do not claim amenities that were not given.
 - Return ONLY the description text — no headings, markdown, bullet points, quotes or emojis.`;
@@ -24,6 +26,7 @@ serve(async (req) => {
     const {
       property_type, location, bedrooms, bathrooms, parking_spaces,
       furnished, pets_allowed, amenities, price, listing_type,
+      key_features, image_urls,
     } = body || {};
 
     if (!property_type && !location) {
@@ -49,7 +52,23 @@ serve(async (req) => {
       Array.isArray(amenities) && amenities.length ? `Amenities: ${amenities.join(', ')}` : null,
       price ? `Monthly rent: R${price}` : null,
       listing_type && `Listing type: ${listing_type}`,
+      typeof key_features === 'string' && key_features.trim()
+        ? `Landlord's highlights: ${key_features.trim().slice(0, 500)}`
+        : null,
     ].filter(Boolean).join('\n');
+
+    // Optional property photos for the vision model. Only trust https URLs, cap the count.
+    const imageUrls: string[] = Array.isArray(image_urls)
+      ? image_urls.filter((u) => typeof u === 'string' && u.startsWith('https://')).slice(0, 6)
+      : [];
+
+    const userText = `Write a listing description for this property:\n${facts}`;
+    const userContent = imageUrls.length
+      ? [
+          { type: 'text', text: `${userText}\n\nPhotos of the property are attached.` },
+          ...imageUrls.map((url) => ({ type: 'image_url', image_url: { url } })),
+        ]
+      : userText;
 
     const upstream = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -61,7 +80,7 @@ serve(async (req) => {
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: `Write a listing description for this property:\n${facts}` },
+          { role: 'user', content: userContent },
         ],
         stream: false,
       }),

@@ -76,6 +76,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
           amenities: v.amenities,
           price: v.price,
           listing_type: v.listing_type,
+          key_features: v.ai_key_features,
         },
       });
       if (error) throw error;
@@ -262,10 +263,23 @@ export default function LocationStep({ control, errors, watch, setValue, structu
               </Button>
             )}
           </div>
+          {watch && setValue && (
+            <div className="space-y-1">
+              <Input
+                value={watch('ai_key_features') || ''}
+                onChange={(e) => setValue('ai_key_features', e.target.value, { shouldDirty: true })}
+                placeholder="Standout features for the AI — pool, sea views, renovated kitchen, fibre…"
+                className="text-base"
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional: list what makes your place special and the AI will write around it. Not shown to tenants.
+              </p>
+            </div>
+          )}
           <Controller
             name="description"
             control={control}
-            rules={{ 
+            rules={{
               required: 'Description is required',
               minLength: { value: DESCRIPTION_MIN, message: `Description should be at least ${DESCRIPTION_MIN} characters` }
             }}

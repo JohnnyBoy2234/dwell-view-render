@@ -21,6 +21,8 @@ export interface ListingFormData {
   postal_code?: string;
   // Transient: bathroom sanity confirmation (never persisted).
   bathrooms_confirmed?: boolean;
+  // Transient: landlord's highlights fed to the AI description generator (never persisted).
+  ai_key_features?: string;
 }
 
 export interface SaleListingFormData extends ListingFormData {

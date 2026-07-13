@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User, AlertTriangle, Pencil, ShieldCheck, XCircle } from 'lucide-react';
+import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User, AlertTriangle, Pencil, ShieldCheck, XCircle, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Input } from '@mzanzihomes/ui/components/input';
@@ -24,6 +24,7 @@ interface ReviewStepProps {
   checklist?: PublishChecklist;
   declaration?: { checked: boolean; onChange: (v: boolean) => void };
   contact?: { phone: string | null; saving: boolean; onSavePhone: (phone: string) => void };
+  regenerate?: { onRegenerate: () => void; generating: boolean };
 }
 
 function PhoneSaver({ saving, onSave }: { saving: boolean; onSave: (phone: string) => void }) {
@@ -45,7 +46,7 @@ function PhoneSaver({ saving, onSave }: { saving: boolean; onSave: (phone: strin
   );
 }
 
-export default function ReviewStep({ formData, isSale, onEdit, checklist, declaration, contact }: ReviewStepProps) {
+export default function ReviewStep({ formData, isSale, onEdit, checklist, declaration, contact, regenerate }: ReviewStepProps) {
   const EditBtn = ({ step }: { step: number }) =>
     onEdit ? (
       <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={() => onEdit(step)}>
@@ -263,9 +264,28 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
       {/* Description */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <CardTitle>Description</CardTitle>
-            <EditBtn step={2} />
+            <div className="flex items-center gap-1">
+              {regenerate && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  disabled={regenerate.generating}
+                  onClick={regenerate.onRegenerate}
+                >
+                  {regenerate.generating ? (
+                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                  ) : (
+                    <Sparkles className="h-3 w-3 mr-1" />
+                  )}
+                  {regenerate.generating ? 'Writing…' : 'Rewrite with AI + photos'}
+                </Button>
+              )}
+              <EditBtn step={2} />
+            </div>
           </div>
         </CardHeader>
         <CardContent>
