@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Progress } from '@mzanzihomes/ui/components/progress';
+import { RecordCard, type RecordCardDetail } from '@mzanzihomes/ui/components/RecordCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { AlertCircle, Mail, Plus, RefreshCw } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
@@ -20,7 +20,6 @@ import {
   trackApplicationsEvent,
   type StatusPresentation
 } from '../applicationPresentation';
-import { PropertyThumbnail } from './PropertyThumbnail';
 import { RequestApplicationSheet } from './RequestApplicationSheet';
 
 const shortDate = (value: string) =>
@@ -35,25 +34,10 @@ interface InvitationItem {
   propertyTitle: string;
   location: string | null;
   price: number | null;
-  image: string | null;
   invitedOn: string;
   expiresAt: string | null;
   expired: boolean;
   startPath: string;
-}
-
-interface CardShellProps {
-  presentation: StatusPresentation;
-  propertyTitle: string;
-  location: string | null;
-  price: number | null;
-  /** Omit entirely to render a text-only card (application/draft cards). */
-  image?: string | null;
-  dateLine: string;
-  extra?: React.ReactNode;
-  ctaLabel?: string | null;
-  onCta?: () => void;
-  onImageFailed?: () => void;
 }
 
 /** Titles like "House in Sea Point" already carry the suburb — don't repeat
@@ -64,72 +48,32 @@ function locationLine(title: string, location: string | null): string | null {
   return suburb && title.toLowerCase().includes(suburb) ? null : location;
 }
 
-/** Shared card layout for invitations, drafts, and applications. Kept sparse
- * on purpose: title with a one-word status badge in the corner, one meta
- * line, date, one action — everything else lives on the detail screens. */
-function RecordCard({
-  presentation,
-  propertyTitle,
-  location,
-  price,
-  image,
-  dateLine,
-  extra,
-  ctaLabel,
-  onCta,
-  onImageFailed
-}: CardShellProps) {
-  const meta = [price ? `R${price.toLocaleString()}/m` : null, locationLine(propertyTitle, location)]
-    .filter(Boolean)
-    .join(' • ');
-  return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-4 space-y-4">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 flex-1 gap-3">
-            {image !== undefined && (
-              <PropertyThumbnail
-                src={image}
-                propertyTitle={propertyTitle}
-                className="h-16 w-20 shrink-0 rounded-lg"
-                onLoadFailed={onImageFailed}
-              />
-            )}
-            <div className="min-w-0 flex-1 space-y-1">
-              <h3 className="text-base font-semibold leading-snug line-clamp-2">{propertyTitle}</h3>
-              {meta && <p className="text-sm text-muted-foreground truncate">{meta}</p>}
-              <p className="text-xs text-muted-foreground">{dateLine}</p>
-            </div>
-          </div>
-          <Badge variant={presentation.badgeVariant} className={`shrink-0 ${presentation.badgeClassName ?? ''}`}>
-            {presentation.label}
-          </Badge>
-        </div>
-
-        {extra}
-
-        {ctaLabel && onCta && (
-          <Button className="w-full sm:w-auto min-h-[44px]" onClick={onCta}>
-            {ctaLabel}
-          </Button>
-        )}
-      </CardContent>
-    </Card>
-  );
+function propertyDetails(title: string, location: string | null, price: number | null): RecordCardDetail[] {
+  const details: RecordCardDetail[] = [];
+  if (price) details.push({ label: 'Rent', value: `R${price.toLocaleString()}/month` });
+  const loc = locationLine(title, location);
+  if (loc) details.push({ label: 'Location', value: loc });
+  return details;
 }
+
+const presentationBadge = (presentation: StatusPresentation) => ({
+  label: presentation.label,
+  variant: presentation.badgeVariant,
+  className: presentation.badgeClassName
+});
 
 const CardSkeleton = () => (
   <Card aria-hidden="true">
-    <CardContent className="p-4 space-y-3">
-      <div className="flex gap-3">
-        <div className="h-20 w-24 shrink-0 rounded-lg bg-muted animate-pulse" />
+    <CardContent className="p-6 space-y-3">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-2/3 rounded bg-muted animate-pulse" />
-          <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+          <div className="h-5 w-2/3 rounded bg-muted animate-pulse" />
           <div className="h-3 w-1/3 rounded bg-muted animate-pulse" />
         </div>
+        <div className="h-5 w-16 rounded-full bg-muted animate-pulse" />
       </div>
-      <div className="h-10 w-full rounded bg-muted animate-pulse" />
+      <div className="h-3 w-1/2 rounded bg-muted animate-pulse" />
+      <div className="h-8 w-36 rounded bg-muted animate-pulse" />
     </CardContent>
   </Card>
 );
@@ -220,7 +164,6 @@ export const TenantApplicationsSection = () => {
       propertyTitle: inv.property?.title ?? 'Property',
       location: inv.property?.location ?? null,
       price: inv.property?.price ?? null,
-      image: inv.property?.images?.[0] ?? null,
       invitedOn: inv.created_at,
       expiresAt: inv.expires_at ?? null,
       expired: isInviteExpired(inv),
@@ -236,7 +179,6 @@ export const TenantApplicationsSection = () => {
         propertyTitle: app.property?.title ?? 'Property',
         location: app.property?.location ?? null,
         price: app.property?.price ?? null,
-        image: app.property?.images?.[0] ?? null,
         invitedOn: app.created_at,
         expiresAt: null,
         expired: false,
@@ -273,8 +215,6 @@ export const TenantApplicationsSection = () => {
       <Plus className="h-4 w-4 mr-2" aria-hidden="true" /> Request an application
     </Button>
   );
-
-  const onThumbnailFailed = () => trackApplicationsEvent(user?.id, 'property_thumbnail_failed', {});
 
   const continueDraft = (draft: ApplicationDraftSummary) =>
     navigate(`/rental-application/${draft.property_id}?landlord=${draft.landlord_id}`);
@@ -331,7 +271,7 @@ export const TenantApplicationsSection = () => {
               action={requestButton}
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid gap-4">
               {invitationItems.map((item) => {
                 const draft = draftByPropertyId.get(item.propertyId);
                 const presentation = item.expired ? EXPIRED_INVITE_PRESENTATION : INVITE_PRESENTATION;
@@ -342,20 +282,25 @@ export const TenantApplicationsSection = () => {
                 return (
                   <RecordCard
                     key={item.key}
-                    presentation={presentation}
-                    propertyTitle={item.propertyTitle}
-                    location={item.location}
-                    price={item.price}
-                    image={item.image}
+                    title={item.propertyTitle}
                     dateLine={dateLine}
-                    ctaLabel={ctaLabel}
-                    onCta={() => {
-                      trackApplicationsEvent(user?.id, draft ? 'application_continue_clicked' : 'application_start_clicked', {
-                        source: 'invitation'
-                      });
-                      navigate(draft ? `/rental-application/${item.propertyId}?landlord=${draft.landlord_id}` : item.startPath);
-                    }}
-                    onImageFailed={onThumbnailFailed}
+                    badge={presentationBadge(presentation)}
+                    details={propertyDetails(item.propertyTitle, item.location, item.price)}
+                    actions={
+                      ctaLabel && (
+                        <Button
+                          size="sm"
+                          onClick={() => {
+                            trackApplicationsEvent(user?.id, draft ? 'application_continue_clicked' : 'application_start_clicked', {
+                              source: 'invitation'
+                            });
+                            navigate(draft ? `/rental-application/${item.propertyId}?landlord=${draft.landlord_id}` : item.startPath);
+                          }}
+                        >
+                          {ctaLabel}
+                        </Button>
+                      )
+                    }
                   />
                 );
               })}
@@ -385,26 +330,35 @@ export const TenantApplicationsSection = () => {
               }
             />
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid gap-4">
               {draftRecords.map((draft) => (
                 <RecordCard
                   key={`draft-${draft.id}`}
-                  presentation={DRAFT_PRESENTATION}
-                  propertyTitle={draft.property?.title ?? 'Property'}
-                  location={draft.property?.location ?? null}
-                  price={draft.property?.price ?? null}
+                  title={draft.property?.title ?? 'Property'}
                   dateLine={`Updated ${shortDate(draft.updated_at)}`}
+                  badge={presentationBadge(DRAFT_PRESENTATION)}
+                  details={propertyDetails(
+                    draft.property?.title ?? 'Property',
+                    draft.property?.location ?? null,
+                    draft.property?.price ?? null
+                  )}
                   extra={
                     <div className="space-y-1">
                       <Progress value={draft.completionPercentage} aria-label="Application progress" />
                       <p className="text-xs text-muted-foreground">{draft.completionPercentage}% complete</p>
                     </div>
                   }
-                  ctaLabel="Continue application"
-                  onCta={() => {
-                    trackApplicationsEvent(user?.id, 'application_continue_clicked', { source: 'draft' });
-                    continueDraft(draft);
-                  }}
+                  actions={
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        trackApplicationsEvent(user?.id, 'application_continue_clicked', { source: 'draft' });
+                        continueDraft(draft);
+                      }}
+                    >
+                      Continue application
+                    </Button>
+                  }
                 />
               ))}
               {applicationRecords.map((app) => {
@@ -416,16 +370,28 @@ export const TenantApplicationsSection = () => {
                 return (
                   <RecordCard
                     key={app.id}
-                    presentation={presentation}
-                    propertyTitle={app.property?.title ?? 'Property'}
-                    location={app.property?.location ?? null}
-                    price={app.property?.price ?? null}
+                    title={app.property?.title ?? 'Property'}
                     dateLine={dateLine}
-                    ctaLabel={presentation.cta}
-                    onCta={() => {
-                      trackApplicationsEvent(user?.id, 'application_status_viewed', { status: app.status });
-                      navigate(`/application/${app.id}`);
-                    }}
+                    badge={presentationBadge(presentation)}
+                    details={propertyDetails(
+                      app.property?.title ?? 'Property',
+                      app.property?.location ?? null,
+                      app.property?.price ?? null
+                    )}
+                    actions={
+                      presentation.cta && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            trackApplicationsEvent(user?.id, 'application_status_viewed', { status: app.status });
+                            navigate(`/application/${app.id}`);
+                          }}
+                        >
+                          {presentation.cta}
+                        </Button>
+                      )
+                    }
                   />
                 );
               })}

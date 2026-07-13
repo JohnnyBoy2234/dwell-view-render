@@ -4,11 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
 import { useUnreadCounts } from '@mzanzihomes/supabase/hooks/useUnreadCounts';
 import { useTenantResponses } from '@mzanzihomes/features/maintenance';
-import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera, Images } from 'lucide-react';
-import { MaintenanceImageGallery } from '@mzanzihomes/features/maintenance';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera } from 'lucide-react';
+import { Card, CardContent } from '@mzanzihomes/ui/components/card';
+import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
@@ -20,19 +19,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import type { Priority, Category } from '@mzanzihomes/common/types/maintenance';
 
-const priorityColors = {
-  low: 'bg-success-green text-white',
-  medium: 'bg-earth-warm text-white',
-  high: 'bg-destructive text-white',
-  emergency: 'bg-red-600 text-white',
+const statusBadges = {
+  submitted: { label: 'Submitted', className: 'bg-blue-500 text-white' },
+  in_progress: { label: 'In Progress', className: 'bg-earth-warm text-white' },
+  completed: { label: 'Completed', className: 'bg-success-green text-white' },
+  cancelled: { label: 'Cancelled', className: 'bg-muted text-muted-foreground' },
 };
 
-const statusColors = {
-  submitted: 'bg-blue-500 text-white',
-  in_progress: 'bg-earth-warm text-white',
-  completed: 'bg-success-green text-white',
-  cancelled: 'bg-muted text-muted-foreground',
-};
+const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slice(1).replace('_', ' ');
+
+const shortDate = (value: string) =>
+  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function TenantMaintenance() {
   const { user } = useAuth();
@@ -389,62 +386,25 @@ export default function TenantMaintenance() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-6">
+          <div className="grid gap-4">
             {maintenanceRequests.map((request) => (
-              <Card key={request.id} className="hover:shadow-lg transition-all duration-200 cursor-pointer border-l-4 border-l-ocean-blue" onClick={()=>navigate(`/maintenance/${request.id}`)}>
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="text-xl mb-2">{request.title}</CardTitle>
-                      <CardDescription className="text-base">
-                        Submitted on {new Date(request.created_at).toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
-                      </CardDescription>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Badge 
-                        className={`${priorityColors[request.priority]} font-semibold px-3 py-1`}
-                      >
-                        {request.priority.toUpperCase()}
-                      </Badge>
-                      <Badge 
-                        className={`${statusColors[request.status]} font-semibold px-3 py-1`}
-                      >
-                        {request.status.replace('_', ' ').toUpperCase()}
-                      </Badge>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground leading-relaxed">{request.description}</p>
-                    
-                    <div className="flex items-center justify-between pt-2 border-t border-muted">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Wrench className="h-4 w-4" />
-                        <span>Request #{request.id.slice(0, 8)}</span>
-                      </div>
-                      <span className="text-sm font-medium text-foreground capitalize bg-muted px-2 py-1 rounded">
-                        {request.category}
-                      </span>
-                    </div>
-                    
-                    {request.images && request.images.length > 0 && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Images className="h-4 w-4" />
-                          <span>{request.images.length} image(s) attached</span>
-                        </div>
-                        <MaintenanceImageGallery images={request.images} ticketTitle={request.title} />
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+              <RecordCard
+                key={request.id}
+                title={request.title}
+                dateLine={`Submitted ${shortDate(request.created_at)}`}
+                badge={statusBadges[request.status] ?? { label: capitalize(request.status), variant: 'outline' }}
+                details={[
+                  { label: 'Priority', value: capitalize(request.priority) },
+                  { label: 'Category', value: capitalize(request.category) },
+                  ...(request.images?.length ? [{ label: 'Photos', value: String(request.images.length) }] : []),
+                ]}
+                actions={
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                    View Details
+                  </Button>
+                }
+                onClick={() => navigate(`/maintenance/${request.id}`)}
+              />
             ))}
           </div>
         )}

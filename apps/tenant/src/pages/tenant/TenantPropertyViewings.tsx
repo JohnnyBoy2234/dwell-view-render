@@ -1,10 +1,11 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, User, Phone, Mail, CheckCircle, XCircle, MessageCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
+import { Calendar, MessageCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
+import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
@@ -14,7 +15,7 @@ interface PropertyViewing {
   property_id: string;
   start_time: string;
   end_time: string;
-  status: 'booked' | 'completed' | 'cancelled';
+  status: string;
   notes?: string;
   property?: {
     id: string;
@@ -53,12 +54,12 @@ export default function TenantPropertyViewings() {
     
     setLoading(true);
     try {
-      // Fetch tenant's booked viewing slots
+      // Fetch the tenant's viewing slots
       const { data: viewingSlots, error } = await supabase
         .from('viewing_slots')
-        .select('id, property_id, landlord_id, start_time, end_time, status')
-        .eq('booked_by_tenant_id', user.id)
-        .order('start_time', { ascending: false });
+        .select('id, conversation_id, property_id, landlord_id, start_at, duration_minutes, status')
+        .eq('tenant_id', user.id)
+        .order('start_at', { ascending: false });
 
       if (error) throw error;
 
@@ -92,14 +93,16 @@ export default function TenantPropertyViewings() {
         const property = properties?.find(p => p.id === slot.property_id);
         const landlordProfile = landlordProfiles?.find(profile => profile.user_id === (slot.landlord_id || property?.landlord_id));
         
+        const start = new Date(slot.start_at);
+        const end = new Date(start.getTime() + (slot.duration_minutes ?? 20) * 60000);
+
         return {
           id: slot.id,
           property_id: slot.property_id,
-          start_time: slot.start_time,
-          end_time: slot.end_time,
-          status: (slot.status === 'booked' ? 'booked' : 
-                   slot.status === 'completed' ? 'completed' : 'cancelled') as 'booked' | 'completed' | 'cancelled',
-          conversation_id: undefined,
+          start_time: slot.start_at,
+          end_time: end.toISOString(),
+          status: slot.status,
+          conversation_id: slot.conversation_id,
           property: property ? {
             id: property.id,
             title: property.title,
@@ -133,19 +136,19 @@ export default function TenantPropertyViewings() {
 
   const cancelViewing = async (viewingId: string) => {
     try {
+      // RLS only lets a tenant act on a slot while it is 'proposed', and only
+      // to confirm or decline it — declining is the tenant's cancel.
       const { error } = await supabase
         .from('viewing_slots')
-        .update({ 
-          status: 'available',
-          booked_by_tenant_id: null
-        })
-        .eq('id', viewingId);
+        .update({ status: 'declined' })
+        .eq('id', viewingId)
+        .eq('status', 'proposed');
 
       if (error) throw error;
 
       toast({
-        title: 'Viewing cancelled',
-        description: 'The viewing has been cancelled successfully.'
+        title: 'Viewing declined',
+        description: 'The landlord has been notified.'
       });
 
       fetchViewings(); // Refresh the list
@@ -158,36 +161,47 @@ export default function TenantPropertyViewings() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const statusBadge = (status: string) => {
     switch (status) {
-      case 'booked':
-        return <Badge className="bg-blue-500 text-white">Upcoming</Badge>;
-      case 'completed':
-        return <Badge className="bg-success-green text-white">Completed</Badge>;
+      case 'proposed':
+        return { label: 'Proposed', variant: 'outline' as const };
+      case 'confirmed':
+        return { label: 'Confirmed', className: 'bg-blue-500 text-white' };
+      case 'declined':
+        return { label: 'Declined', variant: 'destructive' as const };
       case 'cancelled':
-        return <Badge variant="destructive">Cancelled</Badge>;
+        return { label: 'Cancelled', variant: 'destructive' as const };
+      case 'expired':
+        return { label: 'Expired', variant: 'outline' as const };
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return { label: status, variant: 'outline' as const };
     }
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircle className="h-5 w-5 text-success-green" />;
-      case 'cancelled':
-        return <XCircle className="h-5 w-5 text-destructive" />;
-      default:
-        return <Calendar className="h-5 w-5 text-ocean-blue" />;
-    }
+  const viewingDateLine = (viewing: PropertyViewing) => {
+    const day = new Date(viewing.start_time).toLocaleDateString(undefined, {
+      day: 'numeric', month: 'short', year: 'numeric'
+    });
+    const time = (value: string) =>
+      new Date(value).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${day}, ${time(viewing.start_time)} – ${time(viewing.end_time)}`;
   };
+
+  const viewingDetails = (viewing: PropertyViewing) =>
+    [
+      viewing.property?.location && { label: 'Location', value: viewing.property.location },
+      viewing.property?.price && { label: 'Rent', value: `R${viewing.property.price.toLocaleString()}/month` },
+      viewing.landlord?.display_name && { label: 'Landlord', value: viewing.landlord.display_name }
+    ].filter(Boolean);
 
   const isUpcoming = (startTime: string) => {
     return new Date(startTime) > new Date();
   };
 
-  const upcomingViewings = viewings.filter(v => v.status === 'booked' && isUpcoming(v.start_time));
-  const pastViewings = viewings.filter(v => v.status === 'completed' || !isUpcoming(v.start_time));
+  const upcomingViewings = viewings.filter(
+    v => (v.status === 'proposed' || v.status === 'confirmed') && isUpcoming(v.start_time)
+  );
+  const pastViewings = viewings.filter(v => !upcomingViewings.includes(v));
 
   if (loading) {
     return (
@@ -235,76 +249,43 @@ export default function TenantPropertyViewings() {
         ) : (
           <div className="grid gap-4">
             {upcomingViewings.map((viewing) => (
-              <Card key={viewing.id} className="hover:shadow-medium transition-all duration-200 border-ocean-blue/20">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(viewing.status)}
-                      <div>
-                        <h3 className="font-semibold text-lg">{viewing.property?.title}</h3>
-                        <p className="text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-4 w-4" />
-                          {viewing.property?.location}
-                        </p>
-                      </div>
-                    </div>
-                    {getStatusBadge(viewing.status)}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      <span>{new Date(viewing.start_time).toLocaleDateString()}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <span>
-                        {new Date(viewing.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - 
-                        {new Date(viewing.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span>{viewing.landlord?.display_name || 'Landlord'}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between pt-4 border-t">
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span>{viewing.property?.bedrooms} bed • {viewing.property?.bathrooms} bath</span>
-                      <span className="font-semibold text-foreground">
-                        R{viewing.property?.price?.toLocaleString()}/month
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {viewing.conversation_id || viewing.landlord?.user_id ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (viewing.conversation_id) {
-                              navigate(`/messages?c=${viewing.conversation_id}`);
-                            } else if (viewing.property?.id && viewing.property.landlord_id) {
-                              navigate(`/messages?propertyId=${viewing.property.id}&landlordId=${viewing.property.landlord_id}`);
-                            }
-                          }}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          Message
-                        </Button>
-                      ) : null}
+              <RecordCard
+                key={viewing.id}
+                title={viewing.property?.title || 'Property'}
+                dateLine={viewingDateLine(viewing)}
+                badge={statusBadge(viewing.status)}
+                details={viewingDetails(viewing)}
+                actions={
+                  <>
+                    {(viewing.conversation_id || viewing.landlord?.user_id) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          if (viewing.conversation_id) {
+                            navigate(`/messages?c=${viewing.conversation_id}`);
+                          } else if (viewing.property?.id && viewing.property.landlord_id) {
+                            navigate(`/messages?propertyId=${viewing.property.id}&landlordId=${viewing.property.landlord_id}`);
+                          }
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        Message
+                      </Button>
+                    )}
+                    {viewing.status === 'proposed' && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => cancelViewing(viewing.id)}
                         className="text-destructive hover:text-destructive"
                       >
-                        Cancel
+                        Decline
                       </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                    )}
+                  </>
+                }
+              />
             ))}
           </div>
         )}
@@ -320,36 +301,13 @@ export default function TenantPropertyViewings() {
 
           <div className="grid gap-4">
             {pastViewings.map((viewing) => (
-              <Card key={viewing.id} className="opacity-75 hover:opacity-100 transition-opacity">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      {getStatusIcon(viewing.status)}
-                      <div>
-                        <h3 className="font-semibold">{viewing.property?.title}</h3>
-                        <p className="text-muted-foreground flex items-center gap-1 text-sm">
-                          <MapPin className="h-3 w-3" />
-                          {viewing.property?.location}
-                        </p>
-                      </div>
-                    </div>
-                    {getStatusBadge(viewing.status)}
-                  </div>
-
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
-                    <div className="flex items-center gap-4">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {new Date(viewing.start_time).toLocaleDateString()}
-                      </span>
-                      <span>{viewing.property?.bedrooms} bed • {viewing.property?.bathrooms} bath</span>
-                    </div>
-                    <span className="font-semibold text-foreground">
-                      R{viewing.property?.price?.toLocaleString()}/month
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
+              <RecordCard
+                key={viewing.id}
+                title={viewing.property?.title || 'Property'}
+                dateLine={viewingDateLine(viewing)}
+                badge={statusBadge(viewing.status)}
+                details={viewingDetails(viewing)}
+              />
             ))}
           </div>
         </div>

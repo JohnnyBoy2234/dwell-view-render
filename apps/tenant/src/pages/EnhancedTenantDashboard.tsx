@@ -106,7 +106,6 @@ export default function EnhancedTenantDashboard() {
           <div className="flex items-center gap-3">
             <FileText className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold">Lease System</h2>
-            <Badge variant="secondary">Contract Management</Badge>
           </div>
           <LeaseDashboardComponent />
         </div>
