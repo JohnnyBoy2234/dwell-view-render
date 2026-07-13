@@ -47,17 +47,26 @@ interface CardShellProps {
   propertyTitle: string;
   location: string | null;
   price: number | null;
-  image: string | null;
+  /** Omit entirely to render a text-only card (application/draft cards). */
+  image?: string | null;
   dateLine: string;
   extra?: React.ReactNode;
   ctaLabel?: string | null;
   onCta?: () => void;
-  onImageFailed: () => void;
+  onImageFailed?: () => void;
+}
+
+/** Titles like "House in Sea Point" already carry the suburb — don't repeat
+ * the location line under them. */
+function locationLine(title: string, location: string | null): string | null {
+  if (!location) return null;
+  const suburb = location.split(',')[0].trim().toLowerCase();
+  return suburb && title.toLowerCase().includes(suburb) ? null : location;
 }
 
 /** Shared card layout for invitations, drafts, and applications. Kept sparse
- * on purpose: title, location/price, one status row, one action — everything
- * else lives on the detail screens. */
+ * on purpose: title with a one-word status badge in the corner, one meta
+ * line, date, one action — everything else lives on the detail screens. */
 function RecordCard({
   presentation,
   propertyTitle,
@@ -70,28 +79,31 @@ function RecordCard({
   onCta,
   onImageFailed
 }: CardShellProps) {
+  const meta = [price ? `R${price.toLocaleString()}/m` : null, locationLine(propertyTitle, location)]
+    .filter(Boolean)
+    .join(' • ');
   return (
     <Card className="overflow-hidden">
-      <CardContent className="p-4 space-y-3">
-        <div className="flex gap-3">
-          <PropertyThumbnail
-            src={image}
-            propertyTitle={propertyTitle}
-            className="h-16 w-20 shrink-0 rounded-lg"
-            onLoadFailed={onImageFailed}
-          />
-          <div className="min-w-0 flex-1 space-y-1">
-            <h3 className="text-base font-semibold leading-snug line-clamp-2">{propertyTitle}</h3>
-            <p className="text-sm text-muted-foreground truncate">
-              {[price ? `R${price.toLocaleString()}/m` : null, location].filter(Boolean).join(' • ')}
-            </p>
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant={presentation.badgeVariant} className={presentation.badgeClassName}>
-                {presentation.label}
-              </Badge>
-              <span className="text-xs text-muted-foreground">{dateLine}</span>
+      <CardContent className="p-4 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 flex-1 gap-3">
+            {image !== undefined && (
+              <PropertyThumbnail
+                src={image}
+                propertyTitle={propertyTitle}
+                className="h-16 w-20 shrink-0 rounded-lg"
+                onLoadFailed={onImageFailed}
+              />
+            )}
+            <div className="min-w-0 flex-1 space-y-1">
+              <h3 className="text-base font-semibold leading-snug line-clamp-2">{propertyTitle}</h3>
+              {meta && <p className="text-sm text-muted-foreground truncate">{meta}</p>}
+              <p className="text-xs text-muted-foreground">{dateLine}</p>
             </div>
           </div>
+          <Badge variant={presentation.badgeVariant} className={`shrink-0 ${presentation.badgeClassName ?? ''}`}>
+            {presentation.label}
+          </Badge>
         </div>
 
         {extra}
@@ -381,7 +393,6 @@ export const TenantApplicationsSection = () => {
                   propertyTitle={draft.property?.title ?? 'Property'}
                   location={draft.property?.location ?? null}
                   price={draft.property?.price ?? null}
-                  image={draft.property?.images?.[0] ?? null}
                   dateLine={`Updated ${shortDate(draft.updated_at)}`}
                   extra={
                     <div className="space-y-1">
@@ -394,7 +405,6 @@ export const TenantApplicationsSection = () => {
                     trackApplicationsEvent(user?.id, 'application_continue_clicked', { source: 'draft' });
                     continueDraft(draft);
                   }}
-                  onImageFailed={onThumbnailFailed}
                 />
               ))}
               {applicationRecords.map((app) => {
@@ -410,14 +420,12 @@ export const TenantApplicationsSection = () => {
                     propertyTitle={app.property?.title ?? 'Property'}
                     location={app.property?.location ?? null}
                     price={app.property?.price ?? null}
-                    image={app.property?.images?.[0] ?? null}
                     dateLine={dateLine}
                     ctaLabel={presentation.cta}
                     onCta={() => {
                       trackApplicationsEvent(user?.id, 'application_status_viewed', { status: app.status });
                       navigate(`/application/${app.id}`);
                     }}
-                    onImageFailed={onThumbnailFailed}
                   />
                 );
               })}

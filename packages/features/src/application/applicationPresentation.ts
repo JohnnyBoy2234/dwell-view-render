@@ -42,7 +42,7 @@ const UNKNOWN_STATUS: StatusPresentation = {
  */
 const APPLICATION_STATUS_PRESENTATION: Record<string, StatusPresentation> = {
   invited: {
-    label: 'Invited by landlord',
+    label: 'Invited',
     description: 'You have been invited to apply for this property.',
     badgeVariant: 'secondary',
     cta: 'Start application',
@@ -50,7 +50,7 @@ const APPLICATION_STATUS_PRESENTATION: Record<string, StatusPresentation> = {
     terminal: false
   },
   requested: {
-    label: 'Request sent',
+    label: 'Requested',
     description: 'Waiting for the landlord to respond to your request.',
     badgeVariant: 'outline',
     cta: null,
@@ -74,7 +74,7 @@ const APPLICATION_STATUS_PRESENTATION: Record<string, StatusPresentation> = {
     terminal: false
   },
   accepted: {
-    label: 'Application approved',
+    label: 'Approved',
     description: 'The landlord has approved your application.',
     badgeVariant: 'default',
     badgeClassName: 'bg-green-100 text-green-800 hover:bg-green-100',
@@ -105,7 +105,7 @@ export const DRAFT_PRESENTATION: StatusPresentation = {
 };
 
 export const INVITE_PRESENTATION: StatusPresentation = {
-  label: 'Invited by landlord',
+  label: 'Invited',
   description: 'You have been invited to apply for this property.',
   badgeVariant: 'secondary',
   cta: 'Start application',
@@ -114,7 +114,7 @@ export const INVITE_PRESENTATION: StatusPresentation = {
 };
 
 export const EXPIRED_INVITE_PRESENTATION: StatusPresentation = {
-  label: 'Invitation expired',
+  label: 'Expired',
   description: 'This invitation is no longer valid. Ask the landlord for a new one.',
   badgeVariant: 'outline',
   cta: null,

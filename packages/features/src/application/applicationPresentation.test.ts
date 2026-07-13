@@ -27,7 +27,7 @@ describe('applicationStatusPresentation', () => {
 
   it('says what was accepted: the application, terminally', () => {
     const p = applicationStatusPresentation('accepted');
-    expect(p.label).toBe('Application approved');
+    expect(p.label).toBe('Approved');
     expect(p.terminal).toBe(true);
   });
 
