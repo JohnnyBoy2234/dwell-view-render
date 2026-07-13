@@ -26,6 +26,11 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# Env files (contain API keys)
+.env
+.env.*
+!.env.example
 .env.worktrees/
 .worktrees/
 
