@@ -292,8 +292,6 @@ export default function EnhancedLandlordDashboard() {
   // Global application leads (across all properties) for quick invites
   const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string; last_message_at?: string }>>([]);
   const [appInvitesMap, setAppInvitesMap] = useState<Record<string, any>>({}); // key: `${tenant_id}:${property_id}`
-  const [leadQuery, setLeadQuery] = useState('');
-  const [hideInvited, setHideInvited] = useState(false);
 
   // Sync selectedPropertyId with URL params
   useEffect(() => {
@@ -1263,23 +1261,23 @@ export default function EnhancedLandlordDashboard() {
   );
 
   const renderApplicationsTab = () => {
-    // Calculate stats
-    const leadsCount = appLeads.filter(l => !appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status).length;
-
-    // Filter leads (not yet invited)
-    const filteredLeads = appLeads
-      .filter(l => {
+    // Chat leads and sent invites are folded into each property's application
+    // list so every tenant has one card walking the whole pipeline:
+    // Send Application → Awaiting submission → Accept/Decline → Generate Lease.
+    const prospectsByProperty: Record<string, Array<{ conversation_id: string; tenant_id: string; property_id: string; tenant_name: string; last_message_at?: string; invited: boolean }>> = {};
+    appLeads
+      .slice()
+      .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime())
+      .forEach((l) => {
         const invited = appInvitesMap[`${l.tenant_id}:${l.property_id}`]?.status === 'invited';
-        if (hideInvited && invited) return false;
-        if (!leadQuery.trim()) return true;
-        const q = leadQuery.toLowerCase();
-        return l.tenant_name.toLowerCase().includes(q) || l.title.toLowerCase().includes(q);
-      })
-      .sort((a, b) => new Date(b.last_message_at || 0).getTime() - new Date(a.last_message_at || 0).getTime());
+        (prospectsByProperty[l.property_id] ||= []).push({ ...l, invited });
+      });
 
-    // Only show application sections for properties that actually have applications.
+    // Show a section for every property that has applications or leads.
     const propertyIdsWithApps = new Set(applications.map((a: any) => a.property_id));
-    const appProperties = properties.filter((p) => propertyIdsWithApps.has(p.id));
+    const appProperties = properties.filter(
+      (p) => propertyIdsWithApps.has(p.id) || (prospectsByProperty[p.id]?.length ?? 0) > 0
+    );
 
     return (
       <div className="min-h-screen bg-white pb-8 w-full">
@@ -1293,6 +1291,8 @@ export default function EnhancedLandlordDashboard() {
               key={p.id}
               propertyId={p.id}
               propertyTitle={p.title}
+              prospects={prospectsByProperty[p.id] || []}
+              onSendApplication={handleInviteFromLead}
             />
           ))}
           
@@ -1313,83 +1313,8 @@ export default function EnhancedLandlordDashboard() {
           </div>
         ) : (
           <>
-    
-            {/* Leads Section */}
-            {filteredLeads.length > 0 && (
-              <div className="space-y-3">
-                <div className="space-y-3">
-                  {filteredLeads.map((lead) => {
-                    const invited = appInvitesMap[`${lead.tenant_id}:${lead.property_id}`]?.status === 'invited';
-                    return (
-                      <Card key={lead.conversation_id} className="border-l-4 border-l-blue-500 hover:shadow-lg transition-shadow">
-                        <CardContent className="p-4 md:p-6">
-                          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                            <div className="flex gap-4 flex-1 min-w-0">
-                              {/* Avatar */}
-                              <div className="flex-shrink-0">
-                                <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 font-semibold text-lg">
-                                  {lead.tenant_name.charAt(0).toUpperCase()}
-                                </div>
-                              </div>
-                              
-                              {/* Info */}
-                              <div className="flex-1 min-w-0 space-y-2">
-                                <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                                  <h4 className="font-semibold text-lg truncate">{lead.tenant_name}</h4>
-                                  {invited && <Badge variant="secondary">Invited</Badge>}
-                                </div>
-                                
-                                <div className="space-y-1 text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-2">
-                                    <Building className="h-4 w-4" />
-                                    <span className="truncate">{lead.title}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <MessageCircle className="h-4 w-4" />
-                                    <span>Last chat {lead.last_message_at ? new Date(lead.last_message_at).toLocaleString() : 'N/A'}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Actions */}
-                            <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => {
-                                  if (!user) {
-                                    navigate('/auth');
-                                  } else {
-                                    navigate(`/messages?c=${lead.conversation_id}`);
-                                  }
-                                }}
-                                className="w-full sm:w-auto"
-                              >
-                                <MessageCircle className="h-4 w-4 mr-2" />
-                                View Chat
-                              </Button>
-                              {!invited && (
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleInviteFromLead(lead.tenant_id, lead.property_id, lead.conversation_id)}
-                                  className="w-full sm:w-auto"
-                                >
-                                  Send Application
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             {/* Empty State */}
-            {applications.length === 0 && filteredLeads.length === 0 && (
+            {applications.length === 0 && appLeads.length === 0 && (
               <Card className="border-dashed">
                 <CardContent className="p-12 text-center">
                   <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />

@@ -7,7 +7,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { Mail, Building, FileText, Download } from 'lucide-react';
+import { Mail, Building, FileText, Download, MessageCircle } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -17,14 +17,31 @@ import { ViewingWorkflow } from '@mzanzihomes/features/viewing';
 const shortDate = (value: string) =>
   new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
+// A tenant who chatted about the property but hasn't submitted an application
+// yet. Rendered in the same list as applications so each tenant has one card
+// that walks the whole pipeline: Send Application → Awaiting submission →
+// Accept/Decline → Generate Lease.
+export interface ProspectLead {
+  conversation_id: string;
+  tenant_id: string;
+  property_id: string;
+  tenant_name: string;
+  last_message_at?: string;
+  invited: boolean;
+}
+
 interface ApplicationsWithViewingsProps {
   propertyId: string;
   propertyTitle: string;
+  prospects?: ProspectLead[];
+  onSendApplication?: (tenantId: string, propertyId: string, conversationId?: string) => void;
 }
 
 const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
   propertyId,
-  propertyTitle
+  propertyTitle,
+  prospects,
+  onSendApplication
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -87,6 +104,12 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
     await updateApplicationStatus(applicationId, 'declined');
   };
 
+  // Once a tenant submits, their application card takes over from the
+  // prospect card — never show both for the same tenant.
+  const visibleProspects = (prospects || []).filter(
+    (lead) => !applications.some((a) => a.tenant_id === lead.tenant_id)
+  );
+
   if (loading) {
     return (
       <Card>
@@ -112,7 +135,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
       <Tabs defaultValue="applications" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="applications">
-            Applications ({applications.length})
+            Applications ({applications.length + visibleProspects.length})
           </TabsTrigger>
           <TabsTrigger value="viewings">
             Viewings ({viewings.length})
@@ -120,7 +143,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
         </TabsList>
 
         <TabsContent value="applications" className="space-y-4">
-          {applications.length === 0 ? (
+          {applications.length === 0 && visibleProspects.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
                 <div className="text-center text-muted-foreground">
@@ -267,6 +290,44 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
               );
             })
           )}
+
+          {/* Tenants still before the application stage: chat leads and sent invites */}
+          {visibleProspects.map((lead) => {
+            const hasCompletedViewing = canSendApplication(lead.tenant_id);
+            return (
+              <RecordCard
+                key={`lead-${lead.conversation_id}`}
+                title={lead.tenant_name}
+                dateLine={lead.last_message_at ? `Last chat ${shortDate(lead.last_message_at)}` : 'No messages yet'}
+                badge={
+                  lead.invited
+                    ? { label: 'Awaiting submission', className: 'bg-amber-100 text-amber-800' }
+                    : { label: 'Lead', className: 'bg-gray-100 text-gray-800' }
+                }
+                details={[{ label: 'Viewing', value: hasCompletedViewing ? 'Completed' : 'Required' }]}
+                actions={
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/messages?c=${lead.conversation_id}`)}
+                    >
+                      <MessageCircle className="h-4 w-4 mr-1" />
+                      View Chat
+                    </Button>
+                    {!lead.invited && onSendApplication && (
+                      <Button
+                        size="sm"
+                        onClick={() => onSendApplication(lead.tenant_id, propertyId, lead.conversation_id)}
+                      >
+                        Send Application
+                      </Button>
+                    )}
+                  </>
+                }
+              />
+            );
+          })}
         </TabsContent>
 
         <TabsContent value="viewings">
