@@ -122,16 +122,23 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
     );
   }
 
+  const applicantCount = applications.length + visibleProspects.length;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Property Applications & Viewings</h3>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Building className="h-4 w-4" />
-          {propertyTitle}
+    <Card className="overflow-hidden rounded-2xl border border-black/[0.07] shadow-sm">
+      {/* Property identity band — each property gets its own clearly bounded,
+          colored section instead of headings floating in a shared column. */}
+      <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-6 py-3">
+        <div className="flex items-center gap-2 min-w-0 text-white">
+          <Building className="h-4 w-4 flex-shrink-0" />
+          <h3 className="font-semibold truncate">{propertyTitle}</h3>
         </div>
+        <Badge className="bg-white/20 text-white border-0 flex-shrink-0 hover:bg-white/20">
+          {applicantCount} applicant{applicantCount === 1 ? '' : 's'}
+        </Badge>
       </div>
 
+      <CardContent className="p-4 sm:p-6">
       <Tabs defaultValue="applications" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="applications">
@@ -341,7 +348,8 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
           />
         </TabsContent>
       </Tabs>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
