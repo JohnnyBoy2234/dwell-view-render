@@ -36,6 +36,7 @@ import { VerificationGate } from '@mzanzihomes/ui/components/VerificationGate';
 import { PropertySelection } from '@mzanzihomes/ui/components/dashboard/PropertySelection';
 import { ApplicationRequestsManager } from '@mzanzihomes/ui/components/landlord/ApplicationRequestsManager';
 import ApplicationsWithViewings from '@/components/landlord/ApplicationsWithViewings';
+import { PropertyInventoryManager } from '@/components/landlord/PropertyInventoryManager';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { MetricsGrid } from '@mzanzihomes/ui/components/dashboard/landlord/MetricsGrid';
 import { ToolGrid } from '@mzanzihomes/ui/components/dashboard/landlord/ToolGrid';
@@ -1188,22 +1189,29 @@ export default function EnhancedLandlordDashboard() {
   const renderInventoryTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+        <PropertyInventoryManager
+          properties={properties.map((p: any) => ({ id: p.id, title: p.title }))}
+          initialPropertyId={selectedPropertyId}
+        />
+
+        {/* Legacy tenant-submitted condition captures, kept for evidence.
+            Condition documentation now happens in Condition Records. */}
         {inventoryLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-32 bg-muted animate-pulse rounded" />
           ))}
         </div>
-        ) : landlordInventory.length === 0 ? (
-          <Card className="shadow-md hover:shadow-lg transition-shadow bg-white/90 backdrop-blur-sm">
-            <CardContent className="py-12 text-center">
-            <Image className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No inventory yet</h3>
-            <p className="text-muted-foreground">Tenant-submitted inventory photos and audio will appear here.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
+        ) : landlordInventory.length === 0 ? null : (
+        <div className="space-y-3">
+          <div>
+            <h3 className="text-lg font-semibold">Past tenant condition submissions</h3>
+            <p className="text-sm text-muted-foreground">
+              Historical photo and audio captures submitted by tenants. New condition documentation
+              happens in Condition Records.
+            </p>
+          </div>
+          <div className="grid gap-4">
           {landlordInventory.map((record: any) => {
             const photos: string[] = (record?.inventory_items || [])
               .flatMap((it: any) => Array.isArray(it.photos) ? it.photos : [])
@@ -1237,6 +1245,7 @@ export default function EnhancedLandlordDashboard() {
               </Card>
             );
           })}
+          </div>
         </div>
       )}
 
@@ -2499,7 +2508,7 @@ const renderReportsTab = () => (
       ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
       { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
-      { title: 'Inventory',      subtitle: 'Photos & notes',                     icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
+      { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
       { title: 'Condition Records', subtitle: 'Photograph & attest',             icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
       { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/enhancedlandlorddashboard/support' },
     ];

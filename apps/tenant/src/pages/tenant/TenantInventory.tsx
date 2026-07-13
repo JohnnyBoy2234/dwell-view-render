@@ -1,265 +1,254 @@
-import { useState } from 'react';
-import { InventoryStartPanel } from '@mzanzihomes/features/property';
-import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/InventoryDetailModal';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
-import { useInventory } from '@/hooks/useInventory';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { Button } from '@mzanzihomes/ui/components/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { Home, FileText, Camera, Mic, Eye } from 'lucide-react';
-import { InventoryRecordWithDetails } from '@mzanzihomes/common/types/inventory';
+import { Input } from '@mzanzihomes/ui/components/input';
+import { Home, Info, Package, Search } from 'lucide-react';
 
+interface InventoryItem {
+  id: string;
+  room: string;
+  name: string;
+  quantity: number;
+  description: string | null;
+  serial_number: string | null;
+  brand_model: string | null;
+  note: string | null;
+  updated_at: string;
+}
+
+const shortDate = (value: string) =>
+  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+
+/** Read-only view of the landlord-created property inventory. Condition
+ * documentation deliberately lives elsewhere (condition records). */
 export default function TenantInventory() {
-  const { tenantProperty, loading } = useTenantDashboard();
-  const { user } = useAuth();
-  const {
-    inventoryRecords,
-    loading: inventoryLoading,
-    error: inventoryError,
-    viewInventoryRecord
-  } = useInventory();
-  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
-  const [selectedRecord, setSelectedRecord] = useState<InventoryRecordWithDetails | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const { tenantProperty, loading: propertyLoading } = useTenantDashboard();
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [landlordName, setLandlordName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
-  if (loading || inventoryLoading) {
+  useEffect(() => {
+    if (propertyLoading) return;
+    if (!tenantProperty) {
+      setLoading(false);
+      return;
+    }
+    (async () => {
+      try {
+        const [{ data: itemRows, error: itemsError }, { data: property }] = await Promise.all([
+          (supabase.from('property_inventory_items') as any)
+            .select('id, room, name, quantity, description, serial_number, brand_model, note, updated_at')
+            .eq('property_id', tenantProperty.id)
+            .order('room')
+            .order('name'),
+          (supabase.from('properties') as any)
+            .select('landlord_id')
+            .eq('id', tenantProperty.id)
+            .maybeSingle()
+        ]);
+        if (itemsError) throw itemsError;
+        setItems((itemRows ?? []) as InventoryItem[]);
+        if (property?.landlord_id) {
+          const { data: profile } = await (supabase.from('profiles') as any)
+            .select('display_name')
+            .eq('user_id', property.landlord_id)
+            .maybeSingle();
+          setLandlordName(profile?.display_name ?? null);
+        }
+      } catch (e: any) {
+        setError(e.message || 'Could not load the inventory.');
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [propertyLoading, tenantProperty?.id]);
+
+  const filteredItems = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    if (!term) return items;
+    return items.filter((item) =>
+      [item.name, item.room, item.description, item.brand_model, item.serial_number, item.note]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(term))
+    );
+  }, [items, search]);
+
+  const rooms = useMemo(() => {
+    const grouped = new Map<string, InventoryItem[]>();
+    for (const item of filteredItems) {
+      const list = grouped.get(item.room) ?? [];
+      list.push(item);
+      grouped.set(item.room, list);
+    }
+    return [...grouped.entries()];
+  }, [filteredItems]);
+
+  const totalItems = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const lastUpdated = items.length
+    ? items.reduce((latest, item) => (item.updated_at > latest ? item.updated_at : latest), items[0].updated_at)
+    : null;
+
+  if (propertyLoading || loading) {
     return (
       <div className="space-y-6">
         <div className="h-8 bg-muted animate-pulse rounded"></div>
         <div className="grid gap-6">
           {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-48 bg-muted animate-pulse rounded-lg"></div>
+            <div key={i} className="h-40 bg-muted animate-pulse rounded-lg"></div>
           ))}
         </div>
       </div>
     );
   }
 
-  const handleViewInventory = (record: InventoryRecordWithDetails) => {
-    setSelectedRecord(record);
-    setIsDetailModalOpen(true);
-  };
-
-  const handleStartNewInventory = () => {
-    if (tenantProperty) {
-      setSelectedPropertyId(tenantProperty.id);
-    }
-  };
-
-  const getStatusBadge = (status: string, landlordApproved: boolean) => {
-    if (status === 'completed' && landlordApproved) {
-      return <Badge className="bg-success-green text-white">Approved</Badge>;
-    } else if (status === 'completed') {
-      return <Badge variant="secondary">Awaiting Approval</Badge>;
-    } else {
-      return <Badge variant="outline">In Progress</Badge>;
-    }
-  };
-
-  // Show error if there's an inventory error
-  if (inventoryError) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Property Inventory</h1>
-          <p className="text-muted-foreground">
-            Record and manage property condition documentation for your tenancies
-          </p>
-        </div>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-destructive">Error loading inventory records: {inventoryError}</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // If a property is selected for inventory, show the inventory panel
-  if (selectedPropertyId) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
+  const infoCard = (
+    <Card className="bg-muted/30">
+      <CardContent className="pt-6 space-y-4 text-sm">
+        <div className="flex gap-2">
+          <Info className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true" />
           <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Property Inventory</h1>
-            <p className="text-muted-foreground">
-              Record the condition of your property with voice notes and photos
+            <p className="font-semibold">What is the Inventory?</p>
+            <p className="text-muted-foreground mt-1">
+              The Inventory is a list of furniture and other items belonging to the property. It is
+              created and managed by the landlord.
             </p>
           </div>
-          <Button 
-            variant="outline" 
-            onClick={() => setSelectedPropertyId(null)}
-          >
-            Back to Overview
-          </Button>
         </div>
-        <InventoryStartPanel propertyId={selectedPropertyId} />
-      </div>
-    );
-  }
+        <div className="border-t pt-4">
+          <Link to="/tenant/condition-records" className="font-semibold text-primary underline underline-offset-2">
+            View Condition Record
+          </Link>
+          <p className="text-muted-foreground mt-1">
+            To view or document the condition of the property and its items, use the separate
+            Condition Record.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Property Inventory</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Property Inventory</h1>
         <p className="text-muted-foreground">
-          Record and manage property condition documentation for your tenancies
+          View the furniture and items recorded by your landlord for this property.
         </p>
       </div>
 
-      {/* Current Property Section */}
-      {tenantProperty && (
-        <Card className="bg-ocean-blue/5 border-ocean-blue/20">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-ocean-blue">
-              <Home className="h-5 w-5" />
-              Current Property
-            </CardTitle>
-            <CardDescription>
-              Document your current property's condition
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="min-w-0">
-                <h3 className="font-semibold text-lg break-words">{tenantProperty.title}</h3>
-                <p className="text-muted-foreground break-words">{tenantProperty.location}</p>
-                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
-                  <span>Move-in: Available</span>
-                  <span>Monthly Rent: R{tenantProperty.monthlyRent.toLocaleString()}</span>
-                </div>
-              </div>
-              <Button onClick={handleStartNewInventory} className="bg-ocean-blue hover:bg-ocean-blue-dark shrink-0 self-start">
-                <Camera className="h-4 w-4 mr-2" />
-                Start Inventory
-              </Button>
-            </div>
+      {error ? (
+        <Card>
+          <CardContent className="py-10 text-center text-destructive">{error}</CardContent>
+        </Card>
+      ) : !tenantProperty ? (
+        <Card>
+          <CardContent className="py-10 text-center">
+            <Home className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
+            <p className="font-medium">No property linked yet</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              The inventory will appear here once you are connected to a property.
+            </p>
           </CardContent>
         </Card>
-      )}
-
-      {/* Inventory Records */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Inventory Records</h2>
-          <Badge variant="secondary">{inventoryRecords.length} records</Badge>
-        </div>
-
-        {inventoryRecords.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No inventory records yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Start documenting your property's condition to create your first inventory record
-              </p>
-              <Button onClick={handleStartNewInventory}>
-                <Camera className="h-4 w-4 mr-2" />
-                Create First Inventory
-              </Button>
+      ) : (
+        <>
+          {/* Property summary */}
+          <Card className="bg-ocean-blue/5 border-ocean-blue/20">
+            <CardContent className="pt-6 space-y-1">
+              <h2 className="font-semibold text-lg break-words">{tenantProperty.title}</h2>
+              <p className="text-sm text-muted-foreground break-words">{tenantProperty.location}</p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 pt-2 text-sm text-muted-foreground">
+                {landlordName && <span>Landlord: {landlordName}</span>}
+                {lastUpdated && <span>Last updated: {shortDate(lastUpdated)}</span>}
+                <span>{totalItems} item{totalItems === 1 ? '' : 's'} listed</span>
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid gap-4">
-            {inventoryRecords.map((record) => (
-              <Card key={record.id} className="hover:shadow-medium transition-all duration-200">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="font-semibold text-lg">{record.property?.title || 'Property'}</h3>
-                      <p className="text-muted-foreground">
-                        Created: {new Date(record.created_at).toLocaleDateString()}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Country: {record.country}
-                      </p>
-                    </div>
-                    {getStatusBadge(record.status, record.landlord_approved)}
-                  </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-ocean-blue">{record.rooms_recorded}</div>
-                      <div className="text-sm text-muted-foreground">Rooms</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-success-green">{record.photos_count}</div>
-                      <div className="text-sm text-muted-foreground">Photos</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-earth-warm">{record.voice_notes_count}</div>
-                      <div className="text-sm text-muted-foreground">Voice Notes</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-2xl font-bold text-muted-foreground">
-                        {record.landlord_approved ? '✓' : '⏳'}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Status</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 flex-wrap pt-4 border-t">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0">
-                      <Mic className="h-4 w-4 shrink-0" />
-                      <span className="truncate">Audio recordings & photos available</span>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0"
-                      onClick={() => handleViewInventory(record)}
-                    >
-                      <Eye className="h-4 w-4 mr-2" />
-                      View
-                    </Button>
-                  </div>
+          {items.length === 0 ? (
+            <>
+              <Card>
+                <CardContent className="py-10 text-center">
+                  <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
+                  <p className="font-medium">No inventory has been added yet</p>
+                  <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
+                    The landlord has not yet added a list of furniture or property items. You do not
+                    need to create anything.
+                  </p>
                 </CardContent>
               </Card>
-            ))}
-          </div>
-        )}
-      </div>
+              {infoCard}
+            </>
+          ) : (
+            <>
+              {/* Search */}
+              <div className="relative">
+                <Search
+                  className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search items or rooms…"
+                  aria-label="Search the inventory"
+                  className="pl-9"
+                />
+              </div>
 
-      {/* How It Works Section */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="text-lg">How Property Inventory Works</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h4 className="font-semibold mb-2">For Move-In:</h4>
-              <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
-                <li>Document existing conditions and any damage</li>
-                <li>Record voice notes for each room</li>
-                <li>Take photos of key items and potential issues</li>
-                <li>Submit for landlord approval</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-2">For Move-Out:</h4>
-              <ul className="list-disc ml-5 space-y-1 text-sm text-muted-foreground">
-                <li>Compare with original move-in inventory</li>
-                <li>Document any new damage or changes</li>
-                <li>Helps protect your security deposit</li>
-                <li>Provides evidence for dispute resolution</li>
-              </ul>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Inventory Detail Modal */}
-      <InventoryDetailModal
-        record={selectedRecord}
-        isOpen={isDetailModalOpen}
-        onClose={() => {
-          setIsDetailModalOpen(false);
-          setSelectedRecord(null);
-        }}
-      />
+              {rooms.length === 0 ? (
+                <Card>
+                  <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                    No items match your search.
+                  </CardContent>
+                </Card>
+              ) : (
+                rooms.map(([room, roomItems]) => (
+                  <Card key={room}>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex items-center justify-between gap-2">
+                        <span className="truncate">{room}</span>
+                        <Badge variant="secondary" className="shrink-0">
+                          {roomItems.length} item{roomItems.length === 1 ? '' : 's'}
+                        </Badge>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="divide-y">
+                      {roomItems.map((item) => (
+                        <div key={item.id} className="py-3 first:pt-0 last:pb-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="font-medium break-words">{item.name}</p>
+                            <span className="text-sm text-muted-foreground shrink-0">× {item.quantity}</span>
+                          </div>
+                          {item.description && (
+                            <p className="text-sm text-muted-foreground mt-0.5 break-words">{item.description}</p>
+                          )}
+                          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">
+                            {item.brand_model && <span>Brand/model: {item.brand_model}</span>}
+                            {item.serial_number && <span>Serial: {item.serial_number}</span>}
+                          </div>
+                          {item.note && (
+                            <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                              Landlord note: {item.note}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+              {infoCard}
+            </>
+          )}
+        </>
+      )}
     </div>
   );
 }
