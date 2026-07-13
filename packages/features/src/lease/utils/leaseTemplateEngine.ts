@@ -39,10 +39,34 @@ export function getOrdinalSuffix(n: number): string {
 }
 
 /**
+ * Maps condition report answers (s1_… keys) to S1_ANSWER… template variables.
+ * Every statement gets a value so no {{Sn_ANSWER}} placeholder survives into
+ * the rendered lease.
+ */
+function buildConditionReportVariables(data: LeaseWizardData): Record<string, string> {
+  const answerText = (v: unknown) => (v === 'yes' ? 'Yes' : v === 'no' ? 'No' : v === 'na' ? 'N/A' : '—');
+  const vars: Record<string, string> = {};
+  for (let n = 1; n <= 29; n++) {
+    if (n !== 27) vars[`S${n}_ANSWER`] = '—';
+  }
+  vars.S27_YEARS = '____';
+  for (const [key, value] of Object.entries(data.conditionReport || {})) {
+    if (key === 's27_yearsResided') {
+      if (value) vars.S27_YEARS = String(value);
+      continue;
+    }
+    const match = /^s(\d+)_/.exec(key);
+    if (match) vars[`S${match[1]}_ANSWER`] = answerText(value);
+  }
+  return vars;
+}
+
+/**
  * Maps wizard data to template variables
  */
 export function buildTemplateVariables(data: LeaseWizardData): Record<string, string> {
   return {
+    ...buildConditionReportVariables(data),
     // Step 1: Lease Basics
     LEASE_TYPE: data.leaseType === 'fixed' ? 'Fixed-Term' : 'Month-to-Month',
     LEASE_START_DATE: formatDate(data.leaseStartDate),
@@ -80,6 +104,7 @@ export function buildTemplateVariables(data: LeaseWizardData): Record<string, st
 
     // Bank Details
     LANDLORD_BANK_NAME: data.landlordBankName || '',
+    LANDLORD_ACCOUNT_HOLDER: data.landlordAccountHolder || data.landlordFullName || '',
     LANDLORD_BRANCH_CODE: data.landlordBranchCode || '',
     LANDLORD_ACCOUNT_NUMBER: data.landlordAccountNumber || '',
     LANDLORD_REFERENCE: data.landlordReference || '',
