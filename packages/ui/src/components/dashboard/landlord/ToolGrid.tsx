@@ -77,7 +77,7 @@ function ToolTile({ tool, index, onClick, reduced }: ToolTileProps) {
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
       className={cn(
-        'group relative rounded-2xl p-3 text-center bg-white border border-black/[0.06]',
+        'group relative rounded-2xl p-4 text-center bg-white border border-black/[0.06]',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
         'active:scale-95',
         reduced ? '' : 'animate-in fade-in slide-in-from-bottom-2',
@@ -108,10 +108,10 @@ function ToolTile({ tool, index, onClick, reduced }: ToolTileProps) {
         {/* Icon container */}
         <div className="relative mt-0.5">
           <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center mx-auto"
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
             style={{ background: colors.bg }}
           >
-            <tool.icon className="w-5 h-5" style={{ color: colors.iconColor }} />
+            <tool.icon className="w-7 h-7" style={{ color: colors.iconColor }} />
           </div>
 
           {/* Urgency count badge */}
@@ -131,10 +131,10 @@ function ToolTile({ tool, index, onClick, reduced }: ToolTileProps) {
         </div>
 
         {/* Label — minimum 12px for legibility on mobile */}
-        <span className="text-xs font-semibold text-foreground leading-tight mt-0.5">
+        <span className="text-sm font-semibold text-foreground leading-tight mt-0.5">
           {tool.title}
         </span>
-        <span className="text-[10px] text-muted-foreground leading-tight hidden sm:block">
+        <span className="text-[11px] text-muted-foreground leading-tight">
           {tool.subtitle}
         </span>
       </div>
@@ -150,7 +150,7 @@ interface ToolGridProps {
 export function ToolGrid({ tools, onToolClick }: ToolGridProps) {
   const reduced = usePrefersReducedMotion();
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
       {tools.map((tool, i) => (
         <ToolTile
           key={tool.title}
