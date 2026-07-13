@@ -7,9 +7,35 @@ import { Haptics, ImpactStyle } from '@capacitor/haptics';
 import { Network } from '@capacitor/network';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Capacitor } from '@capacitor/core';
+import { supabase } from '@mzanzihomes/supabase/client';
 
 export class MobileServices {
   static isNative = Capacitor.isNativePlatform();
+  private static pendingPushToken: string | null = null;
+
+  // Upsert the FCM device token against the signed-in user. If nobody is
+  // signed in yet (registration fires at app boot), the token is held and
+  // synced on the next sign-in.
+  static async savePushToken(token: string) {
+    this.pendingPushToken = token;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+      // push_tokens is newer than the generated Database types
+      await (supabase as any).from('push_tokens').upsert(
+        {
+          user_id: user.id,
+          token,
+          platform: Capacitor.getPlatform(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'token' }
+      );
+      console.log('Push token saved for user', user.id);
+    } catch (error) {
+      console.error('Failed to save push token:', error);
+    }
+  }
 
   // Initialize mobile services
   static async initialize() {
@@ -108,8 +134,8 @@ export class MobileServices {
 
         // Listen for registration
         PushNotifications.addListener('registration', (token) => {
-          console.log('Push registration success, token: ' + token.value);
-          // Store token in your backend
+          console.log('Push registration success');
+          void this.savePushToken(token.value);
         });
 
         // Listen for registration errors
@@ -123,9 +149,23 @@ export class MobileServices {
           this.vibrate();
         });
 
-        // Listen for notification actions
-        PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-          console.log('Push action performed: ', notification);
+        // Tapping a chat notification opens that conversation
+        PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
+          const data: any = action.notification?.data || {};
+          if (data.type === 'chat_message' && data.conversation_id) {
+            window.location.href = `/messages?c=${encodeURIComponent(data.conversation_id)}`;
+          }
+        });
+
+        // Registration can beat sign-in at app boot: sync the held token
+        // whenever a user signs in, and drop their token on sign-out.
+        supabase.auth.onAuthStateChange((event) => {
+          if (event === 'SIGNED_IN' && this.pendingPushToken) {
+            void this.savePushToken(this.pendingPushToken);
+          }
+          if (event === 'SIGNED_OUT' && this.pendingPushToken) {
+            void (supabase as any).from('push_tokens').delete().eq('token', this.pendingPushToken);
+          }
         });
       }
     } catch (error) {

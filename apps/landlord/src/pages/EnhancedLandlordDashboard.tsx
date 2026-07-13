@@ -408,6 +408,24 @@ export default function EnhancedLandlordDashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Live property updates: a listing created/published in another tab, on
+  // another device, or mid-session shows up without a manual refresh.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('landlord-properties-live')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'properties',
+        filter: `landlord_id=eq.${user.id}`,
+      }, () => {
+        fetchProperties();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
   const fetchProperties = async () => {
     if (!user) return;
 

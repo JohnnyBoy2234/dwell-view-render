@@ -117,24 +117,26 @@ export function useWhatsAppMessaging() {
         profileMap.set(profile.user_id, profile);
       });
 
-      // Calculate unread counts
-      const conversationsWithUnread = await Promise.all(
-        conversationsData.map(async (conv) => {
-          const { count } = await supabase
-            .from('messages')
-            .select('*', { count: 'exact', head: true })
-            .eq('conversation_id', conv.id)
-            .eq(isLandlord ? 'read_by_landlord' : 'read_by_tenant', false)
-            .neq('sender_id', user.id);
+      // Calculate unread counts in ONE query (was one count query per
+      // conversation — a big part of why the messages screen felt slow).
+      const convIds = conversationsData.map((c) => c.id);
+      const { data: unreadRows } = await supabase
+        .from('messages')
+        .select('conversation_id')
+        .in('conversation_id', convIds)
+        .eq(isLandlord ? 'read_by_landlord' : 'read_by_tenant', false)
+        .neq('sender_id', user.id);
+      const unreadByConv = new Map<string, number>();
+      (unreadRows || []).forEach((r: any) => {
+        unreadByConv.set(r.conversation_id, (unreadByConv.get(r.conversation_id) || 0) + 1);
+      });
 
-          return {
-            ...conv,
-            landlord_profile: profileMap.get(conv.landlord_id) || null,
-            tenant_profile: profileMap.get(conv.tenant_id) || null,
-            unread_count: count || 0
-          };
-        })
-      );
+      const conversationsWithUnread = conversationsData.map((conv) => ({
+        ...conv,
+        landlord_profile: profileMap.get(conv.landlord_id) || null,
+        tenant_profile: profileMap.get(conv.tenant_id) || null,
+        unread_count: unreadByConv.get(conv.id) || 0
+      }));
 
       conversationsCache.current = conversationsWithUnread as ConversationData[];
       setConversations(conversationsWithUnread as ConversationData[]);
@@ -155,6 +157,28 @@ export function useWhatsAppMessaging() {
       setLoading(false);
     }
   }, [user, isLandlord, toast]);
+
+  // Stamp incoming messages as delivered (✓✓) and tell the sender live.
+  const stampDelivered = useCallback(async (conversationId: string, incoming: any[]) => {
+    if (!user) return;
+    const ids = incoming
+      .filter((m) => m.sender_id !== user.id && !m.delivered_at)
+      .map((m) => m.id);
+    if (ids.length === 0) return;
+    try {
+      await supabase
+        .from('messages')
+        .update({ delivered_at: new Date().toISOString() })
+        .in('id', ids)
+        .is('delivered_at', null);
+      if (!chatChannelRef.current) {
+        chatChannelRef.current = supabase.channel(`chat-${conversationId}`, { config: { broadcast: { self: true } } }).subscribe();
+      }
+      await chatChannelRef.current.send({ type: 'broadcast', event: 'delivery_receipt', payload: { messageIds: ids } });
+    } catch (e) {
+      console.warn('Failed to stamp delivered', e);
+    }
+  }, [user]);
 
   // Load messages for conversation with caching
   const fetchMessages = useCallback(async (conversationId: string) => {
@@ -192,21 +216,19 @@ export function useWhatsAppMessaging() {
         profileMap.set(profile.user_id, profile);
       });
 
-      // Transform to optimistic messages with correct read status
-      const optimisticMessages: OptimisticMessage[] = messagesData.map(msg => {
-        const isRead = isLandlord ? msg.read_by_landlord : msg.read_by_tenant;
+      // For OWN messages the ticks reflect the OTHER party's receipt state
+      // (this used to check the viewer's own flag — ticks never went blue).
+      const serverMessages: OptimisticMessage[] = messagesData.map(msg => {
+        const otherHasRead = isLandlord ? msg.read_by_tenant : msg.read_by_landlord;
         return {
           ...msg,
           tempId: msg.id,
-          status: isRead ? 'read' : 'delivered',
+          status: msg.sender_id === user.id
+            ? (otherHasRead ? 'read' : msg.delivered_at ? 'delivered' : 'sent')
+            : 'read',
           profiles: profileMap.get(msg.sender_id) || null
         };
       });
-
-      // Build final server list with read status applied
-      const serverMessages: OptimisticMessage[] = optimisticMessages.map(msg =>
-        msg.sender_id !== user.id ? { ...msg, status: 'read' as const } : msg
-      );
 
       // Merge: keep any optimistic messages not yet confirmed by the server
       const serverIds = new Set(serverMessages.map(m => m.id));
@@ -218,8 +240,9 @@ export function useWhatsAppMessaging() {
         return merged;
       });
 
-      // Mark as read after state is set (fire-and-forget — no await needed)
+      // Mark as read + stamp delivered after state is set (fire-and-forget)
       markMessagesAsRead(conversationId);
+      stampDelivered(conversationId, messagesData);
 
       messagesCache.current.set(conversationId, serverMessages);
 
@@ -236,7 +259,7 @@ export function useWhatsAppMessaging() {
         description: error.message
       });
     }
-  }, [user, toast, isLandlord]);
+  }, [user, toast, isLandlord, stampDelivered]);
 
   // Send message with optimistic update
   const sendMessage = useCallback(async (conversationId: string, content: string, files?: File[]) => {
@@ -446,6 +469,9 @@ export function useWhatsAppMessaging() {
         )
       );
 
+      // Let the bottom-bar badge refresh immediately
+      try { window.dispatchEvent(new Event('messages-marked-read')); } catch {}
+
       // Update cache with read status
       const cached = messagesCache.current.get(conversationId);
       if (cached) {
@@ -602,13 +628,14 @@ export function useWhatsAppMessaging() {
           .on('broadcast', { event: 'new_message' }, ({ payload }) => {
             const msg = payload as any;
             if (!msg || msg.conversation_id !== activeConversation) return;
+            const isOwn = msg.sender_id === user?.id;
             setMessages(prev => {
               // Case 1: Self-broadcast of our own optimistic message (tempId === id).
               // We already inserted it on send — update status in-place, never remove.
               if (msg.tempId === msg.id) {
                 if (prev.some(m => m.tempId === msg.tempId)) {
                   return prev.map(m =>
-                    m.tempId === msg.tempId ? { ...m, status: 'delivered' as const } : m
+                    m.tempId === msg.tempId && m.status === 'sending' ? { ...m, status: 'sent' as const } : m
                   );
                 }
                 return prev;
@@ -618,14 +645,20 @@ export function useWhatsAppMessaging() {
               if (msg.tempId) {
                 const withoutTemp = prev.filter(m => m.tempId !== msg.tempId);
                 if (withoutTemp.some(m => m.id === msg.id)) return withoutTemp; // already present
-                const delivered: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
-                return [...withoutTemp, delivered];
+                const confirmed: OptimisticMessage = { ...msg, tempId: msg.id, status: isOwn ? 'sent' : 'read' };
+                return [...withoutTemp, confirmed];
               }
               // Case 3: Message from the other user — add if not already present.
               if (prev.some(m => m.id === msg.id || m.tempId === msg.id)) return prev;
-              const optimistic: OptimisticMessage = { ...msg, tempId: msg.id, status: 'delivered' };
-              return [...prev, optimistic];
+              const incoming: OptimisticMessage = { ...msg, tempId: msg.id, status: 'read' };
+              return [...prev, incoming];
             });
+            // We're in the open thread, so an incoming message is instantly
+            // delivered AND read — persist both and notify the sender live.
+            if (!isOwn && !msg.optimistic) {
+              stampDelivered(activeConversation, [msg]);
+              markMessagesAsRead(activeConversation);
+            }
             const cached = messagesCache.current.get(activeConversation) || [];
             const msgId = (msg as any).id;
             const msgTempId = (msg as any).tempId;
@@ -656,11 +689,21 @@ export function useWhatsAppMessaging() {
             if (!Array.isArray(messageIds) || messageIds.length === 0) return;
             setMessages(prev => prev.map(m => (messageIds.includes(m.id) ? { ...m, status: 'read' as const } : m)));
           })
+          .on('broadcast', { event: 'delivery_receipt' }, ({ payload }) => {
+            const { messageIds } = payload as any;
+            if (!Array.isArray(messageIds) || messageIds.length === 0) return;
+            // Upgrade to delivered, but never downgrade an already-read tick
+            setMessages(prev => prev.map(m =>
+              messageIds.includes(m.id) && m.status !== 'read' ? { ...m, status: 'delivered' as const } : m
+            ));
+          })
           .subscribe();
         chatChannelRef.current = channel;
 
-        // Reliable DB-level realtime: incoming messages appear instantly even
-        // if a broadcast is missed. Refetch on any insert for this conversation.
+        // Reliable DB-level realtime fallback: if a broadcast was missed, the
+        // insert event carries the full row — append it directly instead of
+        // refetching the whole conversation (the old full refetch on every
+        // insert was a major source of perceived slowness).
         const dbChannel = supabase
           .channel(`chat-db-${activeConversation}`)
           .on('postgres_changes', {
@@ -668,8 +711,18 @@ export function useWhatsAppMessaging() {
             schema: 'public',
             table: 'messages',
             filter: `conversation_id=eq.${activeConversation}`,
-          }, () => {
-            fetchMessages(activeConversation);
+          }, (payload) => {
+            const row = payload.new as any;
+            if (!row?.id) return;
+            const isOwn = row.sender_id === user?.id;
+            setMessages(prev => {
+              if (prev.some(m => m.id === row.id || m.tempId === row.id)) return prev;
+              return [...prev, { ...row, tempId: row.id, status: isOwn ? 'sent' : 'read' }];
+            });
+            if (!isOwn) {
+              stampDelivered(activeConversation, [row]);
+              markMessagesAsRead(activeConversation);
+            }
           })
           .subscribe();
         chatDbChannelRef.current = dbChannel;
