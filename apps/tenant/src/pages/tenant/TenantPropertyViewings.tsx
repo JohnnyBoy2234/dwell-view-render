@@ -67,13 +67,36 @@ export default function TenantPropertyViewings() {
 
       if (error) throw error;
 
-      if (!viewingSlots || viewingSlots.length === 0) {
+      // Chat-confirmed viewings live in viewing_proposals, not viewing_slots
+      const { data: proposals, error: proposalsError } = await supabase
+        .from('viewing_proposals')
+        .select('id, conversation_id, property_id, landlord_id, start_at, duration_minutes, status')
+        .eq('tenant_id', user.id)
+        .eq('status', 'confirmed')
+        .order('start_at', { ascending: false });
+
+      if (proposalsError) throw proposalsError;
+
+      const allRecords = [
+        ...(viewingSlots || []),
+        ...(proposals || []).map(p => ({
+          id: p.id,
+          conversation_id: p.conversation_id,
+          property_id: p.property_id,
+          landlord_id: p.landlord_id,
+          start_time: p.start_at,
+          end_time: new Date(new Date(p.start_at).getTime() + (p.duration_minutes ?? 20) * 60000).toISOString(),
+          status: 'confirmed'
+        }))
+      ];
+
+      if (allRecords.length === 0) {
         setViewings([]);
         return;
       }
 
       // Fetch property details for each slot
-      const propertyIds = [...new Set(viewingSlots.map(slot => slot.property_id))];
+      const propertyIds = [...new Set(allRecords.map(slot => slot.property_id))];
       
       const { data: properties, error: propertiesError } = await supabase
         .from('properties')
@@ -93,7 +116,7 @@ export default function TenantPropertyViewings() {
       if (profilesError) throw profilesError;
 
       // Map the data to match the component's interface
-      const mappedViewings: PropertyViewing[] = viewingSlots.map(slot => {
+      const mappedViewings: PropertyViewing[] = allRecords.map(slot => {
         const property = properties?.find(p => p.id === slot.property_id);
         const landlordProfile = landlordProfiles?.find(profile => profile.user_id === (slot.landlord_id || property?.landlord_id));
         
@@ -103,7 +126,7 @@ export default function TenantPropertyViewings() {
           start_time: slot.start_time,
           end_time: slot.end_time,
           status: slot.status,
-          conversation_id: undefined,
+          conversation_id: slot.conversation_id,
           property: property ? {
             id: property.id,
             title: property.title,
@@ -168,6 +191,8 @@ export default function TenantPropertyViewings() {
     switch (status) {
       case 'booked':
         return { label: 'Upcoming', className: 'bg-blue-500 text-white' };
+      case 'confirmed':
+        return { label: 'Confirmed', className: 'bg-blue-500 text-white' };
       case 'completed':
         return { label: 'Completed', className: 'bg-success-green text-white' };
       case 'cancelled':
@@ -197,7 +222,9 @@ export default function TenantPropertyViewings() {
     return new Date(startTime) > new Date();
   };
 
-  const upcomingViewings = viewings.filter(v => v.status === 'booked' && isUpcoming(v.start_time));
+  const upcomingViewings = viewings.filter(
+    v => (v.status === 'booked' || v.status === 'confirmed') && isUpcoming(v.start_time)
+  );
   const pastViewings = viewings.filter(v => !upcomingViewings.includes(v));
 
   if (loading) {
@@ -270,14 +297,17 @@ export default function TenantPropertyViewings() {
                         Message
                       </Button>
                     )}
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => cancelViewing(viewing.id)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      Cancel
-                    </Button>
+                    {/* Chat-confirmed viewings are cancelled in the chat thread */}
+                    {viewing.status === 'booked' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => cancelViewing(viewing.id)}
+                        className="text-destructive hover:text-destructive"
+                      >
+                        Cancel
+                      </Button>
+                    )}
                   </>
                 }
               />

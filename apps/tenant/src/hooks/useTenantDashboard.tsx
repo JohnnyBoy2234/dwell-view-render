@@ -191,10 +191,24 @@ export function useTenantDashboard() {
         .order('start_time', { ascending: true })
         .limit(3);
 
-      if (viewingError) {
-        console.error('Error fetching viewing data:', viewingError);
+      // Chat-confirmed viewings live in viewing_proposals
+      const { data: proposalData, error: proposalError } = await supabase
+        .from('viewing_proposals')
+        .select('id,start_at,status,property_id')
+        .eq('tenant_id', user.id)
+        .eq('status', 'confirmed')
+        .gt('start_at', new Date().toISOString())
+        .order('start_at', { ascending: true })
+        .limit(3);
+
+      if (viewingError || proposalError) {
+        console.error('Error fetching viewing data:', viewingError || proposalError);
       } else {
-        setUpcomingViewings(viewingData || []);
+        const merged = [
+          ...(viewingData || []),
+          ...(proposalData || []).map(p => ({ ...p, start_time: p.start_at }))
+        ].sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+        setUpcomingViewings(merged.slice(0, 3));
       }
 
     } catch (error: any) {
