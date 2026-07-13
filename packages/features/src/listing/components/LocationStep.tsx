@@ -14,6 +14,14 @@ import {
   SelectValue,
 } from '@mzanzihomes/ui/components/select';
 import { MapPin, FileText, Sparkles, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@mzanzihomes/ui/components/dialog';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { ListingFormData } from '../types';
@@ -54,8 +62,12 @@ const parsePlace = (place: any) => {
 export default function LocationStep({ control, errors, watch, setValue, structuredAddress }: LocationStepProps) {
   const { toast } = useToast();
   const [generating, setGenerating] = React.useState(false);
+  // The "Write with AI" mini-interview dialog.
+  const [aiOpen, setAiOpen] = React.useState(false);
+  const [aiFeatures, setAiFeatures] = React.useState('');
+  const [aiArea, setAiArea] = React.useState('');
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (keyFeatures?: string) => {
     if (!watch || !setValue) return;
     const v: any = watch();
     if (!v.property_type && !v.location) {
@@ -76,12 +88,13 @@ export default function LocationStep({ control, errors, watch, setValue, structu
           amenities: v.amenities,
           price: v.price,
           listing_type: v.listing_type,
-          key_features: v.ai_key_features,
+          key_features: keyFeatures ?? v.ai_key_features,
         },
       });
       if (error) throw error;
       if (data?.description) {
         setValue('description', data.description, { shouldValidate: true, shouldDirty: true });
+        setAiOpen(false);
         toast({ title: 'Description generated ✨', description: 'Feel free to tweak it before publishing.' });
       } else {
         throw new Error(data?.error || 'No description was returned.');
@@ -254,28 +267,18 @@ export default function LocationStep({ control, errors, watch, setValue, structu
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleGenerate}
+                onClick={() => {
+                  setAiFeatures((watch('ai_key_features') as string) || '');
+                  setAiOpen(true);
+                }}
                 disabled={generating}
                 className="h-8 text-xs shrink-0"
               >
-                {generating ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Sparkles className="h-3.5 w-3.5 mr-1" />}
-                {generating ? 'Writing…' : 'Write with AI'}
+                <Sparkles className="h-3.5 w-3.5 mr-1" />
+                Write with AI
               </Button>
             )}
           </div>
-          {watch && setValue && (
-            <div className="space-y-1">
-              <Input
-                value={watch('ai_key_features') || ''}
-                onChange={(e) => setValue('ai_key_features', e.target.value, { shouldDirty: true })}
-                placeholder="Standout features for the AI — pool, sea views, renovated kitchen, fibre…"
-                className="text-base"
-              />
-              <p className="text-xs text-muted-foreground">
-                Optional: list what makes your place special and the AI will write around it. Not shown to tenants.
-              </p>
-            </div>
-          )}
           <Controller
             name="description"
             control={control}
@@ -286,7 +289,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
             render={({ field }) => (
               <Textarea
                 {...field}
-                placeholder="Describe your property in detail. Include information about the layout, features, neighborhood, nearby amenities, and what makes it special..."
+                placeholder="Write your own description here, or tap Write with AI…"
                 rows={6}
                 className="text-base resize-none"
               />
@@ -311,11 +314,65 @@ export default function LocationStep({ control, errors, watch, setValue, structu
               </div>
             );
           })()}
-          <p className="text-sm text-muted-foreground">
-            Provide detailed information about the property, its features, and the surrounding area. Mention nearby schools, shopping centers, transport links, etc.
-          </p>
         </div>
       </div>
+
+      {/* Write-with-AI mini interview: two quick questions, then generate. */}
+      <Dialog open={aiOpen} onOpenChange={(open) => { if (!generating) setAiOpen(open); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4" /> Write with AI
+            </DialogTitle>
+            <DialogDescription>
+              Answer two quick questions and the AI writes your description. Both are optional.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="ai-features">What makes your place special?</Label>
+              <Textarea
+                id="ai-features"
+                value={aiFeatures}
+                onChange={(e) => setAiFeatures(e.target.value)}
+                placeholder="Pool, mountain views, renovated kitchen, prepaid electricity, fibre…"
+                rows={3}
+                className="text-base resize-none"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ai-area">Anything nearby worth mentioning?</Label>
+              <Input
+                id="ai-area"
+                value={aiArea}
+                onChange={(e) => setAiArea(e.target.value)}
+                placeholder="Close to schools, Gautrain, shopping centre…"
+                className="text-base"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button type="button" variant="outline" disabled={generating} onClick={() => setAiOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              disabled={generating}
+              onClick={() => {
+                const combined = [
+                  aiFeatures.trim(),
+                  aiArea.trim() ? `Nearby/area: ${aiArea.trim()}` : '',
+                ].filter(Boolean).join('; ');
+                setValue?.('ai_key_features', combined, { shouldDirty: true });
+                void handleGenerate(combined);
+              }}
+            >
+              {generating ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
+              {generating ? 'Writing…' : 'Write description'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -264,9 +264,9 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
       {/* Description */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <CardTitle>Description</CardTitle>
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center gap-1">
               {regenerate && (
                 <Button
                   type="button"
@@ -281,7 +281,7 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
                   ) : (
                     <Sparkles className="h-3 w-3 mr-1" />
                   )}
-                  {regenerate.generating ? 'Writing…' : 'Rewrite with AI + photos'}
+                  {regenerate.generating ? 'Writing…' : 'Rewrite with AI'}
                 </Button>
               )}
               <EditBtn step={2} />
