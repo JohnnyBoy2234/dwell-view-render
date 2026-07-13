@@ -4,6 +4,8 @@ import path from "path";
 
 export default defineConfig({
   root: path.resolve(__dirname),
+  // Env files (.env) live at the monorepo root, not per-app
+  envDir: path.resolve(__dirname, "../.."),
   plugins: [react()],
   resolve: {
     alias: {
