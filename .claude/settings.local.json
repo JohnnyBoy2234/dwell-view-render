@@ -110,7 +110,13 @@
       "Bash(VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH npx vite --port 5199 --strictPort)",
       "Bash(VITE_SUPABASE_URL=http://127.0.0.1:54321 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH npx vite --port 5198 --strictPort)",
       "Bash(curl -s -o /dev/null -w \"tenant:%{http_code} \" http://localhost:5199)",
-      "Bash(curl -s -o /dev/null -w \"landlord:%{http_code}\\\\n\" http://localhost:5198)"
+      "Bash(curl -s -o /dev/null -w \"landlord:%{http_code}\\\\n\" http://localhost:5198)",
+      "Read(//home/caleb/.local/share/claude/versions/**)",
+      "Read(//home/caleb/.claude/**)",
+      "Bash(npm -g config get prefix)",
+      "Read(//home/caleb/**)",
+      "Bash(curl -s --max-time 15 https://downloads.claude.ai/claude-code-releases/latest)",
+      "Bash(xargs -I{} date -d @{} +%F)"
     ]
   },
   "enabledMcpjsonServers": [

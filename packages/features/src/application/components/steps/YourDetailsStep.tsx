@@ -57,6 +57,10 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
         if (extracted.date_of_birth) patch.date_of_birth = extracted.date_of_birth;
         if (extracted.nationality) patch.nationality = extracted.nationality;
         update('identity', patch);
+        const names: Record<string, string> = {};
+        if (extracted.first_name) names.first_name = extracted.first_name;
+        if (extracted.last_name) names.last_name = extracted.last_name;
+        if (Object.keys(names).length > 0) update('personal', names);
         setCheckDetails(true);
       } else {
         toast({
