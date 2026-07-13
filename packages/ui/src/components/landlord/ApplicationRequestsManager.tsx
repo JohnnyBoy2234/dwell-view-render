@@ -47,19 +47,8 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
     if (!user) return;
 
     try {
-      // First get the landlord's profile ID
-      const { data: landlordProfile, error: profileError } = await (supabase as any)
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (profileError) throw profileError;
-      if (!landlordProfile) {
-        setRequests([]);
-        return;
-      }
-
+      // application_requests stores auth user ids (matches its RLS policies
+      // and the realtime filter below), not profiles.id
       let query = supabase
         .from('application_requests')
         .select(`
@@ -67,7 +56,7 @@ export function ApplicationRequestsManager({ propertyId }: ApplicationRequestsMa
           properties(title, location),
           profiles!application_requests_tenant_id_fkey(display_name, avatar_url)
         `)
-        .filter('landlord_id', 'eq', (landlordProfile as any).id)
+        .filter('landlord_id', 'eq', user.id)
         .filter('status', 'eq', 'pending')
         .order('created_at', { ascending: false });
 

@@ -6,7 +6,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { Calendar, CheckCircle, Clock, User, Mail, Phone, Building, MapPin, FileText, Download } from 'lucide-react';
+import { CheckCircle, Clock, User, Mail, Building, FileText, Download } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -50,26 +50,17 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
     }
   };
 
+  // One-word badge; the viewing requirement shows on its own status line
   const getApplicationStatus = (application: ApplicationWithTenant) => {
-    const hasCompletedViewing = viewings.some(v => 
-      v.tenant_id === application.tenant_id && 
-      v.status === 'completed' && 
-      v.completed_at
-    );
-
-    if (!hasCompletedViewing && application.status === 'pending') {
-      return { status: 'viewing_required', label: 'Viewing Required', color: 'bg-yellow-100 text-yellow-800' };
-    }
-
     switch (application.status) {
       case 'pending':
-        return { status: 'pending', label: 'Pending Review', color: 'bg-blue-100 text-blue-800' };
+        return { status: 'pending', label: 'Pending', color: 'bg-blue-100 text-blue-800' };
       case 'accepted':
         return { status: 'accepted', label: 'Accepted', color: 'bg-green-100 text-green-800' };
       case 'declined':
         return { status: 'declined', label: 'Declined', color: 'bg-red-100 text-red-800' };
       default:
-        return { status: 'unknown', label: 'Unknown', color: 'bg-gray-100 text-gray-800' };
+        return { status: 'unknown', label: application.status, color: 'bg-gray-100 text-gray-800' };
     }
   };
 
@@ -151,13 +142,12 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                         </div>
                         <div className="min-w-0">
                           <CardTitle className="text-base truncate">
-                            {application.screening_profile?.first_name} {application.screening_profile?.last_name}
-                            {application.tenant_profile?.display_name &&
-                              ` (${application.tenant_profile.display_name})`
-                            }
+                            {[application.screening_profile?.first_name, application.screening_profile?.last_name]
+                              .filter(Boolean)
+                              .join(' ') || application.tenant_profile?.display_name || 'Applicant'}
                           </CardTitle>
                           <p className="text-sm text-muted-foreground">
-                            Applied {format(new Date(application.created_at), 'PPP')}
+                            Applied {format(new Date(application.created_at), 'PP')}
                           </p>
                         </div>
                       </div>
@@ -179,7 +169,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                         ) : (
                           <>
                             <Clock className="h-4 w-4 text-yellow-600" />
-                            <span className="text-yellow-600">Viewing required before application review</span>
+                            <span className="text-yellow-600">Viewing required</span>
                           </>
                         )}
                       </div>
@@ -235,7 +225,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                                   <div>
                                     <h4 className="font-semibold mb-2">Submitted Documents</h4>
                                     <div className="space-y-2">
-                                      {selectedApplication.documents.map((doc: any) => {
+                                      {selectedApplication.documents.map((doc) => {
                                         const fileName = doc.file_path?.split('/').pop() || 'Document';
                                         const docTypeLabel = doc.document_type === 'EXPERIAN_CREDIT_REPORT' 
                                           ? 'Credit Report' 
@@ -274,10 +264,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
                         {/* Accept/Decline buttons for pending applications */}
                         {application.status === 'pending' && (
                           <>
-                            {!hasCompletedViewing && (
-                              <span className="text-xs text-yellow-600">Note: Viewing not completed</span>
-                            )}
-                            <Button 
+                            <Button
                               size="sm"
                               onClick={() => handleAcceptApplication(application.id)}
                             >
