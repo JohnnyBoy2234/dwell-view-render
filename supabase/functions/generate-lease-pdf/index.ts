@@ -785,7 +785,8 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
   const colors = {
     text: rgb(0, 0, 0),
     muted: rgb(0.4, 0.4, 0.4),
-    brand: rgb(0.12, 0.45, 0.96),
+    // App primary blue: hsl(214 100% 59%)
+    brand: rgb(0.18, 0.54, 1),
     rule: rgb(0.85, 0.85, 0.85),
     invisible: rgb(1, 1, 1)
   };
@@ -840,24 +841,21 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
   };
   function drawBrandHeader(p: any) {
     const bandY = pageHeight - headerHeight;
-    const steps = 36;
-    const start = { r: 0.12, g: 0.45, b: 0.96 };
-    const end = { r: 0.16, g: 0.73, b: 0.52 };
-    const stepWidth = pageWidth / steps;
-    for (let i = 0; i < steps; i++) {
-      const t = i / Math.max(steps - 1, 1);
-      p.drawRectangle({
-        x: i * stepWidth,
-        y: bandY,
-        width: stepWidth + 0.5,
-        height: headerHeight,
-        color: rgb(
-          start.r + (end.r - start.r) * t,
-          start.g + (end.g - start.g) * t,
-          start.b + (end.b - start.b) * t
-        )
-      });
-    }
+    // Solid app-blue band — no gradient
+    p.drawRectangle({
+      x: 0,
+      y: bandY,
+      width: pageWidth,
+      height: headerHeight,
+      color: colors.brand
+    });
+    p.drawText("MzanziHomes", {
+      x: margin,
+      y: bandY + headerHeight / 2 - 6,
+      size: 15,
+      font: fontBold,
+      color: rgb(1, 1, 1)
+    });
     if (brandLogo) {
       const logoHeight = 24;
       const logoWidth = brandLogo.width / brandLogo.height * logoHeight;
@@ -921,8 +919,26 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     }
   }
   // Word-wrap so long clauses/values don't run off the right edge.
+  // A single unbroken word (long email, reference number) wider than the
+  // column is split at character level so nothing runs off the page.
+  function breakLongWord(word: string, font: any, size: number, maxWidth: number): string[] {
+    if (font.widthOfTextAtSize(word, size) <= maxWidth) return [word];
+    const parts: string[] = [];
+    let chunk = "";
+    for (const ch of word) {
+      if (font.widthOfTextAtSize(chunk + ch, size) > maxWidth && chunk) {
+        parts.push(chunk);
+        chunk = ch;
+      } else {
+        chunk += ch;
+      }
+    }
+    if (chunk) parts.push(chunk);
+    return parts;
+  }
   function wrapLines(text: string, font: any, size: number, maxWidth: number): string[] {
-    const words = String(text ?? "").split(/\s+/).filter(Boolean);
+    const words = String(text ?? "").split(/\s+/).filter(Boolean)
+      .flatMap((w) => breakLongWord(w, font, size, maxWidth));
     if (words.length === 0) return [""];
     const lines: string[] = [];
     let line = "";
@@ -952,7 +968,14 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     }
   }
   function drawFormRow(label: string, value: string) {
-    ensureSpace(sizes.body + lineGap);
+    const labelWidth = fontBold.widthOfTextAtSize(label, sizes.body);
+    const valueX = margin + labelWidth + 10;
+    const maxValueWidth = pageWidth - margin - valueX;
+    const valueText = value || "________________________";
+    // Long values (addresses, emails, references) wrap under the value column
+    // instead of running off the right edge.
+    const valueLines = wrapLines(valueText, fontBody, sizes.body, maxValueWidth);
+    ensureSpace((sizes.body + lineGap) * valueLines.length);
     page.drawText(label, {
       x: margin,
       y,
@@ -960,7 +983,6 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       font: fontBold,
       color: colors.text
     });
-    const labelWidth = fontBold.widthOfTextAtSize(label, sizes.body);
     page.drawText(":", {
       x: margin + labelWidth + 2,
       y,
@@ -968,15 +990,16 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       font: fontBody,
       color: colors.text
     });
-    const valueText = value || "________________________";
-    page.drawText(valueText, {
-      x: margin + labelWidth + 10,
-      y,
-      size: sizes.body,
-      font: fontBody,
-      color: colors.text
-    });
-    y -= sizes.body + lineGap;
+    for (const ln of valueLines) {
+      page.drawText(ln, {
+        x: valueX,
+        y,
+        size: sizes.body,
+        font: fontBody,
+        color: colors.text
+      });
+      y -= sizes.body + lineGap;
+    }
   }
   function drawRuleLine() {
     ensureSpace(16);
@@ -991,42 +1014,30 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
 
   // Signatures drawn in place at each party's "Signature:" line, with the
   // invisible anchor DocuSign uses to place its signing tab at the same spot.
+  // `lineY` is the baseline of the "Signature: ____" row so the ink sits ON
+  // the line rather than floating below it.
   let signatureContext: 'landlord' | 'tenant' | null = null;
-  async function drawSignatureBlock() {
+  async function drawSignatureBlock(lineY: number) {
     const isLandlord = signatureContext !== 'tenant';
     const anchor = isLandlord ? 'MzanziHomes_SIGN_LANDLORD' : 'MzanziHomes_SIGN_TENANT_1';
     const sigData = isLandlord ? contract?.landlord_signature_data : contract?.tenant_signature_data;
-    const signedAt = isLandlord ? contract?.landlord_signed_at : contract?.tenant_signed_at;
-    ensureSpace(48);
     page.drawText(anchor, {
       x: margin + 120,
-      y,
+      y: lineY,
       size: 8,
       font: fontBody,
       color: colors.invisible
     });
     const img = await embedSignatureFromDataUrl(sigData?.signature_image_url || sigData?.signatureImageUrl || null);
     if (img) {
-      const targetHeight = 28;
+      const targetHeight = 24;
       const targetWidth = img.width / img.height * targetHeight;
       page.drawImage(img, {
-        x: margin + 70,
-        y: y - 6,
+        x: margin + 75,
+        y: lineY - 3,
         width: targetWidth,
         height: targetHeight
       });
-      if (signedAt) {
-        page.drawText(`Signed: ${new Date(signedAt).toLocaleDateString('en-ZA')}`, {
-          x: margin + 70 + targetWidth + 12,
-          y: y + 2,
-          size: sizes.small,
-          font: fontBody,
-          color: colors.muted
-        });
-      }
-      y -= 34;
-    } else {
-      y -= 10;
     }
   }
 
@@ -1116,11 +1127,34 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       // "Label: value" rows (schedule, signature blocks, annexure header).
       // Sentence-style lines ending in a colon ("In this form:") stay prose:
       // an empty value only gets the fill-in underline for Title Case labels.
+      // "Signed at ___ on this ___ day of ___" — filled in with the actual
+      // signing date once the party in context has signed.
+      if (/^Signed at .*day of/.test(line)) {
+        const isLandlordCtx = signatureContext !== 'tenant';
+        const signedAt = isLandlordCtx ? contract?.landlord_signed_at : contract?.tenant_signed_at;
+        if (signedAt) {
+          const dt = new Date(signedAt);
+          const day = getOrdinalSuffix(dt.getDate());
+          const month = dt.toLocaleDateString('en-ZA', { month: 'long' });
+          drawWrapped(`Signed electronically via MzanziHomes on this ${day} day of ${month} ${dt.getFullYear()}`);
+        } else {
+          drawWrapped(line);
+        }
+        continue;
+      }
       const kv = /^([A-Za-z][A-Za-z0-9 ()/&'-]{0,32}):\s*(.*)$/.exec(line);
       if (kv && (kv[2] || kv[1].split(/[\s/]+/).every((w) => /^[A-Z0-9(]/.test(w)))) {
-        if (kv[1] === 'Signature') ensureSpace(90);
+        if (kv[1] === 'Signature') {
+          // Reserve room up front so the row and its signature never split
+          // across a page break, then remember the row's baseline so the ink
+          // lands on the signature line itself.
+          ensureSpace(90);
+          const rowY = y;
+          drawFormRow(kv[1], kv[2]);
+          await drawSignatureBlock(rowY);
+          continue;
+        }
         drawFormRow(kv[1], kv[2]);
-        if (kv[1] === 'Signature') await drawSignatureBlock();
         continue;
       }
       drawWrapped(line);

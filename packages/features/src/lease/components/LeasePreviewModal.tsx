@@ -99,7 +99,9 @@ export function LeasePreviewModal({
   const conditionReportHtml = renderLeaseAsHtml(processedConditionReport);
 
   // Determine if user can sign
-  const canSign = mode === 'landlord' ? !landlordSignature : !tenantSignature;
+  // Signing requires a sign handler — without one the modal is review-only
+  // (e.g. the landlord previewing at creation, before the tenant has signed).
+  const canSign = !!onSign && (mode === 'landlord' ? !landlordSignature : !tenantSignature);
   const hasOtherPartySignature = mode === 'landlord' ? !!tenantSignature : !!landlordSignature;
   const bothSigned = !!landlordSignature && !!tenantSignature;
 
@@ -477,7 +479,7 @@ export function LeasePreviewModal({
                 </Button>
               )}
               
-              {mode === 'landlord' && landlordSignature && !tenantSignature && onSendToTenant && (
+              {mode === 'landlord' && !tenantSignature && onSendToTenant && (
                 <Button onClick={onSendToTenant} disabled={isSending}>
                   <Send className="h-4 w-4 mr-2" />
                   {isSending ? 'Sending...' : 'Send to Tenant'}

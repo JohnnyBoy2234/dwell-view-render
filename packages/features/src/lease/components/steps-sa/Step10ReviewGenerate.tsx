@@ -26,9 +26,9 @@ export function Step10ReviewGenerate({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <h2 className="text-xl font-semibold">Review & Sign</h2>
+        <h2 className="text-xl font-semibold">Review & Send</h2>
         <p className="text-sm text-muted-foreground">
-          Review your lease details and sign the document. After you sign, you can send it to the tenant.
+          Review your lease details, then send it to your tenant. They review and sign first — you countersign after.
         </p>
       </div>
 

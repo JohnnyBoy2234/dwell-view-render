@@ -55,6 +55,11 @@ serve(async (req) => {
       throw new Error("Tenant has already signed this contract");
     }
 
+    // Signing order: the tenant reviews and signs first, the landlord countersigns.
+    if (isLandlord && !contract.tenant_signed_at) {
+      throw new Error("The tenant must sign first. You'll be able to countersign once they have signed.");
+    }
+
     // Generate document hash for audit
     const documentContent = JSON.stringify(contract.contract_data);
     const encoder = new TextEncoder();

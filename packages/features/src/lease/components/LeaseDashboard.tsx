@@ -54,7 +54,8 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   };
 
   const canSign = (contract: LeaseContract) => {
-    if (isLandlord && !contract.landlord_signed_at) return true;
+    // Tenant signs first; the landlord countersigns once the tenant has signed.
+    if (isLandlord) return !!contract.tenant_signed_at && !contract.landlord_signed_at;
     if (!isLandlord && contract.tenant_id === user?.id && !contract.tenant_signed_at) return true;
     return false;
   };

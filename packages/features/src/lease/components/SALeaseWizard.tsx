@@ -46,14 +46,13 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   const [isLoading, setIsLoading] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [isSigning, setIsSigning] = useState(false);
   const [savedContractId, setSavedContractId] = useState<string | null>(contractId || null);
   
   // Lease preview modal state
   const [showLeasePreview, setShowLeasePreview] = useState(false);
   const [landlordSignature, setLandlordSignature] = useState<SignatureInfo | undefined>();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
-  const [successType, setSuccessType] = useState<'signed' | 'sent'>('signed');
+  const [successType, setSuccessType] = useState<'signed' | 'sent'>('sent');
   
   // Auto-save state
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -361,57 +360,8 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
     setShowLeasePreview(true);
   };
 
-  const handleLandlordSign = async (signatureDataUrl: string) => {
-    if (!savedContractId) {
-      toast.error('Please save the contract first');
-      return;
-    }
-    
-    setIsSigning(true);
-    try {
-      // Get IP address
-      let ipAddress = 'unknown';
-      try {
-        const ipResponse = await fetch('https://api.ipify.org?format=json');
-        const ipData = await ipResponse.json();
-        ipAddress = ipData.ip;
-      } catch {}
-      
-      const signatureData = {
-        signature_image_url: signatureDataUrl,
-        signed_at: new Date().toISOString(),
-        ip_address: ipAddress,
-        user_agent: navigator.userAgent,
-        consent_acknowledged: true,
-      };
-      
-      const { error } = await supabase
-        .from('lease_contracts')
-        .update({
-          landlord_signed_at: new Date().toISOString(),
-          landlord_signature_data: signatureData as any,
-          status: 'pending_tenant',
-        })
-        .eq('id', savedContractId);
-      
-      if (error) throw error;
-      
-      setLandlordSignature({
-        imageUrl: signatureDataUrl,
-        name: data.landlordFullName,
-        signedAt: new Date().toLocaleString(),
-      });
-      
-      setShowLeasePreview(false);
-      setSuccessType('signed');
-      setShowSuccessDialog(true);
-    } catch (err) {
-      console.error('Error signing:', err);
-      toast.error('Failed to sign contract');
-    } finally {
-      setIsSigning(false);
-    }
-  };
+  // Landlord signing at creation was removed: the tenant reviews and signs
+  // first, then the landlord countersigns from the Leases tab.
 
   const handleSendToTenant = async () => {
     if (!savedContractId || (!tenantId && !data.tenantEmail)) {
@@ -509,16 +459,15 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
         )}
       </div>
 
-      {/* Lease Preview Modal */}
+      {/* Lease Preview Modal — review only. The tenant signs first; the
+          landlord countersigns from the Leases tab after the tenant signs. */}
       <LeasePreviewModal
         open={showLeasePreview}
         onOpenChange={setShowLeasePreview}
         wizardData={data}
         mode="landlord"
         landlordSignature={landlordSignature}
-        onSign={handleLandlordSign}
         onSendToTenant={handleSendToTenant}
-        isSigning={isSigning}
         isSending={isSending}
       />
 
