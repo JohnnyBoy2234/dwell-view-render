@@ -168,9 +168,8 @@ export default {
 					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
 				},
 				'message-outgoing': {
-					'0%': { transform: 'translateY(6px) translateX(12px) scale(0.96)', opacity: '0' },
-					'70%': { transform: 'translateY(-2px) translateX(0) scale(1.02)', opacity: '1' },
-					'100%': { transform: 'translateY(0) translateX(0) scale(1)', opacity: '1' }
+					'0%': { transform: 'translateY(4px) scale(0.98)', opacity: '0' },
+					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
 				},
 				'message-status-pulse': {
 					'0%': { transform: 'scale(0.9)', opacity: '0.4' },
@@ -207,15 +206,12 @@ export default {
 					'100%': { transform: 'scale(1)', opacity: '1' }
 				},
 				'msg-spring-pop': {
-					'0%': { transform: 'scale(0.55) translateY(14px)', opacity: '0' },
-					'50%': { transform: 'scale(1.08) translateY(-4px)', opacity: '1' },
-					'75%': { transform: 'scale(0.97) translateY(1px)', opacity: '1' },
-					'100%': { transform: 'scale(1) translateY(0)', opacity: '1' }
+					'0%': { transform: 'translateY(6px) scale(0.97)', opacity: '0' },
+					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
 				},
 				'msg-slide-in': {
-					'0%': { transform: 'translateX(-16px) scale(0.96)', opacity: '0' },
-					'60%': { transform: 'translateX(3px) scale(1.01)', opacity: '1' },
-					'100%': { transform: 'translateX(0) scale(1)', opacity: '1' }
+					'0%': { transform: 'translateY(6px) scale(0.97)', opacity: '0' },
+					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
 				},
 				'nav-pill-in': {
 					'0%': { opacity: '0', transform: 'scaleX(0.6)' },
@@ -235,8 +231,8 @@ export default {
 				'attachment-pop': 'attachment-pop 0.3s cubic-bezier(.22,.61,.36,1) both',
 				'conversation-entry': 'conversation-entry 0.28s cubic-bezier(.22,.61,.36,1) both',
 				'badge-pop': 'badge-pop 0.4s ease-out',
-				'msg-spring-pop': 'msg-spring-pop 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) both',
-				'msg-slide-in': 'msg-slide-in 0.3s cubic-bezier(.22,.61,.36,1) both',
+				'msg-spring-pop': 'msg-spring-pop 0.18s cubic-bezier(.22,.61,.36,1) both',
+				'msg-slide-in': 'msg-slide-in 0.18s cubic-bezier(.22,.61,.36,1) both',
 				'nav-pill-in': 'nav-pill-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both'
 			}
 		}
