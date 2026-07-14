@@ -117,10 +117,10 @@ export default function TenantProofOfPayment() {
     <div className="space-y-6">
 
       <Tabs defaultValue="bills" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="bills">Bills & receipts</TabsTrigger>
-          <TabsTrigger value="ai-verification">AI Payment Verification</TabsTrigger>
-          <TabsTrigger value="documents">Document Archive</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+          <TabsTrigger value="bills" className="text-xs sm:text-sm py-1.5 whitespace-nowrap">Bills</TabsTrigger>
+          <TabsTrigger value="ai-verification" className="text-xs sm:text-sm py-1.5 whitespace-nowrap">Verify</TabsTrigger>
+          <TabsTrigger value="documents" className="text-xs sm:text-sm py-1.5 whitespace-nowrap">Documents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="bills" className="space-y-6">

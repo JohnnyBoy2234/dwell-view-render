@@ -159,7 +159,7 @@ const TENANT_DASHBOARD_ROUTE_CONFIG: Record<string, PageConfig> = {
     backPath: '/tenant-dashboard',
   },
   '/proof-of-payment': {
-    title: 'Proof of Payment',
+    title: 'Billings',
     icon: Receipt,
     showSidebar: false,
     showBackButton: true,

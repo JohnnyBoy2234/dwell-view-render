@@ -543,7 +543,7 @@ export function TaxInvoiceGenerator() {
                     await supabase.from('documents').insert({ document_type: 'invoice', file_path: `income-documents/${path}`, file_type: 'application/pdf', status: 'uploaded' } as any);
                     const { error: fnErr } = await supabase.functions.invoke('send-invoice-to-tenant', { body: { tenant_id: tenantId, property_id: '', filename: result.filename, file_path: `income-documents/${path}` } });
                     if (fnErr) throw fnErr;
-                    toast({ title: 'Invoice sent to tenant', description: 'Email sent and document added to Proof of Payments.' });
+                    toast({ title: 'Invoice sent to tenant', description: 'Email sent and document added to Billings.' });
                   } catch (e: any) {
                     toast({ variant: 'destructive', title: 'Failed to send invoice', description: e?.message || 'Please try again.' });
                   }

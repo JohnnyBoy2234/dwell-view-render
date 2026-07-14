@@ -194,7 +194,9 @@ serve(async (req) => {
     });
 
     // ---- Upload ----
-    const fileName = `${bill.landlord_id}/${bill.id}_receipt.pdf`;
+    // Filename leads with the billing period so a saved/downloaded file is
+    // dated (e.g. receipt_2026-01_<id>.pdf). Still unique + stable per bill.
+    const fileName = `${bill.landlord_id}/receipt_${bill.period}_${bill.id}.pdf`;
     const { error: uploadError } = await supabase.storage
       .from('rent-receipts')
       .upload(fileName, pdfBytes, { contentType: 'application/pdf', upsert: true });
@@ -226,7 +228,7 @@ serve(async (req) => {
           total: Number(bill.total_amount),
           dateLabel: `Date: ${fmtDate(new Date(bill.sent_at ?? bill.created_at))}`,
         });
-        const invoiceFileName = `${bill.landlord_id}/${bill.id}_invoice.pdf`;
+        const invoiceFileName = `${bill.landlord_id}/invoice_${bill.period}_${bill.id}.pdf`;
         const { error: invoiceUploadError } = await supabase.storage
           .from('rent-receipts')
           .upload(invoiceFileName, invoiceBytes, { contentType: 'application/pdf', upsert: true });

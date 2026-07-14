@@ -499,7 +499,7 @@ export default function PaymentSuccess() {
             </div>
             <CardTitle className="text-2xl text-green-800">Payment successful 🎉</CardTitle>
             <CardDescription>
-              Your receipt is in your POP (Proof of Payment) section.
+              Your receipt is in your Billings section.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
