@@ -4,7 +4,7 @@ import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/En
 
 export default function ExpenseSummaryPage() {
   return (
-    <EnhancedDashboardLayout title="SARS Expense Summary">
+    <EnhancedDashboardLayout title="SARS Expense Summary" subtitle="Monthly expense report for SARS">
       <ExpenseSummaryReport />
     </EnhancedDashboardLayout>
   );

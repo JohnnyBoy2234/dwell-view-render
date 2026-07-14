@@ -73,10 +73,12 @@ function ScrollToTop() {
 function DashboardShell({
   children,
   title,
+  subtitle,
   currentTab,
 }: {
   children: React.ReactNode;
   title: string;
+  subtitle?: string;
   currentTab: string;
 }) {
   const navigate = useNavigate();
@@ -87,7 +89,7 @@ function DashboardShell({
           <EnhancedSidebar currentTab={currentTab} onTabChange={(tab) => navigate(tab)} />
         </div>
         <div className="flex-1 min-h-0 flex flex-col">
-          <EnhancedDashboardLayout title={title} currentTab={currentTab} onTabChange={(tab) => navigate(tab)}>
+          <EnhancedDashboardLayout title={title} subtitle={subtitle} currentTab={currentTab} onTabChange={(tab) => navigate(tab)}>
             {children}
           </EnhancedDashboardLayout>
         </div>
@@ -174,18 +176,18 @@ function AppRoutes() {
         } />
         {/* No PlanGuard: the record needs both parties regardless of plan (see plan Task 7). */}
         <Route path="/enhancedlandlorddashboard/condition-records" element={
-          <DashboardShell title="Condition Records" currentTab="/enhancedlandlorddashboard/condition-records">
+          <DashboardShell title="Condition Records" subtitle="Photo evidence at move-in and move-out" currentTab="/enhancedlandlorddashboard/condition-records">
             <ConditionRecordsPage />
           </DashboardShell>
         } />
         <Route path="/enhancedlandlorddashboard/condition-records/:recordId" element={
-          <DashboardShell title="Condition Record" currentTab="/enhancedlandlorddashboard/condition-records">
+          <DashboardShell title="Condition Record" subtitle="Photos, notes and attestation" currentTab="/enhancedlandlorddashboard/condition-records">
             <ConditionRecordDetailPage />
           </DashboardShell>
         } />
         <Route path="/enhancedlandlorddashboard/support" element={
           <AuthenticatedRoute>
-            <DashboardShell title="Support" currentTab="/enhancedlandlorddashboard/support">
+            <DashboardShell title="Support" subtitle="Get help with your account and properties" currentTab="/enhancedlandlorddashboard/support">
               <LandlordSupport />
             </DashboardShell>
           </AuthenticatedRoute>
@@ -274,7 +276,7 @@ function AppRoutes() {
         <Route path="/maintenance/:ticketId" element={
           <RouteGuard>
             <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
-              <EnhancedDashboardLayout title="Maintenance Ticket">
+              <EnhancedDashboardLayout title="Maintenance Ticket" subtitle="Request details and updates">
                 <MaintenanceTicketDetails />
               </EnhancedDashboardLayout>
             </PlanGuard>
@@ -321,7 +323,7 @@ function AppRoutes() {
         {/* Settings & identity */}
         <Route path="/settings" element={
           <RouteGuard>
-            <EnhancedDashboardLayout title="Account Settings">
+            <EnhancedDashboardLayout title="Account Settings" subtitle="Security, notifications and account">
               <SettingsPage />
             </EnhancedDashboardLayout>
           </RouteGuard>

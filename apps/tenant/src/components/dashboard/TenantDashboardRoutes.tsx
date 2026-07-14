@@ -23,17 +23,17 @@ export default function TenantDashboardRoutes() {
       <Route index element={<EnhancedTenantDashboard />} />
 
       <Route path="contracts" element={
-        <EnhancedDashboardLayout title="Contract Documents">
+        <EnhancedDashboardLayout title="Contract Documents" subtitle="Your lease agreement and related documents">
           <TenantLeaseDocuments />
         </EnhancedDashboardLayout>
       } />
       <Route path="leases" element={
-        <EnhancedDashboardLayout title="Lease System">
+        <EnhancedDashboardLayout title="Lease System" subtitle="View and sign your lease">
           <LeaseDashboardComponent />
         </EnhancedDashboardLayout>
       } />
       <Route path="viewings" element={
-        <EnhancedDashboardLayout title="Property Viewings">
+        <EnhancedDashboardLayout title="Property Viewings" subtitle="Upcoming and past viewings">
           <TenantPropertyViewings />
         </EnhancedDashboardLayout>
       } />
@@ -43,12 +43,12 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="condition-records" element={
-        <EnhancedDashboardLayout title="Condition Records">
+        <EnhancedDashboardLayout title="Condition Records" subtitle="Photo evidence at move-in and move-out">
           <ConditionRecordsPage />
         </EnhancedDashboardLayout>
       } />
       <Route path="condition-records/:recordId" element={
-        <EnhancedDashboardLayout title="Condition Record">
+        <EnhancedDashboardLayout title="Condition Record" subtitle="Photos, notes and attestation">
           <ConditionRecordDetailPage />
         </EnhancedDashboardLayout>
       } />
@@ -58,27 +58,27 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="applications" element={
-        <EnhancedDashboardLayout title="Applications">
+        <EnhancedDashboardLayout title="Applications" subtitle="Invitations and application status">
           <TenantApplicationsSection />
         </EnhancedDashboardLayout>
       } />
       <Route path="profile" element={
-        <EnhancedDashboardLayout title="Profile Settings">
+        <EnhancedDashboardLayout title="Profile Settings" subtitle="Your details and preferences">
           <ProfilePage />
         </EnhancedDashboardLayout>
       } />
       <Route path="maintenance" element={
-        <EnhancedDashboardLayout title="Maintenance Requests">
+        <EnhancedDashboardLayout title="Maintenance Requests" subtitle="Report issues and track progress">
           <TenantMaintenance />
         </EnhancedDashboardLayout>
       } />
       <Route path="maintenance/responses" element={
-        <EnhancedDashboardLayout title="Maintenance Responses">
+        <EnhancedDashboardLayout title="Maintenance Responses" subtitle="Landlord replies to your requests">
           <TenantMaintenanceResponses />
         </EnhancedDashboardLayout>
       } />
       <Route path="maintenance/:ticketId" element={
-        <EnhancedDashboardLayout title="Maintenance Ticket">
+        <EnhancedDashboardLayout title="Maintenance Ticket" subtitle="Request details and updates">
           <MaintenanceTicketDetails />
         </EnhancedDashboardLayout>
       } />
@@ -86,12 +86,12 @@ export default function TenantDashboardRoutes() {
           dashboard layout would render the "Messages" title twice */}
       <Route path="messages" element={<Messages />} />
       <Route path="payments" element={
-        <EnhancedDashboardLayout title="Payments & Rent">
+        <EnhancedDashboardLayout title="Payments & Rent" subtitle="Rent, bills and payment history">
           <TenantPayments />
         </EnhancedDashboardLayout>
       } />
       <Route path="support" element={
-        <EnhancedDashboardLayout title="Support & Help">
+        <EnhancedDashboardLayout title="Support & Help" subtitle="FAQs and contact support">
           <TenantSupport />
         </EnhancedDashboardLayout>
       } />

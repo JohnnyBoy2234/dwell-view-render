@@ -322,6 +322,7 @@ export default function EnhancedTenantDashboard() {
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden w-full">
             <EnhancedDashboardLayout
               title="Dashboard"
+              subtitle="Your rental at a glance"
               currentTab={currentTab}
               onTabChange={handleTabChange}
             >

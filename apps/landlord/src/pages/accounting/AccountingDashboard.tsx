@@ -5,7 +5,8 @@ import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/En
 export default function AccountingDashboard() {
   return (
     <EnhancedDashboardLayout 
-      title="SwiftBooks" 
+      title="SwiftBooks"
+      subtitle="Track your property finances"
       currentTab="/enhancedlandlorddashboard/swiftbooks"
     >
       <AccountingOverview />

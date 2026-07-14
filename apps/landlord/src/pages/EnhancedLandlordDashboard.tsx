@@ -2885,6 +2885,11 @@ const renderReportsTab = () => (
     : selectedPropertyId
       ? ''
       : 'Property Portfolio';
+  const headerSubtitle = isBaseTab
+    ? 'Everything for managing your rentals'
+    : selectedPropertyId
+      ? undefined
+      : 'Your properties';
 
   return (
     <VerificationGate requireVerification={true}>
@@ -2894,8 +2899,9 @@ const renderReportsTab = () => (
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
           <div className="flex-1 min-w-0 flex flex-col" style={{ contain: 'layout style paint' }}>
-            <EnhancedDashboardLayout 
+            <EnhancedDashboardLayout
               title={headerTitle}
+              subtitle={headerSubtitle}
               currentTab={currentTab}
               onTabChange={handleTabChange}
               selectedPropertyId={selectedPropertyId}

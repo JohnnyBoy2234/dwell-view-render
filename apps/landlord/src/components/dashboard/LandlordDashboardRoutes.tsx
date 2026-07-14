@@ -71,13 +71,13 @@ export default function LandlordDashboardRoutes() {
   return (
     <Routes>
       <Route path="properties" element={
-        <EnhancedDashboardLayout title="Properties Management">
+        <EnhancedDashboardLayout title="Properties Management" subtitle="Your rental properties">
           <LandlordProperties />
         </EnhancedDashboardLayout>
       } />
       <Route path="tenants" element={
         <PlanGuard requiredPlan="pro" featureName="Tenant Management">
-          <EnhancedDashboardLayout title="Tenant Management">
+          <EnhancedDashboardLayout title="Tenant Management" subtitle="Tenants across your properties">
             <LandlordTenants />
           </EnhancedDashboardLayout>
         </PlanGuard>
@@ -91,57 +91,57 @@ export default function LandlordDashboardRoutes() {
       } />
       <Route path="applications" element={
         <PlanGuard requiredPlan="pro" featureName="Tenant Applications">
-          <EnhancedDashboardLayout title="Applications">
+          <EnhancedDashboardLayout title="Applications" subtitle="Applications for your listings">
             <LandlordApplications />
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
       <Route path="payments" element={
         <PlanGuard requiredPlan="pro" featureName="Payment Management">
-          <EnhancedDashboardLayout title="Payments">
+          <EnhancedDashboardLayout title="Payments" subtitle="Rent collection and billing">
             <LandlordPayments />
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
       <Route path="reports" element={
         <PlanGuard requiredPlan="premium" featureName="SwiftBooks & Analytics">
-          <EnhancedDashboardLayout title="SwiftBooks & Analytics">
+          <EnhancedDashboardLayout title="SwiftBooks & Analytics" subtitle="Financial reports and insights">
             <LandlordReports />
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
       <Route path="maintenance" element={
         <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
-          <EnhancedDashboardLayout title="Maintenance Requests">
+          <EnhancedDashboardLayout title="Maintenance Requests" subtitle="Requests from your tenants">
             <LandlordMaintenance />
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
       {/* No PlanGuard: the record needs both parties regardless of plan (see plan Task 7). */}
       <Route path="condition-records" element={
-        <EnhancedDashboardLayout title="Condition Records">
+        <EnhancedDashboardLayout title="Condition Records" subtitle="Photo evidence at move-in and move-out">
           <ConditionRecordsPage />
         </EnhancedDashboardLayout>
       } />
       <Route path="condition-records/:recordId" element={
-        <EnhancedDashboardLayout title="Condition Record">
+        <EnhancedDashboardLayout title="Condition Record" subtitle="Photos, notes and attestation">
           <ConditionRecordDetailPage />
         </EnhancedDashboardLayout>
       } />
       <Route path="maintenance/:ticketId" element={
         <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
-          <EnhancedDashboardLayout title="Maintenance Ticket">
+          <EnhancedDashboardLayout title="Maintenance Ticket" subtitle="Request details and updates">
             <MaintenanceTicketDetails />
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
       <Route path="profile" element={
-        <EnhancedDashboardLayout title="Profile Settings">
+        <EnhancedDashboardLayout title="Profile Settings" subtitle="Your details and preferences">
           <ProfilePage />
         </EnhancedDashboardLayout>
       } />
       <Route path="support" element={
-        <EnhancedDashboardLayout title="Support & Help">
+        <EnhancedDashboardLayout title="Support & Help" subtitle="FAQs and contact support">
           <MzanziHomesSupport />
         </EnhancedDashboardLayout>
       } />

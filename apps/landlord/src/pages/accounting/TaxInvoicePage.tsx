@@ -13,6 +13,7 @@ export default function TaxInvoicePage() {
   return (
     <EnhancedDashboardLayout 
       title="SwiftBooks"
+      subtitle="Generate a tax invoice"
       currentTab="/dashboard/accounting"
       onBackToProperties={handleBack}
     >

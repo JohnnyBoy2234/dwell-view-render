@@ -4,7 +4,7 @@ import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/En
 
 export default function TransactionsPage() {
   return (
-    <EnhancedDashboardLayout title="Transactions">
+    <EnhancedDashboardLayout title="Transactions" subtitle="All income and expenses">
       <TransactionsList />
     </EnhancedDashboardLayout>
   );

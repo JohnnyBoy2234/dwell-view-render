@@ -158,7 +158,7 @@ function AppRoutes() {
         <Route path="/document" element={<AuthenticatedRoute><DocumentViewer /></AuthenticatedRoute>} />
         <Route path="/settings" element={
           <RouteGuard>
-            <EnhancedDashboardLayout title="Account Settings">
+            <EnhancedDashboardLayout title="Account Settings" subtitle="Security, notifications and account">
               <SettingsPage />
             </EnhancedDashboardLayout>
           </RouteGuard>
@@ -177,7 +177,7 @@ function AppRoutes() {
         {/* Maintenance ticket detail */}
         <Route path="/maintenance/:ticketId" element={
           <RouteGuard>
-            <EnhancedDashboardLayout title="Maintenance Ticket">
+            <EnhancedDashboardLayout title="Maintenance Ticket" subtitle="Request details and updates">
               <MaintenanceTicketDetails />
             </EnhancedDashboardLayout>
           </RouteGuard>
