@@ -20,10 +20,13 @@ import {
 } from '@mzanzihomes/ui/components/alert-dialog';
 import {
   conditionRecordState,
+  approvalWindowEndsAt,
   groupPhotosByLocation,
   type ConditionEventType,
   type ConditionParty,
   type ConditionRecordState,
+  type ConditionRecord,
+  type ConditionDispute,
 } from '@mzanzihomes/common';
 import { useConditionRecords, type ConditionRecordListItem } from '../hooks/useConditionRecords';
 import {
@@ -40,8 +43,8 @@ const EVENT_LABEL: Record<ConditionEventType, string> = {
 
 const STATE_LABEL: Record<ConditionRecordState, string> = {
   open: 'Open — collecting photos',
-  awaiting_tenant: 'Awaiting tenant attestation',
-  awaiting_landlord: 'Awaiting landlord attestation',
+  awaiting_receipts: 'Awaiting receipt signatures',
+  awaiting_approval: 'Awaiting approval',
   locked: 'Saved',
 };
 
@@ -212,12 +215,12 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
 
   const state = conditionRecordState(d.record);
   const locked = state === 'locked';
-  const myAttestedAt =
-    d.myParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
   const otherParty: ConditionParty = d.myParty === 'landlord' ? 'tenant' : 'landlord';
+  // Photos and notes are only editable while the record is open; after
+  // "Ready to sign off" everything is frozen until lock (or re-open).
+  const canEdit = state === 'open' && !!d.myParty;
   const otherAttestedAt =
     otherParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
-  const canEdit = !locked && !!d.myParty && !myAttestedAt;
   const myNotes = d.myParty === 'tenant' ? d.record.tenant_notes : d.record.landlord_notes;
   const theirNotes = d.myParty === 'tenant' ? d.record.landlord_notes : d.record.tenant_notes;
 
@@ -237,8 +240,21 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
     <div className={`space-y-6 ${PAGE_PADDING}`}>
       {/* Back navigation lives in the dashboard app bar */}
       {locked ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-          All photos and notes have now been saved and can no longer be added, changed or deleted.
+        <div className="space-y-3">
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            All photos and notes have now been saved and can no longer be added, changed or deleted.
+          </div>
+          <Button
+            variant="outline"
+            className="w-full sm:w-auto"
+            onClick={async () => {
+              const url = await d.getReportUrl();
+              if (url) window.open(url, '_blank');
+            }}
+            disabled={!d.record.pdf_path}
+          >
+            {d.record.pdf_path ? 'Download signed report (PDF)' : 'Report PDF generating…'}
+          </Button>
         </div>
       ) : (
         <div className="flex justify-end">
@@ -276,10 +292,8 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
           </CardContent>
         </Card>
       )}
-      {!canEdit && myAttestedAt && !locked && (
-        <p className="text-sm text-muted-foreground">
-          You attested on {new Date(myAttestedAt).toLocaleString()}. Your photos have been saved and can no longer be changed.
-        </p>
+      {state === 'open' && d.myParty && (
+        <SignOffCard state={state} onSendForSignoff={d.sendForSignoff} hasPhotos={d.photos.length > 0} />
       )}
 
       <Tabs defaultValue="mine">
@@ -341,7 +355,7 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
           <Textarea
             placeholder="Anything a photo can't show (e.g. geyser age, remotes handed over)…"
             value={notesDraft ?? myNotes ?? ''}
-            disabled={locked}
+            disabled={!canEdit}
             onChange={(e) => setNotesDraft(e.target.value)}
           />
           {theirNotes && (
@@ -352,14 +366,21 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
         </CardContent>
       </Card>
 
-      <AttestationCard
-        record={d.record}
-        myParty={d.myParty}
-        myAttestedAt={myAttestedAt}
-        locked={locked}
-        hasPhotos={myPhotos.length > 0}
-        onAttest={d.attest}
-      />
+      {/* Sign-off: receipt (Stage 1) then approval/dispute (Stage 2) */}
+      {(state === 'awaiting_receipts' || state === 'awaiting_approval') && d.myParty && (
+        <SignAndApproveCard
+          record={d.record}
+          myParty={d.myParty}
+          state={state}
+          disputes={d.disputes}
+          locationTags={d.locationTags}
+          onSignReceipt={d.signReceipt}
+          onApprove={d.approve}
+          onRaiseDispute={d.raiseDispute}
+          onRespondDispute={d.respondDispute}
+          onReopen={d.reopen}
+        />
+      )}
 
       {/* Full-size photo viewer — thumbnails are too small to inspect evidence */}
       <Dialog open={lightbox !== null} onOpenChange={(open) => !open && setLightbox(null)}>
@@ -491,98 +512,241 @@ function PartyGallery({
   );
 }
 
-function AttestationCard({
+// Stage gate while the record is open: freeze uploads and begin sign-off.
+function SignOffCard({
+  onSendForSignoff,
+  hasPhotos,
+}: {
+  state: ConditionRecordState;
+  onSendForSignoff: () => Promise<unknown>;
+  hasPhotos: boolean;
+}) {
+  const { toast } = useToast();
+  const [busy, setBusy] = useState(false);
+  const go = async () => {
+    setBusy(true);
+    try {
+      await onSendForSignoff();
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Could not send for sign-off', description: e.message ?? String(e) });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Ready to sign off?</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="text-sm text-muted-foreground">
+          When everyone has added their photos and notes, start sign-off. This freezes uploads, then
+          both parties sign a receipt and get 7 days to approve or dispute the report.
+        </p>
+        <Button className="w-full sm:w-auto" disabled={!hasPhotos || busy} onClick={() => void go()}>
+          {busy ? 'Starting…' : 'Ready to sign off'}
+        </Button>
+        {!hasPhotos && <p className="text-xs text-muted-foreground">Add at least one photo first.</p>}
+      </CardContent>
+    </Card>
+  );
+}
+
+function Countdown({ endsAt }: { endsAt: Date }) {
+  const ms = endsAt.getTime() - Date.now();
+  if (ms <= 0) return <span className="text-amber-600">window closed — finalising</span>;
+  const days = Math.floor(ms / 86_400_000);
+  const hours = Math.floor((ms % 86_400_000) / 3_600_000);
+  return (
+    <span>
+      {days > 0 ? `${days} day${days === 1 ? '' : 's'} ` : ''}
+      {hours} hour{hours === 1 ? '' : 's'} left to respond
+    </span>
+  );
+}
+
+// Receipt (Stage 1) then approval + per-room disputes (Stage 2).
+function SignAndApproveCard({
   record,
   myParty,
-  myAttestedAt,
-  locked,
-  hasPhotos,
-  onAttest,
+  state,
+  disputes,
+  locationTags,
+  onSignReceipt,
+  onApprove,
+  onRaiseDispute,
+  onRespondDispute,
+  onReopen,
 }: {
-  record: { attestation_text: string; tenant_attested_at: string | null; landlord_attested_at: string | null };
-  myParty: ConditionParty | null;
-  myAttestedAt: string | null;
-  locked: boolean;
-  hasPhotos: boolean;
-  onAttest: () => Promise<void>;
+  record: ConditionRecord;
+  myParty: ConditionParty;
+  state: ConditionRecordState;
+  disputes: ConditionDispute[];
+  locationTags: string[];
+  onSignReceipt: () => Promise<unknown>;
+  onApprove: () => Promise<unknown>;
+  onRaiseDispute: (locationTag: string, comment: string, files?: File[]) => Promise<unknown>;
+  onRespondDispute: (disputeId: string, agree: boolean) => Promise<unknown>;
+  onReopen: () => Promise<unknown>;
 }) {
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [attesting, setAttesting] = useState(false);
-  const [attestError, setAttestError] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [busy, setBusy] = useState<string | null>(null);
+  const [disputeTag, setDisputeTag] = useState(locationTags[0] ?? 'Other');
+  const [disputeComment, setDisputeComment] = useState('');
+  const [disputeFiles, setDisputeFiles] = useState<File[]>([]);
 
-  const confirmAttest = async () => {
-    if (attesting) return;
-    setAttesting(true);
-    setAttestError(null);
+  const myReceiptAt = myParty === 'tenant' ? record.tenant_receipt_at : record.landlord_receipt_at;
+  const otherReceiptAt = myParty === 'tenant' ? record.landlord_receipt_at : record.tenant_receipt_at;
+  const myApprovedAt = myParty === 'tenant' ? record.tenant_attested_at : record.landlord_attested_at;
+  const endsAt = approvalWindowEndsAt(record);
+
+  const run = async (key: string, fn: () => Promise<unknown>, errTitle: string) => {
+    setBusy(key);
     try {
-      await onAttest();
-      setConfirmOpen(false);
+      await fn();
     } catch (e: any) {
-      setAttestError(e.message ?? String(e));
+      toast({ variant: 'destructive', title: errTitle, description: e.message ?? String(e) });
     } finally {
-      setAttesting(false);
+      setBusy(null);
     }
+  };
+
+  const submitDispute = async () => {
+    if (!disputeComment.trim()) {
+      toast({ variant: 'destructive', title: 'Add a comment', description: 'Say what you disagree with.' });
+      return;
+    }
+    await run('dispute', async () => {
+      await onRaiseDispute(disputeTag, disputeComment.trim(), disputeFiles);
+      setDisputeComment('');
+      setDisputeFiles([]);
+    }, 'Could not raise dispute');
   };
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-base">Attestation</CardTitle>
+        <CardTitle className="text-base">
+          {state === 'awaiting_receipts' ? 'Step 1: Confirm receipt' : 'Step 2: Approve or dispute'}
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm">{record.attestation_text}</p>
+      <CardContent className="space-y-4">
+        {/* Receipt status */}
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-          <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
-          <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
+          <span>You received: {myReceiptAt ? <span className="text-green-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
+          <span>Other party received: {otherReceiptAt ? <span className="text-green-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
         </div>
-        {myParty && myAttestedAt && (
-          <Badge>You attested on {new Date(myAttestedAt).toLocaleString()}</Badge>
-        )}
-        {!locked && myParty && !myAttestedAt && (
-          <Button className="w-full sm:w-auto" disabled={!hasPhotos} onClick={() => setConfirmOpen(true)}>
-            Confirm and lock my photos
-          </Button>
-        )}
-        {!locked && myParty && !myAttestedAt && !hasPhotos && (
-          <p className="text-xs text-muted-foreground">Add at least one photo before attesting.</p>
-        )}
-        {!locked && (
-          <p className="text-xs text-muted-foreground">
-            Attesting locks your own photo set; once both parties attest the record locks
-            permanently.
-          </p>
-        )}
-        {attestError && !confirmOpen && <p className="text-sm text-destructive">{attestError}</p>}
-      </CardContent>
 
-      <AlertDialog open={confirmOpen} onOpenChange={(open) => !attesting && setConfirmOpen(open)}>
-        <AlertDialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirm your inspection photos</AlertDialogTitle>
-            <AlertDialogDescription>
-              By confirming, you attest that these photos accurately represent the condition of the
-              property at the time of inspection. Once confirmed, the photos will be locked and you
-              will no longer be able to add, edit, replace, or remove them.
-              <br />
-              <br />
-              Please review all photos before continuing.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {attestError && <p className="text-sm text-destructive">{attestError}</p>}
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={attesting}>Go Back and Review</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={attesting}
-              onClick={(e) => {
-                e.preventDefault();
-                void confirmAttest();
-              }}
-            >
-              {attesting ? 'Confirming…' : 'Confirm and Lock Photos'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        {state === 'awaiting_receipts' && !myReceiptAt && (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              Confirm you have received and can access this report. The 7-day review window opens once
+              both parties confirm.
+            </p>
+            <Button className="w-full sm:w-auto" disabled={busy === 'receipt'} onClick={() => void run('receipt', onSignReceipt, 'Could not sign receipt')}>
+              {busy === 'receipt' ? 'Signing…' : 'I confirm I received this report'}
+            </Button>
+          </div>
+        )}
+
+        {state === 'awaiting_receipts' && myReceiptAt && (
+          <p className="text-sm text-muted-foreground">Waiting for the other party to confirm receipt.</p>
+        )}
+
+        {state === 'awaiting_approval' && (
+          <div className="space-y-3">
+            {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
+            <p className="text-sm">{record.attestation_text}</p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+              <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
+              <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
+            </div>
+
+            {myApprovedAt ? (
+              <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
+            ) : (
+              <>
+                <Button className="w-full sm:w-auto" disabled={busy === 'approve'} onClick={() => void run('approve', onApprove, 'Could not approve')}>
+                  {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the report'}
+                </Button>
+
+                {/* Raise a dispute */}
+                <div className="rounded-lg border p-3 space-y-2">
+                  <p className="text-sm font-medium">Disagree with something? Raise a dispute</p>
+                  <select
+                    aria-label="Disputed room"
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    value={disputeTag}
+                    onChange={(e) => setDisputeTag(e.target.value)}
+                  >
+                    {locationTags.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <Textarea
+                    placeholder="Describe what you disagree with in this room…"
+                    value={disputeComment}
+                    onChange={(e) => setDisputeComment(e.target.value)}
+                  />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    className="block w-full text-sm"
+                    onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
+                  />
+                  <Button size="sm" variant="outline" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
+                    {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Existing disputes */}
+        {disputes.length > 0 && (
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Disputes</p>
+            {disputes.map((dsp) => {
+              const mineRaised = dsp.raised_party === myParty;
+              return (
+                <div key={dsp.id} className="rounded-lg border p-3 text-sm space-y-1">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium">{dsp.location_tag}</span>
+                    <Badge variant={dsp.status === 'agreed' ? 'default' : dsp.status === 'disagreed' ? 'destructive' : 'secondary'}>
+                      {dsp.status === 'open' ? 'Awaiting response' : dsp.status === 'agreed' ? 'Agreed' : 'Not agreed'}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground break-words">{dsp.comment}</p>
+                  <p className="text-xs text-muted-foreground">Raised by {dsp.raised_party}</p>
+                  {!mineRaised && dsp.status === 'open' && state === 'awaiting_approval' && (
+                    <div className="flex gap-2 pt-1">
+                      <Button size="sm" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, true), 'Could not respond')}>Agree</Button>
+                      <Button size="sm" variant="outline" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, false), 'Could not respond')}>Disagree</Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Re-open (tamper detection): changing anything revokes all signatures */}
+        <div className="border-t pt-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            disabled={busy === 'reopen'}
+            onClick={() => {
+              if (window.confirm('Re-open for changes? This revokes all signatures collected so far and restarts sign-off.')) {
+                void run('reopen', onReopen, 'Could not re-open');
+              }
+            }}
+          >
+            {busy === 'reopen' ? 'Re-opening…' : 'Need to change something? Re-open (revokes signatures)'}
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }

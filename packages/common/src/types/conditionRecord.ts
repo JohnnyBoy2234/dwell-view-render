@@ -1,21 +1,68 @@
 export type ConditionEventType = 'move_in' | 'move_out';
 export type ConditionParty = 'tenant' | 'landlord';
-export type ConditionRecordState = 'open' | 'awaiting_tenant' | 'awaiting_landlord' | 'locked';
+// Two-stage signing state machine (Phase 1).
+export type ConditionRecordState = 'open' | 'awaiting_receipts' | 'awaiting_approval' | 'locked';
 
 export interface ConditionRecord {
   id: string;
   tenancy_id: string;
   event_type: ConditionEventType;
   attestation_text: string;
+  state: ConditionRecordState;
+  // Approval signatures (Stage 2)
   tenant_attested_at: string | null;
   landlord_attested_at: string | null;
   tenant_attested_by: string | null;
   landlord_attested_by: string | null;
+  // Receipt signatures (Stage 1)
+  tenant_receipt_at: string | null;
+  landlord_receipt_at: string | null;
+  signoff_at: string | null;
+  signoff_by: string | null;
+  window_started_at: string | null;
+  window_days: number;
   tenant_notes: string | null;
   landlord_notes: string | null;
   locked: boolean;
+  pdf_path: string | null;
+  pdf_generated_at: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface ConditionSignature {
+  id: string;
+  record_id: string;
+  signer_id: string | null;
+  party: ConditionParty;
+  kind: 'receipt' | 'approval';
+  auto: boolean;
+  signed_at: string;
+  ip: string | null;
+  user_agent: string | null;
+  consent_text: string | null;
+}
+
+export interface ConditionDispute {
+  id: string;
+  record_id: string;
+  location_tag: string;
+  raised_by: string | null;
+  raised_party: ConditionParty;
+  comment: string;
+  status: 'open' | 'agreed' | 'disagreed';
+  responded_by: string | null;
+  responded_at: string | null;
+  created_at: string;
+}
+
+export interface ConditionAuditEntry {
+  id: string;
+  record_id: string;
+  actor_id: string | null;
+  action: string;
+  details: Record<string, unknown>;
+  created_at: string;
 }
 
 export interface ConditionPhoto {
@@ -25,6 +72,7 @@ export interface ConditionPhoto {
   location_tag: string;
   caption: string | null;
   storage_path: string;
+  dispute_id: string | null;
   created_at: string;
 }
 
@@ -79,10 +127,18 @@ export const ATTESTATION_TEXT =
   'Both parties confirm that the photographs in this record fairly represent the condition of the property as at the date of their agreement.';
 
 export function conditionRecordState(r: ConditionRecord): ConditionRecordState {
+  // The DB `state` column is authoritative; fall back for any row read before
+  // the signing migration populated it.
+  if (r.state) return r.state;
   if (r.tenant_attested_at && r.landlord_attested_at) return 'locked';
-  if (r.tenant_attested_at) return 'awaiting_landlord';
-  if (r.landlord_attested_at) return 'awaiting_tenant';
   return 'open';
+}
+
+// Deadline of the 7-day approval window, or null if not in that stage.
+export function approvalWindowEndsAt(r: ConditionRecord): Date | null {
+  if (r.state !== 'awaiting_approval' || !r.window_started_at) return null;
+  const start = new Date(r.window_started_at);
+  return new Date(start.getTime() + (r.window_days ?? 7) * 24 * 60 * 60 * 1000);
 }
 
 export function groupPhotosByLocation(

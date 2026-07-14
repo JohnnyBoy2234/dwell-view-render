@@ -13,13 +13,22 @@ const base: ConditionRecord = {
   tenancy_id: 't1',
   event_type: 'move_in',
   attestation_text: 'text',
+  state: 'open',
   tenant_attested_at: null,
   landlord_attested_at: null,
   tenant_attested_by: null,
   landlord_attested_by: null,
+  tenant_receipt_at: null,
+  landlord_receipt_at: null,
+  signoff_at: null,
+  signoff_by: null,
+  window_started_at: null,
+  window_days: 7,
   tenant_notes: null,
   landlord_notes: null,
   locked: false,
+  pdf_path: null,
+  pdf_generated_at: null,
   created_at: '2026-07-09T00:00:00Z',
   updated_at: '2026-07-09T00:00:00Z',
 };
@@ -31,28 +40,16 @@ const photo = (id: string, location_tag: string, created_at: string): ConditionP
   location_tag,
   caption: null,
   storage_path: `r1/${id}.jpg`,
+  dispute_id: null,
   created_at,
 });
 
 describe('conditionRecordState', () => {
-  it('is open when nobody has attested', () => {
+  it('returns the record state column verbatim', () => {
     expect(conditionRecordState(base)).toBe('open');
-  });
-  it('awaits the landlord when only the tenant attested', () => {
-    expect(conditionRecordState({ ...base, tenant_attested_at: '2026-07-09T10:00:00Z' })).toBe('awaiting_landlord');
-  });
-  it('awaits the tenant when only the landlord attested', () => {
-    expect(conditionRecordState({ ...base, landlord_attested_at: '2026-07-09T10:00:00Z' })).toBe('awaiting_tenant');
-  });
-  it('is locked when both attested', () => {
-    expect(
-      conditionRecordState({
-        ...base,
-        tenant_attested_at: '2026-07-09T10:00:00Z',
-        landlord_attested_at: '2026-07-09T11:00:00Z',
-        locked: true,
-      }),
-    ).toBe('locked');
+    expect(conditionRecordState({ ...base, state: 'awaiting_receipts' })).toBe('awaiting_receipts');
+    expect(conditionRecordState({ ...base, state: 'awaiting_approval' })).toBe('awaiting_approval');
+    expect(conditionRecordState({ ...base, state: 'locked', locked: true })).toBe('locked');
   });
 });
 
