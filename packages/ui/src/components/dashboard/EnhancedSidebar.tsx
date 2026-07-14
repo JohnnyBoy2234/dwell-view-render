@@ -40,7 +40,7 @@ const tenantItems: SidebarItem[] = [
   { title: 'Inventory', url: '/tenant/inventory', icon: FileText },
   { title: 'Condition Records', url: '/tenant/condition-records', icon: Camera },
   { title: 'Maintenance', url: '/tenant/maintenance', icon: Settings },
-  { title: 'Billings', url: '/tenant/proof-of-payment', icon: Inbox },
+  { title: 'Payment Records', url: '/tenant/proof-of-payment', icon: Inbox },
   { title: 'Lease Contracts', url: '/enhancedtenantdashboard/leases', icon: FileText },
   { title: 'Applications', url: '/tenant/applications', icon: Building },
 ];

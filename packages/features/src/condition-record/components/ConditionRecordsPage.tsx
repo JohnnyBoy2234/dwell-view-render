@@ -42,7 +42,7 @@ const STATE_LABEL: Record<ConditionRecordState, string> = {
   open: 'Open — collecting photos',
   awaiting_tenant: 'Awaiting tenant attestation',
   awaiting_landlord: 'Awaiting landlord attestation',
-  locked: 'Locked',
+  locked: 'Saved',
 };
 
 const PARTY_LABEL: Record<ConditionParty, string> = {
@@ -116,7 +116,7 @@ function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: (
         Started {new Date(item.record.created_at).toLocaleDateString()}
         {state === 'locked' && item.record.landlord_attested_at && item.record.tenant_attested_at && (
           <>
-            {' · '}Locked{' '}
+            {' · '}Saved{' '}
             {new Date(
               [item.record.tenant_attested_at, item.record.landlord_attested_at].sort().slice(-1)[0]!,
             ).toLocaleDateString()}
@@ -236,9 +236,15 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
   return (
     <div className={`space-y-6 ${PAGE_PADDING}`}>
       {/* Back navigation lives in the dashboard app bar */}
-      <div className="flex justify-end">
-        <Badge variant={locked ? 'default' : 'secondary'}>{STATE_LABEL[state]}</Badge>
-      </div>
+      {locked ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          All photos and notes have now been saved and can no longer be added, changed or deleted.
+        </div>
+      ) : (
+        <div className="flex justify-end">
+          <Badge variant="secondary">{STATE_LABEL[state]}</Badge>
+        </div>
+      )}
 
       {canEdit && (
         <Card>
@@ -272,7 +278,7 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
       )}
       {!canEdit && myAttestedAt && !locked && (
         <p className="text-sm text-muted-foreground">
-          You attested on {new Date(myAttestedAt).toLocaleString()}. Your photos are locked.
+          You attested on {new Date(myAttestedAt).toLocaleString()}. Your photos have been saved and can no longer be changed.
         </p>
       )}
 
@@ -441,7 +447,8 @@ function PartyGallery({
                       <img
                         src={photo.url}
                         alt={p.location_tag}
-                        loading="lazy"
+                        loading="eager"
+                        decoding="async"
                         className="aspect-square w-full cursor-zoom-in object-cover"
                       />
                     </button>

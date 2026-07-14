@@ -53,7 +53,7 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="proof-of-payment" element={
-        <EnhancedDashboardLayout title="Billings" subtitle="Bills, invoices and receipts">
+        <EnhancedDashboardLayout title="Payment Records" subtitle="Bills, invoices and receipts">
           <TenantProofOfPayment />
         </EnhancedDashboardLayout>
       } />
