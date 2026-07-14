@@ -163,13 +163,12 @@ export default {
 					'50%': { transform: 'translateY(-2px)' }
 				},
 				'message-incoming': {
-					'0%': { transform: 'translateY(6px) scale(0.98)', opacity: '0' },
-					'60%': { transform: 'translateY(-2px) scale(1.01)', opacity: '1' },
-					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+					'0%': { transform: 'translateY(8px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
 				'message-outgoing': {
-					'0%': { transform: 'translateY(4px) scale(0.98)', opacity: '0' },
-					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+					'0%': { transform: 'translateY(8px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
 				'message-status-pulse': {
 					'0%': { transform: 'scale(0.9)', opacity: '0.4' },
@@ -206,12 +205,12 @@ export default {
 					'100%': { transform: 'scale(1)', opacity: '1' }
 				},
 				'msg-spring-pop': {
-					'0%': { transform: 'translateY(6px) scale(0.97)', opacity: '0' },
-					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+					'0%': { transform: 'translateY(8px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
 				'msg-slide-in': {
-					'0%': { transform: 'translateY(6px) scale(0.97)', opacity: '0' },
-					'100%': { transform: 'translateY(0) scale(1)', opacity: '1' }
+					'0%': { transform: 'translateY(8px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' }
 				},
 				'nav-pill-in': {
 					'0%': { opacity: '0', transform: 'scaleX(0.6)' },
