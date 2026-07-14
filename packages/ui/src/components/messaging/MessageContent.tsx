@@ -7,12 +7,14 @@ interface MessageContentProps {
   content: string;
   isOwn: boolean;
   isLandlord?: boolean;
+  /** Set when the parent renders its own invite CTA (e.g. the chat thread) */
+  hideInviteCta?: boolean;
 }
 
 /**
  * Component to render message content with link parsing and application invite handling
  */
-export function MessageContent({ content, isOwn, isLandlord }: MessageContentProps) {
+export function MessageContent({ content, isOwn, isLandlord, hideInviteCta }: MessageContentProps) {
   const { textParts, urls, inviteUrl } = useMessageParsing({ content });
 
   const handleInviteClick = () => {
@@ -40,14 +42,23 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
     const elements: (string | JSX.Element)[] = [];
     
     textParts.forEach((textPart, index) => {
-      // Only push text part if it's not empty
-      if (textPart) {
-        elements.push(<span key={`text-${index}`}>{textPart}</span>);
+      // Only push text part if it's not empty. When the message carries an
+      // application invite, the raw URL is hidden (the Start Application
+      // button is the CTA) — also drop the dangling "Click here to start:".
+      const cleanedText = inviteUrl
+        ? textPart.replace(/\s*Click here to start:\s*$/i, '')
+        : textPart;
+      if (cleanedText) {
+        elements.push(<span key={`text-${index}`}>{cleanedText}</span>);
       }
-      
-      // Add URL if it exists at this index
+
+      // Add URL if it exists at this index — except the invite URL, which
+      // never renders as raw text.
       if (index < urls.length && urls[index]) {
         const url = urls[index];
+        if (inviteUrl && url.href === inviteUrl) {
+          return;
+        }
         elements.push(
           <a
             key={`link-${url.href}-${index}`}
@@ -79,7 +90,7 @@ export function MessageContent({ content, isOwn, isLandlord }: MessageContentPro
         {Array.isArray(contentToRender) ? contentToRender : <>{contentToRender}</>}
       </div>
       
-      {inviteUrl && !isLandlord && (
+      {inviteUrl && !isLandlord && !hideInviteCta && (
         <div className="mt-2">
           <Button
             size="sm"

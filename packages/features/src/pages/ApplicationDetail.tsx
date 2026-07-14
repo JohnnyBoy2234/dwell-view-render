@@ -321,9 +321,13 @@ export default function ApplicationDetail() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-4 sm:p-6 max-w-4xl">
-        <Button variant="outline" className="mb-6" onClick={() => navigate(dashboard)}>
+        <Button
+          variant="outline"
+          className="mb-6"
+          onClick={() => (window.history.length > 1 ? navigate(-1) : navigate(dashboard))}
+        >
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Dashboard
+          Back
         </Button>
 
         <div className="mb-6">

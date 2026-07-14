@@ -454,7 +454,7 @@ export function WhatsAppStyleThread({
               className="text-[14.5px] leading-[1.45] whitespace-pre-line break-words hyphens-auto"
               style={{ overflowWrap: 'anywhere' }}
             >
-              <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} />
+              <MessageContent content={message.content} isOwn={isOwn} isLandlord={isLandlord} hideInviteCta />
             </div>
           )}
 

@@ -247,10 +247,10 @@ export default function AddProperty() {
         <div className="flex flex-col items-left gap-4 mb-8">
           <Button
             variant="outline"
-            onClick={() => navigate("/enhancedlandlorddashboard")}
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/enhancedlandlorddashboard"))}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Dashboard
+            Back
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-primary">

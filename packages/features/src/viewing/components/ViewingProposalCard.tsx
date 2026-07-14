@@ -166,8 +166,9 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
   const canStartApplication = user && !effectiveIsLandlord && user.id === proposal.tenant_id && proposal.status === 'confirmed';
 
   const [applicationRequest, setApplicationRequest] = useState<{ id: string; status: string } | null>(null);
+  const [landlordInvite, setLandlordInvite] = useState<{ token: string } | null>(null);
 
-  // Check for existing application request
+  // Check for existing application request and landlord-sent invite
   useEffect(() => {
     if (user && proposal.status === 'confirmed') {
       checkApplicationRequest();
@@ -178,16 +179,27 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('application_requests')
-        .select('id, status')
-        .filter('property_id', 'eq', proposal.property_id)
-        .filter('tenant_id', 'eq', user.id)
-        .maybeSingle();
+      const [{ data, error }, { data: invite }] = await Promise.all([
+        supabase
+          .from('application_requests')
+          .select('id, status')
+          .filter('property_id', 'eq', proposal.property_id)
+          .filter('tenant_id', 'eq', user.id)
+          .maybeSingle(),
+        supabase
+          .from('application_invites')
+          .select('token')
+          .filter('property_id', 'eq', proposal.property_id)
+          .filter('tenant_id', 'eq', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle(),
+      ]);
 
       if (error && error.code !== 'PGRST116') throw error;
 
       setApplicationRequest((data as any) || null);
+      setLandlordInvite((invite as any) || null);
     } catch (error: any) {
       console.error('Error checking application request:', error);
     }
@@ -384,26 +396,39 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
               <span className="font-medium">Viewing confirmed! You'll receive reminders.</span>
             </div>
             
+            {/* If the landlord already sent an invite, requesting is moot —
+                go straight to the application. */}
+            {landlordInvite && (
+              <Button
+                size="sm"
+                onClick={() => navigateToInvite(landlordInvite.token)}
+                disabled={loading}
+                className="w-full bg-green-600 hover:bg-green-700"
+              >
+                Start Application
+              </Button>
+            )}
+
             {/* Show different UI based on application request status */}
-            {!applicationRequest && (
-              <Button 
-                size="sm" 
-                onClick={handleRequestApplication} 
+            {!applicationRequest && !landlordInvite && (
+              <Button
+                size="sm"
+                onClick={handleRequestApplication}
                 disabled={loading}
                 className="w-full"
               >
                 {loading ? 'Requesting...' : 'Request Application'}
               </Button>
             )}
-            
-            {applicationRequest?.status === 'pending' && (
+
+            {!landlordInvite && applicationRequest?.status === 'pending' && (
               <div className="flex items-center gap-2 text-amber-700 text-sm bg-amber-50 border border-amber-200 rounded p-2">
                 <Clock className="h-4 w-4" />
                 <span>Application request pending approval</span>
               </div>
             )}
             
-            {applicationRequest?.status === 'approved' && (
+            {!landlordInvite && applicationRequest?.status === 'approved' && (
               <Button 
                 size="sm" 
                 onClick={handleStartApplication} 

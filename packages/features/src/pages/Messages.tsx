@@ -422,9 +422,13 @@ export default function Messages() {
             >
               <div className="flex items-center gap-2.5">
                 <button
-                  onClick={() => navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')}
+                  onClick={() =>
+                    window.history.length > 1
+                      ? navigate(-1)
+                      : navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')
+                  }
                   className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-muted transition-colors"
-                  aria-label="Back to dashboard"
+                  aria-label="Back"
                 >
                   <ArrowLeft className="h-4 w-4 text-muted-foreground" />
                 </button>

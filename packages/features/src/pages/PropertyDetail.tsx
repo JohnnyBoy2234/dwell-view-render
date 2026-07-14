@@ -441,9 +441,9 @@ export default function PropertyDetail() {
 
         {/* Navigation */}
         <div className="flex items-center gap-4 mb-6">
-          <Button variant="outline" onClick={() => navigate('/properties')}>
+          <Button variant="outline" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/properties'))}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Properties
+            Back
           </Button>
           <div className="flex-1" />
           <SharePropertyMenu

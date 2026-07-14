@@ -363,7 +363,7 @@ export default function ListSale() {
       <div className="container mx-auto p-6 max-w-4xl pb-32 md:pb-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
-          <Button variant="outline" onClick={() => navigate('/')}>
+          <Button variant="outline" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
