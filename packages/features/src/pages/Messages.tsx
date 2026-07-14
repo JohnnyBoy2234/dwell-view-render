@@ -475,14 +475,15 @@ export default function Messages() {
         {/* Full-screen chat */}
         {!showConversations && selectedConversation && (
           <div
-            className="fixed left-0 right-0 top-0 flex flex-col z-30 bg-background"
+            className="fixed left-0 right-0 flex flex-col z-30 bg-background"
             style={{
               // Size to the visible viewport so the header stays pinned to the
-              // top and the composer sits above the keyboard. Falls back to the
-              // full small-viewport height before visualViewport reports in.
+              // top and the composer sits above the keyboard. No CSS transition:
+              // the browser animates the keyboard itself and visualViewport
+              // reports intermediate frames, so the pane follows 1:1 and smooth.
+              // Adding our own transition on top caused an up-then-down bounce.
+              top: chatViewport.offsetTop ? `${chatViewport.offsetTop}px` : 0,
               height: chatViewport.height ? `${chatViewport.height}px` : '100svh',
-              transform: chatViewport.offsetTop ? `translateY(${chatViewport.offsetTop}px)` : undefined,
-              transition: 'height 0.25s cubic-bezier(.22,.61,.36,1), transform 0.25s cubic-bezier(.22,.61,.36,1)',
               overscrollBehavior: 'contain',
             }}
           >

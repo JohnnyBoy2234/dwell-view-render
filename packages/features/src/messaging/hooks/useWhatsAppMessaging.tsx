@@ -146,9 +146,10 @@ export function useWhatsAppMessaging() {
       setConversations(conversationsWithUnread as ConversationData[]);
       setLoading(false);
 
-      // Cache in localStorage for faster loading
+      // Cache in localStorage for faster loading — namespaced by user so a
+      // different account never reads this account's cached conversations.
       try {
-        localStorage.setItem('messaging_conversations', JSON.stringify(conversationsWithUnread));
+        localStorage.setItem(`messaging_conversations_${user.id}`, JSON.stringify(conversationsWithUnread));
       } catch {}
 
     } catch (error: any) {
@@ -252,7 +253,7 @@ export function useWhatsAppMessaging() {
 
       // Cache in localStorage
       try {
-        localStorage.setItem(`messaging_messages_${conversationId}`, JSON.stringify(serverMessages));
+        localStorage.setItem(`messaging_messages_${user.id}_${conversationId}`, JSON.stringify(serverMessages));
       } catch {}
 
     } catch (error: any) {
@@ -755,8 +756,8 @@ export function useWhatsAppMessaging() {
   useEffect(() => {
     if (user) {
       try {
-        // Load conversations from cache
-        const cachedConversations = localStorage.getItem('messaging_conversations');
+        // Load conversations from this user's own cache only
+        const cachedConversations = localStorage.getItem(`messaging_conversations_${user.id}`);
         if (cachedConversations) {
           const parsed = JSON.parse(cachedConversations);
           setConversations(parsed);

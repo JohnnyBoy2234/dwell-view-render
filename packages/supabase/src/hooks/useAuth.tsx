@@ -270,14 +270,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthLoading(false);
       setRolesLoading(false);
       
-      // Clear all auth data from localStorage
-      localStorage.removeItem('sb-rsfrvjaqxhoqavvscvwf-auth-token');
-      localStorage.removeItem('supabase.auth.token');
-      // Clear cached roles
-      // Note: we can't know previous user id here reliably, so clear all sr_roles_* keys
-      Object.keys(localStorage)
-        .filter(k => k.startsWith('sr_roles_'))
-        .forEach(k => localStorage.removeItem(k));
+      // Clear ALL cached user data from localStorage so the next account that
+      // signs in never briefly sees the previous account's data (messages,
+      // conversations, drafts, roles, etc.). Only cross-account-safe keys
+      // (theme, cookie consent, language) are preserved.
+      try {
+        const keep = (k: string) => /theme|cookie|consent|lang|i18n/i.test(k);
+        Object.keys(localStorage).forEach((k) => {
+          if (!keep(k)) localStorage.removeItem(k);
+        });
+      } catch (e) {
+        console.warn('Failed to clear cached data on sign out', e);
+      }
       
       // Then sign out from server
       const { error } = await supabase.auth.signOut({ scope: 'local' });
