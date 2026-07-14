@@ -22,6 +22,7 @@ create index if not exists idx_property_inventory_items_property
 
 alter table public.property_inventory_items enable row level security;
 
+drop policy if exists "Landlords manage their property inventory" on public.property_inventory_items;
 create policy "Landlords manage their property inventory"
   on public.property_inventory_items
   for all
@@ -40,6 +41,7 @@ create policy "Landlords manage their property inventory"
     )
   );
 
+drop policy if exists "Tenants can view their property inventory" on public.property_inventory_items;
 create policy "Tenants can view their property inventory"
   on public.property_inventory_items
   for select
@@ -60,6 +62,7 @@ create policy "Tenants can view their property inventory"
     )
   );
 
+drop trigger if exists update_property_inventory_items_updated_at on public.property_inventory_items;
 create trigger update_property_inventory_items_updated_at
   before update on public.property_inventory_items
   for each row execute function public.update_updated_at_column();
