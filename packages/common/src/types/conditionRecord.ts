@@ -26,6 +26,10 @@ export interface ConditionRecord {
   locked: boolean;
   pdf_path: string | null;
   pdf_generated_at: string | null;
+  // QR verification layer (Phase 1.5)
+  verify_token?: string;
+  report_ref?: string | null;
+  content_hash?: string | null;
   created_at: string;
   updated_at: string;
 }

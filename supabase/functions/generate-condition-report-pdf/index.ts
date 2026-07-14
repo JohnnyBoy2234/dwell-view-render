@@ -7,6 +7,12 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { Image } from "https://deno.land/x/imagescript@1.2.15/mod.ts";
+import QRCode from "https://esm.sh/qrcode@1.5.3";
+
+async function sha256Hex(bytes: Uint8Array): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -103,7 +109,8 @@ serve(async (req) => {
       if (record.tenant_notes) { text("Tenant:", { f: bold }); text(record.tenant_notes, { indent: 10 }); }
     }
 
-    // Photos grouped by room
+    // Photos grouped by room. Per-photo hashes feed the report content hash.
+    const photoHashes: string[] = [];
     const rooms = [...new Set((photos ?? []).filter((p: any) => !p.dispute_id).map((p: any) => p.location_tag))];
     for (const room of rooms) {
       heading(room);
@@ -115,6 +122,7 @@ serve(async (req) => {
           const { data: blob } = await supabase.storage.from(BUCKET).download(p.storage_path);
           if (!blob) continue;
           const bytes = new Uint8Array(await blob.arrayBuffer());
+          photoHashes.push(`${p.storage_path}:${await sha256Hex(bytes)}`);
           const img = await Image.decode(bytes);
           const scale = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
           if (scale < 1) img.resize(Math.round(img.width * scale), Math.round(img.height * scale));
@@ -171,6 +179,42 @@ serve(async (req) => {
     rule();
     text("This condition report is annexed to the lease agreement in accordance with section 5(3) of the Rental Housing Act 50 of 1999. It records the condition of the property as agreed by the parties and is retained as a permanent, tamper-evident record.", { size: 8, color: muted });
 
+    // ---- Content hash (the report's digital fingerprint) ----
+    const fingerprint = JSON.stringify({
+      property: tenancy?.property_id,
+      tenant: tenancy?.tenant_id,
+      landlord: tenancy?.landlord_id,
+      event: record.event_type,
+      notes: { landlord: record.landlord_notes, tenant: record.tenant_notes },
+      photos: photoHashes,
+      signatures: (signatures ?? []).map((s: any) => `${s.party}:${s.kind}:${s.signed_at}:${s.auto}`),
+      disputes: (disputes ?? []).map((x: any) => `${x.location_tag}:${x.raised_party}:${x.comment}:${x.status}`),
+    });
+    const contentHash = await sha256Hex(new TextEncoder().encode(fingerprint));
+
+    // ---- QR code + verification footer on every page ----
+    const verifyUrl = `https://rsfrvjaqxhoqavvscvwf.supabase.co/functions/v1/verify-condition-report?token=${record.verify_token}`;
+    let qrImg: any = null;
+    try {
+      const dataUrl: string = await QRCode.toDataURL(verifyUrl, { margin: 1, width: 240 });
+      const qrBytes = Uint8Array.from(atob(dataUrl.split(",")[1]), (c) => c.charCodeAt(0));
+      qrImg = await doc.embedPng(qrBytes);
+    } catch (_e) { /* footer still renders without the QR */ }
+
+    const acceptedLine = `Tenant accepted ${fmtDT(record.tenant_attested_at)}  ·  Landlord accepted ${fmtDT(record.landlord_attested_at)}`;
+    const pages = doc.getPages();
+    pages.forEach((p, i) => {
+      const fy = 44;
+      p.drawLine({ start: { x: M, y: fy + 20 }, end: { x: W - M, y: fy + 20 }, thickness: 0.5, color: rgb(0.85, 0.85, 0.85) });
+      p.drawText(`MzanziHomes Condition Report   ${record.report_ref ?? ""}   Locked & Immutable`, { x: M, y: fy + 8, size: 8, font: bold, color: rgb(0, 0, 0) });
+      p.drawText(acceptedLine, { x: M, y: fy - 2, size: 7, font, color: muted });
+      p.drawText(`Fingerprint ${contentHash.slice(0, 32)}…   Page ${i + 1} of ${pages.length}`, { x: M, y: fy - 11, size: 6, font, color: muted });
+      if (qrImg) {
+        p.drawImage(qrImg, { x: W - M - 46, y: fy - 10, width: 46, height: 46 });
+        p.drawText("Scan to verify", { x: W - M - 52, y: fy - 18, size: 6, font, color: muted });
+      }
+    });
+
     const pdfBytes = await doc.save();
 
     // ---- Store + link ----
@@ -180,7 +224,7 @@ serve(async (req) => {
     if (upErr) throw upErr;
 
     await supabase.from("condition_records")
-      .update({ pdf_path: path, pdf_generated_at: new Date().toISOString() })
+      .update({ pdf_path: path, pdf_generated_at: new Date().toISOString(), content_hash: contentHash })
       .eq("id", record_id);
 
     return new Response(JSON.stringify({ success: true, path }), {
