@@ -140,6 +140,8 @@ export function evaluateCondition(condition: string, data: LeaseWizardData): boo
       return data.hasGarden;
     case 'PETS_ALLOWED':
       return data.petsAllowed;
+    case 'PETS_NOT_ALLOWED':
+      return !data.petsAllowed;
     case 'SMOKING_ALLOWED':
       return data.smokingAllowed;
     case 'HAS_ALARM_SECURITY':

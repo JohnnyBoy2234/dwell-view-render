@@ -78,6 +78,8 @@ TERMS AND CONDITIONS
 
 1.6 The provisions of this agreement shall be deemed severable, and the unenforceability of any one of the provisions shall not affect the enforceability of other provisions. In the event that a provision is found to be unenforceable, the parties shall substitute that provision with an enforceable provision that preserves the original intent and position of the parties.
 
+1.7 "Fair wear and tear" means the natural deterioration of the property through ordinary and reasonable use over time, and does not include damage caused by negligence, misuse or wilful acts. The tenant is not liable for fair wear and tear.
+
 2. RECITAL
 
 2.1 The landlord hereby lets, and the tenant takes in hire the property on the terms and conditions contained herein, and that the schedule, with the personal details of the parties and the property shall form an integral part of this agreement as if incorporated into the body thereof.
@@ -112,7 +114,7 @@ TERMS AND CONDITIONS
 
 4.3 Should the agreement be renewed or extended, the tenant agrees to a rental escalation as agreed between the parties in the schedule, or any other amount as may be agreed on between the parties.
 
-4.4 The tenant agrees to pay a deposit, as specifically set out in the schedule to this agreement, to the landlord, which may be appropriated by the landlord against any amount(s) which may be outstanding at any time in terms of this agreement and/or any other liability of whatsoever nature for which the tenant is responsible to the landlord, including damages, and which amount may be retained by the landlord throughout the duration of this agreement and until final determination of any such amounts due by the tenant. The tenant shall not be entitled to set off against the deposit any rent or any other amount payable. The deposit will be kept in an interest-bearing trust account and the deposit amount plus accrued interest will be refunded to the tenant upon termination of this agreement, less bank charges and other administrative costs, and further less any amounts deductible in terms of this agreement.
+4.4 The tenant agrees to pay a deposit, as specifically set out in the schedule to this agreement, to the landlord, which may be appropriated by the landlord against any amount(s) which may be outstanding at any time in terms of this agreement and/or any other liability of whatsoever nature for which the tenant is responsible to the landlord, including damages, and which amount may be retained by the landlord throughout the duration of this agreement and until final determination of any such amounts due by the tenant. The tenant shall not be entitled to set off against the deposit any rent or any other amount payable. The deposit shall be held by the landlord in an interest-bearing account with a registered financial institution for the duration of this agreement. All interest on the deposit accrues to the tenant, who may at any time request written proof of the interest accrued. The deposit amount plus accrued interest will be refunded to the tenant upon termination of this agreement, less any amounts deductible in terms of this agreement.
 
 4.5 Should the rent increase, the tenant agrees to increase the deposit proportionately. Further, the tenant agrees to restore and top up the deposit within 3 business days of being requested to do so whenever required in terms of this agreement.
 
@@ -125,6 +127,8 @@ TERMS AND CONDITIONS
 4.9 Should the tenant fail to effect timeous and proper payment of any of the amounts above, it will be construed a material breach of this agreement. Should any supplier or service provider terminate a service due to the tenant's non-payment, the tenant will be liable for any reconnection or reinstatement fees applicable.
 
 4.10 It is specifically recorded that the tenant shall be responsible for the monthly municipal account, except for rates and taxes levied on the property, which amount the tenants shall be required to pay monthly in arrears, as it appears on the outstanding invoice made available to the tenant.
+
+4.11 On termination of this agreement the deposit, together with accrued interest, shall be refunded to the tenant within 7 days of expiry of the lease where no amounts are owed and no damage must be repaired. Where repairs are required, the balance of the deposit shall be refunded within 14 days of restoration of the property. Where the tenant fails to attend the outgoing inspection, the balance shall be refunded within 21 days of expiry of the lease, all in accordance with the Rental Housing Act.
 
 5. DURATION OF LEASE
 
@@ -256,12 +260,10 @@ TERMS AND CONDITIONS
 [[ENDIF]]
 [[ENDIF]]
 
-[[IF PETS_ALLOWED]]
-15.4 The tenant shall be responsible for the maintenance of the interior of the Property, which shall include but not be limited to all appliances, furniture, floors, fitted carpets (if any), locks and keys, electric light fittings and light bulbs, doors, door frames, windows, window frames and window panes, and shall make good and repair any damage which may occur thereto, howsoever arising, and shall at the conclusion of the agreement return the property in the same good order and condition (fair wear and tear excepted).
-[[ENDIF]]
+15.4 The tenant shall be responsible for the maintenance of the interior of the Property, which shall include but not be limited to all appliances, furniture, floors, fitted carpets (if any), locks and keys, electric light fittings and light bulbs, doors, door frames, windows, window frames and window panes, and shall make good and repair any damage which may occur thereto, other than fair wear and tear, and shall at the conclusion of the agreement return the property in the same good order and condition (fair wear and tear excepted).
 
 [[IF HAS_POOL]]
-15.5 The tenant shall be responsible for the maintenance and upkeeping, at their own costs, of the swimming pool and shall make good and repair any damage which may occur thereto, howsoever arising.
+15.5 The tenant shall be responsible for the maintenance and upkeeping, at their own costs, of the swimming pool and shall make good and repair any damage which may occur thereto, fair wear and tear excepted.
 [[ENDIF]]
 
 [[IF HAS_GARDEN]]
@@ -316,7 +318,7 @@ TERMS AND CONDITIONS
 
 21. SUB-LETTING AND CESSION
 
-21.1 The tenant shall not be entitled to sub-let the property or any part thereof or to cede or assign any rights or obligations without the prior written consent of the landlord, in which event the tenant agrees that he still remains liable to the landlord for the full rental and all obligations contained herein.
+21.1 The tenant shall not be entitled to sub-let the property or any part thereof or to cede or assign any rights or obligations without the prior written consent of the landlord, in which event the tenant agrees that he still remains liable to the landlord for the full rental and all obligations contained herein. For the avoidance of doubt, letting the property or any part of it on any short-term letting platform (including Airbnb or similar) is expressly prohibited without the landlord's prior written consent.
 
 21.2 The landlord shall be entitled to cede and/or assign all its rights and obligations under the agreement to a third party without the consent and/or permission of the tenant.
 
@@ -325,6 +327,8 @@ TERMS AND CONDITIONS
 22.1 The tenant agrees to be liable for the landlord's legal fees on an attorney and client scale, including collection commission and tracing agent fees, in the event of the landlord taking legal action against the tenant as a result of a breach of any terms of the agreement.
 
 22.2 The landlord and tenant consent to the jurisdiction of the Magistrates Court in the event of any dispute or legal action arising in connection with the agreement or the validity thereof, notwithstanding the fact that claim exceeds such courts usual jurisdiction.
+
+22.3 Without prejudice to any other right or remedy, either party may refer any dispute arising from this agreement or the tenancy to the Provincial Rental Housing Tribunal, whose services are free of charge.
 
 23. SURETY
 
@@ -340,7 +344,7 @@ TERMS AND CONDITIONS
 
 25. OCCUPANTS
 
-The tenant warrants and confirms that only the persons listed in the schedule will be residing and occupying the Property.
+The tenant warrants and confirms that only the persons listed in the schedule will be residing and occupying the Property. No additional person may take up residence at the property without the landlord's prior written consent.
 
 26. NOTICES
 
@@ -372,6 +376,10 @@ The tenant warrants and confirms that only the persons listed in the schedule wi
 
 [[IF PETS_ALLOWED]]
 27.2 The landlord agrees and consents to pets being kept at the property as specified in the schedule.
+[[ENDIF]]
+
+[[IF PETS_NOT_ALLOWED]]
+27.2 No animals, birds or reptiles of any kind may be kept at the property without the prior written consent of the landlord.
 [[ENDIF]]
 
 27.3 No smoking will be allowed inside the property without the prior written consent of the landlord.
