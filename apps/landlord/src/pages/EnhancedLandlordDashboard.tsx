@@ -23,7 +23,7 @@ const RIcon = ({ className }: { className?: string }) => (
   </div>
 );
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
-import { RentCollectionCard, usePlanCheckout, LandlordBillingPanel } from '@mzanzihomes/features/billing';
+import { RentCollectionCard, usePlanCheckout, LandlordBillingPanel, formatPeriod } from '@mzanzihomes/features/billing';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { BUILD_TAG } from '@/version';
 import { MaintenanceRequest } from '@mzanzihomes/common/types/maintenance';
@@ -293,6 +293,9 @@ export default function EnhancedLandlordDashboard() {
   // Global application leads (across all properties) for quick invites
   const [appLeads, setAppLeads] = useState<Array<{ conversation_id: string; tenant_id: string; property_id: string; title: string; tenant_name: string; last_message_at?: string }>>([]);
   const [appInvitesMap, setAppInvitesMap] = useState<Record<string, any>>({}); // key: `${tenant_id}:${property_id}`
+  // Per-tenant payment history on the Payments tab (bills by tenancy)
+  const [tenantBills, setTenantBills] = useState<any[]>([]);
+  const [expandedTenantBills, setExpandedTenantBills] = useState<string | null>(null);
 
   // Sync selectedPropertyId with URL params
   useEffect(() => {
@@ -371,6 +374,12 @@ export default function EnhancedLandlordDashboard() {
     }
     if (currentTab === '/enhancedlandlorddashboard/inventory') {
       void fetchLandlordInventory(selectedPropertyId || undefined);
+    }
+    if (currentTab === '/enhancedlandlorddashboard/payments') {
+      (supabase.from('monthly_bills') as any)
+        .select('*')
+        .order('period', { ascending: false })
+        .then(({ data }: any) => setTenantBills(data || []));
     }
   }, [currentTab]);
 
@@ -1644,13 +1653,57 @@ export default function EnhancedLandlordDashboard() {
                         size="sm"
                         variant="outline"
                         className="w-full sm:w-auto"
-                        onClick={() => navigate(`/tenant-profile/${tenant.id}`)}
+                        onClick={() => setExpandedTenantBills(expandedTenantBills === tenant.id ? null : tenant.id)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        View
+                        {expandedTenantBills === tenant.id ? 'Hide payments' : 'Payments'}
                       </Button>
                     </div>
                   </div>
+
+                  {/* Per-tenant payment history: month, paid date, invoice + receipt */}
+                  {expandedTenantBills === tenant.id && (() => {
+                    const bills = tenantBills.filter((b) => b.tenancy_id === tenant.id);
+                    const docUrl = (path: string, bill: any) =>
+                      `${supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl}?v=${encodeURIComponent(bill?.updated_at ?? '')}`;
+                    return (
+                      <div className="mt-4 border-t pt-3 space-y-2">
+                        {bills.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">No bills for this tenant yet.</p>
+                        ) : (
+                          bills.map((bill) => (
+                            <div key={bill.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg bg-muted/40 px-3 py-2">
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium">Payment for {formatPeriod(bill.period)}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  R{Number(bill.total_amount).toLocaleString()}
+                                  {bill.status === 'paid'
+                                    ? bill.paid_at ? ` • Paid ${new Date(bill.paid_at).toLocaleDateString('en-ZA')}` : ' • Paid'
+                                    : bill.status === 'sent' ? ' • Awaiting payment' : ' • Draft'}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                {bill.invoice_pdf_path ? (
+                                  <Button variant="outline" size="sm" asChild>
+                                    <a href={docUrl(bill.invoice_pdf_path, bill)} target="_blank" rel="noreferrer">Invoice</a>
+                                  </Button>
+                                ) : null}
+                                {bill.status === 'paid' ? (
+                                  bill.receipt_pdf_path ? (
+                                    <Button variant="outline" size="sm" asChild>
+                                      <a href={docUrl(bill.receipt_pdf_path, bill)} target="_blank" rel="noreferrer">Receipt</a>
+                                    </Button>
+                                  ) : (
+                                    <span className="text-xs text-muted-foreground">Receipt generating…</span>
+                                  )
+                                ) : null}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             ))}
@@ -2524,7 +2577,6 @@ const renderReportsTab = () => (
       { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
       { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
       ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
-      { title: 'SwiftBooks',     subtitle: 'Analytics',                          icon: BarChart3,     tab: '/enhancedlandlorddashboard/swiftbooks' },
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
       { title: 'Condition Records', subtitle: 'Photograph & attest',             icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },

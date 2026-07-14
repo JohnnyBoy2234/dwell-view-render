@@ -8,7 +8,7 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { useProofOfPayment } from '@mzanzihomes/features/payments';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { PaymentVerificationUpload } from '@mzanzihomes/features/payments';
-import { BillDetailSheet } from '@mzanzihomes/features/billing';
+import { BillDetailSheet, formatPeriod } from '@mzanzihomes/features/billing';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -138,7 +138,7 @@ export default function TenantProofOfPayment() {
               {sentBills.map(bill => (
                 <Card key={bill.id} className="border-red-300 mb-3">
                   <CardHeader>
-                    <CardTitle className="text-base">Current bill — {bill.period}</CardTitle>
+                    <CardTitle className="text-base">Current bill — {formatPeriod(bill.period)}</CardTitle>
                     <CardDescription>
                       {new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' })
                         .format(Number(bill.total_amount))} outstanding
@@ -160,22 +160,23 @@ export default function TenantProofOfPayment() {
                 </Card>
               ))}
               {paidBills.map(bill => (
-                <div key={bill.id} className="flex items-center justify-between rounded-lg border px-4 py-3 mb-2">
+                <div key={bill.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border px-4 py-3 mb-2">
                   <div>
-                    <p className="text-sm font-medium">{bill.period} — {bill.properties?.title || bill.properties?.location}</p>
+                    <p className="text-sm font-medium">Payment for {formatPeriod(bill.period)}</p>
                     <p className="text-xs text-muted-foreground">
-                      Paid {bill.paid_at ? new Date(bill.paid_at).toLocaleDateString('en-ZA') : ''}
+                      {bill.properties?.title || bill.properties?.location}
+                      {bill.paid_at ? ` • Paid ${new Date(bill.paid_at).toLocaleDateString('en-ZA')}` : ''}
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
                     {bill.invoice_pdf_path ? (
                       <Button variant="outline" size="sm" asChild>
-                        <Link to={`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${bill.period}`)}`}>Invoice</Link>
+                        <Link to={`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${formatPeriod(bill.period)}`)}`}>Invoice</Link>
                       </Button>
                     ) : null}
                     {bill.receipt_pdf_path ? (
                       <Button variant="outline" size="sm" asChild>
-                        <Link to={`/document?path=${encodeURIComponent(bill.receipt_pdf_path)}&title=${encodeURIComponent(`Receipt — ${bill.period}`)}`}>Receipt</Link>
+                        <Link to={`/document?path=${encodeURIComponent(bill.receipt_pdf_path)}&title=${encodeURIComponent(`Receipt — ${formatPeriod(bill.period)}`)}`}>Receipt</Link>
                       </Button>
                     ) : (
                       <span className="text-xs text-muted-foreground">Receipt generating…</span>

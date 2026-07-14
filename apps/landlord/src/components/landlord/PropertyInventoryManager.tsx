@@ -244,15 +244,15 @@ export function PropertyInventoryManager({
             </p>
             {approval && lastUpdated && lastUpdated > approval.approved_at ? (
               <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-                <Clock className="h-3 w-3 mr-1" /> Changed since tenant approval
+                <Clock className="h-3 w-3 mr-1" /> Changed since tenant acknowledged
               </Badge>
             ) : approval ? (
               <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
-                <CheckCircle2 className="h-3 w-3 mr-1" /> Approved by tenant {new Date(approval.approved_at).toLocaleDateString()}
+                <CheckCircle2 className="h-3 w-3 mr-1" /> Acknowledged by tenant {new Date(approval.approved_at).toLocaleDateString()}
               </Badge>
             ) : (
               <Badge variant="secondary">
-                <Clock className="h-3 w-3 mr-1" /> Awaiting tenant approval
+                <Clock className="h-3 w-3 mr-1" /> Awaiting tenant acknowledgement
               </Badge>
             )}
           </div>

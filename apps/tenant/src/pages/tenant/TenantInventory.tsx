@@ -97,7 +97,7 @@ export default function TenantInventory() {
         .single();
       if (approveError) throw approveError;
       setApproval(data);
-      toast({ title: 'Inventory approved', description: 'Your landlord can see that you have approved the inventory.' });
+      toast({ title: 'Inventory acknowledged', description: 'Your landlord can see that you have agreed to the inventory.' });
     } catch (e: any) {
       toast({ variant: 'destructive', title: 'Could not approve', description: e.message });
     } finally {
@@ -213,7 +213,7 @@ export default function TenantInventory() {
                 <CardContent className="py-4 flex items-center gap-3">
                   <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
                   <p className="text-sm text-green-800">
-                    You approved this inventory on {shortDate(approval.approved_at)}.
+                    You acknowledged this inventory on {shortDate(approval.approved_at)}.
                   </p>
                 </CardContent>
               </Card>
@@ -222,12 +222,12 @@ export default function TenantInventory() {
                 <CardContent className="py-4 space-y-3">
                   <p className="text-sm">
                     {approval
-                      ? 'The landlord updated the inventory since you approved it. Review the changes and approve again.'
-                      : 'Review the items and photos below. If everything matches what you found at the property, approve the inventory.'}
+                      ? 'The landlord updated the inventory since you acknowledged it. Review the changes and acknowledge again.'
+                      : 'Review the items and photos below. If everything matches what you found at the property, acknowledge the inventory.'}
                   </p>
                   <Button onClick={approveInventory} disabled={approving} className="w-full sm:w-auto">
                     <CheckCircle2 className="h-4 w-4 mr-2" />
-                    {approving ? 'Approving…' : approval ? 'Approve again' : 'Approve inventory'}
+                    {approving ? 'Saving…' : approval ? 'Acknowledge again' : 'I agree — acknowledge inventory'}
                   </Button>
                 </CardContent>
               </Card>

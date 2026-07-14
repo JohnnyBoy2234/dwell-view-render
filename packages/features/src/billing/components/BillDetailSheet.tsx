@@ -6,6 +6,8 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
+import { formatPeriod } from '../utils';
+import { FileText } from 'lucide-react';
 
 const fmtR = (n: number) =>
   new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(n);
@@ -54,10 +56,10 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
       <SheetContent side="bottom" className="rounded-t-2xl">
         <SheetHeader>
           <SheetTitle className="flex items-center gap-2">
-            {bill.period} bill
+            {formatPeriod(bill.period)} bill
             {testMode ? <Badge className="bg-amber-500 text-white">TEST MODE</Badge> : null}
           </SheetTitle>
-          <SheetDescription>{propertyName}</SheetDescription>
+          <SheetDescription>Payment for {formatPeriod(bill.period)} — {propertyName}</SheetDescription>
         </SheetHeader>
         <div className="space-y-2 py-4">
           <div className="flex justify-between text-sm">
@@ -71,22 +73,26 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
           <div className="flex justify-between border-t pt-2 font-bold">
             <span>Total</span><span>{fmtR(Number(bill.total_amount))}</span>
           </div>
+        </div>
+        <div className="space-y-2">
           {bill.invoice_pdf_path ? (
-            <button
-              type="button"
-              className="block pt-1 text-sm text-primary underline underline-offset-4"
+            <Button
+              variant="outline"
+              className="w-full"
+              size="lg"
               onClick={() => {
                 onOpenChange(false);
-                navigate(`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${bill.period}`)}&v=${encodeURIComponent(bill.updated_at ?? '')}`);
+                navigate(`/document?path=${encodeURIComponent(bill.invoice_pdf_path)}&title=${encodeURIComponent(`Invoice — ${formatPeriod(bill.period)}`)}&v=${encodeURIComponent(bill.updated_at ?? '')}`);
               }}
             >
-              View invoice (PDF)
-            </button>
+              <FileText className="h-4 w-4 mr-2" />
+              View invoice
+            </Button>
           ) : null}
+          <Button className="w-full" size="lg" disabled={paying} onClick={startPayment}>
+            {paying ? 'Opening secure checkout…' : `Pay ${fmtR(Number(bill.total_amount))}`}
+          </Button>
         </div>
-        <Button className="w-full" size="lg" disabled={paying} onClick={startPayment}>
-          {paying ? 'Opening secure checkout…' : `Pay ${fmtR(Number(bill.total_amount))}`}
-        </Button>
       </SheetContent>
     </Sheet>
   );

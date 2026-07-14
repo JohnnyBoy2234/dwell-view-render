@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useMonthlyBills } from '../hooks/useMonthlyBills';
 import { BillExpenseForm } from './BillExpenseForm';
+import { formatPeriod } from '../utils';
 
 const fmtR = (n: number) =>
   new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR' }).format(n);
@@ -47,7 +48,7 @@ export function LandlordBillingPanel() {
           <CardHeader>
             <CardTitle>Billing due — {propertyName(bill)}</CardTitle>
             <CardDescription>
-              {bill.period}: add this month's expenses, then send the bill to your tenant.
+              {formatPeriod(bill.period)}: add this month's expenses, then send the bill to your tenant.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -78,8 +79,11 @@ export function LandlordBillingPanel() {
           {rest.map(bill => (
             <div key={bill.id} className="flex items-center justify-between rounded-lg border px-4 py-3">
               <div>
-                <p className="text-sm font-medium">{propertyName(bill)} — {bill.period}</p>
-                <p className="text-xs text-muted-foreground">{fmtR(Number(bill.total_amount))}</p>
+                <p className="text-sm font-medium">{propertyName(bill)} — {formatPeriod(bill.period)}</p>
+                <p className="text-xs text-muted-foreground">
+                  {fmtR(Number(bill.total_amount))}
+                  {bill.status === 'paid' && bill.paid_at ? ` • Paid ${new Date(bill.paid_at).toLocaleDateString('en-ZA')}` : ''}
+                </p>
               </div>
               <div className="flex items-center gap-2">
                 {bill.status === 'paid'

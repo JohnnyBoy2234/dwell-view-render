@@ -1,5 +1,6 @@
 export { useMonthlyBills } from './hooks/useMonthlyBills';
 export type { BillLineItemInput } from './hooks/useMonthlyBills';
+export { formatPeriod } from './utils';
 export { useUnpaidBill } from './hooks/useUnpaidBill';
 export { usePlanCheckout } from './hooks/usePlanCheckout';
 export type { CheckoutPurpose } from './hooks/usePlanCheckout';
