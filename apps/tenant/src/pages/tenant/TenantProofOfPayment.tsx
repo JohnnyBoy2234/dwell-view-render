@@ -7,7 +7,6 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { useProofOfPayment } from '@mzanzihomes/features/payments';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
-import { PaymentVerificationUpload } from '@mzanzihomes/features/payments';
 import { BillDetailSheet, formatPeriod } from '@mzanzihomes/features/billing';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useEffect, useState } from 'react';
@@ -24,8 +23,6 @@ export default function TenantProofOfPayment() {
     downloadDocument
   } = useProofOfPayment();
 
-  const [activeTenancy, setActiveTenancy] = useState<any>(null);
-  const [loadingTenancy, setLoadingTenancy] = useState(true);
   const [openBillId, setOpenBillId] = useState<string | null>(null);
 
   const { data: bills = [], isLoading: billsLoading } = useQuery({
@@ -42,25 +39,6 @@ export default function TenantProofOfPayment() {
 
   const sentBills = bills.filter(b => b.status === 'sent');
   const paidBills = bills.filter(b => b.status === 'paid');
-
-  useEffect(() => {
-    loadActiveTenancy();
-  }, []);
-
-  const loadActiveTenancy = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: tenancy } = await supabase
-      .from('tenancies')
-      .select('*, properties(*)')
-      .eq('tenant_id', user.id)
-      .eq('status', 'active')
-      .single();
-
-    setActiveTenancy(tenancy);
-    setLoadingTenancy(false);
-  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -103,7 +81,7 @@ export default function TenantProofOfPayment() {
     }
   };
 
-  if (loading || loadingTenancy) {
+  if (loading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-center py-12">
@@ -117,9 +95,8 @@ export default function TenantProofOfPayment() {
     <div className="space-y-6">
 
       <Tabs defaultValue="bills" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 h-auto p-1">
+        <TabsList className="grid w-full grid-cols-2 h-auto p-1">
           <TabsTrigger value="bills" className="text-xs sm:text-sm py-1.5 whitespace-nowrap">Bills</TabsTrigger>
-          <TabsTrigger value="ai-verification" className="text-xs sm:text-sm py-1.5 whitespace-nowrap">Verify</TabsTrigger>
           <TabsTrigger value="documents" className="text-xs sm:text-sm py-1.5 whitespace-nowrap">Documents</TabsTrigger>
         </TabsList>
 
@@ -180,21 +157,6 @@ export default function TenantProofOfPayment() {
                 </div>
               ))}
             </>
-          )}
-        </TabsContent>
-
-        <TabsContent value="ai-verification" className="space-y-6">
-          {activeTenancy ? (
-            <PaymentVerificationUpload
-              tenancyId={activeTenancy.id}
-              expectedAmount={activeTenancy.monthly_rent}
-            />
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No active tenancy found. You need an active lease to submit payments.</p>
-              </CardContent>
-            </Card>
           )}
         </TabsContent>
 
