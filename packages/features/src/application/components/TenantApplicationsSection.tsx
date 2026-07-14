@@ -223,12 +223,7 @@ export const TenantApplicationsSection = () => {
     // pb-24 keeps the last card's action clear of the mobile bottom navigation
     <section className="mb-8 pb-24 md:pb-0" aria-label="Your applications">
       {/* "Applications" lives in the dashboard app bar */}
-      <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-        <p className="text-sm text-muted-foreground">
-          View landlord invitations and track your rental applications.
-        </p>
-        <div className="shrink-0">{requestButton}</div>
-      </div>
+      <div className="flex justify-end mb-4">{requestButton}</div>
 
       <Tabs
         value={tab}

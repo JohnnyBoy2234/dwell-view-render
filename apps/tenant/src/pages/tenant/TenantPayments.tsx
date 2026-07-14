@@ -81,7 +81,6 @@ export default function TenantPayments() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-muted animate-pulse rounded"></div>
         <div className="grid gap-6">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-48 bg-muted animate-pulse rounded-lg"></div>
@@ -93,10 +92,6 @@ export default function TenantPayments() {
 
   return (
     <div className="space-y-6">
-      {/* Title lives in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">
-        Manage your rent payments and view payment history
-      </p>
 
       {/* Current Rent Due Card */}
       {rentDue && (

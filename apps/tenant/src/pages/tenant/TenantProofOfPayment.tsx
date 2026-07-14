@@ -106,7 +106,6 @@ export default function TenantProofOfPayment() {
   if (loading || loadingTenancy) {
     return (
       <div className="space-y-6">
-        <p className="text-sm text-muted-foreground">Loading your documents...</p>
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 border-2 border-ocean-blue border-t-transparent rounded-full animate-spin" />
         </div>
@@ -116,10 +115,6 @@ export default function TenantProofOfPayment() {
 
   return (
     <div className="space-y-6">
-      {/* Title lives in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">
-        Upload and manage your payment statements and transfer receipts for your records
-      </p>
 
       <Tabs defaultValue="bills" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">

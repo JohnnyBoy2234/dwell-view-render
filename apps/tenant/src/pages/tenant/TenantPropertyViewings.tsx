@@ -242,10 +242,6 @@ export default function TenantPropertyViewings() {
   return (
     // pb-24 keeps the last section's count and cards clear of the floating chat button
     <div className="space-y-6 pb-24 md:pb-8">
-      {/* Title lives in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">
-        Manage your upcoming and past property viewings
-      </p>
 
       {/* Upcoming Viewings */}
       <div className="space-y-4">

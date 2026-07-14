@@ -10,6 +10,7 @@ import { getPageConfig } from '@mzanzihomes/common/constants/dashboardPageConfig
 interface EnhancedDashboardLayoutProps {
   children: React.ReactNode;
   title: string;
+  subtitle?: string;
   actions?: React.ReactNode;
   currentTab?: string;
   onTabChange?: (tab: string) => void;
@@ -36,7 +37,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export function EnhancedDashboardLayout({ children, title, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties }: EnhancedDashboardLayoutProps) {
+export function EnhancedDashboardLayout({ children, title, subtitle, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties }: EnhancedDashboardLayoutProps) {
   const { isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
@@ -119,10 +120,17 @@ export function EnhancedDashboardLayout({ children, title, actions, currentTab, 
             <div className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0" style={{ background: 'hsl(214, 100%, 59%)' }}>
               <PageIcon className="h-4 w-4 text-white" />
             </div>
-            <h1 className="text-base sm:text-lg font-bold text-white truncate">{title || pageConfig.title}</h1>
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/15 text-gray-300 bg-white/5">
-              {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
-            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-3">
+                <h1 className="text-base sm:text-lg font-bold text-white truncate leading-tight">{title || pageConfig.title}</h1>
+                <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/15 text-gray-300 bg-white/5">
+                  {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
+                </span>
+              </div>
+              {subtitle && (
+                <p className="text-[11px] text-gray-400 truncate leading-tight">{subtitle}</p>
+              )}
+            </div>
           </div>
         </div>
 

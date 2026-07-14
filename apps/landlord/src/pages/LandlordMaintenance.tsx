@@ -125,8 +125,6 @@ export default function LandlordMaintenance() {
 
   return (
     <div className="space-y-6 bg-white">
-      {/* Title lives in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">View and manage maintenance requests from your tenants</p>
       <Card>
         <CardHeader>
           <CardTitle>All Requests</CardTitle>

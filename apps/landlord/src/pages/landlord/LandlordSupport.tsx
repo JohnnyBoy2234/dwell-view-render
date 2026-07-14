@@ -77,8 +77,6 @@ export function LandlordSupport() {
 
   return (
     <div className="space-y-6">
-      {/* Title and back button live in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">Get help with your account and properties</p>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-6">

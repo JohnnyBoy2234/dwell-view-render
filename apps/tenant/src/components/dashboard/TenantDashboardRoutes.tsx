@@ -38,7 +38,7 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="inventory" element={
-        <EnhancedDashboardLayout title="Property Inventory">
+        <EnhancedDashboardLayout title="Property Inventory" subtitle="Recorded by your landlord for this property">
           <TenantInventory />
         </EnhancedDashboardLayout>
       } />
@@ -48,7 +48,7 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="proof-of-payment" element={
-        <EnhancedDashboardLayout title="Proof of Payment">
+        <EnhancedDashboardLayout title="Proof of Payment" subtitle="Statements and transfer receipts">
           <TenantProofOfPayment />
         </EnhancedDashboardLayout>
       } />

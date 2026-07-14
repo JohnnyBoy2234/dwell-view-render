@@ -203,12 +203,8 @@ export default function TenantMaintenance() {
 
   return (
     <div className="space-y-5 pb-24 md:pb-8">
-      {/* Compact header */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          {/* Title lives in the dashboard app bar */}
-          <p className="text-sm text-muted-foreground truncate">Report issues and track their progress</p>
-        </div>
+      {/* Title lives in the dashboard app bar */}
+      <div className="flex justify-end">
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
           className="shrink-0 rounded-xl"

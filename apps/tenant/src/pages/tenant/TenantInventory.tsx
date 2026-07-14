@@ -133,7 +133,6 @@ export default function TenantInventory() {
   if (propertyLoading || loading) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-muted animate-pulse rounded"></div>
         <div className="grid gap-6">
           {[...Array(2)].map((_, i) => (
             <div key={i} className="h-40 bg-muted animate-pulse rounded-lg"></div>
@@ -171,11 +170,6 @@ export default function TenantInventory() {
 
   return (
     <div className="space-y-6 pb-24 md:pb-8">
-      {/* Title lives in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">
-        View the furniture and items recorded by your landlord for this property.
-      </p>
-
       {error ? (
         <Card>
           <CardContent className="py-10 text-center text-destructive">{error}</CardContent>

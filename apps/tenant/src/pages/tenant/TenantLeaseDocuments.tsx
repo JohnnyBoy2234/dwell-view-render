@@ -140,7 +140,6 @@ export default function TenantLeaseDocuments() {
   if (loading || loadingLeases) {
     return (
       <div className="space-y-6">
-        <div className="h-8 bg-muted animate-pulse rounded"></div>
         <div className="grid gap-6">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-48 bg-muted animate-pulse rounded-lg"></div>
@@ -154,10 +153,6 @@ export default function TenantLeaseDocuments() {
 
   return (
     <div className="space-y-6">
-      {/* Title lives in the dashboard app bar */}
-      <p className="text-sm text-muted-foreground">
-        Access and download your lease agreement and related documents
-      </p>
 
       {/* Property Information Card */}
       {tenantProperty && (

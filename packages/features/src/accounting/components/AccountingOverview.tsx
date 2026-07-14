@@ -169,9 +169,6 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
           <Card className="bg-white border-0 shadow-none rounded-none">
             <div className="p-8 space-y-6">
               {/* Title lives in the dashboard app bar */}
-              <div className="text-center mb-8">
-                <p className="text-sm text-gray-600">Track your property finances and generate reports</p>
-              </div>
           
               {/* Filters */}
               <div className="max-w-4xl mx-auto mb-4">
