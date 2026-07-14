@@ -99,14 +99,13 @@ export default function EnhancedTenantDashboard() {
     navigate(tab);
   };
 
+  const isLeasesTab = currentTab === '/enhancedtenantdashboard/leases';
+
   const renderTabContent = () => {
-    if (currentTab === '/enhancedtenantdashboard/leases') {
+    if (isLeasesTab) {
       return (
+        // Title lives in the dashboard app bar ("My Lease")
         <div className="space-y-6 p-4 sm:p-6">
-          <div className="flex items-center gap-3">
-            <FileText className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Lease System</h2>
-          </div>
           <LeaseDashboardComponent />
         </div>
       );
@@ -321,8 +320,8 @@ export default function EnhancedTenantDashboard() {
           </div>
           <div className="flex-1 min-h-0 flex flex-col overflow-hidden w-full">
             <EnhancedDashboardLayout
-              title="Dashboard"
-              subtitle="Your rental at a glance"
+              title={isLeasesTab ? 'My Lease' : 'Dashboard'}
+              subtitle={isLeasesTab ? 'View and sign your lease' : 'Your rental at a glance'}
               currentTab={currentTab}
               onTabChange={handleTabChange}
             >
