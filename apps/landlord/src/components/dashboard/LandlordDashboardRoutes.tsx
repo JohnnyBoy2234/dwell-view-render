@@ -82,11 +82,11 @@ export default function LandlordDashboardRoutes() {
           </EnhancedDashboardLayout>
         </PlanGuard>
       } />
+      {/* Messages ships its own full-screen header — wrapping it in the
+          dashboard layout would render the "Messages" title twice */}
       <Route path="messages" element={
         <PlanGuard requiredPlan="pro" featureName="In-Platform Messaging">
-          <EnhancedDashboardLayout title="Messages">
-            <Messages />
-          </EnhancedDashboardLayout>
+          <Messages />
         </PlanGuard>
       } />
       <Route path="applications" element={

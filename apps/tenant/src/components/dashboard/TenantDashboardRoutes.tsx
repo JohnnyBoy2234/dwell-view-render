@@ -77,11 +77,9 @@ export default function TenantDashboardRoutes() {
           <MaintenanceTicketDetails />
         </EnhancedDashboardLayout>
       } />
-      <Route path="messages" element={
-        <EnhancedDashboardLayout title="Messages">
-          <Messages />
-        </EnhancedDashboardLayout>
-      } />
+      {/* Messages ships its own full-screen header — wrapping it in the
+          dashboard layout would render the "Messages" title twice */}
+      <Route path="messages" element={<Messages />} />
       <Route path="payments" element={
         <EnhancedDashboardLayout title="Payments & Rent">
           <TenantPayments />

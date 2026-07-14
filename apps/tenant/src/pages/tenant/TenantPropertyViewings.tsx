@@ -229,8 +229,7 @@ export default function TenantPropertyViewings() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="h-8 bg-muted animate-pulse rounded"></div>
+      <div className="space-y-6 pb-24 md:pb-8">
         <div className="grid gap-6">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="h-48 bg-muted animate-pulse rounded-lg"></div>
@@ -241,14 +240,12 @@ export default function TenantPropertyViewings() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Property Viewings</h1>
-        <p className="text-muted-foreground">
-          Manage your upcoming and past property viewings
-        </p>
-      </div>
+    // pb-24 keeps the last section's count and cards clear of the floating chat button
+    <div className="space-y-6 pb-24 md:pb-8">
+      {/* Title lives in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">
+        Manage your upcoming and past property viewings
+      </p>
 
       {/* Upcoming Viewings */}
       <div className="space-y-4">

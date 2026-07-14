@@ -87,13 +87,10 @@ export default function TenantSupport() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Support & Help</h1>
-        <p className="text-muted-foreground">
-          Find answers to common questions or get in touch with our support team
-        </p>
-      </div>
+      {/* Title lives in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">
+        Find answers to common questions or get in touch with our support team
+      </p>
 
       {/* Quick Contact Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

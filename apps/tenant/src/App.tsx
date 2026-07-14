@@ -177,7 +177,9 @@ function AppRoutes() {
         {/* Maintenance ticket detail */}
         <Route path="/maintenance/:ticketId" element={
           <RouteGuard>
-            <MaintenanceTicketDetails />
+            <EnhancedDashboardLayout title="Maintenance Ticket">
+              <MaintenanceTicketDetails />
+            </EnhancedDashboardLayout>
           </RouteGuard>
         } />
 

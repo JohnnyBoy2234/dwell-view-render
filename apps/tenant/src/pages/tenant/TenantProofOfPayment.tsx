@@ -103,13 +103,10 @@ export default function TenantProofOfPayment() {
     }
   };
 
-  if (loading) {
+  if (loading || loadingTenancy) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Proof of Payment</h1>
-          <p className="text-muted-foreground">Loading your documents...</p>
-        </div>
+        <p className="text-sm text-muted-foreground">Loading your documents...</p>
         <div className="flex items-center justify-center py-12">
           <div className="h-8 w-8 border-2 border-ocean-blue border-t-transparent rounded-full animate-spin" />
         </div>
@@ -117,29 +114,12 @@ export default function TenantProofOfPayment() {
     );
   }
 
-  if (loading || loadingTenancy) {
-    return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Proof of Payment</h1>
-          <p className="text-muted-foreground">Loading...</p>
-        </div>
-        <div className="flex items-center justify-center py-12">
-          <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Proof of Payment</h1>
-        <p className="text-muted-foreground">
-          Upload and manage your payment statements and transfer receipts for your records
-        </p>
-      </div>
+      {/* Title lives in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">
+        Upload and manage your payment statements and transfer receipts for your records
+      </p>
 
       <Tabs defaultValue="bills" className="space-y-6">
         <TabsList className="grid w-full grid-cols-3">

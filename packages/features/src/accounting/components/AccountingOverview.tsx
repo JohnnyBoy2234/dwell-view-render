@@ -144,9 +144,7 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold">Accounting Overview</h2>
-        </div>
+        {/* Title lives in the dashboard app bar */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -170,10 +168,9 @@ export function AccountingOverview({ defaultPropertyId }: AccountingOverviewProp
         <div className="w-full py-6">
           <Card className="bg-white border-0 shadow-none rounded-none">
             <div className="p-8 space-y-6">
-              {/* Subtitle */}
-              <div className="text-center space-y-2 mb-8">
-                <h2 className="text-3xl font-bold text-gray-900">Accounting</h2>
-                <p className="text-gray-600">Track your property finances and generate reports</p>
+              {/* Title lives in the dashboard app bar */}
+              <div className="text-center mb-8">
+                <p className="text-sm text-gray-600">Track your property finances and generate reports</p>
               </div>
           
               {/* Filters */}

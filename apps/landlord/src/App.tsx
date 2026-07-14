@@ -269,7 +269,9 @@ function AppRoutes() {
         <Route path="/maintenance/:ticketId" element={
           <RouteGuard>
             <PlanGuard requiredPlan="premium" featureName="Maintenance Management">
-              <MaintenanceTicketDetails />
+              <EnhancedDashboardLayout title="Maintenance Ticket">
+                <MaintenanceTicketDetails />
+              </EnhancedDashboardLayout>
             </PlanGuard>
           </RouteGuard>
         } />

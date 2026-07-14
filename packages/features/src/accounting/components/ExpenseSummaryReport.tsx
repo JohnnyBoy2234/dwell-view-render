@@ -115,8 +115,9 @@ export function ExpenseSummaryReport() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold">
-            Landlord Expense Summary – {format(new Date(selectedMonth + '-01'), 'MMMM yyyy')}
+          {/* "Expense Summary" lives in the dashboard app bar; the body identifies the period */}
+          <h2 className="text-xl font-semibold">
+            {format(new Date(selectedMonth + '-01'), 'MMMM yyyy')}
           </h2>
           <div className="flex items-center mt-2">
             <img 

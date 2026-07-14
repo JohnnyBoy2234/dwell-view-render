@@ -360,7 +360,8 @@ export default function ProfilePage() {
 
         <CardContent className="pt-0">
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-bold">{profile?.display_name || 'User'}</h1>
+            {/* h2: the dashboard app bar owns the page's h1 ("Profile Settings") */}
+            <h2 className="text-2xl font-bold">{profile?.display_name || 'User'}</h2>
           </div>
           <p className="text-muted-foreground">{user?.email}</p>
         </CardContent>

@@ -93,13 +93,10 @@ export default function TenantPayments() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Payments & Rent</h1>
-        <p className="text-muted-foreground">
-          Manage your rent payments and view payment history
-        </p>
-      </div>
+      {/* Title lives in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">
+        Manage your rent payments and view payment history
+      </p>
 
       {/* Current Rent Due Card */}
       {rentDue && (

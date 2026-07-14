@@ -150,21 +150,8 @@ export default function MaintenanceTicketDetails() {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Maintenance Request</h1>
-          <p className="text-muted-foreground">#{ticket.id.slice(0, 8)}</p>
-        </div>
-      </div>
+      {/* Title and back button live in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">Request #{ticket.id.slice(0, 8)}</p>
 
       {/* Main Details */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

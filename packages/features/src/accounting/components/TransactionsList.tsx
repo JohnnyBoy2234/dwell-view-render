@@ -129,9 +129,7 @@ export function TransactionsList() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-3xl font-bold">Transactions</h2>
-        </div>
+        {/* Title lives in the dashboard app bar */}
         <Card>
           <CardContent className="p-6">
             <div className="animate-pulse space-y-4">
@@ -147,9 +145,8 @@ export function TransactionsList() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-3xl font-bold">Transactions</h2>
+      {/* Title lives in the dashboard app bar */}
+      <div className="flex justify-end">
         <Button asChild>
           <Link to="/dashboard/accounting/new">
             <Plus className="w-4 h-4 mr-2" />

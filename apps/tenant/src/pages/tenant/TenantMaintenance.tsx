@@ -206,7 +206,7 @@ export default function TenantMaintenance() {
       {/* Compact header */}
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Maintenance</h1>
+          {/* Title lives in the dashboard app bar */}
           <p className="text-sm text-muted-foreground truncate">Report issues and track their progress</p>
         </div>
         <Button

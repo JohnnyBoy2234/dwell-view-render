@@ -1,16 +1,14 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { ArrowLeft, MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send } from 'lucide-react';
 import { useSupportMessages } from '@mzanzihomes/features/support';
 
 export function LandlordSupport() {
-  const navigate = useNavigate();
   const { toast } = useToast();
   const { createMessage, messages, loading } = useSupportMessages();
   
@@ -79,20 +77,8 @@ export function LandlordSupport() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate(-1)}
-          className="rounded-full"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Support Center</h1>
-          <p className="text-muted-foreground">Get help with your account and properties</p>
-        </div>
-      </div>
+      {/* Title and back button live in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">Get help with your account and properties</p>
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-6">

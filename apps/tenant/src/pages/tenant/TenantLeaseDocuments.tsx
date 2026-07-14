@@ -154,13 +154,10 @@ export default function TenantLeaseDocuments() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-foreground mb-2">Lease Documents</h1>
-        <p className="text-muted-foreground">
-          Access and download your lease agreement and related documents
-        </p>
-      </div>
+      {/* Title lives in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">
+        Access and download your lease agreement and related documents
+      </p>
 
       {/* Property Information Card */}
       {tenantProperty && (

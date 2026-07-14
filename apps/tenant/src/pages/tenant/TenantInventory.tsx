@@ -171,13 +171,10 @@ export default function TenantInventory() {
 
   return (
     <div className="space-y-6 pb-24 md:pb-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Property Inventory</h1>
-        <p className="text-muted-foreground">
-          View the furniture and items recorded by your landlord for this property.
-        </p>
-      </div>
+      {/* Title lives in the dashboard app bar */}
+      <p className="text-sm text-muted-foreground">
+        View the furniture and items recorded by your landlord for this property.
+      </p>
 
       {error ? (
         <Card>
