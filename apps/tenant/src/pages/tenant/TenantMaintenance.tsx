@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
 import { useUnreadCounts } from '@mzanzihomes/supabase/hooks/useUnreadCounts';
 import { useTenantResponses } from '@mzanzihomes/features/maintenance';
-import { Plus, Wrench, Clock, CheckCircle, AlertTriangle, Camera } from 'lucide-react';
+import { Plus, Wrench, Camera } from 'lucide-react';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -42,6 +42,7 @@ export default function TenantMaintenance() {
   const { toast } = useToast();
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'submitted' | 'in_progress' | 'completed'>('all');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
@@ -184,24 +185,37 @@ export default function TenantMaintenance() {
     );
   }
 
-  return (
-    <div className="space-y-8">
-      {/* Header with prominent action button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">Maintenance Requests</h1>
-          <p className="text-muted-foreground text-sm sm:text-base">
-            Submit new requests and track the status of existing ones
-          </p>
-        </div>
+  const counts = {
+    all: maintenanceRequests?.length || 0,
+    submitted: maintenanceRequests?.filter(r => r.status === 'submitted').length || 0,
+    in_progress: maintenanceRequests?.filter(r => r.status === 'in_progress').length || 0,
+    completed: maintenanceRequests?.filter(r => r.status === 'completed').length || 0,
+  };
+  const filteredRequests = (maintenanceRequests || []).filter(
+    (r) => filter === 'all' || r.status === filter
+  );
+  const filterTabs: Array<{ key: typeof filter; label: string }> = [
+    { key: 'all', label: 'All' },
+    { key: 'submitted', label: 'Open' },
+    { key: 'in_progress', label: 'In progress' },
+    { key: 'completed', label: 'Done' },
+  ];
 
+  return (
+    <div className="space-y-5 pb-24 md:pb-8">
+      {/* Compact header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Maintenance</h1>
+          <p className="text-sm text-muted-foreground truncate">Report issues and track their progress</p>
+        </div>
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
-          size="lg"
-          className="w-full sm:w-auto bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-lg hover:shadow-xl transition-all duration-200"
+          className="shrink-0 rounded-xl"
+          style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
         >
-          <Plus className="h-5 w-5 mr-2" />
-          New Request
+          <Plus className="h-4 w-4 mr-1.5" />
+          New
         </Button>
       </div>
 
@@ -297,118 +311,92 @@ export default function TenantMaintenance() {
         </DialogContent>
       </Dialog>
 
-      {/* Color-coded Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-orange-200 bg-gradient-to-br from-orange-50 to-orange-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Clock className="h-8 w-8 text-orange-600 mb-2" />
-              <div className="text-3xl font-bold text-orange-700 mb-1">
-                {maintenanceRequests?.filter(r => r.status === 'submitted').length || 0}
-              </div>
-              <p className="text-sm font-medium text-orange-600">Submitted</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <Wrench className="h-8 w-8 text-blue-600 mb-2" />
-              <div className="text-3xl font-bold text-blue-700 mb-1">
-                {maintenanceRequests?.filter(r => r.status === 'in_progress').length || 0}
-              </div>
-              <p className="text-sm font-medium text-blue-600">In Progress</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-green-200 bg-gradient-to-br from-green-50 to-green-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <CheckCircle className="h-8 w-8 text-green-600 mb-2" />
-              <div className="text-3xl font-bold text-green-700 mb-1">
-                {maintenanceRequests?.filter(r => r.status === 'completed').length || 0}
-              </div>
-              <p className="text-sm font-medium text-green-600">Completed</p>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card className="border-red-200 bg-gradient-to-br from-red-50 to-red-100/60">
-          <CardContent className="p-4">
-            <div className="flex flex-col items-center text-center">
-              <AlertTriangle className="h-8 w-8 text-red-600 mb-2" />
-              <div className="text-3xl font-bold text-red-700 mb-1">
-                {maintenanceRequests?.filter(r => r.priority === 'high' || r.priority === 'urgent').length || 0}
-              </div>
-              <p className="text-sm font-medium text-red-600">High Priority</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
+      {/* Responses banner */}
       {responses && responses.length > 0 && (
-        <Card className="cursor-pointer" onClick={() => navigate("/tenant-dashboard/maintenance/responses")} >
-          <CardContent className="p-4">
-            <p>You have {responses.length} responses</p>
-          </CardContent>
-        </Card>
+        <button
+          className="w-full flex items-center gap-2 rounded-xl border border-ocean-blue/20 bg-ocean-blue/5 px-4 py-2.5 text-sm text-left hover:bg-ocean-blue/10 transition-colors"
+          onClick={() => navigate('/tenant-dashboard/maintenance/responses')}
+        >
+          <Wrench className="h-4 w-4 text-ocean-blue shrink-0" />
+          <span className="flex-1">
+            {responses.length} response{responses.length === 1 ? '' : 's'} from your landlord
+          </span>
+          <span className="text-ocean-blue font-medium">View</span>
+        </button>
       )}
 
-      {/* Maintenance Requests List */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-foreground">Your Requests</h2>
-        {isLoading ? (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <div className="animate-pulse">Loading your maintenance requests...</div>
-            </CardContent>
-          </Card>
-        ) : !maintenanceRequests || maintenanceRequests.length === 0 ? (
-          <Card className="border-dashed border-2 border-muted">
-            <CardContent className="p-12 text-center">
-              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                <Wrench className="h-10 w-10 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-3 text-foreground">No maintenance requests yet!</h3>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                When you need something fixed or maintained, create your first request and we'll take care of it quickly.
-              </p>
-              <Button 
-                onClick={() => setIsCreateDialogOpen(true)}
-                size="lg"
-                className="bg-gradient-to-r from-ocean-blue to-ocean-blue-dark hover:from-ocean-blue-dark hover:to-ocean-blue text-white shadow-lg"
+      {/* Status filter pills (replaces the old oversized stat cards) */}
+      {(maintenanceRequests?.length || 0) > 0 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+          {filterTabs.map((tab) => {
+            const active = filter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setFilter(tab.key)}
+                className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-medium border transition-colors ${
+                  active
+                    ? 'bg-ocean-blue text-white border-ocean-blue'
+                    : 'bg-white text-muted-foreground border-black/[0.08] hover:border-ocean-blue/40'
+                }`}
               >
-                <Plus className="h-5 w-5 mr-2" />
-                Start Your First Request
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {maintenanceRequests.map((request) => (
-              <RecordCard
-                key={request.id}
-                title={request.title}
-                dateLine={`Submitted ${shortDate(request.created_at)}`}
-                badge={statusBadges[request.status] ?? { label: capitalize(request.status), variant: 'outline' }}
-                details={[
-                  { label: 'Priority', value: capitalize(request.priority) },
-                  { label: 'Category', value: capitalize(request.category) },
-                  ...(request.images?.length ? [{ label: 'Photos', value: String(request.images.length) }] : []),
-                ]}
-                actions={
-                  <Button variant="outline" size="sm" onClick={() => navigate(`/maintenance/${request.id}`)}>
-                    View Details
-                  </Button>
-                }
-                onClick={() => navigate(`/maintenance/${request.id}`)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+                {tab.label}
+                <span
+                  className={`text-xs tabular-nums rounded-full px-1.5 py-0.5 leading-none ${
+                    active ? 'bg-white/20' : 'bg-muted'
+                  }`}
+                >
+                  {counts[tab.key]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Requests list */}
+      {!maintenanceRequests || maintenanceRequests.length === 0 ? (
+        <Card className="border-dashed">
+          <CardContent className="py-10 text-center">
+            <Wrench className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
+            <p className="font-medium">Nothing to fix right now</p>
+            <p className="text-sm text-muted-foreground mt-1 mb-4">
+              When something breaks, report it here and your landlord is notified immediately.
+            </p>
+            <Button onClick={() => setIsCreateDialogOpen(true)} variant="outline">
+              <Plus className="h-4 w-4 mr-1.5" /> Report an issue
+            </Button>
+          </CardContent>
+        </Card>
+      ) : filteredRequests.length === 0 ? (
+        <Card>
+          <CardContent className="py-8 text-center text-sm text-muted-foreground">
+            No {filterTabs.find((t) => t.key === filter)?.label.toLowerCase()} requests.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {filteredRequests.map((request) => (
+            <RecordCard
+              key={request.id}
+              title={request.title}
+              dateLine={`Submitted ${shortDate(request.created_at)}`}
+              badge={statusBadges[request.status] ?? { label: capitalize(request.status), variant: 'outline' }}
+              details={[
+                { label: 'Priority', value: capitalize(request.priority) },
+                { label: 'Category', value: capitalize(request.category) },
+                ...(request.images?.length ? [{ label: 'Photos', value: String(request.images.length) }] : []),
+              ]}
+              actions={
+                <Button variant="outline" size="sm" onClick={() => navigate(`/maintenance/${request.id}`)}>
+                  View Details
+                </Button>
+              }
+              onClick={() => navigate(`/maintenance/${request.id}`)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@mzanzihomes/ui/components/select';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { Package, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Camera, CheckCircle2, Clock, Package, Pencil, Plus, Trash2, X } from 'lucide-react';
 
 interface InventoryItem {
   id: string;
@@ -25,6 +25,7 @@ interface InventoryItem {
   serial_number: string | null;
   brand_model: string | null;
   note: string | null;
+  image_urls: string[] | null;
   updated_at: string;
 }
 
@@ -65,6 +66,11 @@ export function PropertyInventoryManager({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<ItemForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  // Item photos: URLs already saved + files picked in this dialog session
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  // Tenant approval of this property's inventory
+  const [approval, setApproval] = useState<{ approved_at: string } | null>(null);
 
   useEffect(() => {
     if (initialPropertyId) setPropertyId(initialPropertyId);
@@ -92,6 +98,13 @@ export function PropertyInventoryManager({
         }
         setLoading(false);
       });
+    (supabase.from('inventory_approvals') as any)
+      .select('approved_at')
+      .eq('property_id', propertyId)
+      .order('approved_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }: any) => setApproval(data ?? null));
   }, [propertyId]);
 
   const rooms = useMemo(() => {
@@ -107,6 +120,8 @@ export function PropertyInventoryManager({
   const openAdd = () => {
     setEditingId(null);
     setForm(EMPTY_FORM);
+    setExistingImages([]);
+    setNewFiles([]);
     setDialogOpen(true);
   };
 
@@ -121,6 +136,8 @@ export function PropertyInventoryManager({
       brand_model: item.brand_model ?? '',
       note: item.note ?? ''
     });
+    setExistingImages(item.image_urls ?? []);
+    setNewFiles([]);
     setDialogOpen(true);
   };
 
@@ -130,6 +147,22 @@ export function PropertyInventoryManager({
       return;
     }
     setSaving(true);
+
+    // Upload any newly picked photos first
+    const uploadedUrls: string[] = [];
+    for (const file of newFiles) {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${propertyId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('inventory-images').upload(path, file);
+      if (uploadError) {
+        setSaving(false);
+        toast({ variant: 'destructive', title: 'Photo upload failed', description: uploadError.message });
+        return;
+      }
+      const { data: { publicUrl } } = supabase.storage.from('inventory-images').getPublicUrl(path);
+      uploadedUrls.push(publicUrl);
+    }
+
     const payload = {
       property_id: propertyId,
       room: form.room.trim(),
@@ -138,7 +171,8 @@ export function PropertyInventoryManager({
       description: form.description.trim() || null,
       serial_number: form.serial_number.trim() || null,
       brand_model: form.brand_model.trim() || null,
-      note: form.note.trim() || null
+      note: form.note.trim() || null,
+      image_urls: [...existingImages, ...uploadedUrls]
     };
     const table = supabase.from('property_inventory_items') as any;
     const { data, error } = editingId
@@ -203,10 +237,25 @@ export function PropertyInventoryManager({
           </Select>
         )}
         {items.length > 0 && (
-          <p className="text-xs text-muted-foreground mt-2">
-            {totalItems} item{totalItems === 1 ? '' : 's'} listed
-            {lastUpdated && ` • Last updated ${new Date(lastUpdated).toLocaleDateString()}`}
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-2">
+            <p className="text-xs text-muted-foreground">
+              {totalItems} item{totalItems === 1 ? '' : 's'} listed
+              {lastUpdated && ` • Last updated ${new Date(lastUpdated).toLocaleDateString()}`}
+            </p>
+            {approval && lastUpdated && lastUpdated > approval.approved_at ? (
+              <Badge className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+                <Clock className="h-3 w-3 mr-1" /> Changed since tenant approval
+              </Badge>
+            ) : approval ? (
+              <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+                <CheckCircle2 className="h-3 w-3 mr-1" /> Approved by tenant {new Date(approval.approved_at).toLocaleDateString()}
+              </Badge>
+            ) : (
+              <Badge variant="secondary">
+                <Clock className="h-3 w-3 mr-1" /> Awaiting tenant approval
+              </Badge>
+            )}
+          </div>
         )}
       </CardHeader>
       <CardContent className="space-y-4">
@@ -242,6 +291,15 @@ export function PropertyInventoryManager({
                         {item.serial_number && <span>Serial: {item.serial_number}</span>}
                         {item.note && <span>Note: {item.note}</span>}
                       </div>
+                      {(item.image_urls?.length ?? 0) > 0 && (
+                        <div className="flex gap-1.5 mt-2 overflow-x-auto">
+                          {item.image_urls!.map((url) => (
+                            <a key={url} href={url} target="_blank" rel="noreferrer" className="shrink-0">
+                              <img src={url} alt={item.name} className="h-14 w-14 rounded-lg object-cover border" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-1 shrink-0">
                       <Button variant="ghost" size="icon" aria-label={`Edit ${item.name}`} onClick={() => openEdit(item)}>
@@ -301,6 +359,49 @@ export function PropertyInventoryManager({
             <div className="space-y-1">
               <Label htmlFor="inv-note">Note</Label>
               <Textarea id="inv-note" rows={2} value={form.note} onChange={setField('note')} />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="inv-photos" className="flex items-center gap-1">
+                <Camera className="h-4 w-4" /> Photos
+              </Label>
+              <Input
+                id="inv-photos"
+                type="file"
+                accept="image/*"
+                multiple
+                capture="environment"
+                onChange={(e) => setNewFiles((prev) => [...prev, ...Array.from(e.target.files || [])])}
+              />
+              {(existingImages.length > 0 || newFiles.length > 0) && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {existingImages.map((url) => (
+                    <div key={url} className="relative">
+                      <img src={url} alt="Item" className="h-16 w-16 rounded-lg object-cover border" />
+                      <button
+                        type="button"
+                        aria-label="Remove photo"
+                        className="absolute -top-1.5 -right-1.5 bg-black/60 text-white rounded-full p-0.5"
+                        onClick={() => setExistingImages((prev) => prev.filter((u) => u !== url))}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                  {newFiles.map((file, i) => (
+                    <div key={`${file.name}-${i}`} className="relative">
+                      <img src={URL.createObjectURL(file)} alt={file.name} className="h-16 w-16 rounded-lg object-cover border opacity-80" />
+                      <button
+                        type="button"
+                        aria-label="Remove photo"
+                        className="absolute -top-1.5 -right-1.5 bg-black/60 text-white rounded-full p-0.5"
+                        onClick={() => setNewFiles((prev) => prev.filter((_, idx) => idx !== i))}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

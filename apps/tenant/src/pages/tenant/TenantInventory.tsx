@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
+import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
-import { Home, Info, Package, Search } from 'lucide-react';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
+import { CheckCircle2, Home, Info, Package, Search } from 'lucide-react';
 
 interface InventoryItem {
   id: string;
@@ -16,6 +19,7 @@ interface InventoryItem {
   serial_number: string | null;
   brand_model: string | null;
   note: string | null;
+  image_urls: string[] | null;
   updated_at: string;
 }
 
@@ -26,11 +30,15 @@ const shortDate = (value: string) =>
  * documentation deliberately lives elsewhere (condition records). */
 export default function TenantInventory() {
   const { tenantProperty, loading: propertyLoading } = useTenantDashboard();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [landlordName, setLandlordName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [approval, setApproval] = useState<{ approved_at: string } | null>(null);
+  const [approving, setApproving] = useState(false);
 
   useEffect(() => {
     if (propertyLoading) return;
@@ -40,19 +48,27 @@ export default function TenantInventory() {
     }
     (async () => {
       try {
-        const [{ data: itemRows, error: itemsError }, { data: property }] = await Promise.all([
+        const [{ data: itemRows, error: itemsError }, { data: property }, { data: approvalRow }] = await Promise.all([
           (supabase.from('property_inventory_items') as any)
-            .select('id, room, name, quantity, description, serial_number, brand_model, note, updated_at')
+            .select('id, room, name, quantity, description, serial_number, brand_model, note, image_urls, updated_at')
             .eq('property_id', tenantProperty.id)
             .order('room')
             .order('name'),
           (supabase.from('properties') as any)
             .select('landlord_id')
             .eq('id', tenantProperty.id)
-            .maybeSingle()
+            .maybeSingle(),
+          user
+            ? (supabase.from('inventory_approvals') as any)
+                .select('approved_at')
+                .eq('property_id', tenantProperty.id)
+                .eq('tenant_id', user.id)
+                .maybeSingle()
+            : Promise.resolve({ data: null })
         ]);
         if (itemsError) throw itemsError;
         setItems((itemRows ?? []) as InventoryItem[]);
+        setApproval(approvalRow ?? null);
         if (property?.landlord_id) {
           const { data: profile } = await (supabase.from('profiles') as any)
             .select('display_name')
@@ -66,7 +82,28 @@ export default function TenantInventory() {
         setLoading(false);
       }
     })();
-  }, [propertyLoading, tenantProperty?.id]);
+  }, [propertyLoading, tenantProperty?.id, user?.id]);
+
+  const approveInventory = async () => {
+    if (!user || !tenantProperty) return;
+    setApproving(true);
+    try {
+      const { data, error: approveError } = await (supabase.from('inventory_approvals') as any)
+        .upsert(
+          { property_id: tenantProperty.id, tenant_id: user.id, approved_at: new Date().toISOString() },
+          { onConflict: 'property_id,tenant_id' }
+        )
+        .select('approved_at')
+        .single();
+      if (approveError) throw approveError;
+      setApproval(data);
+      toast({ title: 'Inventory approved', description: 'Your landlord can see that you have approved the inventory.' });
+    } catch (e: any) {
+      toast({ variant: 'destructive', title: 'Could not approve', description: e.message });
+    } finally {
+      setApproving(false);
+    }
+  };
 
   const filteredItems = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -171,6 +208,35 @@ export default function TenantInventory() {
             </CardContent>
           </Card>
 
+          {/* Approval banner — the tenant's confirmation that the inventory
+              matches what they found at the property */}
+          {items.length > 0 && (
+            approval && lastUpdated && lastUpdated <= approval.approved_at ? (
+              <Card className="border-green-200 bg-green-50/60">
+                <CardContent className="py-4 flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                  <p className="text-sm text-green-800">
+                    You approved this inventory on {shortDate(approval.approved_at)}.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className={approval ? 'border-amber-200 bg-amber-50/60' : 'border-ocean-blue/20 bg-ocean-blue/5'}>
+                <CardContent className="py-4 space-y-3">
+                  <p className="text-sm">
+                    {approval
+                      ? 'The landlord updated the inventory since you approved it. Review the changes and approve again.'
+                      : 'Review the items and photos below. If everything matches what you found at the property, approve the inventory.'}
+                  </p>
+                  <Button onClick={approveInventory} disabled={approving} className="w-full sm:w-auto">
+                    <CheckCircle2 className="h-4 w-4 mr-2" />
+                    {approving ? 'Approving…' : approval ? 'Approve again' : 'Approve inventory'}
+                  </Button>
+                </CardContent>
+              </Card>
+            )
+          )}
+
           {items.length === 0 ? (
             <>
               <Card>
@@ -237,6 +303,15 @@ export default function TenantInventory() {
                             <p className="text-xs text-muted-foreground mt-0.5 break-words">
                               Landlord note: {item.note}
                             </p>
+                          )}
+                          {(item.image_urls?.length ?? 0) > 0 && (
+                            <div className="flex gap-1.5 mt-2 overflow-x-auto">
+                              {item.image_urls!.map((url) => (
+                                <a key={url} href={url} target="_blank" rel="noreferrer" className="shrink-0">
+                                  <img src={url} alt={item.name} className="h-16 w-16 rounded-lg object-cover border" />
+                                </a>
+                              ))}
+                            </div>
                           )}
                         </div>
                       ))}
