@@ -6,9 +6,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Camera, IdCard, Image, Loader2 } from 'lucide-react';
 import { DOCUMENT_TYPES, SA_PROVINCES } from '@mzanzihomes/common/constants/applicationConstants';
-import { deriveFromIdNumber, extractIdInfo } from '../../services/idExtraction';
+import { deriveFromIdNumber, extractIdInfo, type ExtractedFieldKey } from '../../services/idExtraction';
 import { fileProblem, uploadApplicationDocument } from '../../services/documentService';
+import { normalizeAndAssess, QUALITY_MESSAGES } from '../../services/imagePipeline';
 import { DocumentRow, Field, textInput, useRemoveDocument, type StepProps } from './shared';
+
+const REVIEW_NOTICE = 'We could not read this clearly — please check it against your document.';
 
 /** Step 2: identity, contact and current-address details, with an optional
  * ID scan that pre-fills what it can. Manual entry always stays available. */
@@ -20,14 +23,27 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
   const removeDocument = useRemoveDocument();
   const [scanning, setScanning] = useState(false);
   const [checkDetails, setCheckDetails] = useState(false);
+  const [flagged, setFlagged] = useState<Set<ExtractedFieldKey>>(new Set());
   const cameraInput = useRef<HTMLInputElement>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const fieldsRef = useRef<HTMLDivElement>(null);
 
-  const setP = (field: keyof typeof p) => (v: string) => update('personal', { [field]: v });
+  const unflag = (field: ExtractedFieldKey) =>
+    setFlagged((prev) => {
+      if (!prev.has(field)) return prev;
+      const next = new Set(prev);
+      next.delete(field);
+      return next;
+    });
+
+  const setP = (field: keyof typeof p) => (v: string) => {
+    if (field === 'first_name' || field === 'last_name') unflag(field);
+    update('personal', { [field]: v });
+  };
   const setA = (field: keyof typeof a) => (v: string) => update('address', { [field]: v });
 
   const onIdNumberChange = (value: string) => {
+    unflag('id_number');
     const patch: Partial<typeof i> = { id_number: value };
     if (i.id_type === 'sa_id') {
       const derived = deriveFromIdNumber(value);
@@ -48,19 +64,35 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
       const doc = await uploadApplicationDocument(file, DOCUMENT_TYPES.ID_DOCUMENT, userId);
       update('identity', { document: doc });
       onUploadComplete();
+
+      // Normalize (EXIF rotation + downscale) and check quality before spending
+      // time on OCR — a bad photo either produces nothing or, worse, noise that
+      // happens to look valid. Fall back to the original file if normalization
+      // isn't supported (older browsers).
+      const normalized = await normalizeAndAssess(file);
+      if (normalized && normalized.verdict !== 'ok') {
+        toast({ title: 'Could not read this photo', description: QUALITY_MESSAGES[normalized.verdict], variant: 'destructive' });
+        return;
+      }
+      const ocrInput: File | Blob = normalized?.blob ?? file;
+
       // Autofill is best-effort — everything extracted stays editable below,
       // and extraction is never treated as identity verification.
-      const extracted = await extractIdInfo(file);
-      if (extracted) {
-        const patch: Record<string, string> = {};
+      const result = await extractIdInfo(ocrInput);
+      if (result) {
+        const { info: extracted, lowConfidence } = result;
+        const patch: Partial<typeof i> = {};
         if (extracted.id_number) patch.id_number = extracted.id_number;
         if (extracted.date_of_birth) patch.date_of_birth = extracted.date_of_birth;
         if (extracted.nationality) patch.nationality = extracted.nationality;
+        if (extracted.id_expiry_date) patch.id_expiry_date = extracted.id_expiry_date;
+        if (extracted.document_type === 'passport') patch.id_type = 'passport';
         update('identity', patch);
         const names: Record<string, string> = {};
         if (extracted.first_name) names.first_name = extracted.first_name;
         if (extracted.last_name) names.last_name = extracted.last_name;
         if (Object.keys(names).length > 0) update('personal', names);
+        setFlagged(new Set(lowConfidence));
         setCheckDetails(true);
       } else {
         toast({
@@ -155,8 +187,8 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
           <CardContent className="p-4">
             <p className="font-medium">Check your details</p>
             <p className="text-sm text-muted-foreground mt-1">
-              Make sure the information below matches your identity document — you can edit
-              anything that was filled in automatically.
+              We filled in what we could read. Make sure everything below matches your identity
+              document — anything marked in amber wasn't clear and needs a closer look.
             </p>
           </CardContent>
         </Card>
@@ -164,10 +196,22 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
 
       <div ref={fieldsRef} className="space-y-4 scroll-mt-24">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field id="first_name" label="First name" required error={errors.first_name}>
+          <Field
+            id="first_name"
+            label="First name"
+            required
+            error={errors.first_name}
+            notice={flagged.has('first_name') ? REVIEW_NOTICE : undefined}
+          >
             {textInput('first_name', p.first_name, setP('first_name'), { autoComplete: 'given-name' })}
           </Field>
-          <Field id="last_name" label="Surname" required error={errors.last_name}>
+          <Field
+            id="last_name"
+            label="Surname"
+            required
+            error={errors.last_name}
+            notice={flagged.has('last_name') ? REVIEW_NOTICE : undefined}
+          >
             {textInput('last_name', p.last_name, setP('last_name'), { autoComplete: 'family-name' })}
           </Field>
         </div>
@@ -192,32 +236,60 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             label={i.id_type === 'passport' ? 'Passport number' : 'ID number'}
             required
             error={errors.id_number}
+            notice={flagged.has('id_number') ? REVIEW_NOTICE : undefined}
           >
             {textInput('id_number', i.id_number, onIdNumberChange, {
               inputMode: i.id_type === 'sa_id' ? 'numeric' : 'text'
             })}
           </Field>
-          <Field id="date_of_birth" label="Date of birth" required error={errors.date_of_birth}>
+          <Field
+            id="date_of_birth"
+            label="Date of birth"
+            required
+            error={errors.date_of_birth}
+            notice={flagged.has('date_of_birth') ? REVIEW_NOTICE : undefined}
+          >
             <Input
               id="date_of_birth"
               type="date"
               value={i.date_of_birth}
-              onChange={(e) => update('identity', { date_of_birth: e.target.value })}
+              onChange={(e) => {
+                unflag('date_of_birth');
+                update('identity', { date_of_birth: e.target.value });
+              }}
             />
           </Field>
-          <Field id="nationality" label="Citizenship" required error={errors.nationality}>
-            {textInput('nationality', i.nationality, (v) => update('identity', { nationality: v }))}
+          <Field
+            id="nationality"
+            label="Citizenship"
+            required
+            error={errors.nationality}
+            notice={flagged.has('nationality') ? REVIEW_NOTICE : undefined}
+          >
+            {textInput('nationality', i.nationality, (v) => {
+              unflag('nationality');
+              update('identity', { nationality: v });
+            })}
           </Field>
         </div>
 
         {i.id_type === 'passport' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Field id="id_expiry_date" label="Passport expiry date" required error={errors.id_expiry_date}>
+            <Field
+              id="id_expiry_date"
+              label="Passport expiry date"
+              required
+              error={errors.id_expiry_date}
+              notice={flagged.has('id_expiry_date') ? REVIEW_NOTICE : undefined}
+            >
               <Input
                 id="id_expiry_date"
                 type="date"
                 value={i.id_expiry_date}
-                onChange={(e) => update('identity', { id_expiry_date: e.target.value })}
+                onChange={(e) => {
+                  unflag('id_expiry_date');
+                  update('identity', { id_expiry_date: e.target.value });
+                }}
               />
             </Field>
             <Field id="permit_type" label="Permit type (if applicable)">

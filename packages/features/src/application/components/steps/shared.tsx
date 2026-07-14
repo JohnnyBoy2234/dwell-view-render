@@ -29,12 +29,15 @@ export function Field({
   id,
   label,
   error,
+  notice,
   required,
   children
 }: {
   id: string;
   label: string;
   error?: string;
+  /** Non-blocking "we're not sure about this" hint, e.g. for low-confidence OCR fields. */
+  notice?: string;
   required?: boolean;
   children: React.ReactNode;
 }) {
@@ -46,6 +49,7 @@ export function Field({
       </Label>
       {children}
       <FieldError error={error} />
+      {!error && notice && <p className="text-xs text-amber-600 mt-1">{notice}</p>}
     </div>
   );
 }
