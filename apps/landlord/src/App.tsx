@@ -27,7 +27,7 @@ import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
-import { ConditionRecordsPage } from "@mzanzihomes/features/condition-record";
+import { ConditionRecordsPage, ConditionRecordDetailPage } from "@mzanzihomes/features/condition-record";
 import LandlordMaintenance from "@/pages/LandlordMaintenance";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
@@ -176,6 +176,11 @@ function AppRoutes() {
         <Route path="/enhancedlandlorddashboard/condition-records" element={
           <DashboardShell title="Condition Records" currentTab="/enhancedlandlorddashboard/condition-records">
             <ConditionRecordsPage />
+          </DashboardShell>
+        } />
+        <Route path="/enhancedlandlorddashboard/condition-records/:recordId" element={
+          <DashboardShell title="Condition Record" currentTab="/enhancedlandlorddashboard/condition-records">
+            <ConditionRecordDetailPage />
           </DashboardShell>
         } />
         <Route path="/enhancedlandlorddashboard/support" element={

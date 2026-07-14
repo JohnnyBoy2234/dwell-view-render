@@ -1,9 +1,13 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Camera } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
+import { Dialog, DialogContent, DialogTitle } from '@mzanzihomes/ui/components/dialog';
+import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +31,7 @@ import {
   type PendingUpload,
   type PhotoWithUrl,
 } from '../hooks/useConditionRecordDetail';
+import { missingRecordOffers } from '../recordOffers';
 
 const EVENT_LABEL: Record<ConditionEventType, string> = {
   move_in: 'Move-in',
@@ -45,35 +50,52 @@ const PARTY_LABEL: Record<ConditionParty, string> = {
   landlord: 'Landlord',
 };
 
+// Layout padding comes from the dashboard shell; the pb keeps the last card
+// clear of the mobile bottom navigation and floating chat button.
+const PAGE_PADDING = 'pb-[calc(7rem+env(safe-area-inset-bottom))]';
+
 export function ConditionRecordsPage() {
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const navigate = useNavigate();
   const list = useConditionRecords();
 
-  if (selectedId) {
+  if (list.loading) {
     return (
-      <RecordDetail
-        recordId={selectedId}
-        onBack={() => {
-          setSelectedId(null);
-          list.refetch();
-        }}
-      />
+      <div className={`space-y-4 ${PAGE_PADDING}`}>
+        {[...Array(2)].map((_, i) => (
+          <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+        ))}
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
-      {list.loading && <p className="text-muted-foreground">Loading condition records…</p>}
+    <div className={`space-y-4 ${PAGE_PADDING}`}>
       {list.error && <p className="text-destructive">{list.error}</p>}
-      {!list.loading && list.records.length === 0 && (
-        <p className="text-muted-foreground">No condition records yet.</p>
+      {!list.error && list.records.length === 0 && (
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Camera className="mx-auto mb-3 h-10 w-10 text-muted-foreground" aria-hidden="true" />
+            <p className="font-medium">No condition records yet</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              A record is started automatically at move-in and move-out so both parties can
+              photograph the property's condition.
+            </p>
+          </CardContent>
+        </Card>
       )}
       {list.records.map((item) => (
-        <RecordCard key={item.record.id} item={item} onOpen={() => setSelectedId(item.record.id)} />
+        <RecordCard key={item.record.id} item={item} onOpen={() => navigate(item.record.id)} />
       ))}
       <StartRecordButtons list={list} />
     </div>
   );
+}
+
+// Route wrapper: /condition-records/:recordId. A routed detail deep-links from
+// notifications, survives refresh, and lets the app-bar back button behave.
+export function ConditionRecordDetailPage() {
+  const { recordId } = useParams<{ recordId: string }>();
+  return <RecordDetail recordId={recordId ?? null} />;
 }
 
 function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: () => void }) {
@@ -108,14 +130,27 @@ function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: (
 // Manual creation covers early terminations and pre-auto-create tenancies;
 // the DB unique constraint dedupes against the cron/edge-function paths.
 function StartRecordButtons({ list }: { list: ReturnType<typeof useConditionRecords> }) {
-  const missing = useMemo(() => {
-    const have = new Set(list.records.map((r) => `${r.record.tenancy_id}:${r.record.event_type}`));
-    return list.activeTenancies.flatMap((t) =>
-      (['move_in', 'move_out'] as ConditionEventType[])
-        .filter((e) => !have.has(`${t.id}:${e}`))
-        .map((e) => ({ tenancy: t, eventType: e })),
-    );
-  }, [list.records, list.activeTenancies]);
+  const { toast } = useToast();
+  const [creating, setCreating] = useState<string | null>(null);
+  const missing = useMemo(
+    () => missingRecordOffers(list.records.map((r) => r.record), list.tenancies),
+    [list.records, list.tenancies],
+  );
+
+  const create = async (tenancyId: string, eventType: ConditionEventType) => {
+    setCreating(`${tenancyId}:${eventType}`);
+    try {
+      await list.createRecord(tenancyId, eventType);
+    } catch (e: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Could not start the record',
+        description: e.message ?? String(e),
+      });
+    } finally {
+      setCreating(null);
+    }
+  };
 
   if (missing.length === 0) return null;
   return (
@@ -124,26 +159,53 @@ function StartRecordButtons({ list }: { list: ReturnType<typeof useConditionReco
         <Button
           key={`${tenancy.id}:${eventType}`}
           variant="outline"
-          onClick={() => list.createRecord(tenancy.id, eventType)}
+          disabled={creating !== null}
+          onClick={() => void create(tenancy.id, eventType)}
         >
-          Start {EVENT_LABEL[eventType].toLowerCase()} record
+          {creating === `${tenancy.id}:${eventType}` ? 'Starting…' : `Start ${EVENT_LABEL[eventType].toLowerCase()} record`}
         </Button>
       ))}
     </div>
   );
 }
 
-function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => void }) {
+function RecordDetail({ recordId }: { recordId: string | null }) {
   const d = useConditionRecordDetail(recordId);
   const [locationTag, setLocationTag] = useState<string>('');
   const [notesDraft, setNotesDraft] = useState<string | null>(null);
+  const [notesStatus, setNotesStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [lightbox, setLightbox] = useState<PhotoWithUrl | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const myNotesSaved =
+    d.myParty === 'tenant' ? d.record?.tenant_notes : d.record?.landlord_notes;
+
+  // Autosave the notes draft: blur-only saving loses the draft when the user
+  // navigates away with the textarea still focused.
+  useEffect(() => {
+    if (notesDraft === null || notesDraft === (myNotesSaved ?? '')) return;
+    const timer = setTimeout(async () => {
+      setNotesStatus('saving');
+      try {
+        await d.saveNotes(notesDraft);
+        setNotesStatus('saved');
+      } catch {
+        setNotesStatus('error');
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [notesDraft]);
+
+  if (d.error && !d.record) {
+    return <p className="text-destructive">{d.error}</p>;
+  }
   if (d.loading || !d.record || !d.tenancy) {
     return (
-      <div className="p-4">
-        <Button variant="ghost" onClick={onBack}>← Back</Button>
-        <p className="text-muted-foreground">{d.error ?? 'Loading…'}</p>
+      <div className={`space-y-4 ${PAGE_PADDING}`}>
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
+        ))}
       </div>
     );
   }
@@ -172,9 +234,9 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
   };
 
   return (
-    <div className="space-y-6 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))]">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <Button variant="ghost" onClick={onBack}>← Back</Button>
+    <div className={`space-y-6 ${PAGE_PADDING}`}>
+      {/* Back navigation lives in the dashboard app bar */}
+      <div className="flex justify-end">
         <Badge variant={locked ? 'default' : 'secondary'}>{STATE_LABEL[state]}</Badge>
       </div>
 
@@ -185,6 +247,7 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
           </CardHeader>
           <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <select
+              aria-label="Photo location"
               className="w-full min-w-0 rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
               value={currentTag}
               onChange={(e) => setLocationTag(e.target.value)}
@@ -229,6 +292,7 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
             emptyAllText="You have not uploaded any photos yet."
             onRetry={d.retryUpload}
             onDismiss={d.dismissUpload}
+            onView={setLightbox}
           />
         </TabsContent>
         <TabsContent value="theirs" className="mt-4 space-y-6">
@@ -249,13 +313,23 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
             tagOrder={d.locationTags}
             emptyLocationText="The other party has not uploaded photos for this location yet."
             emptyAllText="The other party has not uploaded any photos yet."
+            onView={setLightbox}
           />
         </TabsContent>
       </Tabs>
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Notes</CardTitle>
+          <CardTitle className="flex items-baseline justify-between gap-2 text-base">
+            Notes
+            <span className="text-xs font-normal text-muted-foreground" aria-live="polite">
+              {notesStatus === 'saving' && 'Saving…'}
+              {notesStatus === 'saved' && 'Saved'}
+              {notesStatus === 'error' && (
+                <span className="text-destructive">Not saved — keep typing to retry</span>
+              )}
+            </span>
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Textarea
@@ -263,9 +337,6 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
             value={notesDraft ?? myNotes ?? ''}
             disabled={locked}
             onChange={(e) => setNotesDraft(e.target.value)}
-            onBlur={() => {
-              if (notesDraft !== null && notesDraft !== (myNotes ?? '')) d.saveNotes(notesDraft);
-            }}
           />
           {theirNotes && (
             <p className="break-words text-sm text-muted-foreground">
@@ -283,6 +354,27 @@ function RecordDetail({ recordId, onBack }: { recordId: string; onBack: () => vo
         hasPhotos={myPhotos.length > 0}
         onAttest={d.attest}
       />
+
+      {/* Full-size photo viewer — thumbnails are too small to inspect evidence */}
+      <Dialog open={lightbox !== null} onOpenChange={(open) => !open && setLightbox(null)}>
+        <DialogContent className="max-w-[calc(100vw-2rem)] p-2 sm:max-w-3xl">
+          {lightbox && (
+            <>
+              <DialogTitle className="px-2 pt-1 text-sm font-medium">
+                {lightbox.location_tag}
+                <span className="ml-2 font-normal text-muted-foreground">
+                  {PARTY_LABEL[partyOf(lightbox)]} · {new Date(lightbox.created_at).toLocaleString()}
+                </span>
+              </DialogTitle>
+              <img
+                src={lightbox.url}
+                alt={lightbox.location_tag}
+                className="max-h-[80vh] w-full rounded object-contain"
+              />
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -295,6 +387,7 @@ function PartyGallery({
   emptyAllText,
   onRetry,
   onDismiss,
+  onView,
 }: {
   photos: PhotoWithUrl[];
   pending: PendingUpload[];
@@ -303,6 +396,7 @@ function PartyGallery({
   emptyAllText: string;
   onRetry?: (id: string) => void;
   onDismiss?: (id: string) => void;
+  onView?: (photo: PhotoWithUrl) => void;
 }) {
   const groups = groupPhotosByLocation(photos, tagOrder);
   const photoById = new Map(photos.map((p) => [p.id, p]));
@@ -337,13 +431,20 @@ function PartyGallery({
                 {locationPhotos.map((p) => {
                   const photo = photoById.get(p.id)!;
                   return (
-                    <div key={p.id} className="overflow-hidden rounded-md border">
+                    <button
+                      key={p.id}
+                      type="button"
+                      className="overflow-hidden rounded-md border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => onView?.(photo)}
+                      aria-label={`View ${p.location_tag} photo full size`}
+                    >
                       <img
                         src={photo.url}
                         alt={p.location_tag}
-                        className="aspect-square w-full object-cover"
+                        loading="lazy"
+                        className="aspect-square w-full cursor-zoom-in object-cover"
                       />
-                    </div>
+                    </button>
                   );
                 })}
                 {locationPending.map((u) => (

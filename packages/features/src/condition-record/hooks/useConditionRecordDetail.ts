@@ -66,6 +66,9 @@ export function useConditionRecordDetail(recordId: string | null) {
   // File handles for pending uploads so a failed upload can be retried.
   const pendingFilesRef = useRef(new Map<string, { file: File; locationTag: string }>());
   const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  // Signed URLs are cached by storage path so a refetch (realtime, upload) does
+  // not change every <img src> and make the whole gallery flicker/reload.
+  const urlCacheRef = useRef(new Map<string, { url: string; expiresAt: number }>());
 
   const db = supabase as any; // ponytail: untyped until supabase types regen (Task 8)
 
@@ -113,12 +116,27 @@ export function useConditionRecordDetail(recordId: string | null) {
       if (list.length === 0) {
         setPhotos([]);
       } else {
-        const { data: signed, error: sErr } = await supabase.storage
-          .from(BUCKET)
-          .createSignedUrls(list.map((p) => p.storage_path), SIGNED_URL_TTL);
-        if (sErr) throw sErr;
-        const urlByPath = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
-        setPhotos(list.map((p) => ({ ...p, url: urlByPath.get(p.storage_path) ?? '' })));
+        // Only sign paths that are new or within 20 minutes of expiry — cached
+        // URLs keep their src stable across refetches. The margin is wider than
+        // the refresh interval's 15-minute remainder so the timer always renews.
+        const cache = urlCacheRef.current;
+        const now = Date.now();
+        const stale = list.filter((p) => {
+          const c = cache.get(p.storage_path);
+          return !c || c.expiresAt < now + 20 * 60_000;
+        });
+        if (stale.length > 0) {
+          const { data: signed, error: sErr } = await supabase.storage
+            .from(BUCKET)
+            .createSignedUrls(stale.map((p) => p.storage_path), SIGNED_URL_TTL);
+          if (sErr) throw sErr;
+          for (const s of signed ?? []) {
+            if (s.path && s.signedUrl) {
+              cache.set(s.path, { url: s.signedUrl, expiresAt: now + SIGNED_URL_TTL * 1000 });
+            }
+          }
+        }
+        setPhotos(list.map((p) => ({ ...p, url: cache.get(p.storage_path)?.url ?? '' })));
       }
     } catch (e: any) {
       setError(e.message ?? String(e));
@@ -253,9 +271,15 @@ export function useConditionRecordDetail(recordId: string | null) {
         p_notes: notes,
       });
       if (err) throw err;
-      await refetch();
+      // Patch locally instead of refetching: autosave fires while the user is
+      // typing, and a refetch would clobber the draft and re-render the page.
+      setRecord((prev) => {
+        if (!prev || !tenancy) return prev;
+        const mine = myParty === 'tenant' ? 'tenant_notes' : 'landlord_notes';
+        return { ...prev, [mine]: notes };
+      });
     },
-    [recordId, refetch],
+    [recordId, tenancy, myParty],
   );
 
   // Both parties watch the shared record live (immediate-visibility requirement).
@@ -275,9 +299,13 @@ export function useConditionRecordDetail(recordId: string | null) {
         () => debouncedRefetch(),
       )
       .subscribe();
+    // Re-sign photo URLs before the 1h TTL runs out so a long-open page
+    // doesn't end up with broken images.
+    const refreshInterval = setInterval(refetch, (SIGNED_URL_TTL - 15 * 60) * 1000);
     return () => {
       supabase.removeChannel(channel);
       clearTimeout(refetchTimerRef.current);
+      clearInterval(refreshInterval);
     };
   }, [recordId, refetch, debouncedRefetch]);
 

@@ -20,7 +20,7 @@ export interface ConditionRecordListItem {
 
 export function useConditionRecords() {
   const [records, setRecords] = useState<ConditionRecordListItem[]>([]);
-  const [activeTenancies, setActiveTenancies] = useState<TenancySummary[]>([]);
+  const [tenancies, setTenancies] = useState<TenancySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,17 +34,17 @@ export function useConditionRecords() {
       const uid = auth.user?.id;
       if (!uid) {
         setRecords([]);
-        setActiveTenancies([]);
+        setTenancies([]);
         return;
       }
       // RLS already scopes tenancies to the caller; the or-filter is belt and braces.
-      const { data: tenancies, error: tErr } = await db
+      const { data: tenancyRows, error: tErr } = await db
         .from('tenancies')
         .select('id, property_id, tenant_id, landlord_id, start_date, end_date, status')
         .or(`tenant_id.eq.${uid},landlord_id.eq.${uid}`);
       if (tErr) throw tErr;
-      const tList: TenancySummary[] = tenancies ?? [];
-      setActiveTenancies(tList.filter((t) => t.status === 'active'));
+      const tList: TenancySummary[] = tenancyRows ?? [];
+      setTenancies(tList);
       if (tList.length === 0) {
         setRecords([]);
         return;
@@ -101,5 +101,5 @@ export function useConditionRecords() {
     refetch();
   }, [refetch]);
 
-  return { records, activeTenancies, loading, error, refetch, createRecord };
+  return { records, tenancies, loading, error, refetch, createRecord };
 }

@@ -3,7 +3,7 @@ import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/En
 import { Messages } from '@mzanzihomes/features/pages';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import LandlordMaintenance from '@/pages/LandlordMaintenance';
-import { ConditionRecordsPage } from '@mzanzihomes/features/condition-record';
+import { ConditionRecordsPage, ConditionRecordDetailPage } from '@mzanzihomes/features/condition-record';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { MzanziHomesSupport } from '@mzanzihomes/features/support';
 import { PlanGuard } from '@mzanzihomes/ui/components/PlanGuard';
@@ -121,6 +121,11 @@ export default function LandlordDashboardRoutes() {
       <Route path="condition-records" element={
         <EnhancedDashboardLayout title="Condition Records">
           <ConditionRecordsPage />
+        </EnhancedDashboardLayout>
+      } />
+      <Route path="condition-records/:recordId" element={
+        <EnhancedDashboardLayout title="Condition Record">
+          <ConditionRecordDetailPage />
         </EnhancedDashboardLayout>
       } />
       <Route path="maintenance/:ticketId" element={
