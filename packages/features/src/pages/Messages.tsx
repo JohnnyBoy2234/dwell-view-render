@@ -196,6 +196,24 @@ export default function Messages() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [scrollToProposalFn, setScrollToProposalFn] = useState<((id: string) => void) | null>(null);
 
+  // Anchor the full-screen chat pane to the *visible* viewport (the area not
+  // covered by the on-screen keyboard) so the name header stays pinned to the
+  // top and the composer rides just above the keyboard — iMessage-style,
+  // instead of the whole pane sliding up and hiding the header when typing.
+  const [chatViewport, setChatViewport] = useState<{ height: number; offsetTop: number }>({ height: 0, offsetTop: 0 });
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const update = () => setChatViewport({ height: vv.height, offsetTop: vv.offsetTop });
+    update();
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, []);
+
   const {
     conversations,
     activeConversation,
@@ -457,8 +475,16 @@ export default function Messages() {
         {/* Full-screen chat */}
         {!showConversations && selectedConversation && (
           <div
-            className="fixed inset-0 flex flex-col z-30 bg-background"
-            style={{ height: '100svh', overscrollBehavior: 'contain' }}
+            className="fixed left-0 right-0 top-0 flex flex-col z-30 bg-background"
+            style={{
+              // Size to the visible viewport so the header stays pinned to the
+              // top and the composer sits above the keyboard. Falls back to the
+              // full small-viewport height before visualViewport reports in.
+              height: chatViewport.height ? `${chatViewport.height}px` : '100svh',
+              transform: chatViewport.offsetTop ? `translateY(${chatViewport.offsetTop}px)` : undefined,
+              transition: 'height 0.25s cubic-bezier(.22,.61,.36,1), transform 0.25s cubic-bezier(.22,.61,.36,1)',
+              overscrollBehavior: 'contain',
+            }}
           >
             {/* Chat header */}
             <div

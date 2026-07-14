@@ -200,13 +200,11 @@ export class MobileServices {
   static initializeKeyboard() {
     if (!this.isNative) return;
 
-    Keyboard.addListener('keyboardWillShow', info => {
-      document.body.style.transform = `translateY(-${info.keyboardHeight}px)`;
-    });
-
-    Keyboard.addListener('keyboardWillHide', () => {
-      document.body.style.transform = 'translateY(0px)';
-    });
+    // The Capacitor Keyboard plugin is configured with resize: "body", which
+    // already shrinks the viewport to make room for the keyboard. We must NOT
+    // also translate the body up — that double-compensates and pushes fixed
+    // headers (e.g. the chat name bar) off the top of the screen. Layouts that
+    // need to react to the keyboard use the visualViewport API instead.
   }
 
   // Haptic Feedback
