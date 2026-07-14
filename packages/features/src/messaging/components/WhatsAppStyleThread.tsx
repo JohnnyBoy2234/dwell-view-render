@@ -26,6 +26,8 @@ interface Message {
   attachment_url?: string | null;
   viewing_proposal_id?: string | null;
   tempId?: string;
+  // Stable key across the optimistic→server id swap (prevents remount/re-animation)
+  clientKey?: string;
   status?: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
 }
 
@@ -521,7 +523,7 @@ export function WhatsAppStyleThread({
     );
 
     return (
-      <React.Fragment key={message.id}>
+      <React.Fragment key={message.clientKey ?? message.id}>
         {showNewDayDivider && (
           <div className="flex justify-center my-4">
             <span className="px-3 py-1 text-[11px] font-semibold rounded-full bg-black/8 text-ios-gray-dark backdrop-blur-sm">

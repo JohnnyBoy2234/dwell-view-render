@@ -8,6 +8,10 @@ import type { RealtimeMessage, MessageAck } from './useWebSocketConnection';
 
 interface OptimisticMessage extends RealtimeMessage {
   tempId: string;
+  // Stable React key that survives the optimistic→server id swap, so the
+  // bubble is updated in place (never remounted) and its entry animation
+  // does not replay when the server confirms the message.
+  clientKey?: string;
   status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
   read_by_landlord?: boolean;
   read_by_tenant?: boolean;
@@ -272,6 +276,7 @@ export function useWhatsAppMessaging() {
     const optimisticMessage: OptimisticMessage = {
       id: tempId,
       tempId,
+      clientKey: tempId,
       conversation_id: conversationId,
       sender_id: user.id,
       content: trimmedContent,
@@ -342,10 +347,13 @@ export function useWhatsAppMessaging() {
 
       if (error) throw error;
 
-      // Update optimistic message with real data
+      // Update optimistic message with real data. Keep the original
+      // clientKey so React updates this bubble in place (no remount → no
+      // re-animation) when the temp id is replaced by the server id.
       const realMessage: OptimisticMessage = {
         ...data,
         tempId: data.id,
+        clientKey: tempId,
         status: 'sent'
       };
 
