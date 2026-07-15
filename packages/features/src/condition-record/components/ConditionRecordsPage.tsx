@@ -796,7 +796,7 @@ function SignAndApproveCard({
         <Button
           variant="ghost"
           size="sm"
-          className="text-muted-foreground"
+          className="h-auto w-full justify-start whitespace-normal px-0 text-left text-muted-foreground"
           disabled={busy === 'reopen'}
           onClick={() => {
             if (window.confirm('Re-open for changes? This revokes all signatures collected so far and restarts sign-off.')) {
