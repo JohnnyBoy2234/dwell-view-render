@@ -16,7 +16,6 @@ import {
   type ConditionParty,
   type ConditionRecordState,
   type ConditionRecord,
-  type ConditionDispute,
 } from '@mzanzihomes/common';
 import { useConditionRecords, type ConditionRecordListItem } from '../hooks/useConditionRecords';
 import {
@@ -34,7 +33,7 @@ const EVENT_LABEL: Record<ConditionEventType, string> = {
 const STATE_LABEL: Record<ConditionRecordState, string> = {
   open: 'Open — collecting photos',
   awaiting_receipts: 'Awaiting receipt signatures',
-  awaiting_approval: 'Awaiting approval',
+  awaiting_approval: 'Awaiting acceptance',
   locked: 'Saved',
 };
 
@@ -304,7 +303,7 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
       {!locked && (
         <div className="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
           Once this inspection has been completed and accepted, all photos and notes become a
-          permanent record and can no longer be added, edited or deleted.
+          permanent record and can no longer be edited or deleted.
         </div>
       )}
 
@@ -453,11 +452,7 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
           <SignAndApproveCard
             record={d.record}
             myParty={d.myParty}
-            disputes={d.disputes}
-            locationTags={d.locationTags}
             onApprove={d.approve}
-            onRaiseDispute={d.raiseDispute}
-            onRespondDispute={d.respondDispute}
           />
         </SectionCard>
       )}
@@ -616,7 +611,7 @@ function SignOffCard({
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
         When everyone has added their photos and notes, start sign-off. This freezes uploads and
-        gives both parties 7 days to approve the inspection or raise a dispute.
+        gives both parties 7 days to review and accept the inspection.
       </p>
       <Button className="w-full sm:w-auto" disabled={!hasPhotos || busy} onClick={() => void go()}>
         {busy ? 'Starting…' : 'Ready to sign off'}
@@ -639,158 +634,61 @@ function Countdown({ endsAt }: { endsAt: Date }) {
   );
 }
 
-// Approve or dispute, with per-room dispute threads. Both parties get a 7-day
-// window; either approves or raises disputes — there is no separate receipt step.
+// Accept the inspection with a simple yes/no. "No" just advises talking to the
+// other party — there is no formal dispute flow.
 function SignAndApproveCard({
   record,
   myParty,
-  disputes,
-  locationTags,
   onApprove,
-  onRaiseDispute,
-  onRespondDispute,
 }: {
   record: ConditionRecord;
   myParty: ConditionParty;
-  disputes: ConditionDispute[];
-  locationTags: string[];
   onApprove: () => Promise<unknown>;
-  onRaiseDispute: (locationTag: string, comment: string, files?: File[]) => Promise<unknown>;
-  onRespondDispute: (disputeId: string, agree: boolean) => Promise<unknown>;
 }) {
   const { toast } = useToast();
-  const [busy, setBusy] = useState<string | null>(null);
-  const [disputeTag, setDisputeTag] = useState(locationTags[0] ?? 'Other');
-  const [disputeComment, setDisputeComment] = useState('');
-  const [disputeFiles, setDisputeFiles] = useState<File[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [saidNo, setSaidNo] = useState(false);
 
+  const otherParty: ConditionParty = myParty === 'landlord' ? 'tenant' : 'landlord';
   const myApprovedAt = myParty === 'tenant' ? record.tenant_attested_at : record.landlord_attested_at;
   const endsAt = approvalWindowEndsAt(record);
 
-  const run = async (key: string, fn: () => Promise<unknown>, errTitle: string) => {
-    setBusy(key);
+  const accept = async () => {
+    setBusy(true);
     try {
-      await fn();
+      await onApprove();
     } catch (e: any) {
-      toast({ variant: 'destructive', title: errTitle, description: e.message ?? String(e) });
+      toast({ variant: 'destructive', title: 'Could not accept', description: e.message ?? String(e) });
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   };
 
-  const submitDispute = async () => {
-    if (!disputeComment.trim()) {
-      toast({ variant: 'destructive', title: 'Add a comment', description: 'Say what you disagree with.' });
-      return;
-    }
-    await run('dispute', async () => {
-      await onRaiseDispute(disputeTag, disputeComment.trim(), disputeFiles);
-      setDisputeComment('');
-      setDisputeFiles([]);
-    }, 'Could not raise dispute');
-  };
+  if (myApprovedAt) {
+    return <Badge>You accepted on {new Date(myApprovedAt).toLocaleString()}</Badge>;
+  }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
-      <p className="text-sm">{record.attestation_text}</p>
-      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
-        <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
+      <p className="text-sm font-semibold">Does this portray an accurate inspection?</p>
+      <div className="flex flex-wrap gap-2">
+        <Button
+          className="bg-emerald-600 hover:bg-emerald-700"
+          disabled={busy}
+          onClick={() => { setSaidNo(false); void accept(); }}
+        >
+          {busy ? 'Saving…' : 'Yes'}
+        </Button>
+        <Button variant="outline" disabled={busy} onClick={() => setSaidNo(true)}>
+          No
+        </Button>
       </div>
-
-      {myApprovedAt ? (
-        <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
-      ) : (
-        <>
-          <p className="text-sm font-medium">Review the inspection, then choose one:</p>
-
-          {/* Choice A: approve */}
-          <div className="space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20">
-            <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Agree with the inspection?</p>
-            <Button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 sm:w-auto"
-              disabled={busy === 'approve'}
-              onClick={() => void run('approve', onApprove, 'Could not approve')}
-            >
-              {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the inspection'}
-            </Button>
-          </div>
-
-          {/* Choice B: dispute */}
-          <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/20">
-            <p className="text-sm font-semibold text-red-700 dark:text-red-300">Don't agree? Raise a dispute</p>
-            <p className="text-xs text-muted-foreground">
-              Pick the room, say what you disagree with and attach photos as evidence. The other
-              party is notified and can agree or disagree before the window closes.
-            </p>
-            <select
-              aria-label="Disputed room"
-              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-              value={disputeTag}
-              onChange={(e) => setDisputeTag(e.target.value)}
-            >
-              {locationTags.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-            <Textarea
-              placeholder="Describe what you disagree with in this room…"
-              value={disputeComment}
-              onChange={(e) => setDisputeComment(e.target.value)}
-            />
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              className="block w-full text-sm"
-              onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
-            />
-            <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:text-red-300" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
-              {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
-            </Button>
-          </div>
-        </>
-      )}
-
-      {/* Existing disputes */}
-      {disputes.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Disputes</p>
-          {disputes.map((dsp) => {
-            const mineRaised = dsp.raised_party === myParty;
-            return (
-              <div key={dsp.id} className="space-y-1 rounded-lg border p-3 text-sm">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{dsp.location_tag}</span>
-                  <Badge variant={dsp.status === 'agreed' ? 'default' : dsp.status === 'disagreed' ? 'destructive' : 'secondary'}>
-                    {dsp.status === 'open' ? 'Awaiting response' : dsp.status === 'agreed' ? 'Agreed' : 'Not agreed'}
-                  </Badge>
-                </div>
-                <p className="break-words text-muted-foreground">{dsp.comment}</p>
-                <p className="text-xs text-muted-foreground">Raised by {dsp.raised_party}</p>
-                {!mineRaised && dsp.status === 'open' && (
-                  <div className="flex gap-2 pt-1">
-                    <Button size="sm" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, true), 'Could not respond')}>Agree</Button>
-                    <Button size="sm" variant="outline" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, false), 'Could not respond')}>Disagree</Button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+      {saidNo && (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-300">
+          We advise you to talk to the {PARTY_LABEL[otherParty].toLowerCase()} before accepting.
+        </p>
       )}
     </div>
-  );
-}
-
-function AttestationStatus({ label, at }: { label: string; at: string | null }) {
-  return (
-    <span>
-      {label}:{' '}
-      {at ? (
-        <span className="text-emerald-600">agreed {new Date(at).toLocaleString()}</span>
-      ) : (
-        <span className="text-muted-foreground">not yet agreed</span>
-      )}
-    </span>
   );
 }
