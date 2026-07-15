@@ -270,8 +270,6 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
   const otherParty: ConditionParty = d.myParty === 'landlord' ? 'tenant' : 'landlord';
   // Notes are editable only while the record is open.
   const canEdit = state === 'open' && !!d.myParty;
-  const otherAttestedAt =
-    otherParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
   const myAttestedAt =
     d.myParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
   // Either party can keep adding their own photos until THEY sign off, so both
@@ -387,17 +385,6 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
               />
             </TabsContent>
             <TabsContent value="theirs" className="mt-4 space-y-6">
-              <p className="text-sm text-muted-foreground">
-                {PARTY_LABEL[otherParty]} attestation:{' '}
-                {otherAttestedAt ? (
-                  <span className="text-emerald-600">
-                    attested {new Date(otherAttestedAt).toLocaleString()}
-                  </span>
-                ) : (
-                  'not yet attested'
-                )}
-                {' · '}View only
-              </p>
               <PartyGallery
                 photos={theirPhotos}
                 pending={[]}
