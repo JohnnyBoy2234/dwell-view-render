@@ -446,7 +446,6 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
             onApprove={d.approve}
             onRaiseDispute={d.raiseDispute}
             onRespondDispute={d.respondDispute}
-            onReopen={d.reopen}
           />
         </SectionCard>
       )}
@@ -639,7 +638,6 @@ function SignAndApproveCard({
   onApprove,
   onRaiseDispute,
   onRespondDispute,
-  onReopen,
 }: {
   record: ConditionRecord;
   myParty: ConditionParty;
@@ -650,7 +648,6 @@ function SignAndApproveCard({
   onApprove: () => Promise<unknown>;
   onRaiseDispute: (locationTag: string, comment: string, files?: File[]) => Promise<unknown>;
   onRespondDispute: (disputeId: string, agree: boolean) => Promise<unknown>;
-  onReopen: () => Promise<unknown>;
 }) {
   const { toast } = useToast();
   const [busy, setBusy] = useState<string | null>(null);
@@ -791,22 +788,6 @@ function SignAndApproveCard({
         </div>
       )}
 
-      {/* Re-open (tamper detection): changing anything revokes all signatures */}
-      <div className="border-t pt-3">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-auto w-full justify-start whitespace-normal px-0 text-left text-muted-foreground"
-          disabled={busy === 'reopen'}
-          onClick={() => {
-            if (window.confirm('Re-open for changes? This revokes all signatures collected so far and restarts sign-off.')) {
-              void run('reopen', onReopen, 'Could not re-open');
-            }
-          }}
-        >
-          {busy === 'reopen' ? 'Re-opening…' : 'Need to change something? Re-open (revokes signatures)'}
-        </Button>
-      </div>
     </div>
   );
 }
