@@ -269,11 +269,16 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
   const state = conditionRecordState(d.record);
   const locked = state === 'locked';
   const otherParty: ConditionParty = d.myParty === 'landlord' ? 'tenant' : 'landlord';
-  // Photos and notes are only editable while the record is open; after
-  // "Ready to sign off" everything is frozen until lock (or re-open).
+  // Notes are editable only while the record is open.
   const canEdit = state === 'open' && !!d.myParty;
   const otherAttestedAt =
     otherParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
+  const myAttestedAt =
+    d.myParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
+  // Either party can keep adding their own photos until THEY sign off, so both
+  // sides can document move-in and move-out even after the other has started
+  // sign-off. Once you approve, your photo set is final.
+  const canAddPhotos = !!d.myParty && !locked && !myAttestedAt;
   const myNotes = d.myParty === 'tenant' ? d.record.tenant_notes : d.record.landlord_notes;
   const theirNotes = d.myParty === 'tenant' ? d.record.landlord_notes : d.record.tenant_notes;
 
@@ -338,7 +343,7 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
       {/* 2. Photos */}
       <SectionCard icon={Camera} title="Photos" accent={BLUE}>
         <div className="space-y-4">
-          {canEdit && (
+          {canAddPhotos && (
             <div className="flex flex-col gap-3 rounded-xl bg-blue-50/60 p-3 sm:flex-row sm:items-center dark:bg-blue-950/20">
               <select
                 aria-label="Photo location"
