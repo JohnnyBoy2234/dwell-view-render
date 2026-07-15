@@ -8,7 +8,13 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
       <input
         type={type}
         className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          "flex h-10 rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+          // Chrome renders type="date" as a left-clustered value+icon with no
+          // way to CSS-reposition the icon to the box's right edge (the
+          // ::-webkit-datetime-edit/::-webkit-calendar-picker-indicator
+          // pseudo-elements ignore layout properties). w-full leaves a dead
+          // gap after the icon; sizing to content avoids it.
+          type === "date" ? "w-auto" : "w-full",
           className
         )}
         ref={ref}
