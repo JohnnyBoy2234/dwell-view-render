@@ -294,6 +294,15 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
 
   return (
     <div className={`space-y-5 ${PAGE_PADDING}`}>
+      {/* Permanent-record disclaimer — always visible until the record locks
+          (once locked, the red "saved" banner below states the same). */}
+      {!locked && (
+        <div className="rounded-2xl border border-red-300 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          Once this inspection has been completed and accepted, all photos and notes become a
+          permanent record and can no longer be added, edited or deleted.
+        </div>
+      )}
+
       {/* 1. Status header */}
       {locked ? (
         <div className="space-y-3">
@@ -698,8 +707,10 @@ function SignAndApproveCard({
       {state === 'awaiting_receipts' && !myReceiptAt && (
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground">
-            Confirm you have received and can access this inspection. The 7-day review window opens
-            once both parties confirm.
+            This only confirms you have received and can access the inspection — it is{' '}
+            <span className="font-semibold">not</span> agreement. Once both parties confirm receipt,
+            a 7-day window opens where you can either <span className="font-semibold">approve</span>{' '}
+            the inspection or <span className="font-semibold">raise a dispute</span>.
           </p>
           <Button className="w-full sm:w-auto" disabled={busy === 'receipt'} onClick={() => void run('receipt', onSignReceipt, 'Could not sign receipt')}>
             {busy === 'receipt' ? 'Signing…' : 'I confirm I received this inspection'}
@@ -724,13 +735,27 @@ function SignAndApproveCard({
             <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
           ) : (
             <>
-              <Button className="w-full sm:w-auto" disabled={busy === 'approve'} onClick={() => void run('approve', onApprove, 'Could not approve')}>
-                {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the inspection'}
-              </Button>
+              <p className="text-sm font-medium">Review the inspection, then choose one:</p>
 
-              {/* Raise a dispute */}
-              <div className="space-y-2 rounded-lg border p-3">
-                <p className="text-sm font-medium">Disagree with something? Raise a dispute</p>
+              {/* Choice A: approve */}
+              <div className="space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20">
+                <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Agree with the inspection?</p>
+                <Button
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 sm:w-auto"
+                  disabled={busy === 'approve'}
+                  onClick={() => void run('approve', onApprove, 'Could not approve')}
+                >
+                  {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the inspection'}
+                </Button>
+              </div>
+
+              {/* Choice B: dispute */}
+              <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/20">
+                <p className="text-sm font-semibold text-red-700 dark:text-red-300">Don't agree? Raise a dispute</p>
+                <p className="text-xs text-muted-foreground">
+                  Pick the room, say what you disagree with and attach photos as evidence. The other
+                  party is notified and can agree or disagree before the window closes.
+                </p>
                 <select
                   aria-label="Disputed room"
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
@@ -751,7 +776,7 @@ function SignAndApproveCard({
                   className="block w-full text-sm"
                   onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
                 />
-                <Button size="sm" variant="outline" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
+                <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:text-red-300" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
                   {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
                 </Button>
               </div>
