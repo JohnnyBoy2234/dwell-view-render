@@ -443,15 +443,13 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
           <SignOffCard onSendForSignoff={d.sendForSignoff} hasPhotos={d.photos.length > 0} />
         </SectionCard>
       )}
-      {(state === 'awaiting_receipts' || state === 'awaiting_approval') && d.myParty && (
+      {state === 'awaiting_approval' && d.myParty && (
         <SectionCard icon={ShieldCheck} title="Sign off" accent={AMBER}>
           <SignAndApproveCard
             record={d.record}
             myParty={d.myParty}
-            state={state}
             disputes={d.disputes}
             locationTags={d.locationTags}
-            onSignReceipt={d.signReceipt}
             onApprove={d.approve}
             onRaiseDispute={d.raiseDispute}
             onRespondDispute={d.respondDispute}
@@ -612,8 +610,8 @@ function SignOffCard({
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        When everyone has added their photos and notes, start sign-off. This freezes uploads, then
-        both parties sign a receipt and get 7 days to approve or dispute the inspection.
+        When everyone has added their photos and notes, start sign-off. This freezes uploads and
+        gives both parties 7 days to approve the inspection or raise a dispute.
       </p>
       <Button className="w-full sm:w-auto" disabled={!hasPhotos || busy} onClick={() => void go()}>
         {busy ? 'Starting…' : 'Ready to sign off'}
@@ -636,24 +634,21 @@ function Countdown({ endsAt }: { endsAt: Date }) {
   );
 }
 
-// Receipt (Stage 1) then approval + per-room disputes (Stage 2).
+// Approve or dispute, with per-room dispute threads. Both parties get a 7-day
+// window; either approves or raises disputes — there is no separate receipt step.
 function SignAndApproveCard({
   record,
   myParty,
-  state,
   disputes,
   locationTags,
-  onSignReceipt,
   onApprove,
   onRaiseDispute,
   onRespondDispute,
 }: {
   record: ConditionRecord;
   myParty: ConditionParty;
-  state: ConditionRecordState;
   disputes: ConditionDispute[];
   locationTags: string[];
-  onSignReceipt: () => Promise<unknown>;
   onApprove: () => Promise<unknown>;
   onRaiseDispute: (locationTag: string, comment: string, files?: File[]) => Promise<unknown>;
   onRespondDispute: (disputeId: string, agree: boolean) => Promise<unknown>;
@@ -664,8 +659,6 @@ function SignAndApproveCard({
   const [disputeComment, setDisputeComment] = useState('');
   const [disputeFiles, setDisputeFiles] = useState<File[]>([]);
 
-  const myReceiptAt = myParty === 'tenant' ? record.tenant_receipt_at : record.landlord_receipt_at;
-  const otherReceiptAt = myParty === 'tenant' ? record.landlord_receipt_at : record.tenant_receipt_at;
   const myApprovedAt = myParty === 'tenant' ? record.tenant_attested_at : record.landlord_attested_at;
   const endsAt = approvalWindowEndsAt(record);
 
@@ -694,95 +687,63 @@ function SignAndApproveCard({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm font-semibold">
-        {state === 'awaiting_receipts' ? 'Step 1: Confirm receipt' : 'Step 2: Approve or dispute'}
-      </p>
-
-      {/* Receipt status */}
+      {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
+      <p className="text-sm">{record.attestation_text}</p>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-        <span>You received: {myReceiptAt ? <span className="text-emerald-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
-        <span>Other party received: {otherReceiptAt ? <span className="text-emerald-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
+        <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
+        <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
       </div>
 
-      {state === 'awaiting_receipts' && !myReceiptAt && (
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            This only confirms you have received and can access the inspection — it is{' '}
-            <span className="font-semibold">not</span> agreement. Once both parties confirm receipt,
-            a 7-day window opens where you can either <span className="font-semibold">approve</span>{' '}
-            the inspection or <span className="font-semibold">raise a dispute</span>.
-          </p>
-          <Button className="w-full sm:w-auto" disabled={busy === 'receipt'} onClick={() => void run('receipt', onSignReceipt, 'Could not sign receipt')}>
-            {busy === 'receipt' ? 'Signing…' : 'I confirm I received this inspection'}
-          </Button>
-        </div>
-      )}
+      {myApprovedAt ? (
+        <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
+      ) : (
+        <>
+          <p className="text-sm font-medium">Review the inspection, then choose one:</p>
 
-      {state === 'awaiting_receipts' && myReceiptAt && (
-        <p className="text-sm text-muted-foreground">Waiting for the other party to confirm receipt.</p>
-      )}
-
-      {state === 'awaiting_approval' && (
-        <div className="space-y-3">
-          {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
-          <p className="text-sm">{record.attestation_text}</p>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-            <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
-            <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
+          {/* Choice A: approve */}
+          <div className="space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20">
+            <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Agree with the inspection?</p>
+            <Button
+              className="w-full bg-emerald-600 hover:bg-emerald-700 sm:w-auto"
+              disabled={busy === 'approve'}
+              onClick={() => void run('approve', onApprove, 'Could not approve')}
+            >
+              {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the inspection'}
+            </Button>
           </div>
 
-          {myApprovedAt ? (
-            <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
-          ) : (
-            <>
-              <p className="text-sm font-medium">Review the inspection, then choose one:</p>
-
-              {/* Choice A: approve */}
-              <div className="space-y-1.5 rounded-lg border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20">
-                <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">Agree with the inspection?</p>
-                <Button
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 sm:w-auto"
-                  disabled={busy === 'approve'}
-                  onClick={() => void run('approve', onApprove, 'Could not approve')}
-                >
-                  {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the inspection'}
-                </Button>
-              </div>
-
-              {/* Choice B: dispute */}
-              <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/20">
-                <p className="text-sm font-semibold text-red-700 dark:text-red-300">Don't agree? Raise a dispute</p>
-                <p className="text-xs text-muted-foreground">
-                  Pick the room, say what you disagree with and attach photos as evidence. The other
-                  party is notified and can agree or disagree before the window closes.
-                </p>
-                <select
-                  aria-label="Disputed room"
-                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                  value={disputeTag}
-                  onChange={(e) => setDisputeTag(e.target.value)}
-                >
-                  {locationTags.map((t) => <option key={t} value={t}>{t}</option>)}
-                </select>
-                <Textarea
-                  placeholder="Describe what you disagree with in this room…"
-                  value={disputeComment}
-                  onChange={(e) => setDisputeComment(e.target.value)}
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="block w-full text-sm"
-                  onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
-                />
-                <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:text-red-300" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
-                  {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
+          {/* Choice B: dispute */}
+          <div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-900 dark:bg-red-950/20">
+            <p className="text-sm font-semibold text-red-700 dark:text-red-300">Don't agree? Raise a dispute</p>
+            <p className="text-xs text-muted-foreground">
+              Pick the room, say what you disagree with and attach photos as evidence. The other
+              party is notified and can agree or disagree before the window closes.
+            </p>
+            <select
+              aria-label="Disputed room"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+              value={disputeTag}
+              onChange={(e) => setDisputeTag(e.target.value)}
+            >
+              {locationTags.map((t) => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <Textarea
+              placeholder="Describe what you disagree with in this room…"
+              value={disputeComment}
+              onChange={(e) => setDisputeComment(e.target.value)}
+            />
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="block w-full text-sm"
+              onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
+            />
+            <Button size="sm" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100 dark:text-red-300" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
+              {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
+            </Button>
+          </div>
+        </>
       )}
 
       {/* Existing disputes */}
@@ -801,7 +762,7 @@ function SignAndApproveCard({
                 </div>
                 <p className="break-words text-muted-foreground">{dsp.comment}</p>
                 <p className="text-xs text-muted-foreground">Raised by {dsp.raised_party}</p>
-                {!mineRaised && dsp.status === 'open' && state === 'awaiting_approval' && (
+                {!mineRaised && dsp.status === 'open' && (
                   <div className="flex gap-2 pt-1">
                     <Button size="sm" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, true), 'Could not respond')}>Agree</Button>
                     <Button size="sm" variant="outline" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, false), 'Could not respond')}>Disagree</Button>
@@ -812,7 +773,6 @@ function SignAndApproveCard({
           })}
         </div>
       )}
-
     </div>
   );
 }
