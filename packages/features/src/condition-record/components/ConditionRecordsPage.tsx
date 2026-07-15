@@ -124,12 +124,12 @@ function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: (
       className={`cursor-pointer border-l-4 shadow-sm transition-all hover:shadow-md ${STATE_ACCENT[state].bar}`}
       onClick={onOpen}
     >
-      <CardContent className="flex items-center gap-3 p-4">
+      <CardContent className="flex items-start gap-3 p-4">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
           <Camera className="h-5 w-5 text-blue-500" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold">
+          <p className="break-words font-semibold">
             {item.propertyTitle} — {EVENT_LABEL[item.record.event_type]} inspection
           </p>
           <p className="mt-0.5 text-xs text-muted-foreground">
@@ -311,7 +311,7 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
       {locked ? (
         <div className="space-y-3">
           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-            All photos and notes have now been saved and can no longer be added, changed or deleted.
+            All photos and notes are now a permanent record and can no longer be edited or deleted.
             {d.record.report_ref && (
               <span className="mt-1 block font-normal">
                 Report ID <span className="font-semibold">{d.record.report_ref}</span> — the signed
