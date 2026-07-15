@@ -1,3 +1,4 @@
+import { supabase } from '@mzanzihomes/supabase/client';
 import { isValidSaId, parseSaId } from '@mzanzihomes/common/utils/saId';
 
 export interface ExtractedIdInfo {
@@ -20,18 +21,27 @@ const LOW_OCR_CONFIDENCE_THRESHOLD = 65;
 
 /** Which extracted fields should be highlighted for review. ID number, date of
  * birth and nationality are algorithmically derived (Luhn/MRZ checksum) so they
- * stay unflagged unless the whole scan's OCR confidence was low. */
-export function lowConfidenceFields(extracted: ExtractedIdInfo, ocrConfidence: number): ExtractedFieldKey[] {
+ * stay unflagged unless the whole scan's OCR confidence was low. `null` means
+ * the OCR provider gave no usable scalar confidence (OCR.space's non-overlay
+ * response doesn't) — algorithmic fields are trusted in that case and only
+ * the always-fragile fields (names) are flagged. */
+export function lowConfidenceFields(extracted: ExtractedIdInfo, ocrConfidence: number | null): ExtractedFieldKey[] {
   const keys = Object.keys(extracted).filter((k) => k !== 'document_type') as ExtractedFieldKey[];
-  if (ocrConfidence < LOW_OCR_CONFIDENCE_THRESHOLD) return keys;
+  if (ocrConfidence !== null && ocrConfidence < LOW_OCR_CONFIDENCE_THRESHOLD) return keys;
   return keys.filter((k) => ALWAYS_LOW_CONFIDENCE.includes(k));
 }
 
-/** Value on the line after a label like "Surname" / "Names" on SA ID cards
- * and books (labels can carry OCR noise, e.g. "Surname/Van"). */
+/** Value after a label like "Surname" / "Names" on SA ID cards and books —
+ * either on the same line ("Surname: NKOSI") or the line below (smart card
+ * layouts print the label and value as separate lines). Labels can carry
+ * OCR noise, e.g. "Surname/Van". */
 function labelledValue(lines: string[], label: string): string | undefined {
-  const idx = lines.findIndex((l) => new RegExp(`^${label}\\b`, 'i').test(l));
-  const value = idx >= 0 ? lines[idx + 1]?.trim() : undefined;
+  const labelRe = new RegExp(`^${label}\\b[:./]?\\s*(.*)$`, 'i');
+  const idx = lines.findIndex((l) => labelRe.test(l));
+  if (idx < 0) return undefined;
+
+  const sameLine = lines[idx].match(labelRe)?.[1]?.trim();
+  const value = sameLine || lines[idx + 1]?.trim();
   // A real name line: letters only, not the next label
   if (value && /^[A-Za-z][A-Za-z .'-]+$/.test(value) && !/^(surname|names|forenames|identity|nationality|sex|country|date)/i.test(value)) {
     return value;
@@ -174,10 +184,12 @@ export interface OcrScanResult {
 }
 
 /**
- * OCR extraction from an uploaded ID image, fully client-side (tesseract.js,
- * loaded on demand so it never weighs down the main bundle). Best-effort by
- * contract: any failure — PDF input, unreadable photo, engine unavailable
- * offline — returns null and the wizard falls back to manual entry.
+ * OCR extraction from an uploaded ID image. The image never leaves our own
+ * backend for a third party directly from the browser: this posts to the
+ * ocr-process Edge Function, which proxies to OCR.space server-side and
+ * keeps the provider API key private. Best-effort by contract: any failure —
+ * PDF input, unreadable photo, provider unavailable, network error — returns
+ * null and the wizard falls back to manual entry.
  *
  * This is NOT identity verification; a verification provider remains a
  * separate integration.
@@ -185,16 +197,20 @@ export interface OcrScanResult {
 export async function extractIdInfo(file: File | Blob): Promise<OcrScanResult | null> {
   if (!file.type.startsWith('image/')) return null;
   try {
-    const { createWorker } = await import('tesseract.js');
-    const worker = await createWorker('eng');
-    try {
-      const { data } = await worker.recognize(file);
-      const info = parseDocumentText(data.text ?? '');
-      if (!info) return null;
-      return { info, lowConfidence: lowConfidenceFields(info, data.confidence ?? 0) };
-    } finally {
-      await worker.terminate();
-    }
+    const body = new FormData();
+    body.append('file', file, file instanceof File ? file.name : 'id-scan.jpg');
+    body.append('documentType', 'sa_id');
+    body.append('language', 'eng');
+    body.append('overlay', 'false');
+
+    const { data, error } = await supabase.functions.invoke('ocr-process', { body });
+    if (error || !data?.success) return null;
+
+    const info = parseDocumentText(data.rawText ?? '');
+    if (!info) return null;
+    // OCR.space's non-overlay response carries no scalar confidence — see
+    // lowConfidenceFields for how a null confidence is handled.
+    return { info, lowConfidence: lowConfidenceFields(info, null) };
   } catch (error) {
     console.warn('ID text extraction unavailable', error);
     return null;

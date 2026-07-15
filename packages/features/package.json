@@ -11,8 +11,5 @@
   },
   "devDependencies": {
     "vitest": "^4.0.15"
-  },
-  "dependencies": {
-    "tesseract.js": "^7.0.0"
   }
 }

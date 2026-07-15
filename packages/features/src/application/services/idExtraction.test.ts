@@ -20,6 +20,18 @@ describe('parseIdText', () => {
     expect(info?.first_name).toBe('SARAH JANE');
   });
 
+  it('finds surname/names when the label and value share a line', () => {
+    const text = [
+      'REPUBLIC OF SOUTH AFRICA',
+      '800101 5009 087',
+      'Surname: NKOSI',
+      'Names: SARAH JANE'
+    ].join('\n');
+    const info = parseIdText(text);
+    expect(info?.last_name).toBe('NKOSI');
+    expect(info?.first_name).toBe('SARAH JANE');
+  });
+
   it('ignores 13-digit sequences that fail the Luhn check', () => {
     expect(parseIdText('ID 1234567890123 nothing else')).toBeNull();
   });
@@ -75,5 +87,13 @@ describe('lowConfidenceFields', () => {
   it('flags every extracted field when overall OCR confidence is low', () => {
     const flagged = lowConfidenceFields({ id_number: 'L898902C3', date_of_birth: '1974-08-12' }, 40);
     expect(flagged.sort()).toEqual(['date_of_birth', 'id_number']);
+  });
+
+  it('trusts algorithmic fields when the provider gives no confidence signal at all', () => {
+    const flagged = lowConfidenceFields(
+      { first_name: 'ANNA', id_number: 'L898902C3', date_of_birth: '1974-08-12' },
+      null
+    );
+    expect(flagged).toEqual(['first_name']);
   });
 });

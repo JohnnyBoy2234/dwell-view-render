@@ -176,8 +176,12 @@
             "npm:@capacitor/push-notifications@^7.0.3",
             "npm:@capacitor/splash-screen@^7.0.3",
             "npm:@capacitor/status-bar@^7.0.3",
+            "npm:@dnd-kit/core@^6.3.1",
+            "npm:@dnd-kit/sortable@10",
+            "npm:@dnd-kit/utilities@^3.2.2",
             "npm:@hookform/resolvers@^3.9.0",
             "npm:@mzanzihomes/common@*",
+            "npm:@mzanzihomes/features@*",
             "npm:@mzanzihomes/supabase@*",
             "npm:@mzanzihomes/ui@*",
             "npm:@react-pdf/renderer@^4.3.1",
@@ -240,6 +244,7 @@
             "npm:@capacitor/status-bar@^7.0.3",
             "npm:@hookform/resolvers@^3.9.0",
             "npm:@mzanzihomes/common@*",
+            "npm:@mzanzihomes/features@*",
             "npm:@mzanzihomes/supabase@*",
             "npm:@mzanzihomes/ui@*",
             "npm:@supabase/supabase-js@^2.55.0",
@@ -288,6 +293,7 @@
           "dependencies": [
             "npm:@hookform/resolvers@^3.9.0",
             "npm:@mzanzihomes/common@*",
+            "npm:@mzanzihomes/features@*",
             "npm:@mzanzihomes/supabase@*",
             "npm:@mzanzihomes/ui@*",
             "npm:@supabase/supabase-js@^2.55.0",
@@ -328,6 +334,13 @@
         }
       },
       "packages/common": {
+        "packageJson": {
+          "dependencies": [
+            "npm:vitest@^4.0.15"
+          ]
+        }
+      },
+      "packages/features": {
         "packageJson": {
           "dependencies": [
             "npm:vitest@^4.0.15"
