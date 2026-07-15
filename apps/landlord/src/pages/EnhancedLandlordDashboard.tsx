@@ -31,6 +31,7 @@ import { useLandlordApplications } from '@mzanzihomes/features/application';
 import { useLandlordNotifications } from '@mzanzihomes/supabase/hooks/useLandlordNotifications';
 import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
 import { AccountingOverview } from '@mzanzihomes/features/accounting';
+import { ConditionRecordsPage, ConditionRecordDetail } from '@mzanzihomes/features/condition-record';
 import { PROPERTY_CARD_STYLES } from '@mzanzihomes/common/constants/propertyCardConstants';
 import { VerificationGate } from '@mzanzihomes/ui/components/VerificationGate';
 import { PropertySelection } from '@mzanzihomes/ui/components/dashboard/PropertySelection';
@@ -54,7 +55,7 @@ const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: s
   'SwiftBooks':   { bg: 'bg-violet-100',  icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
   'Leases':       { bg: 'bg-blue-100',    icon: 'text-blue-600',    border: 'group-hover:border-blue-200'    },
   'Inventory':    { bg: 'bg-teal-100',    icon: 'text-teal-600',    border: 'group-hover:border-teal-200'    },
-  'Condition Records': { bg: 'bg-amber-100', icon: 'text-amber-600', border: 'group-hover:border-amber-200'   },
+  'Inspection List': { bg: 'bg-amber-100', icon: 'text-amber-600', border: 'group-hover:border-amber-200'   },
   'Support':      { bg: 'bg-slate-100',   icon: 'text-slate-500',   border: 'group-hover:border-slate-200'   },
 };
 
@@ -1144,7 +1145,22 @@ export default function EnhancedLandlordDashboard() {
 
     // Property is selected, show property-specific dashboard
     const selectedProperty = getSelectedProperty();
-    
+
+    // Inspection List (formerly Condition Records) renders in-shell, exactly
+    // like the other tools, instead of breaking out to a separate route. The
+    // detail path carries the record id, so match by prefix before the switch.
+    if (currentTab.startsWith('/enhancedlandlorddashboard/condition-records')) {
+      const rest = currentTab.slice('/enhancedlandlorddashboard/condition-records'.length);
+      const recordId = rest.startsWith('/') ? rest.slice(1) : '';
+      return (
+        <div className="min-h-screen bg-white pb-8 w-full">
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
+            {recordId ? <ConditionRecordDetail recordId={recordId} /> : <ConditionRecordsPage />}
+          </div>
+        </div>
+      );
+    }
+
     switch (currentTab) {
       case '/enhancedlandlorddashboard/properties':
         console.log('[Dashboard] Rendering properties tab');
@@ -1222,7 +1238,7 @@ export default function EnhancedLandlordDashboard() {
         />
 
         {/* Legacy tenant-submitted condition captures, kept for evidence.
-            Condition documentation now happens in Condition Records. */}
+            Condition documentation now happens in the Inspection List. */}
         {inventoryLoading ? (
         <div className="grid gap-4">
           {[...Array(3)].map((_, i) => (
@@ -1235,7 +1251,7 @@ export default function EnhancedLandlordDashboard() {
             <h3 className="text-lg font-semibold">Past tenant condition submissions</h3>
             <p className="text-sm text-muted-foreground">
               Historical photo and audio captures submitted by tenants. New condition documentation
-              happens in Condition Records.
+              happens in the Inspection List.
             </p>
           </div>
           <div className="grid gap-4">
@@ -2579,7 +2595,7 @@ const renderReportsTab = () => (
       ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
       { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
-      { title: 'Condition Records', subtitle: 'Photograph & attest',             icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
+      { title: 'Inspection List',   subtitle: 'Photos, notes & sign-off',          icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
       { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/enhancedlandlorddashboard/support' },
     ];
 

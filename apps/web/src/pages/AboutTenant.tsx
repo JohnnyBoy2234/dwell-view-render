@@ -74,7 +74,7 @@ const AboutTenant = () => {
     },
     {
       icon: Eye,
-      title: "Condition Records",
+      title: "Inspection List",
       description: "Document property condition with photos and notes. Protect yourself with detailed move-in and move-out records.",
       color: "text-ocean-blue"
     },

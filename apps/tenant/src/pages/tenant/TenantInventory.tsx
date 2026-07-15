@@ -157,11 +157,11 @@ export default function TenantInventory() {
         </div>
         <div className="border-t pt-4">
           <Link to="/tenant/condition-records" className="font-semibold text-primary underline underline-offset-2">
-            View Condition Record
+            View Inspection List
           </Link>
           <p className="text-muted-foreground mt-1">
             To view or document the condition of the property and its items, use the separate
-            Condition Record.
+            Inspection List.
           </p>
         </div>
       </CardContent>

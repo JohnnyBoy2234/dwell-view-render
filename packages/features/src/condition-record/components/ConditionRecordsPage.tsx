@@ -1,24 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { Camera, Trash2, Plus } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Camera, ChevronRight, ImagePlus, FileText, ShieldCheck, Download } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
-import { Input } from '@mzanzihomes/ui/components/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { Dialog, DialogContent, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@mzanzihomes/ui/components/alert-dialog';
 import {
   conditionRecordState,
   approvalWindowEndsAt,
@@ -28,14 +17,6 @@ import {
   type ConditionRecordState,
   type ConditionRecord,
   type ConditionDispute,
-  type ConditionChecklistItem,
-  type ConditionMeter,
-  type ConditionKey,
-  type ChecklistCondition,
-  type ChecklistCleanliness,
-  type ChecklistChangeType,
-  CHECKLIST_CONDITION_LABEL,
-  CHANGE_TYPE_LABEL,
 } from '@mzanzihomes/common';
 import { useConditionRecords, type ConditionRecordListItem } from '../hooks/useConditionRecords';
 import {
@@ -57,6 +38,15 @@ const STATE_LABEL: Record<ConditionRecordState, string> = {
   locked: 'Saved',
 };
 
+// Colour accents matching the landlord Applications cards: a coloured left bar
+// plus a soft badge, keyed by where the inspection is in its lifecycle.
+const STATE_ACCENT: Record<ConditionRecordState, { bar: string; badge: string }> = {
+  open: { bar: 'border-l-blue-500', badge: 'bg-blue-100 text-blue-700 border-blue-200' },
+  awaiting_receipts: { bar: 'border-l-amber-500', badge: 'bg-amber-100 text-amber-700 border-amber-200' },
+  awaiting_approval: { bar: 'border-l-amber-500', badge: 'bg-amber-100 text-amber-700 border-amber-200' },
+  locked: { bar: 'border-l-emerald-500', badge: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
+};
+
 const PARTY_LABEL: Record<ConditionParty, string> = {
   tenant: 'Tenant',
   landlord: 'Landlord',
@@ -66,15 +56,28 @@ const PARTY_LABEL: Record<ConditionParty, string> = {
 // clear of the mobile bottom navigation and floating chat button.
 const PAGE_PADDING = 'pb-[calc(7rem+env(safe-area-inset-bottom))]';
 
+function StatePill({ state }: { state: ConditionRecordState }) {
+  return (
+    <span className={`inline-flex shrink-0 items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STATE_ACCENT[state].badge}`}>
+      {STATE_LABEL[state]}
+    </span>
+  );
+}
+
 export function ConditionRecordsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const list = useConditionRecords();
+
+  // Navigate to the detail within whatever base path this app mounted the list
+  // at (landlord dashboard vs tenant dashboard), so it opens in the same shell.
+  const openRecord = (id: string) => navigate(`${location.pathname.replace(/\/$/, '')}/${id}`);
 
   if (list.loading) {
     return (
       <div className={`space-y-4 ${PAGE_PADDING}`}>
         {[...Array(2)].map((_, i) => (
-          <div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+          <div key={i} className="h-24 animate-pulse rounded-2xl bg-muted" />
         ))}
       </div>
     );
@@ -84,56 +87,61 @@ export function ConditionRecordsPage() {
     <div className={`space-y-4 ${PAGE_PADDING}`}>
       {list.error && <p className="text-destructive">{list.error}</p>}
       {!list.error && list.records.length === 0 && (
-        <Card>
+        <Card className="border-dashed">
           <CardContent className="py-12 text-center">
-            <Camera className="mx-auto mb-3 h-10 w-10 text-muted-foreground" aria-hidden="true" />
-            <p className="font-medium">No condition records yet</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              A record is started automatically at move-in and move-out so both parties can
-              photograph the property's condition.
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50">
+              <Camera className="h-6 w-6 text-blue-500" aria-hidden="true" />
+            </div>
+            <p className="font-semibold">No inspections yet</p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
+              An inspection is started at move-in and move-out so both parties can photograph the
+              property's condition and sign off on it.
             </p>
           </CardContent>
         </Card>
       )}
       {list.records.map((item) => (
-        <RecordCard key={item.record.id} item={item} onOpen={() => navigate(item.record.id)} />
+        <RecordCard key={item.record.id} item={item} onOpen={() => openRecord(item.record.id)} />
       ))}
       <StartRecordButtons list={list} />
     </div>
   );
 }
 
-// Route wrapper: /condition-records/:recordId. A routed detail deep-links from
-// notifications, survives refresh, and lets the app-bar back button behave.
+// Route wrapper for apps that mount the detail as its own <Route> (tenant).
 export function ConditionRecordDetailPage() {
   const { recordId } = useParams<{ recordId: string }>();
-  return <RecordDetail recordId={recordId ?? null} />;
+  return <ConditionRecordDetail recordId={recordId ?? null} />;
 }
 
 function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: () => void }) {
   const state = conditionRecordState(item.record);
+  const savedAt =
+    state === 'locked' && item.record.tenant_attested_at && item.record.landlord_attested_at
+      ? [item.record.tenant_attested_at, item.record.landlord_attested_at].sort().slice(-1)[0]!
+      : null;
   return (
-    <Card className="cursor-pointer hover:bg-accent/50" onClick={onOpen}>
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-start justify-between gap-2 text-base">
-          <span className="min-w-0 break-words">
-            {item.propertyTitle} — {EVENT_LABEL[item.record.event_type]}
-          </span>
-          <Badge className="shrink-0 text-center" variant={state === 'locked' ? 'default' : 'secondary'}>
-            {STATE_LABEL[state]}
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        Started {new Date(item.record.created_at).toLocaleDateString()}
-        {state === 'locked' && item.record.landlord_attested_at && item.record.tenant_attested_at && (
-          <>
-            {' · '}Saved{' '}
-            {new Date(
-              [item.record.tenant_attested_at, item.record.landlord_attested_at].sort().slice(-1)[0]!,
-            ).toLocaleDateString()}
-          </>
-        )}
+    <Card
+      className={`cursor-pointer border-l-4 shadow-sm transition-all hover:shadow-md ${STATE_ACCENT[state].bar}`}
+      onClick={onOpen}
+    >
+      <CardContent className="flex items-center gap-3 p-4">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
+          <Camera className="h-5 w-5 text-blue-500" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold">
+            {item.propertyTitle} — {EVENT_LABEL[item.record.event_type]} inspection
+          </p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Started {new Date(item.record.created_at).toLocaleDateString()}
+            {savedAt && <> · Saved {new Date(savedAt).toLocaleDateString()}</>}
+          </p>
+          <div className="mt-2">
+            <StatePill state={state} />
+          </div>
+        </div>
+        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
       </CardContent>
     </Card>
   );
@@ -156,7 +164,7 @@ function StartRecordButtons({ list }: { list: ReturnType<typeof useConditionReco
     } catch (e: any) {
       toast({
         variant: 'destructive',
-        title: 'Could not start the record',
+        title: 'Could not start the inspection',
         description: e.message ?? String(e),
       });
     } finally {
@@ -174,14 +182,50 @@ function StartRecordButtons({ list }: { list: ReturnType<typeof useConditionReco
           disabled={creating !== null}
           onClick={() => void create(tenancy.id, eventType)}
         >
-          {creating === `${tenancy.id}:${eventType}` ? 'Starting…' : `Start ${EVENT_LABEL[eventType].toLowerCase()} record`}
+          {creating === `${tenancy.id}:${eventType}`
+            ? 'Starting…'
+            : `Start ${EVENT_LABEL[eventType].toLowerCase()} inspection`}
         </Button>
       ))}
     </div>
   );
 }
 
-function RecordDetail({ recordId }: { recordId: string | null }) {
+// Small coloured section heading used across the detail page.
+function SectionCard({
+  icon: Icon,
+  title,
+  accent,
+  action,
+  children,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  accent: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <Card className="overflow-hidden border-l-4 shadow-sm" style={{ borderLeftColor: accent }}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 space-y-0 pb-2">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <span className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: `${accent}1a`, color: accent }}>
+            <Icon className="h-4 w-4" />
+          </span>
+          {title}
+        </CardTitle>
+        {action}
+      </CardHeader>
+      <CardContent>{children}</CardContent>
+    </Card>
+  );
+}
+
+const BLUE = 'hsl(214, 100%, 59%)';
+const GREEN = 'hsl(142, 72%, 44%)';
+const AMBER = '#f59e0b';
+
+export function ConditionRecordDetail({ recordId }: { recordId: string | null }) {
   const d = useConditionRecordDetail(recordId);
   const [locationTag, setLocationTag] = useState<string>('');
   const [notesDraft, setNotesDraft] = useState<string | null>(null);
@@ -216,7 +260,7 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
     return (
       <div className={`space-y-4 ${PAGE_PADDING}`}>
         {[...Array(3)].map((_, i) => (
-          <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
+          <div key={i} className="h-32 animate-pulse rounded-2xl bg-muted" />
         ))}
       </div>
     );
@@ -236,11 +280,11 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
   const currentTag = d.locationTags.includes(locationTag) ? locationTag : d.locationTags[0];
   const partyOf = (p: PhotoWithUrl): ConditionParty =>
     p.uploaded_by === d.tenancy!.tenant_id ? 'tenant' : 'landlord';
-  // "Additional photos" galleries show only photos not attached to a checklist
-  // item or a dispute (those render in their own sections).
-  const extra = (p: PhotoWithUrl) => !p.item_id && !p.dispute_id;
-  const myPhotos = d.photos.filter((p) => partyOf(p) === d.myParty && extra(p));
-  const theirPhotos = d.photos.filter((p) => partyOf(p) === otherParty && extra(p));
+  // Dispute photos render inside the sign-off section, so keep them out of the
+  // main galleries.
+  const gallery = (p: PhotoWithUrl) => !p.dispute_id;
+  const myPhotos = d.photos.filter((p) => partyOf(p) === d.myParty && gallery(p));
+  const theirPhotos = d.photos.filter((p) => partyOf(p) === otherParty && gallery(p));
 
   const onFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -249,15 +293,16 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
   };
 
   return (
-    <div className={`space-y-6 ${PAGE_PADDING}`}>
-      {/* Back navigation lives in the dashboard app bar */}
+    <div className={`space-y-5 ${PAGE_PADDING}`}>
+      {/* 1. Status header */}
       {locked ? (
         <div className="space-y-3">
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
             All photos and notes have now been saved and can no longer be added, changed or deleted.
             {d.record.report_ref && (
               <span className="mt-1 block font-normal">
-                Report ID <span className="font-semibold">{d.record.report_ref}</span> — the signed PDF carries a QR code anyone can scan to verify it.
+                Report ID <span className="font-semibold">{d.record.report_ref}</span> — the signed
+                PDF carries a QR code anyone can scan to verify it.
               </span>
             )}
           </div>
@@ -270,134 +315,105 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
             }}
             disabled={!d.record.pdf_path}
           >
+            <Download className="mr-1.5 h-4 w-4" />
             {d.record.pdf_path ? 'Download signed report (PDF)' : 'Report PDF generating…'}
           </Button>
         </div>
       ) : (
-        <div className="flex justify-end">
-          <Badge variant="secondary">{STATE_LABEL[state]}</Badge>
+        <div className="flex items-center justify-between gap-2 rounded-2xl border-l-4 border-l-blue-500 bg-white/70 px-4 py-3 shadow-sm dark:bg-white/5">
+          <span className="text-sm font-medium text-muted-foreground">Inspection status</span>
+          <StatePill state={state} />
         </div>
       )}
 
-      {canEdit && (
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Add photos</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
-            <select
-              aria-label="Photo location"
-              className="w-full min-w-0 rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
-              value={currentTag}
-              onChange={(e) => setLocationTag(e.target.value)}
-            >
-              {d.locationTags.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => onFiles(e.target.files)}
-            />
-            <Button className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()}>
-              Add photos
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-      {state === 'open' && d.myParty && (
-        <SignOffCard state={state} onSendForSignoff={d.sendForSignoff} hasPhotos={d.photos.length > 0} />
-      )}
+      {/* 2. Photos */}
+      <SectionCard icon={Camera} title="Photos" accent={BLUE}>
+        <div className="space-y-4">
+          {canEdit && (
+            <div className="flex flex-col gap-3 rounded-xl bg-blue-50/60 p-3 sm:flex-row sm:items-center dark:bg-blue-950/20">
+              <select
+                aria-label="Photo location"
+                className="w-full min-w-0 rounded-md border bg-background px-3 py-2 text-sm sm:w-auto"
+                value={currentTag}
+                onChange={(e) => setLocationTag(e.target.value)}
+              >
+                {d.locationTags.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={(e) => onFiles(e.target.files)}
+              />
+              <Button className="w-full sm:w-auto" onClick={() => fileInputRef.current?.click()}>
+                <ImagePlus className="mr-1.5 h-4 w-4" /> Add photos
+              </Button>
+            </div>
+          )}
+          <Tabs defaultValue="mine">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="mine" className="min-w-0 truncate">My photos</TabsTrigger>
+              <TabsTrigger value="theirs" className="min-w-0 truncate">
+                {PARTY_LABEL[otherParty]} photos
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="mine" className="mt-4 space-y-6">
+              <PartyGallery
+                photos={myPhotos}
+                pending={d.pendingUploads}
+                tagOrder={d.locationTags}
+                emptyLocationText="You have not uploaded photos for this location yet."
+                emptyAllText="You have not uploaded any photos yet."
+                onRetry={d.retryUpload}
+                onDismiss={d.dismissUpload}
+                onView={setLightbox}
+              />
+            </TabsContent>
+            <TabsContent value="theirs" className="mt-4 space-y-6">
+              <p className="text-sm text-muted-foreground">
+                {PARTY_LABEL[otherParty]} attestation:{' '}
+                {otherAttestedAt ? (
+                  <span className="text-emerald-600">
+                    attested {new Date(otherAttestedAt).toLocaleString()}
+                  </span>
+                ) : (
+                  'not yet attested'
+                )}
+                {' · '}View only
+              </p>
+              <PartyGallery
+                photos={theirPhotos}
+                pending={[]}
+                tagOrder={d.locationTags}
+                emptyLocationText="The other party has not uploaded photos for this location yet."
+                emptyAllText="The other party has not uploaded any photos yet."
+                onView={setLightbox}
+              />
+            </TabsContent>
+          </Tabs>
+        </div>
+      </SectionCard>
 
-      {/* Structured room/item checklist (with check-out comparison on move-out) */}
-      <ChecklistSection
-        canEdit={canEdit}
-        isMoveOut={d.record.event_type === 'move_out'}
-        checklist={d.checklist}
-        checkInItems={d.checkInItems}
-        photos={d.photos}
-        locationTags={d.locationTags}
-        onSeed={d.seedChecklist}
-        onCopyFromCheckIn={d.copyFromCheckIn}
-        onAddItem={d.addChecklistItem}
-        onUpdateItem={d.updateChecklistItem}
-        onDeleteItem={d.deleteChecklistItem}
-        onUploadItemPhotos={d.uploadItemPhotos}
-        onViewPhoto={setLightbox}
-      />
-
-      {/* Meter readings + keys issued */}
-      <MetersKeysSection
-        canEdit={canEdit}
-        meters={d.meters}
-        keys={d.keys}
-        onAddMeter={d.addMeter}
-        onDeleteMeter={d.deleteMeter}
-        onAddKey={d.addKey}
-        onDeleteKey={d.deleteKey}
-      />
-
-      <h3 className="pt-2 text-sm font-semibold text-muted-foreground">Additional photos (not tied to a checklist item)</h3>
-      <Tabs defaultValue="mine">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="mine" className="min-w-0 truncate">My Photos</TabsTrigger>
-          <TabsTrigger value="theirs" className="min-w-0 truncate">
-            {PARTY_LABEL[otherParty]} Photos
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="mine" className="mt-4 space-y-6">
-          <PartyGallery
-            photos={myPhotos}
-            pending={d.pendingUploads}
-            tagOrder={d.locationTags}
-            emptyLocationText="You have not uploaded photos for this location yet."
-            emptyAllText="You have not uploaded any photos yet."
-            onRetry={d.retryUpload}
-            onDismiss={d.dismissUpload}
-            onView={setLightbox}
-          />
-        </TabsContent>
-        <TabsContent value="theirs" className="mt-4 space-y-6">
-          <p className="text-sm text-muted-foreground">
-            {PARTY_LABEL[otherParty]} attestation:{' '}
-            {otherAttestedAt ? (
-              <span className="text-green-600">
-                attested {new Date(otherAttestedAt).toLocaleString()}
-              </span>
-            ) : (
-              'not yet attested'
+      {/* 3. Notes */}
+      <SectionCard
+        icon={FileText}
+        title="Notes"
+        accent={GREEN}
+        action={
+          <span className="text-xs font-normal text-muted-foreground" aria-live="polite">
+            {notesStatus === 'saving' && 'Saving…'}
+            {notesStatus === 'saved' && 'Saved'}
+            {notesStatus === 'error' && (
+              <span className="text-destructive">Not saved — keep typing to retry</span>
             )}
-            {' · '}View only
-          </p>
-          <PartyGallery
-            photos={theirPhotos}
-            pending={[]}
-            tagOrder={d.locationTags}
-            emptyLocationText="The other party has not uploaded photos for this location yet."
-            emptyAllText="The other party has not uploaded any photos yet."
-            onView={setLightbox}
-          />
-        </TabsContent>
-      </Tabs>
-
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-baseline justify-between gap-2 text-base">
-            Notes
-            <span className="text-xs font-normal text-muted-foreground" aria-live="polite">
-              {notesStatus === 'saving' && 'Saving…'}
-              {notesStatus === 'saved' && 'Saved'}
-              {notesStatus === 'error' && (
-                <span className="text-destructive">Not saved — keep typing to retry</span>
-              )}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+          </span>
+        }
+      >
+        <div className="space-y-3">
           <Textarea
             placeholder="Anything a photo can't show (e.g. geyser age, remotes handed over)…"
             value={notesDraft ?? myNotes ?? ''}
@@ -405,27 +421,34 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
             onChange={(e) => setNotesDraft(e.target.value)}
           />
           {theirNotes && (
-            <p className="break-words text-sm text-muted-foreground">
+            <p className="break-words rounded-lg bg-muted/50 p-3 text-sm text-muted-foreground">
               <span className="font-medium">{PARTY_LABEL[otherParty]} notes:</span> {theirNotes}
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </SectionCard>
 
-      {/* Sign-off: receipt (Stage 1) then approval/dispute (Stage 2) */}
+      {/* 4. Sign-off */}
+      {state === 'open' && d.myParty && (
+        <SectionCard icon={ShieldCheck} title="Sign off" accent={AMBER}>
+          <SignOffCard onSendForSignoff={d.sendForSignoff} hasPhotos={d.photos.length > 0} />
+        </SectionCard>
+      )}
       {(state === 'awaiting_receipts' || state === 'awaiting_approval') && d.myParty && (
-        <SignAndApproveCard
-          record={d.record}
-          myParty={d.myParty}
-          state={state}
-          disputes={d.disputes}
-          locationTags={d.locationTags}
-          onSignReceipt={d.signReceipt}
-          onApprove={d.approve}
-          onRaiseDispute={d.raiseDispute}
-          onRespondDispute={d.respondDispute}
-          onReopen={d.reopen}
-        />
+        <SectionCard icon={ShieldCheck} title="Sign off" accent={AMBER}>
+          <SignAndApproveCard
+            record={d.record}
+            myParty={d.myParty}
+            state={state}
+            disputes={d.disputes}
+            locationTags={d.locationTags}
+            onSignReceipt={d.signReceipt}
+            onApprove={d.approve}
+            onRaiseDispute={d.raiseDispute}
+            onRespondDispute={d.respondDispute}
+            onReopen={d.reopen}
+          />
+        </SectionCard>
       )}
 
       {/* Full-size photo viewer — thumbnails are too small to inspect evidence */}
@@ -507,7 +530,7 @@ function PartyGallery({
                     <button
                       key={p.id}
                       type="button"
-                      className="overflow-hidden rounded-md border focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="overflow-hidden rounded-xl border bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       onClick={() => onView?.(photo)}
                       aria-label={`View ${p.location_tag} photo full size`}
                     >
@@ -522,7 +545,7 @@ function PartyGallery({
                   );
                 })}
                 {locationPending.map((u) => (
-                  <div key={u.id} className="relative overflow-hidden rounded-md border">
+                  <div key={u.id} className="relative overflow-hidden rounded-xl border">
                     <img
                       src={u.previewUrl}
                       alt={u.fileName}
@@ -563,7 +586,6 @@ function SignOffCard({
   onSendForSignoff,
   hasPhotos,
 }: {
-  state: ConditionRecordState;
   onSendForSignoff: () => Promise<unknown>;
   hasPhotos: boolean;
 }) {
@@ -580,21 +602,16 @@ function SignOffCard({
     }
   };
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Ready to sign off?</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <p className="text-sm text-muted-foreground">
-          When everyone has added their photos and notes, start sign-off. This freezes uploads, then
-          both parties sign a receipt and get 7 days to approve or dispute the report.
-        </p>
-        <Button className="w-full sm:w-auto" disabled={!hasPhotos || busy} onClick={() => void go()}>
-          {busy ? 'Starting…' : 'Ready to sign off'}
-        </Button>
-        {!hasPhotos && <p className="text-xs text-muted-foreground">Add at least one photo first.</p>}
-      </CardContent>
-    </Card>
+    <div className="space-y-3">
+      <p className="text-sm text-muted-foreground">
+        When everyone has added their photos and notes, start sign-off. This freezes uploads, then
+        both parties sign a receipt and get 7 days to approve or dispute the inspection.
+      </p>
+      <Button className="w-full sm:w-auto" disabled={!hasPhotos || busy} onClick={() => void go()}>
+        {busy ? 'Starting…' : 'Ready to sign off'}
+      </Button>
+      {!hasPhotos && <p className="text-xs text-muted-foreground">Add at least one photo first.</p>}
+    </div>
   );
 }
 
@@ -670,130 +687,127 @@ function SignAndApproveCard({
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">
-          {state === 'awaiting_receipts' ? 'Step 1: Confirm receipt' : 'Step 2: Approve or dispute'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Receipt status */}
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-          <span>You received: {myReceiptAt ? <span className="text-green-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
-          <span>Other party received: {otherReceiptAt ? <span className="text-green-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
-        </div>
+    <div className="space-y-4">
+      <p className="text-sm font-semibold">
+        {state === 'awaiting_receipts' ? 'Step 1: Confirm receipt' : 'Step 2: Approve or dispute'}
+      </p>
 
-        {state === 'awaiting_receipts' && !myReceiptAt && (
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              Confirm you have received and can access this report. The 7-day review window opens once
-              both parties confirm.
-            </p>
-            <Button className="w-full sm:w-auto" disabled={busy === 'receipt'} onClick={() => void run('receipt', onSignReceipt, 'Could not sign receipt')}>
-              {busy === 'receipt' ? 'Signing…' : 'I confirm I received this report'}
-            </Button>
-          </div>
-        )}
+      {/* Receipt status */}
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+        <span>You received: {myReceiptAt ? <span className="text-emerald-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
+        <span>Other party received: {otherReceiptAt ? <span className="text-emerald-600">yes</span> : <span className="text-muted-foreground">not yet</span>}</span>
+      </div>
 
-        {state === 'awaiting_receipts' && myReceiptAt && (
-          <p className="text-sm text-muted-foreground">Waiting for the other party to confirm receipt.</p>
-        )}
-
-        {state === 'awaiting_approval' && (
-          <div className="space-y-3">
-            {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
-            <p className="text-sm">{record.attestation_text}</p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
-              <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
-              <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
-            </div>
-
-            {myApprovedAt ? (
-              <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
-            ) : (
-              <>
-                <Button className="w-full sm:w-auto" disabled={busy === 'approve'} onClick={() => void run('approve', onApprove, 'Could not approve')}>
-                  {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the report'}
-                </Button>
-
-                {/* Raise a dispute */}
-                <div className="rounded-lg border p-3 space-y-2">
-                  <p className="text-sm font-medium">Disagree with something? Raise a dispute</p>
-                  <select
-                    aria-label="Disputed room"
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={disputeTag}
-                    onChange={(e) => setDisputeTag(e.target.value)}
-                  >
-                    {locationTags.map((t) => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <Textarea
-                    placeholder="Describe what you disagree with in this room…"
-                    value={disputeComment}
-                    onChange={(e) => setDisputeComment(e.target.value)}
-                  />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    className="block w-full text-sm"
-                    onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
-                  />
-                  <Button size="sm" variant="outline" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
-                    {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Existing disputes */}
-        {disputes.length > 0 && (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Disputes</p>
-            {disputes.map((dsp) => {
-              const mineRaised = dsp.raised_party === myParty;
-              return (
-                <div key={dsp.id} className="rounded-lg border p-3 text-sm space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="font-medium">{dsp.location_tag}</span>
-                    <Badge variant={dsp.status === 'agreed' ? 'default' : dsp.status === 'disagreed' ? 'destructive' : 'secondary'}>
-                      {dsp.status === 'open' ? 'Awaiting response' : dsp.status === 'agreed' ? 'Agreed' : 'Not agreed'}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground break-words">{dsp.comment}</p>
-                  <p className="text-xs text-muted-foreground">Raised by {dsp.raised_party}</p>
-                  {!mineRaised && dsp.status === 'open' && state === 'awaiting_approval' && (
-                    <div className="flex gap-2 pt-1">
-                      <Button size="sm" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, true), 'Could not respond')}>Agree</Button>
-                      <Button size="sm" variant="outline" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, false), 'Could not respond')}>Disagree</Button>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Re-open (tamper detection): changing anything revokes all signatures */}
-        <div className="border-t pt-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground"
-            disabled={busy === 'reopen'}
-            onClick={() => {
-              if (window.confirm('Re-open for changes? This revokes all signatures collected so far and restarts sign-off.')) {
-                void run('reopen', onReopen, 'Could not re-open');
-              }
-            }}
-          >
-            {busy === 'reopen' ? 'Re-opening…' : 'Need to change something? Re-open (revokes signatures)'}
+      {state === 'awaiting_receipts' && !myReceiptAt && (
+        <div className="space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Confirm you have received and can access this inspection. The 7-day review window opens
+            once both parties confirm.
+          </p>
+          <Button className="w-full sm:w-auto" disabled={busy === 'receipt'} onClick={() => void run('receipt', onSignReceipt, 'Could not sign receipt')}>
+            {busy === 'receipt' ? 'Signing…' : 'I confirm I received this inspection'}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {state === 'awaiting_receipts' && myReceiptAt && (
+        <p className="text-sm text-muted-foreground">Waiting for the other party to confirm receipt.</p>
+      )}
+
+      {state === 'awaiting_approval' && (
+        <div className="space-y-3">
+          {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
+          <p className="text-sm">{record.attestation_text}</p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <AttestationStatus label="Tenant" at={record.tenant_attested_at} />
+            <AttestationStatus label="Landlord" at={record.landlord_attested_at} />
+          </div>
+
+          {myApprovedAt ? (
+            <Badge>You approved on {new Date(myApprovedAt).toLocaleString()}</Badge>
+          ) : (
+            <>
+              <Button className="w-full sm:w-auto" disabled={busy === 'approve'} onClick={() => void run('approve', onApprove, 'Could not approve')}>
+                {busy === 'approve' ? 'Approving…' : 'Approve — I agree with the inspection'}
+              </Button>
+
+              {/* Raise a dispute */}
+              <div className="space-y-2 rounded-lg border p-3">
+                <p className="text-sm font-medium">Disagree with something? Raise a dispute</p>
+                <select
+                  aria-label="Disputed room"
+                  className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  value={disputeTag}
+                  onChange={(e) => setDisputeTag(e.target.value)}
+                >
+                  {locationTags.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <Textarea
+                  placeholder="Describe what you disagree with in this room…"
+                  value={disputeComment}
+                  onChange={(e) => setDisputeComment(e.target.value)}
+                />
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="block w-full text-sm"
+                  onChange={(e) => setDisputeFiles(Array.from(e.target.files ?? []))}
+                />
+                <Button size="sm" variant="outline" disabled={busy === 'dispute'} onClick={() => void submitDispute()}>
+                  {busy === 'dispute' ? 'Submitting…' : 'Submit dispute'}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Existing disputes */}
+      {disputes.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Disputes</p>
+          {disputes.map((dsp) => {
+            const mineRaised = dsp.raised_party === myParty;
+            return (
+              <div key={dsp.id} className="space-y-1 rounded-lg border p-3 text-sm">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-medium">{dsp.location_tag}</span>
+                  <Badge variant={dsp.status === 'agreed' ? 'default' : dsp.status === 'disagreed' ? 'destructive' : 'secondary'}>
+                    {dsp.status === 'open' ? 'Awaiting response' : dsp.status === 'agreed' ? 'Agreed' : 'Not agreed'}
+                  </Badge>
+                </div>
+                <p className="break-words text-muted-foreground">{dsp.comment}</p>
+                <p className="text-xs text-muted-foreground">Raised by {dsp.raised_party}</p>
+                {!mineRaised && dsp.status === 'open' && state === 'awaiting_approval' && (
+                  <div className="flex gap-2 pt-1">
+                    <Button size="sm" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, true), 'Could not respond')}>Agree</Button>
+                    <Button size="sm" variant="outline" disabled={busy === `d-${dsp.id}`} onClick={() => void run(`d-${dsp.id}`, () => onRespondDispute(dsp.id, false), 'Could not respond')}>Disagree</Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Re-open (tamper detection): changing anything revokes all signatures */}
+      <div className="border-t pt-3">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground"
+          disabled={busy === 'reopen'}
+          onClick={() => {
+            if (window.confirm('Re-open for changes? This revokes all signatures collected so far and restarts sign-off.')) {
+              void run('reopen', onReopen, 'Could not re-open');
+            }
+          }}
+        >
+          {busy === 'reopen' ? 'Re-opening…' : 'Need to change something? Re-open (revokes signatures)'}
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -802,272 +816,10 @@ function AttestationStatus({ label, at }: { label: string; at: string | null }) 
     <span>
       {label}:{' '}
       {at ? (
-        <span className="text-green-600">agreed {new Date(at).toLocaleString()}</span>
+        <span className="text-emerald-600">agreed {new Date(at).toLocaleString()}</span>
       ) : (
         <span className="text-muted-foreground">not yet agreed</span>
       )}
     </span>
-  );
-}
-
-const CONDITION_OPTS: ChecklistCondition[] = ['good', 'fair', 'poor', 'damaged'];
-const CONDITION_STYLE: Record<ChecklistCondition, string> = {
-  good: 'bg-green-100 text-green-800 border-green-300',
-  fair: 'bg-blue-100 text-blue-800 border-blue-300',
-  poor: 'bg-amber-100 text-amber-800 border-amber-300',
-  damaged: 'bg-red-100 text-red-800 border-red-300',
-};
-
-function ChecklistSection({
-  canEdit, isMoveOut, checklist, checkInItems, photos, locationTags,
-  onSeed, onCopyFromCheckIn, onAddItem, onUpdateItem, onDeleteItem, onUploadItemPhotos, onViewPhoto,
-}: {
-  canEdit: boolean;
-  isMoveOut: boolean;
-  checklist: ConditionChecklistItem[];
-  checkInItems: ConditionChecklistItem[];
-  photos: PhotoWithUrl[];
-  locationTags: string[];
-  onSeed: (tags: string[]) => Promise<void>;
-  onCopyFromCheckIn: () => Promise<void>;
-  onAddItem: (tag: string, name: string) => Promise<void>;
-  onUpdateItem: (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name' | 'change_type' | 'change_note'>>) => Promise<void>;
-  onDeleteItem: (id: string) => Promise<void>;
-  onUploadItemPhotos: (itemId: string, tag: string, files: File[]) => Promise<void>;
-  onViewPhoto: (p: PhotoWithUrl) => void;
-}) {
-  const { toast } = useToast();
-  const [seeding, setSeeding] = useState(false);
-  const [addTag, setAddTag] = useState<string | null>(null);
-  const [addName, setAddName] = useState('');
-  // Check-in condition lookup for move-out comparison, keyed by room::name.
-  const checkInByKey = useMemo(() => {
-    const m = new Map<string, ConditionChecklistItem>();
-    for (const i of checkInItems) m.set(`${i.location_tag}::${i.name.toLowerCase()}`, i);
-    return m;
-  }, [checkInItems]);
-
-  const rooms = useMemo(() => {
-    const byRoom = new Map<string, ConditionChecklistItem[]>();
-    for (const i of checklist) { (byRoom.get(i.location_tag) ?? byRoom.set(i.location_tag, []).get(i.location_tag)!).push(i); }
-    return [...byRoom.entries()];
-  }, [checklist]);
-
-  const wrap = async (fn: () => Promise<void>, err: string) => {
-    try { await fn(); } catch (e: any) { toast({ variant: 'destructive', title: err, description: e.message ?? String(e) }); }
-  };
-
-  if (checklist.length === 0 && !canEdit) return null;
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">Room checklist</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-5">
-        {checklist.length === 0 ? (
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              {isMoveOut
-                ? 'Grade the property again at move-out. Copy the check-in items to compare like-for-like, or start from the standard checklist.'
-                : 'Grade each part of the property room by room. Start with the standard checklist, then add or remove items.'}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {isMoveOut && checkInItems.length > 0 && (
-                <Button size="sm" disabled={seeding} onClick={() => wrap(async () => { setSeeding(true); try { await onCopyFromCheckIn(); } finally { setSeeding(false); } }, 'Could not copy check-in items')}>
-                  {seeding ? 'Copying…' : 'Copy items from check-in'}
-                </Button>
-              )}
-              <Button size="sm" variant={isMoveOut ? 'outline' : 'default'} disabled={seeding} onClick={() => wrap(async () => { setSeeding(true); try { await onSeed(locationTags); } finally { setSeeding(false); } }, 'Could not create checklist')}>
-                {seeding ? 'Creating…' : 'Generate standard checklist'}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          rooms.map(([room, items]) => (
-            <div key={room} className="space-y-2">
-              <h4 className="font-semibold text-sm">{room}</h4>
-              <div className="divide-y border rounded-lg">
-                {items.map((item) => {
-                  const itemPhotos = photos.filter((p) => p.item_id === item.id);
-                  const checkIn = isMoveOut ? checkInByKey.get(`${item.location_tag}::${item.name.toLowerCase()}`) : undefined;
-                  const changed = isMoveOut && !!checkIn && item.condition != null && item.condition !== checkIn.condition;
-                  return (
-                    <div key={item.id} className="p-3 space-y-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <span className="font-medium text-sm break-words">{item.name}</span>
-                        {canEdit && (
-                          <button type="button" aria-label={`Remove ${item.name}`} className="text-destructive shrink-0" onClick={() => wrap(() => onDeleteItem(item.id), 'Could not remove')}>
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        )}
-                      </div>
-                      {isMoveOut && (
-                        <p className="text-xs text-muted-foreground">
-                          At check-in: {checkIn?.condition ? CHECKLIST_CONDITION_LABEL[checkIn.condition] : 'not graded'}
-                          {checkIn?.cleanliness ? ` · ${checkIn.cleanliness === 'clean' ? 'Clean' : 'Needs cleaning'}` : ''}
-                        </p>
-                      )}
-                      {/* Condition */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {CONDITION_OPTS.map((c) => {
-                          const active = item.condition === c;
-                          return (
-                            <button key={c} type="button" disabled={!canEdit}
-                              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${active ? CONDITION_STYLE[c] : 'bg-background text-muted-foreground border-black/[0.08]'} ${canEdit ? '' : 'opacity-70'}`}
-                              onClick={() => canEdit && wrap(() => onUpdateItem(item.id, { condition: active ? null : c }), 'Could not update')}>
-                              {CHECKLIST_CONDITION_LABEL[c]}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {/* Cleanliness */}
-                      <div className="flex flex-wrap gap-1.5">
-                        {(['clean', 'needs_cleaning'] as ChecklistCleanliness[]).map((cl) => {
-                          const active = item.cleanliness === cl;
-                          return (
-                            <button key={cl} type="button" disabled={!canEdit}
-                              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${active ? 'bg-slate-800 text-white border-slate-800' : 'bg-background text-muted-foreground border-black/[0.08]'}`}
-                              onClick={() => canEdit && wrap(() => onUpdateItem(item.id, { cleanliness: active ? null : cl }), 'Could not update')}>
-                              {cl === 'clean' ? 'Clean' : 'Needs cleaning'}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {canEdit ? (
-                        <Input defaultValue={item.note ?? ''} placeholder="Note (optional)…" className="text-sm h-8"
-                          onBlur={(e) => { if ((e.target.value || '') !== (item.note ?? '')) void wrap(() => onUpdateItem(item.id, { note: e.target.value || null }), 'Could not save note'); }} />
-                      ) : item.note ? <p className="text-xs text-muted-foreground">{item.note}</p> : null}
-
-                      {/* Check-out classification: shown when the condition changed from check-in */}
-                      {isMoveOut && (changed || item.change_type) && (
-                        <div className="rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1.5 dark:bg-amber-950/20 dark:border-amber-900">
-                          <p className="text-xs font-medium text-amber-800 dark:text-amber-300">Condition changed — classify:</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {(['fair_wear', 'tenant_damage', 'pre_existing'] as ChecklistChangeType[]).map((ct) => {
-                              const active = item.change_type === ct;
-                              return (
-                                <button key={ct} type="button" disabled={!canEdit}
-                                  className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${active ? 'bg-amber-600 text-white border-amber-600' : 'bg-background text-muted-foreground border-black/[0.08]'}`}
-                                  onClick={() => canEdit && wrap(() => onUpdateItem(item.id, { change_type: active ? null : ct }), 'Could not update')}>
-                                  {CHANGE_TYPE_LABEL[ct]}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          {canEdit ? (
-                            <Input defaultValue={item.change_note ?? ''} placeholder="Explain the change (optional)…" className="text-sm h-8"
-                              onBlur={(e) => { if ((e.target.value || '') !== (item.change_note ?? '')) void wrap(() => onUpdateItem(item.id, { change_note: e.target.value || null }), 'Could not save'); }} />
-                          ) : item.change_note ? <p className="text-xs text-muted-foreground">{item.change_note}</p> : null}
-                        </div>
-                      )}
-                      {/* Item photos */}
-                      {(itemPhotos.length > 0 || canEdit) && (
-                        <div className="flex flex-wrap gap-1.5">
-                          {itemPhotos.map((p) => (
-                            <button key={p.id} type="button" onClick={() => onViewPhoto(p)} className="shrink-0">
-                              <img src={p.url} alt={item.name} loading="eager" className="h-14 w-14 rounded-md object-cover border" />
-                            </button>
-                          ))}
-                          {canEdit && (
-                            <label className="h-14 w-14 rounded-md border border-dashed flex items-center justify-center cursor-pointer text-muted-foreground">
-                              <Camera className="h-4 w-4" />
-                              <input type="file" accept="image/*" multiple className="hidden"
-                                onChange={(e) => { const f = Array.from(e.target.files ?? []); if (f.length) void wrap(() => onUploadItemPhotos(item.id, room, f), 'Upload failed'); e.currentTarget.value = ''; }} />
-                            </label>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-              {canEdit && (
-                addTag === room ? (
-                  <div className="flex gap-2">
-                    <Input autoFocus value={addName} onChange={(e) => setAddName(e.target.value)} placeholder="New item name" className="h-8 text-sm" />
-                    <Button size="sm" onClick={() => wrap(async () => { await onAddItem(room, addName); setAddName(''); setAddTag(null); }, 'Could not add')}>Add</Button>
-                    <Button size="sm" variant="ghost" onClick={() => { setAddTag(null); setAddName(''); }}>Cancel</Button>
-                  </div>
-                ) : (
-                  <Button size="sm" variant="outline" onClick={() => { setAddTag(room); setAddName(''); }}><Plus className="h-3.5 w-3.5 mr-1" />Add item</Button>
-                )
-              )}
-            </div>
-          ))
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function MetersKeysSection({
-  canEdit, meters, keys, onAddMeter, onDeleteMeter, onAddKey, onDeleteKey,
-}: {
-  canEdit: boolean;
-  meters: ConditionMeter[];
-  keys: ConditionKey[];
-  onAddMeter: (type: string, reading: string, note: string, file?: File) => Promise<void>;
-  onDeleteMeter: (id: string) => Promise<void>;
-  onAddKey: (label: string, quantity: number, note: string) => Promise<void>;
-  onDeleteKey: (id: string) => Promise<void>;
-}) {
-  const { toast } = useToast();
-  const [mType, setMType] = useState('electricity');
-  const [mReading, setMReading] = useState('');
-  const [mFile, setMFile] = useState<File | null>(null);
-  const [kLabel, setKLabel] = useState('');
-  const [kQty, setKQty] = useState('1');
-
-  const wrap = async (fn: () => Promise<void>, err: string) => {
-    try { await fn(); } catch (e: any) { toast({ variant: 'destructive', title: err, description: e.message ?? String(e) }); }
-  };
-
-  if (meters.length === 0 && keys.length === 0 && !canEdit) return null;
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-base">Meter readings</CardTitle></CardHeader>
-        <CardContent className="space-y-2">
-          {meters.map((m) => (
-            <div key={m.id} className="flex items-center justify-between gap-2 text-sm border rounded-md px-3 py-2">
-              <span><span className="font-medium capitalize">{m.meter_type}</span>: {m.reading}{m.photo_path ? ' 📷' : ''}</span>
-              {canEdit && <button type="button" aria-label="Remove" className="text-destructive" onClick={() => wrap(() => onDeleteMeter(m.id), 'Could not remove')}><Trash2 className="h-4 w-4" /></button>}
-            </div>
-          ))}
-          {meters.length === 0 && <p className="text-sm text-muted-foreground">No readings recorded.</p>}
-          {canEdit && (
-            <div className="space-y-2 border-t pt-2">
-              <select aria-label="Meter type" className="w-full rounded-md border bg-background px-2 py-1.5 text-sm" value={mType} onChange={(e) => setMType(e.target.value)}>
-                <option value="electricity">Electricity</option><option value="water">Water</option><option value="gas">Gas</option><option value="other">Other</option>
-              </select>
-              <Input value={mReading} onChange={(e) => setMReading(e.target.value)} placeholder="Reading" className="h-8 text-sm" />
-              <input type="file" accept="image/*" className="block w-full text-xs" onChange={(e) => setMFile(e.target.files?.[0] ?? null)} />
-              <Button size="sm" disabled={!mReading.trim()} onClick={() => wrap(async () => { await onAddMeter(mType, mReading, '', mFile ?? undefined); setMReading(''); setMFile(null); }, 'Could not add reading')}>Add reading</Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader className="pb-2"><CardTitle className="text-base">Keys & remotes issued</CardTitle></CardHeader>
-        <CardContent className="space-y-2">
-          {keys.map((k) => (
-            <div key={k.id} className="flex items-center justify-between gap-2 text-sm border rounded-md px-3 py-2">
-              <span><span className="font-medium">{k.label}</span> × {k.quantity}</span>
-              {canEdit && <button type="button" aria-label="Remove" className="text-destructive" onClick={() => wrap(() => onDeleteKey(k.id), 'Could not remove')}><Trash2 className="h-4 w-4" /></button>}
-            </div>
-          ))}
-          {keys.length === 0 && <p className="text-sm text-muted-foreground">No keys recorded.</p>}
-          {canEdit && (
-            <div className="space-y-2 border-t pt-2">
-              <Input value={kLabel} onChange={(e) => setKLabel(e.target.value)} placeholder="e.g. Front door key, gate remote" className="h-8 text-sm" />
-              <Input type="number" min={1} value={kQty} onChange={(e) => setKQty(e.target.value)} className="h-8 text-sm w-24" />
-              <Button size="sm" disabled={!kLabel.trim()} onClick={() => wrap(async () => { await onAddKey(kLabel, parseInt(kQty, 10) || 1, ''); setKLabel(''); setKQty('1'); }, 'Could not add key')}>Add key</Button>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
   );
 }

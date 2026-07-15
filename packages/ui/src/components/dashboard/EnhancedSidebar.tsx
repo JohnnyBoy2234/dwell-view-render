@@ -38,7 +38,7 @@ const tenantItems: SidebarItem[] = [
   { title: 'Overview', url: '/enhancedtenantdashboard', icon: Home },
   { title: 'Property Viewings', url: '/tenant/viewings', icon: Eye },
   { title: 'Inventory', url: '/tenant/inventory', icon: FileText },
-  { title: 'Condition Records', url: '/tenant/condition-records', icon: Camera },
+  { title: 'Inspection List', url: '/tenant/condition-records', icon: Camera },
   { title: 'Maintenance', url: '/tenant/maintenance', icon: Settings },
   { title: 'Payment Records', url: '/tenant/proof-of-payment', icon: Inbox },
   { title: 'Lease Contracts', url: '/enhancedtenantdashboard/leases', icon: FileText },
@@ -89,10 +89,10 @@ const landlordItems: SidebarItem[] = [
     requiredPlan: 'premium'
   },
   {
-    title: 'Condition Records',
+    title: 'Inspection List',
     url: '/enhancedlandlorddashboard/condition-records',
     icon: Camera,
-    description: 'Photograph and attest property condition at move-in and move-out',
+    description: 'Photos, notes and sign-off at move-in and move-out',
     requiredPlan: 'free'
   },
   { 

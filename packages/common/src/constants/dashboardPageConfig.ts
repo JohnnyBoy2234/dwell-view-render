@@ -152,7 +152,7 @@ const TENANT_DASHBOARD_ROUTE_CONFIG: Record<string, PageConfig> = {
     backPath: '/tenant-dashboard',
   },
   '/condition-records': {
-    title: 'Condition Records',
+    title: 'Inspection List',
     icon: Camera,
     showSidebar: false,
     showBackButton: true,
@@ -257,7 +257,7 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
     backPath: '/enhancedlandlorddashboard',
   },
   '/enhancedlandlorddashboard/condition-records': {
-    title: 'Condition Records',
+    title: 'Inspection List',
     icon: Camera,
     showSidebar: false,
     showBackButton: true,

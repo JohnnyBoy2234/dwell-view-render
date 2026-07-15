@@ -2,4 +2,4 @@ export { useConditionRecords } from './hooks/useConditionRecords';
 export type { ConditionRecordListItem, TenancySummary } from './hooks/useConditionRecords';
 export { useConditionRecordDetail } from './hooks/useConditionRecordDetail';
 export type { PhotoWithUrl, PendingUpload } from './hooks/useConditionRecordDetail';
-export { ConditionRecordsPage, ConditionRecordDetailPage } from './components/ConditionRecordsPage';
+export { ConditionRecordsPage, ConditionRecordDetailPage, ConditionRecordDetail } from './components/ConditionRecordsPage';

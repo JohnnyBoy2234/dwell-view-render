@@ -27,7 +27,6 @@ import NotFound from "@mzanzihomes/ui/components/pages/NotFound";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
-import { ConditionRecordsPage, ConditionRecordDetailPage } from "@mzanzihomes/features/condition-record";
 import LandlordMaintenance from "@/pages/LandlordMaintenance";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
@@ -174,17 +173,8 @@ function AppRoutes() {
             <EnhancedLandlordDashboard />
           </AuthenticatedRoute>
         } />
-        {/* No PlanGuard: the record needs both parties regardless of plan (see plan Task 7). */}
-        <Route path="/enhancedlandlorddashboard/condition-records" element={
-          <DashboardShell title="Condition Records" subtitle="Photo evidence at move-in and move-out" currentTab="/enhancedlandlorddashboard/condition-records">
-            <ConditionRecordsPage />
-          </DashboardShell>
-        } />
-        <Route path="/enhancedlandlorddashboard/condition-records/:recordId" element={
-          <DashboardShell title="Condition Record" subtitle="Photos, notes and attestation" currentTab="/enhancedlandlorddashboard/condition-records">
-            <ConditionRecordDetailPage />
-          </DashboardShell>
-        } />
+        {/* Inspection List renders in-shell inside EnhancedLandlordDashboard's
+            renderTabContent (like every other tool), so no special route here. */}
         <Route path="/enhancedlandlorddashboard/support" element={
           <AuthenticatedRoute>
             <DashboardShell title="Support" subtitle="Get help with your account and properties" currentTab="/enhancedlandlorddashboard/support">

@@ -43,12 +43,12 @@ export default function TenantDashboardRoutes() {
         </EnhancedDashboardLayout>
       } />
       <Route path="condition-records" element={
-        <EnhancedDashboardLayout title="Condition Records" subtitle="Photo evidence at move-in and move-out">
+        <EnhancedDashboardLayout title="Inspection List" subtitle="Photos, notes and sign-off">
           <ConditionRecordsPage />
         </EnhancedDashboardLayout>
       } />
       <Route path="condition-records/:recordId" element={
-        <EnhancedDashboardLayout title="Condition Record" subtitle="Photos, notes and attestation">
+        <EnhancedDashboardLayout title="Inspection" subtitle="Photos, notes and sign-off">
           <ConditionRecordDetailPage />
         </EnhancedDashboardLayout>
       } />
