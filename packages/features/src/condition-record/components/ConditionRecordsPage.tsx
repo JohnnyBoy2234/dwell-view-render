@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Camera, ChevronRight, ImagePlus, FileText, ShieldCheck, Download } from 'lucide-react';
+import { Camera, ChevronRight, ImagePlus, FileText, ShieldCheck, Download, MessageCircle } from 'lucide-react';
+import { supabase } from '@mzanzihomes/supabase/client';
+import { useMessaging } from '@mzanzihomes/supabase/hooks/useMessaging';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
@@ -440,6 +442,9 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
             record={d.record}
             myParty={d.myParty}
             onApprove={d.approve}
+            tenantId={d.tenancy!.tenant_id}
+            landlordId={d.tenancy!.landlord_id}
+            propertyId={d.tenancy!.property_id}
           />
         </SectionCard>
       )}
@@ -621,22 +626,30 @@ function Countdown({ endsAt }: { endsAt: Date }) {
   );
 }
 
-// Accept the inspection with a simple yes/no. "No" just advises talking to the
-// other party — there is no formal dispute flow.
+// Sign-off acceptance. The landlord answers "is this accurate?" yes/no (No
+// advises talking to the tenant, with a shortcut to their chat); the tenant
+// simply accepts. Either action records that party's acceptance.
 function SignAndApproveCard({
   record,
   myParty,
   onApprove,
+  tenantId,
+  landlordId,
+  propertyId,
 }: {
   record: ConditionRecord;
   myParty: ConditionParty;
   onApprove: () => Promise<unknown>;
+  tenantId: string;
+  landlordId: string;
+  propertyId: string;
 }) {
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { createConversation } = useMessaging();
   const [busy, setBusy] = useState(false);
   const [saidNo, setSaidNo] = useState(false);
 
-  const otherParty: ConditionParty = myParty === 'landlord' ? 'tenant' : 'landlord';
   const myApprovedAt = myParty === 'tenant' ? record.tenant_attested_at : record.landlord_attested_at;
   const endsAt = approvalWindowEndsAt(record);
 
@@ -651,10 +664,44 @@ function SignAndApproveCard({
     }
   };
 
+  // Open (or create) the landlord↔tenant chat for this property.
+  const messageTenant = async () => {
+    try {
+      const { data } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('tenant_id', tenantId as any)
+        .eq('landlord_id', landlordId as any)
+        .limit(1);
+      let cid = (data as any)?.[0]?.id as string | undefined;
+      if (!cid) {
+        const convo = await createConversation(propertyId, landlordId, tenantId);
+        cid = convo && 'id' in convo ? (convo as any).id : undefined;
+      }
+      navigate(cid ? `/messages?c=${cid}` : '/messages');
+    } catch {
+      navigate('/messages');
+    }
+  };
+
   if (myApprovedAt) {
     return <Badge>You accepted on {new Date(myApprovedAt).toLocaleString()}</Badge>;
   }
 
+  // Tenant: a single acceptance, no yes/no.
+  if (myParty === 'tenant') {
+    return (
+      <div className="space-y-3">
+        {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
+        <p className="text-sm text-muted-foreground">Review the photos and notes, then accept the inspection.</p>
+        <Button className="bg-emerald-600 hover:bg-emerald-700" disabled={busy} onClick={() => void accept()}>
+          {busy ? 'Saving…' : 'Accept inspection'}
+        </Button>
+      </div>
+    );
+  }
+
+  // Landlord: is this accurate? Yes accepts; No advises talking to the tenant.
   return (
     <div className="space-y-3">
       {endsAt && <p className="text-sm font-medium"><Countdown endsAt={endsAt} /></p>}
@@ -672,9 +719,14 @@ function SignAndApproveCard({
         </Button>
       </div>
       {saidNo && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/20 dark:text-amber-300">
-          We advise you to talk to the {PARTY_LABEL[otherParty].toLowerCase()} before accepting.
-        </p>
+        <div className="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950/20">
+          <p className="text-sm text-amber-800 dark:text-amber-300">
+            We advise you to talk to the tenant before accepting.
+          </p>
+          <Button size="sm" variant="outline" onClick={() => void messageTenant()}>
+            <MessageCircle className="mr-1.5 h-4 w-4" /> Send message
+          </Button>
+        </div>
       )}
     </div>
   );
