@@ -3,6 +3,7 @@ import { isValidSaId, parseSaId } from '@mzanzihomes/common/utils/saId';
 
 export interface ExtractedIdInfo {
   first_name?: string;
+  middle_name?: string;
   last_name?: string;
   id_number?: string;
   date_of_birth?: string;
@@ -16,7 +17,7 @@ export type ExtractedFieldKey = Exclude<keyof ExtractedIdInfo, 'document_type'>;
 
 // Names come from a fragile label-adjacency regex, not an algorithmic check —
 // always ask the applicant to double-check them regardless of OCR confidence.
-const ALWAYS_LOW_CONFIDENCE: ExtractedFieldKey[] = ['first_name', 'last_name'];
+const ALWAYS_LOW_CONFIDENCE: ExtractedFieldKey[] = ['first_name', 'middle_name', 'last_name'];
 const LOW_OCR_CONFIDENCE_THRESHOLD = 65;
 
 /** Which extracted fields should be highlighted for review. ID number, date of
@@ -35,6 +36,15 @@ export function lowConfidenceFields(extracted: ExtractedIdInfo, ocrConfidence: n
 // how a person actually writes their name for display.
 function titleCase(value: string): string {
   return value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Splits a "given names" string into a first name and (optional) middle
+ * name(s): the first space-separated word is the first name, the rest is
+ * the middle name — unless that first word is hyphenated ("Sarah-Jane"),
+ * which stays a single first name since it has no space to split on. */
+function splitGivenNames(value: string): { first: string; middle?: string } {
+  const [first, ...rest] = value.trim().split(/\s+/);
+  return { first, middle: rest.length ? rest.join(' ') : undefined };
 }
 
 /** Value after a label like "Surname" / "Names" on SA ID cards and books —
@@ -90,7 +100,11 @@ export function parseIdText(text: string): ExtractedIdInfo | null {
   const surname = labelledValue(lines, 'Surname');
   const names = labelledValue(lines, 'Names') ?? labelledValue(lines, 'Forenames');
   if (surname) info.last_name = titleCase(surname);
-  if (names) info.first_name = titleCase(names);
+  if (names) {
+    const { first, middle } = splitGivenNames(names);
+    info.first_name = titleCase(first);
+    if (middle) info.middle_name = titleCase(middle);
+  }
 
   return info;
 }
@@ -167,7 +181,11 @@ export function parseMrzText(text: string): ExtractedIdInfo | null {
     const surname = surnamePart?.replace(/</g, ' ').trim();
     const givenNames = givenPart?.replace(/</g, ' ').trim();
     if (surname) info.last_name = titleCase(surname);
-    if (givenNames) info.first_name = titleCase(givenNames);
+    if (givenNames) {
+      const { first, middle } = splitGivenNames(givenNames);
+      info.first_name = titleCase(first);
+      if (middle) info.middle_name = titleCase(middle);
+    }
 
     return info;
   }

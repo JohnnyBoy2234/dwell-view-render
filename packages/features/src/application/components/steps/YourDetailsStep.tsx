@@ -37,7 +37,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
     });
 
   const setP = (field: keyof typeof p) => (v: string) => {
-    if (field === 'first_name' || field === 'last_name') unflag(field);
+    if (field === 'first_name' || field === 'middle_name' || field === 'last_name') unflag(field);
     update('personal', { [field]: v });
   };
   const setA = (field: keyof typeof a) => (v: string) => update('address', { [field]: v });
@@ -90,6 +90,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
         update('identity', patch);
         const names: Record<string, string> = {};
         if (extracted.first_name) names.first_name = extracted.first_name;
+        if (extracted.middle_name) names.middle_name = extracted.middle_name;
         if (extracted.last_name) names.last_name = extracted.last_name;
         if (Object.keys(names).length > 0) update('personal', names);
         setFlagged(new Set(lowConfidence));
@@ -215,7 +216,11 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             {textInput('last_name', p.last_name, setP('last_name'), { autoComplete: 'family-name' })}
           </Field>
         </div>
-        <Field id="middle_name" label="Middle name (optional)">
+        <Field
+          id="middle_name"
+          label="Middle name (optional)"
+          notice={flagged.has('middle_name') ? REVIEW_NOTICE : undefined}
+        >
           {textInput('middle_name', p.middle_name, setP('middle_name'))}
         </Field>
 

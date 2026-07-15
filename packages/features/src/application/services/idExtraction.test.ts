@@ -17,7 +17,8 @@ describe('parseIdText', () => {
     expect(info?.date_of_birth).toBe('1980-01-01');
     expect(info?.nationality).toBe('South African');
     expect(info?.last_name).toBe('Nkosi');
-    expect(info?.first_name).toBe('Sarah Jane');
+    expect(info?.first_name).toBe('Sarah');
+    expect(info?.middle_name).toBe('Jane');
   });
 
   it('finds surname/names when the label and value share a line', () => {
@@ -29,7 +30,20 @@ describe('parseIdText', () => {
     ].join('\n');
     const info = parseIdText(text);
     expect(info?.last_name).toBe('Nkosi');
-    expect(info?.first_name).toBe('Sarah Jane');
+    expect(info?.first_name).toBe('Sarah');
+    expect(info?.middle_name).toBe('Jane');
+  });
+
+  it('keeps a hyphenated first name together instead of splitting it to middle name', () => {
+    const text = [
+      'REPUBLIC OF SOUTH AFRICA',
+      '800101 5009 087',
+      'Surname: NKOSI',
+      'Names: SARAH-JANE'
+    ].join('\n');
+    const info = parseIdText(text);
+    expect(info?.first_name).toBe('Sarah-Jane');
+    expect(info?.middle_name).toBeUndefined();
   });
 
   it('ignores 13-digit sequences that fail the Luhn check', () => {
@@ -63,7 +77,8 @@ describe('parseMrzText', () => {
     expect(info?.id_number).toBe('L898902C3');
     expect(info?.date_of_birth).toBe('1974-08-12');
     expect(info?.last_name).toBe('Eriksson');
-    expect(info?.first_name).toBe('Anna Maria');
+    expect(info?.first_name).toBe('Anna');
+    expect(info?.middle_name).toBe('Maria');
     expect(info?.id_expiry_date).toBe('2012-04-15');
   });
 
