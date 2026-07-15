@@ -31,6 +31,12 @@ export function lowConfidenceFields(extracted: ExtractedIdInfo, ocrConfidence: n
   return keys.filter((k) => ALWAYS_LOW_CONFIDENCE.includes(k));
 }
 
+// OCR/MRZ names come back ALL CAPS ("NKOSI", "SARAH JANE") — normalize to
+// how a person actually writes their name for display.
+function titleCase(value: string): string {
+  return value.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /** Value after a label like "Surname" / "Names" on SA ID cards and books —
  * either on the same line ("Surname: NKOSI") or the line below (smart card
  * layouts print the label and value as separate lines). Labels can carry
@@ -83,8 +89,8 @@ export function parseIdText(text: string): ExtractedIdInfo | null {
 
   const surname = labelledValue(lines, 'Surname');
   const names = labelledValue(lines, 'Names') ?? labelledValue(lines, 'Forenames');
-  if (surname) info.last_name = surname;
-  if (names) info.first_name = names;
+  if (surname) info.last_name = titleCase(surname);
+  if (names) info.first_name = titleCase(names);
 
   return info;
 }
@@ -160,8 +166,8 @@ export function parseMrzText(text: string): ExtractedIdInfo | null {
     const [surnamePart, givenPart] = line1.slice(5).split('<<');
     const surname = surnamePart?.replace(/</g, ' ').trim();
     const givenNames = givenPart?.replace(/</g, ' ').trim();
-    if (surname) info.last_name = surname;
-    if (givenNames) info.first_name = givenNames;
+    if (surname) info.last_name = titleCase(surname);
+    if (givenNames) info.first_name = titleCase(givenNames);
 
     return info;
   }

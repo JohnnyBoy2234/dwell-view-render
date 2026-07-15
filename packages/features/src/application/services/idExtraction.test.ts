@@ -16,8 +16,8 @@ describe('parseIdText', () => {
     expect(info?.id_number).toBe('8001015009087');
     expect(info?.date_of_birth).toBe('1980-01-01');
     expect(info?.nationality).toBe('South African');
-    expect(info?.last_name).toBe('NKOSI');
-    expect(info?.first_name).toBe('SARAH JANE');
+    expect(info?.last_name).toBe('Nkosi');
+    expect(info?.first_name).toBe('Sarah Jane');
   });
 
   it('finds surname/names when the label and value share a line', () => {
@@ -28,8 +28,8 @@ describe('parseIdText', () => {
       'Names: SARAH JANE'
     ].join('\n');
     const info = parseIdText(text);
-    expect(info?.last_name).toBe('NKOSI');
-    expect(info?.first_name).toBe('SARAH JANE');
+    expect(info?.last_name).toBe('Nkosi');
+    expect(info?.first_name).toBe('Sarah Jane');
   });
 
   it('ignores 13-digit sequences that fail the Luhn check', () => {
@@ -62,8 +62,8 @@ describe('parseMrzText', () => {
     expect(info?.document_type).toBe('passport');
     expect(info?.id_number).toBe('L898902C3');
     expect(info?.date_of_birth).toBe('1974-08-12');
-    expect(info?.last_name).toBe('ERIKSSON');
-    expect(info?.first_name).toBe('ANNA MARIA');
+    expect(info?.last_name).toBe('Eriksson');
+    expect(info?.first_name).toBe('Anna Maria');
     expect(info?.id_expiry_date).toBe('2012-04-15');
   });
 
