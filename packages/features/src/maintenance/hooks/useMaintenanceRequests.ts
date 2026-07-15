@@ -118,8 +118,12 @@ export function useUpdateMaintenanceRequest() {
       return data as unknown as MaintenanceRequest;
     },
     retry: 0,
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['maintenance-requests'] });
+      // The ticket-details screen reads a separate per-id query; without this it
+      // keeps showing stale data, so status changes and saved details appear to
+      // "revert" until a hard reload.
+      queryClient.invalidateQueries({ queryKey: ['maintenance-request', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['maintenance-unread-counts'] });
       toast({
         title: "Updated",

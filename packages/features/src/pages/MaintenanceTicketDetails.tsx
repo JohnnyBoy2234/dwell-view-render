@@ -102,10 +102,19 @@ export default function MaintenanceTicketDetails() {
     if (contractorName.trim()) updates.contractor_name = contractorName;
     if (contractorContact.trim()) updates.contractor_contact = contractorContact;
     
-    updateMaintenance.mutate({
-      id: ticket.id,
-      updates
-    });
+    updateMaintenance.mutate(
+      { id: ticket.id, updates },
+      {
+        onSuccess: () => {
+          // Clear the inputs; the saved values now render from the refetched
+          // ticket (Notes / Cost / Contractor sections).
+          setNotes('');
+          setEstimatedCost('');
+          setContractorName('');
+          setContractorContact('');
+        },
+      },
+    );
   };
 
   if (isLoading) {
