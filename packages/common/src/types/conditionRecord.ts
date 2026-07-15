@@ -69,6 +69,68 @@ export interface ConditionAuditEntry {
   created_at: string;
 }
 
+export type ChecklistCondition = 'good' | 'fair' | 'poor' | 'damaged';
+export type ChecklistCleanliness = 'clean' | 'needs_cleaning';
+
+export interface ConditionChecklistItem {
+  id: string;
+  record_id: string;
+  location_tag: string;
+  name: string;
+  condition: ChecklistCondition | null;
+  cleanliness: ChecklistCleanliness | null;
+  note: string | null;
+  sort_order: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConditionMeter {
+  id: string;
+  record_id: string;
+  meter_type: 'electricity' | 'water' | 'gas' | 'other';
+  reading: string;
+  photo_path: string | null;
+  note: string | null;
+  created_at: string;
+}
+
+export interface ConditionKey {
+  id: string;
+  record_id: string;
+  label: string;
+  quantity: number;
+  note: string | null;
+  created_at: string;
+}
+
+export const CHECKLIST_CONDITION_LABEL: Record<ChecklistCondition, string> = {
+  good: 'Good',
+  fair: 'Fair',
+  poor: 'Poor',
+  damaged: 'Damaged',
+};
+
+// Standard checklist items seeded per room, keyed by matching the room name.
+// The landlord can add, rename or remove items after seeding.
+const STANDARD_BY_ROOM: { match: (t: string) => boolean; items: string[] }[] = [
+  { match: (t) => /kitchen/i.test(t), items: ['Walls', 'Floor', 'Ceiling', 'Cupboards', 'Countertops', 'Sink & taps', 'Stove / oven', 'Extractor', 'Windows', 'Door', 'Lights & plugs'] },
+  { match: (t) => /bath/i.test(t), items: ['Walls', 'Floor', 'Ceiling', 'Toilet', 'Basin & taps', 'Bath / shower', 'Mirror / cabinet', 'Windows', 'Door', 'Lights & plugs'] },
+  { match: (t) => /bedroom/i.test(t), items: ['Walls', 'Floor', 'Ceiling', 'Built-in cupboards', 'Windows', 'Door', 'Curtains / blinds', 'Lights & plugs'] },
+  { match: (t) => /lounge|living|dining|entrance|passage/i.test(t), items: ['Walls', 'Floor', 'Ceiling', 'Windows', 'Door', 'Curtains / blinds', 'Lights & plugs'] },
+  { match: (t) => /garage/i.test(t), items: ['Walls', 'Floor', 'Ceiling', 'Door / motor', 'Remote', 'Lights & plugs'] },
+  { match: (t) => /garden/i.test(t), items: ['Lawn', 'Beds & plants', 'Paving', 'Irrigation', 'Boundary walls / fence'] },
+  { match: (t) => /pool/i.test(t), items: ['Water & surface', 'Pump & filter', 'Cleaning equipment', 'Safety net / fence'] },
+  { match: (t) => /balcony|patio/i.test(t), items: ['Floor', 'Railings', 'Walls / ceiling', 'Lights'] },
+  { match: (t) => /exterior/i.test(t), items: ['Exterior walls', 'Roof / gutters', 'Windows', 'Doors', 'Boundary walls / fence'] },
+];
+
+export function standardChecklistItems(locationTag: string): string[] {
+  const hit = STANDARD_BY_ROOM.find((r) => r.match(locationTag));
+  return hit ? [...hit.items] : ['Walls', 'Floor', 'Ceiling', 'Windows', 'Door', 'Lights & plugs'];
+}
+
 export interface ConditionPhoto {
   id: string;
   record_id: string;
@@ -77,6 +139,7 @@ export interface ConditionPhoto {
   caption: string | null;
   storage_path: string;
   dispute_id: string | null;
+  item_id: string | null;
   created_at: string;
 }
 

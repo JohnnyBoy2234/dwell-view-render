@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Camera } from 'lucide-react';
+import { Camera, Trash2, Plus } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
+import { Input } from '@mzanzihomes/ui/components/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@mzanzihomes/ui/components/tabs';
 import { Dialog, DialogContent, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -27,6 +28,12 @@ import {
   type ConditionRecordState,
   type ConditionRecord,
   type ConditionDispute,
+  type ConditionChecklistItem,
+  type ConditionMeter,
+  type ConditionKey,
+  type ChecklistCondition,
+  type ChecklistCleanliness,
+  CHECKLIST_CONDITION_LABEL,
 } from '@mzanzihomes/common';
 import { useConditionRecords, type ConditionRecordListItem } from '../hooks/useConditionRecords';
 import {
@@ -227,8 +234,11 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
   const currentTag = d.locationTags.includes(locationTag) ? locationTag : d.locationTags[0];
   const partyOf = (p: PhotoWithUrl): ConditionParty =>
     p.uploaded_by === d.tenancy!.tenant_id ? 'tenant' : 'landlord';
-  const myPhotos = d.photos.filter((p) => partyOf(p) === d.myParty);
-  const theirPhotos = d.photos.filter((p) => partyOf(p) === otherParty);
+  // "Additional photos" galleries show only photos not attached to a checklist
+  // item or a dispute (those render in their own sections).
+  const extra = (p: PhotoWithUrl) => !p.item_id && !p.dispute_id;
+  const myPhotos = d.photos.filter((p) => partyOf(p) === d.myParty && extra(p));
+  const theirPhotos = d.photos.filter((p) => partyOf(p) === otherParty && extra(p));
 
   const onFiles = (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -301,6 +311,32 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
         <SignOffCard state={state} onSendForSignoff={d.sendForSignoff} hasPhotos={d.photos.length > 0} />
       )}
 
+      {/* Structured room/item checklist */}
+      <ChecklistSection
+        canEdit={canEdit}
+        checklist={d.checklist}
+        photos={d.photos}
+        locationTags={d.locationTags}
+        onSeed={d.seedChecklist}
+        onAddItem={d.addChecklistItem}
+        onUpdateItem={d.updateChecklistItem}
+        onDeleteItem={d.deleteChecklistItem}
+        onUploadItemPhotos={d.uploadItemPhotos}
+        onViewPhoto={setLightbox}
+      />
+
+      {/* Meter readings + keys issued */}
+      <MetersKeysSection
+        canEdit={canEdit}
+        meters={d.meters}
+        keys={d.keys}
+        onAddMeter={d.addMeter}
+        onDeleteMeter={d.deleteMeter}
+        onAddKey={d.addKey}
+        onDeleteKey={d.deleteKey}
+      />
+
+      <h3 className="pt-2 text-sm font-semibold text-muted-foreground">Additional photos (not tied to a checklist item)</h3>
       <Tabs defaultValue="mine">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="mine" className="min-w-0 truncate">My Photos</TabsTrigger>
@@ -766,5 +802,216 @@ function AttestationStatus({ label, at }: { label: string; at: string | null }) 
         <span className="text-muted-foreground">not yet agreed</span>
       )}
     </span>
+  );
+}
+
+const CONDITION_OPTS: ChecklistCondition[] = ['good', 'fair', 'poor', 'damaged'];
+const CONDITION_STYLE: Record<ChecklistCondition, string> = {
+  good: 'bg-green-100 text-green-800 border-green-300',
+  fair: 'bg-blue-100 text-blue-800 border-blue-300',
+  poor: 'bg-amber-100 text-amber-800 border-amber-300',
+  damaged: 'bg-red-100 text-red-800 border-red-300',
+};
+
+function ChecklistSection({
+  canEdit, checklist, photos, locationTags,
+  onSeed, onAddItem, onUpdateItem, onDeleteItem, onUploadItemPhotos, onViewPhoto,
+}: {
+  canEdit: boolean;
+  checklist: ConditionChecklistItem[];
+  photos: PhotoWithUrl[];
+  locationTags: string[];
+  onSeed: (tags: string[]) => Promise<void>;
+  onAddItem: (tag: string, name: string) => Promise<void>;
+  onUpdateItem: (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name'>>) => Promise<void>;
+  onDeleteItem: (id: string) => Promise<void>;
+  onUploadItemPhotos: (itemId: string, tag: string, files: File[]) => Promise<void>;
+  onViewPhoto: (p: PhotoWithUrl) => void;
+}) {
+  const { toast } = useToast();
+  const [seeding, setSeeding] = useState(false);
+  const [addTag, setAddTag] = useState<string | null>(null);
+  const [addName, setAddName] = useState('');
+
+  const rooms = useMemo(() => {
+    const byRoom = new Map<string, ConditionChecklistItem[]>();
+    for (const i of checklist) { (byRoom.get(i.location_tag) ?? byRoom.set(i.location_tag, []).get(i.location_tag)!).push(i); }
+    return [...byRoom.entries()];
+  }, [checklist]);
+
+  const wrap = async (fn: () => Promise<void>, err: string) => {
+    try { await fn(); } catch (e: any) { toast({ variant: 'destructive', title: err, description: e.message ?? String(e) }); }
+  };
+
+  if (checklist.length === 0 && !canEdit) return null;
+
+  return (
+    <Card>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Room checklist</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        {checklist.length === 0 ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">Grade each part of the property room by room. Start with the standard checklist, then add or remove items.</p>
+            <Button size="sm" disabled={seeding} onClick={() => wrap(async () => { setSeeding(true); try { await onSeed(locationTags); } finally { setSeeding(false); } }, 'Could not create checklist')}>
+              {seeding ? 'Creating…' : 'Generate standard checklist'}
+            </Button>
+          </div>
+        ) : (
+          rooms.map(([room, items]) => (
+            <div key={room} className="space-y-2">
+              <h4 className="font-semibold text-sm">{room}</h4>
+              <div className="divide-y border rounded-lg">
+                {items.map((item) => {
+                  const itemPhotos = photos.filter((p) => p.item_id === item.id);
+                  return (
+                    <div key={item.id} className="p-3 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="font-medium text-sm break-words">{item.name}</span>
+                        {canEdit && (
+                          <button type="button" aria-label={`Remove ${item.name}`} className="text-destructive shrink-0" onClick={() => wrap(() => onDeleteItem(item.id), 'Could not remove')}>
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                      {/* Condition */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {CONDITION_OPTS.map((c) => {
+                          const active = item.condition === c;
+                          return (
+                            <button key={c} type="button" disabled={!canEdit}
+                              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${active ? CONDITION_STYLE[c] : 'bg-background text-muted-foreground border-black/[0.08]'} ${canEdit ? '' : 'opacity-70'}`}
+                              onClick={() => canEdit && wrap(() => onUpdateItem(item.id, { condition: active ? null : c }), 'Could not update')}>
+                              {CHECKLIST_CONDITION_LABEL[c]}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {/* Cleanliness */}
+                      <div className="flex flex-wrap gap-1.5">
+                        {(['clean', 'needs_cleaning'] as ChecklistCleanliness[]).map((cl) => {
+                          const active = item.cleanliness === cl;
+                          return (
+                            <button key={cl} type="button" disabled={!canEdit}
+                              className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${active ? 'bg-slate-800 text-white border-slate-800' : 'bg-background text-muted-foreground border-black/[0.08]'}`}
+                              onClick={() => canEdit && wrap(() => onUpdateItem(item.id, { cleanliness: active ? null : cl }), 'Could not update')}>
+                              {cl === 'clean' ? 'Clean' : 'Needs cleaning'}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {canEdit ? (
+                        <Input defaultValue={item.note ?? ''} placeholder="Note (optional)…" className="text-sm h-8"
+                          onBlur={(e) => { if ((e.target.value || '') !== (item.note ?? '')) void wrap(() => onUpdateItem(item.id, { note: e.target.value || null }), 'Could not save note'); }} />
+                      ) : item.note ? <p className="text-xs text-muted-foreground">{item.note}</p> : null}
+                      {/* Item photos */}
+                      {(itemPhotos.length > 0 || canEdit) && (
+                        <div className="flex flex-wrap gap-1.5">
+                          {itemPhotos.map((p) => (
+                            <button key={p.id} type="button" onClick={() => onViewPhoto(p)} className="shrink-0">
+                              <img src={p.url} alt={item.name} loading="eager" className="h-14 w-14 rounded-md object-cover border" />
+                            </button>
+                          ))}
+                          {canEdit && (
+                            <label className="h-14 w-14 rounded-md border border-dashed flex items-center justify-center cursor-pointer text-muted-foreground">
+                              <Camera className="h-4 w-4" />
+                              <input type="file" accept="image/*" multiple className="hidden"
+                                onChange={(e) => { const f = Array.from(e.target.files ?? []); if (f.length) void wrap(() => onUploadItemPhotos(item.id, room, f), 'Upload failed'); e.currentTarget.value = ''; }} />
+                            </label>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {canEdit && (
+                addTag === room ? (
+                  <div className="flex gap-2">
+                    <Input autoFocus value={addName} onChange={(e) => setAddName(e.target.value)} placeholder="New item name" className="h-8 text-sm" />
+                    <Button size="sm" onClick={() => wrap(async () => { await onAddItem(room, addName); setAddName(''); setAddTag(null); }, 'Could not add')}>Add</Button>
+                    <Button size="sm" variant="ghost" onClick={() => { setAddTag(null); setAddName(''); }}>Cancel</Button>
+                  </div>
+                ) : (
+                  <Button size="sm" variant="outline" onClick={() => { setAddTag(room); setAddName(''); }}><Plus className="h-3.5 w-3.5 mr-1" />Add item</Button>
+                )
+              )}
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function MetersKeysSection({
+  canEdit, meters, keys, onAddMeter, onDeleteMeter, onAddKey, onDeleteKey,
+}: {
+  canEdit: boolean;
+  meters: ConditionMeter[];
+  keys: ConditionKey[];
+  onAddMeter: (type: string, reading: string, note: string, file?: File) => Promise<void>;
+  onDeleteMeter: (id: string) => Promise<void>;
+  onAddKey: (label: string, quantity: number, note: string) => Promise<void>;
+  onDeleteKey: (id: string) => Promise<void>;
+}) {
+  const { toast } = useToast();
+  const [mType, setMType] = useState('electricity');
+  const [mReading, setMReading] = useState('');
+  const [mFile, setMFile] = useState<File | null>(null);
+  const [kLabel, setKLabel] = useState('');
+  const [kQty, setKQty] = useState('1');
+
+  const wrap = async (fn: () => Promise<void>, err: string) => {
+    try { await fn(); } catch (e: any) { toast({ variant: 'destructive', title: err, description: e.message ?? String(e) }); }
+  };
+
+  if (meters.length === 0 && keys.length === 0 && !canEdit) return null;
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Meter readings</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          {meters.map((m) => (
+            <div key={m.id} className="flex items-center justify-between gap-2 text-sm border rounded-md px-3 py-2">
+              <span><span className="font-medium capitalize">{m.meter_type}</span>: {m.reading}{m.photo_path ? ' 📷' : ''}</span>
+              {canEdit && <button type="button" aria-label="Remove" className="text-destructive" onClick={() => wrap(() => onDeleteMeter(m.id), 'Could not remove')}><Trash2 className="h-4 w-4" /></button>}
+            </div>
+          ))}
+          {meters.length === 0 && <p className="text-sm text-muted-foreground">No readings recorded.</p>}
+          {canEdit && (
+            <div className="space-y-2 border-t pt-2">
+              <select aria-label="Meter type" className="w-full rounded-md border bg-background px-2 py-1.5 text-sm" value={mType} onChange={(e) => setMType(e.target.value)}>
+                <option value="electricity">Electricity</option><option value="water">Water</option><option value="gas">Gas</option><option value="other">Other</option>
+              </select>
+              <Input value={mReading} onChange={(e) => setMReading(e.target.value)} placeholder="Reading" className="h-8 text-sm" />
+              <input type="file" accept="image/*" className="block w-full text-xs" onChange={(e) => setMFile(e.target.files?.[0] ?? null)} />
+              <Button size="sm" disabled={!mReading.trim()} onClick={() => wrap(async () => { await onAddMeter(mType, mReading, '', mFile ?? undefined); setMReading(''); setMFile(null); }, 'Could not add reading')}>Add reading</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Keys & remotes issued</CardTitle></CardHeader>
+        <CardContent className="space-y-2">
+          {keys.map((k) => (
+            <div key={k.id} className="flex items-center justify-between gap-2 text-sm border rounded-md px-3 py-2">
+              <span><span className="font-medium">{k.label}</span> × {k.quantity}</span>
+              {canEdit && <button type="button" aria-label="Remove" className="text-destructive" onClick={() => wrap(() => onDeleteKey(k.id), 'Could not remove')}><Trash2 className="h-4 w-4" /></button>}
+            </div>
+          ))}
+          {keys.length === 0 && <p className="text-sm text-muted-foreground">No keys recorded.</p>}
+          {canEdit && (
+            <div className="space-y-2 border-t pt-2">
+              <Input value={kLabel} onChange={(e) => setKLabel(e.target.value)} placeholder="e.g. Front door key, gate remote" className="h-8 text-sm" />
+              <Input type="number" min={1} value={kQty} onChange={(e) => setKQty(e.target.value)} className="h-8 text-sm w-24" />
+              <Button size="sm" disabled={!kLabel.trim()} onClick={() => wrap(async () => { await onAddKey(kLabel, parseInt(kQty, 10) || 1, ''); setKLabel(''); setKQty('1'); }, 'Could not add key')}>Add key</Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }

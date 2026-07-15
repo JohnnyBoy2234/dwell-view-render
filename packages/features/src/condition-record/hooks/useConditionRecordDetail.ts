@@ -8,6 +8,10 @@ import {
   type ConditionSignature,
   type ConditionDispute,
   type ConditionAuditEntry,
+  type ConditionChecklistItem,
+  type ConditionMeter,
+  type ConditionKey,
+  standardChecklistItems,
 } from '@mzanzihomes/common';
 import type { TenancySummary } from './useConditionRecords';
 
@@ -74,13 +78,16 @@ export function useConditionRecordDetail(recordId: string | null) {
   const [signatures, setSignatures] = useState<ConditionSignature[]>([]);
   const [disputes, setDisputes] = useState<ConditionDispute[]>([]);
   const [audit, setAudit] = useState<ConditionAuditEntry[]>([]);
+  const [checklist, setChecklist] = useState<ConditionChecklistItem[]>([]);
+  const [meters, setMeters] = useState<ConditionMeter[]>([]);
+  const [keys, setKeys] = useState<ConditionKey[]>([]);
   const [locationTags, setLocationTags] = useState<string[]>(locationTagsForProperty(null));
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // File handles for pending uploads so a failed upload can be retried.
-  const pendingFilesRef = useRef(new Map<string, { file: File; locationTag: string; disputeId?: string }>());
+  const pendingFilesRef = useRef(new Map<string, { file: File; locationTag: string; disputeId?: string; itemId?: string }>());
   const refetchTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   // Signed URLs are cached by storage path so a refetch (realtime, upload) does
   // not change every <img src> and make the whole gallery flicker/reload.
@@ -164,6 +171,15 @@ export function useConditionRecordDetail(recordId: string | null) {
       setSignatures((sigs ?? []) as ConditionSignature[]);
       setDisputes((disp ?? []) as ConditionDispute[]);
       setAudit((aud ?? []) as ConditionAuditEntry[]);
+
+      const [{ data: items }, { data: mtr }, { data: kys }] = await Promise.all([
+        db.from('condition_checklist_items').select('*').eq('record_id', recordId).order('location_tag').order('sort_order'),
+        db.from('condition_meters').select('*').eq('record_id', recordId).order('created_at'),
+        db.from('condition_keys').select('*').eq('record_id', recordId).order('created_at'),
+      ]);
+      setChecklist((items ?? []) as ConditionChecklistItem[]);
+      setMeters((mtr ?? []) as ConditionMeter[]);
+      setKeys((kys ?? []) as ConditionKey[]);
     } catch (e: any) {
       setError(e.message ?? String(e));
     } finally {
@@ -207,6 +223,7 @@ export function useConditionRecordDetail(recordId: string | null) {
           location_tag: entry.locationTag,
           storage_path: path,
           dispute_id: entry.disputeId ?? null,
+          item_id: entry.itemId ?? null,
         });
         // 23505 = the row already exists from an earlier attempt whose
         // response was lost; that's success, not a duplicate photo.
@@ -236,11 +253,11 @@ export function useConditionRecordDetail(recordId: string | null) {
   );
 
   const uploadPhotos = useCallback(
-    async (files: File[], locationTag: string, disputeId?: string) => {
+    async (files: File[], locationTag: string, opts?: { disputeId?: string; itemId?: string }) => {
       if (!recordId || files.length === 0) return;
       const ids = files.map((file) => {
         const id = crypto.randomUUID();
-        pendingFilesRef.current.set(id, { file, locationTag, disputeId });
+        pendingFilesRef.current.set(id, { file, locationTag, disputeId: opts?.disputeId, itemId: opts?.itemId });
         return id;
       });
       setPendingUploads((prev) => [
@@ -325,7 +342,7 @@ export function useConditionRecordDetail(recordId: string | null) {
       });
       if (err) throw err;
       const disputeId = data as string;
-      if (files && files.length > 0) await uploadPhotos(files, locationTag, disputeId);
+      if (files && files.length > 0) await uploadPhotos(files, locationTag, { disputeId });
       await refetch();
       return disputeId;
     },
@@ -342,6 +359,92 @@ export function useConditionRecordDetail(recordId: string | null) {
     () => callRpc('condition_reopen', { p_record_id: recordId }),
     [callRpc, recordId],
   );
+
+  // ── Phase 2: checklist / meters / keys (editable only while open) ──────────
+  const seedChecklist = useCallback(async (tags: string[]) => {
+    if (!recordId) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const existing = new Set(checklist.map((i) => `${i.location_tag}::${i.name.toLowerCase()}`));
+    const rows: any[] = [];
+    for (const tag of tags) {
+      standardChecklistItems(tag).forEach((name, idx) => {
+        if (!existing.has(`${tag}::${name.toLowerCase()}`)) {
+          rows.push({ record_id: recordId, location_tag: tag, name, sort_order: idx, created_by: user?.id ?? null });
+        }
+      });
+    }
+    if (rows.length === 0) return;
+    const { error: err } = await db.from('condition_checklist_items').insert(rows);
+    if (err) throw err;
+    await refetch();
+  }, [recordId, checklist, refetch]);
+
+  const addChecklistItem = useCallback(async (locationTag: string, name: string) => {
+    if (!recordId || !name.trim()) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const maxSort = Math.max(0, ...checklist.filter((i) => i.location_tag === locationTag).map((i) => i.sort_order));
+    const { error: err } = await db.from('condition_checklist_items').insert({
+      record_id: recordId, location_tag: locationTag, name: name.trim(), sort_order: maxSort + 1, created_by: user?.id ?? null,
+    });
+    if (err) throw err;
+    await refetch();
+  }, [recordId, checklist, refetch]);
+
+  const updateChecklistItem = useCallback(async (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name'>>) => {
+    // Optimistic patch so grading feels instant; refetch reconciles.
+    setChecklist((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
+    const { error: err } = await db.from('condition_checklist_items').update(patch).eq('id', id);
+    if (err) throw err;
+  }, []);
+
+  const deleteChecklistItem = useCallback(async (id: string) => {
+    const { error: err } = await db.from('condition_checklist_items').delete().eq('id', id);
+    if (err) throw err;
+    await refetch();
+  }, [refetch]);
+
+  const uploadItemPhotos = useCallback(
+    (itemId: string, locationTag: string, files: File[]) => uploadPhotos(files, locationTag, { itemId }),
+    [uploadPhotos],
+  );
+
+  const addMeter = useCallback(async (meterType: string, reading: string, note: string, file?: File) => {
+    if (!recordId) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    let photoPath: string | null = null;
+    if (file) {
+      const path = `${recordId}/meter_${crypto.randomUUID()}.jpg`;
+      const { error: upErr } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type || undefined });
+      if (!upErr) photoPath = path;
+    }
+    const { error: err } = await db.from('condition_meters').insert({
+      record_id: recordId, meter_type: meterType, reading: reading.trim(), note: note.trim() || null, photo_path: photoPath, created_by: user?.id ?? null,
+    });
+    if (err) throw err;
+    await refetch();
+  }, [recordId, refetch]);
+
+  const deleteMeter = useCallback(async (id: string) => {
+    const { error: err } = await db.from('condition_meters').delete().eq('id', id);
+    if (err) throw err;
+    await refetch();
+  }, [refetch]);
+
+  const addKey = useCallback(async (label: string, quantity: number, note: string) => {
+    if (!recordId || !label.trim()) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error: err } = await db.from('condition_keys').insert({
+      record_id: recordId, label: label.trim(), quantity: Math.max(1, quantity), note: note.trim() || null, created_by: user?.id ?? null,
+    });
+    if (err) throw err;
+    await refetch();
+  }, [recordId, refetch]);
+
+  const deleteKey = useCallback(async (id: string) => {
+    const { error: err } = await db.from('condition_keys').delete().eq('id', id);
+    if (err) throw err;
+    await refetch();
+  }, [refetch]);
 
   // Signed URL for the finalised report PDF (stored in the condition-photos bucket).
   const getReportUrl = useCallback(async (): Promise<string | null> => {
@@ -396,6 +499,11 @@ export function useConditionRecordDetail(recordId: string | null) {
         { event: '*', schema: 'public', table: 'condition_signatures', filter: `record_id=eq.${recordId}` },
         () => debouncedRefetch(),
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'condition_checklist_items', filter: `record_id=eq.${recordId}` },
+        () => debouncedRefetch(),
+      )
       .subscribe();
     // Re-sign photo URLs before the 1h TTL runs out so a long-open page
     // doesn't end up with broken images.
@@ -415,6 +523,9 @@ export function useConditionRecordDetail(recordId: string | null) {
     signatures,
     disputes,
     audit,
+    checklist,
+    meters,
+    keys,
     locationTags,
     pendingUploads,
     loading,
@@ -430,5 +541,14 @@ export function useConditionRecordDetail(recordId: string | null) {
     respondDispute,
     reopen,
     getReportUrl,
+    seedChecklist,
+    addChecklistItem,
+    updateChecklistItem,
+    deleteChecklistItem,
+    uploadItemPhotos,
+    addMeter,
+    deleteMeter,
+    addKey,
+    deleteKey,
   };
 }

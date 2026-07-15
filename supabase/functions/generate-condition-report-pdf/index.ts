@@ -56,6 +56,12 @@ serve(async (req) => {
       supabase.from("condition_disputes").select("*").eq("record_id", record_id).order("created_at"),
       supabase.from("condition_record_audit").select("*").eq("record_id", record_id).order("created_at"),
     ]);
+    const [{ data: checklist }, { data: meters }, { data: keys }] = await Promise.all([
+      supabase.from("condition_checklist_items").select("*").eq("record_id", record_id).order("location_tag").order("sort_order"),
+      supabase.from("condition_meters").select("*").eq("record_id", record_id).order("created_at"),
+      supabase.from("condition_keys").select("*").eq("record_id", record_id).order("created_at"),
+    ]);
+    const CONDITION_LABEL: Record<string, string> = { good: "Good", fair: "Fair", poor: "Poor", damaged: "Damaged" };
 
     // ---- PDF ----
     const doc = await PDFDocument.create();
@@ -109,25 +115,59 @@ serve(async (req) => {
       if (record.tenant_notes) { text("Tenant:", { f: bold }); text(record.tenant_notes, { indent: 10 }); }
     }
 
-    // Photos grouped by room. Per-photo hashes feed the report content hash.
-    const photoHashes: string[] = [];
-    const rooms = [...new Set((photos ?? []).filter((p: any) => !p.dispute_id).map((p: any) => p.location_tag))];
+    // Reusable image embed with downscale.
+    const embedThumb = async (storagePath: string) => {
+      const { data: blob } = await supabase.storage.from(BUCKET).download(storagePath);
+      if (!blob) return null;
+      const bytes = new Uint8Array(await blob.arrayBuffer());
+      const img = await Image.decode(bytes);
+      const scale = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
+      if (scale < 1) img.resize(Math.round(img.width * scale), Math.round(img.height * scale));
+      return await doc.embedJpg(await img.encodeJPEG(70));
+    };
+
+    // Checklist grouped by room (with item photos)
+    if ((checklist ?? []).length > 0) {
+      const byRoom = new Map<string, any[]>();
+      for (const it of checklist!) { (byRoom.get(it.location_tag) ?? byRoom.set(it.location_tag, []).get(it.location_tag)!).push(it); }
+      heading("Room checklist");
+      for (const [room, items] of byRoom) {
+        text(room, { f: bold, size: 11 });
+        for (const it of items) {
+          const bits = [it.condition ? `Condition: ${CONDITION_LABEL[it.condition] ?? it.condition}` : null, it.cleanliness ? (it.cleanliness === "clean" ? "Clean" : "Needs cleaning") : null].filter(Boolean).join("  ·  ");
+          text(`• ${it.name}${bits ? `  —  ${bits}` : ""}`, { indent: 8, size: 9 });
+          if (it.note) text(it.note, { indent: 16, size: 8, color: muted });
+          const itemPhotos = (photos ?? []).filter((p: any) => p.item_id === it.id);
+          if (itemPhotos.length > 0) {
+            let x = M + 16; const thumb = 70; space(thumb + 8);
+            for (const p of itemPhotos) {
+              try {
+                const emb = await embedThumb(p.storage_path);
+                if (!emb) continue;
+                if (x + thumb > W - M) { x = M + 16; y -= thumb + 6; space(thumb + 8); }
+                page.drawImage(emb, { x, y: y - thumb, width: thumb, height: thumb });
+                x += thumb + 6;
+              } catch (_e) { /* skip */ }
+            }
+            y -= thumb + 8;
+          }
+        }
+        y -= 4;
+      }
+    }
+
+    // Additional photos grouped by room (exclude item + dispute photos).
+    const rooms = [...new Set((photos ?? []).filter((p: any) => !p.dispute_id && !p.item_id).map((p: any) => p.location_tag))];
+    if (rooms.length > 0) heading("Additional photos");
     for (const room of rooms) {
       heading(room);
-      const roomPhotos = (photos ?? []).filter((p: any) => p.location_tag === room && !p.dispute_id);
+      const roomPhotos = (photos ?? []).filter((p: any) => p.location_tag === room && !p.dispute_id && !p.item_id);
       let x = M; const thumb = 120; const gap = 10; const rowH = thumb + 14;
       space(rowH);
       for (const p of roomPhotos) {
         try {
-          const { data: blob } = await supabase.storage.from(BUCKET).download(p.storage_path);
-          if (!blob) continue;
-          const bytes = new Uint8Array(await blob.arrayBuffer());
-          photoHashes.push(`${p.storage_path}:${await sha256Hex(bytes)}`);
-          const img = await Image.decode(bytes);
-          const scale = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
-          if (scale < 1) img.resize(Math.round(img.width * scale), Math.round(img.height * scale));
-          const jpg = await img.encodeJPEG(70);
-          const embed = await doc.embedJpg(jpg);
+          const embed = await embedThumb(p.storage_path);
+          if (!embed) continue;
           const ar = embed.width / embed.height;
           const w = ar >= 1 ? thumb : thumb * ar;
           const h = ar >= 1 ? thumb / ar : thumb;
@@ -139,6 +179,16 @@ serve(async (req) => {
       y -= rowH;
       page.drawText(`Taken between ${fmtDT(roomPhotos[0]?.created_at)} and ${fmtDT(roomPhotos[roomPhotos.length - 1]?.created_at)}`, { x: M, y, size: 8, font, color: muted });
       y -= 12;
+    }
+
+    // Meters + keys
+    if ((meters ?? []).length > 0) {
+      heading("Meter readings");
+      for (const m of meters!) text(`${m.meter_type}: ${m.reading}${m.note ? ` (${m.note})` : ""}`, { indent: 8, size: 9 });
+    }
+    if ((keys ?? []).length > 0) {
+      heading("Keys & remotes issued");
+      for (const k of keys!) text(`${k.label} × ${k.quantity}${k.note ? ` (${k.note})` : ""}`, { indent: 8, size: 9 });
     }
 
     // Disputes
@@ -186,7 +236,12 @@ serve(async (req) => {
       landlord: tenancy?.landlord_id,
       event: record.event_type,
       notes: { landlord: record.landlord_notes, tenant: record.tenant_notes },
-      photos: photoHashes,
+      // Photos are immutable in storage, so their path + timestamp fingerprints
+      // the exact image set (add/remove/reassign all change the hash).
+      photos: (photos ?? []).map((p: any) => `${p.storage_path}:${p.created_at}:${p.item_id ?? ""}:${p.dispute_id ?? ""}`).sort(),
+      checklist: (checklist ?? []).map((i: any) => `${i.location_tag}:${i.name}:${i.condition ?? ""}:${i.cleanliness ?? ""}:${i.note ?? ""}`).sort(),
+      meters: (meters ?? []).map((m: any) => `${m.meter_type}:${m.reading}:${m.note ?? ""}`).sort(),
+      keys: (keys ?? []).map((k: any) => `${k.label}:${k.quantity}:${k.note ?? ""}`).sort(),
       signatures: (signatures ?? []).map((s: any) => `${s.party}:${s.kind}:${s.signed_at}:${s.auto}`),
       disputes: (disputes ?? []).map((x: any) => `${x.location_tag}:${x.raised_party}:${x.comment}:${x.status}`),
     });

@@ -41,6 +41,7 @@ const photo = (id: string, location_tag: string, created_at: string): ConditionP
   caption: null,
   storage_path: `r1/${id}.jpg`,
   dispute_id: null,
+  item_id: null,
   created_at,
 });
 
