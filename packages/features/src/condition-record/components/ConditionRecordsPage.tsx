@@ -33,7 +33,9 @@ import {
   type ConditionKey,
   type ChecklistCondition,
   type ChecklistCleanliness,
+  type ChecklistChangeType,
   CHECKLIST_CONDITION_LABEL,
+  CHANGE_TYPE_LABEL,
 } from '@mzanzihomes/common';
 import { useConditionRecords, type ConditionRecordListItem } from '../hooks/useConditionRecords';
 import {
@@ -311,13 +313,16 @@ function RecordDetail({ recordId }: { recordId: string | null }) {
         <SignOffCard state={state} onSendForSignoff={d.sendForSignoff} hasPhotos={d.photos.length > 0} />
       )}
 
-      {/* Structured room/item checklist */}
+      {/* Structured room/item checklist (with check-out comparison on move-out) */}
       <ChecklistSection
         canEdit={canEdit}
+        isMoveOut={d.record.event_type === 'move_out'}
         checklist={d.checklist}
+        checkInItems={d.checkInItems}
         photos={d.photos}
         locationTags={d.locationTags}
         onSeed={d.seedChecklist}
+        onCopyFromCheckIn={d.copyFromCheckIn}
         onAddItem={d.addChecklistItem}
         onUpdateItem={d.updateChecklistItem}
         onDeleteItem={d.deleteChecklistItem}
@@ -814,16 +819,19 @@ const CONDITION_STYLE: Record<ChecklistCondition, string> = {
 };
 
 function ChecklistSection({
-  canEdit, checklist, photos, locationTags,
-  onSeed, onAddItem, onUpdateItem, onDeleteItem, onUploadItemPhotos, onViewPhoto,
+  canEdit, isMoveOut, checklist, checkInItems, photos, locationTags,
+  onSeed, onCopyFromCheckIn, onAddItem, onUpdateItem, onDeleteItem, onUploadItemPhotos, onViewPhoto,
 }: {
   canEdit: boolean;
+  isMoveOut: boolean;
   checklist: ConditionChecklistItem[];
+  checkInItems: ConditionChecklistItem[];
   photos: PhotoWithUrl[];
   locationTags: string[];
   onSeed: (tags: string[]) => Promise<void>;
+  onCopyFromCheckIn: () => Promise<void>;
   onAddItem: (tag: string, name: string) => Promise<void>;
-  onUpdateItem: (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name'>>) => Promise<void>;
+  onUpdateItem: (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name' | 'change_type' | 'change_note'>>) => Promise<void>;
   onDeleteItem: (id: string) => Promise<void>;
   onUploadItemPhotos: (itemId: string, tag: string, files: File[]) => Promise<void>;
   onViewPhoto: (p: PhotoWithUrl) => void;
@@ -832,6 +840,12 @@ function ChecklistSection({
   const [seeding, setSeeding] = useState(false);
   const [addTag, setAddTag] = useState<string | null>(null);
   const [addName, setAddName] = useState('');
+  // Check-in condition lookup for move-out comparison, keyed by room::name.
+  const checkInByKey = useMemo(() => {
+    const m = new Map<string, ConditionChecklistItem>();
+    for (const i of checkInItems) m.set(`${i.location_tag}::${i.name.toLowerCase()}`, i);
+    return m;
+  }, [checkInItems]);
 
   const rooms = useMemo(() => {
     const byRoom = new Map<string, ConditionChecklistItem[]>();
@@ -853,10 +867,21 @@ function ChecklistSection({
       <CardContent className="space-y-5">
         {checklist.length === 0 ? (
           <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">Grade each part of the property room by room. Start with the standard checklist, then add or remove items.</p>
-            <Button size="sm" disabled={seeding} onClick={() => wrap(async () => { setSeeding(true); try { await onSeed(locationTags); } finally { setSeeding(false); } }, 'Could not create checklist')}>
-              {seeding ? 'Creating…' : 'Generate standard checklist'}
-            </Button>
+            <p className="text-sm text-muted-foreground">
+              {isMoveOut
+                ? 'Grade the property again at move-out. Copy the check-in items to compare like-for-like, or start from the standard checklist.'
+                : 'Grade each part of the property room by room. Start with the standard checklist, then add or remove items.'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {isMoveOut && checkInItems.length > 0 && (
+                <Button size="sm" disabled={seeding} onClick={() => wrap(async () => { setSeeding(true); try { await onCopyFromCheckIn(); } finally { setSeeding(false); } }, 'Could not copy check-in items')}>
+                  {seeding ? 'Copying…' : 'Copy items from check-in'}
+                </Button>
+              )}
+              <Button size="sm" variant={isMoveOut ? 'outline' : 'default'} disabled={seeding} onClick={() => wrap(async () => { setSeeding(true); try { await onSeed(locationTags); } finally { setSeeding(false); } }, 'Could not create checklist')}>
+                {seeding ? 'Creating…' : 'Generate standard checklist'}
+              </Button>
+            </div>
           </div>
         ) : (
           rooms.map(([room, items]) => (
@@ -865,6 +890,8 @@ function ChecklistSection({
               <div className="divide-y border rounded-lg">
                 {items.map((item) => {
                   const itemPhotos = photos.filter((p) => p.item_id === item.id);
+                  const checkIn = isMoveOut ? checkInByKey.get(`${item.location_tag}::${item.name.toLowerCase()}`) : undefined;
+                  const changed = isMoveOut && !!checkIn && item.condition != null && item.condition !== checkIn.condition;
                   return (
                     <div key={item.id} className="p-3 space-y-2">
                       <div className="flex items-start justify-between gap-2">
@@ -875,6 +902,12 @@ function ChecklistSection({
                           </button>
                         )}
                       </div>
+                      {isMoveOut && (
+                        <p className="text-xs text-muted-foreground">
+                          At check-in: {checkIn?.condition ? CHECKLIST_CONDITION_LABEL[checkIn.condition] : 'not graded'}
+                          {checkIn?.cleanliness ? ` · ${checkIn.cleanliness === 'clean' ? 'Clean' : 'Needs cleaning'}` : ''}
+                        </p>
+                      )}
                       {/* Condition */}
                       <div className="flex flex-wrap gap-1.5">
                         {CONDITION_OPTS.map((c) => {
@@ -905,6 +938,29 @@ function ChecklistSection({
                         <Input defaultValue={item.note ?? ''} placeholder="Note (optional)…" className="text-sm h-8"
                           onBlur={(e) => { if ((e.target.value || '') !== (item.note ?? '')) void wrap(() => onUpdateItem(item.id, { note: e.target.value || null }), 'Could not save note'); }} />
                       ) : item.note ? <p className="text-xs text-muted-foreground">{item.note}</p> : null}
+
+                      {/* Check-out classification: shown when the condition changed from check-in */}
+                      {isMoveOut && (changed || item.change_type) && (
+                        <div className="rounded-md bg-amber-50 border border-amber-200 p-2 space-y-1.5 dark:bg-amber-950/20 dark:border-amber-900">
+                          <p className="text-xs font-medium text-amber-800 dark:text-amber-300">Condition changed — classify:</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {(['fair_wear', 'tenant_damage', 'pre_existing'] as ChecklistChangeType[]).map((ct) => {
+                              const active = item.change_type === ct;
+                              return (
+                                <button key={ct} type="button" disabled={!canEdit}
+                                  className={`rounded-full border px-2.5 py-0.5 text-xs font-medium ${active ? 'bg-amber-600 text-white border-amber-600' : 'bg-background text-muted-foreground border-black/[0.08]'}`}
+                                  onClick={() => canEdit && wrap(() => onUpdateItem(item.id, { change_type: active ? null : ct }), 'Could not update')}>
+                                  {CHANGE_TYPE_LABEL[ct]}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          {canEdit ? (
+                            <Input defaultValue={item.change_note ?? ''} placeholder="Explain the change (optional)…" className="text-sm h-8"
+                              onBlur={(e) => { if ((e.target.value || '') !== (item.change_note ?? '')) void wrap(() => onUpdateItem(item.id, { change_note: e.target.value || null }), 'Could not save'); }} />
+                          ) : item.change_note ? <p className="text-xs text-muted-foreground">{item.change_note}</p> : null}
+                        </div>
+                      )}
                       {/* Item photos */}
                       {(itemPhotos.length > 0 || canEdit) && (
                         <div className="flex flex-wrap gap-1.5">

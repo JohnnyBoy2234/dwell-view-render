@@ -81,6 +81,8 @@ export function useConditionRecordDetail(recordId: string | null) {
   const [checklist, setChecklist] = useState<ConditionChecklistItem[]>([]);
   const [meters, setMeters] = useState<ConditionMeter[]>([]);
   const [keys, setKeys] = useState<ConditionKey[]>([]);
+  // Check-in counterpart items, loaded read-only for move-out comparison.
+  const [checkInItems, setCheckInItems] = useState<ConditionChecklistItem[]>([]);
   const [locationTags, setLocationTags] = useState<string[]>(locationTagsForProperty(null));
   const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
   const [loading, setLoading] = useState(true);
@@ -180,6 +182,22 @@ export function useConditionRecordDetail(recordId: string | null) {
       setChecklist((items ?? []) as ConditionChecklistItem[]);
       setMeters((mtr ?? []) as ConditionMeter[]);
       setKeys((kys ?? []) as ConditionKey[]);
+
+      // For a move-out record, load the check-in report's checklist so the UI
+      // and PDF can show check-in condition beside check-out condition.
+      if (rec.event_type === 'move_out') {
+        const { data: checkIn } = await db
+          .from('condition_records').select('id')
+          .eq('tenancy_id', rec.tenancy_id).eq('event_type', 'move_in').maybeSingle();
+        if (checkIn?.id) {
+          const { data: ci } = await db.from('condition_checklist_items').select('*').eq('record_id', checkIn.id);
+          setCheckInItems((ci ?? []) as ConditionChecklistItem[]);
+        } else {
+          setCheckInItems([]);
+        }
+      } else {
+        setCheckInItems([]);
+      }
     } catch (e: any) {
       setError(e.message ?? String(e));
     } finally {
@@ -390,12 +408,27 @@ export function useConditionRecordDetail(recordId: string | null) {
     await refetch();
   }, [recordId, checklist, refetch]);
 
-  const updateChecklistItem = useCallback(async (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name'>>) => {
+  const updateChecklistItem = useCallback(async (id: string, patch: Partial<Pick<ConditionChecklistItem, 'condition' | 'cleanliness' | 'note' | 'name' | 'change_type' | 'change_note'>>) => {
     // Optimistic patch so grading feels instant; refetch reconciles.
     setChecklist((prev) => prev.map((i) => (i.id === id ? { ...i, ...patch } : i)));
     const { error: err } = await db.from('condition_checklist_items').update(patch).eq('id', id);
     if (err) throw err;
   }, []);
+
+  // Move-out only: copy the check-in report's item list (rooms + names) so the
+  // same items line up for side-by-side comparison. Conditions are graded fresh.
+  const copyFromCheckIn = useCallback(async () => {
+    if (!recordId || checkInItems.length === 0) return;
+    const { data: { user } } = await supabase.auth.getUser();
+    const existing = new Set(checklist.map((i) => `${i.location_tag}::${i.name.toLowerCase()}`));
+    const rows = checkInItems
+      .filter((i) => !existing.has(`${i.location_tag}::${i.name.toLowerCase()}`))
+      .map((i) => ({ record_id: recordId, location_tag: i.location_tag, name: i.name, sort_order: i.sort_order, created_by: user?.id ?? null }));
+    if (rows.length === 0) return;
+    const { error: err } = await db.from('condition_checklist_items').insert(rows);
+    if (err) throw err;
+    await refetch();
+  }, [recordId, checkInItems, checklist, refetch]);
 
   const deleteChecklistItem = useCallback(async (id: string) => {
     const { error: err } = await db.from('condition_checklist_items').delete().eq('id', id);
@@ -524,6 +557,7 @@ export function useConditionRecordDetail(recordId: string | null) {
     disputes,
     audit,
     checklist,
+    checkInItems,
     meters,
     keys,
     locationTags,
@@ -542,6 +576,7 @@ export function useConditionRecordDetail(recordId: string | null) {
     reopen,
     getReportUrl,
     seedChecklist,
+    copyFromCheckIn,
     addChecklistItem,
     updateChecklistItem,
     deleteChecklistItem,

@@ -62,6 +62,17 @@ serve(async (req) => {
       supabase.from("condition_keys").select("*").eq("record_id", record_id).order("created_at"),
     ]);
     const CONDITION_LABEL: Record<string, string> = { good: "Good", fair: "Fair", poor: "Poor", damaged: "Damaged" };
+    const CHANGE_LABEL: Record<string, string> = { fair_wear: "Fair wear & tear", tenant_damage: "Tenant damage", pre_existing: "Pre-existing" };
+
+    // Move-out: load the check-in checklist to show condition at check-in.
+    const checkInBy = new Map<string, any>();
+    if (record.event_type === "move_out") {
+      const { data: ci } = await supabase.from("condition_records").select("id").eq("tenancy_id", record.tenancy_id).eq("event_type", "move_in").maybeSingle();
+      if (ci?.id) {
+        const { data: ciItems } = await supabase.from("condition_checklist_items").select("*").eq("record_id", ci.id);
+        for (const it of ciItems ?? []) checkInBy.set(`${it.location_tag}::${String(it.name).toLowerCase()}`, it);
+      }
+    }
 
     // ---- PDF ----
     const doc = await PDFDocument.create();
@@ -130,12 +141,17 @@ serve(async (req) => {
     if ((checklist ?? []).length > 0) {
       const byRoom = new Map<string, any[]>();
       for (const it of checklist!) { (byRoom.get(it.location_tag) ?? byRoom.set(it.location_tag, []).get(it.location_tag)!).push(it); }
-      heading("Room checklist");
+      heading(record.event_type === "move_out" ? "Room checklist (check-out vs check-in)" : "Room checklist");
       for (const [room, items] of byRoom) {
         text(room, { f: bold, size: 11 });
         for (const it of items) {
           const bits = [it.condition ? `Condition: ${CONDITION_LABEL[it.condition] ?? it.condition}` : null, it.cleanliness ? (it.cleanliness === "clean" ? "Clean" : "Needs cleaning") : null].filter(Boolean).join("  ·  ");
           text(`• ${it.name}${bits ? `  —  ${bits}` : ""}`, { indent: 8, size: 9 });
+          if (record.event_type === "move_out") {
+            const ci = checkInBy.get(`${it.location_tag}::${String(it.name).toLowerCase()}`);
+            text(`At check-in: ${ci?.condition ? (CONDITION_LABEL[ci.condition] ?? ci.condition) : "not graded"}`, { indent: 16, size: 8, color: muted });
+            if (it.change_type) text(`Classified: ${CHANGE_LABEL[it.change_type] ?? it.change_type}${it.change_note ? ` — ${it.change_note}` : ""}`, { indent: 16, size: 8, color: muted });
+          }
           if (it.note) text(it.note, { indent: 16, size: 8, color: muted });
           const itemPhotos = (photos ?? []).filter((p: any) => p.item_id === it.id);
           if (itemPhotos.length > 0) {
@@ -239,7 +255,7 @@ serve(async (req) => {
       // Photos are immutable in storage, so their path + timestamp fingerprints
       // the exact image set (add/remove/reassign all change the hash).
       photos: (photos ?? []).map((p: any) => `${p.storage_path}:${p.created_at}:${p.item_id ?? ""}:${p.dispute_id ?? ""}`).sort(),
-      checklist: (checklist ?? []).map((i: any) => `${i.location_tag}:${i.name}:${i.condition ?? ""}:${i.cleanliness ?? ""}:${i.note ?? ""}`).sort(),
+      checklist: (checklist ?? []).map((i: any) => `${i.location_tag}:${i.name}:${i.condition ?? ""}:${i.cleanliness ?? ""}:${i.note ?? ""}:${i.change_type ?? ""}:${i.change_note ?? ""}`).sort(),
       meters: (meters ?? []).map((m: any) => `${m.meter_type}:${m.reading}:${m.note ?? ""}`).sort(),
       keys: (keys ?? []).map((k: any) => `${k.label}:${k.quantity}:${k.note ?? ""}`).sort(),
       signatures: (signatures ?? []).map((s: any) => `${s.party}:${s.kind}:${s.signed_at}:${s.auto}`),

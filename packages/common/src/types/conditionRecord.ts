@@ -71,6 +71,7 @@ export interface ConditionAuditEntry {
 
 export type ChecklistCondition = 'good' | 'fair' | 'poor' | 'damaged';
 export type ChecklistCleanliness = 'clean' | 'needs_cleaning';
+export type ChecklistChangeType = 'fair_wear' | 'tenant_damage' | 'pre_existing';
 
 export interface ConditionChecklistItem {
   id: string;
@@ -80,11 +81,20 @@ export interface ConditionChecklistItem {
   condition: ChecklistCondition | null;
   cleanliness: ChecklistCleanliness | null;
   note: string | null;
+  // Check-out only: how the condition changed from check-in (Phase 3).
+  change_type: ChecklistChangeType | null;
+  change_note: string | null;
   sort_order: number;
   created_by: string | null;
   created_at: string;
   updated_at: string;
 }
+
+export const CHANGE_TYPE_LABEL: Record<ChecklistChangeType, string> = {
+  fair_wear: 'Fair wear & tear',
+  tenant_damage: 'Tenant damage',
+  pre_existing: 'Pre-existing',
+};
 
 export interface ConditionMeter {
   id: string;
