@@ -87,10 +87,10 @@ export function RentDueBanner() {
         aria-label={`Rent due ${fmtR(Number(bill.total_amount))} — view bill`}
       >
         <span className="min-w-0">
-          <span className="block text-sm font-bold leading-tight">
+          <span className="block truncate text-sm font-bold leading-tight">
             {monthName} rent &amp; utilities
           </span>
-          <span className="block text-xs opacity-90">{fmtR(Number(bill.total_amount))} outstanding</span>
+          <span className="block truncate text-xs opacity-90">{fmtR(Number(bill.total_amount))} outstanding</span>
         </span>
         <span
           onClick={(e) => { e.stopPropagation(); setPayNow(true); setOpen(true); }}
