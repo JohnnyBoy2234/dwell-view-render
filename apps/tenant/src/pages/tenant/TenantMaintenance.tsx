@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
 import { useUnreadCounts } from '@mzanzihomes/supabase/hooks/useUnreadCounts';
 import { useTenantResponses } from '@mzanzihomes/features/maintenance';
-import { Plus, Wrench, Camera } from 'lucide-react';
+import { Plus, Wrench } from 'lucide-react';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -47,7 +47,6 @@ export default function TenantMaintenance() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
   const [category, setCategory] = useState<Category>('other');
-  const [photos, setPhotos] = useState<FileList | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,36 +109,13 @@ export default function TenantMaintenance() {
         }
       }
 
-      // Upload images if any
-      const imageUrls: string[] = [];
-      if (photos && photos.length > 0) {
-        for (let i = 0; i < photos.length; i++) {
-          const file = photos[i];
-          const fileExt = file.name.split('.').pop();
-          const fileName = `${user.id}/${Date.now()}_${i}.${fileExt}`;
-          
-        const { error: uploadError } = await supabase.storage
-          .from('maintenance-images')
-          .upload(fileName, file);
-          
-        if (uploadError) {
-          console.error('Error uploading image:', uploadError);
-        } else {
-          const { data: { publicUrl } } = supabase.storage
-            .from('maintenance-images')
-            .getPublicUrl(fileName);
-          imageUrls.push(publicUrl);
-        }
-        }
-      }
-
       await createMaintenance.mutateAsync({
         property_id: propertyId,
         title: title.trim(),
         description: description.trim(),
         priority,
         category,
-        images: imageUrls,
+        images: [],
       });
 
       // Reset form
@@ -147,14 +123,7 @@ export default function TenantMaintenance() {
       setDescription('');
       setPriority('medium');
       setCategory('other');
-      setPhotos(null);
-      
-      // Reset file input
-      const fileInput = document.getElementById('photos') as HTMLInputElement;
-      if (fileInput) {
-        fileInput.value = '';
-      }
-      
+
       setIsCreateDialogOpen(false);
       
       toast({
@@ -280,23 +249,7 @@ export default function TenantMaintenance() {
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="photos">Photos (Optional)</Label>
-              <Input
-                id="photos"
-                type="file"
-                multiple
-                accept="image/*"
-                capture="environment"
-                onChange={(e) => setPhotos(e.target.files)}
-              />
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Camera className="h-4 w-4" />
-                <span>Upload photos to help us understand the issue better</span>
-              </div>
-            </div>
-
-            <Button 
+            <Button
               type="submit" 
               className="w-full bg-ocean-blue hover:bg-ocean-blue-dark"
               disabled={createMaintenance.isPending}
@@ -355,12 +308,12 @@ export default function TenantMaintenance() {
         <Card className="border-dashed">
           <CardContent className="py-10 text-center">
             <Wrench className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-            <p className="font-medium">Nothing to fix right now</p>
+            <p className="font-medium">Log a maintenance request</p>
             <p className="text-sm text-muted-foreground mt-1 mb-4">
-              When something breaks, report it here and your landlord is notified immediately.
+              Something needs fixing? Add a note describing the issue and your landlord is notified immediately.
             </p>
-            <Button onClick={() => setIsCreateDialogOpen(true)} variant="outline">
-              <Plus className="h-4 w-4 mr-1.5" /> Report an issue
+            <Button onClick={() => setIsCreateDialogOpen(true)}>
+              <Plus className="h-4 w-4 mr-1.5" /> Log maintenance request
             </Button>
           </CardContent>
         </Card>
