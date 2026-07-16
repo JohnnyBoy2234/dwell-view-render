@@ -2479,7 +2479,7 @@ const renderReportsTab = () => (
                   <p className="text-sm text-muted-foreground line-clamp-2">{request.description}</p>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     <Badge variant={request.priority === 'urgent' ? 'destructive' : 'secondary'}>{request.priority}</Badge>
-                    <Badge variant="outline">{request.status.replace('_', ' ')}</Badge>
+                    <Badge variant="outline">{request.status === 'in_progress' ? 'Busy' : request.status === 'submitted' ? 'New' : request.status.replace('_', ' ')}</Badge>
                     <span className="text-xs text-muted-foreground">
                       {request.category.replace('_', ' ')} • {new Date(request.created_at).toLocaleDateString()}
                     </span>
@@ -2494,7 +2494,7 @@ const renderReportsTab = () => (
                 {request.status === 'submitted' && (
                   <Button size="sm" className="w-full sm:w-auto" onClick={() => updateMaintenanceStatus(request.id, 'in_progress')}>
                     <Play className="h-4 w-4 mr-2" />
-                    Start
+                    Busy
                   </Button>
                 )}
                 {request.status === 'in_progress' && (
