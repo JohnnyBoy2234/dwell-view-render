@@ -45,5 +45,13 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>MzanziHomes uses the camera to photograph maintenance issues and document property condition.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>MzanziHomes needs access to your photos so you can attach images to maintenance requests and inspections.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>MzanziHomes saves photos you capture to your photo library.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>MzanziHomes uses your location to help you find and view nearby rental properties.</string>
 </dict>
 </plist>
