@@ -115,10 +115,10 @@ export default function TenantHome() {
           </div>
           <button
             onClick={() => navigate('/properties')}
-            className="flex shrink-0 items-center gap-1.5 border-l border-slate-100 py-1.5 pl-2.5 pr-1 text-[13px] font-semibold text-slate-700 active:opacity-70"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 active:opacity-70"
+            aria-label="More filters"
           >
-            <SlidersHorizontal className="h-4 w-4 text-slate-600" />
-            More Filters
+            <SlidersHorizontal className="h-[18px] w-[18px] text-slate-600" />
           </button>
           <button
             onClick={runSearch}
