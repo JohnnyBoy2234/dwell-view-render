@@ -184,6 +184,13 @@ export default function TenantInventory() {
             </p>
           </CardContent>
         </Card>
+      ) : items.length === 0 ? (
+        <Card>
+          <CardContent className="py-10 text-center">
+            <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
+            <p className="font-medium">Nothing has been created</p>
+          </CardContent>
+        </Card>
       ) : (
         <>
           {/* Property summary */}
@@ -201,118 +208,98 @@ export default function TenantInventory() {
 
           {/* Approval banner — the tenant's confirmation that the inventory
               matches what they found at the property */}
-          {items.length > 0 && (
-            approval && lastUpdated && lastUpdated <= approval.approved_at ? (
-              <Card className="border-green-200 bg-green-50/60">
-                <CardContent className="py-4 flex items-center gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-                  <p className="text-sm text-green-800">
-                    You acknowledged this inventory on {shortDate(approval.approved_at)}.
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className={approval ? 'border-amber-200 bg-amber-50/60' : 'border-ocean-blue/20 bg-ocean-blue/5'}>
-                <CardContent className="py-4 space-y-3">
-                  <p className="text-sm">
-                    {approval
-                      ? 'The landlord updated the inventory since you acknowledged it. Review the changes and acknowledge again.'
-                      : 'Review the items and photos below. If everything matches what you found at the property, acknowledge the inventory.'}
-                  </p>
-                  <Button onClick={approveInventory} disabled={approving} className="w-full sm:w-auto">
-                    <CheckCircle2 className="h-4 w-4 mr-2" />
-                    {approving ? 'Saving…' : approval ? 'Acknowledge again' : 'I agree — acknowledge inventory'}
-                  </Button>
-                </CardContent>
-              </Card>
-            )
-          )}
-
-          {items.length === 0 ? (
-            <>
-              <Card>
-                <CardContent className="py-10 text-center">
-                  <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
-                  <p className="font-medium">No inventory has been added yet</p>
-                  <p className="text-sm text-muted-foreground mt-1 max-w-md mx-auto">
-                    The landlord has not yet added a list of furniture or property items. You do not
-                    need to create anything.
-                  </p>
-                </CardContent>
-              </Card>
-              {infoCard}
-            </>
+          {approval && lastUpdated && lastUpdated <= approval.approved_at ? (
+            <Card className="border-green-200 bg-green-50/60">
+              <CardContent className="py-4 flex items-center gap-3">
+                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
+                <p className="text-sm text-green-800">
+                  You acknowledged this inventory on {shortDate(approval.approved_at)}.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            <>
-              {/* Search */}
-              <div className="relative">
-                <Search
-                  className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search items or rooms…"
-                  aria-label="Search the inventory"
-                  className="pl-9"
-                />
-              </div>
-
-              {rooms.length === 0 ? (
-                <Card>
-                  <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                    No items match your search.
-                  </CardContent>
-                </Card>
-              ) : (
-                rooms.map(([room, roomItems]) => (
-                  <Card key={room}>
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center justify-between gap-2">
-                        <span className="truncate">{room}</span>
-                        <Badge variant="secondary" className="shrink-0">
-                          {roomItems.length} item{roomItems.length === 1 ? '' : 's'}
-                        </Badge>
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="divide-y">
-                      {roomItems.map((item) => (
-                        <div key={item.id} className="py-3 first:pt-0 last:pb-0">
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="font-medium break-words">{item.name}</p>
-                            <span className="text-sm text-muted-foreground shrink-0">× {item.quantity}</span>
-                          </div>
-                          {item.description && (
-                            <p className="text-sm text-muted-foreground mt-0.5 break-words">{item.description}</p>
-                          )}
-                          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">
-                            {item.brand_model && <span>Brand/model: {item.brand_model}</span>}
-                            {item.serial_number && <span>Serial: {item.serial_number}</span>}
-                          </div>
-                          {item.note && (
-                            <p className="text-xs text-muted-foreground mt-0.5 break-words">
-                              Landlord note: {item.note}
-                            </p>
-                          )}
-                          {(item.image_urls?.length ?? 0) > 0 && (
-                            <div className="flex gap-1.5 mt-2 overflow-x-auto">
-                              {item.image_urls!.map((url) => (
-                                <a key={url} href={url} target="_blank" rel="noreferrer" className="shrink-0">
-                                  <img src={url} alt={item.name} className="h-16 w-16 rounded-lg object-cover border" />
-                                </a>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-              {infoCard}
-            </>
+            <Card className={approval ? 'border-amber-200 bg-amber-50/60' : 'border-ocean-blue/20 bg-ocean-blue/5'}>
+              <CardContent className="py-4 space-y-3">
+                <p className="text-sm">
+                  {approval
+                    ? 'The landlord updated the inventory since you acknowledged it. Review the changes and acknowledge again.'
+                    : 'Review the items and photos below. If everything matches what you found at the property, acknowledge the inventory.'}
+                </p>
+                <Button onClick={approveInventory} disabled={approving} className="w-full sm:w-auto">
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  {approving ? 'Saving…' : approval ? 'Acknowledge again' : 'I agree — acknowledge inventory'}
+                </Button>
+              </CardContent>
+            </Card>
           )}
+
+          {/* Search */}
+          <div className="relative">
+            <Search
+              className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search items or rooms…"
+              aria-label="Search the inventory"
+              className="pl-9"
+            />
+          </div>
+
+          {rooms.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-sm text-muted-foreground">
+                No items match your search.
+              </CardContent>
+            </Card>
+          ) : (
+            rooms.map(([room, roomItems]) => (
+              <Card key={room}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center justify-between gap-2">
+                    <span className="truncate">{room}</span>
+                    <Badge variant="secondary" className="shrink-0">
+                      {roomItems.length} item{roomItems.length === 1 ? '' : 's'}
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="divide-y">
+                  {roomItems.map((item) => (
+                    <div key={item.id} className="py-3 first:pt-0 last:pb-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <p className="font-medium break-words">{item.name}</p>
+                        <span className="text-sm text-muted-foreground shrink-0">× {item.quantity}</span>
+                      </div>
+                      {item.description && (
+                        <p className="text-sm text-muted-foreground mt-0.5 break-words">{item.description}</p>
+                      )}
+                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">
+                        {item.brand_model && <span>Brand/model: {item.brand_model}</span>}
+                        {item.serial_number && <span>Serial: {item.serial_number}</span>}
+                      </div>
+                      {item.note && (
+                        <p className="text-xs text-muted-foreground mt-0.5 break-words">
+                          Landlord note: {item.note}
+                        </p>
+                      )}
+                      {(item.image_urls?.length ?? 0) > 0 && (
+                        <div className="flex gap-1.5 mt-2 overflow-x-auto">
+                          {item.image_urls!.map((url) => (
+                            <a key={url} href={url} target="_blank" rel="noreferrer" className="shrink-0">
+                              <img src={url} alt={item.name} className="h-16 w-16 rounded-lg object-cover border" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            ))
+          )}
+          {infoCard}
         </>
       )}
     </div>
