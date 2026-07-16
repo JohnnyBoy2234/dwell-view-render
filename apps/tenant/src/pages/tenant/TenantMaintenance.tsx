@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
 import { useUnreadCounts } from '@mzanzihomes/supabase/hooks/useUnreadCounts';
 import { useTenantResponses } from '@mzanzihomes/features/maintenance';
-import { Plus, Wrench } from 'lucide-react';
+import { Plus, Wrench, Camera } from 'lucide-react';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -47,6 +47,7 @@ export default function TenantMaintenance() {
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
   const [category, setCategory] = useState<Category>('other');
+  const [photos, setPhotos] = useState<FileList | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,13 +110,34 @@ export default function TenantMaintenance() {
         }
       }
 
+      // Upload any photos to the public maintenance-images bucket.
+      const imageUrls: string[] = [];
+      if (photos && photos.length > 0) {
+        for (let i = 0; i < photos.length; i++) {
+          const file = photos[i];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${user.id}/${Date.now()}_${i}.${fileExt}`;
+          const { error: uploadError } = await supabase.storage
+            .from('maintenance-images')
+            .upload(fileName, file);
+          if (uploadError) {
+            console.error('Error uploading image:', uploadError);
+          } else {
+            const { data: { publicUrl } } = supabase.storage
+              .from('maintenance-images')
+              .getPublicUrl(fileName);
+            imageUrls.push(publicUrl);
+          }
+        }
+      }
+
       await createMaintenance.mutateAsync({
         property_id: propertyId,
         title: title.trim(),
         description: description.trim(),
         priority,
         category,
-        images: [],
+        images: imageUrls,
       });
 
       // Reset form
@@ -123,6 +145,7 @@ export default function TenantMaintenance() {
       setDescription('');
       setPriority('medium');
       setCategory('other');
+      setPhotos(null);
 
       setIsCreateDialogOpen(false);
       
@@ -249,8 +272,27 @@ export default function TenantMaintenance() {
               </Select>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="photos">Photos (optional)</Label>
+              <Input
+                id="photos"
+                type="file"
+                multiple
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => setPhotos(e.target.files)}
+              />
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Camera className="h-4 w-4" />
+                <span>Add photos to help your landlord see the issue</span>
+              </div>
+              {photos && photos.length > 0 && (
+                <p className="text-xs text-muted-foreground">{photos.length} photo{photos.length === 1 ? '' : 's'} selected</p>
+              )}
+            </div>
+
             <Button
-              type="submit" 
+              type="submit"
               className="w-full bg-ocean-blue hover:bg-ocean-blue-dark"
               disabled={createMaintenance.isPending}
             >
