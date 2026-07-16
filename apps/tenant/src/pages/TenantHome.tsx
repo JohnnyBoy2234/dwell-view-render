@@ -4,21 +4,22 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import {
-  Home, Menu, Search, MapPin, SlidersHorizontal, ChevronRight,
+  Home, Menu, Search, MapPin, SlidersHorizontal,
   Wrench, ClipboardCheck, MessageCircle, Receipt, FileText, ShieldCheck,
 } from 'lucide-react';
 import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
 
-// The six feature tiles under the search card (2 rows × 3 columns).
+// The six feature tiles under the search card (2 rows × 3 columns),
+// styled like the dashboard's Quick Access tiles.
 const TILES = [
-  { label: 'My Rentals',      desc: 'View your connected properties',  icon: Home,          iconBg: 'bg-blue-100',    iconFg: 'text-blue-600',    path: '/enhancedtenantdashboard' },
-  { label: 'Maintenance',     desc: 'Track and manage requests',       icon: Wrench,        iconBg: 'bg-orange-100',  iconFg: 'text-orange-500',  path: '/tenant/maintenance' },
-  { label: 'Applications',    desc: 'Track your applications',         icon: ClipboardCheck, iconBg: 'bg-emerald-100', iconFg: 'text-emerald-600', path: '/tenant/applications' },
-  { label: 'Messages',        desc: 'Chat with your landlord',         icon: MessageCircle, iconBg: 'bg-violet-100',  iconFg: 'text-violet-600',  path: '/messages', showUnread: true },
-  { label: 'Payments',        desc: 'View rent payments and history',  icon: Receipt,       iconBg: 'bg-green-100',   iconFg: 'text-green-600',   path: '/tenant/payments' },
-  { label: 'Lease Contracts', desc: 'View and manage your leases',     icon: FileText,      iconBg: 'bg-violet-100',  iconFg: 'text-violet-600',  path: '/tenant/leases' },
+  { label: 'My Rentals',      icon: Home,           tint: 'bg-blue-50',   iconBg: 'bg-blue-100',    iconFg: 'text-blue-600',    path: '/enhancedtenantdashboard' },
+  { label: 'Maintenance',     icon: Wrench,         tint: 'bg-orange-50', iconBg: 'bg-orange-100',  iconFg: 'text-orange-500',  path: '/tenant/maintenance' },
+  { label: 'Applications',    icon: ClipboardCheck, tint: 'bg-pink-50',   iconBg: 'bg-pink-100',    iconFg: 'text-pink-600',    path: '/tenant/applications' },
+  { label: 'Messages',        icon: MessageCircle,  tint: 'bg-violet-50', iconBg: 'bg-violet-100',  iconFg: 'text-violet-600',  path: '/messages', showUnread: true },
+  { label: 'Payments',        icon: Receipt,        tint: 'bg-green-50',  iconBg: 'bg-emerald-100', iconFg: 'text-emerald-600', path: '/tenant/payments' },
+  { label: 'Lease Contracts', icon: FileText,       tint: 'bg-sky-50',    iconBg: 'bg-indigo-100',  iconFg: 'text-indigo-600',  path: '/tenant/leases' },
 ] as const;
 
 /** The tenant "Home" tab: search-first marketplace + quick access to rental admin. */
@@ -135,21 +136,17 @@ export default function TenantHome() {
               <button
                 key={t.label}
                 onClick={() => openTile(t.path)}
-                className="relative flex flex-col items-start gap-2.5 rounded-2xl bg-white p-3.5 text-left shadow-[0_12px_28px_-18px_rgba(20,50,90,0.35)] active:scale-[0.98]"
+                className={cn('relative flex flex-col items-center gap-2.5 rounded-2xl border border-black/[0.04] px-2 py-5 transition active:scale-95', t.tint)}
               >
                 {badge > 0 && (
-                  <span className="absolute right-2 top-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-extrabold text-white">
+                  <span className="absolute right-2 top-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                     {badge > 9 ? '9+' : badge}
                   </span>
                 )}
-                <span className={cn('flex h-11 w-11 items-center justify-center rounded-full', t.iconBg)}>
-                  <t.icon className={cn('h-[22px] w-[22px]', t.iconFg)} />
+                <span className={cn('flex h-12 w-12 items-center justify-center rounded-full', t.iconBg)}>
+                  <t.icon className={cn('h-6 w-6', t.iconFg)} />
                 </span>
-                <span className="text-[15px] font-bold leading-tight text-slate-900">{t.label}</span>
-                <span className="flex w-full items-end gap-1">
-                  <span className="flex-1 text-[11.5px] leading-snug text-slate-500">{t.desc}</span>
-                  <ChevronRight className="mb-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                </span>
+                <span className="text-center text-[13px] font-bold leading-tight text-slate-800">{t.label}</span>
               </button>
             );
           })}
