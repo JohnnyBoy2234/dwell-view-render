@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@mzanzihomes/ui/components/RouteGuard";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
 import Index from "@/pages/Index";
+import TenantHome from "@/pages/TenantHome";
 import { MobileBottomBar } from "@mzanzihomes/ui/components/MobileBottomBar";
 import { MobileServices } from "@mzanzihomes/ui/services/mobileServices";
 import { MobileNetworkStatus } from "@mzanzihomes/ui/components/mobile/MobileNetworkStatus";
@@ -97,6 +98,13 @@ function TenantRoleGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// The "Home" tab: signed-in tenants get the search-first home; visitors get the
+// public landing page.
+function HomeRoute() {
+  const { user, isLandlord } = useAuth();
+  return user && !isLandlord ? <TenantHome /> : <Index />;
+}
+
 function AppRoutes() {
   useEffect(() => {
     MobileServices.initialize();
@@ -107,7 +115,7 @@ function AppRoutes() {
       <PaymentRedirectHandler />
       <Routes>
         {/* Public browsing */}
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<HomeRoute />} />
         <Route path="/properties" element={<><MiniNavbar hideLandlordActions minimal /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/invite/:token" element={<ApplyInvite />} />
