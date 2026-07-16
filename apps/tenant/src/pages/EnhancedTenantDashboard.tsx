@@ -49,6 +49,18 @@ const FEATURE_ICON_COLORS: Record<string, { bg: string; icon: string; border: st
   'Support':          { bg: 'bg-amber-100',   icon: 'text-amber-600',   border: 'group-hover:border-amber-200'   },
 };
 
+// One-line subtitle per tile, mirroring the landlord dashboard's tile style.
+const FEATURE_SUBTITLE: Record<string, string> = {
+  'Viewings':        'Upcoming & past',
+  'Maintenance':     'Report an issue',
+  'Inventory':       'Property items',
+  'Inspection List': 'Photos & sign-off',
+  'Payment Records': 'Bills & receipts',
+  'Lease Contracts': 'View & sign',
+  'Applications':    'Status & invites',
+  'Support':         'Help & FAQs',
+};
+
 export default function EnhancedTenantDashboard() {
   const { user, isLandlord } = useAuth();
   const navigate = useNavigate();
@@ -142,59 +154,67 @@ export default function EnhancedTenantDashboard() {
       >
         {/* ── Property hero ──────────────────────────────────── */}
         {tenantProperty ? (
-          <Card className="overflow-hidden animate-in fade-in slide-in-from-top-4 duration-400">
-            {tenantProperty.images?.[0] && (
-              <ImageWithSkeleton
-                src={tenantProperty.images[0]}
-                alt={tenantProperty.title}
-                className="w-full h-32 object-cover"
-                aspectRatio="16/9"
+          <Card className="overflow-hidden rounded-2xl border-0 shadow-md animate-in fade-in slide-in-from-top-4 duration-400">
+            <div className="relative h-44 w-full">
+              {tenantProperty.images?.[0] ? (
+                <ImageWithSkeleton
+                  src={tenantProperty.images[0]}
+                  alt={tenantProperty.title}
+                  className="w-full h-44 object-cover"
+                  aspectRatio="16/9"
+                />
+              ) : (
+                <div
+                  className="h-44 w-full"
+                  style={{ background: 'linear-gradient(135deg, hsl(214,100%,59%), hsl(214,86%,46%))' }}
+                />
+              )}
+              <div
+                className="absolute inset-0"
+                style={{ background: 'linear-gradient(to top, rgba(6,12,24,0.85) 0%, rgba(6,12,24,0.15) 55%, transparent 100%)' }}
               />
-            )}
-            <CardContent className="p-4">
-              <div className="flex items-start justify-between gap-2">
-                <div className="min-w-0">
-                  <h2 className="font-semibold text-foreground text-base leading-tight truncate">
-                    {tenantProperty.title}
-                  </h2>
-                  <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
-                    <MapPin className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">{tenantProperty.location}</span>
-                  </div>
+              <span className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                {hasSignedLease ? 'Active lease' : 'Connected'}
+              </span>
+              <div className="absolute inset-x-0 bottom-0 p-4">
+                <h2 className="break-words text-lg font-bold leading-tight text-white drop-shadow-sm">
+                  {tenantProperty.title}
+                </h2>
+                <div className="mt-1 flex items-center gap-1.5 text-sm text-white/85">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{tenantProperty.location}</span>
                 </div>
-                <Badge variant="secondary" className="shrink-0 text-xs">
-                  {hasSignedLease ? 'Active Lease' : 'Connected'}
-                </Badge>
               </div>
-              {!hasSignedLease && (
-                <div className="flex items-center gap-1.5 mt-2.5 text-xs text-muted-foreground">
-                  <Link2 className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">
-                    You have been connected to {tenantProperty.location || tenantProperty.title}
-                  </span>
-                </div>
-              )}
-              {hasSignedLease && tenantProperty.leaseEndDate && (
-                <div className="flex items-center gap-1.5 mt-2.5 text-xs text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5 shrink-0" />
-                  <span>
-                    Lease ends{' '}
-                    {new Date(tenantProperty.leaseEndDate).toLocaleDateString('en-ZA', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                    })}
-                  </span>
-                </div>
-              )}
-            </CardContent>
+            </div>
+            {(!hasSignedLease || tenantProperty.leaseEndDate) && (
+              <CardContent className="p-3.5">
+                {!hasSignedLease ? (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Link2 className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">You have been connected to this property</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <Calendar className="h-3.5 w-3.5 shrink-0" />
+                    <span>
+                      Lease ends{' '}
+                      {new Date(tenantProperty.leaseEndDate!).toLocaleDateString('en-ZA', {
+                        day: 'numeric', month: 'long', year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                )}
+              </CardContent>
+            )}
           </Card>
         ) : (
-          <Card className="p-6 text-center">
+          <Card className="rounded-2xl p-6 text-center">
             <Building className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-sm font-medium text-foreground">No active lease</p>
             <p className="text-xs text-muted-foreground mt-1">
               Browse properties to find your next home
             </p>
-            <Button size="sm" className="mt-3" onClick={() => navigate('/properties')}>
+            <Button size="sm" className="mt-3 rounded-xl" onClick={() => navigate('/properties')}>
               Browse Properties
             </Button>
           </Card>
@@ -254,17 +274,14 @@ export default function EnhancedTenantDashboard() {
           </Card>
         )}
 
-        {/* ── Section divider ────────────────────────────────── */}
-        <div className="flex items-center gap-3 py-1">
-          <Separator className="flex-1" />
-          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-            Quick Access
-          </span>
-          <Separator className="flex-1" />
+        {/* ── Section heading ────────────────────────────────── */}
+        <div className="px-1 pt-1">
+          <h3 className="text-base font-bold text-foreground">Quick access</h3>
+          <p className="text-xs text-muted-foreground">Everything for your tenancy</p>
         </div>
 
         {/* ── Feature grid ───────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 gap-3">
           {FEATURE_BLOCKS.map((block, i) => {
             const count =
               block.countKey === 'maintenance'
@@ -280,24 +297,29 @@ export default function EnhancedTenantDashboard() {
               <button
                 key={block.title}
                 onClick={() => (!user ? navigate('/auth') : navigate(block.path))}
-                className="group focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl animate-in fade-in slide-in-from-bottom-3 duration-300"
+                className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl animate-in fade-in slide-in-from-bottom-3 duration-300"
                 style={{ animationDelay: `${i * 45}ms`, animationFillMode: 'backwards' }}
               >
-                <Card className={cn('h-full transition-all duration-200 group-hover:shadow-md group-active:scale-95', colors.border)}>
-                  <CardContent className="p-3 flex flex-col items-center gap-1.5 text-center">
-                    <div className="relative mt-1">
-                      <div className={cn('w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-200 group-hover:scale-110', colors.bg)}>
-                        <block.icon className={cn('w-5 h-5 transition-colors', colors.icon)} />
+                <Card className={cn('h-full rounded-2xl border transition-all duration-200 group-hover:shadow-md group-active:scale-[0.98]', colors.border)}>
+                  <CardContent className="p-4 flex items-center gap-3">
+                    <div className="relative shrink-0">
+                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105', colors.bg)}>
+                        <block.icon className={cn('w-6 h-6', colors.icon)} />
                       </div>
                       {count > 0 && (
-                        <span className="absolute -top-1 -right-1 h-4 min-w-[1rem] px-1 rounded-full text-[9px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
+                        <span className="absolute -top-1.5 -right-1.5 h-5 min-w-[1.25rem] px-1 rounded-full text-[10px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
                           {count > 99 ? '99+' : count}
                         </span>
                       )}
                     </div>
-                    <span className="text-[11px] font-medium text-foreground leading-tight">
-                      {block.title}
-                    </span>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-foreground leading-tight truncate">
+                        {block.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {FEATURE_SUBTITLE[block.title] ?? ''}
+                      </p>
+                    </div>
                   </CardContent>
                 </Card>
               </button>
