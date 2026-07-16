@@ -16,6 +16,9 @@ interface EnhancedDashboardLayoutProps {
   onTabChange?: (tab: string) => void;
   selectedPropertyId?: string | null;
   onBackToProperties?: () => void;
+  // Hide the dark app-bar and remove main padding so a page can own the full
+  // canvas (e.g. the tenant dashboard's blue header that curves into a sheet).
+  hideHeader?: boolean;
 }
 
 function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetErrorBoundary: () => void }) {
@@ -37,7 +40,7 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
   );
 }
 
-export function EnhancedDashboardLayout({ children, title, subtitle, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties }: EnhancedDashboardLayoutProps) {
+export function EnhancedDashboardLayout({ children, title, subtitle, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties, hideHeader }: EnhancedDashboardLayoutProps) {
   const { isLandlord } = useAuth();
   const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
@@ -96,6 +99,7 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
       style={{ minHeight: '100dvh', background: 'hsl(214, 60%, 97%)' }}
     >
       {/* Header — dark glass, matching home page navbar */}
+      {!hideHeader && (
       <header
         className="h-16 flex items-center border-b border-white/10 sticky z-40 px-3 sm:px-4 lg:px-6 backdrop-blur-md shrink-0"
         style={{
@@ -140,10 +144,11 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
           <UserMenu />
         </div>
       </header>
+      )}
 
       {/* Main Content */}
       <main
-        className={`flex-1 w-full overflow-x-hidden ${isLandlordDashboardRoute ? 'p-0' : 'p-3 sm:p-5 lg:p-7'}`}
+        className={`flex-1 w-full overflow-x-hidden ${isLandlordDashboardRoute || hideHeader ? 'p-0' : 'p-3 sm:p-5 lg:p-7'}`}
         style={{ contain: 'layout style paint' }}
       >
         {children}

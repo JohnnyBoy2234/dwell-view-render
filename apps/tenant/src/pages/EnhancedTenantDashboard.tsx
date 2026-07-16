@@ -16,9 +16,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import {
   FileText, Eye, Settings, Building, User,
   Receipt, Camera, HelpCircle, MapPin,
-  Calendar, AlertCircle, Clock,
+  Calendar, AlertCircle, Clock, CheckCircle2, Home,
   CreditCard, MessageCircle, Wrench, Bell, Link2,
 } from 'lucide-react';
+import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import { ImageWithSkeleton } from '@mzanzihomes/ui/components/ImageWithSkeleton';
 import { ensureTwoHourViewingRemindersForTenant, ensureTwoHourViewingRemindersForLandlord } from '@/utils/viewingReminders';
@@ -125,20 +126,27 @@ export default function EnhancedTenantDashboard() {
     return renderDashboardContent();
   };
 
+  const BLUE_GRAD = 'linear-gradient(165deg, hsl(214,100%,63%) 0%, hsl(214,94%,53%) 55%, hsl(214,90%,45%) 100%)';
+
   const renderDashboardContent = () => {
     if (loading) {
       return (
-        <div className="p-4 space-y-4">
-          <Skeleton className="h-40 w-full rounded-2xl" />
-          <Skeleton className="h-24 w-full rounded-2xl" />
-          <div className="grid grid-cols-2 gap-3">
-            <Skeleton className="h-20 rounded-xl" />
-            <Skeleton className="h-20 rounded-xl" />
+        <div className="min-h-full" style={{ background: 'hsl(214,60%,97%)' }}>
+          <div className="px-5 pb-16" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)', background: BLUE_GRAD }}>
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-11 w-11 rounded-2xl bg-white/20" />
+              <Skeleton className="h-5 w-32 bg-white/20" />
+            </div>
+            <Skeleton className="mt-6 h-8 w-52 bg-white/20" />
+            <Skeleton className="mt-5 h-16 w-full rounded-2xl bg-white/20" />
           </div>
-          <div className="grid grid-cols-3 gap-2.5">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <Skeleton key={i} className="h-20 rounded-xl" />
-            ))}
+          <div className="-mt-8 space-y-4 rounded-t-[28px] px-4 pt-6" style={{ background: 'hsl(214,60%,97%)' }}>
+            <Skeleton className="h-44 w-full rounded-2xl" />
+            <div className="grid grid-cols-2 gap-3">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <Skeleton key={i} className="h-20 rounded-2xl" />
+              ))}
+            </div>
           </div>
         </div>
       );
@@ -146,185 +154,179 @@ export default function EnhancedTenantDashboard() {
 
     const maintenanceCount = recentMaintenance?.length ?? 0;
     const viewingsCount = upcomingViewings?.length ?? 0;
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+    const firstName = String(
+      (user as any)?.user_metadata?.full_name ||
+      (user as any)?.user_metadata?.display_name ||
+      user?.email?.split('@')[0] || '',
+    ).trim().split(' ')[0];
 
     return (
-      <div
-        className="p-4 space-y-4"
-        style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
-      >
-        {/* ── Property hero ──────────────────────────────────── */}
-        {tenantProperty ? (
-          <Card className="overflow-hidden rounded-2xl border-0 shadow-md animate-in fade-in slide-in-from-top-4 duration-400">
-            <div className="relative h-44 w-full">
-              {tenantProperty.images?.[0] ? (
-                <ImageWithSkeleton
-                  src={tenantProperty.images[0]}
-                  alt={tenantProperty.title}
-                  className="w-full h-44 object-cover"
-                  aspectRatio="16/9"
-                />
-              ) : (
-                <div
-                  className="h-44 w-full"
-                  style={{ background: 'linear-gradient(135deg, hsl(214,100%,59%), hsl(214,86%,46%))' }}
-                />
-              )}
-              <div
-                className="absolute inset-0"
-                style={{ background: 'linear-gradient(to top, rgba(6,12,24,0.85) 0%, rgba(6,12,24,0.15) 55%, transparent 100%)' }}
-              />
-              <span className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
-                {hasSignedLease ? 'Active lease' : 'Connected'}
+      <div className="min-h-full" style={{ background: 'hsl(214,60%,97%)' }}>
+        {/* ── Blue header zone ───────────────────────────────── */}
+        <div
+          className="px-5 pb-16"
+          style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)', background: BLUE_GRAD }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/25 bg-white/15 backdrop-blur">
+              <Home className="h-5 w-5 text-white" />
+            </div>
+            <div className="min-w-0 leading-tight">
+              <p className="text-[17px] font-bold text-white">MzanziHomes</p>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/80">Tenant</span>
+            </div>
+            <div className="ml-auto">
+              <UserMenu />
+            </div>
+          </div>
+
+          <div className="mt-6 animate-in fade-in slide-in-from-top-3 duration-400">
+            <h1 className="text-[26px] font-extrabold leading-tight text-white">
+              {greeting}{firstName ? `, ${firstName}` : ''}
+            </h1>
+            <p className="mt-1 text-sm text-white/80">Here's your rental at a glance</p>
+          </div>
+
+          {rentDue ? (
+            <button
+              onClick={handleMakePayment}
+              className="mt-5 flex w-full items-center justify-between gap-3 rounded-2xl border border-white/25 bg-white/15 px-4 py-3.5 text-left backdrop-blur transition active:scale-[0.99]"
+            >
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 text-xs font-medium text-white/85">
+                  {rentDue.status === 'overdue' ? <AlertCircle className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
+                  {rentDue.status === 'overdue' ? 'Rent overdue' : 'Rent due'} ·{' '}
+                  {new Date(rentDue.dueDate).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short' })}
+                </div>
+                <p className="mt-0.5 text-[26px] font-extrabold leading-tight text-white">
+                  R {rentDue.amount.toLocaleString('en-ZA')}
+                </p>
+              </div>
+              <span className="shrink-0 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-[hsl(214,90%,45%)]">
+                Pay now
               </span>
-              <div className="absolute inset-x-0 bottom-0 p-4">
-                <h2 className="break-words text-lg font-bold leading-tight text-white drop-shadow-sm">
-                  {tenantProperty.title}
-                </h2>
-                <div className="mt-1 flex items-center gap-1.5 text-sm text-white/85">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{tenantProperty.location}</span>
+            </button>
+          ) : hasSignedLease ? (
+            <div className="mt-5 flex items-center gap-2 rounded-2xl border border-white/25 bg-white/15 px-4 py-3 backdrop-blur">
+              <CheckCircle2 className="h-5 w-5 text-white" />
+              <p className="text-sm font-medium text-white">You're all paid up</p>
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate('/properties')}
+              className="mt-5 w-full rounded-2xl bg-white px-4 py-3 text-sm font-bold text-[hsl(214,90%,45%)]"
+            >
+              Find your next home →
+            </button>
+          )}
+        </div>
+
+        {/* ── White sheet ────────────────────────────────────── */}
+        <div
+          className="relative z-10 -mt-8 space-y-4 rounded-t-[28px] px-4 pt-6"
+          style={{ background: 'hsl(214,60%,97%)', paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
+        >
+          {/* Property hero */}
+          {tenantProperty && (
+            <Card className="overflow-hidden rounded-2xl border-0 shadow-md animate-in fade-in slide-in-from-bottom-4 duration-400">
+              <div className="relative h-44 w-full">
+                {tenantProperty.images?.[0] ? (
+                  <ImageWithSkeleton
+                    src={tenantProperty.images[0]}
+                    alt={tenantProperty.title}
+                    className="w-full h-44 object-cover"
+                    aspectRatio="16/9"
+                  />
+                ) : (
+                  <div className="h-44 w-full" style={{ background: BLUE_GRAD }} />
+                )}
+                <div
+                  className="absolute inset-0"
+                  style={{ background: 'linear-gradient(to top, rgba(6,12,24,0.85) 0%, rgba(6,12,24,0.15) 55%, transparent 100%)' }}
+                />
+                <span className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-foreground shadow-sm backdrop-blur">
+                  {hasSignedLease ? 'Active lease' : 'Connected'}
+                </span>
+                <div className="absolute inset-x-0 bottom-0 p-4">
+                  <h2 className="break-words text-lg font-bold leading-tight text-white drop-shadow-sm">
+                    {tenantProperty.title}
+                  </h2>
+                  <div className="mt-1 flex items-center gap-1.5 text-sm text-white/85">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" />
+                    <span className="truncate">{tenantProperty.location}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            {(!hasSignedLease || tenantProperty.leaseEndDate) && (
-              <CardContent className="p-3.5">
-                {!hasSignedLease ? (
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <Link2 className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">You have been connected to this property</span>
-                  </div>
-                ) : (
+              {hasSignedLease && tenantProperty.leaseEndDate && (
+                <CardContent className="p-3.5">
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                     <Calendar className="h-3.5 w-3.5 shrink-0" />
                     <span>
                       Lease ends{' '}
-                      {new Date(tenantProperty.leaseEndDate!).toLocaleDateString('en-ZA', {
+                      {new Date(tenantProperty.leaseEndDate).toLocaleDateString('en-ZA', {
                         day: 'numeric', month: 'long', year: 'numeric',
                       })}
                     </span>
                   </div>
-                )}
-              </CardContent>
-            )}
-          </Card>
-        ) : (
-          <Card className="rounded-2xl p-6 text-center">
-            <Building className="h-10 w-10 text-muted-foreground/30 mx-auto mb-2" />
-            <p className="text-sm font-medium text-foreground">No active lease</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Browse properties to find your next home
-            </p>
-            <Button size="sm" className="mt-3 rounded-xl" onClick={() => navigate('/properties')}>
-              Browse Properties
-            </Button>
-          </Card>
-        )}
+                </CardContent>
+              )}
+            </Card>
+          )}
 
-        {/* ── Rent due ───────────────────────────────────────── */}
-        {rentDue && (
-          <Card
-            className={cn(
-              'border animate-in fade-in slide-in-from-left-4 duration-300',
-              rentDue.status === 'overdue' && 'border-destructive/40 bg-destructive/5',
-              rentDue.status === 'pending' && 'border-amber-500/40 bg-amber-500/5',
-            )}
-          >
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    {rentDue.status === 'overdue' ? (
-                      <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-                    ) : (
-                      <Clock className="h-4 w-4 text-amber-500 shrink-0" />
-                    )}
-                    <span className="text-sm font-medium text-foreground">
-                      {rentDue.status === 'overdue' ? 'Rent Overdue' : 'Rent Due'}
-                    </span>
-                    <Badge
-                      variant={rentDue.status === 'overdue' ? 'destructive' : 'outline'}
-                      className={cn(
-                        'text-[10px]',
-                        rentDue.status === 'pending' && 'border-amber-500 text-amber-600',
-                      )}
-                    >
-                      {rentDue.status === 'overdue' ? 'Overdue' : 'Pending'}
-                    </Badge>
-                  </div>
-                  <p className="text-2xl font-bold text-foreground">
-                    R {rentDue.amount.toLocaleString('en-ZA')}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Due{' '}
-                    {new Date(rentDue.dueDate).toLocaleDateString('en-ZA', {
-                      day: 'numeric', month: 'long', year: 'numeric',
-                    })}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant={rentDue.status === 'overdue' ? 'destructive' : 'default'}
-                  onClick={handleMakePayment}
-                  className="shrink-0"
+          {/* Quick access */}
+          <div className="px-1 pt-1">
+            <h3 className="text-base font-bold text-foreground">Quick access</h3>
+            <p className="text-xs text-muted-foreground">Everything for your tenancy</p>
+          </div>
+
+          {/* Feature grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {FEATURE_BLOCKS.map((block, i) => {
+              const count =
+                block.countKey === 'maintenance'
+                  ? maintenanceCount
+                  : block.countKey === 'viewings'
+                  ? viewingsCount
+                  : 0;
+              const colors = FEATURE_ICON_COLORS[block.title] ?? {
+                bg: 'bg-muted', icon: 'text-muted-foreground', border: 'group-hover:border-primary/30',
+              };
+
+              return (
+                <button
+                  key={block.title}
+                  onClick={() => (!user ? navigate('/auth') : navigate(block.path))}
+                  className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl animate-in fade-in slide-in-from-bottom-3 duration-300"
+                  style={{ animationDelay: `${i * 45}ms`, animationFillMode: 'backwards' }}
                 >
-                  Pay Now
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ── Section heading ────────────────────────────────── */}
-        <div className="px-1 pt-1">
-          <h3 className="text-base font-bold text-foreground">Quick access</h3>
-          <p className="text-xs text-muted-foreground">Everything for your tenancy</p>
-        </div>
-
-        {/* ── Feature grid ───────────────────────────────────── */}
-        <div className="grid grid-cols-2 gap-3">
-          {FEATURE_BLOCKS.map((block, i) => {
-            const count =
-              block.countKey === 'maintenance'
-                ? maintenanceCount
-                : block.countKey === 'viewings'
-                ? viewingsCount
-                : 0;
-            const colors = FEATURE_ICON_COLORS[block.title] ?? {
-              bg: 'bg-muted', icon: 'text-muted-foreground', border: 'group-hover:border-primary/30',
-            };
-
-            return (
-              <button
-                key={block.title}
-                onClick={() => (!user ? navigate('/auth') : navigate(block.path))}
-                className="group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl animate-in fade-in slide-in-from-bottom-3 duration-300"
-                style={{ animationDelay: `${i * 45}ms`, animationFillMode: 'backwards' }}
-              >
-                <Card className={cn('h-full rounded-2xl border transition-all duration-200 group-hover:shadow-md group-active:scale-[0.98]', colors.border)}>
-                  <CardContent className="p-4 flex items-center gap-3">
-                    <div className="relative shrink-0">
-                      <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105', colors.bg)}>
-                        <block.icon className={cn('w-6 h-6', colors.icon)} />
+                  <Card className={cn('h-full rounded-2xl border transition-all duration-200 group-hover:shadow-md group-active:scale-[0.98]', colors.border)}>
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="relative shrink-0">
+                        <div className={cn('w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-200 group-hover:scale-105', colors.bg)}>
+                          <block.icon className={cn('w-6 h-6', colors.icon)} />
+                        </div>
+                        {count > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 h-5 min-w-[1.25rem] px-1 rounded-full text-[10px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
+                            {count > 99 ? '99+' : count}
+                          </span>
+                        )}
                       </div>
-                      {count > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 h-5 min-w-[1.25rem] px-1 rounded-full text-[10px] font-bold bg-destructive text-white flex items-center justify-center leading-none animate-in zoom-in-50 duration-200">
-                          {count > 99 ? '99+' : count}
-                        </span>
-                      )}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground leading-tight truncate">
-                        {block.title}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {FEATURE_SUBTITLE[block.title] ?? ''}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              </button>
-            );
-          })}
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-foreground leading-tight truncate">
+                          {block.title}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {FEATURE_SUBTITLE[block.title] ?? ''}
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     );
@@ -346,6 +348,7 @@ export default function EnhancedTenantDashboard() {
               subtitle={isLeasesTab ? 'View and sign your lease' : 'Your rental at a glance'}
               currentTab={currentTab}
               onTabChange={handleTabChange}
+              hideHeader={!isLeasesTab}
             >
               {renderTabContent()}
             </EnhancedDashboardLayout>
