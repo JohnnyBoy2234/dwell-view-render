@@ -146,7 +146,7 @@ export default function EnhancedTenantDashboard() {
         {/* ── Navy header ────────────────────────────────────── */}
         <div className="px-5 pb-16" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 18px)', background: NAVY }}>
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full shadow-md" style={{ background: '#F59E0B' }}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full shadow-md" style={{ background: '#2563EB' }}>
               <Home className="h-6 w-6 text-white" />
             </div>
             <div className="min-w-0">

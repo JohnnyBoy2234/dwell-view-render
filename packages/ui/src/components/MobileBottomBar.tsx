@@ -65,7 +65,6 @@ export function MobileBottomBar() {
         { path: '/properties', icon: Search, label: 'Find' },
         { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
         { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
-        { path: getDeskRoute(), icon: Building, label: 'My Home' },
       ];
 
   const isItemActive = (item: NavItem, index: number) => {
