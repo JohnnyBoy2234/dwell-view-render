@@ -33,6 +33,8 @@ workflows:
         script: cd apps/tenant/ios/App && pod install
       - name: Set up code signing
         script: xcode-project use-profiles
+      - name: Set unique build number
+        script: cd apps/tenant/ios/App && agvtool new-version -all "$BUILD_NUMBER"
       - name: Build .ipa
         script: |
           xcode-project build-ipa \
@@ -80,6 +82,8 @@ workflows:
         script: cd apps/landlord/ios/App && pod install
       - name: Set up code signing
         script: xcode-project use-profiles
+      - name: Set unique build number
+        script: cd apps/landlord/ios/App && agvtool new-version -all "$BUILD_NUMBER"
       - name: Build .ipa
         script: |
           xcode-project build-ipa \
