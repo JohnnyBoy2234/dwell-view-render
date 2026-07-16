@@ -479,13 +479,23 @@ export function useConditionRecordDetail(recordId: string | null) {
     await refetch();
   }, [refetch]);
 
-  // Signed URL for the finalised report PDF (stored in the condition-photos bucket).
+  // Signed URL for the finalised report PDF. Generates it on demand if the
+  // background trigger hasn't produced it yet, so the download always works.
   const getReportUrl = useCallback(async (): Promise<string | null> => {
-    if (!record?.pdf_path) return null;
-    const { data, error: err } = await supabase.storage.from(BUCKET).createSignedUrl(record.pdf_path, SIGNED_URL_TTL);
+    let path = record?.pdf_path ?? null;
+    if (!path && recordId) {
+      const { error: fnErr } = await supabase.functions.invoke('generate-condition-report-pdf', {
+        body: { record_id: recordId },
+      });
+      if (fnErr) throw fnErr;
+      const { data: row } = await db.from('condition_records').select('pdf_path').eq('id', recordId).single();
+      path = row?.pdf_path ?? null;
+    }
+    if (!path) return null;
+    const { data, error: err } = await supabase.storage.from(BUCKET).createSignedUrl(path, SIGNED_URL_TTL);
     if (err) return null;
     return data?.signedUrl ?? null;
-  }, [record?.pdf_path]);
+  }, [record?.pdf_path, recordId]);
 
   const saveNotes = useCallback(
     async (notes: string) => {

@@ -232,7 +232,9 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
   const [notesDraft, setNotesDraft] = useState<string | null>(null);
   const [notesStatus, setNotesStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [lightbox, setLightbox] = useState<PhotoWithUrl | null>(null);
+  const [reportBusy, setReportBusy] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const myNotesSaved =
     d.myParty === 'tenant' ? d.record?.tenant_notes : d.record?.landlord_notes;
@@ -322,14 +324,31 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
           <Button
             variant="outline"
             className="w-full sm:w-auto"
+            disabled={reportBusy}
             onClick={async () => {
-              const url = await d.getReportUrl();
-              if (url) window.open(url, '_blank');
+              // Open the tab inside the click gesture so the browser doesn't
+              // block it while the PDF is (re)generated.
+              const win = window.open('', '_blank');
+              setReportBusy(true);
+              try {
+                const url = await d.getReportUrl();
+                if (url) {
+                  if (win) win.location.href = url;
+                  else window.open(url, '_blank');
+                } else {
+                  win?.close();
+                  toast({ variant: 'destructive', title: 'Report not ready', description: 'Could not prepare the PDF. Please try again.' });
+                }
+              } catch (e: any) {
+                win?.close();
+                toast({ variant: 'destructive', title: 'Could not prepare the report', description: e.message ?? String(e) });
+              } finally {
+                setReportBusy(false);
+              }
             }}
-            disabled={!d.record.pdf_path}
           >
             <Download className="mr-1.5 h-4 w-4" />
-            {d.record.pdf_path ? 'Download signed report (PDF)' : 'Report PDF generating…'}
+            {reportBusy ? 'Preparing report…' : 'Download report (PDF)'}
           </Button>
         </div>
       ) : (
