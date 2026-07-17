@@ -10,7 +10,6 @@ const appRoot = resolve(fileURLToPath(new URL('.', import.meta.url)), '../..');
 const repoRoot = resolve(appRoot, '../..');
 
 const wrappedPages = [
-  'src/pages/EnhancedTenantDashboard.tsx',
   'src/pages/tenant/TenantInventory.tsx',
   'src/pages/tenant/TenantLeaseDocuments.tsx',
   'src/pages/tenant/TenantMaintenance.tsx',

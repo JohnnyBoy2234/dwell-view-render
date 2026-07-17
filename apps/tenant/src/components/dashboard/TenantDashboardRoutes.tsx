@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import TileDetailLayout from '@/components/TileDetailLayout';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
@@ -11,7 +11,6 @@ import TenantMaintenanceResponses from '@/pages/tenant/TenantMaintenanceResponse
 import TenantPayments from '@/pages/tenant/TenantPayments';
 import TenantSupport from '@/pages/tenant/TenantSupport';
 import { Messages } from '@mzanzihomes/features/pages';
-import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
@@ -22,8 +21,8 @@ import {
 export default function TenantDashboardRoutes() {
   return (
     <Routes>
-      {/* Default dashboard route */}
-      <Route index element={<EnhancedTenantDashboard />} />
+      {/* The standalone dashboard was retired — Home is the hub. */}
+      <Route index element={<Navigate to="/" replace />} />
 
       <Route path="contracts" element={
         <TileDetailLayout icon={FileText} title="Contract Documents" subtitle="Your lease agreement and related documents">

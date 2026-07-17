@@ -4,7 +4,7 @@ import { Toaster } from "@mzanzihomes/ui/components/toaster";
 import { Toaster as Sonner } from "@mzanzihomes/ui/components/sonner";
 import { TooltipProvider } from "@mzanzihomes/ui/components/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@mzanzihomes/ui/components/RouteGuard";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
@@ -32,7 +32,6 @@ import Auth from "@/pages/Auth";
 import JoinProperty from "@/pages/JoinProperty";
 import ApplyInvite from "@/pages/ApplyInvite";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
-import EnhancedTenantDashboard from "@/pages/EnhancedTenantDashboard";
 import TenantMessages from "@/pages/TenantMessages";
 import DocumentViewer from "@/pages/DocumentViewer";
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
@@ -130,7 +129,9 @@ function AppRoutes() {
         <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Tenant dashboard */}
-        <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
+        {/* The standalone tenant dashboard was retired — the Home tab is the
+            single hub. Redirect any lingering links to it. */}
+        <Route path="/enhancedtenantdashboard" element={<Navigate to="/" replace />} />
         <Route path="/enhancedtenantdashboard/leases" element={
           <TileDetailLayout icon={FileText} title="Lease Contracts" subtitle="View and sign your lease">
             <LeaseDashboard />

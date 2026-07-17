@@ -22,7 +22,7 @@ export default function TileDetailLayout({ title, subtitle, icon: Icon, children
   const navigate = useNavigate();
   const goBack = () => {
     if (window.history.length > 1) navigate(-1);
-    else navigate('/enhancedtenantdashboard');
+    else navigate('/');
   };
 
   return (
