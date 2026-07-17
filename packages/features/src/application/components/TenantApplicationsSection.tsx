@@ -134,7 +134,7 @@ function InvitationEnvelope() {
             <stop offset="1" stopColor="#2563eb" />
           </linearGradient>
           <clipPath id="env-body">
-            <rect x="56" y="104" width="128" height="62" rx="16" />
+            <rect x="48" y="104" width="144" height="62" rx="16" />
           </clipPath>
           <filter id="env-soft" x="-40%" y="-40%" width="180%" height="180%">
             <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#3b5bab" floodOpacity="0.16" />
@@ -146,10 +146,10 @@ function InvitationEnvelope() {
         <ellipse cx="120" cy="98" rx="104" ry="86" fill="url(#env-glow)" />
 
         {/* Gentle floating shadow (soft, not harsh) */}
-        <ellipse cx="120" cy="178" rx="60" ry="8" fill="#5c7fc0" opacity="0.16" filter="url(#env-blur)" />
+        <ellipse cx="120" cy="178" rx="68" ry="8" fill="#5c7fc0" opacity="0.16" filter="url(#env-blur)" />
 
         {/* Back flap hint behind the letter */}
-        <path d="M64 106 Q120 74 176 106 L176 120 L64 120 Z" fill="#cfe0fb" opacity="0.7" />
+        <path d="M56 106 Q120 74 184 106 L184 120 L56 120 Z" fill="#cfe0fb" opacity="0.7" />
 
         {/* Letter emerging from the envelope */}
         <g filter="url(#env-soft)">
@@ -164,11 +164,11 @@ function InvitationEnvelope() {
 
         {/* Envelope front — side flaps + centre pocket (clipped for rounded base) */}
         <g clipPath="url(#env-body)">
-          <path d="M56 104 L120 128 L56 166 Z" fill="url(#env-left)" />
-          <path d="M184 104 L120 128 L184 166 Z" fill="url(#env-right)" />
-          <path d="M56 166 L120 128 L184 166 Z" fill="url(#env-pocket)" />
+          <path d="M48 104 L120 128 L48 166 Z" fill="url(#env-left)" />
+          <path d="M192 104 L120 128 L192 166 Z" fill="url(#env-right)" />
+          <path d="M48 166 L120 128 L192 166 Z" fill="url(#env-pocket)" />
           {/* subtle inner shadow where the letter meets the opening */}
-          <path d="M56 104 L120 128 L184 104 Z" fill="#2b3f6b" opacity="0.10" />
+          <path d="M48 104 L120 128 L192 104 Z" fill="#2b3f6b" opacity="0.10" />
         </g>
 
         {/* Notification badge */}
