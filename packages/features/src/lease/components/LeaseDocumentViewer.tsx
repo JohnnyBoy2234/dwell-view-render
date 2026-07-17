@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzan
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { Download, Eye, FileText, Shield, Clock, User } from 'lucide-react';
+import { Download, Eye, FileText, Shield, Clock, User, Send, PenLine, FilePlus, RefreshCw } from 'lucide-react';
 import { useLeaseContracts } from '../hooks/useLeaseContracts';
 import { useESignature } from '../hooks/useESignature';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
@@ -14,6 +14,50 @@ import type { LeaseContract } from '@mzanzihomes/common/types/lease';
 
 interface LeaseDocumentViewerProps {
   contract: LeaseContract;
+}
+
+const ACTION_META: Record<string, { icon: typeof FileText; label: string }> = {
+  contract_created: { icon: FilePlus, label: 'Contract created' },
+  contract_updated: { icon: RefreshCw, label: 'Contract updated' },
+  sent_to_tenant: { icon: Send, label: 'Sent to tenant' },
+  signature_session_created: { icon: PenLine, label: 'Signing session started' },
+  pdf_generated: { icon: Download, label: 'PDF generated' },
+};
+
+interface TimelineItem {
+  key: string;
+  timestamp: string;
+  icon: typeof FileText;
+  title: string;
+  subtitle?: string;
+}
+
+// contract_signed lifecycle entries are dropped here — the signature audit
+// entries below are the authoritative, both-party record of who signed when.
+function buildAuditTimeline(lifecycle: any[], signatures: any[]): TimelineItem[] {
+  const lifecycleItems: TimelineItem[] = (lifecycle ?? [])
+    .filter((entry) => entry.action !== 'contract_signed')
+    .map((entry, index) => {
+      const meta = ACTION_META[entry.action] ?? { icon: Clock, label: (entry.action ?? 'Activity').replace(/_/g, ' ') };
+      return {
+        key: `lifecycle-${index}`,
+        timestamp: entry.timestamp,
+        icon: meta.icon,
+        title: meta.label,
+      };
+    });
+
+  const signatureItems: TimelineItem[] = (signatures ?? []).map((entry, index) => ({
+    key: `signature-${index}`,
+    timestamp: entry.timestamp,
+    icon: Shield,
+    title: `${entry.signer_role === 'landlord' ? 'Landlord' : 'Tenant'} signed`,
+    subtitle: entry.consent_method ? `Consent: ${entry.consent_method.replace(/_/g, ' ')}` : undefined,
+  }));
+
+  return [...lifecycleItems, ...signatureItems].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
 }
 
 export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
@@ -205,49 +249,36 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
                   </DialogDescription>
                 </DialogHeader>
                 
-                <div className="space-y-4">
-                  {contract.audit_trail.map((entry: any, index: number) => (
-                    <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-                      <div className="h-2 w-2 rounded-full bg-primary mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">{entry.action.replace('_', ' ').toUpperCase()}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatDate(entry.timestamp)}
-                          </p>
-                        </div>
-                        {entry.details && Object.keys(entry.details).length > 0 && (
-                          <div className="mt-1 text-sm text-muted-foreground">
-                            {Object.entries(entry.details).map(([key, value]: [string, any]) => (
-                              <p key={key}>
-                                <span className="font-medium">{key}:</span> {JSON.stringify(value)}
-                              </p>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
+                {(() => {
+                  const timeline = buildAuditTimeline(contract.audit_trail, auditTrail);
 
-                  {auditTrail.map((entry: any, index: number) => (
-                    <div key={`signature-${index}`} className="flex items-start gap-3 p-3 border rounded-lg bg-blue-50">
-                      <div className="h-2 w-2 rounded-full bg-blue-500 mt-2" />
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">SIGNATURE - {entry.signer_role.toUpperCase()}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {formatDate(entry.timestamp)}
-                          </p>
-                        </div>
-                        <div className="mt-1 text-sm text-muted-foreground">
-                          <p><span className="font-medium">IP Address:</span> {entry.ip_address}</p>
-                          <p><span className="font-medium">Consent Method:</span> {entry.consent_method}</p>
-                          <p><span className="font-medium">Signature Hash:</span> {entry.signature_hash.substring(0, 16)}...</p>
-                        </div>
-                      </div>
+                  if (timeline.length === 0) {
+                    return (
+                      <p className="py-8 text-center text-sm text-muted-foreground">No activity yet</p>
+                    );
+                  }
+
+                  return (
+                    <div className="relative ml-3 space-y-6 border-l-2 border-border py-1 pl-6">
+                      {timeline.map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <div key={item.key} className="relative">
+                            <span className="absolute -left-[29px] top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-primary ring-4 ring-background" />
+                            <div className="flex items-center gap-2">
+                              <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+                              <p className="text-sm font-medium">{item.title}</p>
+                            </div>
+                            <p className="mt-0.5 text-xs text-muted-foreground">
+                              {formatDate(item.timestamp)}
+                              {item.subtitle ? ` · ${item.subtitle}` : ''}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  );
+                })()}
               </DialogContent>
             </Dialog>
           )}

@@ -144,29 +144,6 @@ export function useLeaseContracts(propertyId?: string) {
     }
   };
 
-  const sendContractToTenant = async (contractId: string, tenantEmail: string): Promise<boolean> => {
-    if (!user) return false;
-
-    try {
-      // Invoke edge function to send contract
-      const { data, error } = await supabase.functions.invoke('send-contract-to-tenant', {
-        body: { contractId, tenantEmail }
-      });
-
-      if (error) throw error;
-
-      // Update contract status
-      await updateContract(contractId, { status: 'pending_tenant' });
-
-      toast.success('Contract sent to tenant successfully');
-      return true;
-    } catch (err) {
-      console.error('Error sending contract:', err);
-      toast.error('Failed to send contract to tenant');
-      return false;
-    }
-  };
-
   const generatePDF = async (contractId: string): Promise<string | null> => {
     if (!user) return null;
 
@@ -221,7 +198,6 @@ export function useLeaseContracts(propertyId?: string) {
     createContract,
     updateContract,
     deleteContract,
-    sendContractToTenant,
     generatePDF,
     searchContracts,
     refetch: fetchContracts

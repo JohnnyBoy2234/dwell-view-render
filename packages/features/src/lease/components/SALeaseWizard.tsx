@@ -47,7 +47,11 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [savedContractId, setSavedContractId] = useState<string | null>(contractId || null);
-  
+  // `tenantId` (prop) only arrives via the `?tenantId=` query string, which
+  // isn't present when resuming a draft from the dashboard or from
+  // CreateLeaseModal's hand-off — so also capture it from the loaded row.
+  const [resolvedTenantId, setResolvedTenantId] = useState<string | null>(tenantId || null);
+
   // Lease preview modal state
   const [showLeasePreview, setShowLeasePreview] = useState(false);
   const [landlordSignature, setLandlordSignature] = useState<SignatureInfo | undefined>();
@@ -287,9 +291,10 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
         .eq('id', id)
         .single();
       if (error) throw error;
+      if (contract?.tenant_id) setResolvedTenantId(contract.tenant_id);
       if (contract?.contract_data) {
         setData({ ...DEFAULT_WIZARD_DATA, ...contract.contract_data });
-        
+
         // Load landlord signature if exists
         if (contract.landlord_signed_at && contract.landlord_signature_data) {
           const sigData = contract.landlord_signature_data as any;
@@ -322,7 +327,7 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
         const { data: newContract, error } = await supabase.from('lease_contracts').insert({
           landlord_id: user.id,
           property_id: propertyId,
-          tenant_id: tenantId,
+          tenant_id: resolvedTenantId,
           title: data.propertyAddress ? `Lease for ${data.propertyAddress.split('\n')[0]}` : 'New Lease Agreement',
           contract_data: data as any,
           status: 'draft'
@@ -364,8 +369,8 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
   // first, then the landlord countersigns from the Leases tab.
 
   const handleSendToTenant = async () => {
-    if (!savedContractId || (!tenantId && !data.tenantEmail)) {
-      toast.error('Select a tenant or enter their email');
+    if (!savedContractId || !resolvedTenantId) {
+      toast.error('No tenant linked to this lease yet');
       return;
     }
     setIsSending(true);
@@ -373,7 +378,7 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
       // Save banking details + set up rent payouts (subaccount) once-off.
       await ensureBankingSetup();
       const { error } = await supabase.functions.invoke('send-contract-to-tenant', {
-        body: { contractId: savedContractId, tenantEmail: data.tenantEmail, tenantId }
+        body: { contractId: savedContractId, tenantId: resolvedTenantId }
       });
       if (error) throw error;
       
@@ -479,7 +484,7 @@ export function SALeaseWizard({ contractId, propertyId, tenantId, onContractSave
         title={successType === 'signed' ? 'Lease Signed!' : 'Lease Sent!'}
         subtitle={successType === 'signed' 
           ? 'You have successfully signed the lease agreement.'
-          : `The lease has been sent to ${data.tenantEmail}`
+          : `The lease has been sent to ${data.tenantEmail || 'your tenant'}`
         }
         nextSteps={successType === 'signed' ? [
           { title: 'Send to tenant', description: 'The tenant will receive the lease to review and sign' },

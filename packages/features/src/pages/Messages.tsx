@@ -603,6 +603,12 @@ export default function Messages() {
             <div className="flex-1 min-h-0 overflow-hidden">
               <WhatsAppStyleThread
                 conversationId={activeConversation}
+                messages={messages}
+                loading={loading}
+                typingUsers={typingUsers}
+                sendMessage={sendMessage}
+                sendTypingIndicator={sendTypingIndicator}
+                markMessagesAsRead={markConversationMessagesAsRead}
                 onMessageSent={() => fetchConversations?.()}
                 onScrollToProposal={setScrollToProposalFn}
                 onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}
@@ -763,6 +769,12 @@ export default function Messages() {
               <div className="flex-1 min-h-0">
                 <WhatsAppStyleThread
                   conversationId={activeConversation}
+                  messages={messages}
+                  loading={loading}
+                  typingUsers={typingUsers}
+                  sendMessage={sendMessage}
+                  sendTypingIndicator={sendTypingIndicator}
+                  markMessagesAsRead={markConversationMessagesAsRead}
                   onMessageSent={() => fetchConversations?.()}
                   onScrollToProposal={setScrollToProposalFn}
                   onCreateViewing={isLandlordInConversation ? () => setShowViewingModal(true) : undefined}

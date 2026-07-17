@@ -173,27 +173,15 @@ export function Step02Parties({ data, onUpdate }: Step02Props) {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="tenantEmail">Email Address <span className="text-muted-foreground font-normal">(optional)</span></Label>
-              <Input
-                id="tenantEmail"
-                type="email"
-                value={data.tenantEmail}
-                onChange={(e) => onUpdate({ tenantEmail: e.target.value })}
-                placeholder="We'll use their account email automatically"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tenantPhone">Phone Number</Label>
-              <Input
-                id="tenantPhone"
-                type="tel"
-                value={data.tenantPhone || ''}
-                onChange={(e) => onUpdate({ tenantPhone: e.target.value })}
-                placeholder="083 456 7890"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenantPhone">Phone Number</Label>
+            <Input
+              id="tenantPhone"
+              type="tel"
+              value={data.tenantPhone || ''}
+              onChange={(e) => onUpdate({ tenantPhone: e.target.value })}
+              placeholder="083 456 7890"
+            />
           </div>
         </CardContent>
       </Card>
@@ -230,11 +218,6 @@ export function validateStep02(data: LeaseWizardData): StepValidationResult {
   }
   if (!data.tenantAddress?.trim()) {
     errors.push('Tenant address is required');
-  }
-  if (!data.tenantEmail?.trim()) {
-    errors.push('Tenant email is required');
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.tenantEmail)) {
-    errors.push('Tenant email is invalid');
   }
 
   return {

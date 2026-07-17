@@ -81,16 +81,16 @@ export function ReferencesDocumentsStep({ data, update, errors, userId, onUpload
           {r.rented_before === 'yes' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field id="landlord_name" label="Previous landlord or agent name" required error={errors.landlord_name}>
-                {textInput('landlord_name', r.landlord_name, (v) => update('references', { landlord_name: v }))}
+                {textInput('landlord_name', r.landlord_name, (v) => update('references', { landlord_name: v }), { placeholder: 'e.g. Jane Smith' })}
               </Field>
               <Field id="landlord_phone" label="Their mobile number" error={errors.landlord_phone}>
-                {textInput('landlord_phone', r.landlord_phone, (v) => update('references', { landlord_phone: v }), { type: 'tel', inputMode: 'tel' })}
+                {textInput('landlord_phone', r.landlord_phone, (v) => update('references', { landlord_phone: v }), { type: 'tel', inputMode: 'tel', placeholder: 'e.g. 082 123 4567' })}
               </Field>
               <Field id="landlord_email" label="Their email address (optional)">
-                {textInput('landlord_email', r.landlord_email, (v) => update('references', { landlord_email: v }), { type: 'email', inputMode: 'email' })}
+                {textInput('landlord_email', r.landlord_email, (v) => update('references', { landlord_email: v }), { type: 'email', inputMode: 'email', placeholder: 'e.g. name@example.com' })}
               </Field>
               <Field id="previous_address" label="The rental address (optional)">
-                {textInput('previous_address', r.previous_address, (v) => update('references', { previous_address: v }))}
+                {textInput('previous_address', r.previous_address, (v) => update('references', { previous_address: v }), { placeholder: 'e.g. 45 Oak Street, Rosebank' })}
               </Field>
               <div className="sm:col-span-2 flex items-start space-x-2">
                 <Checkbox
@@ -122,7 +122,7 @@ export function ReferencesDocumentsStep({ data, update, errors, userId, onUpload
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field id="income_ref_name" label="Name">
-              {textInput('income_ref_name', r.income_ref_name, (v) => update('references', { income_ref_name: v }))}
+              {textInput('income_ref_name', r.income_ref_name, (v) => update('references', { income_ref_name: v }), { placeholder: 'e.g. Jane Smith' })}
             </Field>
             <Field id="income_ref_role" label="Their role">
               {textInput('income_ref_role', r.income_ref_role, (v) => update('references', { income_ref_role: v }), { placeholder: 'e.g. employer, accountant' })}

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MessageComposer } from '@mzanzihomes/ui/components/messaging/MessageComposer';
-import { useWhatsAppMessaging } from '../hooks/useWhatsAppMessaging';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -35,6 +34,18 @@ interface Message {
 
 interface WhatsAppStyleThreadProps {
   conversationId: string;
+  // Messaging state now owned by the parent (single `useWhatsAppMessaging`
+  // instance) — this component used to call the hook itself, which meant
+  // sending a message showed up instantly (optimistic update, same instance)
+  // but anything the parent triggered on its own copy of the hook (e.g. a
+  // viewing proposal created via an edge function) never reached the thread
+  // that's actually on screen until a full page reload remounted everything.
+  messages: Message[];
+  loading: boolean;
+  typingUsers: Map<string, string>;
+  sendMessage: (conversationId: string, content: string, files?: File[]) => Promise<void> | void;
+  sendTypingIndicator: (conversationId: string, typing: boolean) => void;
+  markMessagesAsRead: (conversationId: string) => Promise<void> | void;
   onMessageSent?: () => void;
   onScrollToProposal?: (fn: (proposalId: string) => void) => void;
   onCreateViewing?: () => void;
@@ -80,6 +91,12 @@ function MessageStatusIndicator({
 
 export function WhatsAppStyleThread({
   conversationId,
+  messages,
+  loading,
+  typingUsers,
+  sendMessage,
+  sendTypingIndicator,
+  markMessagesAsRead,
   onMessageSent,
   onScrollToProposal,
   onCreateViewing,
@@ -106,17 +123,6 @@ export function WhatsAppStyleThread({
   // Track newly sent own message IDs for spring pop
   const newlyAddedIdsRef = useRef<Set<string>>(new Set());
 
-  const {
-    messages,
-    loading,
-    connectionStatus,
-    typingUsers,
-    sendMessage,
-    sendTypingIndicator,
-    setActiveConversation,
-    markMessagesAsRead,
-  } = useWhatsAppMessaging();
-
   // Reset stagger tracking on conversation switch + immediately show skeletons
   useEffect(() => {
     if (conversationId !== prevConvIdRef.current) {
@@ -141,17 +147,15 @@ export function WhatsAppStyleThread({
     }
   }, [loading, messages]);
 
-  // Load messages when conversation changes
+  // Mark as read shortly after opening a conversation (the parent owns
+  // fetching/subscribing now — this component only needs the read-receipt side effect)
   useEffect(() => {
-    if (conversationId) {
-      setActiveConversation(conversationId);
-      setTimeout(() => {
-        if (markMessagesAsRead) {
-          markMessagesAsRead(conversationId);
-        }
-      }, 1000);
-    }
-  }, [conversationId, setActiveConversation, markMessagesAsRead]);
+    if (!conversationId) return;
+    const tid = setTimeout(() => {
+      markMessagesAsRead?.(conversationId);
+    }, 1000);
+    return () => clearTimeout(tid);
+  }, [conversationId, markMessagesAsRead]);
 
   // Auto-scroll to bottom
   const scrollToBottom = (force = false) => {

@@ -2781,6 +2781,14 @@ export type Database = {
         Args: { property_uuid: string; tenant_uuid: string }
         Returns: boolean
       }
+      get_lease_audit_trail: {
+        Args: { p_contract_id: string }
+        Returns: {
+          signer_role: string
+          timestamp: string
+          consent_method: string
+        }[]
+      }
       can_create_application: {
         Args: {
           landlord_uuid: string

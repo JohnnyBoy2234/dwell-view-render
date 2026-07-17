@@ -60,12 +60,12 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
           <p className="text-sm text-muted-foreground">
             How many people (including you) will be living here?
           </p>
-          <div className="grid grid-cols-2 gap-4 max-w-xs">
+          <div className="grid grid-cols-2 gap-4 max-w-sm">
             <Field id="adults" label="Adults" required error={errors.adults}>
-              {textInput('adults', h.adults, (v) => update('household', { adults: v }), { inputMode: 'numeric' })}
+              {textInput('adults', h.adults, (v) => update('household', { adults: v }), { inputMode: 'numeric', placeholder: 'e.g. 2' })}
             </Field>
             <Field id="children" label="Children / dependants" required error={errors.children}>
-              {textInput('children', h.children, (v) => update('household', { children: v }), { inputMode: 'numeric' })}
+              {textInput('children', h.children, (v) => update('household', { children: v }), { inputMode: 'numeric', placeholder: 'e.g. 1' })}
             </Field>
           </div>
         </CardContent>
@@ -94,10 +94,10 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
           {isEmployed && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field id="employer_name" label="Employer name" required error={errors.employer_name}>
-                {textInput('employer_name', e.employer_name, setE('employer_name'))}
+                {textInput('employer_name', e.employer_name, setE('employer_name'), { placeholder: 'e.g. Pick n Pay' })}
               </Field>
               <Field id="job_title" label="Job title" required error={errors.job_title}>
-                {textInput('job_title', e.job_title, setE('job_title'))}
+                {textInput('job_title', e.job_title, setE('job_title'), { placeholder: 'e.g. Store Manager' })}
               </Field>
               <Field id="start_date" label="Employment start date">
                 <Input id="start_date" type="date" value={e.start_date} onChange={(ev) => setE('start_date')(ev.target.value)} />
@@ -106,10 +106,10 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
                 {textInput('employer_contact', e.employer_contact, setE('employer_contact'), { placeholder: 'Phone or email' })}
               </Field>
               <Field id="gross_monthly_income" label="Gross monthly income (R)" error={errors.gross_monthly_income}>
-                {textInput('gross_monthly_income', e.gross_monthly_income, (v) => setE('gross_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal' })}
+                {textInput('gross_monthly_income', e.gross_monthly_income, (v) => setE('gross_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal', placeholder: 'e.g. 18,000' })}
               </Field>
               <Field id="net_monthly_income" label="Net monthly income (R)" required error={errors.net_monthly_income}>
-                {textInput('net_monthly_income', e.net_monthly_income, (v) => setE('net_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal' })}
+                {textInput('net_monthly_income', e.net_monthly_income, (v) => setE('net_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal', placeholder: 'e.g. 15,000' })}
               </Field>
               <div className="sm:col-span-2">
                 <YesNoQuestion
@@ -131,11 +131,11 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
               </Field>
               {isSelfEmployed && (
                 <Field id="business_name" label="Business name (if any)">
-                  {textInput('business_name', e.business_name, setE('business_name'))}
+                  {textInput('business_name', e.business_name, setE('business_name'), { placeholder: 'e.g. Nkosi Consulting' })}
                 </Field>
               )}
               <Field id="net_monthly_income" label="Average monthly income (R)" required error={errors.net_monthly_income}>
-                {textInput('net_monthly_income', e.net_monthly_income, (v) => setE('net_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal' })}
+                {textInput('net_monthly_income', e.net_monthly_income, (v) => setE('net_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal', placeholder: 'e.g. 15,000' })}
               </Field>
               <Field id="income_frequency" label="How often do you receive income?" required error={errors.income_frequency}>
                 <Select value={e.income_frequency} onValueChange={setE('income_frequency')}>
@@ -179,16 +179,16 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
           {isStudent && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Field id="institution" label="Institution name" required error={errors.institution}>
-                {textInput('institution', e.institution, setE('institution'))}
+                {textInput('institution', e.institution, setE('institution'), { placeholder: 'e.g. University of Cape Town' })}
               </Field>
               <Field id="course" label="Course or qualification">
-                {textInput('course', e.course, setE('course'))}
+                {textInput('course', e.course, setE('course'), { placeholder: 'e.g. BCom Accounting' })}
               </Field>
               <Field id="payment_source" label="Who will pay the rent?" required error={errors.payment_source}>
                 {textInput('payment_source', e.payment_source, setE('payment_source'), { placeholder: 'e.g. bursary, parents' })}
               </Field>
               <Field id="sponsor_details" label="Sponsor or responsible payer (optional)">
-                {textInput('sponsor_details', e.sponsor_details, setE('sponsor_details'))}
+                {textInput('sponsor_details', e.sponsor_details, setE('sponsor_details'), { placeholder: "e.g. Parent's name and contact" })}
               </Field>
             </div>
           )}
@@ -199,7 +199,7 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
                 {textInput('payment_source', e.payment_source, setE('payment_source'), { placeholder: 'e.g. pension, savings, family support' })}
               </Field>
               <Field id="net_monthly_income" label="Monthly amount available (R)" error={errors.net_monthly_income}>
-                {textInput('net_monthly_income', e.net_monthly_income, (v) => setE('net_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal' })}
+                {textInput('net_monthly_income', e.net_monthly_income, (v) => setE('net_monthly_income')(v.replace(/,/g, '')), { inputMode: 'decimal', placeholder: 'e.g. 8,000' })}
               </Field>
             </div>
           )}
@@ -214,10 +214,10 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
             {s.has_guarantor === 'yes' && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
                 <Field id="guarantor_name" label="Guarantor's full name" required error={errors.guarantor_name}>
-                  {textInput('guarantor_name', s.guarantor_name, (v) => update('support', { guarantor_name: v }))}
+                  {textInput('guarantor_name', s.guarantor_name, (v) => update('support', { guarantor_name: v }), { placeholder: 'e.g. Jane Nkosi' })}
                 </Field>
                 <Field id="guarantor_relationship" label="Relationship to you">
-                  {textInput('guarantor_relationship', s.guarantor_relationship, (v) => update('support', { guarantor_relationship: v }))}
+                  {textInput('guarantor_relationship', s.guarantor_relationship, (v) => update('support', { guarantor_relationship: v }), { placeholder: 'e.g. Parent, sibling, friend' })}
                 </Field>
                 <Field id="guarantor_contact" label="Guarantor's contact details" required error={errors.guarantor_contact}>
                   {textInput('guarantor_contact', s.guarantor_contact, (v) => update('support', { guarantor_contact: v }), { placeholder: 'Phone or email' })}
@@ -266,7 +266,7 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
                       {textInput(`pet_${idx}_type`, pet.type, (v) => setPet(idx, { type: v }), { placeholder: 'e.g. Dog' })}
                     </Field>
                     <Field id={`pet_${idx}_breed`} label="Breed">
-                      {textInput(`pet_${idx}_breed`, pet.breed, (v) => setPet(idx, { breed: v }))}
+                      {textInput(`pet_${idx}_breed`, pet.breed, (v) => setPet(idx, { breed: v }), { placeholder: 'e.g. Labrador' })}
                     </Field>
                     <Field id={`pet_${idx}_size`} label="Size">
                       {textInput(`pet_${idx}_size`, pet.size, (v) => setPet(idx, { size: v }), { placeholder: 'Small / Medium / Large' })}

@@ -70,6 +70,7 @@ export default function DetailsStep({ control, errors, setValue, watch, trigger 
                 {...field}
                 type="number"
                 min="0"
+                placeholder="2"
                 className="text-base"
                 onChange={(e) => {
                   field.onChange(e.target.value === '' ? '' : Number(e.target.value));
@@ -112,6 +113,7 @@ export default function DetailsStep({ control, errors, setValue, watch, trigger 
                 {...field}
                 type="number"
                 min="1"
+                placeholder="1"
                 className="text-base"
                 onChange={(e) => {
                   field.onChange(e.target.value === '' ? '' : Number(e.target.value));
@@ -138,6 +140,7 @@ export default function DetailsStep({ control, errors, setValue, watch, trigger 
                 {...field}
                 type="number"
                 min="0"
+                placeholder="1"
                 className="text-base"
                 onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
               />

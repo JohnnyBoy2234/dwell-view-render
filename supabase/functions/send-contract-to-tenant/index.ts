@@ -38,34 +38,14 @@ serve(async (req) => {
       .eq('user_id', contract.landlord_id)
       .single();
 
-    // Resolve the tenant. Prefer the real linked account: the caller-provided
-    // tenantId, then the tenant_id already on the contract (set when the lease
-    // was built). Only fall back to an email lookup / new account when we have
-    // no linked tenant — otherwise a typed email that doesn't match the tenant's
-    // login (e.g. an Apple relay address) would repoint the lease at a phantom
-    // account the real tenant can never see.
-    let tenantUserId: string | null = tenantId || contract.tenant_id || null;
-
-    if (!tenantUserId && tenantEmail) {
-      const { data: listData, error: listUsersError } = await supabase.auth.admin.listUsers();
-      const users = listData?.users;
-      if (!listUsersError && users) {
-        const existingUser = users.find((u) => u.email === tenantEmail);
-        if (existingUser) tenantUserId = existingUser.id;
-      }
-      if (!tenantUserId) {
-        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-          email: tenantEmail,
-          email_confirm: true,
-          user_metadata: { invited_for_lease: contractId, role: 'tenant' },
-        });
-        if (createError) throw createError;
-        tenantUserId = newUser.user?.id ?? null;
-      }
-    }
+    // Resolve the tenant. Leases are only ever created against an existing
+    // tenant account (an active tenancy or an accepted application), so the
+    // real linked account — the caller-provided tenantId, or the tenant_id
+    // already on the contract — is always the source of truth.
+    const tenantUserId: string | null = tenantId || contract.tenant_id || null;
 
     if (!tenantUserId) {
-      throw new Error("No tenant to send the lease to. Please select a tenant or provide their email.");
+      throw new Error("No tenant linked to this contract.");
     }
 
     // Always email the tenant's real address (the typed email may be wrong or a relay).

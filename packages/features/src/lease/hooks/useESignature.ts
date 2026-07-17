@@ -129,11 +129,9 @@ export function useESignature() {
 
   const getSignatureAuditTrail = async (contractId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('signature_audit')
-        .select('*')
-        .eq('lease_contract_id', contractId)
-        .order('timestamp', { ascending: true });
+      const { data, error } = await supabase.rpc('get_lease_audit_trail', {
+        p_contract_id: contractId,
+      });
 
       if (error) throw error;
       return data;

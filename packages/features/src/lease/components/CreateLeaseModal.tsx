@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@mzanzihomes/ui/components/dialog';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
-import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
@@ -18,7 +17,6 @@ interface CreateLeaseModalProps {
 interface TenantOption {
   id: string;
   name: string;
-  email: string;
 }
 
 interface PropertyOption {
@@ -36,8 +34,6 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
   const [properties, setProperties] = useState<PropertyOption[]>([]);
   const [selectedTenant, setSelectedTenant] = useState<string>('');
   const [selectedProperty, setSelectedProperty] = useState<string>('');
-  const [tenantEmail, setTenantEmail] = useState<string>('');
-  const [useExistingTenant, setUseExistingTenant] = useState(true);
 
   useEffect(() => {
     if (open && user) {
@@ -87,7 +83,6 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
           {
             id: t.tenant_id,
             name: t.tenant_profiles?.display_name || 'Unknown Tenant',
-            email: '' // We'd need to get this from auth.users but that's not accessible
           }
         ])).values()
       );
@@ -120,13 +115,8 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
       return;
     }
 
-    if (useExistingTenant && !selectedTenant) {
+    if (!selectedTenant) {
       toast.error('Please select a tenant');
-      return;
-    }
-
-    if (!tenantEmail) {
-      toast.error('Please enter tenant email');
       return;
     }
 
@@ -138,8 +128,7 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
 
       const contractData = {
         propertyAddress: property ? `${property.title}, ${property.location}` : '',
-        tenantEmail,
-        tenantName: useExistingTenant ? selectedTenantData?.name : '',
+        tenantName: selectedTenantData?.name || '',
         landlordName: user?.user_metadata?.full_name || user?.user_metadata?.name || 'Landlord',
         landlordEmail: user?.email || ''
       };
@@ -147,13 +136,10 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
       const contractId = await createContract(contractData, selectedProperty);
 
       if (contractId) {
-        // Update contract with tenant_id if using existing tenant
-        if (useExistingTenant && selectedTenant) {
-          await supabase
-            .from('lease_contracts')
-            .update({ tenant_id: selectedTenant } as any)
-            .filter('id', 'eq', contractId);
-        }
+        await supabase
+          .from('lease_contracts')
+          .update({ tenant_id: selectedTenant } as any)
+          .filter('id', 'eq', contractId);
 
         onOpenChange(false);
         navigate(`/lease/builder/${contractId}`);
@@ -169,8 +155,6 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
   const resetForm = () => {
     setSelectedTenant('');
     setSelectedProperty('');
-    setTenantEmail('');
-    setUseExistingTenant(true);
   };
 
   return (
@@ -203,55 +187,20 @@ export function CreateLeaseModal({ open, onOpenChange }: CreateLeaseModalProps) 
             </Select>
           </div>
 
-          <div className="space-y-3">
-            <Label>Tenant Selection</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  checked={useExistingTenant}
-                  onChange={() => setUseExistingTenant(true)}
-                />
-                <span>Existing Tenant</span>
-              </label>
-              <label className="flex items-center space-x-2">
-                <input
-                  type="radio"
-                  checked={!useExistingTenant}
-                  onChange={() => setUseExistingTenant(false)}
-                />
-                <span>New Tenant</span>
-              </label>
-            </div>
-
-            {useExistingTenant ? (
-              <Select value={selectedTenant} onValueChange={setSelectedTenant}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a tenant" />
-                </SelectTrigger>
-                <SelectContent>
-                  {tenants.map((tenant) => (
-                    <SelectItem key={tenant.id} value={tenant.id}>
-                      {tenant.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            ) : null}
-
-            {/* The app doesn't have a queryable email for existing tenants either
-                (auth.users isn't client-accessible), so this is always needed --
-                the lease wizard's next step requires it regardless. */}
-            <div className="space-y-2">
-              <Label htmlFor="tenantEmail">Tenant Email *</Label>
-              <Input
-                id="tenantEmail"
-                type="email"
-                placeholder="Enter tenant email address"
-                value={tenantEmail}
-                onChange={(e) => setTenantEmail(e.target.value)}
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="tenant">Tenant *</Label>
+            <Select value={selectedTenant} onValueChange={setSelectedTenant}>
+              <SelectTrigger id="tenant">
+                <SelectValue placeholder="Select a tenant" />
+              </SelectTrigger>
+              <SelectContent>
+                {tenants.map((tenant) => (
+                  <SelectItem key={tenant.id} value={tenant.id}>
+                    {tenant.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

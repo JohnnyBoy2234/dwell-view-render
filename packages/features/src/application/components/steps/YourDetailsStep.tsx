@@ -204,7 +204,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             error={errors.first_name}
             notice={flagged.has('first_name') ? REVIEW_NOTICE : undefined}
           >
-            {textInput('first_name', p.first_name, setP('first_name'), { autoComplete: 'given-name' })}
+            {textInput('first_name', p.first_name, setP('first_name'), { autoComplete: 'given-name', placeholder: 'e.g. Thabo' })}
           </Field>
           <Field
             id="last_name"
@@ -213,7 +213,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             error={errors.last_name}
             notice={flagged.has('last_name') ? REVIEW_NOTICE : undefined}
           >
-            {textInput('last_name', p.last_name, setP('last_name'), { autoComplete: 'family-name' })}
+            {textInput('last_name', p.last_name, setP('last_name'), { autoComplete: 'family-name', placeholder: 'e.g. Nkosi' })}
           </Field>
         </div>
         <Field
@@ -221,7 +221,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
           label="Middle name (optional)"
           notice={flagged.has('middle_name') ? REVIEW_NOTICE : undefined}
         >
-          {textInput('middle_name', p.middle_name, setP('middle_name'))}
+          {textInput('middle_name', p.middle_name, setP('middle_name'), { placeholder: 'e.g. Kwame' })}
         </Field>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -244,7 +244,8 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             notice={flagged.has('id_number') ? REVIEW_NOTICE : undefined}
           >
             {textInput('id_number', i.id_number, onIdNumberChange, {
-              inputMode: i.id_type === 'sa_id' ? 'numeric' : 'text'
+              inputMode: i.id_type === 'sa_id' ? 'numeric' : 'text',
+              placeholder: i.id_type === 'sa_id' ? 'e.g. 9001015800086' : 'e.g. A1234567'
             })}
           </Field>
           <Field
@@ -274,7 +275,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             {textInput('nationality', i.nationality, (v) => {
               unflag('nationality');
               update('identity', { nationality: v });
-            })}
+            }, { placeholder: 'e.g. South African' })}
           </Field>
         </div>
 
@@ -317,26 +318,26 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field id="phone" label="Mobile number" required error={errors.phone}>
-            {textInput('phone', p.phone, setP('phone'), { type: 'tel', autoComplete: 'tel', inputMode: 'tel' })}
+            {textInput('phone', p.phone, setP('phone'), { type: 'tel', autoComplete: 'tel', inputMode: 'tel', placeholder: 'e.g. 082 123 4567' })}
           </Field>
           <Field id="email" label="Email address" required error={errors.email}>
-            {textInput('email', p.email, setP('email'), { type: 'email', autoComplete: 'email', inputMode: 'email' })}
+            {textInput('email', p.email, setP('email'), { type: 'email', autoComplete: 'email', inputMode: 'email', placeholder: 'e.g. name@example.com' })}
           </Field>
         </div>
 
         <h4 className="text-sm font-semibold pt-2">Current residential address</h4>
         <Field id="line1" label="Street address" required error={errors.line1}>
-          {textInput('line1', a.line1, setA('line1'), { autoComplete: 'address-line1' })}
+          {textInput('line1', a.line1, setA('line1'), { autoComplete: 'address-line1', placeholder: 'e.g. 12 Protea Road' })}
         </Field>
         <Field id="line2" label="Unit / complex (optional)">
-          {textInput('line2', a.line2, setA('line2'), { autoComplete: 'address-line2' })}
+          {textInput('line2', a.line2, setA('line2'), { autoComplete: 'address-line2', placeholder: 'e.g. Unit 4, Protea Court' })}
         </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Field id="suburb" label="Suburb" required error={errors.suburb}>
-            {textInput('suburb', a.suburb, setA('suburb'))}
+            {textInput('suburb', a.suburb, setA('suburb'), { placeholder: 'e.g. Sandton' })}
           </Field>
           <Field id="city" label="City or town" required error={errors.city}>
-            {textInput('city', a.city, setA('city'), { autoComplete: 'address-level2' })}
+            {textInput('city', a.city, setA('city'), { autoComplete: 'address-level2', placeholder: 'e.g. Johannesburg' })}
           </Field>
           <Field id="province" label="Province" required error={errors.province}>
             <Select value={a.province} onValueChange={setA('province')}>
@@ -353,10 +354,10 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
             </Select>
           </Field>
           <Field id="postal_code" label="Postal code" required error={errors.postal_code}>
-            {textInput('postal_code', a.postal_code, setA('postal_code'), { inputMode: 'numeric', autoComplete: 'postal-code' })}
+            {textInput('postal_code', a.postal_code, setA('postal_code'), { inputMode: 'numeric', autoComplete: 'postal-code', placeholder: 'e.g. 2196' })}
           </Field>
           <Field id="country" label="Country" required error={errors.country}>
-            {textInput('country', a.country, setA('country'), { autoComplete: 'country-name' })}
+            {textInput('country', a.country, setA('country'), { autoComplete: 'country-name', placeholder: 'e.g. South Africa' })}
           </Field>
           <Field id="years_at_address" label="How long have you lived here?" required error={errors.years_at_address}>
             {textInput('years_at_address', a.years_at_address, setA('years_at_address'), {
