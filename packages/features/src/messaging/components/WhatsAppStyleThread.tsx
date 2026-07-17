@@ -448,8 +448,8 @@ export function WhatsAppStyleThread({
             // gradient renders a different shade per bubble size, which read
             // as inconsistent colors. Same soft shadow both directions.
             isOwn
-              ? 'rounded-[26px] rounded-br-[10px] bg-[#4A6FE3] text-white shadow-[0_1px_2px_rgba(20,35,80,0.08),0_4px_10px_rgba(20,35,80,0.06)]'
-              : 'rounded-[26px] rounded-bl-[10px] bg-white text-ios-gray-dark border border-[rgba(15,23,42,0.06)] shadow-[0_1px_2px_rgba(20,35,80,0.08),0_4px_10px_rgba(20,35,80,0.06)]',
+              ? 'rounded-[26px] bg-[#4A6FE3] text-white shadow-[0_1px_2px_rgba(20,35,80,0.08),0_4px_10px_rgba(20,35,80,0.06)]'
+              : 'rounded-[26px] bg-white text-ios-gray-dark border border-[rgba(15,23,42,0.06)] shadow-[0_1px_2px_rgba(20,35,80,0.08),0_4px_10px_rgba(20,35,80,0.06)]',
             // Animation — new own bubbles spring up from the composer;
             // everything else gets the calm fade/slide
             isNewOwn
@@ -638,7 +638,6 @@ export function WhatsAppStyleThread({
                     className={cn(
                       'relative overflow-hidden',
                       'rounded-[26px]',
-                      s.own ? 'rounded-br-[10px]' : 'rounded-bl-[10px]',
                       'chat-skeleton'
                     )}
                     style={{ width: `${s.widthPct}%`, maxWidth: '78%' }}
