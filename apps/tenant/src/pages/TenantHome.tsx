@@ -11,10 +11,11 @@ import {
   ensureTwoHourViewingRemindersForLandlord,
 } from '@/utils/viewingReminders';
 import {
-  Home, Menu, Search, MapPin, SlidersHorizontal, ChevronRight,
+  Home, Search, MapPin, SlidersHorizontal, ChevronRight,
   Wrench, ClipboardCheck, MessageCircle, Receipt, FileText, ShieldCheck,
   Eye, Package, Camera, HelpCircle, Calendar, Link2, Building, CreditCard, Bell,
 } from 'lucide-react';
+import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
@@ -89,13 +90,7 @@ export default function TenantHome() {
             <span className="text-[22px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
           </div>
           {user ? (
-            <button
-              onClick={() => navigate('/settings')}
-              className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
-              aria-label="Menu"
-            >
-              <Menu className="h-5 w-5 text-slate-700" />
-            </button>
+            <UserMenu variant="light" />
           ) : (
             <button
               onClick={() => navigate('/auth')}

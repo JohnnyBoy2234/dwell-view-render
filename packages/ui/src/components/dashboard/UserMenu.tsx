@@ -14,7 +14,7 @@ import { BillingSubscriptionDialog } from './BillingSubscriptionDialog';
 
 // Avatar in the dashboard header's top-right corner (Slack/Google style).
 // Replaces the old separate Profile tab — account actions live in this menu.
-export function UserMenu() {
+export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = {}) {
   const { user, isLandlord, signOut } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ display_name?: string | null; avatar_url?: string | null } | null>(null);
@@ -54,7 +54,11 @@ export function UserMenu() {
         <DropdownMenuTrigger asChild>
           <button
             aria-label="Account menu"
-            className="w-9 h-9 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-xs font-bold text-white hover:border-white/45 transition-colors shrink-0"
+            className={
+              variant === 'light'
+                ? 'w-11 h-11 rounded-full overflow-hidden bg-white shadow-sm border border-slate-200 flex items-center justify-center text-sm font-bold text-slate-700 hover:border-slate-300 active:scale-95 transition shrink-0'
+                : 'w-9 h-9 rounded-full overflow-hidden border border-white/20 bg-white/10 flex items-center justify-center text-xs font-bold text-white hover:border-white/45 transition-colors shrink-0'
+            }
           >
             {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt={displayName} className="w-full h-full object-cover" />
