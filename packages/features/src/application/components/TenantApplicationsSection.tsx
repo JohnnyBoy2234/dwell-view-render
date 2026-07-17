@@ -101,22 +101,118 @@ const CardSkeleton = () => (
 );
 
 /** Illustrated empty state, matching the tile-page design reference. */
+/** Premium 3D open-envelope illustration with a letter emerging, a soft blue
+ * glow, sparkles and a notification badge — the Invitations empty-state art. */
+function InvitationEnvelope() {
+  return (
+    <div className="mx-auto w-44 animate-soft-float">
+      <svg viewBox="0 0 240 200" className="h-auto w-full" role="img" aria-label="Open envelope with a letter">
+        <defs>
+          <radialGradient id="env-glow" cx="50%" cy="46%" r="55%">
+            <stop offset="0%" stopColor="#7ea4f0" stopOpacity="0.38" />
+            <stop offset="55%" stopColor="#7ea4f0" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#7ea4f0" stopOpacity="0" />
+          </radialGradient>
+          <linearGradient id="env-doc" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffffff" />
+            <stop offset="1" stopColor="#eef4fe" />
+          </linearGradient>
+          <linearGradient id="env-pocket" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#e2edfc" />
+            <stop offset="1" stopColor="#b7d0f8" />
+          </linearGradient>
+          <linearGradient id="env-left" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#adc8f7" />
+            <stop offset="1" stopColor="#89aef2" />
+          </linearGradient>
+          <linearGradient id="env-right" x1="1" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#9cbdf5" />
+            <stop offset="1" stopColor="#7aa1ef" />
+          </linearGradient>
+          <linearGradient id="env-bell" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#4f8dff" />
+            <stop offset="1" stopColor="#2563eb" />
+          </linearGradient>
+          <clipPath id="env-body">
+            <rect x="56" y="104" width="128" height="62" rx="16" />
+          </clipPath>
+          <filter id="env-soft" x="-40%" y="-40%" width="180%" height="180%">
+            <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#3b5bab" floodOpacity="0.16" />
+          </filter>
+          <filter id="env-blur"><feGaussianBlur stdDeviation="5" /></filter>
+        </defs>
+
+        {/* Soft blue glow behind everything */}
+        <ellipse cx="120" cy="98" rx="104" ry="86" fill="url(#env-glow)" />
+
+        {/* Gentle floating shadow (soft, not harsh) */}
+        <ellipse cx="120" cy="178" rx="60" ry="8" fill="#5c7fc0" opacity="0.16" filter="url(#env-blur)" />
+
+        {/* Back flap hint behind the letter */}
+        <path d="M64 106 Q120 74 176 106 L176 120 L64 120 Z" fill="#cfe0fb" opacity="0.7" />
+
+        {/* Letter emerging from the envelope */}
+        <g filter="url(#env-soft)">
+          <rect x="80" y="50" width="80" height="92" rx="10" fill="url(#env-doc)" />
+          <circle cx="99" cy="72" r="9" fill="#3b82f6" />
+          <rect x="113" y="66" width="34" height="5" rx="2.5" fill="#cfe0fb" />
+          <rect x="113" y="76" width="24" height="5" rx="2.5" fill="#dfeafc" />
+          <rect x="90" y="97" width="60" height="5" rx="2.5" fill="#dfeafc" />
+          <rect x="90" y="108" width="60" height="5" rx="2.5" fill="#dfeafc" />
+          <rect x="90" y="119" width="40" height="5" rx="2.5" fill="#dfeafc" />
+        </g>
+
+        {/* Envelope front — side flaps + centre pocket (clipped for rounded base) */}
+        <g clipPath="url(#env-body)">
+          <path d="M56 104 L120 128 L56 166 Z" fill="url(#env-left)" />
+          <path d="M184 104 L120 128 L184 166 Z" fill="url(#env-right)" />
+          <path d="M56 166 L120 128 L184 166 Z" fill="url(#env-pocket)" />
+          {/* subtle inner shadow where the letter meets the opening */}
+          <path d="M56 104 L120 128 L184 104 Z" fill="#2b3f6b" opacity="0.10" />
+        </g>
+
+        {/* Notification badge */}
+        <g filter="url(#env-soft)">
+          <circle cx="182" cy="66" r="16" fill="url(#env-bell)" />
+          <path
+            d="M182 59 a5 5 0 0 1 5 5 c0 4 1.6 5.4 2.6 6.2 a0.8 0.8 0 0 1 -0.5 1.4 h-14.2 a0.8 0.8 0 0 1 -0.5 -1.4 c1 -0.8 2.6 -2.2 2.6 -6.2 a5 5 0 0 1 5 -5 z"
+            fill="#ffffff"
+          />
+          <path d="M180 73.5 a2.2 2.2 0 0 0 4 0 z" fill="#ffffff" />
+        </g>
+
+        {/* Sparkles */}
+        <g fill="none" strokeLinecap="round">
+          <path d="M70 78 l0 8 M66 82 l8 0" stroke="#5b8def" strokeWidth="2.4" opacity="0.7" />
+          <path d="M92 56 l0 6 M89 59 l6 0" stroke="#4fd1c5" strokeWidth="2.2" opacity="0.7" />
+          <path d="M156 100 l0 6 M153 103 l6 0" stroke="#a78bfa" strokeWidth="2.2" opacity="0.7" />
+          <circle cx="150" cy="60" r="1.8" fill="#f6c454" opacity="0.8" />
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 function EmptyState({
   icon: Icon,
+  illustration,
   title,
   paragraphs,
   action
 }: {
   icon: React.ComponentType<{ className?: string }>;
+  illustration?: React.ReactNode;
   title: string;
   paragraphs: string[];
   action?: React.ReactNode;
 }) {
   return (
     <div className="rounded-3xl bg-white p-6 text-center shadow-sm">
-      <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full" style={{ background: '#eef3fd' }}>
-        <Icon className="h-12 w-12 text-blue-400" />
-      </div>
+      {illustration ?? (
+        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full" style={{ background: '#eef3fd' }}>
+          <Icon className="h-12 w-12 text-blue-400" />
+        </div>
+      )}
       <h2 className="mt-4 text-[22px] font-extrabold text-slate-900">{title}</h2>
       {paragraphs.map((p) => (
         <p key={p} className="mt-2 text-[14px] leading-relaxed text-slate-500">{p}</p>
@@ -335,6 +431,7 @@ export const TenantApplicationsSection = () => {
           ) : invitationItems.length === 0 && !invitesError ? (
             <EmptyState
               icon={Inbox}
+              illustration={<InvitationEnvelope />}
               title="No invitations yet"
               paragraphs={[
                 'When a landlord invites you to apply for a property, it will appear here.',
