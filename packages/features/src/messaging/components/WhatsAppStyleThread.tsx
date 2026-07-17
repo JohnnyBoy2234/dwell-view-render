@@ -9,6 +9,7 @@ import { TypingIndicator } from '@mzanzihomes/ui/components/messaging/TypingIndi
 import { MessageContent } from '@mzanzihomes/ui/components/messaging/MessageContent';
 import { MessageAttachment } from '@mzanzihomes/ui/components/messaging/MessageAttachment';
 import { cn } from '@mzanzihomes/common/lib/utils';
+import { CHAT_WALLPAPER_URL } from '../chatWallpaper';
 import { Clock, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import React from 'react';
 
@@ -569,8 +570,10 @@ export function WhatsAppStyleThread({
     <div
       className="flex flex-col h-full"
       style={{
-        // Clean, calm background — pure light blue-tinted gray
-        background: 'hsl(214, 22%, 96%)',
+        // Branded wallpaper (Mzanzi typography + doodle houses + ghosted
+        // bubbles) on the calm light base. It sits on this non-scrolling
+        // wrapper, so it stays fixed while messages scroll — WhatsApp-style.
+        background: `url("${CHAT_WALLPAPER_URL}") center top / cover no-repeat, hsl(214, 22%, 96%)`,
       }}
     >
       {/* Messages scroll area */}
