@@ -161,7 +161,9 @@ export function MessageComposer({
           rows={1}
           className={cn(
             'flex-1 resize-none bg-transparent border-0 outline-none py-1.5 px-0',
-            'text-[15px] leading-[1.45] text-foreground',
+            // 16px minimum: anything smaller makes iOS Safari zoom the page
+            // when the input focuses, which reads as a layout jump.
+            'text-[16px] leading-[1.4] text-foreground',
             'placeholder:text-muted-foreground/50',
             'scrollbar-none'
           )}
@@ -187,7 +189,7 @@ export function MessageComposer({
           className={cn(
             'shrink-0 h-9 w-9 rounded-full flex items-center justify-center transition-all duration-200 mb-[1px]',
             hasContent
-              ? 'bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white shadow-[0_4px_12px_rgba(37,99,235,0.35)] active:scale-90'
+              ? 'bg-[#4A6FE3] text-white shadow-[0_2px_8px_rgba(20,35,80,0.25)] active:scale-90'
               : 'bg-black/6 text-muted-foreground/50',
             isSending && 'animate-send-press'
           )}

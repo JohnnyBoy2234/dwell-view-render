@@ -256,10 +256,12 @@ export function WhatsAppStyleThread({
       latestMessage.id !== lastMessageId.current
     ) {
       const isOwn = latestMessage.sender_id === user?.id;
+      // Effects run after the DOM commit, so scroll directly — stacked
+      // timeouts here were one source of the visible double-jump.
       if (isOwn) {
-        setTimeout(() => scrollToBottom(true), 50);
+        scrollToBottom(true);
       } else if (isScrolledToBottom) {
-        setTimeout(() => scrollToBottom(), 50);
+        scrollToBottom();
       }
       lastMessageId.current = latestMessage.id;
     }
@@ -372,7 +374,8 @@ export function WhatsAppStyleThread({
 
     sendTypingIndicator(conversationId, false);
     setNewMessage('');
-    setTimeout(() => scrollToBottom(true), 50);
+    // No scroll here: the new-message effect pins to the bottom right after
+    // the optimistic bubble commits to the DOM.
 
     try {
       await sendMessage(conversationId, trimmed, files || []);
@@ -428,8 +431,10 @@ export function WhatsAppStyleThread({
 
     const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
 
-    // Staggered reveal for the initial batch only
+    // Staggered reveal for the initial batch; newly sent own bubbles get the
+    // composer-origin send animation instead
     const isInitial = initialMsgIdsRef.current.has(message.id);
+    const isNewOwn = isOwn && !isInitial;
     const staggerDelay = isInitial ? Math.min(index * 28, 380) : 0;
 
     const bubbleElement = (
@@ -439,18 +444,25 @@ export function WhatsAppStyleThread({
         <div
           className={cn(
             'relative w-fit max-w-[82%] md:max-w-[68%] px-4 py-2.5',
-            // Shape — large soft radius, iMessage-style tail rendered below
+            // One flat royal blue for every outgoing bubble: a per-bubble
+            // gradient renders a different shade per bubble size, which read
+            // as inconsistent colors. Same soft shadow both directions.
             isOwn
-              ? 'rounded-[26px] rounded-br-[10px] text-white shadow-[0_8px_20px_-10px_rgba(79,126,248,0.55)]'
-              : 'rounded-[26px] rounded-bl-[10px] bg-white/90 text-ios-gray-dark backdrop-blur-sm border border-[#dbe4f2] shadow-[0_4px_14px_-8px_rgba(30,58,138,0.18)]',
-            // Animation — one calm fade/slide for both directions
-            isOwn ? 'animate-message-outgoing' : 'animate-msg-slide-in'
+              ? 'rounded-[26px] rounded-br-[10px] bg-[#4A6FE3] text-white shadow-[0_1px_2px_rgba(20,35,80,0.08),0_4px_10px_rgba(20,35,80,0.06)]'
+              : 'rounded-[26px] rounded-bl-[10px] bg-white text-ios-gray-dark border border-[rgba(15,23,42,0.06)] shadow-[0_1px_2px_rgba(20,35,80,0.08),0_4px_10px_rgba(20,35,80,0.06)]',
+            // Animation — new own bubbles spring up from the composer;
+            // everything else gets the calm fade/slide
+            isNewOwn
+              ? 'animate-msg-send origin-bottom-right'
+              : isOwn
+              ? 'animate-message-outgoing'
+              : 'animate-msg-slide-in',
+            'motion-reduce:animate-none'
           )}
           style={{
             wordBreak: 'break-word',
             animationDelay: isInitial ? `${staggerDelay}ms` : '0ms',
             animationFillMode: 'backwards',
-            ...(isOwn ? { background: 'linear-gradient(135deg, #4F7EF8 0%, #5D8FFF 50%, #6FA3FF 100%)' } : null),
           }}
         >
           {/* Sender name (incoming only, group context) */}

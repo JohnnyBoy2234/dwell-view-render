@@ -198,13 +198,20 @@ export default function Messages() {
 
   // Anchor the full-screen chat pane to the *visible* viewport (the area not
   // covered by the on-screen keyboard) so the name header stays pinned to the
-  // top and the composer rides just above the keyboard — iMessage-style,
-  // instead of the whole pane sliding up and hiding the header when typing.
-  const [chatViewport, setChatViewport] = useState<{ height: number; offsetTop: number }>({ height: 0, offsetTop: 0 });
+  // top and the composer rides just above the keyboard — iMessage-style.
+  // Written straight to the DOM, NOT React state: a state update re-renders
+  // the entire message list on every keyboard animation frame, which lags the
+  // keyboard and reads as an up-then-down bounce.
+  const chatPaneRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const vv = window.visualViewport;
     if (!vv) return;
-    const update = () => setChatViewport({ height: vv.height, offsetTop: vv.offsetTop });
+    const update = () => {
+      const el = chatPaneRef.current;
+      if (!el) return;
+      el.style.top = `${vv.offsetTop}px`;
+      el.style.height = `${vv.height}px`;
+    };
     update();
     vv.addEventListener('resize', update);
     vv.addEventListener('scroll', update);
@@ -212,7 +219,21 @@ export default function Messages() {
       vv.removeEventListener('resize', update);
       vv.removeEventListener('scroll', update);
     };
-  }, []);
+  }, [showConversations]);
+
+  // While a chat is open the page behind it must never scroll — otherwise
+  // Safari pans the body when the input focuses (the other half of the jump).
+  useEffect(() => {
+    if (showConversations || !isMobile) return;
+    const body = document.body;
+    const prev = { overflow: body.style.overflow, overscroll: body.style.overscrollBehavior };
+    body.style.overflow = 'hidden';
+    body.style.overscrollBehavior = 'none';
+    return () => {
+      body.style.overflow = prev.overflow;
+      body.style.overscrollBehavior = prev.overscroll;
+    };
+  }, [showConversations, isMobile]);
 
   const {
     conversations,
@@ -475,15 +496,14 @@ export default function Messages() {
         {/* Full-screen chat */}
         {!showConversations && selectedConversation && (
           <div
+            ref={chatPaneRef}
             className="fixed left-0 right-0 flex flex-col z-30 bg-background"
             style={{
-              // Size to the visible viewport so the header stays pinned to the
-              // top and the composer sits above the keyboard. No CSS transition:
-              // the browser animates the keyboard itself and visualViewport
-              // reports intermediate frames, so the pane follows 1:1 and smooth.
-              // Adding our own transition on top caused an up-then-down bounce.
-              top: chatViewport.offsetTop ? `${chatViewport.offsetTop}px` : 0,
-              height: chatViewport.height ? `${chatViewport.height}px` : '100svh',
+              // Fallback until the visual-viewport effect takes over; it then
+              // writes top/height directly on keyboard frames (no re-render,
+              // no CSS transition — the browser animates the keyboard itself).
+              top: 0,
+              height: '100svh',
               overscrollBehavior: 'contain',
             }}
           >
