@@ -100,13 +100,6 @@ function TenantRoleGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// The "Home" tab: signed-in tenants get the search-first home; visitors get the
-// public landing page.
-function HomeRoute() {
-  const { user, isLandlord } = useAuth();
-  return user && !isLandlord ? <TenantHome /> : <Index />;
-}
-
 function AppRoutes() {
   useEffect(() => {
     MobileServices.initialize();
@@ -116,8 +109,11 @@ function AppRoutes() {
     <>
       <PaymentRedirectHandler />
       <Routes>
-        {/* Public browsing */}
-        <Route path="/" element={<HomeRoute />} />
+        {/* Public browsing — the one-page hub is the landing for everyone
+            (signed-out visitors included); the old marketing page lives on
+            at /learn-more, reachable from the hub's "Learn more" button. */}
+        <Route path="/" element={<TenantHome />} />
+        <Route path="/learn-more" element={<Index />} />
         <Route path="/properties" element={<><MiniNavbar hideLandlordActions minimal /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/invite/:token" element={<ApplyInvite />} />

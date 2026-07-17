@@ -88,13 +88,22 @@ export default function TenantHome() {
             </div>
             <span className="text-[22px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
           </div>
-          <button
-            onClick={() => navigate('/settings')}
-            className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
-            aria-label="Menu"
-          >
-            <Menu className="h-5 w-5 text-slate-700" />
-          </button>
+          {user ? (
+            <button
+              onClick={() => navigate('/settings')}
+              className="flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
+              aria-label="Menu"
+            >
+              <Menu className="h-5 w-5 text-slate-700" />
+            </button>
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className="rounded-full bg-blue-600 px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-95"
+            >
+              Sign in
+            </button>
+          )}
         </div>
 
         {/* Hero — villa photo bleeding in from the right, fading into the page */}
@@ -245,7 +254,7 @@ export default function TenantHome() {
             </p>
           </div>
           <button
-            onClick={() => navigate('/tenant/support')}
+            onClick={() => navigate('/learn-more')}
             className="shrink-0 rounded-full bg-white px-3 py-2 text-[12px] font-bold text-blue-600 shadow-sm active:scale-95"
           >
             Learn more
