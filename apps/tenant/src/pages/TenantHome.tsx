@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
+import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -20,19 +21,35 @@ import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
 
-// Every rental-management feature the tenant needs, one grid. `countKey` maps
-// to a live badge (maintenance, viewings, messages); the rest have no badge.
+// Every rental-management feature the tenant needs, one grid. `kind` ties a
+// tile to the notification category that badges it (mirrors the app's
+// notification-routing classifier); Messages badges from unread chats.
 const TILES = [
-  { label: 'Viewings',        icon: Eye,            tint: 'bg-blue-50',    iconBg: 'bg-blue-100',    iconFg: 'text-blue-600',    path: '/tenant/viewings',          countKey: 'viewings' },
-  { label: 'Maintenance',     icon: Wrench,         tint: 'bg-orange-50',  iconBg: 'bg-orange-100',  iconFg: 'text-orange-500',  path: '/tenant/maintenance',       countKey: 'maintenance' },
-  { label: 'Applications',    icon: ClipboardCheck, tint: 'bg-pink-50',    iconBg: 'bg-pink-100',    iconFg: 'text-pink-600',    path: '/tenant/applications' },
-  { label: 'Messages',        icon: MessageCircle,  tint: 'bg-violet-50',  iconBg: 'bg-violet-100',  iconFg: 'text-violet-600',  path: '/messages',                 countKey: 'messages' },
-  { label: 'Payments',        icon: Receipt,        tint: 'bg-emerald-50', iconBg: 'bg-emerald-100', iconFg: 'text-emerald-600', path: '/tenant/payments' },
-  { label: 'Lease Contracts', icon: FileText,       tint: 'bg-sky-50',     iconBg: 'bg-indigo-100',  iconFg: 'text-indigo-600',  path: '/tenant/leases' },
-  { label: 'Inventory',       icon: Package,        tint: 'bg-teal-50',    iconBg: 'bg-teal-100',    iconFg: 'text-teal-600',    path: '/tenant/inventory' },
-  { label: 'Inspection List', icon: Camera,         tint: 'bg-rose-50',    iconBg: 'bg-rose-100',    iconFg: 'text-rose-600',    path: '/tenant/condition-records' },
+  { label: 'Viewings',        icon: Eye,            tint: 'bg-blue-50',    iconBg: 'bg-blue-100',    iconFg: 'text-blue-600',    path: '/tenant/viewings',          kind: 'viewing' },
+  { label: 'Maintenance',     icon: Wrench,         tint: 'bg-orange-50',  iconBg: 'bg-orange-100',  iconFg: 'text-orange-500',  path: '/tenant/maintenance',       kind: 'maintenance' },
+  { label: 'Applications',    icon: ClipboardCheck, tint: 'bg-pink-50',    iconBg: 'bg-pink-100',    iconFg: 'text-pink-600',    path: '/tenant/applications',      kind: 'application' },
+  { label: 'Messages',        icon: MessageCircle,  tint: 'bg-violet-50',  iconBg: 'bg-violet-100',  iconFg: 'text-violet-600',  path: '/messages',                 kind: 'message' },
+  { label: 'Payments',        icon: Receipt,        tint: 'bg-emerald-50', iconBg: 'bg-emerald-100', iconFg: 'text-emerald-600', path: '/tenant/payments',          kind: 'payment' },
+  { label: 'Lease Contracts', icon: FileText,       tint: 'bg-sky-50',     iconBg: 'bg-indigo-100',  iconFg: 'text-indigo-600',  path: '/tenant/leases',            kind: 'lease' },
+  { label: 'Inventory',       icon: Package,        tint: 'bg-teal-50',    iconBg: 'bg-teal-100',    iconFg: 'text-teal-600',    path: '/tenant/inventory',         kind: 'inventory' },
+  { label: 'Inspection List', icon: Camera,         tint: 'bg-rose-50',    iconBg: 'bg-rose-100',    iconFg: 'text-rose-600',    path: '/tenant/condition-records', kind: 'condition_record' },
   { label: 'Support',         icon: HelpCircle,     tint: 'bg-amber-50',   iconBg: 'bg-amber-100',   iconFg: 'text-amber-600',   path: '/tenant/support' },
 ] as const;
+
+// Same normalisation the notification router uses (packages/ui notificationRoutes).
+function notifKind(type?: string): string {
+  const t = (type || '').toLowerCase();
+  return t.includes('message') ? 'message'
+    : t.includes('lease') ? 'lease'
+    : (t.includes('application') || t.includes('offer')) ? 'application'
+    : t.includes('viewing') ? 'viewing'
+    : t.includes('maintenance') ? 'maintenance'
+    : (t.includes('payment') || t.includes('billing')) ? 'payment'
+    : t.includes('condition') ? 'condition_record'
+    : t.includes('inventory') ? 'inventory'
+    : t.includes('kyc') ? 'kyc'
+    : 'other';
+}
 
 /** The tenant "Home" tab and single hub: search-first marketplace up top,
  * the tenant's current rental, then a grid to every management feature. */
@@ -40,7 +57,8 @@ export default function TenantHome() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { unreadCount } = useUnreadMessages();
-  const { tenantProperty, hasSignedLease, recentMaintenance, upcomingViewings } = useTenantDashboard();
+  const { notifications, markAsRead } = useNotifications();
+  const { tenantProperty, hasSignedLease, upcomingViewings } = useTenantDashboard();
 
   const [searchLocation, setSearchLocation] = useState('');
   const [dealType, setDealType] = useState<'rent' | 'buy'>('rent');
@@ -67,19 +85,39 @@ export default function TenantHome() {
     return () => clearInterval(interval);
   }, [user, upcomingViewings]);
 
-  const maintenanceCount = recentMaintenance?.length ?? 0;
-  const viewingsCount = upcomingViewings?.length ?? 0;
-  const badgeFor = (key?: string) =>
-    key === 'maintenance' ? maintenanceCount : key === 'viewings' ? viewingsCount : key === 'messages' ? (unreadCount || 0) : 0;
+  // Unread notifications grouped by tile category — these drive the tile
+  // badges, exactly as they'd surface on the landlord dashboard tiles.
+  const unreadByKind = useMemo(() => {
+    const m: Record<string, number> = {};
+    for (const n of notifications || []) {
+      if ((n as any).is_read) continue;
+      const k = notifKind((n as any).type);
+      m[k] = (m[k] || 0) + 1;
+    }
+    return m;
+  }, [notifications]);
+
+  const badgeFor = (kind?: string) =>
+    !kind ? 0 : kind === 'message' ? (unreadCount || 0) : (unreadByKind[kind] || 0);
 
   const runSearch = () =>
     navigate(`/properties${searchLocation.trim() ? `?q=${encodeURIComponent(searchLocation.trim())}` : ''}`);
 
-  const openTile = (path: string) => (!user ? navigate('/auth') : navigate(path));
+  // Opening a tile clears its notifications (mark-as-read), like tapping into
+  // the item from the landlord dashboard would.
+  const openTile = (path: string, kind?: string) => {
+    if (!user) { navigate('/auth'); return; }
+    if (kind && kind !== 'message') {
+      for (const n of notifications || []) {
+        if (!(n as any).is_read && notifKind((n as any).type) === kind) markAsRead((n as any).id);
+      }
+    }
+    navigate(path);
+  };
 
   return (
     <div className="min-h-screen" style={{ background: PAGE_BG, minHeight: '100dvh' }}>
-      <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)', paddingBottom: 'calc(6rem + env(safe-area-inset-bottom))' }}>
+      <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -215,11 +253,12 @@ export default function TenantHome() {
           <h2 className="mb-3 text-[15px] font-extrabold tracking-tight text-slate-900">Manage your rental</h2>
           <div className="grid grid-cols-3 gap-3">
             {TILES.map((t) => {
-              const badge = badgeFor((t as { countKey?: string }).countKey);
+              const kind = (t as { kind?: string }).kind;
+              const badge = badgeFor(kind);
               return (
                 <button
                   key={t.label}
-                  onClick={() => openTile(t.path)}
+                  onClick={() => openTile(t.path, kind)}
                   className={cn('relative flex flex-col items-center gap-2.5 rounded-2xl border border-black/[0.04] px-2 py-5 transition active:scale-95', t.tint)}
                 >
                   {badge > 0 && (

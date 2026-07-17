@@ -34,8 +34,12 @@ export function MobileBottomBar() {
     location.pathname.startsWith('/MzanziHomes-lease/');
   const isJoinPage = location.pathname.startsWith('/join');
 
+  // Tenants no longer use a bottom nav — every feature lives on the Home hub,
+  // and notifications surface as tile badges. Only the landlord app shows it.
+  const hidden = isInConversation || isSigningPage || isJoinPage || !isLandlord;
+
   useEffect(() => {
-    if (isInConversation || isSigningPage || isJoinPage) {
+    if (hidden) {
       document.body.classList.remove('has-mobile-bottom-bar');
       return;
     }
@@ -43,7 +47,7 @@ export function MobileBottomBar() {
     return () => {
       document.body.classList.remove('has-mobile-bottom-bar');
     };
-  }, [isInConversation, isSigningPage, isJoinPage]);
+  }, [hidden]);
 
   const totalNotifications = notificationUnread + (isLandlord ? landlordUnread : tenantUnread);
 
@@ -87,7 +91,7 @@ export function MobileBottomBar() {
   const activeIndex = navItems.findIndex(isItemActive);
   const pillWidth = 100 / navItems.length;
 
-  if (isInConversation || isSigningPage || isJoinPage) return null;
+  if (hidden) return null;
 
   return (
     // Docked iOS-style tab bar — light frosted glass that blends with the
