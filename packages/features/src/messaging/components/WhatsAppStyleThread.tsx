@@ -209,6 +209,25 @@ export function WhatsAppStyleThread({
     return () => clearTimeout(tid);
   }, [messages.length, conversationId]);
 
+  // Keep the thread pinned to the bottom while the keyboard opens/closes.
+  // Pinning synchronously on every visual-viewport resize tick avoids the
+  // up-then-down jump a delayed scroll caused after the keyboard animation.
+  const isScrolledToBottomRef = useRef(true);
+  useEffect(() => {
+    isScrolledToBottomRef.current = isScrolledToBottom;
+  }, [isScrolledToBottom]);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      if (!isScrolledToBottomRef.current) return;
+      const viewport = scrollContainerRef.current;
+      if (viewport) viewport.scrollTop = viewport.scrollHeight;
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
+
   useEffect(() => {
     if (conversationId && !loading) {
       const tid = setTimeout(() => scrollToBottom(true), 200);
@@ -368,7 +387,9 @@ export function WhatsAppStyleThread({
   };
 
   const handleComposerFocus = () => {
-    setTimeout(() => scrollToBottom(true), 300);
+    // Pin immediately; the visual-viewport listener keeps us pinned while the
+    // keyboard animates. (A 300ms delayed jump here read as an extra bounce.)
+    scrollToBottom(true);
   };
 
   const handleMessageChange = (value: string) => {
@@ -407,9 +428,8 @@ export function WhatsAppStyleThread({
 
     const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
 
-    // Decide animation: staggered reveal for initial batch, spring pop for own new messages
+    // Staggered reveal for the initial batch only
     const isInitial = initialMsgIdsRef.current.has(message.id);
-    const isNewOwn = isOwn && !isInitial;
     const staggerDelay = isInitial ? Math.min(index * 28, 380) : 0;
 
     const bubbleElement = (
@@ -423,12 +443,8 @@ export function WhatsAppStyleThread({
             isOwn
               ? 'rounded-[26px] rounded-br-[10px] text-white shadow-[0_8px_20px_-10px_rgba(79,126,248,0.55)]'
               : 'rounded-[26px] rounded-bl-[10px] bg-white/90 text-ios-gray-dark backdrop-blur-sm border border-[#dbe4f2] shadow-[0_4px_14px_-8px_rgba(30,58,138,0.18)]',
-            // Animation
-            isNewOwn
-              ? 'animate-msg-spring-pop'
-              : isOwn
-              ? 'animate-message-outgoing'
-              : 'animate-msg-slide-in'
+            // Animation — one calm fade/slide for both directions
+            isOwn ? 'animate-message-outgoing' : 'animate-msg-slide-in'
           )}
           style={{
             wordBreak: 'break-word',
@@ -437,16 +453,6 @@ export function WhatsAppStyleThread({
             ...(isOwn ? { background: 'linear-gradient(135deg, #4F7EF8 0%, #5D8FFF 50%, #6FA3FF 100%)' } : null),
           }}
         >
-          {/* Bubble tail — SVG (a CSS mask would clash with the wallpaper) */}
-          {isOwn ? (
-            <svg className="absolute -right-[7px] bottom-0 h-[16px] w-[14px]" viewBox="0 0 14 16" aria-hidden="true">
-              <path d="M0 0 v7 c0 5 4 9 12 9 c-6 -3 -8 -8 -8 -16 z" fill="#6FA3FF" />
-            </svg>
-          ) : (
-            <svg className="absolute -left-[7px] bottom-0 h-[16px] w-[14px]" viewBox="0 0 14 16" aria-hidden="true">
-              <path d="M14 0 v7 c0 5 -4 9 -12 9 c6 -3 8 -8 8 -16 z" fill="#ffffff" fillOpacity="0.92" />
-            </svg>
-          )}
           {/* Sender name (incoming only, group context) */}
           {!isOwn && message.profiles?.display_name && (
             <div className="text-[11px] font-semibold text-ocean-blue mb-0.5 tracking-tight">
