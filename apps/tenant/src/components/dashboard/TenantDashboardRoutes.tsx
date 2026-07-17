@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import { EnhancedDashboardLayout } from '@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout';
+import TileDetailLayout from '@/components/TileDetailLayout';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
@@ -15,6 +15,9 @@ import EnhancedTenantDashboard from '@/pages/EnhancedTenantDashboard';
 import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
+import {
+  Eye, Settings, FileText, Camera, Receipt, Building, HelpCircle, CreditCard, User,
+} from 'lucide-react';
 
 export default function TenantDashboardRoutes() {
   return (
@@ -23,77 +26,77 @@ export default function TenantDashboardRoutes() {
       <Route index element={<EnhancedTenantDashboard />} />
 
       <Route path="contracts" element={
-        <EnhancedDashboardLayout title="Contract Documents" subtitle="Your lease agreement and related documents">
+        <TileDetailLayout icon={FileText} title="Contract Documents" subtitle="Your lease agreement and related documents">
           <TenantLeaseDocuments />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="leases" element={
-        <EnhancedDashboardLayout title="Lease System" subtitle="View and sign your lease">
+        <TileDetailLayout icon={FileText} title="Lease Contracts" subtitle="View and sign your lease">
           <LeaseDashboardComponent />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="viewings" element={
-        <EnhancedDashboardLayout title="Property Viewings" subtitle="Upcoming and past viewings">
+        <TileDetailLayout icon={Eye} title="Viewings" subtitle="Upcoming and past viewings">
           <TenantPropertyViewings />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="inventory" element={
-        <EnhancedDashboardLayout title="Property Inventory" subtitle="Recorded by your landlord for this property">
+        <TileDetailLayout icon={FileText} title="Inventory" subtitle="Recorded by your landlord for this property">
           <TenantInventory />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="condition-records" element={
-        <EnhancedDashboardLayout title="Inspection List" subtitle="Photos, notes and sign-off">
+        <TileDetailLayout icon={Camera} title="Inspection List" subtitle="Photos, notes and sign-off">
           <ConditionRecordsPage />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="condition-records/:recordId" element={
-        <EnhancedDashboardLayout title="Inspection" subtitle="Photos, notes and sign-off">
+        <TileDetailLayout icon={Camera} title="Inspection" subtitle="Photos, notes and sign-off">
           <ConditionRecordDetailPage />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="proof-of-payment" element={
-        <EnhancedDashboardLayout title="Payment Records" subtitle="Bills, invoices and receipts">
+        <TileDetailLayout icon={Receipt} title="Payment Records" subtitle="Bills, invoices and receipts">
           <TenantProofOfPayment />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="applications" element={
-        <EnhancedDashboardLayout title="Applications" subtitle="Invitations and application status">
+        <TileDetailLayout icon={Building} title="Applications" subtitle="Invitations, requests and application status">
           <TenantApplicationsSection />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="profile" element={
-        <EnhancedDashboardLayout title="Profile Settings" subtitle="Your details and preferences">
+        <TileDetailLayout icon={User} title="Profile Settings" subtitle="Your details and preferences">
           <ProfilePage />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="maintenance" element={
-        <EnhancedDashboardLayout title="Maintenance Requests" subtitle="Report issues and track progress">
+        <TileDetailLayout icon={Settings} title="Maintenance" subtitle="Report issues and track progress">
           <TenantMaintenance />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="maintenance/responses" element={
-        <EnhancedDashboardLayout title="Maintenance Responses" subtitle="Landlord replies to your requests">
+        <TileDetailLayout icon={Settings} title="Maintenance Responses" subtitle="Landlord replies to your requests">
           <TenantMaintenanceResponses />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="maintenance/:ticketId" element={
-        <EnhancedDashboardLayout title="Maintenance Ticket" subtitle="Request details and updates">
+        <TileDetailLayout icon={Settings} title="Maintenance Ticket" subtitle="Request details and updates">
           <MaintenanceTicketDetails />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       {/* Messages ships its own full-screen header — wrapping it in the
           dashboard layout would render the "Messages" title twice */}
       <Route path="messages" element={<Messages />} />
       <Route path="payments" element={
-        <EnhancedDashboardLayout title="Payments & Rent" subtitle="Rent, bills and payment history">
+        <TileDetailLayout icon={CreditCard} title="Payments" subtitle="Rent, bills and payment history">
           <TenantPayments />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
       <Route path="support" element={
-        <EnhancedDashboardLayout title="Support & Help" subtitle="FAQs and contact support">
+        <TileDetailLayout icon={HelpCircle} title="Support & Help" subtitle="FAQs and contact support">
           <TenantSupport />
-        </EnhancedDashboardLayout>
+        </TileDetailLayout>
       } />
     </Routes>
   );

@@ -23,6 +23,9 @@ import { RentDueBanner } from "@mzanzihomes/features/billing";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout";
 import TenantDashboardRoutes from "@/components/dashboard/TenantDashboardRoutes";
+import TileDetailLayout from "@/components/TileDetailLayout";
+import { LeaseDashboard } from "@mzanzihomes/features/lease";
+import { FileText, Settings as SettingsIcon } from "lucide-react";
 import Properties from "@/pages/Properties";
 import { PropertyDetail } from "@mzanzihomes/features/pages";
 import Auth from "@/pages/Auth";
@@ -128,7 +131,11 @@ function AppRoutes() {
 
         {/* Tenant dashboard */}
         <Route path="/enhancedtenantdashboard" element={<EnhancedTenantDashboard />} />
-        <Route path="/enhancedtenantdashboard/leases" element={<EnhancedTenantDashboard />} />
+        <Route path="/enhancedtenantdashboard/leases" element={
+          <TileDetailLayout icon={FileText} title="Lease Contracts" subtitle="View and sign your lease">
+            <LeaseDashboard />
+          </TileDetailLayout>
+        } />
         <Route path="/tenant-dashboard/*" element={<TenantDashboardRoutes />} />
         <Route path="/tenant/*" element={<TenantDashboardRoutes />} />
 
@@ -185,9 +192,9 @@ function AppRoutes() {
         {/* Maintenance ticket detail */}
         <Route path="/maintenance/:ticketId" element={
           <RouteGuard>
-            <EnhancedDashboardLayout title="Maintenance Ticket" subtitle="Request details and updates">
+            <TileDetailLayout icon={SettingsIcon} title="Maintenance Ticket" subtitle="Request details and updates">
               <MaintenanceTicketDetails />
-            </EnhancedDashboardLayout>
+            </TileDetailLayout>
           </RouteGuard>
         } />
 
