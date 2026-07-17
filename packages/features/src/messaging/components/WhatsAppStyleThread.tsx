@@ -532,7 +532,7 @@ export function WhatsAppStyleThread({
         {message.message_type === 'viewing_proposal' && message.viewing_proposal_id ? (
           <div
             id={`proposal-${message.viewing_proposal_id}`}
-            className="max-w-[95%] sm:max-w-[85%] mx-auto animate-message-incoming"
+            className="max-w-[95%] sm:max-w-[85%] mx-auto my-4 animate-message-incoming"
           >
             {proposalsById[message.viewing_proposal_id] ? (
               renderViewingProposal?.({
