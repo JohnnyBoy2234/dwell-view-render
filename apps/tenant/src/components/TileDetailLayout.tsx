@@ -32,18 +32,18 @@ export default function TileDetailLayout({ title, subtitle, icon: Icon, children
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white active:scale-95"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white active:scale-95"
             aria-label="Back"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </button>
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full" style={{ background: '#2563EB' }}>
-            <Icon className="h-6 w-6 text-white" />
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: '#2563EB' }}>
+            <Icon className="h-[18px] w-[18px] text-white" />
           </span>
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-[22px] font-extrabold leading-tight text-white">{title}</h1>
+            <h1 className="truncate text-[17px] font-bold leading-tight text-white">{title}</h1>
             {subtitle && (
-              <p className="truncate text-[13px] leading-snug" style={{ color: 'rgba(191,214,255,0.85)' }}>{subtitle}</p>
+              <p className="truncate text-[12px] leading-snug" style={{ color: 'rgba(191,214,255,0.85)' }}>{subtitle}</p>
             )}
           </div>
           <UserMenu />
