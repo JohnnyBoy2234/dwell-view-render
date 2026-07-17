@@ -9,6 +9,7 @@ import { TypingIndicator } from '@mzanzihomes/ui/components/messaging/TypingIndi
 import { MessageContent } from '@mzanzihomes/ui/components/messaging/MessageContent';
 import { MessageAttachment } from '@mzanzihomes/ui/components/messaging/MessageAttachment';
 import { cn } from '@mzanzihomes/common/lib/utils';
+import { Message as MessageRow, MessageContent as MessageColumn } from '@mzanzihomes/ui/components/message';
 import { CHAT_WALLPAPER_URL } from '../chatWallpaper';
 import { Clock, Check, CheckCheck, ChevronDown } from 'lucide-react';
 import React from 'react';
@@ -73,40 +74,6 @@ function MessageStatusIndicator({
     default:
       return null;
   }
-}
-
-// ─── Bubble tail SVGs ─────────────────────────────────────────────────────────
-
-// Outgoing tail: bottom-right, matches gradient end colour
-function OutgoingTail() {
-  return (
-    <svg
-      className="absolute bottom-0 -right-[7px]"
-      width="9"
-      height="12"
-      viewBox="0 0 9 12"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path d="M0 12 L0 0 Q9 8 9 12 Z" fill="hsl(214,100%,49%)" />
-    </svg>
-  );
-}
-
-// Incoming tail: bottom-left, white
-function IncomingTail() {
-  return (
-    <svg
-      className="absolute bottom-0 -left-[7px]"
-      width="9"
-      height="12"
-      viewBox="0 0 9 12"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path d="M9 12 L9 0 Q0 8 0 12 Z" fill="white" />
-    </svg>
-  );
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -438,9 +405,8 @@ export function WhatsAppStyleThread({
     const staggerDelay = isInitial ? Math.min(index * 28, 380) : 0;
 
     const bubbleElement = (
-      <div
-        className={cn('flex items-end gap-2 mb-0.5', isOwn ? 'justify-end' : 'justify-start')}
-      >
+      <MessageRow align={isOwn ? 'end' : 'start'} className="items-end gap-2 mb-0.5">
+        <MessageColumn className={cn('gap-0.5', isOwn ? 'items-end' : 'items-start')}>
         <div
           className={cn(
             'relative w-fit max-w-[82%] md:max-w-[68%] px-4 py-2.5',
@@ -544,11 +510,9 @@ export function WhatsAppStyleThread({
                 </button>
               </div>
             )}
-
-          {/* Bubble tail */}
-          {isOwn ? <OutgoingTail /> : <IncomingTail />}
         </div>
-      </div>
+        </MessageColumn>
+      </MessageRow>
     );
 
     return (
