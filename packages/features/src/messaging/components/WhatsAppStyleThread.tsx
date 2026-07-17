@@ -418,12 +418,11 @@ export function WhatsAppStyleThread({
       >
         <div
           className={cn(
-            'relative w-fit max-w-[82%] md:max-w-[68%] px-3.5 py-2.5',
-            'shadow-ios-sm',
-            // Shape — no radius on tail side
+            'relative w-fit max-w-[82%] md:max-w-[68%] px-4 py-2.5',
+            // Shape — large soft radius, iMessage-style tail rendered below
             isOwn
-              ? 'rounded-[20px] rounded-br-[6px] bg-gradient-to-br from-ocean-blue to-ocean-blue-dark text-white'
-              : 'rounded-[20px] rounded-bl-[6px] bg-white text-ios-gray-dark',
+              ? 'rounded-[26px] rounded-br-[10px] text-white shadow-[0_8px_20px_-10px_rgba(79,126,248,0.55)]'
+              : 'rounded-[26px] rounded-bl-[10px] bg-white/90 text-ios-gray-dark backdrop-blur-sm border border-[#dbe4f2] shadow-[0_4px_14px_-8px_rgba(30,58,138,0.18)]',
             // Animation
             isNewOwn
               ? 'animate-msg-spring-pop'
@@ -435,8 +434,19 @@ export function WhatsAppStyleThread({
             wordBreak: 'break-word',
             animationDelay: isInitial ? `${staggerDelay}ms` : '0ms',
             animationFillMode: 'backwards',
+            ...(isOwn ? { background: 'linear-gradient(135deg, #4F7EF8 0%, #5D8FFF 50%, #6FA3FF 100%)' } : null),
           }}
         >
+          {/* Bubble tail — SVG (a CSS mask would clash with the wallpaper) */}
+          {isOwn ? (
+            <svg className="absolute -right-[7px] bottom-0 h-[16px] w-[14px]" viewBox="0 0 14 16" aria-hidden="true">
+              <path d="M0 0 v7 c0 5 4 9 12 9 c-6 -3 -8 -8 -8 -16 z" fill="#6FA3FF" />
+            </svg>
+          ) : (
+            <svg className="absolute -left-[7px] bottom-0 h-[16px] w-[14px]" viewBox="0 0 14 16" aria-hidden="true">
+              <path d="M14 0 v7 c0 5 -4 9 -12 9 c6 -3 8 -8 8 -16 z" fill="#ffffff" fillOpacity="0.92" />
+            </svg>
+          )}
           {/* Sender name (incoming only, group context) */}
           {!isOwn && message.profiles?.display_name && (
             <div className="text-[11px] font-semibold text-ocean-blue mb-0.5 tracking-tight">
@@ -609,8 +619,8 @@ export function WhatsAppStyleThread({
                   <div
                     className={cn(
                       'relative overflow-hidden',
-                      'rounded-[20px]',
-                      s.own ? 'rounded-br-[6px]' : 'rounded-bl-[6px]',
+                      'rounded-[26px]',
+                      s.own ? 'rounded-br-[10px]' : 'rounded-bl-[10px]',
                       'chat-skeleton'
                     )}
                     style={{ width: `${s.widthPct}%`, maxWidth: '78%' }}
