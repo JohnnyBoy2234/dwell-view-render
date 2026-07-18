@@ -140,21 +140,13 @@ export default function TenantHome() {
             />
           </div>
 
-          {/* Top row */}
+          {/* Top row — brand · bell · account */}
           <div className="relative z-10 flex items-center justify-between">
-            <div className="inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
-              <button
-                onClick={() => setDealType('rent')}
-                className={cn('rounded-full px-6 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-              >
-                Rent
-              </button>
-              <button
-                onClick={() => setDealType('buy')}
-                className={cn('rounded-full px-6 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-              >
-                Buy
-              </button>
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}>
+                <Home className="h-6 w-6 text-white" />
+              </div>
+              <span className="text-[23px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
             </div>
 
             {user ? (
@@ -185,16 +177,32 @@ export default function TenantHome() {
           </div>
 
           {/* Greeting */}
-          <div className="relative z-10 mt-7 pb-2">
+          <div className="relative z-10 mt-6">
             <p className="text-[19px] font-medium text-slate-500">Welcome home,</p>
             <h1 className="text-[38px] font-extrabold leading-tight tracking-tight text-slate-900">
               {firstName || 'there'} <span className="align-baseline">👋</span>
             </h1>
+
+            {/* Rent / Buy toggle, under the name */}
+            <div className="mt-4 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
+              <button
+                onClick={() => setDealType('rent')}
+                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
+              >
+                Rent
+              </button>
+              <button
+                onClick={() => setDealType('buy')}
+                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
+              >
+                Buy
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Search card — location · more filters · search, in one row */}
-        <div className="relative mt-4 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+        <div className="relative mt-10 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
             <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
@@ -317,8 +325,8 @@ export default function TenantHome() {
               </p>
               <button
                 onClick={() => navigate('/learn-more')}
-                className="mt-3 rounded-full px-4 py-2 text-[12.5px] font-bold text-white shadow-[0_8px_16px_-8px_rgba(37,99,235,0.7)] active:scale-95"
-                style={{ background: '#2563EB' }}
+                className="mt-3 rounded-full px-4 py-2 text-[12.5px] font-bold text-white shadow-[0_8px_16px_-8px_rgba(109,40,217,0.7)] active:scale-95"
+                style={{ background: '#6d28d9' }}
               >
                 Learn more
               </button>

@@ -451,12 +451,10 @@ export default function Messages() {
           <div className="min-h-screen bg-background">
             {/* Mobile header */}
             <div
-              className="sticky top-0 z-20 px-4 pt-3 pb-3 flex items-center justify-between gap-3"
+              className="sticky top-0 z-20 px-4 pb-4 flex items-center justify-between gap-3"
               style={{
-                background: 'rgba(255,255,255,0.94)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)',
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
+                paddingTop: 'calc(env(safe-area-inset-top) + 14px)',
+                background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)',
               }}
             >
               <div className="flex items-center gap-2.5">
@@ -464,19 +462,19 @@ export default function Messages() {
                   onClick={() =>
                     window.history.length > 1
                       ? navigate(-1)
-                      : navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')
+                      : navigate(isLandlord ? '/enhancedlandlorddashboard' : '/')
                   }
-                  className="flex items-center justify-center w-8 h-8 rounded-xl hover:bg-muted transition-colors"
+                  className="flex items-center justify-center w-9 h-9 rounded-full border border-white/15 bg-white/10 text-white active:scale-95 transition"
                   aria-label="Back"
                 >
-                  <ArrowLeft className="h-4 w-4 text-muted-foreground" />
+                  <ArrowLeft className="h-4 w-4" />
                 </button>
-                <div className="w-8 h-8 rounded-xl bg-ocean-blue flex items-center justify-center shadow-ios-xs">
-                  <MessageSquare className="h-4 w-4 text-white" />
+                <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: '#2563EB' }}>
+                  <MessageSquare className="h-[18px] w-[18px] text-white" />
                 </div>
-                <h1 className="text-[18px] font-bold tracking-tight">Messages</h1>
+                <h1 className="text-[19px] font-bold tracking-tight text-white">Messages</h1>
                 {totalUnread > 0 && (
-                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-ocean-blue text-white animate-badge-pop">
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-white/15 text-white">
                     {totalUnread}
                   </span>
                 )}
