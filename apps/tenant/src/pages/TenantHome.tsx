@@ -26,15 +26,15 @@ const PAGE_BG = '#f5f8fd';
 // tile to the notification category that badges it (mirrors the app's
 // notification-routing classifier); Messages badges from unread chats.
 const TILES = [
-  { label: 'Viewings',        icon: Eye,            tone: 'sapphire', path: '/tenant/viewings',          kind: 'viewing' },
-  { label: 'Maintenance',     icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
-  { label: 'Applications',    icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
-  { label: 'Messages',        icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
-  { label: 'Payments',        icon: Receipt,        tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
-  { label: 'Lease Contracts', icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
-  { label: 'Inventory',       icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
-  { label: 'Inspection List', icon: Camera,         tone: 'ruby',     path: '/tenant/condition-records', kind: 'condition_record' },
-  { label: 'Support',         icon: HelpCircle,     tone: 'amber',    path: '/tenant/support' },
+  { label: 'Viewings',        desc: 'Manage and track property viewings',   icon: Eye,            tone: 'sapphire', path: '/tenant/viewings',          kind: 'viewing' },
+  { label: 'Maintenance',     desc: 'Report and track maintenance',         icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
+  { label: 'Applications',    desc: 'View and manage rental applications',  icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
+  { label: 'Messages',        desc: 'Chat with your landlord',              icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
+  { label: 'Payments',        desc: 'Rent payments and transaction history',icon: Receipt,        tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
+  { label: 'Lease Contracts', desc: 'View and manage lease agreements',     icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
+  { label: 'Inventory',       desc: 'View property inventory',              icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
+  { label: 'Inspection List', desc: 'Property inspection and condition',    icon: Camera,         tone: 'ruby',     path: '/tenant/condition-records', kind: 'condition_record' },
+  { label: 'Support',         desc: 'Get help and support',                 icon: HelpCircle,     tone: 'amber',    path: '/tenant/support' },
 ] as const;
 
 // Same normalisation the notification router uses (packages/ui notificationRoutes).
@@ -117,77 +117,88 @@ export default function TenantHome() {
     navigate(path);
   };
 
+  const totalUnread = (notifications || []).filter((n: any) => !n.is_read).length;
+  const fullName = (user?.user_metadata?.display_name || user?.user_metadata?.full_name || user?.email?.split('@')[0] || '') as string;
+  const firstName = fullName ? fullName.split(/\s+/)[0].replace(/^\w/, (c) => c.toUpperCase()) : '';
+
   return (
     <div className="min-h-screen" style={{ background: PAGE_BG, minHeight: '100dvh' }}>
-      <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
+      <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
 
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-full shadow-sm" style={{ background: '#2563EB' }}>
-              <Home className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-[22px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
-          </div>
-          {user ? (
-            <UserMenu variant="light" />
-          ) : (
-            <button
-              onClick={() => navigate('/auth')}
-              className="rounded-full bg-blue-600 px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-95"
-            >
-              Sign in
-            </button>
-          )}
-        </div>
-
-        {/* Hero — villa photo bleeding in from the right, fading into the page */}
+        {/* Hero — top row (Rent/Buy · bell · account) + greeting, over a
+            property image bleeding into the top-right corner */}
         <div className="relative">
-          <div className="pointer-events-none absolute -right-5 top-8 h-[352px] w-[62%]">
+          <div className="pointer-events-none absolute -right-5 -top-4 h-[280px] w-[60%] overflow-hidden rounded-bl-[40px]">
             <img
               src={heroHouse}
               alt=""
-              className="h-full w-full object-cover object-left"
+              className="h-full w-full object-cover"
               style={{
-                WebkitMaskImage: 'linear-gradient(to left, black 40%, transparent 80%)',
-                maskImage: 'linear-gradient(to left, black 40%, transparent 80%)',
+                WebkitMaskImage: 'linear-gradient(215deg, black 44%, transparent 82%)',
+                maskImage: 'linear-gradient(215deg, black 44%, transparent 82%)',
               }}
             />
           </div>
-          <div className="relative pt-10">
-            <h1 className="text-[34px] font-extrabold leading-[1.12] tracking-tight text-slate-900">
-              Find your<br />
-              perfect <span className="text-blue-600">home</span><br />
-              in South Africa
-            </h1>
-            <p className="mt-4 max-w-[15.5rem] text-[15px] leading-relaxed text-slate-500">
-              Verified listings. Direct landlords. Zero agent fees. MzanziHomes makes renting simple, safe, and transparent.
-            </p>
-            <div className="mt-5 inline-flex rounded-full bg-white p-1 shadow-sm">
+
+          {/* Top row */}
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
               <button
                 onClick={() => setDealType('rent')}
-                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-blue-600 text-white' : 'text-slate-600')}
+                className={cn('rounded-full px-6 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
               >
                 Rent
               </button>
               <button
                 onClick={() => setDealType('buy')}
-                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-blue-600 text-white' : 'text-slate-600')}
+                className={cn('rounded-full px-6 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
               >
                 Buy
               </button>
             </div>
+
+            {user ? (
+              <div className="flex items-center gap-2.5">
+                <button
+                  onClick={() => navigate('/notifications')}
+                  className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-5 w-5 text-slate-700" />
+                  {totalUnread > 0 && (
+                    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: '#7c3aed' }}>
+                      {totalUnread > 9 ? '9+' : totalUnread}
+                    </span>
+                  )}
+                </button>
+                <UserMenu variant="light" />
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/auth')}
+                className="rounded-full px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(109,40,217,0.7)] active:scale-95"
+                style={{ background: '#6d28d9' }}
+              >
+                Sign in
+              </button>
+            )}
+          </div>
+
+          {/* Greeting */}
+          <div className="relative z-10 mt-7 pb-2">
+            <p className="text-[19px] font-medium text-slate-500">Welcome home,</p>
+            <h1 className="text-[38px] font-extrabold leading-tight tracking-tight text-slate-900">
+              {firstName || 'there'} <span className="align-baseline">👋</span>
+            </h1>
           </div>
         </div>
 
         {/* Search card — location · more filters · search, in one row */}
-        <div className="relative mt-6 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
-          <div className="flex min-w-0 flex-1 items-center gap-2 pl-1">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50">
-              <MapPin className="h-[18px] w-[18px] text-blue-600" />
-            </span>
+        <div className="relative mt-4 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+          <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
+            <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">Location</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#7c3aed' }}>Location</p>
               <input
                 value={searchLocation}
                 onChange={(e) => setSearchLocation(e.target.value)}
@@ -199,14 +210,15 @@ export default function TenantHome() {
           </div>
           <button
             onClick={() => navigate('/properties')}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-slate-200 active:opacity-70"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
             aria-label="More filters"
           >
             <SlidersHorizontal className="h-[18px] w-[18px] text-slate-600" />
           </button>
           <button
             onClick={runSearch}
-            className="flex shrink-0 items-center gap-1.5 rounded-full bg-blue-600 px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(109,40,217,0.7)] active:scale-[0.98]"
+            style={{ background: '#6d28d9' }}
           >
             <Search className="h-4 w-4" /> Search
           </button>
@@ -250,10 +262,10 @@ export default function TenantHome() {
           </div>
         )}
 
-        {/* Manage — every rental feature in one grid */}
+        {/* Manage — every rental feature as a rectangle block */}
         <div className="mt-7">
-          <h2 className="mb-3 text-[15px] font-extrabold tracking-tight text-slate-900">Manage your rental</h2>
-          <div className="grid grid-cols-3 gap-3">
+          <h2 className="mb-3 text-[19px] font-extrabold tracking-tight text-slate-900">Manage your rental</h2>
+          <div className="grid grid-cols-2 gap-3">
             {TILES.map((t) => {
               const kind = (t as { kind?: string }).kind;
               const badge = badgeFor(kind);
@@ -265,15 +277,19 @@ export default function TenantHome() {
                   onPointerUp={() => setPressedTile(null)}
                   onPointerLeave={() => setPressedTile(null)}
                   onPointerCancel={() => setPressedTile(null)}
-                  className="relative flex flex-col items-center gap-2.5 rounded-2xl bg-white px-2 py-5 shadow-[0_12px_26px_-16px_rgba(20,50,90,0.4)] transition active:scale-[0.99]"
+                  className="relative flex items-center gap-2.5 rounded-2xl bg-white p-3 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.99]"
                 >
                   {badge > 0 && (
-                    <span className="absolute right-2 top-2 z-10 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    <span className="absolute right-2 top-2 z-10 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge > 9 ? '9+' : badge}
                     </span>
                   )}
-                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} pressed={pressedTile === t.label} />
-                  <span className="text-center text-[13px] font-bold leading-tight text-slate-800">{t.label}</span>
+                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} size={46} pressed={pressedTile === t.label} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13.5px] font-extrabold leading-tight text-slate-900">{t.label}</p>
+                    <p className="mt-0.5 text-[11px] leading-snug text-slate-500 line-clamp-2">{t.desc}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
                 </button>
               );
             })}
@@ -281,22 +297,34 @@ export default function TenantHome() {
         </div>
 
         {/* Why rent with MzanziHomes */}
-        <div className="mt-5 flex items-center gap-2.5 rounded-3xl p-3.5" style={{ background: '#e7effc' }}>
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100">
-            <ShieldCheck className="h-5 w-5 text-blue-600" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13.5px] font-bold text-slate-900">Why rent with MzanziHomes?</p>
-            <p className="mt-0.5 text-[12px] leading-snug text-slate-500">
-              Connect directly with landlords, enjoy zero agent fees, and manage everything in one secure place.
-            </p>
+        <div className="relative mt-5 overflow-hidden rounded-3xl p-4" style={{ background: '#efeaff' }}>
+          <div className="pointer-events-none absolute -bottom-1 -right-3 h-[92px] w-[42%] overflow-hidden">
+            <img
+              src={heroHouse}
+              alt=""
+              className="h-full w-full rounded-2xl object-cover"
+              style={{
+                WebkitMaskImage: 'linear-gradient(to left, black 55%, transparent 100%)',
+                maskImage: 'linear-gradient(to left, black 55%, transparent 100%)',
+              }}
+            />
           </div>
-          <button
-            onClick={() => navigate('/learn-more')}
-            className="shrink-0 rounded-full bg-white px-3 py-2 text-[12px] font-bold text-blue-600 shadow-sm active:scale-95"
-          >
-            Learn more
-          </button>
+          <div className="relative flex items-start gap-3">
+            <GlossyIcon tone={GLOSSY_TONES.purple} icon={ShieldCheck} size={48} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[15px] font-extrabold text-slate-900">Why rent with MzanziHomes?</p>
+              <p className="mt-1 max-w-[15rem] text-[12px] leading-snug text-slate-600">
+                Connect directly with landlords, enjoy zero agent fees, and manage everything in one secure place.
+              </p>
+              <button
+                onClick={() => navigate('/learn-more')}
+                className="mt-3 rounded-full px-4 py-2 text-[12.5px] font-bold text-white shadow-[0_8px_16px_-8px_rgba(109,40,217,0.7)] active:scale-95"
+                style={{ background: '#6d28d9' }}
+              >
+                Learn more
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
