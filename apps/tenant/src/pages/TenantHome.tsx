@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
+import { MoreFiltersModal } from '@mzanzihomes/ui/components/search/MoreFiltersModal';
+import { usePropertySearchFilters } from '@mzanzihomes/ui/hooks/usePropertySearchFilters';
 import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
@@ -59,11 +61,13 @@ export default function TenantHome() {
   const navigate = useNavigate();
   const { unreadCount } = useUnreadMessages();
   const { notifications, markAsRead } = useNotifications();
-  const { tenantProperty, hasSignedLease, upcomingViewings } = useTenantDashboard();
+  const { upcomingViewings } = useTenantDashboard();
+  const { filters, updateFilters, clearFilters, executeSearch } = usePropertySearchFilters();
 
   const [searchLocation, setSearchLocation] = useState('');
   const [dealType, setDealType] = useState<'rent' | 'buy'>('rent');
   const [pressedTile, setPressedTile] = useState<string | null>(null);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   // First-time welcome, shown right after a tenant joins via an invite.
   const [showWelcome, setShowWelcome] = useState(false);
@@ -202,7 +206,7 @@ export default function TenantHome() {
         </div>
 
         {/* Search card — location · more filters · search, in one row */}
-        <div className="relative mt-10 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+        <div className="relative mt-16 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
             <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
@@ -217,7 +221,7 @@ export default function TenantHome() {
             </div>
           </div>
           <button
-            onClick={() => navigate('/properties')}
+            onClick={() => { updateFilters({ searchTerm: searchLocation }); setFiltersOpen(true); }}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
             aria-label="More filters"
           >
@@ -232,46 +236,8 @@ export default function TenantHome() {
           </button>
         </div>
 
-        {/* Your rental — the tenant's connected property */}
-        {tenantProperty && (
-          <div className="mt-7">
-            <h2 className="mb-2.5 text-[15px] font-extrabold tracking-tight text-slate-900">Your rental</h2>
-            <button
-              onClick={() => navigate('/tenant/leases')}
-              className="flex w-full items-center gap-3 rounded-3xl bg-white p-3 text-left shadow-[0_14px_32px_-20px_rgba(20,50,90,0.4)] active:scale-[0.99]"
-            >
-              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-slate-100">
-                {tenantProperty.images?.[0] ? (
-                  <img src={tenantProperty.images[0]} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="h-full w-full" style={{ background: 'linear-gradient(135deg,#dfe7cf,#cdd8e6)' }} />
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate text-[15px] font-bold text-slate-900">{tenantProperty.title}</p>
-                  <span className="flex shrink-0 items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> {hasSignedLease ? 'Active' : 'Connected'}
-                  </span>
-                </div>
-                <p className="mt-1 flex items-center gap-1 text-[13px] text-slate-500">
-                  <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
-                  <span className="truncate">{tenantProperty.location}</span>
-                </p>
-                {hasSignedLease && tenantProperty.leaseEndDate && (
-                  <p className="mt-0.5 flex items-center gap-1 text-[12px] text-slate-400">
-                    <Calendar className="h-3.5 w-3.5 shrink-0" />
-                    Lease ends {new Date(tenantProperty.leaseEndDate).toLocaleDateString('en-ZA', { day: 'numeric', month: 'short', year: 'numeric' })}
-                  </p>
-                )}
-              </div>
-              <ChevronRight className="h-5 w-5 shrink-0 text-slate-400" />
-            </button>
-          </div>
-        )}
-
         {/* Manage — every rental feature as a rectangle block */}
-        <div className="mt-7">
+        <div className="mt-8">
           <h2 className="mb-3 text-[19px] font-extrabold tracking-tight text-slate-900">Manage your rental</h2>
           <div className="grid grid-cols-2 gap-3">
             {TILES.map((t) => {
@@ -334,6 +300,16 @@ export default function TenantHome() {
           </div>
         </div>
       </div>
+
+      {/* More filters — search refinement sheet */}
+      <MoreFiltersModal
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        filters={filters}
+        onFiltersChange={updateFilters}
+        onApplyFilters={executeSearch}
+        onClearFilters={clearFilters}
+      />
 
       {/* First-time "Your benefits" popup after joining via an invite */}
       <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
