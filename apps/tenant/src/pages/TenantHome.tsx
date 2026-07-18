@@ -129,66 +129,64 @@ export default function TenantHome() {
     <div className="min-h-screen" style={{ background: PAGE_BG, minHeight: '100dvh' }}>
       <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
 
-        {/* Hero — text on the left, family/home photo bleeding in from the
-            right and fading softly to the left into the white page. */}
-        <div className="relative">
-          <div className="pointer-events-none absolute -right-5 -top-6 h-[440px] w-[66%] overflow-hidden">
+        {/* Top row — brand · bell · account (clean white) */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}>
+              <Home className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-[23px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
+          </div>
+
+          {user ? (
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => navigate('/notifications')}
+                className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5 text-slate-700" />
+                {totalUnread > 0 && (
+                  <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: '#2563EB' }}>
+                    {totalUnread > 9 ? '9+' : totalUnread}
+                  </span>
+                )}
+              </button>
+              <UserMenu variant="light" />
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className="rounded-full px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-95"
+              style={{ background: '#2563EB' }}
+            >
+              Sign in
+            </button>
+          )}
+        </div>
+
+        {/* Hero band — greeting on the left, family/home photo bleeding in on
+            the right. The photo fades into white on every inner edge, so the
+            row above and the search below sit on clean white. */}
+        <div className="relative mt-5 min-h-[196px]">
+          <div className="pointer-events-none absolute inset-y-0 -right-5 w-[58%] overflow-hidden">
             <img
               src={heroFamily}
               alt="A family at their modern South African home at sunset"
               className="h-full w-full object-cover object-center"
               style={{
-                // Fade the photo into white on the left, top and bottom edges
-                // (two mask layers intersected).
                 WebkitMaskImage:
-                  'linear-gradient(to left, black 54%, transparent 94%), linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%)',
+                  'linear-gradient(to left, black 50%, transparent 96%), linear-gradient(to bottom, transparent 0%, black 20%, black 78%, transparent 100%)',
                 WebkitMaskComposite: 'source-in',
                 maskImage:
-                  'linear-gradient(to left, black 54%, transparent 94%), linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%)',
+                  'linear-gradient(to left, black 50%, transparent 96%), linear-gradient(to bottom, transparent 0%, black 20%, black 78%, transparent 100%)',
                 maskComposite: 'intersect',
               }}
             />
           </div>
 
-          {/* Top row — brand · bell · account */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}>
-                <Home className="h-6 w-6 text-white" />
-              </div>
-              <span className="text-[23px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
-            </div>
-
-            {user ? (
-              <div className="flex items-center gap-2.5">
-                <button
-                  onClick={() => navigate('/notifications')}
-                  className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-5 w-5 text-slate-700" />
-                  {totalUnread > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: '#2563EB' }}>
-                      {totalUnread > 9 ? '9+' : totalUnread}
-                    </span>
-                  )}
-                </button>
-                <UserMenu variant="light" />
-              </div>
-            ) : (
-              <button
-                onClick={() => navigate('/auth')}
-                className="rounded-full px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-95"
-                style={{ background: '#2563EB' }}
-              >
-                Sign in
-              </button>
-            )}
-          </div>
-
-          {/* Greeting headline + short support line */}
-          <div className="relative z-10 mt-9 max-w-[64%]">
-            <h1 className="text-[29px] font-extrabold leading-[1.12] tracking-tight text-slate-900">
+          <div className="relative z-10 max-w-[56%] pt-7">
+            <h1 className="text-[28px] font-extrabold leading-[1.12] tracking-tight text-slate-900">
               {hasSignedLease
                 ? `Welcome home${firstName ? `, ${firstName}` : ''}!`
                 : 'Hi there, welcome to MzanziHomes!'}
@@ -197,26 +195,26 @@ export default function TenantHome() {
               Commission-free renting, made simple and secure.
             </p>
           </div>
+        </div>
 
-          {/* Rent / Buy toggle */}
-          <div className="relative z-10 mt-6 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
-            <button
-              onClick={() => setDealType('rent')}
-              className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-            >
-              Rent
-            </button>
-            <button
-              onClick={() => setDealType('buy')}
-              className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-            >
-              Buy
-            </button>
-          </div>
+        {/* Rent / Buy toggle (clean white) */}
+        <div className="mt-1 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
+          <button
+            onClick={() => setDealType('rent')}
+            className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
+          >
+            Rent
+          </button>
+          <button
+            onClick={() => setDealType('buy')}
+            className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
+          >
+            Buy
+          </button>
         </div>
 
         {/* Search card — location · more filters · search, in one row */}
-        <div className="relative mt-6 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+        <div className="relative mt-7 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
             <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
