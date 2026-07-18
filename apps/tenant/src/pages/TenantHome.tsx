@@ -21,7 +21,7 @@ import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon'
 import { MoreFiltersModal } from '@mzanzihomes/ui/components/search/MoreFiltersModal';
 import { usePropertySearchFilters } from '@mzanzihomes/ui/hooks/usePropertySearchFilters';
 import HomeCarousel from '@/components/HomeCarousel';
-import heroHouse from '@/assets/hero-house.jpg';
+import heroFamily from '@/assets/hero-family.jpg';
 
 const PAGE_BG = '#f5f8fd';
 
@@ -29,14 +29,14 @@ const PAGE_BG = '#f5f8fd';
 // tile to the notification category that badges it (mirrors the app's
 // notification-routing classifier); Messages badges from unread chats.
 const TILES = [
-  { label: 'Viewings',        desc: 'Manage and track property viewings',   icon: Eye,            tone: 'sapphire', path: '/tenant/viewings',          kind: 'viewing' },
-  { label: 'Maintenance',     desc: 'Report and track maintenance',         icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
-  { label: 'Applications',    desc: 'View and manage rental applications',  icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
-  { label: 'Messages',        desc: 'Chat with your landlord',              icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
-  { label: 'Payments',        desc: 'Rent payments and transaction history',icon: CreditCard,     tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
-  { label: 'Lease Contracts', desc: 'View and manage lease agreements',     icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
-  { label: 'Inventory',       desc: 'View property inventory',              icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
-  { label: 'Inspection List', desc: 'Property inspection and condition',    icon: Camera,         tone: 'ruby',     path: '/tenant/condition-records', kind: 'condition_record' },
+  { label: 'Viewings',        desc: 'Manage your property viewings.',                                        icon: Eye,            tone: 'sapphire', path: '/tenant/viewings',          kind: 'viewing' },
+  { label: 'Maintenance',     desc: 'Report maintenance issues and upload photos.',                          icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
+  { label: 'Applications',    desc: 'View and manage your rental applications.',                             icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
+  { label: 'Messages',        desc: 'Securely message your landlord with immutable messages.',               icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
+  { label: 'Payments',        desc: 'Rent payments and transaction history.',                                icon: CreditCard,     tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
+  { label: 'Lease Contracts', desc: 'View, sign and securely store your online rental agreements.',          icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
+  { label: 'Inventory',       desc: 'View your property’s inventory, including furniture and recorded items.', icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
+  { label: 'Inspection List', desc: 'Keep permanent records of property inspections with photos, notes and condition reports.', icon: Camera, tone: 'ruby',  path: '/tenant/condition-records', kind: 'condition_record' },
 ] as const;
 
 // Same normalisation the notification router uses (packages/ui notificationRoutes).
@@ -129,10 +129,23 @@ export default function TenantHome() {
     <div className="min-h-screen" style={{ background: PAGE_BG, minHeight: '100dvh' }}>
       <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
 
-        {/* Hero — brand row, family banner, trust heading */}
+        {/* Hero — text on the left, family/home photo bleeding in from the
+            right and fading softly to the left into the white page. */}
         <div className="relative">
+          <div className="pointer-events-none absolute -right-5 -top-6 h-[440px] w-[66%] overflow-hidden">
+            <img
+              src={heroFamily}
+              alt="A family at their modern South African home at sunset"
+              className="h-full w-full object-cover object-center"
+              style={{
+                WebkitMaskImage: 'linear-gradient(to left, black 54%, transparent 94%)',
+                maskImage: 'linear-gradient(to left, black 54%, transparent 94%)',
+              }}
+            />
+          </div>
+
           {/* Top row — brand · bell · account */}
-          <div className="flex items-center justify-between">
+          <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}>
                 <Home className="h-6 w-6 text-white" />
@@ -167,24 +180,20 @@ export default function TenantHome() {
             )}
           </div>
 
-          {/* Family hero banner. NOTE: replace hero-house.jpg with a warm SA
-              family lifestyle photo (parents + two children, ~12-13) — home,
-              family, trust, belonging. */}
-          <div className="relative mt-4 h-[172px] overflow-hidden rounded-3xl shadow-[0_22px_46px_-24px_rgba(20,50,90,0.55)]">
-            <img src={heroHouse} alt="A South African family at home" className="h-full w-full object-cover" />
-            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,31,69,0) 52%, rgba(10,31,69,0.32) 100%)' }} />
-          </div>
-
-          {/* Trust heading */}
-          <div className="mt-5">
-            {firstName && <p className="text-[15px] font-semibold text-slate-500">Hi {firstName} 👋</p>}
-            <h1 className="mt-1 text-[23px] font-extrabold leading-snug tracking-tight text-slate-900">
-              Welcome to South Africa&apos;s most advanced and trusted <span className="text-blue-600">commission-free rental platform</span>.
+          {/* Greeting headline + short support line */}
+          <div className="relative z-10 mt-9 max-w-[64%]">
+            <h1 className="text-[29px] font-extrabold leading-[1.12] tracking-tight text-slate-900">
+              {hasSignedLease
+                ? `Welcome home${firstName ? `, ${firstName}` : ''}!`
+                : 'Hi there, welcome to MzanziHomes!'}
             </h1>
+            <p className="mt-3 text-[14px] leading-relaxed text-slate-500">
+              Commission-free renting, made simple and secure.
+            </p>
           </div>
 
           {/* Rent / Buy toggle */}
-          <div className="mt-5 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
+          <div className="relative z-10 mt-6 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
             <button
               onClick={() => setDealType('rent')}
               className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
@@ -284,15 +293,9 @@ export default function TenantHome() {
           </div>
         </div>
 
-        {/* Why Use MzanziHomes? — intro + carousel */}
+        {/* Homepage carousel (intro lives in slide 1) */}
         <div className="mt-8">
-          <h2 className="text-[19px] font-extrabold tracking-tight text-slate-900">Why Use MzanziHomes?</h2>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed text-slate-500">
-            MzanziHomes was created to give tenants a safer, simpler and more secure rental experience. Every important conversation, document, inspection and record is kept together in one trusted place, helping protect your rights and giving you greater confidence from move-in to move-out.
-          </p>
-          <div className="mt-4">
-            <HomeCarousel />
-          </div>
+          <HomeCarousel />
         </div>
       </div>
 

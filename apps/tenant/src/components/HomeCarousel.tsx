@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
-import heroHouse from '@/assets/hero-house.jpg';
+import heroFamily from '@/assets/hero-family.jpg';
 
 interface Slide {
   title: string;
   body: string;
 }
 
+// "Why Use MzanziHomes?" leads, then the feature stories.
 const SLIDES: Slide[] = [
+  { title: 'Why Use MzanziHomes?', body: 'MzanziHomes was created to give tenants a safer, simpler and more secure rental experience. Every important conversation, document, inspection and record is kept together in one trusted place, helping protect your rights from move-in to move-out.' },
   { title: 'Commission-Free Renting', body: 'Connect directly with landlords through MzanziHomes. Enjoy a simpler rental experience without paying agent commission fees.' },
   { title: 'Smart Rental Platform', body: 'Everything you need to rent with confidence, including digital lease agreements, electronic signatures and powerful rental management tools.' },
   { title: 'Rent with Confidence', body: 'Simple digital tools, secure records and friendly support help you stay organised and protected throughout your rental journey.' },
@@ -15,13 +17,16 @@ const SLIDES: Slide[] = [
   { title: 'Secure In-App Messaging', body: 'Communicate securely with your landlord directly inside MzanziHomes, keeping all important rental conversations in one protected place.' },
 ];
 
-/** Premium homepage carousel: one fixed home image, sliding text, dots. */
+/**
+ * Homepage carousel — same premium language as the hero: white card, text on
+ * the left, home image bleeding in from the right and fading to white.
+ * Auto-rotates; swipe or tap dots to navigate.
+ */
 export default function HomeCarousel() {
   const [index, setIndex] = useState(0);
   const pausedRef = useRef(false);
   const startX = useRef<number | null>(null);
 
-  // Auto-advance every 5s unless the user is interacting.
   useEffect(() => {
     const id = setInterval(() => {
       if (!pausedRef.current) setIndex((i) => (i + 1) % SLIDES.length);
@@ -47,37 +52,48 @@ export default function HomeCarousel() {
 
   return (
     <div
-      className="relative h-[188px] select-none overflow-hidden rounded-3xl shadow-[0_22px_46px_-24px_rgba(20,50,90,0.55)]"
+      className="relative select-none overflow-hidden rounded-3xl bg-white shadow-[0_22px_46px_-26px_rgba(20,50,90,0.5)]"
       onPointerDown={onPointerDown}
       onPointerUp={onPointerUp}
       onPointerLeave={() => { startX.current = null; pausedRef.current = false; }}
     >
-      {/* Fixed home image + scrim */}
-      <img src={heroHouse} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,31,69,0.10) 0%, rgba(10,31,69,0.30) 42%, rgba(8,22,53,0.82) 100%)' }} />
+      {/* Home image bleeding in from the right, fading to white */}
+      <div className="pointer-events-none absolute -right-2 top-0 h-full w-[52%] overflow-hidden">
+        <img
+          src={heroFamily}
+          alt=""
+          className="h-full w-full object-cover object-center"
+          style={{
+            WebkitMaskImage: 'linear-gradient(to left, black 46%, transparent 96%)',
+            maskImage: 'linear-gradient(to left, black 46%, transparent 96%)',
+          }}
+        />
+      </div>
 
       {/* Sliding text track */}
       <div
-        className="absolute inset-x-0 bottom-0 flex"
+        className="relative flex"
         style={{ transform: `translateX(-${index * 100}%)`, transition: 'transform 620ms cubic-bezier(0.22, 1, 0.36, 1)' }}
       >
         {SLIDES.map((s) => (
-          <div key={s.title} className="w-full shrink-0 px-5 pb-9 pt-4">
-            <h3 className="text-[19px] font-extrabold leading-tight text-white">{s.title}</h3>
-            <p className="mt-1.5 text-[12.5px] leading-snug text-white/85">{s.body}</p>
+          <div key={s.title} className="w-full shrink-0 px-5 pb-11 pt-6">
+            <div className="max-w-[58%]">
+              <h3 className="text-[18px] font-extrabold leading-tight tracking-tight text-slate-900">{s.title}</h3>
+              <p className="mt-2 text-[12px] leading-snug text-slate-500">{s.body}</p>
+            </div>
           </div>
         ))}
       </div>
 
       {/* Pagination dots */}
-      <div className="absolute inset-x-0 bottom-3 flex items-center justify-center gap-1.5">
+      <div className="absolute inset-x-0 bottom-3.5 flex items-center justify-start gap-1.5 px-5">
         {SLIDES.map((s, i) => (
           <button
             key={s.title}
             onClick={() => go(i)}
             aria-label={`Go to slide ${i + 1}`}
             className="h-1.5 rounded-full transition-all duration-300"
-            style={{ width: i === index ? 18 : 6, background: i === index ? '#ffffff' : 'rgba(255,255,255,0.5)' }}
+            style={{ width: i === index ? 18 : 6, background: i === index ? '#2563EB' : '#cbd5e1' }}
           />
         ))}
       </div>
