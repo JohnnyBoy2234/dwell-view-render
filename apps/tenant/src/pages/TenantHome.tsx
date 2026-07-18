@@ -138,8 +138,14 @@ export default function TenantHome() {
               alt="A family at their modern South African home at sunset"
               className="h-full w-full object-cover object-center"
               style={{
-                WebkitMaskImage: 'linear-gradient(to left, black 54%, transparent 94%)',
-                maskImage: 'linear-gradient(to left, black 54%, transparent 94%)',
+                // Fade the photo into white on the left, top and bottom edges
+                // (two mask layers intersected).
+                WebkitMaskImage:
+                  'linear-gradient(to left, black 54%, transparent 94%), linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%)',
+                WebkitMaskComposite: 'source-in',
+                maskImage:
+                  'linear-gradient(to left, black 54%, transparent 94%), linear-gradient(to bottom, transparent 0%, black 16%, black 82%, transparent 100%)',
+                maskComposite: 'intersect',
               }}
             />
           </div>
