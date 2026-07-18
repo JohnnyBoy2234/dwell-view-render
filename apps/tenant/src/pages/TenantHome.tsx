@@ -17,6 +17,7 @@ import {
   Eye, Package, Camera, HelpCircle, Calendar, Link2, Building, CreditCard, Bell,
 } from 'lucide-react';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
+import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
@@ -25,15 +26,15 @@ const PAGE_BG = '#f5f8fd';
 // tile to the notification category that badges it (mirrors the app's
 // notification-routing classifier); Messages badges from unread chats.
 const TILES = [
-  { label: 'Viewings',        icon: Eye,            tint: 'bg-blue-50',    iconBg: 'bg-blue-100',    iconFg: 'text-blue-600',    path: '/tenant/viewings',          kind: 'viewing' },
-  { label: 'Maintenance',     icon: Wrench,         tint: 'bg-orange-50',  iconBg: 'bg-orange-100',  iconFg: 'text-orange-500',  path: '/tenant/maintenance',       kind: 'maintenance' },
-  { label: 'Applications',    icon: ClipboardCheck, tint: 'bg-pink-50',    iconBg: 'bg-pink-100',    iconFg: 'text-pink-600',    path: '/tenant/applications',      kind: 'application' },
-  { label: 'Messages',        icon: MessageCircle,  tint: 'bg-violet-50',  iconBg: 'bg-violet-100',  iconFg: 'text-violet-600',  path: '/messages',                 kind: 'message' },
-  { label: 'Payments',        icon: Receipt,        tint: 'bg-emerald-50', iconBg: 'bg-emerald-100', iconFg: 'text-emerald-600', path: '/tenant/payments',          kind: 'payment' },
-  { label: 'Lease Contracts', icon: FileText,       tint: 'bg-sky-50',     iconBg: 'bg-indigo-100',  iconFg: 'text-indigo-600',  path: '/tenant/leases',            kind: 'lease' },
-  { label: 'Inventory',       icon: Package,        tint: 'bg-teal-50',    iconBg: 'bg-teal-100',    iconFg: 'text-teal-600',    path: '/tenant/inventory',         kind: 'inventory' },
-  { label: 'Inspection List', icon: Camera,         tint: 'bg-rose-50',    iconBg: 'bg-rose-100',    iconFg: 'text-rose-600',    path: '/tenant/condition-records', kind: 'condition_record' },
-  { label: 'Support',         icon: HelpCircle,     tint: 'bg-amber-50',   iconBg: 'bg-amber-100',   iconFg: 'text-amber-600',   path: '/tenant/support' },
+  { label: 'Viewings',        icon: Eye,            tone: 'sapphire', path: '/tenant/viewings',          kind: 'viewing' },
+  { label: 'Maintenance',     icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
+  { label: 'Applications',    icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
+  { label: 'Messages',        icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
+  { label: 'Payments',        icon: Receipt,        tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
+  { label: 'Lease Contracts', icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
+  { label: 'Inventory',       icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
+  { label: 'Inspection List', icon: Camera,         tone: 'ruby',     path: '/tenant/condition-records', kind: 'condition_record' },
+  { label: 'Support',         icon: HelpCircle,     tone: 'amber',    path: '/tenant/support' },
 ] as const;
 
 // Same normalisation the notification router uses (packages/ui notificationRoutes).
@@ -62,6 +63,7 @@ export default function TenantHome() {
 
   const [searchLocation, setSearchLocation] = useState('');
   const [dealType, setDealType] = useState<'rent' | 'buy'>('rent');
+  const [pressedTile, setPressedTile] = useState<string | null>(null);
 
   // First-time welcome, shown right after a tenant joins via an invite.
   const [showWelcome, setShowWelcome] = useState(false);
@@ -259,16 +261,18 @@ export default function TenantHome() {
                 <button
                   key={t.label}
                   onClick={() => openTile(t.path, kind)}
-                  className={cn('relative flex flex-col items-center gap-2.5 rounded-2xl border border-black/[0.04] px-2 py-5 transition active:scale-95', t.tint)}
+                  onPointerDown={() => setPressedTile(t.label)}
+                  onPointerUp={() => setPressedTile(null)}
+                  onPointerLeave={() => setPressedTile(null)}
+                  onPointerCancel={() => setPressedTile(null)}
+                  className="relative flex flex-col items-center gap-2.5 rounded-2xl bg-white px-2 py-5 shadow-[0_12px_26px_-16px_rgba(20,50,90,0.4)] transition active:scale-[0.99]"
                 >
                   {badge > 0 && (
-                    <span className="absolute right-2 top-2 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                    <span className="absolute right-2 top-2 z-10 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge > 9 ? '9+' : badge}
                     </span>
                   )}
-                  <span className={cn('flex h-12 w-12 items-center justify-center rounded-full', t.iconBg)}>
-                    <t.icon className={cn('h-6 w-6', t.iconFg)} />
-                  </span>
+                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} pressed={pressedTile === t.label} />
                   <span className="text-center text-[13px] font-bold leading-tight text-slate-800">{t.label}</span>
                 </button>
               );

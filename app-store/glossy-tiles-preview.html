@@ -1,0 +1,62 @@
+<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  body{font-family:Inter,sans-serif;margin:0;background:#f5f8fd;display:flex;justify-content:center}
+  .wrap{width:430px;padding:24px 20px}
+  h2{font-size:15px;font-weight:800;color:#0f172a;margin:0 0 12px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:20px 8px;
+        box-shadow:0 12px 26px -16px rgba(20,50,90,.4);cursor:pointer;transition:transform .15s}
+  .tile:active{transform:scale(.99)}
+  .tile span.lbl{font-size:13px;font-weight:700;color:#1e293b;text-align:center}
+  .g{position:relative;width:54px;height:54px;border-radius:99px;display:flex;align-items:center;justify-content:center;
+     transition:transform .24s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease,filter .16s ease}
+  .g svg{position:relative;width:25px;height:25px;stroke:#fff;fill:none;stroke-width:2.4}
+  .g .spec{position:absolute;top:13%;left:21%;width:42%;height:27%;border-radius:99px;
+     background:radial-gradient(closest-side,rgba(255,255,255,.9),rgba(255,255,255,0));filter:blur(1px)}
+  .tile:active .g{transform:scale(.97);filter:brightness(.96) saturate(1.05)}
+  .badge{position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;height:20px;min-width:20px;
+     border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 5px;z-index:10}
+</style></head><body>
+<div class="wrap">
+  <h2>Manage your rental</h2>
+  <div class="grid" id="grid"></div>
+</div>
+<script>
+  const tones = {
+    sapphire:['#7db0ff','#1e6bff','#0b3ea8'], emerald:['#5fe9b4','#10b981','#046a49'],
+    orange:['#ffb267','#f97316','#a8420a'], purple:['#b48cff','#7c3aed','#45177f'],
+    cyan:['#63e2f6','#06b6d4','#046d92'], indigo:['#8f89f6','#4f46e5','#2a238c'],
+    teal:['#5fe8d8','#14b8a6','#0a6d63'], ruby:['#ff6f8d','#e11d48','#8e0d2c'],
+    amber:['#ffcd63','#f59e0b','#a86200'],
+  };
+  const icons = {
+    Viewings:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+    Maintenance:'<path d="M14.7 6.3a5 5 0 0 0-6.9 6L3 17l4 4 4.7-4.8a5 5 0 0 0 6-6.9L14 13l-3-3z"/>',
+    Applications:'<path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/>',
+    Messages:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+    Payments:'<path d="M4 3h16v18l-3-2-3 2-3-2-3 2-4-2z"/><path d="M8 8h8M8 12h5"/>',
+    'Lease Contracts':'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>',
+    Inventory:'<path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/>',
+    'Inspection List':'<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>',
+    Support:'<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4"/><path d="M12 17h.01"/>',
+  };
+  const tileTone = {Viewings:'sapphire',Maintenance:'emerald',Applications:'orange',Messages:'purple',Payments:'cyan','Lease Contracts':'indigo',Inventory:'teal','Inspection List':'ruby',Support:'amber'};
+  const badges = {Viewings:2,Maintenance:1,Messages:3};
+  const grid=document.getElementById('grid');
+  Object.keys(icons).forEach(label=>{
+    const [light,base,dark]=tones[tileTone[label]];
+    const bg=`radial-gradient(66% 42% at 33% 16%,rgba(255,255,255,.95),rgba(255,255,255,0) 72%),radial-gradient(82% 54% at 50% 112%,rgba(255,255,255,.42),rgba(255,255,255,0) 62%),radial-gradient(135% 130% at 50% 24%,${light} 0%,${base} 48%,${dark} 100%)`;
+    const sh=`inset 0 2px 2px rgba(255,255,255,.82),inset 0 -7px 12px rgba(0,0,0,.30),inset 0 10px 18px rgba(255,255,255,.20),0 9px 18px -4px ${dark}8c,0 3px 6px rgba(0,0,0,.16)`;
+    const b=badges[label];
+    grid.insertAdjacentHTML('beforeend',`
+      <div class="tile">
+        ${b?`<span class="badge">${b}</span>`:''}
+        <span class="g" style="background:${bg};box-shadow:${sh}"><span class="spec"></span>
+          <svg viewBox="0 0 24 24">${icons[label]}</svg></span>
+        <span class="lbl">${label}</span>
+      </div>`);
+  });
+</script>
+</body></html>
