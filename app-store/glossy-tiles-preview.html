@@ -11,32 +11,31 @@
   .seg .off{background:transparent;color:#64748b}
   .icobtn{position:relative;width:44px;height:44px;border-radius:99px;background:#fff;box-shadow:0 4px 12px -4px rgba(20,50,90,.25);display:flex;align-items:center;justify-content:center}
   .icobtn svg{width:20px;height:20px;stroke:#334155;fill:none;stroke-width:2}
-  .nb{position:absolute;top:-3px;right:-3px;background:#7c3aed;color:#fff;font-size:10px;font-weight:700;height:20px;min-width:20px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 5px}
+  .nb{position:absolute;top:-3px;right:-3px;background:#2563EB;color:#fff;font-size:10px;font-weight:700;height:20px;min-width:20px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 5px}
   .av{width:44px;height:44px;border-radius:99px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-weight:700;color:#475569;font-size:14px}
   h1{font-size:38px;font-weight:800;color:#0f172a;margin:2px 0 0}
   .hi{font-size:19px;color:#64748b;font-weight:500;margin-top:24px}
   .search{margin-top:16px;display:flex;align-items:center;gap:8px;background:#fff;border-radius:24px;padding:12px;box-shadow:0 20px 44px -22px rgba(20,50,90,.4)}
   .search .loc{flex:1;display:flex;align-items:center;gap:10px}
-  .search .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#7c3aed}
+  .search .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#2563EB}
   .search input{border:0;outline:0;font-size:13px;color:#334155;width:100%}
   .filt{width:40px;height:40px;border-radius:99px;background:#f1f5f9;display:flex;align-items:center;justify-content:center}
   .filt svg{width:18px;height:18px;stroke:#475569;fill:none;stroke-width:2}
-  .sbtn{display:flex;align-items:center;gap:6px;background:#6d28d9;color:#fff;font-weight:700;font-size:14px;border-radius:99px;padding:12px 16px}
+  .sbtn{display:flex;align-items:center;gap:6px;background:#2563EB;color:#fff;font-weight:700;font-size:14px;border-radius:99px;padding:12px 16px}
   .sbtn svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2.4}
   h2{font-size:19px;font-weight:800;color:#0f172a;margin:28px 0 12px}
   .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-  .tile{position:relative;display:flex;align-items:center;gap:10px;background:#fff;border-radius:16px;padding:12px;box-shadow:0 12px 26px -18px rgba(20,50,90,.45)}
+  .tile{position:relative;display:flex;align-items:center;gap:10px;min-height:92px;background:#fff;border-radius:16px;padding:12px;box-shadow:0 12px 26px -18px rgba(20,50,90,.45)}
   .tile .tt{flex:1;min-width:0}
-  .tile .tl{font-size:13.5px;font-weight:800;color:#0f172a;line-height:1.1}
-  .tile .td{font-size:11px;color:#64748b;line-height:1.25;margin-top:2px}
-  .tile .cv{width:16px;height:16px;stroke:#cbd5e1;fill:none;stroke-width:2}
+  .tile .tl{font-size:13px;font-weight:800;color:#0f172a;line-height:1.1}
+  .tile .td{font-size:10.5px;color:#64748b;line-height:1.15;margin-top:4px}
   .g{position:relative;width:46px;height:46px;border-radius:99px;flex:none;display:flex;align-items:center;justify-content:center}
   .g svg{position:relative;width:21px;height:21px;stroke:#fff;fill:none;stroke-width:2.4}
   .g .spec{position:absolute;top:15%;left:26%;width:22%;height:15%;border-radius:99px;background:radial-gradient(closest-side,rgba(255,255,255,1),rgba(255,255,255,0))}
   .banner{position:relative;overflow:hidden;margin-top:20px;background:#efeaff;border-radius:24px;padding:16px;display:flex;gap:12px;align-items:flex-start}
   .banner .bt{font-size:15px;font-weight:800;color:#0f172a}
   .banner .bd{font-size:12px;color:#475569;margin-top:4px;max-width:15rem;line-height:1.35}
-  .banner .lm{margin-top:12px;background:#6d28d9;color:#fff;font-weight:700;font-size:12.5px;border-radius:99px;padding:8px 16px;display:inline-block}
+  .banner .lm{margin-top:12px;background:#2563EB;color:#fff;font-weight:700;font-size:12.5px;border-radius:99px;padding:8px 16px;display:inline-block}
 </style></head><body>
 <div class="wrap">
   <div class="row">
@@ -68,7 +67,7 @@
   </div>
 </div>
 <script>
-  const tones={sapphire:['#7db0ff','#1f6bff','#0b3ca6'],emerald:['#7bea90','#22c55e','#12763a'],orange:['#ffb35f','#f97316','#a8420a'],purple:['#b492ff','#7c3aed','#45177f'],cyan:['#54dcc9','#0f9e8e','#0a5b53'],indigo:['#6d8cf3','#2447c8','#132873'],teal:['#5ce7d6','#14b8a6','#0a6d63'],ruby:['#ff8072','#ef4444','#a01818'],amber:['#ffce63','#f4a009','#a86200']};
+  const tones={sapphire:['#7db0ff','#1f6bff','#0b3ca6'],emerald:['#7bea90','#22c55e','#12763a'],orange:['#ffb35f','#f97316','#a8420a'],purple:['#b492ff','#2563EB','#45177f'],cyan:['#54dcc9','#0f9e8e','#0a5b53'],indigo:['#6d8cf3','#2447c8','#132873'],teal:['#5ce7d6','#14b8a6','#0a6d63'],ruby:['#ff8072','#ef4444','#a01818'],amber:['#ffce63','#f4a009','#a86200']};
   const ic={
     Viewings:['sapphire','Manage and track property viewings','<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'],
     Maintenance:['emerald','Report and track maintenance','<path d="M14.7 6.3a5 5 0 0 0-6.9 6L3 17l4 4 4.7-4.8a5 5 0 0 0 6-6.9L14 13l-3-3z"/>'],
@@ -81,13 +80,13 @@
     Support:['amber','Get help and support','<circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 2-3 4"/><path d="M12 17h.01"/>'],
   };
   function orb(el,tone,svg){const[light,base,dark]=tones[tone];
-    el.style.background=`radial-gradient(40% 32% at 30% 22%,rgba(255,255,255,.98) 0%,rgba(255,255,255,.35) 42%,rgba(255,255,255,0) 68%),radial-gradient(85% 58% at 42% 4%,rgba(255,255,255,.42),rgba(255,255,255,0) 55%),radial-gradient(62% 40% at 50% 104%,${light} 0%,rgba(255,255,255,0) 58%),radial-gradient(125% 120% at 40% 32%,${light} 0%,${base} 44%,${dark} 100%)`;
-    el.style.boxShadow=`inset 0 3px 5px rgba(255,255,255,.45),inset 0 -9px 15px rgba(0,0,0,.34),0 10px 20px -5px ${dark}94,0 3px 6px rgba(0,0,0,.16)`;
+    el.style.background=`radial-gradient(46% 36% at 30% 20%,rgba(255,255,255,1) 0%,rgba(255,255,255,.5) 38%,rgba(255,255,255,0) 66%),radial-gradient(68% 46% at 50% 108%,rgba(255,255,255,.7),rgba(255,255,255,0) 60%),radial-gradient(120% 118% at 42% 36%,${light} 0%,${base} 58%,${dark} 100%)`;
+    el.style.boxShadow=`inset 0 0 0 1.4px rgba(255,255,255,.35),inset 0 3px 7px rgba(255,255,255,.6),inset 0 -9px 15px rgba(0,0,0,.20),0 8px 18px -5px ${base}75,0 2px 5px rgba(0,0,0,.12)`;
     el.innerHTML=`<span class="spec"></span><svg viewBox="0 0 24 24">${svg}</svg>`;}
   const grid=document.getElementById('grid');
   Object.keys(ic).forEach(label=>{const[tone,desc,svg]=ic[label];
     const d=document.createElement('div');d.className='tile';
-    d.innerHTML=`<span class="g"></span><div class="tt"><div class="tl">${label}</div><div class="td">${desc}</div></div><svg class="cv" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>`;
+    d.innerHTML=`<span class="g"></span><div class="tt"><div class="tl">${label}</div><div class="td">${desc}</div></div>`;
     grid.appendChild(d);orb(d.querySelector('.g'),tone,svg);});
   orb(document.getElementById('loc'),'sapphire','<path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>');
   orb(document.getElementById('shield'),'purple','<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>');

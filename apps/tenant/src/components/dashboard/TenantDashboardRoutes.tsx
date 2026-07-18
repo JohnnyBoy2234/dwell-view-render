@@ -15,7 +15,7 @@ import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
 import {
-  Eye, Settings, FileText, Camera, Receipt, Building, HelpCircle, CreditCard, User,
+  Eye, Wrench, FileText, Camera, Receipt, ClipboardCheck, HelpCircle, Package, User,
 } from 'lucide-react';
 
 export default function TenantDashboardRoutes() {
@@ -40,7 +40,7 @@ export default function TenantDashboardRoutes() {
         </TileDetailLayout>
       } />
       <Route path="inventory" element={
-        <TileDetailLayout icon={FileText} title="Inventory" subtitle="Recorded by your landlord for this property">
+        <TileDetailLayout icon={Package} title="Inventory" subtitle="Recorded by your landlord for this property">
           <TenantInventory />
         </TileDetailLayout>
       } />
@@ -60,7 +60,7 @@ export default function TenantDashboardRoutes() {
         </TileDetailLayout>
       } />
       <Route path="applications" element={
-        <TileDetailLayout icon={Building} title="Applications" subtitle="Invitations, requests and application status">
+        <TileDetailLayout icon={ClipboardCheck} title="Applications" subtitle="Invitations, requests and application status">
           <TenantApplicationsSection />
         </TileDetailLayout>
       } />
@@ -70,17 +70,17 @@ export default function TenantDashboardRoutes() {
         </TileDetailLayout>
       } />
       <Route path="maintenance" element={
-        <TileDetailLayout icon={Settings} title="Maintenance" subtitle="Report issues and track progress">
+        <TileDetailLayout icon={Wrench} title="Maintenance" subtitle="Report issues and track progress">
           <TenantMaintenance />
         </TileDetailLayout>
       } />
       <Route path="maintenance/responses" element={
-        <TileDetailLayout icon={Settings} title="Maintenance Responses" subtitle="Landlord replies to your requests">
+        <TileDetailLayout icon={Wrench} title="Maintenance Responses" subtitle="Landlord replies to your requests">
           <TenantMaintenanceResponses />
         </TileDetailLayout>
       } />
       <Route path="maintenance/:ticketId" element={
-        <TileDetailLayout icon={Settings} title="Maintenance Ticket" subtitle="Request details and updates">
+        <TileDetailLayout icon={Wrench} title="Maintenance Ticket" subtitle="Request details and updates">
           <MaintenanceTicketDetails />
         </TileDetailLayout>
       } />
@@ -88,7 +88,7 @@ export default function TenantDashboardRoutes() {
           dashboard layout would render the "Messages" title twice */}
       <Route path="messages" element={<Messages />} />
       <Route path="payments" element={
-        <TileDetailLayout icon={CreditCard} title="Payments" subtitle="Rent, bills and payment history">
+        <TileDetailLayout icon={Receipt} title="Payments" subtitle="Rent, bills and payment history">
           <TenantPayments />
         </TileDetailLayout>
       } />

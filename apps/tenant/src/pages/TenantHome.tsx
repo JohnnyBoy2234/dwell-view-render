@@ -166,7 +166,7 @@ export default function TenantHome() {
                 >
                   <Bell className="h-5 w-5 text-slate-700" />
                   {totalUnread > 0 && (
-                    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: '#7c3aed' }}>
+                    <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: '#2563EB' }}>
                       {totalUnread > 9 ? '9+' : totalUnread}
                     </span>
                   )}
@@ -176,8 +176,8 @@ export default function TenantHome() {
             ) : (
               <button
                 onClick={() => navigate('/auth')}
-                className="rounded-full px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(109,40,217,0.7)] active:scale-95"
-                style={{ background: '#6d28d9' }}
+                className="rounded-full px-5 py-2.5 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-95"
+                style={{ background: '#2563EB' }}
               >
                 Sign in
               </button>
@@ -198,7 +198,7 @@ export default function TenantHome() {
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
             <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#7c3aed' }}>Location</p>
+              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
               <input
                 value={searchLocation}
                 onChange={(e) => setSearchLocation(e.target.value)}
@@ -217,8 +217,8 @@ export default function TenantHome() {
           </button>
           <button
             onClick={runSearch}
-            className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(109,40,217,0.7)] active:scale-[0.98]"
-            style={{ background: '#6d28d9' }}
+            className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+            style={{ background: '#2563EB' }}
           >
             <Search className="h-4 w-4" /> Search
           </button>
@@ -277,19 +277,18 @@ export default function TenantHome() {
                   onPointerUp={() => setPressedTile(null)}
                   onPointerLeave={() => setPressedTile(null)}
                   onPointerCancel={() => setPressedTile(null)}
-                  className="relative flex items-center gap-2.5 rounded-2xl bg-white p-3 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.99]"
+                  className="relative flex min-h-[92px] items-center gap-2.5 rounded-2xl bg-white p-3 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.99]"
                 >
                   {badge > 0 && (
                     <span className="absolute right-2 top-2 z-10 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge > 9 ? '9+' : badge}
                     </span>
                   )}
-                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} size={46} pressed={pressedTile === t.label} />
+                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} size={44} pressed={pressedTile === t.label} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-[13.5px] font-extrabold leading-tight text-slate-900">{t.label}</p>
-                    <p className="mt-0.5 text-[11px] leading-snug text-slate-500 line-clamp-2">{t.desc}</p>
+                    <p className="text-[13px] font-extrabold leading-tight text-slate-900">{t.label}</p>
+                    <p className="mt-1 text-[10.5px] leading-tight text-slate-500">{t.desc}</p>
                   </div>
-                  <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
                 </button>
               );
             })}
@@ -318,8 +317,8 @@ export default function TenantHome() {
               </p>
               <button
                 onClick={() => navigate('/learn-more')}
-                className="mt-3 rounded-full px-4 py-2 text-[12.5px] font-bold text-white shadow-[0_8px_16px_-8px_rgba(109,40,217,0.7)] active:scale-95"
-                style={{ background: '#6d28d9' }}
+                className="mt-3 rounded-full px-4 py-2 text-[12.5px] font-bold text-white shadow-[0_8px_16px_-8px_rgba(37,99,235,0.7)] active:scale-95"
+                style={{ background: '#2563EB' }}
               >
                 Learn more
               </button>

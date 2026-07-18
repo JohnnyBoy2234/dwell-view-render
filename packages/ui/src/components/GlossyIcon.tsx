@@ -45,26 +45,27 @@ export function GlossyIcon({ tone, icon: Icon, size = 54, pressed = false, class
       style={{
         width: size,
         height: size,
-        // Glossy 3D marble: a bright soft catch-light upper-left, a broad top
-        // sheen, a colour bounce along the bottom rim, over a sphere-shaded
-        // body (bright crown → base → dark lower edge). Layers top→bottom.
+        // Liquid glass: a bright glassy crown highlight, light transmitting up
+        // through the lower edge, a luminous coloured body and a bright glass
+        // rim — translucent and wet rather than an opaque marble.
         background: `
-          radial-gradient(40% 32% at 30% 22%, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.35) 42%, rgba(255,255,255,0) 68%),
-          radial-gradient(85% 58% at 42% 4%, rgba(255,255,255,0.42), rgba(255,255,255,0) 55%),
-          radial-gradient(62% 40% at 50% 104%, ${light} 0%, rgba(255,255,255,0) 58%),
-          radial-gradient(125% 120% at 40% 32%, ${light} 0%, ${base} 44%, ${dark} 100%)
+          radial-gradient(46% 36% at 30% 20%, rgba(255,255,255,1) 0%, rgba(255,255,255,0.5) 38%, rgba(255,255,255,0) 66%),
+          radial-gradient(68% 46% at 50% 108%, rgba(255,255,255,0.7), rgba(255,255,255,0) 60%),
+          radial-gradient(120% 118% at 42% 36%, ${light} 0%, ${base} 58%, ${dark} 100%)
         `,
         boxShadow: pressed
-          ? `inset 0 2px 4px rgba(255,255,255,0.35),
-             inset 0 -5px 10px rgba(0,0,0,0.38),
-             0 4px 9px -4px ${dark}99,
-             0 1px 3px rgba(0,0,0,0.20)`
-          : `inset 0 3px 5px rgba(255,255,255,0.45),
-             inset 0 -9px 15px rgba(0,0,0,0.34),
-             0 10px 20px -5px ${dark}94,
-             0 3px 6px rgba(0,0,0,0.16)`,
+          ? `inset 0 0 0 1.2px rgba(255,255,255,0.3),
+             inset 0 2px 5px rgba(255,255,255,0.5),
+             inset 0 -5px 10px rgba(0,0,0,0.22),
+             0 4px 10px -4px ${base}80,
+             0 1px 3px rgba(0,0,0,0.14)`
+          : `inset 0 0 0 1.4px rgba(255,255,255,0.35),
+             inset 0 3px 7px rgba(255,255,255,0.6),
+             inset 0 -9px 15px rgba(0,0,0,0.20),
+             0 8px 18px -5px ${base}75,
+             0 2px 5px rgba(0,0,0,0.12)`,
         transform: pressed ? 'scale(0.97)' : 'scale(1)',
-        filter: pressed ? 'brightness(0.95) saturate(1.06)' : 'none',
+        filter: pressed ? 'brightness(0.97) saturate(1.06)' : 'none',
         transition:
           'transform 240ms cubic-bezier(0.34,1.56,0.64,1), box-shadow 220ms ease, filter 160ms ease',
         willChange: 'transform',
