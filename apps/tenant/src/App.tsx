@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@mzanzihomes/ui/components/RouteGuard";
 import { MiniNavbar } from "@/components/ui/mini-navbar";
-import Index from "@/pages/Index";
 import TenantHome from "@/pages/TenantHome";
 import { MobileBottomBar } from "@mzanzihomes/ui/components/MobileBottomBar";
 import { MobileServices } from "@mzanzihomes/ui/services/mobileServices";
@@ -109,11 +108,9 @@ function AppRoutes() {
     <>
       <PaymentRedirectHandler />
       <Routes>
-        {/* Public browsing — the one-page hub is the landing for everyone
-            (signed-out visitors included); the old marketing page lives on
-            at /learn-more, reachable from the hub's "Learn more" button. */}
+        {/* Public browsing — the one-page hub is the landing for everyone,
+            signed-out visitors included. */}
         <Route path="/" element={<TenantHome />} />
-        <Route path="/learn-more" element={<Index />} />
         <Route path="/properties" element={<><MiniNavbar hideLandlordActions minimal /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/invite/:token" element={<ApplyInvite />} />

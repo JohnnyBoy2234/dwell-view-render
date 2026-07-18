@@ -12,14 +12,15 @@ import {
   ensureTwoHourViewingRemindersForLandlord,
 } from '@/utils/viewingReminders';
 import {
-  Home, Search, MapPin, SlidersHorizontal, ChevronRight,
-  Wrench, ClipboardCheck, MessageCircle, Receipt, FileText, ShieldCheck,
-  Eye, Package, Camera, HelpCircle, Calendar, Link2, Building, CreditCard, Bell,
+  Home, Search, MapPin, SlidersHorizontal,
+  Wrench, ClipboardCheck, MessageCircle, FileText, Headset, Receipt,
+  Eye, Package, Camera, CreditCard, Bell,
 } from 'lucide-react';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import { MoreFiltersModal } from '@mzanzihomes/ui/components/search/MoreFiltersModal';
 import { usePropertySearchFilters } from '@mzanzihomes/ui/hooks/usePropertySearchFilters';
+import HomeCarousel from '@/components/HomeCarousel';
 import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
@@ -32,11 +33,10 @@ const TILES = [
   { label: 'Maintenance',     desc: 'Report and track maintenance',         icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
   { label: 'Applications',    desc: 'View and manage rental applications',  icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
   { label: 'Messages',        desc: 'Chat with your landlord',              icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
-  { label: 'Payments',        desc: 'Rent payments and transaction history',icon: Receipt,        tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
+  { label: 'Payments',        desc: 'Rent payments and transaction history',icon: CreditCard,     tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
   { label: 'Lease Contracts', desc: 'View and manage lease agreements',     icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
   { label: 'Inventory',       desc: 'View property inventory',              icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
   { label: 'Inspection List', desc: 'Property inspection and condition',    icon: Camera,         tone: 'ruby',     path: '/tenant/condition-records', kind: 'condition_record' },
-  { label: 'Support',         desc: 'Get help and support',                 icon: HelpCircle,     tone: 'amber',    path: '/tenant/support' },
 ] as const;
 
 // Same normalisation the notification router uses (packages/ui notificationRoutes).
@@ -61,7 +61,7 @@ export default function TenantHome() {
   const navigate = useNavigate();
   const { unreadCount } = useUnreadMessages();
   const { notifications, markAsRead } = useNotifications();
-  const { upcomingViewings } = useTenantDashboard();
+  const { upcomingViewings, hasSignedLease } = useTenantDashboard();
   const { filters, updateFilters, clearFilters, executeSearch } = usePropertySearchFilters();
 
   const [searchLocation, setSearchLocation] = useState('');
@@ -129,25 +129,12 @@ export default function TenantHome() {
     <div className="min-h-screen" style={{ background: PAGE_BG, minHeight: '100dvh' }}>
       <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
 
-        {/* Hero — top row (Rent/Buy · bell · account) + greeting, over a
-            property image bleeding into the top-right corner */}
+        {/* Hero — brand row, family banner, trust heading */}
         <div className="relative">
-          <div className="pointer-events-none absolute -right-5 -top-4 h-[280px] w-[60%] overflow-hidden rounded-bl-[40px]">
-            <img
-              src={heroHouse}
-              alt=""
-              className="h-full w-full object-cover"
-              style={{
-                WebkitMaskImage: 'linear-gradient(215deg, black 44%, transparent 82%)',
-                maskImage: 'linear-gradient(215deg, black 44%, transparent 82%)',
-              }}
-            />
-          </div>
-
           {/* Top row — brand · bell · account */}
-          <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}>
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}>
                 <Home className="h-6 w-6 text-white" />
               </div>
               <span className="text-[23px] font-extrabold tracking-tight text-slate-900">MzanziHomes</span>
@@ -180,33 +167,41 @@ export default function TenantHome() {
             )}
           </div>
 
-          {/* Greeting */}
-          <div className="relative z-10 mt-6">
-            <p className="text-[19px] font-medium text-slate-500">Welcome home,</p>
-            <h1 className="text-[38px] font-extrabold leading-tight tracking-tight text-slate-900">
-              {firstName || 'there'} <span className="align-baseline">👋</span>
-            </h1>
+          {/* Family hero banner. NOTE: replace hero-house.jpg with a warm SA
+              family lifestyle photo (parents + two children, ~12-13) — home,
+              family, trust, belonging. */}
+          <div className="relative mt-4 h-[172px] overflow-hidden rounded-3xl shadow-[0_22px_46px_-24px_rgba(20,50,90,0.55)]">
+            <img src={heroHouse} alt="A South African family at home" className="h-full w-full object-cover" />
+            <div className="pointer-events-none absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,31,69,0) 52%, rgba(10,31,69,0.32) 100%)' }} />
+          </div>
 
-            {/* Rent / Buy toggle, under the name */}
-            <div className="mt-4 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
-              <button
-                onClick={() => setDealType('rent')}
-                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-              >
-                Rent
-              </button>
-              <button
-                onClick={() => setDealType('buy')}
-                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-              >
-                Buy
-              </button>
-            </div>
+          {/* Trust heading */}
+          <div className="mt-5">
+            {firstName && <p className="text-[15px] font-semibold text-slate-500">Hi {firstName} 👋</p>}
+            <h1 className="mt-1 text-[23px] font-extrabold leading-snug tracking-tight text-slate-900">
+              Welcome to South Africa&apos;s most advanced and trusted <span className="text-blue-600">commission-free rental platform</span>.
+            </h1>
+          </div>
+
+          {/* Rent / Buy toggle */}
+          <div className="mt-5 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
+            <button
+              onClick={() => setDealType('rent')}
+              className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
+            >
+              Rent
+            </button>
+            <button
+              onClick={() => setDealType('buy')}
+              className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
+            >
+              Buy
+            </button>
           </div>
         </div>
 
         {/* Search card — location · more filters · search, in one row */}
-        <div className="relative mt-16 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+        <div className="relative mt-6 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
             <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
@@ -236,10 +231,12 @@ export default function TenantHome() {
           </button>
         </div>
 
-        {/* Manage — every rental feature as a rectangle block */}
+        {/* Feature grid — heading depends on whether a lease exists yet */}
         <div className="mt-8">
-          <h2 className="mb-3 text-[19px] font-extrabold tracking-tight text-slate-900">Manage your rental</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <h2 className="mb-3 text-[19px] font-extrabold tracking-tight text-slate-900">
+            {hasSignedLease ? 'Manage your rental' : 'Everything you need to rent'}
+          </h2>
+          <div className="grid grid-cols-2 gap-2.5">
             {TILES.map((t) => {
               const kind = (t as { kind?: string }).kind;
               const badge = badgeFor(kind);
@@ -251,7 +248,7 @@ export default function TenantHome() {
                   onPointerUp={() => setPressedTile(null)}
                   onPointerLeave={() => setPressedTile(null)}
                   onPointerCancel={() => setPressedTile(null)}
-                  className="relative flex min-h-[92px] items-center gap-2.5 rounded-2xl bg-white p-3 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.99]"
+                  className="relative flex min-h-[78px] items-center gap-2.5 rounded-2xl bg-white p-3 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.99]"
                 >
                   {badge > 0 && (
                     <span className="absolute right-2 top-2 z-10 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
@@ -266,37 +263,35 @@ export default function TenantHome() {
                 </button>
               );
             })}
+
+            {/* Support — full-width card to balance the grid */}
+            <button
+              onClick={() => openTile('/tenant/support')}
+              onPointerDown={() => setPressedTile('Support')}
+              onPointerUp={() => setPressedTile(null)}
+              onPointerLeave={() => setPressedTile(null)}
+              onPointerCancel={() => setPressedTile(null)}
+              className="relative col-span-2 flex min-h-[78px] items-center gap-3.5 rounded-2xl bg-white p-3.5 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.995]"
+            >
+              <GlossyIcon tone={GLOSSY_TONES.amber} icon={Headset} size={48} pressed={pressedTile === 'Support'} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] font-extrabold leading-tight text-slate-900">We&apos;re Here to Help You</p>
+                <p className="mt-1 text-[11px] leading-snug text-slate-500">
+                  Our friendly team is always here to help. Whether you have a question, need guidance or need assistance using MzanziHomes, we&apos;re only a message away.
+                </p>
+              </div>
+            </button>
           </div>
         </div>
 
-        {/* Why rent with MzanziHomes */}
-        <div className="relative mt-5 overflow-hidden rounded-3xl p-4" style={{ background: '#efeaff' }}>
-          <div className="pointer-events-none absolute -bottom-1 -right-3 h-[92px] w-[42%] overflow-hidden">
-            <img
-              src={heroHouse}
-              alt=""
-              className="h-full w-full rounded-2xl object-cover"
-              style={{
-                WebkitMaskImage: 'linear-gradient(to left, black 55%, transparent 100%)',
-                maskImage: 'linear-gradient(to left, black 55%, transparent 100%)',
-              }}
-            />
-          </div>
-          <div className="relative flex items-start gap-3">
-            <GlossyIcon tone={GLOSSY_TONES.purple} icon={ShieldCheck} size={48} />
-            <div className="min-w-0 flex-1">
-              <p className="text-[15px] font-extrabold text-slate-900">Why rent with MzanziHomes?</p>
-              <p className="mt-1 max-w-[15rem] text-[12px] leading-snug text-slate-600">
-                Connect directly with landlords, enjoy zero agent fees, and manage everything in one secure place.
-              </p>
-              <button
-                onClick={() => navigate('/learn-more')}
-                className="mt-3 rounded-full px-4 py-2 text-[12.5px] font-bold text-white shadow-[0_8px_16px_-8px_rgba(109,40,217,0.7)] active:scale-95"
-                style={{ background: '#6d28d9' }}
-              >
-                Learn more
-              </button>
-            </div>
+        {/* Why Use MzanziHomes? — intro + carousel */}
+        <div className="mt-8">
+          <h2 className="text-[19px] font-extrabold tracking-tight text-slate-900">Why Use MzanziHomes?</h2>
+          <p className="mt-1.5 text-[12.5px] leading-relaxed text-slate-500">
+            MzanziHomes was created to give tenants a safer, simpler and more secure rental experience. Every important conversation, document, inspection and record is kept together in one trusted place, helping protect your rights and giving you greater confidence from move-in to move-out.
+          </p>
+          <div className="mt-4">
+            <HomeCarousel />
           </div>
         </div>
       </div>

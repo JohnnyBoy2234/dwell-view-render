@@ -15,7 +15,7 @@ import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
 import {
-  Eye, Wrench, FileText, Camera, Receipt, ClipboardCheck, HelpCircle, Package, User,
+  Eye, Wrench, FileText, Camera, Receipt, ClipboardCheck, Headset, Package, User, CreditCard,
 } from 'lucide-react';
 
 export default function TenantDashboardRoutes() {
@@ -88,12 +88,12 @@ export default function TenantDashboardRoutes() {
           dashboard layout would render the "Messages" title twice */}
       <Route path="messages" element={<Messages />} />
       <Route path="payments" element={
-        <TileDetailLayout icon={Receipt} title="Payments" subtitle="Rent, bills and payment history">
+        <TileDetailLayout icon={CreditCard} title="Payments" subtitle="Rent, bills and payment history">
           <TenantPayments />
         </TileDetailLayout>
       } />
       <Route path="support" element={
-        <TileDetailLayout icon={HelpCircle} title="Support & Help" subtitle="FAQs and contact support">
+        <TileDetailLayout icon={Headset} title="Support & Help" subtitle="FAQs and contact support">
           <TenantSupport />
         </TileDetailLayout>
       } />
