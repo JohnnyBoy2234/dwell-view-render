@@ -280,8 +280,8 @@ export default function TenantPropertyViewings() {
 
   return (
     <div className="relative mx-auto w-full max-w-2xl pb-8">
-      {/* Your next viewing */}
-      {next && (
+      {/* Your next viewing (illustration shows even with no bookings yet) */}
+      {(
         <div className="relative overflow-hidden rounded-3xl p-5" style={{ background: '#eaeefb' }}>
           <svg viewBox="0 0 170 140" className="pointer-events-none absolute -right-1 bottom-2 h-[124px] w-auto">
             <path d="M14 104 L34 84 L54 104 Z M22 104 v-14 h24 v14" fill="#c7d2f4" opacity="0.55" />
@@ -303,20 +303,38 @@ export default function TenantPropertyViewings() {
           </svg>
 
           <div className="relative z-10 max-w-[58%]">
-            <p className="text-[13px] font-semibold text-slate-500">Your next viewing</p>
-            <p className="mt-1 text-[25px] font-extrabold leading-tight text-blue-600">{relDay(next.start_time)}</p>
-            <p className="mt-1 truncate text-[16px] font-bold text-slate-900">{addr(next)}</p>
-            <span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-[12px] font-bold ${pill(next.status).cls}`}>
-              {pill(next.status).label}
-            </span>
-            <div>
-              <button
-                onClick={() => openViewing(next)}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
-              >
-                View details <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+            {next ? (
+              <>
+                <p className="text-[13px] font-semibold text-slate-500">Your next viewing</p>
+                <p className="mt-1 text-[25px] font-extrabold leading-tight text-blue-600">{relDay(next.start_time)}</p>
+                <p className="mt-1 truncate text-[16px] font-bold text-slate-900">{addr(next)}</p>
+                <span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-[12px] font-bold ${pill(next.status).cls}`}>
+                  {pill(next.status).label}
+                </span>
+                <div>
+                  <button
+                    onClick={() => openViewing(next)}
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+                  >
+                    View details <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-[13px] font-semibold text-slate-500">Your viewings</p>
+                <p className="mt-1 text-[23px] font-extrabold leading-tight text-slate-900">No viewings<br />scheduled yet</p>
+                <p className="mt-2 text-[13px] leading-snug text-slate-500">Book a viewing on a property and it will show up here.</p>
+                <div>
+                  <button
+                    onClick={() => navigate('/properties')}
+                    className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+                  >
+                    Browse properties <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
