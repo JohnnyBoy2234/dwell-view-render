@@ -70,17 +70,17 @@ export default function TenantDashboardRoutes() {
         </TileDetailLayout>
       } />
       <Route path="maintenance" element={
-        <TileDetailLayout icon={Wrench} title="Maintenance" subtitle="Report issues and track progress">
+        <TileDetailLayout accent="#16a34a" icon={Wrench} title="Maintenance" subtitle="Report issues and track progress">
           <TenantMaintenance />
         </TileDetailLayout>
       } />
       <Route path="maintenance/responses" element={
-        <TileDetailLayout icon={Wrench} title="Maintenance Responses" subtitle="Landlord replies to your requests">
+        <TileDetailLayout accent="#16a34a" icon={Wrench} title="Maintenance Responses" subtitle="Landlord replies to your requests">
           <TenantMaintenanceResponses />
         </TileDetailLayout>
       } />
       <Route path="maintenance/:ticketId" element={
-        <TileDetailLayout icon={Wrench} title="Maintenance Ticket" subtitle="Request details and updates">
+        <TileDetailLayout accent="#16a34a" icon={Wrench} title="Maintenance Ticket" subtitle="Request details and updates">
           <MaintenanceTicketDetails />
         </TileDetailLayout>
       } />

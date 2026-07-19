@@ -10,6 +10,8 @@ interface TileDetailLayoutProps {
   title: string;
   subtitle?: string;
   icon: ComponentType<{ className?: string }>;
+  /** Icon-badge colour (defaults to brand blue). */
+  accent?: string;
   children: ReactNode;
 }
 
@@ -18,7 +20,7 @@ interface TileDetailLayoutProps {
  * blue icon badge, title/subtitle, avatar) curving into a light sheet with the
  * branded "Mzanzi" watermark texture in the open spaces.
  */
-export default function TileDetailLayout({ title, subtitle, icon: Icon, children }: TileDetailLayoutProps) {
+export default function TileDetailLayout({ title, subtitle, icon: Icon, accent = '#2563EB', children }: TileDetailLayoutProps) {
   const navigate = useNavigate();
   const goBack = () => {
     if (window.history.length > 1) navigate(-1);
@@ -37,7 +39,7 @@ export default function TileDetailLayout({ title, subtitle, icon: Icon, children
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: '#2563EB' }}>
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: accent }}>
             <Icon className="h-[18px] w-[18px] text-white" />
           </span>
           <div className="min-w-0 flex-1">
