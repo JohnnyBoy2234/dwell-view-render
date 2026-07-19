@@ -106,82 +106,82 @@ const CardSkeleton = () => (
   </Card>
 );
 
-/** Premium orange open-envelope illustration: a letter carrying a house emblem
- * emerges from the envelope, with soft hills, trees and sparkles behind. Shared
- * by the hero (large) and the empty states (smaller). */
+/** Premium 3D open-envelope illustration: a crisp white document (folded
+ * top-right corner, profile circle + placeholder lines) rises out of a glossy
+ * orange envelope, with a soft contact shadow. Centred in a square viewBox so it
+ * never crops. Shared by the hero (large) and the empty states (smaller). */
 function EnvelopeArt({ className }: { className?: string }) {
   return (
     <div className={className}>
-      <svg viewBox="0 0 240 200" className="h-full w-full" role="img" aria-label="Open envelope with a letter">
+      <svg viewBox="0 0 220 224" className="h-full w-full" role="img" aria-label="Open envelope with a document">
         <defs>
-          <radialGradient id="ap-glow" cx="50%" cy="46%" r="55%">
-            <stop offset="0%" stopColor="#fbbf77" stopOpacity="0.45" />
-            <stop offset="100%" stopColor="#fbbf77" stopOpacity="0" />
-          </radialGradient>
           <linearGradient id="ap-doc" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0" stopColor="#ffffff" />
-            <stop offset="1" stopColor="#fff3e8" />
+            <stop offset="1" stopColor="#f6f8fb" />
           </linearGradient>
-          <linearGradient id="ap-pocket" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#fcd4a6" />
-            <stop offset="1" stopColor="#f7a94f" />
+          <linearGradient id="ap-back" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffce7e" />
+            <stop offset="1" stopColor="#ffb14a" />
           </linearGradient>
           <linearGradient id="ap-left" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#f9be74" />
-            <stop offset="1" stopColor="#f39b3c" />
+            <stop offset="0" stopColor="#ffd089" />
+            <stop offset="1" stopColor="#ffb54f" />
           </linearGradient>
           <linearGradient id="ap-right" x1="1" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#f7ad57" />
-            <stop offset="1" stopColor="#ef8a2b" />
+            <stop offset="0" stopColor="#ffc267" />
+            <stop offset="1" stopColor="#fca02b" />
+          </linearGradient>
+          <linearGradient id="ap-front" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor="#ffc35c" />
+            <stop offset="1" stopColor="#fb8c00" />
           </linearGradient>
           <filter id="ap-soft" x="-40%" y="-40%" width="180%" height="180%">
-            <feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#c8721f" floodOpacity="0.18" />
+            <feDropShadow dx="0" dy="7" stdDeviation="8" floodColor="#c8721f" floodOpacity="0.16" />
           </filter>
-          <clipPath id="ap-body"><rect x="48" y="100" width="144" height="80" rx="16" /></clipPath>
         </defs>
 
-        <ellipse cx="120" cy="98" rx="108" ry="90" fill="url(#ap-glow)" />
+        {/* soft contact shadow */}
+        <ellipse cx="110" cy="210" rx="82" ry="11" fill="#e79a3f" opacity="0.22" />
 
-        {/* hills */}
-        <path d="M18 168 Q60 128 104 168 Z" fill="#fbe0c4" opacity="0.8" />
-        <path d="M120 170 Q170 124 226 170 Z" fill="#fbdcbb" opacity="0.7" />
+        {/* envelope back / interior */}
+        <rect x="28" y="106" width="164" height="96" rx="18" fill="url(#ap-back)" />
 
-        {/* faint trees */}
-        <g opacity="0.6">
-          <rect x="45" y="150" width="4" height="12" rx="2" fill="#eec59a" />
-          <path d="M47 131 l11 21 h-22 z" fill="#f2d0a8" />
-          <rect x="198" y="150" width="4" height="12" rx="2" fill="#eec59a" />
-          <path d="M200 136 l9 16 h-18 z" fill="#f2d0a8" />
-        </g>
-
-        {/* soft shadow under the envelope */}
-        <ellipse cx="120" cy="190" rx="66" ry="8" fill="#c8721f" opacity="0.14" />
-
-        {/* letter with a house emblem */}
+        {/* document rising out of the envelope */}
         <g filter="url(#ap-soft)">
-          <rect x="80" y="46" width="80" height="96" rx="10" fill="url(#ap-doc)" />
-          <path d="M120 60 L136 73 L104 73 Z" fill="#f59e0b" />
-          <rect x="108" y="72" width="24" height="18" rx="2" fill="#fcae3d" />
-          <rect x="116" y="80" width="9" height="10" rx="1" fill="#ffffff" />
-          <rect x="94" y="100" width="52" height="5" rx="2.5" fill="#fde3c6" />
-          <rect x="94" y="111" width="52" height="5" rx="2.5" fill="#fde7d2" />
-          <rect x="94" y="122" width="34" height="5" rx="2.5" fill="#fde7d2" />
+          <path
+            d="M64 30 H150 L166 46 V162 q0 10 -10 10 H64 q-10 0 -10 -10 V40 q0 -10 10 -10 Z"
+            fill="url(#ap-doc)"
+          />
+          {/* folded top-right corner */}
+          <path d="M150 30 L150 46 L166 46 Z" fill="#fcd7a0" />
+          {/* profile circle + short lines */}
+          <circle cx="80" cy="64" r="15" fill="#ffa726" />
+          <rect x="102" y="57" width="46" height="6" rx="3" fill="#e6e9ee" />
+          <rect x="102" y="70" width="34" height="6" rx="3" fill="#eceff3" />
+          {/* placeholder lines */}
+          <rect x="66" y="96" width="94" height="7" rx="3.5" fill="#e6e9ee" />
+          <rect x="66" y="112" width="94" height="7" rx="3.5" fill="#eceff3" />
+          <rect x="66" y="128" width="70" height="7" rx="3.5" fill="#eceff3" />
         </g>
 
-        {/* envelope front */}
-        <g clipPath="url(#ap-body)">
-          <path d="M48 100 L120 138 L48 180 Z" fill="url(#ap-left)" />
-          <path d="M192 100 L120 138 L192 180 Z" fill="url(#ap-right)" />
-          <path d="M48 180 L120 138 L192 180 Z" fill="url(#ap-pocket)" />
-          <path d="M48 100 L120 138 L192 100 Z" fill="#8a4c12" opacity="0.10" />
+        {/* envelope front flaps (cover the lower half of the document) */}
+        <g clipPath="url(#ap-clip)">
+          <path d="M28 110 L110 168 L28 202 Z" fill="url(#ap-left)" />
+          <path d="M192 110 L110 168 L192 202 Z" fill="url(#ap-right)" />
+          <path d="M28 202 L110 168 L192 202 Z" fill="url(#ap-front)" />
+          {/* subtle seams + apex highlight for depth */}
+          <path d="M28 110 L110 168 L192 110" stroke="#e88b1e" strokeWidth="1.4" fill="none" opacity="0.35" />
+          <path d="M28 202 L110 168 L192 202" stroke="#d9791a" strokeWidth="1.4" fill="none" opacity="0.3" />
+          <path d="M110 168 L86 202 L134 202 Z" fill="#ffffff" opacity="0.12" />
         </g>
+        <clipPath id="ap-clip"><rect x="28" y="106" width="164" height="96" rx="18" /></clipPath>
 
-        {/* sparkles */}
-        <g strokeLinecap="round" fill="none">
-          <path d="M70 74 l0 8 M66 78 l8 0" stroke="#f7a94f" strokeWidth="2.4" opacity="0.75" />
-          <path d="M156 96 l0 6 M153 99 l6 0" stroke="#fbbf24" strokeWidth="2.2" opacity="0.75" />
-          <path d="M92 52 l0 6 M89 55 l6 0" stroke="#fdba74" strokeWidth="2" opacity="0.7" />
-          <circle cx="150" cy="58" r="2" fill="#fb923c" opacity="0.8" />
+        {/* floating particles */}
+        <g fill="#ffb74d" opacity="0.6">
+          <circle cx="40" cy="70" r="2.4" />
+          <circle cx="182" cy="86" r="2" />
+          <circle cx="196" cy="150" r="2.4" />
+          <circle cx="30" cy="150" r="2" />
         </g>
       </svg>
     </div>
@@ -191,7 +191,7 @@ function EnvelopeArt({ className }: { className?: string }) {
 function EmptyState({ title, paragraph }: { title: string; paragraph: string }) {
   return (
     <div className="rounded-[28px] bg-white p-8 text-center shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
-      <EnvelopeArt className="mx-auto h-28 w-32 animate-soft-float" />
+      <EnvelopeArt className="mx-auto h-32 w-32 animate-soft-float" />
       <h2 className="mt-3 text-[19px] font-extrabold text-slate-900">{title}</h2>
       <p className="mx-auto mt-1.5 max-w-xs text-[13.5px] leading-relaxed text-slate-500">{paragraph}</p>
     </div>
@@ -393,7 +393,7 @@ export const TenantApplicationsSection = () => {
         className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_20px_44px_-28px_rgba(200,90,20,0.5)]"
         style={{ background: 'linear-gradient(135deg,#fdeadb 0%, #fbe0cf 100%)' }}
       >
-        <EnvelopeArt className="pointer-events-none absolute -right-2 top-1/2 h-[150px] w-[176px] -translate-y-1/2 animate-soft-float" />
+        <EnvelopeArt className="pointer-events-none absolute right-1 top-1/2 h-[150px] w-[150px] -translate-y-1/2 animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Find your next home</h2>
           <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Track invitations, submit applications and stay updated.</p>
