@@ -339,7 +339,9 @@ export default function TenantPropertyViewings() {
         </div>
       )}
 
-      {/* Tabs */}
+      {/* Tabs + list — only when there's at least one viewing (the hero
+          already carries the empty state, so no duplicate empty card). */}
+      {viewings.length > 0 && (<>
       <div className="mt-6 flex items-center gap-7 border-b border-slate-200">
         {(['upcoming', 'past'] as const).map((t) => (
           <button
@@ -356,15 +358,7 @@ export default function TenantPropertyViewings() {
       {/* List */}
       <div className="mt-4 overflow-hidden rounded-3xl bg-white shadow-[0_14px_32px_-22px_rgba(20,50,90,0.4)]">
         {list.length === 0 ? (
-          <div className="p-8 text-center">
-            <Calendar className="mx-auto h-9 w-9 text-slate-300" />
-            <p className="mt-2 text-[14px] font-semibold text-slate-700">No {tab} viewings</p>
-            {tab === 'upcoming' && (
-              <button onClick={() => navigate('/properties')} className="mt-3 rounded-full bg-blue-600 px-4 py-2 text-[13px] font-bold text-white active:scale-95">
-                Browse properties
-              </button>
-            )}
-          </div>
+          <p className="px-4 py-6 text-center text-[13px] text-slate-400">No {tab} viewings.</p>
         ) : (
           list.map((v, i) => (
             <button
@@ -385,6 +379,7 @@ export default function TenantPropertyViewings() {
           ))
         )}
       </div>
+      </>)}
 
       {/* Viewing tips + reschedule */}
       <div className="mt-5 rounded-3xl bg-white p-5 shadow-[0_14px_32px_-22px_rgba(20,50,90,0.4)]">
