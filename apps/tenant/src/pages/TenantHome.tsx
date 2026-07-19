@@ -37,6 +37,7 @@ const TILES = [
   { label: 'Lease Contracts', desc: 'View, sign and securely store your online rental agreements.',          icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
   { label: 'Inventory',       desc: 'View your property’s inventory, including furniture and recorded items.', icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
   { label: 'Inspection List', desc: 'Keep permanent records of property inspections with photos, notes and condition reports.', icon: Camera, tone: 'ruby',  path: '/tenant/condition-records', kind: 'condition_record' },
+  { label: 'Support',         desc: 'Get help and support.',                                                 icon: Headset,        tone: 'amber',    path: '/tenant/support' },
 ] as const;
 
 // Same normalisation the notification router uses (packages/ui notificationRoutes).
@@ -248,7 +249,7 @@ export default function TenantHome() {
           <h2 className="mb-3 text-[19px] font-extrabold tracking-tight text-slate-900">
             {hasSignedLease ? 'Manage your rental' : 'Everything you need to rent'}
           </h2>
-          <div className="grid grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-3 gap-3">
             {TILES.map((t) => {
               const kind = (t as { kind?: string }).kind;
               const badge = badgeFor(kind);
@@ -260,39 +261,18 @@ export default function TenantHome() {
                   onPointerUp={() => setPressedTile(null)}
                   onPointerLeave={() => setPressedTile(null)}
                   onPointerCancel={() => setPressedTile(null)}
-                  className="relative flex min-h-[78px] items-center gap-2.5 rounded-2xl bg-white p-3 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.99]"
+                  className="relative flex flex-col items-center gap-2.5 rounded-2xl bg-white px-2 py-4 shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.97]"
                 >
                   {badge > 0 && (
                     <span className="absolute right-2 top-2 z-10 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
                       {badge > 9 ? '9+' : badge}
                     </span>
                   )}
-                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} size={44} pressed={pressedTile === t.label} />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-extrabold leading-tight text-slate-900">{t.label}</p>
-                    <p className="mt-1 text-[10.5px] leading-tight text-slate-500">{t.desc}</p>
-                  </div>
+                  <GlossyIcon tone={GLOSSY_TONES[t.tone]} icon={t.icon} size={46} pressed={pressedTile === t.label} />
+                  <span className="text-center text-[12px] font-bold leading-tight text-slate-800">{t.label}</span>
                 </button>
               );
             })}
-
-            {/* Support — full-width card to balance the grid */}
-            <button
-              onClick={() => openTile('/tenant/support')}
-              onPointerDown={() => setPressedTile('Support')}
-              onPointerUp={() => setPressedTile(null)}
-              onPointerLeave={() => setPressedTile(null)}
-              onPointerCancel={() => setPressedTile(null)}
-              className="relative col-span-2 flex min-h-[78px] items-center gap-3.5 rounded-2xl bg-white p-3.5 text-left shadow-[0_12px_26px_-18px_rgba(20,50,90,0.45)] transition active:scale-[0.995]"
-            >
-              <GlossyIcon tone={GLOSSY_TONES.amber} icon={Headset} size={48} pressed={pressedTile === 'Support'} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-extrabold leading-tight text-slate-900">We&apos;re Here to Help You</p>
-                <p className="mt-1 text-[11px] leading-snug text-slate-500">
-                  Our friendly team is always here to help. Whether you have a question, need guidance or need assistance using MzanziHomes, we&apos;re only a message away.
-                </p>
-              </div>
-            </button>
           </div>
         </div>
 
