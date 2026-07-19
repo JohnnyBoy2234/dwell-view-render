@@ -60,7 +60,7 @@ export default function TenantDashboardRoutes() {
         </TileDetailLayout>
       } />
       <Route path="applications" element={
-        <TileDetailLayout icon={ClipboardCheck} title="Applications" subtitle="Invitations, requests and application status">
+        <TileDetailLayout accent="#f97316" icon={ClipboardCheck} title="Applications" subtitle="Invitations, requests and application status">
           <TenantApplicationsSection />
         </TileDetailLayout>
       } />
