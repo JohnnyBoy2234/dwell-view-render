@@ -1,11 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MessageCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { Button } from '@mzanzihomes/ui/components/button';
-import { Badge } from '@mzanzihomes/ui/components/badge';
-import { RecordCard } from '@mzanzihomes/ui/components/RecordCard';
+import { Calendar, Clock, ChevronRight, Plus, Lightbulb, MessageCircle, Camera, HelpCircle, Contact } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
@@ -42,6 +38,7 @@ export default function TenantPropertyViewings() {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [viewings, setViewings] = useState<PropertyViewing[]>([]);
+  const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming');
 
   useEffect(() => {
     if (user) {
@@ -222,140 +219,197 @@ export default function TenantPropertyViewings() {
     return new Date(startTime) > new Date();
   };
 
-  const upcomingViewings = viewings.filter(
-    v => (v.status === 'booked' || v.status === 'confirmed') && isUpcoming(v.start_time)
+  const upcomingViewings = [...viewings]
+    .filter(v => (v.status === 'booked' || v.status === 'confirmed') && isUpcoming(v.start_time))
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  const pastViewings = viewings.filter(
+    v => !((v.status === 'booked' || v.status === 'confirmed') && isUpcoming(v.start_time))
   );
-  const pastViewings = viewings.filter(v => !upcomingViewings.includes(v));
+
+  const next = upcomingViewings[0];
+  const list = tab === 'upcoming' ? upcomingViewings : pastViewings;
+
+  const timeStr = (iso: string) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+  const relDay = (iso: string) => {
+    const d = new Date(iso);
+    const now = new Date();
+    const tom = new Date(now); tom.setDate(now.getDate() + 1);
+    if (sameDay(d, now)) return `Today at ${timeStr(iso)}`;
+    if (sameDay(d, tom)) return `Tomorrow at ${timeStr(iso)}`;
+    return `${d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })} at ${timeStr(iso)}`;
+  };
+  const rowDate = (iso: string) => {
+    const d = new Date(iso);
+    if (sameDay(d, new Date())) return `Today, ${timeStr(iso)}`;
+    return `${d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })}, ${timeStr(iso)}`;
+  };
+  const addr = (v: PropertyViewing) => v.property?.location || v.property?.title || 'Property';
+  const pill = (status: string) => {
+    const map: Record<string, { cls: string; label: string }> = {
+      confirmed: { cls: 'bg-blue-100 text-blue-700', label: 'Confirmed' },
+      booked:    { cls: 'bg-blue-100 text-blue-700', label: 'Confirmed' },
+      pending:   { cls: 'bg-amber-100 text-amber-700', label: 'Pending' },
+      completed: { cls: 'bg-emerald-100 text-emerald-700', label: 'Completed' },
+      cancelled: { cls: 'bg-red-100 text-red-600', label: 'Cancelled' },
+    };
+    return map[status] || { cls: 'bg-slate-100 text-slate-600', label: status };
+  };
+  const openViewing = (v?: PropertyViewing) => {
+    if (!v) return;
+    if (v.conversation_id) navigate(`/messages?c=${v.conversation_id}`);
+    else if (v.property?.id && v.property.landlord_id) navigate(`/messages?propertyId=${v.property.id}&landlordId=${v.property.landlord_id}`);
+    else if (v.property?.id) navigate(`/property/${v.property.id}`);
+  };
+
+  const TIPS = [
+    { icon: Clock, label: 'Arrive on time' },
+    { icon: Contact, label: 'Bring valid ID' },
+    { icon: HelpCircle, label: 'Ask questions' },
+    { icon: Camera, label: 'Take photos' },
+  ];
 
   if (loading) {
     return (
-      <div className="space-y-6 pb-24 md:pb-8">
-        <div className="grid gap-6">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-48 bg-muted animate-pulse rounded-lg"></div>
-          ))}
-        </div>
+      <div className="mx-auto w-full max-w-2xl space-y-4">
+        <div className="h-44 animate-pulse rounded-3xl bg-white/70" />
+        <div className="h-64 animate-pulse rounded-3xl bg-white/70" />
       </div>
     );
   }
 
   return (
-    // pb-24 keeps the last section's count and cards clear of the floating chat button
-    <div className="space-y-6 pb-24 md:pb-8">
+    <div className="relative mx-auto w-full max-w-2xl pb-8">
+      {/* Your next viewing */}
+      {next && (
+        <div className="relative overflow-hidden rounded-3xl p-5" style={{ background: '#eaeefb' }}>
+          <svg viewBox="0 0 170 140" className="pointer-events-none absolute -right-1 bottom-2 h-[124px] w-auto">
+            <path d="M14 104 L34 84 L54 104 Z M22 104 v-14 h24 v14" fill="#c7d2f4" opacity="0.55" />
+            <circle cx="70" cy="60" r="2" fill="#b9c6f0" /><circle cx="150" cy="52" r="2.5" fill="#b9c6f0" /><circle cx="60" cy="96" r="1.6" fill="#b9c6f0" />
+            {/* calendar */}
+            <rect x="52" y="30" width="76" height="76" rx="12" fill="#ffffff" stroke="#c7d2f4" strokeWidth="1.5" />
+            <path d="M52 42 a12 12 0 0 1 12 -12 h52 a12 12 0 0 1 12 12 v8 h-76 z" fill="#3b5bdb" />
+            <rect x="68" y="22" width="5" height="15" rx="2.5" fill="#2a3f9e" />
+            <rect x="107" y="22" width="5" height="15" rx="2.5" fill="#2a3f9e" />
+            <g fill="#dbe3fa">
+              <rect x="62" y="60" width="15" height="12" rx="2.5" /><rect x="82" y="60" width="15" height="12" rx="2.5" /><rect x="102" y="60" width="15" height="12" rx="2.5" />
+              <rect x="62" y="78" width="15" height="12" rx="2.5" /><rect x="82" y="78" width="15" height="12" rx="2.5" />
+            </g>
+            {/* clock */}
+            <circle cx="122" cy="94" r="26" fill="#ffffff" stroke="#3b5bdb" strokeWidth="4.5" />
+            <line x1="122" y1="94" x2="122" y2="78" stroke="#2a3f9e" strokeWidth="3.4" strokeLinecap="round" />
+            <line x1="122" y1="94" x2="134" y2="94" stroke="#2a3f9e" strokeWidth="3.4" strokeLinecap="round" />
+            <circle cx="122" cy="94" r="2.6" fill="#2a3f9e" />
+          </svg>
 
-      {/* Upcoming Viewings */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Upcoming Viewings</h2>
-          <Badge variant="secondary">{upcomingViewings.length} scheduled</Badge>
-        </div>
-
-        {upcomingViewings.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No upcoming viewings</h3>
-              <p className="text-muted-foreground mb-4">
-                Browse available properties to schedule your next viewing
-              </p>
-              <Button onClick={() => navigate('/properties')}>
-                Browse Properties
-              </Button>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="grid gap-4">
-            {upcomingViewings.map((viewing) => (
-              <RecordCard
-                key={viewing.id}
-                title={viewing.property?.title || 'Property'}
-                dateLine={viewingDateLine(viewing)}
-                badge={statusBadge(viewing.status)}
-                details={viewingDetails(viewing)}
-                actions={
-                  <>
-                    {(viewing.conversation_id || viewing.landlord?.user_id) && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          if (viewing.conversation_id) {
-                            navigate(`/messages?c=${viewing.conversation_id}`);
-                          } else if (viewing.property?.id && viewing.property.landlord_id) {
-                            navigate(`/messages?propertyId=${viewing.property.id}&landlordId=${viewing.property.landlord_id}`);
-                          }
-                        }}
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        Message
-                      </Button>
-                    )}
-                    {/* Chat-confirmed viewings are cancelled in the chat thread */}
-                    {viewing.status === 'booked' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => cancelViewing(viewing.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        Cancel
-                      </Button>
-                    )}
-                  </>
-                }
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Past Viewings */}
-      {pastViewings.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Past Viewings</h2>
-            <Badge variant="secondary">{pastViewings.length} completed</Badge>
-          </div>
-
-          <div className="grid gap-4">
-            {pastViewings.map((viewing) => (
-              <RecordCard
-                key={viewing.id}
-                title={viewing.property?.title || 'Property'}
-                dateLine={viewingDateLine(viewing)}
-                badge={statusBadge(viewing.status)}
-                details={viewingDetails(viewing)}
-              />
-            ))}
+          <div className="relative z-10 max-w-[58%]">
+            <p className="text-[13px] font-semibold text-slate-500">Your next viewing</p>
+            <p className="mt-1 text-[25px] font-extrabold leading-tight text-blue-600">{relDay(next.start_time)}</p>
+            <p className="mt-1 truncate text-[16px] font-bold text-slate-900">{addr(next)}</p>
+            <span className={`mt-3 inline-flex items-center rounded-full px-3 py-1 text-[12px] font-bold ${pill(next.status).cls}`}>
+              {pill(next.status).label}
+            </span>
+            <div>
+              <button
+                onClick={() => openViewing(next)}
+                className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-5 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+              >
+                View details <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Help Section */}
-      <Card className="bg-muted/30">
-        <CardHeader>
-          <CardTitle className="text-lg">Viewing Tips</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3 text-sm">
-            <div>
-              <h4 className="font-semibold mb-1">Before your viewing:</h4>
-              <ul className="list-disc ml-5 space-y-1 text-muted-foreground">
-                <li>Arrive on time and bring valid ID</li>
-                <li>Prepare questions about the property and lease terms</li>
-                <li>Take notes and photos if permitted</li>
-                <li>Check for any maintenance issues or concerns</li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold mb-1">Need to reschedule?</h4>
-              <p className="text-muted-foreground">
-                Contact the landlord as soon as possible if you need to change your viewing time.
-              </p>
-            </div>
+      {/* Tabs */}
+      <div className="mt-6 flex items-center gap-7 border-b border-slate-200">
+        {(['upcoming', 'past'] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`relative pb-3 text-[15px] font-bold capitalize transition ${tab === t ? 'text-blue-600' : 'text-slate-400'}`}
+          >
+            {t}
+            {tab === t && <span className="absolute inset-x-0 -bottom-px h-[3px] rounded-full bg-blue-600" />}
+          </button>
+        ))}
+      </div>
+
+      {/* List */}
+      <div className="mt-4 overflow-hidden rounded-3xl bg-white shadow-[0_14px_32px_-22px_rgba(20,50,90,0.4)]">
+        {list.length === 0 ? (
+          <div className="p-8 text-center">
+            <Calendar className="mx-auto h-9 w-9 text-slate-300" />
+            <p className="mt-2 text-[14px] font-semibold text-slate-700">No {tab} viewings</p>
+            {tab === 'upcoming' && (
+              <button onClick={() => navigate('/properties')} className="mt-3 rounded-full bg-blue-600 px-4 py-2 text-[13px] font-bold text-white active:scale-95">
+                Browse properties
+              </button>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        ) : (
+          list.map((v, i) => (
+            <button
+              key={v.id}
+              onClick={() => openViewing(v)}
+              className={`flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 ${i > 0 ? 'border-t border-slate-100' : ''}`}
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50">
+                <Calendar className="h-[18px] w-[18px] text-blue-600" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[14.5px] font-bold text-slate-900">{rowDate(v.start_time)}</p>
+                <p className="truncate text-[12.5px] text-slate-500">{addr(v)}</p>
+              </div>
+              <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11.5px] font-bold ${pill(v.status).cls}`}>{pill(v.status).label}</span>
+              <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
+            </button>
+          ))
+        )}
+      </div>
+
+      {/* Viewing tips + reschedule */}
+      <div className="mt-5 rounded-3xl bg-white p-5 shadow-[0_14px_32px_-22px_rgba(20,50,90,0.4)]">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="h-5 w-5 text-blue-600" />
+          <h3 className="text-[16px] font-extrabold text-slate-900">Viewing Tips</h3>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3">
+          {TIPS.map((t) => (
+            <div key={t.label} className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
+                <t.icon className="h-4 w-4 text-blue-600" />
+              </span>
+              <span className="text-[12.5px] font-medium text-slate-600">{t.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="my-4 h-px bg-slate-100" />
+        <div className="flex items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[15px] font-extrabold text-slate-900">Need to reschedule?</p>
+            <p className="mt-1 max-w-[16rem] text-[12.5px] leading-snug text-slate-500">
+              Contact the landlord as soon as possible if you need to change your viewing time.
+            </p>
+          </div>
+          <button
+            onClick={() => openViewing(next || upcomingViewings[0] || pastViewings[0])}
+            className="flex shrink-0 items-center gap-1.5 rounded-full border border-blue-200 px-4 py-2.5 text-[13px] font-bold text-blue-600 active:scale-95"
+          >
+            <MessageCircle className="h-4 w-4" /> Chat now
+          </button>
+        </div>
+      </div>
+
+      {/* Floating add — browse to book a viewing */}
+      <button
+        onClick={() => navigate('/properties')}
+        aria-label="Book a viewing"
+        className="fixed bottom-6 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_14px_30px_-10px_rgba(37,99,235,0.8)] active:scale-95"
+      >
+        <Plus className="h-6 w-6" />
+      </button>
     </div>
   );
 }
+
