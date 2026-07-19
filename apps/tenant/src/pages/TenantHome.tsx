@@ -165,52 +165,46 @@ export default function TenantHome() {
           )}
         </div>
 
-        {/* Hero band — greeting on the left, family/home photo bleeding in on
-            the right. The photo fades into white on every inner edge, so the
-            row above and the search below sit on clean white. */}
-        <div className="relative mt-5 min-h-[196px]">
-          <div className="pointer-events-none absolute inset-y-0 -right-5 w-[58%] overflow-hidden">
+        {/* Hero — headline on the left, house/family photo bleeding in from
+            the right and fading to the left into the white page. */}
+        <div className="relative">
+          <div className="pointer-events-none absolute -right-5 top-4 h-[356px] w-[60%] overflow-hidden">
             <img
               src={heroFamily}
               alt="A family at their modern South African home at sunset"
               className="h-full w-full object-cover object-center"
               style={{
-                WebkitMaskImage:
-                  'linear-gradient(to left, black 50%, transparent 96%), linear-gradient(to bottom, transparent 0%, black 20%, black 78%, transparent 100%)',
-                WebkitMaskComposite: 'source-in',
-                maskImage:
-                  'linear-gradient(to left, black 50%, transparent 96%), linear-gradient(to bottom, transparent 0%, black 20%, black 78%, transparent 100%)',
-                maskComposite: 'intersect',
+                WebkitMaskImage: 'linear-gradient(to left, black 42%, transparent 84%)',
+                maskImage: 'linear-gradient(to left, black 42%, transparent 84%)',
               }}
             />
           </div>
 
-          <div className="relative z-10 max-w-[56%] pt-7">
-            <h1 className="text-[28px] font-extrabold leading-[1.12] tracking-tight text-slate-900">
-              {hasSignedLease
-                ? `Welcome home${firstName ? `, ${firstName}` : ''}!`
-                : 'Hi there, welcome to MzanziHomes!'}
+          <div className="relative z-10 pt-8">
+            <h1 className="text-[34px] font-extrabold leading-[1.1] tracking-tight text-slate-900">
+              Find your<br />
+              perfect <span className="text-blue-600">home</span><br />
+              in South Africa
             </h1>
-            <p className="mt-3 text-[14px] leading-relaxed text-slate-500">
-              Commission-free renting, made simple and secure.
+            <p className="mt-4 max-w-[15.5rem] text-[15px] leading-relaxed text-slate-500">
+              Verified listings. Direct landlords. Zero agent fees. MzanziHomes makes renting simple, safe, and transparent.
             </p>
-          </div>
-        </div>
 
-        {/* Rent / Buy toggle (clean white) */}
-        <div className="mt-1 inline-flex rounded-full bg-slate-100 p-1 shadow-sm">
-          <button
-            onClick={() => setDealType('rent')}
-            className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-          >
-            Rent
-          </button>
-          <button
-            onClick={() => setDealType('buy')}
-            className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-white text-slate-900 shadow-[0_2px_8px_rgba(20,50,90,0.16)]' : 'text-slate-500')}
-          >
-            Buy
-          </button>
+            <div className="mt-6 inline-flex rounded-full bg-white p-1 shadow-[0_6px_18px_-8px_rgba(20,50,90,0.35)]">
+              <button
+                onClick={() => setDealType('rent')}
+                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-blue-600 text-white' : 'text-slate-500')}
+              >
+                Rent
+              </button>
+              <button
+                onClick={() => setDealType('buy')}
+                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-blue-600 text-white' : 'text-slate-500')}
+              >
+                Buy
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Search card — location · more filters · search, in one row */}
