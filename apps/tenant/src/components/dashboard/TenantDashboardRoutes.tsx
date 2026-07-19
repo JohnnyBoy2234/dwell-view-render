@@ -88,7 +88,7 @@ export default function TenantDashboardRoutes() {
           dashboard layout would render the "Messages" title twice */}
       <Route path="messages" element={<Messages />} />
       <Route path="payments" element={
-        <TileDetailLayout icon={CreditCard} title="Payments" subtitle="Rent, bills and payment history">
+        <TileDetailLayout accent="#14b8a6" icon={CreditCard} title="Payments" subtitle="Rent, bills and payment history">
           <TenantPayments />
         </TileDetailLayout>
       } />
