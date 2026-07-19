@@ -147,7 +147,7 @@ export default function TenantMaintenance() {
         className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_20px_44px_-28px_rgba(22,101,52,0.55)]"
         style={{ background: 'linear-gradient(135deg, #eef8ee 0%, #e2f3e2 100%)' }}
       >
-        <MaintenanceToolbox className="pointer-events-none absolute -right-2 bottom-0 h-[168px] w-auto [animation:mtFloat_6s_ease-in-out_infinite]" />
+        <MaintenanceToolbox className="pointer-events-none absolute -right-3 -bottom-1 h-[184px] w-auto animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Need something fixed?</h2>
           <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Let us know and we&apos;ll get it sorted.</p>
