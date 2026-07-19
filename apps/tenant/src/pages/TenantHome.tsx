@@ -174,8 +174,13 @@ export default function TenantHome() {
               alt="A modern South African home"
               className="h-full w-full object-cover object-left"
               style={{
-                WebkitMaskImage: 'linear-gradient(to left, black 42%, transparent 84%)',
-                maskImage: 'linear-gradient(to left, black 42%, transparent 84%)',
+                // Fade left into the page, plus a soft fade at the bottom.
+                WebkitMaskImage:
+                  'linear-gradient(to left, black 42%, transparent 84%), linear-gradient(to bottom, black 74%, transparent 100%)',
+                WebkitMaskComposite: 'source-in',
+                maskImage:
+                  'linear-gradient(to left, black 42%, transparent 84%), linear-gradient(to bottom, black 74%, transparent 100%)',
+                maskComposite: 'intersect',
               }}
             />
           </div>
