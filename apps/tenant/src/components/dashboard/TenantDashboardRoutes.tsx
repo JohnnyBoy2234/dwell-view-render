@@ -30,7 +30,7 @@ export default function TenantDashboardRoutes() {
         </TileDetailLayout>
       } />
       <Route path="leases" element={
-        <TileDetailLayout icon={FileText} title="Lease Contracts" subtitle="View and sign your lease">
+        <TileDetailLayout icon={FileText} title="Contracts" subtitle="View and sign your lease">
           <LeaseDashboardComponent />
         </TileDetailLayout>
       } />

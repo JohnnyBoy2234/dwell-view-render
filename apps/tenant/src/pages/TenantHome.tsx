@@ -34,7 +34,7 @@ const TILES = [
   { label: 'Applications',    desc: 'View and manage your rental applications.',                             icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
   { label: 'Messages',        desc: 'Securely message your landlord with immutable messages.',               icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
   { label: 'Payments',        desc: 'Rent payments and transaction history.',                                icon: CreditCard,     tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
-  { label: 'Lease Contracts', desc: 'View, sign and securely store your online rental agreements.',          icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
+  { label: 'Contracts',       desc: 'View, sign and securely store your online rental agreements.',          icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
   { label: 'Inventory',       desc: 'View your property’s inventory, including furniture and recorded items.', icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
   { label: 'Inspection List', desc: 'Keep permanent records of property inspections with photos, notes and condition reports.', icon: Camera, tone: 'ruby',  path: '/tenant/condition-records', kind: 'condition_record' },
   { label: 'Support',         desc: 'Get help and support.',                                                 icon: Headset,        tone: 'amber',    path: '/tenant/support' },

@@ -126,7 +126,7 @@ function AppRoutes() {
             single hub. Redirect any lingering links to it. */}
         <Route path="/enhancedtenantdashboard" element={<Navigate to="/" replace />} />
         <Route path="/enhancedtenantdashboard/leases" element={
-          <TileDetailLayout icon={FileText} title="Lease Contracts" subtitle="View and sign your lease">
+          <TileDetailLayout icon={FileText} title="Contracts" subtitle="View and sign your lease">
             <LeaseDashboard />
           </TileDetailLayout>
         } />
