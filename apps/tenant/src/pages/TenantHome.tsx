@@ -29,15 +29,15 @@ const PAGE_BG = '#f5f8fd';
 // tile to the notification category that badges it (mirrors the app's
 // notification-routing classifier); Messages badges from unread chats.
 const TILES = [
-  { label: 'Viewings',        desc: 'Manage your property viewings.',                                        icon: Eye,            tone: 'sapphire', path: '/tenant/viewings',          kind: 'viewing' },
-  { label: 'Maintenance',     desc: 'Report maintenance issues and upload photos.',                          icon: Wrench,         tone: 'emerald',  path: '/tenant/maintenance',       kind: 'maintenance' },
+  { label: 'Viewings',        desc: 'Manage your property viewings.',                                        icon: Eye,            tone: 'blue',     path: '/tenant/viewings',          kind: 'viewing' },
+  { label: 'Maintenance',     desc: 'Report maintenance issues and upload photos.',                          icon: Wrench,         tone: 'green',    path: '/tenant/maintenance',       kind: 'maintenance' },
   { label: 'Applications',    desc: 'View and manage your rental applications.',                             icon: ClipboardCheck, tone: 'orange',   path: '/tenant/applications',      kind: 'application' },
   { label: 'Messages',        desc: 'Securely message your landlord with immutable messages.',               icon: MessageCircle,  tone: 'purple',   path: '/messages',                 kind: 'message' },
-  { label: 'Payments',        desc: 'Rent payments and transaction history.',                                icon: CreditCard,     tone: 'cyan',     path: '/tenant/payments',          kind: 'payment' },
-  { label: 'Contracts',       desc: 'View, sign and securely store your online rental agreements.',          icon: FileText,       tone: 'indigo',   path: '/tenant/leases',            kind: 'lease' },
-  { label: 'Inventory',       desc: 'View your property’s inventory, including furniture and recorded items.', icon: Package,        tone: 'teal',     path: '/tenant/inventory',         kind: 'inventory' },
-  { label: 'Inspection List', desc: 'Keep permanent records of property inspections with photos, notes and condition reports.', icon: Camera, tone: 'ruby',  path: '/tenant/condition-records', kind: 'condition_record' },
-  { label: 'Support',         desc: 'Get help and support.',                                                 icon: Headset,        tone: 'amber',    path: '/tenant/support' },
+  { label: 'Payments',        desc: 'Rent payments and transaction history.',                                icon: CreditCard,     tone: 'teal',     path: '/tenant/payments',          kind: 'payment' },
+  { label: 'Contracts',       desc: 'View, sign and securely store your online rental agreements.',          icon: FileText,       tone: 'navy',     path: '/tenant/leases',            kind: 'lease' },
+  { label: 'Inventory',       desc: 'View your property’s inventory, including furniture and recorded items.', icon: Package,        tone: 'darkteal', path: '/tenant/inventory',         kind: 'inventory' },
+  { label: 'Inspection List', desc: 'Keep permanent records of property inspections with photos, notes and condition reports.', icon: Camera, tone: 'red',  path: '/tenant/condition-records', kind: 'condition_record' },
+  { label: 'Support',         desc: 'Get help and support.',                                                 icon: Headset,        tone: 'gold',     path: '/tenant/support' },
 ] as const;
 
 // Same normalisation the notification router uses (packages/ui notificationRoutes).
@@ -193,7 +193,7 @@ export default function TenantHome() {
               in South Africa
             </h1>
             <p className="mt-4 max-w-[16.5rem] text-[13.5px] leading-relaxed text-slate-500">
-              South Africa&apos;s smarter rental platform connecting trusted landlords and tenants through seamless digital experiences every day.
+              South Africa&apos;s smarter rental platform connecting verified landlords and tenants through seamless digital experiences every day.
             </p>
 
             <div className="mt-6 inline-flex rounded-full bg-white p-1 shadow-[0_6px_18px_-8px_rgba(20,50,90,0.35)]">
@@ -216,7 +216,7 @@ export default function TenantHome() {
         {/* Search card — location · more filters · search, in one row */}
         <div className="relative mt-7 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
-            <GlossyIcon tone={GLOSSY_TONES.sapphire} icon={MapPin} size={40} />
+            <GlossyIcon tone={GLOSSY_TONES.sky} icon={MapPin} size={40} />
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
               <input

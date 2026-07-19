@@ -14,13 +14,13 @@ interface Slide {
 // Styled like the "Why rent with MzanziHomes?" card: glossy icon left,
 // text middle, home image right — one per slide, "Why Use" leads.
 const SLIDES: Slide[] = [
-  { title: 'Why Use MzanziHomes?',     body: 'A safer, simpler and more secure rental experience. Every conversation, document, inspection and record is kept together in one trusted place.', icon: ShieldCheck,   tone: 'purple',   tint: '#f2effe' },
-  { title: 'Commission-Free Renting',  body: 'Connect directly with landlords and enjoy a simpler rental experience — without paying agent commission fees.',                                 icon: Wallet,        tone: 'emerald',  tint: '#ecfbf1' },
-  { title: 'Smart Rental Platform',    body: 'Everything you need to rent with confidence: digital lease agreements, electronic signatures and powerful management tools.',                       icon: Sparkles,      tone: 'sapphire', tint: '#eef4ff' },
-  { title: 'Rent with Confidence',     body: 'Simple digital tools, secure records and friendly support help you stay organised and protected throughout your journey.',                          icon: BadgeCheck,    tone: 'teal',     tint: '#eafaf7' },
-  { title: 'Built-in Invoicing',       body: 'Receive professional digital rent invoices directly through the platform, making it easier to track your payments.',                                icon: FileText,      tone: 'cyan',     tint: '#eafaf6' },
-  { title: 'Verified & Secure',        body: 'Landlords and tenants are verified, with legally binding digital lease agreements for a safer, more trusted experience.',                            icon: Lock,          tone: 'indigo',   tint: '#eeeffe' },
-  { title: 'Secure In-App Messaging',  body: 'Communicate securely with your landlord inside MzanziHomes, keeping all important conversations in one protected place.',                            icon: MessageCircle, tone: 'amber',    tint: '#fff7e8' },
+  { title: 'Why Use MzanziHomes?',     body: 'A safer, simpler and more secure rental experience. Every conversation, document, inspection and record is kept together in one trusted place.', icon: ShieldCheck,   tone: 'violet',  tint: '#f1ecfe' },
+  { title: 'Commission-Free Renting',  body: 'Connect directly with landlords and enjoy a simpler rental experience — without paying agent commission fees.',                                 icon: Wallet,        tone: 'lime',    tint: '#f3fbe6' },
+  { title: 'Smart Rental Platform',    body: 'Everything you need to rent with confidence: digital lease agreements, electronic signatures and powerful management tools.',                       icon: Sparkles,      tone: 'coral',   tint: '#fef0ee' },
+  { title: 'Rent with Confidence',     body: 'Simple digital tools, secure records and friendly support help you stay organised and protected throughout your journey.',                          icon: BadgeCheck,    tone: 'spring',  tint: '#e9fbf3' },
+  { title: 'Built-in Invoicing',       body: 'Receive professional digital rent invoices directly through the platform, making it easier to track your payments.',                                icon: FileText,      tone: 'amber',   tint: '#fff6e6' },
+  { title: 'Verified & Secure',        body: 'Landlords and tenants are verified, with legally binding digital lease agreements for a safer, more trusted experience.',                            icon: Lock,          tone: 'fuchsia', tint: '#fdeefe' },
+  { title: 'Secure In-App Messaging',  body: 'Communicate securely with your landlord inside MzanziHomes, keeping all important conversations in one protected place.',                            icon: MessageCircle, tone: 'pink',    tint: '#fdecf3' },
 ];
 
 /** Homepage carousel — each slide mirrors the "Why rent" card: glossy icon on
