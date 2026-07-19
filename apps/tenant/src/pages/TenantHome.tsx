@@ -21,7 +21,7 @@ import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon'
 import { MoreFiltersModal } from '@mzanzihomes/ui/components/search/MoreFiltersModal';
 import { usePropertySearchFilters } from '@mzanzihomes/ui/hooks/usePropertySearchFilters';
 import HomeCarousel from '@/components/HomeCarousel';
-import heroFamily from '@/assets/hero-family.jpg';
+import heroHouse from '@/assets/hero-house.jpg';
 
 const PAGE_BG = '#f5f8fd';
 
@@ -168,11 +168,11 @@ export default function TenantHome() {
         {/* Hero — headline on the left, house/family photo bleeding in from
             the right and fading to the left into the white page. */}
         <div className="relative">
-          <div className="pointer-events-none absolute -right-5 top-4 h-[356px] w-[60%] overflow-hidden">
+          <div className="pointer-events-none absolute -right-5 top-4 h-[356px] w-[62%] overflow-hidden">
             <img
-              src={heroFamily}
-              alt="A family at their modern South African home at sunset"
-              className="h-full w-full object-cover object-center"
+              src={heroHouse}
+              alt="A modern South African home"
+              className="h-full w-full object-cover object-left"
               style={{
                 WebkitMaskImage: 'linear-gradient(to left, black 42%, transparent 84%)',
                 maskImage: 'linear-gradient(to left, black 42%, transparent 84%)',

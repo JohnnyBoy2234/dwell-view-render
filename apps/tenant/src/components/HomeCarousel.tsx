@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import heroFamily from '@/assets/hero-family.jpg';
+import heroHouse from '@/assets/hero-house.jpg';
 
 interface Slide {
   title: string;
@@ -60,7 +60,7 @@ export default function HomeCarousel() {
       {/* Home image bleeding in from the right, fading to white */}
       <div className="pointer-events-none absolute -right-2 top-0 h-full w-[52%] overflow-hidden">
         <img
-          src={heroFamily}
+          src={heroHouse}
           alt=""
           className="h-full w-full object-cover object-center"
           style={{
