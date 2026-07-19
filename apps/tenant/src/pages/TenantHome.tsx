@@ -187,14 +187,9 @@ export default function TenantHome() {
           </div>
 
           <div className="relative z-10 pt-8">
-            <h1 className="text-[34px] font-extrabold leading-[1.1] tracking-tight text-slate-900">
-              Find your<br />
-              perfect <span className="text-blue-600">home</span><br />
-              in South Africa
+            <h1 className="max-w-[16.5rem] text-[22px] font-extrabold leading-snug tracking-tight text-slate-900">
+              South Africa&apos;s <span className="text-blue-600">smarter rental platform</span> connecting trusted landlords and tenants through seamless digital experiences every day.
             </h1>
-            <p className="mt-4 max-w-[15.5rem] text-[15px] leading-relaxed text-slate-500">
-              Verified listings. Direct landlords. Zero agent fees. MzanziHomes makes renting simple, safe, and transparent.
-            </p>
 
             <div className="mt-6 inline-flex rounded-full bg-white p-1 shadow-[0_6px_18px_-8px_rgba(20,50,90,0.35)]">
               <button

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
-import { ShieldCheck, Wallet, Sparkles, BadgeCheck, Receipt, Lock, MessageCircle } from 'lucide-react';
+import { ShieldCheck, Wallet, Sparkles, BadgeCheck, FileText, Lock, MessageCircle } from 'lucide-react';
 import heroHouse from '@/assets/hero-house.jpg';
 
 interface Slide {
@@ -18,7 +18,7 @@ const SLIDES: Slide[] = [
   { title: 'Commission-Free Renting',  body: 'Connect directly with landlords and enjoy a simpler rental experience — without paying agent commission fees.',                                 icon: Wallet,        tone: 'emerald',  tint: '#ecfbf1' },
   { title: 'Smart Rental Platform',    body: 'Everything you need to rent with confidence: digital lease agreements, electronic signatures and powerful management tools.',                       icon: Sparkles,      tone: 'sapphire', tint: '#eef4ff' },
   { title: 'Rent with Confidence',     body: 'Simple digital tools, secure records and friendly support help you stay organised and protected throughout your journey.',                          icon: BadgeCheck,    tone: 'teal',     tint: '#eafaf7' },
-  { title: 'Built-in Invoicing',       body: 'Receive professional digital rent invoices directly through the platform, making it easier to track your payments.',                                icon: Receipt,       tone: 'cyan',     tint: '#eafaf6' },
+  { title: 'Built-in Invoicing',       body: 'Receive professional digital rent invoices directly through the platform, making it easier to track your payments.',                                icon: FileText,      tone: 'cyan',     tint: '#eafaf6' },
   { title: 'Verified & Secure',        body: 'Landlords and tenants are verified, with legally binding digital lease agreements for a safer, more trusted experience.',                            icon: Lock,          tone: 'indigo',   tint: '#eeeffe' },
   { title: 'Secure In-App Messaging',  body: 'Communicate securely with your landlord inside MzanziHomes, keeping all important conversations in one protected place.',                            icon: MessageCircle, tone: 'amber',    tint: '#fff7e8' },
 ];
@@ -93,7 +93,7 @@ export default function HomeCarousel() {
       </div>
 
       {/* Pagination dots */}
-      <div className="absolute bottom-3.5 left-4 flex items-center gap-1.5">
+      <div className="absolute inset-x-0 bottom-3.5 flex items-center justify-center gap-1.5">
         {SLIDES.map((s, i) => (
           <button
             key={s.title}
