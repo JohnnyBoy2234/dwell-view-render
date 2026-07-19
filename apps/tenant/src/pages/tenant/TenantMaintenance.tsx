@@ -1,10 +1,11 @@
 // @ts-nocheck
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihomes/features/maintenance';
 import { useTenantResponses } from '@mzanzihomes/features/maintenance';
 import {
   Plus, Wrench, Camera, ChevronRight, Droplets, Lightbulb, Plug, Bug,
+  SquarePen, Clock, CheckCircle2, Phone,
 } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
@@ -16,6 +17,7 @@ import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
+import MaintenanceToolbox from '@/components/MaintenanceToolbox';
 import type { Priority, Category } from '@mzanzihomes/common/types/maintenance';
 
 const GREEN = '#16a34a';
@@ -40,6 +42,14 @@ const CATEGORY_META: Record<string, { icon: any; bg: string; fg: string }> = {
 const catMeta = (c: string) => CATEGORY_META[c] || CATEGORY_META.other;
 const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1).replace(/_/g, ' ');
 
+// Matches the reference, worded so it's clear the landlord handles the repair.
+const HOW_IT_WORKS = [
+  { icon: SquarePen,    n: 1, title: 'Submit request', body: 'Tell us what needs fixing' },
+  { icon: Clock,        n: 2, title: 'Landlord notified', body: 'They review and confirm' },
+  { icon: Wrench,       n: 3, title: 'Issue resolved', body: 'Your landlord gets it sorted' },
+  { icon: CheckCircle2, n: 4, title: "You're updated", body: 'Track the status right here' },
+];
+
 export default function TenantMaintenance() {
   const { user } = useAuth();
   const { tenantProperty } = useTenantDashboard();
@@ -51,12 +61,61 @@ export default function TenantMaintenance() {
 
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [landlordPhone, setLandlordPhone] = useState<string | null>(null);
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<Priority>('medium');
   const [category, setCategory] = useState<Category>('other');
   const [photos, setPhotos] = useState<FileList | null>(null);
+
+  // Fetch the landlord's phone so "Call now" dials a real person, not a stub.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!user) return;
+      try {
+        let landlordId: string | null = null;
+        const { data: tenancy } = await supabase
+          .from('tenancies')
+          .select('landlord_id')
+          .eq('tenant_id', user.id)
+          .eq('status', 'active')
+          .maybeSingle();
+        landlordId = tenancy?.landlord_id ?? null;
+        if (!landlordId) {
+          const { data: lease } = await supabase
+            .from('lease_contracts')
+            .select('landlord_id')
+            .eq('tenant_id', user.id)
+            .in('status', ['signed', 'pending_tenant'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          landlordId = lease?.landlord_id ?? null;
+        }
+        if (!landlordId) return;
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('user_id', landlordId)
+          .maybeSingle();
+        if (!cancelled && profile?.phone) setLandlordPhone(profile.phone);
+      } catch {
+        /* leave phone unset — Call now falls back to Messages */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  const handleEmergency = () => {
+    if (landlordPhone) {
+      window.location.href = `tel:${landlordPhone.replace(/\s+/g, '')}`;
+    } else {
+      toast({ title: 'No number on file', description: 'Message your landlord directly for urgent issues.' });
+      navigate('/messages');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,25 +192,26 @@ export default function TenantMaintenance() {
   if (isLoading) {
     return (
       <div className="mx-auto w-full max-w-2xl space-y-4">
-        <div className="h-40 animate-pulse rounded-3xl bg-white/70" />
+        <div className="h-44 animate-pulse rounded-3xl bg-white/70" />
         <div className="h-56 animate-pulse rounded-3xl bg-white/70" />
       </div>
     );
   }
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl pb-8">
+    <div className="relative mx-auto w-full max-w-2xl pb-8 [animation:fadeUp_0.5s_ease-out]">
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-3xl p-5" style={{ background: '#eaf6ea' }}>
-        <span className="pointer-events-none absolute -right-3 -bottom-3 flex h-32 w-32 items-center justify-center rounded-full" style={{ background: 'rgba(22,163,74,0.10)' }}>
-          <Wrench className="h-14 w-14" style={{ color: 'rgba(22,163,74,0.35)' }} />
-        </span>
-        <div className="relative z-10 max-w-[64%]">
-          <h2 className="text-[22px] font-extrabold leading-tight text-slate-900">Need something fixed?</h2>
-          <p className="mt-1 text-[13.5px] leading-snug text-slate-500">Report it and your landlord will get it sorted.</p>
+      <div
+        className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_20px_44px_-28px_rgba(22,101,52,0.55)]"
+        style={{ background: 'linear-gradient(135deg, #eef8ee 0%, #e2f3e2 100%)' }}
+      >
+        <MaintenanceToolbox className="pointer-events-none absolute -right-2 bottom-0 h-[168px] w-auto [animation:mtFloat_6s_ease-in-out_infinite]" />
+        <div className="relative z-10 max-w-[58%]">
+          <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Need something fixed?</h2>
+          <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Let us know and we&apos;ll get it sorted.</p>
           <button
             onClick={() => setIsCreateDialogOpen(true)}
-            className="mt-4 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_12px_24px_-10px_rgba(22,163,74,0.7)] active:scale-[0.98]"
+            className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(22,163,74,0.75)] transition-transform active:scale-[0.97]"
             style={{ background: GREEN }}
           >
             <Plus className="h-5 w-5" /> New request
@@ -172,34 +232,27 @@ export default function TenantMaintenance() {
       )}
 
       {/* My requests */}
-      <div className="mt-6 flex items-center justify-between">
+      <div className="mt-7 flex items-center justify-between">
         <h3 className="text-[18px] font-extrabold tracking-tight text-slate-900">My requests</h3>
         {requests.length > 3 && (
-          <button onClick={() => setShowAll((s) => !s)} className="text-[13px] font-bold text-green-600">
+          <button onClick={() => setShowAll((s) => !s)} className="text-[13px] font-bold text-green-600 active:opacity-70">
             {showAll ? 'Show less' : 'View all'}
           </button>
         )}
       </div>
 
       {requests.length === 0 ? (
-        <div className="mt-3 rounded-3xl bg-white p-8 text-center shadow-[0_14px_32px_-22px_rgba(20,50,90,0.4)]">
+        <div className="mt-3 rounded-[28px] bg-white p-8 text-center shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
             <Wrench className="h-8 w-8 text-green-500" />
           </div>
-          <p className="mt-4 text-[16px] font-bold text-slate-900">No maintenance requests yet</p>
-          <p className="mx-auto mt-1 max-w-xs text-[13px] leading-relaxed text-slate-500">
-            Something needs fixing? Report it here and your landlord is notified straight away to sort it out.
+          <p className="mt-4 text-[16px] font-bold text-slate-900">No requests so far</p>
+          <p className="mx-auto mt-1.5 max-w-xs text-[13px] leading-relaxed text-slate-500">
+            When you report a maintenance issue, it will appear here so you can track its progress from start to finish.
           </p>
-          <button
-            onClick={() => setIsCreateDialogOpen(true)}
-            className="mt-4 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white active:scale-95"
-            style={{ background: GREEN }}
-          >
-            <Plus className="h-4 w-4" /> Report an issue
-          </button>
         </div>
       ) : (
-        <div className="mt-3 overflow-hidden rounded-3xl bg-white shadow-[0_14px_32px_-22px_rgba(20,50,90,0.4)]">
+        <div className="mt-3 overflow-hidden rounded-[28px] bg-white shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
           {visible.map((r, i) => {
             const cm = catMeta(r.category);
             const sm = statusMeta(r.status);
@@ -207,7 +260,7 @@ export default function TenantMaintenance() {
               <button
                 key={r.id}
                 onClick={() => navigate(`/maintenance/${r.id}`)}
-                className={`flex w-full items-center gap-3 px-4 py-3.5 text-left active:bg-slate-50 ${i > 0 ? 'border-t border-slate-100' : ''}`}
+                className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors active:bg-slate-50 ${i > 0 ? 'border-t border-slate-100' : ''}`}
               >
                 <span className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${cm.bg}`}>
                   <cm.icon className={`h-[20px] w-[20px] ${cm.fg}`} />
@@ -225,22 +278,54 @@ export default function TenantMaintenance() {
         </div>
       )}
 
-      {/* Floating add */}
-      <button
-        onClick={() => setIsCreateDialogOpen(true)}
-        aria-label="New maintenance request"
-        className="fixed bottom-6 right-5 z-30 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_14px_30px_-10px_rgba(22,163,74,0.8)] active:scale-95"
-        style={{ background: GREEN }}
-      >
-        <Plus className="h-6 w-6" />
-      </button>
+      {/* How it works */}
+      <div className="mt-7 rounded-[28px] p-5" style={{ background: 'linear-gradient(135deg, #eff8ef 0%, #e7f4e7 100%)' }}>
+        <h3 className="text-[17px] font-extrabold tracking-tight text-slate-900">How it works</h3>
+        <div className="relative mt-5">
+          {/* dashed connector behind the icons */}
+          <div className="absolute left-[14%] right-[14%] top-7 border-t border-dashed border-green-300/70" />
+          <div className="relative grid grid-cols-4 gap-1">
+            {HOW_IT_WORKS.map((step) => (
+              <div key={step.n} className="flex flex-col items-center text-center">
+                <div className="relative">
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-[0_8px_18px_-8px_rgba(22,101,52,0.4)]">
+                    <step.icon className="h-6 w-6 text-green-600" />
+                  </span>
+                  <span className="absolute -bottom-1 left-1/2 flex h-5 w-5 -translate-x-1/2 items-center justify-center rounded-full bg-green-600 text-[11px] font-bold text-white ring-2 ring-white">
+                    {step.n}
+                  </span>
+                </div>
+                <p className="mt-3 text-[11.5px] font-bold leading-tight text-slate-900">{step.title}</p>
+                <p className="mt-0.5 text-[10.5px] leading-tight text-slate-500">{step.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Emergency maintenance */}
+      <div className="mt-4 flex items-center gap-3 rounded-[24px] bg-white p-4 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-50">
+          <Phone className="h-5 w-5 text-green-600" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[14.5px] font-bold text-slate-900">Emergency maintenance</p>
+          <p className="text-[12.5px] text-slate-500">For urgent issues outside office hours</p>
+        </div>
+        <button
+          onClick={handleEmergency}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-2xl border border-green-500 px-3.5 py-2 text-[13px] font-bold text-green-600 transition-transform active:scale-95"
+        >
+          <Phone className="h-4 w-4" /> Call now
+        </button>
+      </div>
 
       {/* Create request dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Report an issue</DialogTitle>
-            <DialogDescription>Describe the problem and we&apos;ll get it sorted as soon as possible.</DialogDescription>
+            <DialogDescription>Describe the problem and your landlord will get it sorted as soon as possible.</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
