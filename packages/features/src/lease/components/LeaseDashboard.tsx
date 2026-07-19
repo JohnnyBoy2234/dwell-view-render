@@ -166,10 +166,10 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
     <div className="mx-auto w-full max-w-2xl pb-10 animate-fade-in">
       {/* Hero */}
       <div
-        className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_22px_46px_-28px_rgba(79,70,229,0.5)]"
+        className="relative min-h-[176px] overflow-hidden rounded-[28px] p-5 shadow-[0_22px_46px_-28px_rgba(79,70,229,0.5)]"
         style={{ background: 'linear-gradient(135deg,#efeafe 0%,#e6e1fb 100%)' }}
       >
-        <ContractDoc className="pointer-events-none absolute right-1 top-1/2 h-[150px] w-[150px] -translate-y-1/2 animate-soft-float" />
+        <ContractDoc className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[150px] w-[150px] animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <h2 className="text-[22px] font-extrabold leading-tight text-slate-900">All your important documents in one place</h2>
           <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">View, sign and manage your lease agreements securely.</p>

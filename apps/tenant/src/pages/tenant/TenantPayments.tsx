@@ -97,10 +97,10 @@ export default function TenantPayments() {
     <div className="mx-auto w-full max-w-2xl pb-10 animate-fade-in">
       {/* Hero — total balance + wallet */}
       <div
-        className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_22px_46px_-28px_rgba(13,148,136,0.55)]"
+        className="relative min-h-[176px] overflow-hidden rounded-[28px] p-5 shadow-[0_22px_46px_-28px_rgba(13,148,136,0.55)]"
         style={{ background: 'linear-gradient(135deg,#e9faf6 0%,#d6f3ec 100%)' }}
       >
-        <PaymentsWallet className="pointer-events-none absolute right-1 top-1/2 h-[150px] w-[150px] -translate-y-1/2 animate-soft-float" />
+        <PaymentsWallet className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[150px] w-[150px] animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <p className="text-[13px] font-semibold text-slate-500">Total balance</p>
           <p className="mt-1 text-[32px] font-extrabold leading-none" style={{ color: TEAL }}>{fmtR(outstanding)}</p>

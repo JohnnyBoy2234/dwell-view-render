@@ -390,10 +390,10 @@ export const TenantApplicationsSection = () => {
     <section className="mx-auto w-full max-w-2xl pb-28 md:pb-10 animate-fade-in" aria-label="Your applications">
       {/* Hero */}
       <div
-        className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_20px_44px_-28px_rgba(200,90,20,0.5)]"
+        className="relative min-h-[176px] overflow-hidden rounded-[28px] p-5 shadow-[0_20px_44px_-28px_rgba(200,90,20,0.5)]"
         style={{ background: 'linear-gradient(135deg,#fdeadb 0%, #fbe0cf 100%)' }}
       >
-        <EnvelopeArt className="pointer-events-none absolute right-1 top-1/2 h-[150px] w-[150px] -translate-y-1/2 animate-soft-float" />
+        <EnvelopeArt className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[150px] w-[150px] animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Find your next home</h2>
           <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Track invitations, submit applications and stay updated.</p>
