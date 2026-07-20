@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@mzan
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
-import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark, CreditCard, LogOut, Loader2 } from "lucide-react";
+import { MessageCircle, Bell, Home, Activity, FileText, Users, Building, Check, X, Eye, AlertTriangle, Plus, BarChart3, Calendar, Trash2, Save, User, Wrench, Play, Camera, Image, ArrowLeft, Clock, AlertCircle, PenTool, Inbox, HelpCircle, Receipt, Shield, UserPlus, Tag, Landmark, CreditCard, LogOut, Loader2, ClipboardCheck, Package, Headset } from "lucide-react";
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
@@ -2591,14 +2591,14 @@ const renderReportsTab = () => (
       { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
       ...(canInvite ? [{ title: 'Invite Tenant', subtitle: 'Onboard your tenant', icon: UserPlus, action: () => setShowInviteModal(true) }] : []),
       { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
-      { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: Inbox, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
+      { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: ClipboardCheck, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
       { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
-      { title: 'Payments',       subtitle: 'Track rent',                         icon: Receipt,       tab: '/enhancedlandlorddashboard/payments' },
+      { title: 'Payments',       subtitle: 'Track rent',                         icon: CreditCard,    tab: '/enhancedlandlorddashboard/payments' },
       ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
       { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
-      { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Camera,        tab: '/enhancedlandlorddashboard/inventory' },
+      { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Package,       tab: '/enhancedlandlorddashboard/inventory' },
       { title: 'Inspection List',   subtitle: 'Photos, notes & sign-off',          icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
-      { title: 'Support',        subtitle: 'Help & resources',                   icon: HelpCircle,    path: '/enhancedlandlorddashboard/support' },
+      { title: 'Support',        subtitle: 'Help & resources',                   icon: Headset,       path: '/enhancedlandlorddashboard/support' },
     ];
 
     return (

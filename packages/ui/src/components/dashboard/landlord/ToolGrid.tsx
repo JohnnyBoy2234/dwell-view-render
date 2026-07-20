@@ -1,5 +1,22 @@
 import * as React from 'react';
 import { cn } from '@mzanzihomes/common/lib/utils';
+import { GlossyIcon, GLOSSY_TONES } from '../../GlossyIcon';
+
+// Glossy candy-button tone per tool, matching the tenant home's tile tones.
+const TONE_BY_TITLE: Record<string, keyof typeof GLOSSY_TONES> = {
+  Applications: 'orange',
+  Maintenance: 'green',
+  Payments: 'teal',
+  Leases: 'navy',
+  Inventory: 'darkteal',
+  'Inspection List': 'red',
+  Support: 'gold',
+  Messages: 'purple',
+  SwiftBooks: 'violet',
+  'Invite Tenant': 'blue',
+  'List Property': 'violet',
+  'Rent collection': 'spring',
+};
 
 export interface ToolItem {
   title: string;
@@ -105,14 +122,14 @@ function ToolTile({ tool, index, onClick, reduced }: ToolTileProps) {
       )}
 
       <div className="flex flex-col items-center gap-1.5">
-        {/* Icon container */}
+        {/* Glossy candy-button icon, matching the tenant home */}
         <div className="relative mt-0.5">
-          <div
-            className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto"
-            style={{ background: colors.bg }}
-          >
-            <tool.icon className="w-6 h-6" style={{ color: colors.iconColor }} />
-          </div>
+          <GlossyIcon
+            tone={GLOSSY_TONES[TONE_BY_TITLE[tool.title] ?? 'sky']}
+            icon={tool.icon as React.ComponentType<{ size?: number; strokeWidth?: number; color?: string; className?: string }>}
+            size={48}
+            className="mx-auto"
+          />
 
           {/* Urgency count badge */}
           {urgent && (
