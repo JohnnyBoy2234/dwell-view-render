@@ -2608,7 +2608,7 @@ const renderReportsTab = () => (
         {/* Hero — portfolio banner in the tenant-home style. Same image size as
             the tenant hero (h-356 / w-62%); apartment image bleeds in from the
             right and fades into the page. No search bar for landlords. */}
-        <div className="relative">
+        <div className="relative min-h-[210px]">
           <div className="pointer-events-none absolute -right-5 top-4 h-[356px] w-[62%] overflow-hidden">
             <img
               src={heroApartment}
@@ -2635,13 +2635,17 @@ const renderReportsTab = () => (
           </div>
         </div>
 
+        {/* Actions + tools render above the hero image (relative z-10) with white
+            cards, so the tall apartment image can't cover them. */}
+        <div className="relative z-10 space-y-4">
         {/* Top prompt: address form when no properties, invite tenant link once property exists */}
         {properties.length === 0 ? (
           <div
             className="rounded-2xl p-5 flex flex-col gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
             style={{
-              background: 'linear-gradient(135deg, hsl(214,100%,59%,0.12) 0%, hsl(214,100%,59%,0.05) 100%)',
-              border: '1px solid hsl(214,100%,59%,0.2)',
+              background: '#ffffff',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 20px 44px -22px rgba(20,50,90,0.4)',
             }}
           >
             <div className="flex items-center gap-3">
@@ -2676,8 +2680,9 @@ const renderReportsTab = () => (
           <div
             className="rounded-2xl p-4 flex items-center justify-between gap-3 animate-in fade-in slide-in-from-top-4 duration-400"
             style={{
-              background: 'linear-gradient(135deg, hsl(142,72%,44%,0.10) 0%, hsl(142,72%,44%,0.04) 100%)',
-              border: '1px solid hsl(142,72%,44%,0.2)',
+              background: '#ffffff',
+              border: '1px solid rgba(0,0,0,0.05)',
+              boxShadow: '0 20px 44px -22px rgba(20,50,90,0.4)',
             }}
           >
             <div className="flex items-center gap-3">
@@ -2734,6 +2739,7 @@ const renderReportsTab = () => (
             else if (tool.path) navigate(tool.path);
           }}
         />
+        </div>
       </div>
     );
   };
