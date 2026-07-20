@@ -46,7 +46,8 @@ import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/Inven
 import { PlanPromptSheet } from '@/components/PlanPromptSheet';
 import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
-import heroApartment from '@/assets/hero-background.jpg';
+import heroHome from '@/assets/hero-family.jpg';
+import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -2605,13 +2606,28 @@ const renderReportsTab = () => (
         className="p-4 space-y-4"
         style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
       >
+        {/* Brand row — MzanziHomes, like the tenant home (dark header is hidden
+            on this base tab via hideHeader). */}
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-[0_8px_18px_-6px_rgba(37,99,235,0.6)]"
+              style={{ background: 'linear-gradient(135deg, #3b82f6, #2563EB)' }}
+            >
+              <Home className="h-6 w-6 text-white" />
+            </div>
+            <span className="text-[23px] font-extrabold tracking-tight text-foreground">MzanziHomes</span>
+          </div>
+          <UserMenu variant="light" />
+        </div>
+
         {/* Hero — portfolio banner in the tenant-home style. Same image size as
             the tenant hero (h-356 / w-62%); apartment image bleeds in from the
             right and fades into the page. No search bar for landlords. */}
         <div className="relative min-h-[268px]">
           <div className="pointer-events-none absolute -right-5 top-4 h-[356px] w-[62%] overflow-hidden">
             <img
-              src={heroApartment}
+              src={heroHome}
               alt=""
               aria-hidden="true"
               className="h-full w-full object-cover object-center"
@@ -2959,6 +2975,7 @@ const renderReportsTab = () => (
               onTabChange={handleTabChange}
               selectedPropertyId={selectedPropertyId}
               onBackToProperties={handleBackToProperties}
+              hideHeader={isBaseTab}
             >
               {renderTabContent()}
             </EnhancedDashboardLayout>
