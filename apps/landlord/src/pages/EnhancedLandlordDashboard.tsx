@@ -46,7 +46,7 @@ import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/Inven
 import { PlanPromptSheet } from '@/components/PlanPromptSheet';
 import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
-import heroHome from '@/assets/hero-family.jpg';
+import heroHome from '@/assets/hero-house.jpg';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
