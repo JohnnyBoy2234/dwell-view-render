@@ -2665,8 +2665,8 @@ const renderReportsTab = () => (
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%,0.15)' }}>
-                <Building className="w-5 h-5" style={{ color: 'hsl(214,100%,59%)' }} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(142,72%,44%,0.15)' }}>
+                <Building className="w-5 h-5" style={{ color: 'hsl(142,72%,44%)' }} />
               </div>
               <div>
                 <p className="font-semibold text-foreground">Add property</p>
@@ -2686,7 +2686,7 @@ const renderReportsTab = () => (
                 disabled={!addressInput.trim() || addingProperty}
                 onClick={handleAddPropertyByAddress}
                 className="rounded-xl px-4 shrink-0"
-                style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+                style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
               >
                 {addingProperty ? '...' : 'Add'}
               </Button>
@@ -2726,7 +2726,7 @@ const renderReportsTab = () => (
           <Button
             onClick={() => setShowAddPropertyModal(true)}
             className="w-full rounded-2xl py-5 justify-center gap-2 font-semibold shadow-sm"
-            style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+            style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
           >
             <Plus className="h-4 w-4" /> Add Property
           </Button>
