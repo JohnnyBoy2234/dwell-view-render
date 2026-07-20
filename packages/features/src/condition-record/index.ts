@@ -3,3 +3,5 @@ export type { ConditionRecordListItem, TenancySummary } from './hooks/useConditi
 export { useConditionRecordDetail } from './hooks/useConditionRecordDetail';
 export type { PhotoWithUrl, PendingUpload } from './hooks/useConditionRecordDetail';
 export { ConditionRecordsPage, ConditionRecordDetailPage, ConditionRecordDetail } from './components/ConditionRecordsPage';
+export { missingRecordOffers } from './recordOffers';
+export type { RecordOffer } from './recordOffers';

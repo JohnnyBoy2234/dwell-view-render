@@ -145,9 +145,9 @@ export default function TenantMaintenance() {
       {/* Hero */}
       <div
         className="relative overflow-hidden rounded-[28px] p-5 shadow-[0_20px_44px_-28px_rgba(22,101,52,0.55)]"
-        style={{ background: 'linear-gradient(135deg, #eef8ee 0%, #e2f3e2 100%)' }}
+        style={{ background: 'linear-gradient(135deg, #e3f6e9 0%, #d1eed8 100%)' }}
       >
-        <MaintenanceToolbox className="pointer-events-none absolute -right-3 -bottom-1 h-[184px] w-auto animate-soft-float" />
+        <MaintenanceToolbox className="pointer-events-none absolute right-3 bottom-3 h-[184px] w-auto animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Need something fixed?</h2>
           <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Let us know and we&apos;ll get it sorted.</p>

@@ -1,307 +1,165 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Box, CheckCircle2, ClipboardList } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { useTenantDashboard } from '@/hooks/useTenantDashboard';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
-import { Badge } from '@mzanzihomes/ui/components/badge';
-import { Button } from '@mzanzihomes/ui/components/button';
-import { Input } from '@mzanzihomes/ui/components/input';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { CheckCircle2, Home, Info, Package, Search } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import TileDetailLayout from '@/components/TileDetailLayout';
+import { useTenantInventory } from '@/hooks/useTenantInventory';
+import { INVENTORY_TEAL, shortDate } from '@/components/inventory/inventoryModel';
+import { InventoryHero } from '@/components/inventory/InventoryHero';
+import { InventoryStatsRow } from '@/components/inventory/InventoryStatsRow';
+import { InventoryPropertyCard } from '@/components/inventory/InventoryPropertyCard';
+import { RoomChips } from '@/components/inventory/RoomChips';
+import { RecentItemsList } from '@/components/inventory/RecentItemsList';
+import {
+  InventoryEmptyState,
+  InventoryNoPropertyState,
+  InventoryErrorState,
+  InventorySkeleton,
+  OfflineBanner,
+} from '@/components/inventory/InventoryStates';
 
-interface InventoryItem {
-  id: string;
-  room: string;
-  name: string;
-  quantity: number;
-  description: string | null;
-  serial_number: string | null;
-  brand_model: string | null;
-  note: string | null;
-  image_urls: string[] | null;
-  updated_at: string;
+function useOnline() {
+  const [online, setOnline] = useState(typeof navigator === 'undefined' ? true : navigator.onLine);
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', off);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', off);
+    };
+  }, []);
+  return online;
 }
 
-const shortDate = (value: string) =>
-  new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-
-/** Read-only view of the landlord-created property inventory. Condition
- * documentation deliberately lives elsewhere (condition records). */
+/** Tenant Inventory overview — a read-only view of the landlord-created
+ * property inventory. Condition documentation deliberately lives in the
+ * separate Condition Records module. View-only: no add / edit / delete. */
 export default function TenantInventory() {
-  const { tenantProperty, loading: propertyLoading } = useTenantDashboard();
+  const { property, propertyLoading, isLoading, isError, refetch, items, approval, lastUpdatedAt } =
+    useTenantInventory();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [items, setItems] = useState<InventoryItem[]>([]);
-  const [landlordName, setLandlordName] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [search, setSearch] = useState('');
-  const [approval, setApproval] = useState<{ approved_at: string } | null>(null);
+  const queryClient = useQueryClient();
+  const online = useOnline();
   const [approving, setApproving] = useState(false);
+  const roomsRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (propertyLoading) return;
-    if (!tenantProperty) {
-      setLoading(false);
-      return;
-    }
-    (async () => {
-      try {
-        const [{ data: itemRows, error: itemsError }, { data: property }, { data: approvalRow }] = await Promise.all([
-          (supabase.from('property_inventory_items') as any)
-            .select('id, room, name, quantity, description, serial_number, brand_model, note, image_urls, updated_at')
-            .eq('property_id', tenantProperty.id)
-            .order('room')
-            .order('name'),
-          (supabase.from('properties') as any)
-            .select('landlord_id')
-            .eq('id', tenantProperty.id)
-            .maybeSingle(),
-          user
-            ? (supabase.from('inventory_approvals') as any)
-                .select('approved_at')
-                .eq('property_id', tenantProperty.id)
-                .eq('tenant_id', user.id)
-                .maybeSingle()
-            : Promise.resolve({ data: null })
-        ]);
-        if (itemsError) throw itemsError;
-        setItems((itemRows ?? []) as InventoryItem[]);
-        setApproval(approvalRow ?? null);
-        if (property?.landlord_id) {
-          const { data: profile } = await (supabase.from('profiles') as any)
-            .select('display_name')
-            .eq('user_id', property.landlord_id)
-            .maybeSingle();
-          setLandlordName(profile?.display_name ?? null);
-        }
-      } catch (e: any) {
-        setError(e.message || 'Could not load the inventory.');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [propertyLoading, tenantProperty?.id, user?.id]);
+  const acknowledged = !!(approval && lastUpdatedAt && lastUpdatedAt <= approval.approved_at);
 
-  const approveInventory = async () => {
-    if (!user || !tenantProperty) return;
+  const acknowledgeInventory = async () => {
+    if (!user || !property) return;
     setApproving(true);
     try {
-      const { data, error: approveError } = await (supabase.from('inventory_approvals') as any)
-        .upsert(
-          { property_id: tenantProperty.id, tenant_id: user.id, approved_at: new Date().toISOString() },
-          { onConflict: 'property_id,tenant_id' }
-        )
-        .select('approved_at')
-        .single();
-      if (approveError) throw approveError;
-      setApproval(data);
-      toast({ title: 'Inventory acknowledged', description: 'Your landlord can see that you have agreed to the inventory.' });
+      const { error } = await (supabase.from('inventory_approvals') as any).upsert(
+        { property_id: property.id, tenant_id: user.id, approved_at: new Date().toISOString() },
+        { onConflict: 'property_id,tenant_id' },
+      );
+      if (error) throw error;
+      await queryClient.invalidateQueries({ queryKey: ['tenant-inventory'] });
+      toast({ title: 'Inventory acknowledged', description: 'Your landlord can see that you agree with the inventory.' });
     } catch (e: any) {
-      toast({ variant: 'destructive', title: 'Could not approve', description: e.message });
+      toast({ variant: 'destructive', title: 'Could not acknowledge', description: e.message });
     } finally {
       setApproving(false);
     }
   };
 
-  const filteredItems = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) return items;
-    return items.filter((item) =>
-      [item.name, item.room, item.description, item.brand_model, item.serial_number, item.note]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(term))
+  let body: React.ReactNode;
+  if (propertyLoading || isLoading) {
+    body = <InventorySkeleton />;
+  } else if (!property) {
+    body = (
+      <div className="space-y-5 [animation:fadeUp_0.5s_ease-out]">
+        <InventoryHero />
+        <InventoryNoPropertyState />
+      </div>
     );
-  }, [items, search]);
+  } else if (isError) {
+    body = (
+      <div className="space-y-5 [animation:fadeUp_0.5s_ease-out]">
+        <InventoryHero />
+        <InventoryErrorState onRetry={() => refetch()} />
+      </div>
+    );
+  } else if (items.length === 0) {
+    body = (
+      <div className="space-y-5 [animation:fadeUp_0.5s_ease-out]">
+        <InventoryHero />
+        <InventoryEmptyState />
+      </div>
+    );
+  } else {
+    body = (
+      <div className="space-y-5 [animation:fadeUp_0.5s_ease-out]">
+        {!online && <OfflineBanner />}
 
-  const rooms = useMemo(() => {
-    const grouped = new Map<string, InventoryItem[]>();
-    for (const item of filteredItems) {
-      const list = grouped.get(item.room) ?? [];
-      list.push(item);
-      grouped.set(item.room, list);
-    }
-    return [...grouped.entries()];
-  }, [filteredItems]);
+        <InventoryHero onView={() => roomsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })} />
 
-  const totalItems = items.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  const lastUpdated = items.length
-    ? items.reduce((latest, item) => (item.updated_at > latest ? item.updated_at : latest), items[0].updated_at)
-    : null;
+        <InventoryStatsRow items={items} />
 
-  if (propertyLoading || loading) {
-    return (
-      <div className="space-y-6">
-        <div className="grid gap-6">
-          {[...Array(2)].map((_, i) => (
-            <div key={i} className="h-40 bg-muted animate-pulse rounded-lg"></div>
-          ))}
+        <InventoryPropertyCard property={property} items={items} lastUpdatedAt={lastUpdatedAt} />
+
+        <div ref={roomsRef} className="scroll-mt-4">
+          <RoomChips items={items} />
         </div>
+
+        <RecentItemsList items={items} />
+
+        {/* Tenant acknowledgement — the tenant's confirmation that the recorded
+            inventory matches what they found at the property. */}
+        {acknowledged ? (
+          <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/70 px-4 py-3">
+            <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-600" aria-hidden="true" />
+            <p className="text-[13px] text-emerald-800">
+              You acknowledged this inventory on {shortDate(approval!.approved_at)}.
+            </p>
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-teal-200 bg-teal-50/60 px-4 py-3.5">
+            <p className="text-[13px] text-slate-700">
+              {approval
+                ? 'Your landlord updated the inventory since you acknowledged it. Review the changes and acknowledge again.'
+                : 'If everything matches what you found at the property, acknowledge the inventory.'}
+            </p>
+            <button
+              onClick={acknowledgeInventory}
+              disabled={approving}
+              className="mt-3 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-bold text-white shadow-[0_12px_24px_-10px_rgba(20,179,154,0.8)] active:scale-[0.98] disabled:opacity-70"
+              style={{ background: INVENTORY_TEAL }}
+            >
+              <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+              {approving ? 'Saving…' : approval ? 'Acknowledge again' : 'I agree — acknowledge inventory'}
+            </button>
+          </div>
+        )}
+
+        {/* Inventory stays separate from the Condition Record / Inspection List. */}
+        <Link
+          to="/tenant/condition-records"
+          className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-[0_16px_34px_-26px_rgba(20,50,90,0.5)] active:scale-[0.99]"
+        >
+          <ClipboardList className="h-5 w-5 shrink-0 text-teal-600" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-semibold text-slate-900">View condition record</p>
+            <p className="text-[12px] text-slate-500">Document the condition of the property separately.</p>
+          </div>
+        </Link>
+
+        <p className="px-1 text-center text-[12px] text-slate-400">
+          This inventory is recorded and maintained by your landlord.
+        </p>
       </div>
     );
   }
 
-  const infoCard = (
-    <Card className="bg-muted/30">
-      <CardContent className="pt-6 space-y-4 text-sm">
-        <div className="flex gap-2">
-          <Info className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <div>
-            <p className="font-semibold">What is the Inventory?</p>
-            <p className="text-muted-foreground mt-1">
-              The Inventory is a list of furniture and other items belonging to the property. It is
-              created and managed by the landlord.
-            </p>
-          </div>
-        </div>
-        <div className="border-t pt-4">
-          <Link to="/tenant/condition-records" className="font-semibold text-primary underline underline-offset-2">
-            View Inspection List
-          </Link>
-          <p className="text-muted-foreground mt-1">
-            To view or document the condition of the property and its items, use the separate
-            Inspection List.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
-
   return (
-    <div className="space-y-6 pb-24 md:pb-8">
-      {error ? (
-        <Card>
-          <CardContent className="py-10 text-center text-destructive">{error}</CardContent>
-        </Card>
-      ) : !tenantProperty ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <Home className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
-            <p className="font-medium">No property linked yet</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              The inventory will appear here once you are connected to a property.
-            </p>
-          </CardContent>
-        </Card>
-      ) : items.length === 0 ? (
-        <Card>
-          <CardContent className="py-10 text-center">
-            <Package className="h-10 w-10 text-muted-foreground mx-auto mb-3" aria-hidden="true" />
-            <p className="font-medium">Nothing has been created</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          {/* Property summary */}
-          <Card className="bg-ocean-blue/5 border-ocean-blue/20">
-            <CardContent className="pt-6 space-y-1">
-              <h2 className="font-semibold text-lg break-words">{tenantProperty.title}</h2>
-              <p className="text-sm text-muted-foreground break-words">{tenantProperty.location}</p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 pt-2 text-sm text-muted-foreground">
-                {landlordName && <span>Landlord: {landlordName}</span>}
-                {lastUpdated && <span>Last updated: {shortDate(lastUpdated)}</span>}
-                <span>{totalItems} item{totalItems === 1 ? '' : 's'} listed</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Approval banner — the tenant's confirmation that the inventory
-              matches what they found at the property */}
-          {approval && lastUpdated && lastUpdated <= approval.approved_at ? (
-            <Card className="border-green-200 bg-green-50/60">
-              <CardContent className="py-4 flex items-center gap-3">
-                <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0" />
-                <p className="text-sm text-green-800">
-                  You acknowledged this inventory on {shortDate(approval.approved_at)}.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className={approval ? 'border-amber-200 bg-amber-50/60' : 'border-ocean-blue/20 bg-ocean-blue/5'}>
-              <CardContent className="py-4 space-y-3">
-                <p className="text-sm">
-                  {approval
-                    ? 'The landlord updated the inventory since you acknowledged it. Review the changes and acknowledge again.'
-                    : 'Review the items and photos below. If everything matches what you found at the property, acknowledge the inventory.'}
-                </p>
-                <Button onClick={approveInventory} disabled={approving} className="w-full sm:w-auto">
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  {approving ? 'Saving…' : approval ? 'Acknowledge again' : 'I agree — acknowledge inventory'}
-                </Button>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Search */}
-          <div className="relative">
-            <Search
-              className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search items or rooms…"
-              aria-label="Search the inventory"
-              className="pl-9"
-            />
-          </div>
-
-          {rooms.length === 0 ? (
-            <Card>
-              <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                No items match your search.
-              </CardContent>
-            </Card>
-          ) : (
-            rooms.map(([room, roomItems]) => (
-              <Card key={room}>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base flex items-center justify-between gap-2">
-                    <span className="truncate">{room}</span>
-                    <Badge variant="secondary" className="shrink-0">
-                      {roomItems.length} item{roomItems.length === 1 ? '' : 's'}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="divide-y">
-                  {roomItems.map((item) => (
-                    <div key={item.id} className="py-3 first:pt-0 last:pb-0">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-medium break-words">{item.name}</p>
-                        <span className="text-sm text-muted-foreground shrink-0">× {item.quantity}</span>
-                      </div>
-                      {item.description && (
-                        <p className="text-sm text-muted-foreground mt-0.5 break-words">{item.description}</p>
-                      )}
-                      <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-0.5 text-xs text-muted-foreground">
-                        {item.brand_model && <span>Brand/model: {item.brand_model}</span>}
-                        {item.serial_number && <span>Serial: {item.serial_number}</span>}
-                      </div>
-                      {item.note && (
-                        <p className="text-xs text-muted-foreground mt-0.5 break-words">
-                          Landlord note: {item.note}
-                        </p>
-                      )}
-                      {(item.image_urls?.length ?? 0) > 0 && (
-                        <div className="flex gap-1.5 mt-2 overflow-x-auto">
-                          {item.image_urls!.map((url) => (
-                            <a key={url} href={url} target="_blank" rel="noreferrer" className="shrink-0">
-                              <img src={url} alt={item.name} className="h-16 w-16 rounded-lg object-cover border" />
-                            </a>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            ))
-          )}
-          {infoCard}
-        </>
-      )}
-    </div>
+    <TileDetailLayout icon={Box} accent={INVENTORY_TEAL} title="Inventory" subtitle="Recorded by your landlord">
+      {body}
+    </TileDetailLayout>
   );
 }

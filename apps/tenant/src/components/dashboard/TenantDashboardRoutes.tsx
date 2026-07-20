@@ -3,7 +3,10 @@ import TileDetailLayout from '@/components/TileDetailLayout';
 import { LeaseDashboard as LeaseDashboardComponent } from '@mzanzihomes/features/lease';
 import TenantPropertyViewings from '@/pages/tenant/TenantPropertyViewings';
 import TenantInventory from '@/pages/tenant/TenantInventory';
-import { ConditionRecordsPage, ConditionRecordDetailPage } from '@mzanzihomes/features/condition-record';
+import TenantInventoryRoom from '@/pages/tenant/TenantInventoryRoom';
+import TenantInventoryItem from '@/pages/tenant/TenantInventoryItem';
+import { ConditionRecordDetailPage } from '@mzanzihomes/features/condition-record';
+import TenantInspectionList from '@/pages/tenant/TenantInspectionList';
 import TenantProofOfPayment from '@/pages/tenant/TenantProofOfPayment';
 import TenantLeaseDocuments from '@/pages/tenant/TenantLeaseDocuments';
 import TenantMaintenance from '@/pages/tenant/TenantMaintenance';
@@ -15,7 +18,7 @@ import { MaintenanceTicketDetails } from '@mzanzihomes/features/pages';
 import { TenantApplicationsSection } from '@mzanzihomes/features/application';
 import ProfilePage from '@mzanzihomes/ui/components/profile/ProfilePage';
 import {
-  Eye, Wrench, FileText, Camera, Receipt, ClipboardCheck, Headset, Package, User, CreditCard,
+  Eye, Wrench, FileText, Camera, Receipt, ClipboardCheck, User, CreditCard,
 } from 'lucide-react';
 
 export default function TenantDashboardRoutes() {
@@ -39,16 +42,15 @@ export default function TenantDashboardRoutes() {
           <TenantPropertyViewings />
         </TileDetailLayout>
       } />
-      <Route path="inventory" element={
-        <TileDetailLayout icon={Package} title="Inventory" subtitle="Recorded by your landlord for this property">
-          <TenantInventory />
-        </TileDetailLayout>
-      } />
-      <Route path="condition-records" element={
-        <TileDetailLayout icon={Camera} title="Inspection List" subtitle="Photos, notes and sign-off">
-          <ConditionRecordsPage />
-        </TileDetailLayout>
-      } />
+      {/* Inventory pages render their own TileDetailLayout so room/item screens
+          can show dynamic titles. */}
+      <Route path="inventory" element={<TenantInventory />} />
+      <Route path="inventory/room/:roomName" element={<TenantInventoryRoom />} />
+      <Route path="inventory/item/:itemId" element={<TenantInventoryItem />} />
+      {/* Tenant Inspection List: coral redesign that self-wraps its layout and
+          reuses the shared condition-record hooks/state. Detail route below is
+          unchanged (existing sign-off / photo / immutability flow). */}
+      <Route path="condition-records" element={<TenantInspectionList />} />
       <Route path="condition-records/:recordId" element={
         <TileDetailLayout icon={Camera} title="Inspection" subtitle="Photos, notes and sign-off">
           <ConditionRecordDetailPage />
@@ -92,11 +94,8 @@ export default function TenantDashboardRoutes() {
           <TenantPayments />
         </TileDetailLayout>
       } />
-      <Route path="support" element={
-        <TileDetailLayout icon={Headset} title="Support & Help" subtitle="FAQs and contact support">
-          <TenantSupport />
-        </TileDetailLayout>
-      } />
+      {/* Support self-wraps its layout (golden accent). */}
+      <Route path="support" element={<TenantSupport />} />
     </Routes>
   );
 }

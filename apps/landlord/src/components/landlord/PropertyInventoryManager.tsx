@@ -25,6 +25,8 @@ interface InventoryItem {
   serial_number: string | null;
   brand_model: string | null;
   note: string | null;
+  category: string | null;
+  condition: string;
   image_urls: string[] | null;
   updated_at: string;
 }
@@ -37,11 +39,34 @@ interface ItemForm {
   serial_number: string;
   brand_model: string;
   note: string;
+  category: string;
+  condition: string;
 }
 
 const EMPTY_FORM: ItemForm = {
-  room: '', name: '', quantity: '1', description: '', serial_number: '', brand_model: '', note: ''
+  room: '', name: '', quantity: '1', description: '', serial_number: '', brand_model: '', note: '',
+  category: 'none', condition: 'good'
 };
+
+// Condition describes the item as the landlord supplies it. Values must match
+// the property_inventory_items.condition check constraint.
+const CONDITION_CHOICES = [
+  { value: 'good', label: 'Good condition' },
+  { value: 'needs_attention', label: 'Needs attention' },
+  { value: 'not_working', label: 'Not working' },
+  { value: 'unknown', label: 'Not recorded' },
+];
+
+const CATEGORY_CHOICES = [
+  { value: 'furniture', label: 'Furniture' },
+  { value: 'appliances', label: 'Appliances' },
+  { value: 'electronics', label: 'Electronics' },
+  { value: 'fixtures', label: 'Fixtures' },
+  { value: 'decor', label: 'Decor' },
+  { value: 'kitchenware', label: 'Kitchenware' },
+  { value: 'outdoor', label: 'Outdoor' },
+  { value: 'other', label: 'Other' },
+];
 
 const ROOM_SUGGESTIONS = [
   'Living room', 'Dining room', 'Kitchen', 'Main bedroom', 'Bedroom 2', 'Bathroom',
@@ -134,7 +159,9 @@ export function PropertyInventoryManager({
       description: item.description ?? '',
       serial_number: item.serial_number ?? '',
       brand_model: item.brand_model ?? '',
-      note: item.note ?? ''
+      note: item.note ?? '',
+      category: item.category ?? 'none',
+      condition: item.condition ?? 'unknown'
     });
     setExistingImages(item.image_urls ?? []);
     setNewFiles([]);
@@ -172,6 +199,8 @@ export function PropertyInventoryManager({
       serial_number: form.serial_number.trim() || null,
       brand_model: form.brand_model.trim() || null,
       note: form.note.trim() || null,
+      category: form.category === 'none' ? null : form.category,
+      condition: form.condition,
       image_urls: [...existingImages, ...uploadedUrls]
     };
     const table = supabase.from('property_inventory_items') as any;
@@ -343,6 +372,31 @@ export function PropertyInventoryManager({
             <div className="space-y-1">
               <Label htmlFor="inv-qty">Quantity</Label>
               <Input id="inv-qty" type="number" min={1} value={form.quantity} onChange={setField('quantity')} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Condition</Label>
+                <Select value={form.condition} onValueChange={(v) => setForm((prev) => ({ ...prev, condition: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Condition" /></SelectTrigger>
+                  <SelectContent>
+                    {CONDITION_CHOICES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label>Category</Label>
+                <Select value={form.category} onValueChange={(v) => setForm((prev) => ({ ...prev, category: v }))}>
+                  <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No category</SelectItem>
+                    {CATEGORY_CHOICES.map((c) => (
+                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="space-y-1">
               <Label htmlFor="inv-desc">Description</Label>

@@ -100,7 +100,7 @@ export default function TenantPayments() {
         className="relative min-h-[176px] overflow-hidden rounded-[28px] p-5 shadow-[0_22px_46px_-28px_rgba(13,148,136,0.55)]"
         style={{ background: 'linear-gradient(135deg,#e9faf6 0%,#d6f3ec 100%)' }}
       >
-        <PaymentsWallet className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[150px] w-[150px] animate-soft-float" />
+        <PaymentsWallet className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[150px] w-auto animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <p className="text-[13px] font-semibold text-slate-500">Total balance</p>
           <p className="mt-1 text-[32px] font-extrabold leading-none" style={{ color: TEAL }}>{fmtR(outstanding)}</p>
@@ -182,7 +182,7 @@ export default function TenantPayments() {
       {/* Recent payments */}
       {bills.length === 0 ? (
         <div className="mt-4 rounded-[28px] bg-white p-8 text-center shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
-          <PaymentsWallet className="mx-auto h-28 w-28 animate-soft-float" />
+          <PaymentsWallet className="mx-auto h-28 w-auto animate-soft-float" />
           <p className="mt-2 text-[17px] font-bold text-slate-900">No payments yet</p>
           <p className="mx-auto mt-1.5 max-w-xs text-[13.5px] leading-relaxed text-slate-500">
             Your rent payments, invoices and receipts will appear here once your property is linked.
