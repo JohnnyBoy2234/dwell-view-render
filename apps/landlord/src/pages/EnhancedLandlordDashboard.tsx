@@ -46,6 +46,7 @@ import { InventoryDetailModal } from '@mzanzihomes/ui/components/inventory/Inven
 import { PlanPromptSheet } from '@/components/PlanPromptSheet';
 import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
+import heroCity from '@/assets/hero-background-new.jpg';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -2604,6 +2605,31 @@ const renderReportsTab = () => (
         className="p-4 space-y-4"
         style={{ paddingBottom: 'calc(7rem + env(safe-area-inset-bottom))' }}
       >
+        {/* Hero — portfolio banner in the tenant-home style (image bleeds in from
+            the right and fades into the page; no search bar for landlords). */}
+        <div className="relative overflow-hidden">
+          <div className="pointer-events-none absolute -right-4 top-1 bottom-1 w-[58%] overflow-hidden rounded-2xl">
+            <img
+              src={heroCity}
+              alt=""
+              aria-hidden="true"
+              className="h-full w-full object-cover object-left"
+              style={{
+                WebkitMaskImage: 'linear-gradient(to left, black 38%, transparent 90%)',
+                maskImage: 'linear-gradient(to left, black 38%, transparent 90%)',
+              }}
+            />
+          </div>
+          <div className="relative z-10 py-4">
+            <h1 className="text-[27px] font-extrabold leading-[1.12] tracking-tight text-foreground">
+              Manage your<br />rental <span className="text-blue-600">portfolio</span>
+            </h1>
+            <p className="mt-3 max-w-[15rem] text-[13px] leading-relaxed text-muted-foreground">
+              Applications, leases, maintenance and payments — all in one place.
+            </p>
+          </div>
+        </div>
+
         {/* Top prompt: address form when no properties, invite tenant link once property exists */}
         {properties.length === 0 ? (
           <div

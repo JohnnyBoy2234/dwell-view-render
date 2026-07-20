@@ -276,19 +276,13 @@ export function ViewingProposalCard({ proposal, onUpdate, isLandlordInConversati
         return;
       }
 
-      // Create a new invite if none exists
-      const token = crypto.randomUUID();
-      const { error: createError } = await supabase
-        .from('application_invites')
-        .insert({
-          token,
-          property_id: proposal.property_id,
-          landlord_id: proposal.landlord_id,
-          tenant_id: user.id,
-          status: 'invited'
-        } as any);
-      if (createError) throw createError;
-      navigateToInvite(token);
+      // No invite yet. Tenants cannot create invites (RLS restricts INSERT to
+      // the landlord) — the invite is created server-side when the landlord
+      // approves the request. Guide the tenant instead of failing.
+      toast({
+        title: 'Not ready yet',
+        description: 'You can start your application once the landlord has approved your request.',
+      });
     } catch (error: any) {
       console.error('Error starting application:', error);
       toast({
