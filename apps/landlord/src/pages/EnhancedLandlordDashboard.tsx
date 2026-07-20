@@ -2608,7 +2608,7 @@ const renderReportsTab = () => (
         {/* Hero — portfolio banner in the tenant-home style. Same image size as
             the tenant hero (h-356 / w-62%); apartment image bleeds in from the
             right and fades into the page. No search bar for landlords. */}
-        <div className="relative min-h-[210px]">
+        <div className="relative min-h-[268px]">
           <div className="pointer-events-none absolute -right-5 top-4 h-[356px] w-[62%] overflow-hidden">
             <img
               src={heroApartment}
@@ -2617,10 +2617,10 @@ const renderReportsTab = () => (
               className="h-full w-full object-cover object-center"
               style={{
                 WebkitMaskImage:
-                  'linear-gradient(to left, black 42%, transparent 84%), linear-gradient(to bottom, black 74%, transparent 100%)',
+                  'linear-gradient(to left, black 42%, transparent 84%), linear-gradient(to bottom, black 45%, transparent 96%)',
                 WebkitMaskComposite: 'source-in',
                 maskImage:
-                  'linear-gradient(to left, black 42%, transparent 84%), linear-gradient(to bottom, black 74%, transparent 100%)',
+                  'linear-gradient(to left, black 42%, transparent 84%), linear-gradient(to bottom, black 45%, transparent 96%)',
                 maskComposite: 'intersect',
               }}
             />
