@@ -48,6 +48,7 @@ import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import heroHome from '@/assets/hero-house.jpg';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
+import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -2665,8 +2666,8 @@ const renderReportsTab = () => (
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(142,72%,44%,0.15)' }}>
-                <Building className="w-5 h-5" style={{ color: 'hsl(142,72%,44%)' }} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(214,100%,59%,0.15)' }}>
+                <Building className="w-5 h-5" style={{ color: 'hsl(214,100%,59%)' }} />
               </div>
               <div>
                 <p className="font-semibold text-foreground">Add property</p>
@@ -2686,7 +2687,7 @@ const renderReportsTab = () => (
                 disabled={!addressInput.trim() || addingProperty}
                 onClick={handleAddPropertyByAddress}
                 className="rounded-xl px-4 shrink-0"
-                style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
+                style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
               >
                 {addingProperty ? '...' : 'Add'}
               </Button>
@@ -2702,9 +2703,7 @@ const renderReportsTab = () => (
             }}
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'hsl(142,72%,44%,0.12)' }}>
-                <UserPlus className="w-4 h-4" style={{ color: 'hsl(142,72%,44%)' }} />
-              </div>
+              <GlossyIcon tone={GLOSSY_TONES.blue} icon={UserPlus} size={40} className="shrink-0" />
               <div>
                 <p className="font-semibold text-foreground text-sm">Property added!</p>
                 <p className="text-xs text-muted-foreground">Ready to invite a tenant?</p>
@@ -2726,7 +2725,7 @@ const renderReportsTab = () => (
           <Button
             onClick={() => setShowAddPropertyModal(true)}
             className="w-full rounded-2xl py-5 justify-center gap-2 font-semibold shadow-sm"
-            style={{ background: 'hsl(142,72%,44%)', color: '#fff' }}
+            style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
           >
             <Plus className="h-4 w-4" /> Add Property
           </Button>
