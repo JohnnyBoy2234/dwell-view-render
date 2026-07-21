@@ -50,6 +50,7 @@ import heroHome from '@/assets/hero-house.jpg';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import HomeCarousel from '@/components/HomeCarousel';
+import { LandlordModuleIntro } from '@/components/LandlordModuleIntro';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -1159,6 +1160,7 @@ export default function EnhancedLandlordDashboard() {
       return (
         <div className="min-h-screen bg-white pb-8 w-full">
           <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
+            {!recordId && <LandlordModuleIntro module="inspection" />}
             {recordId ? <ConditionRecordDetail recordId={recordId} /> : <ConditionRecordsPage />}
           </div>
         </div>
@@ -1236,6 +1238,7 @@ export default function EnhancedLandlordDashboard() {
   const renderInventoryTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+        <LandlordModuleIntro module="inventory" />
         <PropertyInventoryManager
           properties={properties.map((p: any) => ({ id: p.id, title: p.title }))}
           initialPropertyId={selectedPropertyId}
@@ -1311,6 +1314,7 @@ export default function EnhancedLandlordDashboard() {
   const renderLeasesTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+        <LandlordModuleIntro module="leases" />
         <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
       </div>
     </div>
@@ -1338,6 +1342,7 @@ export default function EnhancedLandlordDashboard() {
     return (
       <div className="min-h-screen bg-white pb-8 w-full">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
+          <LandlordModuleIntro module="applications" />
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
 
@@ -2517,6 +2522,7 @@ const renderReportsTab = () => (
     return (
       <div className="min-h-screen bg-white pb-8">
         <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8 w-full">
+        <LandlordModuleIntro module="maintenance" />
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (

@@ -139,7 +139,7 @@ const CardSkeleton = () => (
  * top-right corner, profile circle + placeholder lines) rises out of a glossy
  * orange envelope, with a soft contact shadow. Centred in a square viewBox so it
  * never crops. Shared by the hero (large) and the empty states (smaller). */
-function EnvelopeArt({ className }: { className?: string }) {
+export function EnvelopeArt({ className }: { className?: string }) {
   return (
     <div className={className}>
       <svg viewBox="0 0 220 224" className="h-full w-full" role="img" aria-label="Open envelope with a document">

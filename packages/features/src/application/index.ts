@@ -1,5 +1,5 @@
 export { TenantApplicationButton } from './components/TenantApplicationButton';
-export { TenantApplicationsSection } from './components/TenantApplicationsSection';
+export { TenantApplicationsSection, EnvelopeArt } from './components/TenantApplicationsSection';
 export { ScreeningApplicationWizard } from './components/ScreeningApplicationWizard';
 
 export { useApplications } from './hooks/useApplications';

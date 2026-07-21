@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzan
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { MessageSquare, Send } from 'lucide-react';
 import { useSupportMessages } from '@mzanzihomes/features/support';
+import { LandlordModuleIntro } from '@/components/LandlordModuleIntro';
 
 export function LandlordSupport() {
   const { toast } = useToast();
@@ -77,6 +78,7 @@ export function LandlordSupport() {
 
   return (
     <div className="space-y-6">
+      <LandlordModuleIntro module="support" />
 
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-2 space-y-6">
