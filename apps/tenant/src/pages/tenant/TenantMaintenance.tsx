@@ -158,7 +158,7 @@ export default function TenantMaintenance() {
         <MaintenanceToolbox className="pointer-events-none absolute right-3 bottom-3 h-[184px] w-auto animate-soft-float" />
         <div className="relative z-10 max-w-[58%]">
           <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Need something fixed?</h2>
-          <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Let us know and we&apos;ll get it sorted.</p>
+          <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Tell your landlord and they&apos;ll get it sorted.</p>
           <button
             onClick={() => setIsCreateDialogOpen(true)}
             className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(22,163,74,0.75)] transition-transform active:scale-[0.97]"
