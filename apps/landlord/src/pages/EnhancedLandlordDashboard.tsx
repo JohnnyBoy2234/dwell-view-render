@@ -49,6 +49,7 @@ import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import heroHome from '@/assets/hero-house.jpg';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
+import HomeCarousel from '@/components/HomeCarousel';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -2703,7 +2704,7 @@ const renderReportsTab = () => (
             }}
           >
             <div className="flex items-center gap-3">
-              <GlossyIcon tone={GLOSSY_TONES.blue} icon={UserPlus} size={40} className="shrink-0" />
+              <GlossyIcon tone={GLOSSY_TONES.green} icon={UserPlus} size={40} className="shrink-0" />
               <div>
                 <p className="font-semibold text-foreground text-sm">Property added!</p>
                 <p className="text-xs text-muted-foreground">Ready to invite a tenant?</p>
@@ -2754,6 +2755,9 @@ const renderReportsTab = () => (
             else if (tool.path) navigate(tool.path);
           }}
         />
+
+        {/* Feature carousel — landlord features */}
+        <HomeCarousel />
         </div>
       </div>
     );

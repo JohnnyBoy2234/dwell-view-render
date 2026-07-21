@@ -5,7 +5,7 @@ import { GlossyIcon, GLOSSY_TONES } from '../../GlossyIcon';
 // Glossy candy-button tone per tool, matching the tenant home's tile tones.
 const TONE_BY_TITLE: Record<string, keyof typeof GLOSSY_TONES> = {
   Applications: 'orange',
-  Maintenance: 'green',
+  Maintenance: 'gold',
   Payments: 'teal',
   Leases: 'navy',
   Inventory: 'darkteal',
@@ -13,7 +13,7 @@ const TONE_BY_TITLE: Record<string, keyof typeof GLOSSY_TONES> = {
   Support: 'gold',
   Messages: 'purple',
   SwiftBooks: 'violet',
-  'Invite Tenant': 'blue',
+  'Invite Tenant': 'green',
   'List Property': 'violet',
   'Rent collection': 'spring',
 };
