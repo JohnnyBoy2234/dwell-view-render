@@ -42,7 +42,6 @@ function ErrorFallback({ error, resetErrorBoundary }: { error: Error; resetError
 
 export function EnhancedDashboardLayout({ children, title, subtitle, actions, currentTab, onTabChange, selectedPropertyId, onBackToProperties, hideHeader }: EnhancedDashboardLayoutProps) {
   const { isLandlord } = useAuth();
-  const userRole = isLandlord ? 'landlord' : 'tenant';
   const navigate = useNavigate();
 
   const { pathname } = useLocation();
@@ -92,64 +91,50 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
 
   return (
     <div
-      // overflow-x-clip (not overflow-hidden) so this div is not a scroll container:
-      // the sticky header must track the viewport, or its top offset (rent-banner-h)
-      // is applied immediately and opens a banner-sized gap above the header.
       className="flex flex-col min-h-screen w-full overflow-x-clip"
-      style={{ minHeight: '100dvh', background: 'hsl(214, 60%, 97%)' }}
+      style={{ minHeight: '100dvh', background: hideHeader ? 'hsl(214, 60%, 97%)' : '#0a1f45' }}
     >
-      {/* Header — dark glass, matching home page navbar */}
+      {/* Header — navy gradient curving into a light sheet, matching the tenant tile pages */}
       {!hideHeader && (
-      <header
-        className="h-16 flex items-center border-b border-white/10 sticky z-40 px-3 sm:px-4 lg:px-6 backdrop-blur-md shrink-0"
-        style={{
-          // Sits below the tenant rent-due banner when it's visible (var is 0px otherwise)
-          top: 'var(--rent-banner-h, 0px)',
-          background: 'rgba(10,10,20,0.78)',
-          boxShadow: '0 2px 24px rgba(37,99,235,0.14), inset 0 1px 0 rgba(255,255,255,0.06)',
-          willChange: 'transform',
-        }}
-      >
-        {shouldShowBackButton && (
-          <button
-            onClick={handleBackClick}
-            className="mr-3 w-8 h-8 rounded-full bg-white/8 flex items-center justify-center hover:bg-white/15 transition-colors text-gray-300 hover:text-white"
+        <>
+          <div
+            className="px-4 pb-12"
+            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)' }}
           >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-        )}
-
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-xl shrink-0" style={{ background: 'hsl(214, 100%, 59%)' }}>
-              <PageIcon className="h-4 w-4 text-white" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-3">
-                <h1 className="text-base sm:text-lg font-bold text-white truncate leading-tight">{title || pageConfig.title}</h1>
-                <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/15 text-gray-300 bg-white/5">
-                  {userRole === 'landlord' ? 'Landlord' : 'Tenant'}
-                </span>
-              </div>
-              {subtitle && (
-                <p className="text-[11px] text-gray-400 truncate leading-tight">{subtitle}</p>
+            <div className="flex items-center gap-3">
+              {shouldShowBackButton && (
+                <button
+                  onClick={handleBackClick}
+                  aria-label="Back"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/15 active:scale-95"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </button>
               )}
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: '#2563EB' }}>
+                <PageIcon className="h-[18px] w-[18px] text-white" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <h1 className="truncate text-[17px] font-bold leading-tight text-white">{title || pageConfig.title}</h1>
+                {subtitle && (
+                  <p className="truncate text-[12px] leading-snug" style={{ color: 'rgba(191,214,255,0.85)' }}>{subtitle}</p>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center gap-2">
+                {actions}
+                <UserMenu />
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center gap-2 sm:gap-3 ml-auto shrink-0">
-          {/* Notification bell removed — notifications surface via the tile badge in management tools */}
-          {actions}
-          <UserMenu />
-        </div>
-      </header>
+          {/* Light sheet lip that curves up over the navy header */}
+          <div className="-mt-7 h-7 rounded-t-[28px]" style={{ background: '#f6f8fc' }} />
+        </>
       )}
 
       {/* Main Content */}
       <main
         className={`flex-1 w-full overflow-x-hidden ${isLandlordDashboardRoute || hideHeader ? 'p-0' : 'p-3 sm:p-5 lg:p-7'}`}
-        style={{ contain: 'layout style paint' }}
+        style={{ background: hideHeader ? undefined : '#f6f8fc', contain: 'layout style paint' }}
       >
         {children}
       </main>
