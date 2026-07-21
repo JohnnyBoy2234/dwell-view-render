@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, Clock, ChevronRight, Plus, Lightbulb, MessageCircle, Camera, HelpCircle, Contact } from 'lucide-react';
+import { Calendar, Clock, ChevronRight, Plus, Lightbulb, MessageCircle, Camera, HelpCircle, Contact, Search, Wrench, Receipt, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
@@ -263,10 +263,11 @@ export default function TenantPropertyViewings() {
   };
 
   const TIPS = [
-    { icon: Clock, label: 'Arrive on time' },
-    { icon: Contact, label: 'Bring valid ID' },
-    { icon: HelpCircle, label: 'Ask questions' },
-    { icon: Camera, label: 'Take photos' },
+    { icon: Search, text: 'Inspect the property for any existing damage or defects.' },
+    { icon: Wrench, text: 'Test all water fixtures, lighting, and air conditioning (where applicable) to ensure they are in working order.' },
+    { icon: Receipt, text: 'Confirm the agreed rental amount, security deposit, and any other applicable charges.' },
+    { icon: ClipboardCheck, text: 'Confirm who is responsible for managing maintenance requests and repairs during the tenancy.' },
+    { icon: Contact, text: 'Always show identification.' },
   ];
 
   if (loading) {
@@ -387,13 +388,13 @@ export default function TenantPropertyViewings() {
           <Lightbulb className="h-5 w-5 text-blue-600" />
           <h3 className="text-[16px] font-extrabold text-slate-900">Viewing Tips</h3>
         </div>
-        <div className="mt-4 flex flex-wrap gap-x-5 gap-y-3">
-          {TIPS.map((t) => (
-            <div key={t.label} className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50">
+        <div className="mt-4 space-y-3">
+          {TIPS.map((t, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-50">
                 <t.icon className="h-4 w-4 text-blue-600" />
               </span>
-              <span className="text-[12.5px] font-medium text-slate-600">{t.label}</span>
+              <span className="text-[13px] leading-snug text-slate-600">{t.text}</span>
             </div>
           ))}
         </div>
