@@ -7,6 +7,10 @@ import {
   Wrench,
   BarChart3,
   Camera,
+  ClipboardCheck,
+  CreditCard,
+  Package,
+  Headset,
   LucideIcon,
   MessageCircle,
   Bell,
@@ -216,7 +220,7 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   },
   '/enhancedlandlorddashboard/applications': {
     title: 'Applications',
-    icon: Inbox,
+    icon: ClipboardCheck,
     showSidebar: false,
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
@@ -237,7 +241,7 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   },
   '/enhancedlandlorddashboard/payments': {
     title: 'Payments',
-    icon: BarChart3,
+    icon: CreditCard,
     showSidebar: false,
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
@@ -251,7 +255,7 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   },
   '/enhancedlandlorddashboard/inventory': {
     title: 'Inventory',
-    icon: Camera,
+    icon: Package,
     showSidebar: false,
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',
@@ -273,6 +277,13 @@ export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
   '/enhancedlandlorddashboard/tax-invoice': {
     title: 'SwiftBooks',
     icon: BarChart3,
+    showSidebar: false,
+    showBackButton: true,
+    backPath: '/enhancedlandlorddashboard',
+  },
+  '/enhancedlandlorddashboard/support': {
+    title: 'Support',
+    icon: Headset,
     showSidebar: false,
     showBackButton: true,
     backPath: '/enhancedlandlorddashboard',

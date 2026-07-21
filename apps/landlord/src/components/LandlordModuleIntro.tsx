@@ -47,13 +47,12 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
     gradient: 'linear-gradient(135deg,#fdeadb 0%, #fbe0cf 100%)',
     illustration: <EnvelopeArt className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[132px] w-[132px] animate-soft-float" />,
     title: 'Rental applications',
-    subtitle: 'Review applicants, check documents and move them through to a lease.',
+    subtitle: 'Review applicants and check their documents, income and references.',
     tipsTitle: 'Reviewing applications',
     tips: [
       { title: 'Check documents carefully', desc: 'Verify ID, income, bank statements and references before deciding.' },
       { title: 'Run affordability checks', desc: 'Compare income against the rent and any existing obligations.' },
       { title: 'Respond to applicants', desc: 'Keep candidates informed to secure good tenants quickly.' },
-      { title: 'Move to a lease', desc: 'Approve and generate a digital lease straight from the application.' },
     ],
   },
   inventory: {
