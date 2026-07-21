@@ -51,6 +51,7 @@ import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import HomeCarousel from '@/components/HomeCarousel';
 import { LandlordModuleIntro } from '@/components/LandlordModuleIntro';
+import { LandlordContractsTips } from '@/components/LandlordContractsTips';
 
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
@@ -1314,8 +1315,8 @@ export default function EnhancedLandlordDashboard() {
   const renderLeasesTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
-        <LandlordModuleIntro module="leases" />
         <LeaseDashboardComponent propertyId={selectedPropertyId || undefined} />
+        <LandlordContractsTips />
       </div>
     </div>
   );
