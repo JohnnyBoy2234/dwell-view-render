@@ -23,6 +23,35 @@ import { RequestApplicationSheet } from './RequestApplicationSheet';
 
 const ORANGE = '#f97316';
 
+const APPLICATION_DOCS: { title: string; items: string[] }[] = [
+  {
+    title: 'Required',
+    items: [
+      'South African ID (or Passport + Visa/Permit if applicable)',
+      'Proof of income (latest payslip or employment letter)',
+      'Recent bank statements (last 3 months)',
+      'Proof of current address',
+      'Free credit report (if requested)',
+    ],
+  },
+  {
+    title: 'If self-employed',
+    items: [
+      'Bank statements (last 3–6 months)',
+      'Business registration (if applicable)',
+    ],
+  },
+  {
+    title: 'Optional but recommended',
+    items: [
+      'Previous landlord reference',
+      'Employer reference',
+      'Rental payment history (if available)',
+      'Pet information (if applying with pets)',
+    ],
+  },
+];
+
 const shortDate = (value: string) =>
   new Date(value).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -625,6 +654,27 @@ export const TenantApplicationsSection = () => {
           ))}
         </div>
       </button>
+
+      {/* What you'll need to apply */}
+      <div className="mt-6 rounded-[28px] bg-white p-5 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
+        <div className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-orange-500" />
+          <h3 className="text-[16px] font-extrabold text-slate-900">What you'll need to apply</h3>
+        </div>
+        {APPLICATION_DOCS.map((group) => (
+          <div key={group.title} className="mt-4">
+            <p className="text-[11.5px] font-bold uppercase tracking-wide text-orange-600">{group.title}</p>
+            <ul className="mt-2 space-y-2">
+              {group.items.map((item, i) => (
+                <li key={i} className="flex items-start gap-2.5">
+                  <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+                  <span className="text-[13px] leading-snug text-slate-600">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
 
       <p className="mt-8 flex items-center justify-center gap-1.5 text-center text-xs text-slate-400">
         <Lock className="h-3.5 w-3.5" /> Your data is secure and only visible to you.
