@@ -5,6 +5,7 @@ import { useMaintenanceRequests, useCreateMaintenanceRequest } from '@mzanzihome
 import { useTenantResponses } from '@mzanzihomes/features/maintenance';
 import {
   Plus, Wrench, Camera, ChevronRight, Droplets, Lightbulb, Plug, Bug,
+  Clock, Send, Home, ClipboardCheck,
 } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
@@ -40,6 +41,13 @@ const CATEGORY_META: Record<string, { icon: any; bg: string; fg: string }> = {
 };
 const catMeta = (c: string) => CATEGORY_META[c] || CATEGORY_META.other;
 const capitalize = (v: string) => v.charAt(0).toUpperCase() + v.slice(1).replace(/_/g, ' ');
+
+const MAINTENANCE_TIPS = [
+  { icon: Clock, title: 'Report issues promptly', desc: 'Report problems as soon as you notice them to prevent further damage.' },
+  { icon: Send, title: 'Use the correct request channel', desc: 'Submit all maintenance requests through the platform or agreed contact method.' },
+  { icon: Home, title: 'Take care of the property', desc: 'Treat the home with care and allow reasonable access for repairs when needed.' },
+  { icon: ClipboardCheck, title: 'Know your responsibilities', desc: 'Understand your repair responsibilities, response times, and emergency procedures as outlined in your tenancy agreement.' },
+];
 
 export default function TenantMaintenance() {
   const { user } = useAuth();
@@ -219,6 +227,27 @@ export default function TenantMaintenance() {
           })}
         </div>
       )}
+
+      {/* Maintenance tips */}
+      <div className="mt-5 rounded-[28px] bg-white p-5 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
+        <div className="flex items-center gap-2">
+          <Lightbulb className="h-5 w-5 text-green-600" />
+          <h3 className="text-[16px] font-extrabold text-slate-900">Maintenance tips</h3>
+        </div>
+        <div className="mt-4 space-y-3.5">
+          {MAINTENANCE_TIPS.map((t, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-green-50">
+                <t.icon className="h-[18px] w-[18px] text-green-600" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13.5px] font-bold text-slate-900">{t.title}</p>
+                <p className="mt-0.5 text-[12.5px] leading-snug text-slate-500">{t.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Create request dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
