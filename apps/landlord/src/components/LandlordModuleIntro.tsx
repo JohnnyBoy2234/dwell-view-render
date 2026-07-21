@@ -5,8 +5,9 @@ import maintenanceToolbox from '@/assets/maintenance-toolbox.png';
 import inventoryFurniture from '@/assets/inventory-furniture.png';
 import inspectionHouseCamera from '@/assets/inspection-house-camera.png';
 import supportHeadset from '@/assets/support-headset.png';
+import paymentsWallet from '@/assets/payments-wallet.png';
 
-export type ModuleKey = 'maintenance' | 'applications' | 'inventory' | 'inspection' | 'leases' | 'support';
+export type ModuleKey = 'maintenance' | 'applications' | 'inventory' | 'inspection' | 'leases' | 'payments' | 'support';
 
 interface Tip {
   title: string;
@@ -81,6 +82,20 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
       { title: 'Add clear notes', desc: 'Describe anything a photo cannot show, like appliance age or existing wear.' },
       { title: 'Sign off together', desc: 'Both you and the tenant confirm the record so it is legally sound.' },
       { title: 'It becomes permanent', desc: 'Once accepted, photos and notes are locked as tamper-proof evidence.' },
+    ],
+  },
+  payments: {
+    color: '#14b8a6',
+    gradient: 'linear-gradient(135deg,#e9faf6 0%,#d6f3ec 100%)',
+    illustration: floatImg(paymentsWallet, 'right-2 top-0 bottom-0 my-auto h-[140px] w-auto'),
+    title: 'Payments',
+    subtitle: 'Collect rent, send invoices and track every payment.',
+    tipsTitle: 'Managing payments',
+    tips: [
+      { title: 'Set up rent collection', desc: 'Add your bank details so tenant rent payments reach you.' },
+      { title: 'Send invoices', desc: 'Issue professional digital rent invoices to your tenants each cycle.' },
+      { title: 'Track every payment', desc: 'See what is paid, pending or overdue for each property at a glance.' },
+      { title: 'Keep clean records', desc: 'Every transaction is stored for your accounting and audit trail.' },
     ],
   },
   leases: {

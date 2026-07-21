@@ -1560,6 +1560,7 @@ export default function EnhancedLandlordDashboard() {
   const renderPaymentsTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
+        <LandlordModuleIntro module="payments" />
         {/* Monthly billing: draft bills awaiting expenses (the banner lands here) + sent/paid history */}
         <LandlordBillingPanel />
         {tenants.length === 0 ? (
