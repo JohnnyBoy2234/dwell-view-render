@@ -293,21 +293,23 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
         )}
       </div>
 
-      {/* Help card */}
-      <button
-        type="button"
-        onClick={() => navigate('/messages')}
-        className="mt-6 flex w-full items-center gap-3 rounded-[24px] bg-indigo-50/70 p-4 text-left transition-transform active:scale-[0.99]"
-      >
-        <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white">
-          <MessageCircle className="h-5 w-5 text-indigo-600" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="text-[14px] font-bold text-slate-900">Need help understanding your lease?</p>
-          <p className="text-[12.5px] text-slate-500">Questions before signing? Message your landlord directly.</p>
-        </div>
-        <span className="shrink-0 rounded-full border border-indigo-300 px-3 py-1.5 text-[12.5px] font-bold text-indigo-600">Open Messages</span>
-      </button>
+      {/* Help card — tenant-only ("message your landlord" makes no sense for the landlord) */}
+      {!isLandlord && (
+        <button
+          type="button"
+          onClick={() => navigate('/messages')}
+          className="mt-6 flex w-full items-center gap-3 rounded-[24px] bg-indigo-50/70 p-4 text-left transition-transform active:scale-[0.99]"
+        >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white">
+            <MessageCircle className="h-5 w-5 text-indigo-600" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[14px] font-bold text-slate-900">Need help understanding your lease?</p>
+            <p className="text-[12.5px] text-slate-500">Questions before signing? Message your landlord directly.</p>
+          </div>
+          <span className="shrink-0 rounded-full border border-indigo-300 px-3 py-1.5 text-[12.5px] font-bold text-indigo-600">Open Messages</span>
+        </button>
+      )}
 
       {/* Contract details modal */}
       {selectedContract && !showSignaturePad && (
