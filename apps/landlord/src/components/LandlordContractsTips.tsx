@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   BadgeCheck,
   FileStack,
-  History,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -82,25 +81,11 @@ const SECTIONS: Section[] = [
 
 const DOCUMENTS: string[] = [
   'Contracts',
-  'Contract Updates',
   'Inspection Reports',
-  'Condition Reports',
   'Rental Notices',
   'Supporting Documents',
   'POPIA Consent Records',
   'Credit Check Consent Records',
-];
-
-const TIMELINE: string[] = [
-  'Rental Application',
-  'Credit Check',
-  'Contract',
-  'Contract Updates',
-  'Inspection Reports',
-  'Condition Reports',
-  'Notices',
-  'Maintenance History',
-  'Move-Out Records',
 ];
 
 /**
@@ -218,38 +203,6 @@ export function LandlordContractsTips() {
               </div>
             </div>
 
-            {/* Complete property timeline */}
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl"
-                  style={{ background: `${VIOLET}1a` }}
-                >
-                  <History className="h-4 w-4" style={{ color: VIOLET }} />
-                </span>
-                <h5 className="text-[14px] font-extrabold text-slate-900">Complete Property Timeline</h5>
-              </div>
-              <p className="mt-3 text-[12.5px] leading-relaxed text-slate-600">
-                Every rental automatically builds a secure timeline showing:
-              </p>
-              <ol className="mt-3 space-y-2">
-                {TIMELINE.map((t, i) => (
-                  <li key={t} className="flex items-center gap-3">
-                    <span
-                      className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white"
-                      style={{ background: VIOLET }}
-                    >
-                      {i + 1}
-                    </span>
-                    <span className="text-[12.5px] font-semibold text-slate-800">{t}</span>
-                  </li>
-                ))}
-              </ol>
-              <p className="mt-3 text-[12.5px] leading-relaxed text-slate-600">
-                Everything is organised chronologically, giving landlords and tenants a complete
-                history of the tenancy.
-              </p>
-            </div>
           </div>
         )}
       </div>
