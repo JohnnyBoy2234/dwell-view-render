@@ -752,20 +752,11 @@ export function useWhatsAppMessaging() {
     }
   }, [activeConversation, fetchMessages]);
 
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    if (user) {
-      try {
-        // Load conversations from this user's own cache only
-        const cachedConversations = localStorage.getItem(`messaging_conversations_${user.id}`);
-        if (cachedConversations) {
-          const parsed = JSON.parse(cachedConversations);
-          setConversations(parsed);
-          conversationsCache.current = parsed;
-        }
-      } catch {}
-    }
-  }, [user]);
+  // NOTE: We deliberately do NOT hydrate the conversation list from
+  // localStorage on mount. Doing so flashed stale conversations (e.g. chats that
+  // were since deleted server-side) for a moment before the fresh fetch replaced
+  // them. The server is the single source of truth for the list; the in-memory
+  // conversationsCache.current still gives instant re-renders within a session.
 
   // Merge core typing users with local per-conversation typing
   const mergedTypingUsers = (() => {

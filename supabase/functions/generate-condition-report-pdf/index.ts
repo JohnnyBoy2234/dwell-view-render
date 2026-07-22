@@ -192,15 +192,39 @@ serve(async (req) => {
       if (record.tenant_notes) { text("Tenant", { f: bold, color: brandDark, size: 10 }); text(record.tenant_notes, { indent: 10, color: ink }); }
     }
 
-    // Reusable image embed with downscale.
-    const embedThumb = async (storagePath: string) => {
-      const { data: blob } = await supabase.storage.from(BUCKET).download(storagePath);
-      if (!blob) return null;
-      const bytes = new Uint8Array(await blob.arrayBuffer());
+    // Reusable image embed.
+    //
+    // Decoding full-resolution photos in pure-JS imagescript blew the edge
+    // function's CPU budget once a record had several photos, crashing the whole
+    // PDF with a 546 WORKER_RESOURCE_LIMIT. pdf-lib embeds JPEG/PNG bytes
+    // *directly* (JPEG is a native PDF image format — no pixel decode needed), so
+    // we embed the stored bytes as-is and only fall back to imagescript for exotic
+    // formats. When Storage image transforms are enabled we prefer a small resized
+    // copy (keeps the PDF lean); otherwise we embed the original, which is cheap.
+    const embedBytes = async (bytes: Uint8Array) => {
+      try { return await doc.embedJpg(bytes); } catch (_e) { /* not baseline jpeg */ }
+      try { return await doc.embedPng(bytes); } catch (_e) { /* not png */ }
+      // Last resort for uncommon formats: transcode a single image via imagescript.
       const img = await Image.decode(bytes);
       const scale = Math.min(1, THUMB_MAX / Math.max(img.width, img.height));
       if (scale < 1) img.resize(Math.round(img.width * scale), Math.round(img.height * scale));
       return await doc.embedJpg(await img.encodeJPEG(70));
+    };
+    const embedThumb = async (storagePath: string) => {
+      // Preferred: natively-resized copy (only works if transforms are enabled).
+      try {
+        const { data: blob } = await supabase.storage.from(BUCKET).download(storagePath, {
+          transform: { width: THUMB_MAX, height: THUMB_MAX, resize: "contain", quality: 75 },
+        } as any);
+        if (blob) {
+          const bytes = new Uint8Array(await blob.arrayBuffer());
+          try { return await doc.embedJpg(bytes); } catch (_e) { /* try png / original */ }
+          try { return await doc.embedPng(bytes); } catch (_e) { /* fall through */ }
+        }
+      } catch (_e) { /* transforms unavailable — embed original below */ }
+      const { data: blob } = await supabase.storage.from(BUCKET).download(storagePath);
+      if (!blob) return null;
+      return await embedBytes(new Uint8Array(await blob.arrayBuffer()));
     };
 
     // ─── Checklist grouped by room ──────────────────────────────────────────────
