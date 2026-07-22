@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { AdminLayout } from '@mzanzihomes/ui/components/admin/AdminLayout';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
@@ -50,7 +49,7 @@ export default function DocumentReview() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Document Review</h1>
@@ -75,12 +74,12 @@ export default function DocumentReview() {
             ))}
           </div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Document Review</h1>
@@ -99,6 +98,6 @@ export default function DocumentReview() {
           </CardContent>
         </Card>
       </div>
-    </AdminLayout>
+    </>
   );
 }

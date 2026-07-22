@@ -23,7 +23,6 @@ import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { KycStatusPill } from '@mzanzihomes/features/kyc';
 import { KycReviewDrawer } from '@/components/admin/KycReviewDrawer';
-import { AdminLayout } from '@mzanzihomes/ui/components/admin/AdminLayout';
 import type { AdminKycListItem, KycStatus } from '@mzanzihomes/common/types/kyc';
 
 function KycManagementContent() {
@@ -333,8 +332,8 @@ function KycManagementContent() {
 
 export default function KycManagement() {
   return (
-    <AdminLayout>
+    <>
       <KycManagementContent />
-    </AdminLayout>
+    </>
   );
 }

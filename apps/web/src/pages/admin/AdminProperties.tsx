@@ -1,6 +1,5 @@
 // @ts-nocheck
 import { useState, useEffect } from 'react';
-import { AdminLayout } from '@mzanzihomes/ui/components/admin/AdminLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
@@ -137,7 +136,7 @@ export default function AdminProperties() {
 
   if (loading) {
     return (
-      <AdminLayout>
+      <>
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Property Management</h1>
@@ -145,12 +144,12 @@ export default function AdminProperties() {
           </div>
           <div className="text-center py-8">Loading properties...</div>
         </div>
-      </AdminLayout>
+      </>
     );
   }
 
   return (
-    <AdminLayout>
+    <>
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Property Management</h1>
@@ -262,6 +261,6 @@ export default function AdminProperties() {
           </Card>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }
