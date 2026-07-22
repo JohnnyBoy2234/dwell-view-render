@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  User, Settings, CreditCard, Shield, FileText, HelpCircle, LogOut,
+  User, Settings, CreditCard, Shield, ShieldCheck, FileText, HelpCircle, LogOut,
 } from 'lucide-react';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
@@ -15,7 +15,7 @@ import { BillingSubscriptionDialog } from './BillingSubscriptionDialog';
 // Avatar in the dashboard header's top-right corner (Slack/Google style).
 // Replaces the old separate Profile tab — account actions live in this menu.
 export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = {}) {
-  const { user, isLandlord, signOut } = useAuth();
+  const { user, isLandlord, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<{ display_name?: string | null; avatar_url?: string | null } | null>(null);
   const [billingOpen, setBillingOpen] = useState(false);
@@ -47,6 +47,20 @@ export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = 
     .toUpperCase();
 
   const go = (path: string) => () => navigate(path);
+
+  // The admin panel is served only by the web app (mzanzihomes.com). The JT menu
+  // also renders in the landlord/tenant apps (separate deployments with no /admin
+  // route), so from there we jump to the web app's absolute URL instead of an
+  // in-app navigation that would 404.
+  const goAdmin = () => {
+    const host = window.location.hostname;
+    const isWebApp =
+      host === 'mzanzihomes.com' || host === 'www.mzanzihomes.com' ||
+      host === 'rentlekker.com' || host === 'www.rentlekker.com' ||
+      host === 'localhost' || host === '127.0.0.1';
+    if (isWebApp) navigate('/admin/dashboard');
+    else window.location.href = 'https://mzanzihomes.com/admin/dashboard';
+  };
 
   return (
     <>
@@ -82,6 +96,14 @@ export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = 
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          {isAdmin ? (
+            <>
+              <DropdownMenuItem className="gap-2.5 py-2 font-semibold text-primary focus:text-primary" onClick={goAdmin}>
+                <ShieldCheck className="w-4 h-4" /> Admin Panel
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          ) : null}
           <DropdownMenuItem className="gap-2.5 py-2" onClick={go(isLandlord ? '/enhancedlandlorddashboard/profile' : '/tenant/profile')}>
             <User className="w-4 h-4 text-muted-foreground" /> My Account
           </DropdownMenuItem>
