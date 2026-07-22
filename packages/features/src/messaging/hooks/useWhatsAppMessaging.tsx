@@ -267,7 +267,7 @@ export function useWhatsAppMessaging() {
   }, [user, toast, isLandlord, stampDelivered]);
 
   // Send message with optimistic update
-  const sendMessage = useCallback(async (conversationId: string, content: string, files?: File[]) => {
+  const sendMessage = useCallback(async (conversationId: string, content: string, files?: File[], replyToId?: string) => {
     if (!user || (!content.trim() && (!files || files.length === 0))) return;
 
     const tempId = generateTempId();
@@ -283,10 +283,11 @@ export function useWhatsAppMessaging() {
       content: trimmedContent,
       message_type: files && files.length > 0 ? 'attachment' : 'text',
       attachment_url: null,
+      reply_to_id: replyToId ?? null,
       created_at: new Date().toISOString(),
       status: 'sending',
       optimistic: true
-    };
+    } as OptimisticMessage;
 
     // Add to messages immediately (optimistic update)
     setMessages(prev => [...prev, optimisticMessage]);
@@ -341,7 +342,8 @@ export function useWhatsAppMessaging() {
           sender_id: user.id,
           content: trimmedContent,
           message_type: attachmentUrl ? 'attachment' : 'text',
-          attachment_url: attachmentUrl
+          attachment_url: attachmentUrl,
+          reply_to_id: replyToId ?? null
         })
         .select()
         .single();

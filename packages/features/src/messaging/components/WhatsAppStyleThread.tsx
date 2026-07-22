@@ -10,7 +10,8 @@ import { MessageAttachment } from '@mzanzihomes/ui/components/messaging/MessageA
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { Message as MessageRow, MessageContent as MessageColumn } from '@mzanzihomes/ui/components/message';
 import { CHAT_WALLPAPER_URL } from '../chatWallpaper';
-import { Clock, Check, CheckCheck, ChevronDown } from 'lucide-react';
+import { Clock, Check, CheckCheck, ChevronDown, Reply as ReplyIcon, X } from 'lucide-react';
+import { useMessageReactions, QUICK_REACTIONS } from '../hooks/useMessageReactions';
 import React from 'react';
 
 interface Message {
@@ -25,6 +26,7 @@ interface Message {
   optimistic?: boolean;
   message_type?: string | null;
   attachment_url?: string | null;
+  reply_to_id?: string | null;
   viewing_proposal_id?: string | null;
   tempId?: string;
   // Stable key across the optimistic→server id swap (prevents remount/re-animation)
@@ -43,7 +45,7 @@ interface WhatsAppStyleThreadProps {
   messages: Message[];
   loading: boolean;
   typingUsers: Map<string, string>;
-  sendMessage: (conversationId: string, content: string, files?: File[]) => Promise<void> | void;
+  sendMessage: (conversationId: string, content: string, files?: File[], replyToId?: string) => Promise<void> | void;
   sendTypingIndicator: (conversationId: string, typing: boolean) => void;
   markMessagesAsRead: (conversationId: string) => Promise<void> | void;
   onMessageSent?: () => void;
@@ -140,6 +142,21 @@ export function WhatsAppStyleThread({
   const [proposalsById, setProposalsById] = useState<Record<string, any>>({});
   // Show skeletons immediately — start as true so first render never flashes empty content
   const [isTransitioning, setIsTransitioning] = useState(true);
+
+  // Reactions + reply
+  const { reactions, toggle: toggleReaction } = useMessageReactions(conversationId);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [actionMsg, setActionMsg] = useState<Message | null>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startLongPress = (m: Message) => {
+    // Reactions/replies reference a real server row — skip un-sent bubbles.
+    if (m.optimistic || m.status === 'failed' || String(m.id).startsWith('temp_')) return;
+    if (m.message_type === 'viewing_proposal') return;
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = setTimeout(() => { vibrate(16); setActionMsg(m); }, 420);
+  };
+  const cancelLongPress = () => { if (longPressTimer.current) clearTimeout(longPressTimer.current); };
 
   // Track which message IDs are "initial" for stagger animation
   const initialMsgIdsRef = useRef<Set<string>>(new Set());
@@ -369,13 +386,15 @@ export function WhatsAppStyleThread({
     if (!trimmed && (!files || files.length === 0)) return;
 
     vibrate(7); // subtle tick on send
+    const replyId = replyTo?.id;
+    setReplyTo(null);
     sendTypingIndicator(conversationId, false);
     setNewMessage('');
     // No scroll here: the new-message effect pins to the bottom right after
     // the optimistic bubble commits to the DOM.
 
     try {
-      await sendMessage(conversationId, trimmed, files || []);
+      await sendMessage(conversationId, trimmed, files || [], replyId);
       onMessageSent?.();
     } catch (error: any) {
       toast({
@@ -439,6 +458,10 @@ export function WhatsAppStyleThread({
 
     const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
 
+    // Reactions on this message + the message it quotes (if any).
+    const msgReactions = reactions[message.id] || [];
+    const quoted = message.reply_to_id ? messages.find((m) => m.id === message.reply_to_id) : null;
+
     // Staggered reveal for the initial batch; newly sent own bubbles get the
     // composer-origin send animation instead
     const isInitial = initialMsgIdsRef.current.has(message.id);
@@ -470,12 +493,35 @@ export function WhatsAppStyleThread({
             wordBreak: 'break-word',
             animationDelay: isInitial ? `${staggerDelay}ms` : '0ms',
             animationFillMode: 'backwards',
+            touchAction: 'pan-y',
           }}
+          onPointerDown={() => startLongPress(message)}
+          onPointerUp={cancelLongPress}
+          onPointerLeave={cancelLongPress}
+          onPointerCancel={cancelLongPress}
+          onContextMenu={(e) => { e.preventDefault(); vibrate(12); setActionMsg(message); }}
         >
           {/* Sender name (incoming only; hidden on grouped follow-ups) */}
           {!isOwn && !isGroupedWithPrev && message.profiles?.display_name && (
             <div className="text-[11px] font-semibold text-ocean-blue mb-0.5 tracking-tight">
               {message.profiles.display_name}
+            </div>
+          )}
+
+          {/* Quoted reply preview */}
+          {quoted && (
+            <div
+              className={cn(
+                'mb-1.5 rounded-lg py-1 pl-2 pr-2.5 border-l-2',
+                isOwn ? 'border-white/70 bg-white/10' : 'border-ocean-blue/60 bg-black/[0.04]',
+              )}
+            >
+              <div className={cn('text-[11px] font-semibold', isOwn ? 'text-white/90' : 'text-ocean-blue')}>
+                {quoted.sender_id === user?.id ? 'You' : (quoted.profiles?.display_name || 'Message')}
+              </div>
+              <div className={cn('text-[12px] truncate', isOwn ? 'text-white/75' : 'text-ios-gray-dark/70')}>
+                {quoted.message_type === 'attachment' ? '📎 Attachment' : (quoted.content || '')}
+              </div>
             </div>
           )}
 
@@ -552,6 +598,24 @@ export function WhatsAppStyleThread({
               </div>
             )}
         </div>
+        {msgReactions.length > 0 && (
+          <div className={cn('flex flex-wrap gap-1 -mt-0.5', isOwn ? 'justify-end pr-1' : 'justify-start pl-1')}>
+            {msgReactions.map((r) => (
+              <button
+                key={r.emoji}
+                onClick={() => toggleReaction(message.id, r.emoji)}
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-[3px] text-[12.5px] leading-none border shadow-sm transition-transform active:scale-90',
+                  r.mine ? 'bg-ocean-blue/10 border-ocean-blue/40' : 'bg-white border-black/8',
+                )}
+                aria-label={`${r.emoji} ${r.count}`}
+              >
+                <span>{r.emoji}</span>
+                {r.count > 1 && <span className="text-[11px] font-semibold text-ios-gray-dark tabular-nums">{r.count}</span>}
+              </button>
+            ))}
+          </div>
+        )}
         </MessageColumn>
       </MessageRow>
     );
@@ -693,11 +757,70 @@ export function WhatsAppStyleThread({
         </button>
       )}
 
+      {/* Long-press action sheet: react + reply */}
+      {actionMsg && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/30"
+          onClick={() => setActionMsg(null)}
+        >
+          <div
+            className="mb-24 w-[min(92%,360px)] rounded-2xl bg-white p-2 shadow-ios-lg animate-in fade-in slide-in-from-bottom-2 duration-150"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-around px-1 py-1.5">
+              {QUICK_REACTIONS.map((emoji) => {
+                const mine = (reactions[actionMsg.id] || []).some((r) => r.emoji === emoji && r.mine);
+                return (
+                  <button
+                    key={emoji}
+                    onClick={() => { vibrate(10); toggleReaction(actionMsg.id, emoji); setActionMsg(null); }}
+                    className={cn(
+                      'flex h-11 w-11 items-center justify-center rounded-full text-[22px] transition-transform active:scale-90',
+                      mine && 'bg-ocean-blue/12',
+                    )}
+                    aria-label={`React ${emoji}`}
+                  >
+                    {emoji}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="my-1 h-px bg-black/[0.06]" />
+            <button
+              onClick={() => { setReplyTo(actionMsg); setActionMsg(null); }}
+              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-[14px] font-medium text-ios-gray-dark hover:bg-black/5"
+            >
+              <ReplyIcon className="h-4 w-4 text-ocean-blue" /> Reply
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Composer */}
       <div
         className="px-3 pt-2 pb-2 bg-white/90 backdrop-blur-md border-t border-black/6 sticky bottom-0 z-10 shrink-0"
         style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)' }}
       >
+        {replyTo && (
+          <div className="mb-2 flex items-center gap-2 rounded-xl border-l-2 border-ocean-blue bg-black/[0.04] px-3 py-2 animate-in fade-in slide-in-from-bottom-1 duration-150">
+            <ReplyIcon className="h-4 w-4 shrink-0 text-ocean-blue" />
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-semibold text-ocean-blue">
+                Replying to {replyTo.sender_id === user?.id ? 'yourself' : (replyTo.profiles?.display_name || 'message')}
+              </div>
+              <div className="truncate text-[12px] text-ios-gray-dark/70">
+                {replyTo.message_type === 'attachment' ? '📎 Attachment' : (replyTo.content || '')}
+              </div>
+            </div>
+            <button
+              onClick={() => setReplyTo(null)}
+              className="shrink-0 rounded-full p-1 text-ios-gray hover:bg-black/5"
+              aria-label="Cancel reply"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
         <MessageComposer
           onSend={handleSendMessage}
           placeholder="Message…"
