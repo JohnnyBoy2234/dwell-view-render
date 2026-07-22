@@ -60,6 +60,30 @@ interface WhatsAppStyleThreadProps {
   }) => React.ReactNode;
 }
 
+// ─── Small helpers ────────────────────────────────────────────────────────────
+
+// WhatsApp-style day label: Today / Yesterday / "Mon, 12 Jul" (year only if past).
+function dayLabel(d: Date): string {
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  const sameYear = d.getFullYear() === today.getFullYear();
+  return d.toLocaleDateString(undefined, {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    ...(sameYear ? {} : { year: 'numeric' }),
+  });
+}
+
+// Subtle haptic tick. Native haptics come via Capacitor on device; on the web
+// layer the Vibration API is a no-op where unsupported (e.g. iOS Safari).
+function vibrate(ms: number) {
+  try { (navigator as any).vibrate?.(ms); } catch { /* unsupported */ }
+}
+
 // ─── Status indicator ────────────────────────────────────────────────────────
 
 function MessageStatusIndicator({
@@ -231,8 +255,9 @@ export function WhatsAppStyleThread({
       // timeouts here were one source of the visible double-jump.
       if (isOwn) {
         scrollToBottom(true);
-      } else if (isScrolledToBottom) {
-        scrollToBottom();
+      } else {
+        vibrate(12); // gentle buzz when a message arrives
+        if (isScrolledToBottom) scrollToBottom();
       }
       lastMessageId.current = latestMessage.id;
     }
@@ -343,6 +368,7 @@ export function WhatsAppStyleThread({
     const trimmed = content.trim();
     if (!trimmed && (!files || files.length === 0)) return;
 
+    vibrate(7); // subtle tick on send
     sendTypingIndicator(conversationId, false);
     setNewMessage('');
     // No scroll here: the new-message effect pins to the bottom right after
@@ -400,6 +426,17 @@ export function WhatsAppStyleThread({
         new Date(messages[index - 1]?.created_at || 0).getTime() >
         300_000; // 5 min
 
+    // Group consecutive messages from the same sender (WhatsApp-style): the
+    // follow-ups drop the sender name and hug the previous bubble.
+    const prevMsg = messages[index - 1];
+    const isGroupedWithPrev =
+      !!prevMsg &&
+      prevMsg.sender_id === message.sender_id &&
+      prevMsg.message_type !== 'viewing_proposal' &&
+      message.message_type !== 'viewing_proposal' &&
+      !showNewDayDivider &&
+      new Date(message.created_at).getTime() - new Date(prevMsg.created_at || 0).getTime() < 180_000;
+
     const hasAttachment = message.message_type === 'attachment' && message.attachment_url;
 
     // Staggered reveal for the initial batch; newly sent own bubbles get the
@@ -409,7 +446,7 @@ export function WhatsAppStyleThread({
     const staggerDelay = isInitial ? Math.min(index * 28, 380) : 0;
 
     const bubbleElement = (
-      <MessageRow align={isOwn ? 'end' : 'start'} className="items-end gap-2 mb-0.5">
+      <MessageRow align={isOwn ? 'end' : 'start'} className={cn('items-end gap-2 mb-0.5', !isGroupedWithPrev && 'mt-2')}>
         <MessageColumn className={cn('gap-0.5', isOwn ? 'items-end' : 'items-start')}>
         <div
           className={cn(
@@ -435,8 +472,8 @@ export function WhatsAppStyleThread({
             animationFillMode: 'backwards',
           }}
         >
-          {/* Sender name (incoming only, group context) */}
-          {!isOwn && message.profiles?.display_name && (
+          {/* Sender name (incoming only; hidden on grouped follow-ups) */}
+          {!isOwn && !isGroupedWithPrev && message.profiles?.display_name && (
             <div className="text-[11px] font-semibold text-ocean-blue mb-0.5 tracking-tight">
               {message.profiles.display_name}
             </div>
@@ -524,11 +561,7 @@ export function WhatsAppStyleThread({
         {showNewDayDivider && (
           <div className="flex justify-center my-4">
             <span className="px-3 py-1 text-[11px] font-semibold rounded-full bg-black/8 text-ios-gray-dark backdrop-blur-sm">
-              {new Date(message.created_at).toLocaleDateString(undefined, {
-                weekday: 'short',
-                month: 'short',
-                day: 'numeric',
-              })}
+              {dayLabel(new Date(message.created_at))}
             </span>
           </div>
         )}
