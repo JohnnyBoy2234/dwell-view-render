@@ -74,6 +74,9 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 const QUICK_LINKS = [
   { label: 'User Management', to: '/admin/users', icon: Users },
   { label: 'Properties', to: '/admin/properties', icon: Building2 },
+  { label: 'Applications', to: '/admin/applications', icon: ClipboardCheck },
+  { label: 'Leases & Contracts', to: '/admin/leases', icon: FileText },
+  { label: 'Payments', to: '/admin/payments', icon: Banknote },
   { label: 'KYC Verification', to: '/admin/kyc', icon: ShieldCheck },
   { label: 'Documents', to: '/admin/documents', icon: FileText },
   { label: 'Property Reports', to: '/admin/reports', icon: Activity },

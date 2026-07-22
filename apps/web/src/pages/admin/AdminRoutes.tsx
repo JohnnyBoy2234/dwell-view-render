@@ -7,6 +7,9 @@ import PropertyReports from "@/pages/admin/PropertyReports";
 import DocumentReview from "@/pages/admin/DocumentReview";
 import UsersManagement from "@/pages/admin/UsersManagement";
 import KycManagement from "@/pages/admin/KycManagement";
+import AdminApplications from "@/pages/admin/AdminApplications";
+import AdminLeases from "@/pages/admin/AdminLeases";
+import AdminPayments from "@/pages/admin/AdminPayments";
 import { SupportMessagesAdmin } from "@/components/admin/SupportMessagesAdmin";
 
 // Mounted at /admin/* in App.tsx, so paths here are relative to /admin.
@@ -19,6 +22,9 @@ export default function AdminRoutes() {
       <Route path="users" element={<AdminLayout><UsersManagement /></AdminLayout>} />
       <Route path="admin-users" element={<AdminLayout><AdminManagement /></AdminLayout>} />
       <Route path="properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
+      <Route path="applications" element={<AdminLayout><AdminApplications /></AdminLayout>} />
+      <Route path="leases" element={<AdminLayout><AdminLeases /></AdminLayout>} />
+      <Route path="payments" element={<AdminLayout><AdminPayments /></AdminLayout>} />
       <Route path="documents" element={<AdminLayout><DocumentReview /></AdminLayout>} />
       <Route path="kyc" element={<AdminLayout><KycManagement /></AdminLayout>} />
       <Route path="reports" element={<AdminLayout><PropertyReports /></AdminLayout>} />
