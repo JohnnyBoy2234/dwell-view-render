@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { LeasePreviewModal } from '@mzanzihomes/features/lease';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import { DEFAULT_WIZARD_DATA, type LeaseWizardData } from '@mzanzihomes/common/types/lease';
+import { CONSENT_REGISTRY } from '@mzanzihomes/common/constants/consentRegistry';
 
 interface SignatureInfo {
   imageUrl: string;
@@ -109,10 +110,12 @@ export function LeaseSignature() {
         ip_address: ipAddress,
         user_agent: navigator.userAgent,
         consent_acknowledged: true,
+        consent_text: CONSENT_REGISTRY.lease_esignature.text,
+        consent_version: CONSENT_REGISTRY.lease_esignature.version,
       };
-      
+
       const bothSigned = !!landlordSignature;
-      
+
       const { error } = await supabase
         .from('lease_contracts')
         .update({
@@ -121,9 +124,25 @@ export function LeaseSignature() {
           status: bothSigned ? 'signed' : 'pending_landlord',
         })
         .eq('id', contractId);
-      
+
       if (error) throw error;
-      
+
+      // This path signs directly (bypassing the sign-lease-contract edge
+      // function/signature_audit trail), so record the consent event here.
+      if (user) {
+        const { error: consentError } = await (supabase.from('consents') as any).insert({
+          user_id: user.id,
+          consent_type: 'lease_esignature',
+          subject_type: 'lease',
+          subject_id: contractId,
+          consented: true,
+          consent_version: CONSENT_REGISTRY.lease_esignature.version,
+          consent_text_snapshot: CONSENT_REGISTRY.lease_esignature.text,
+          user_agent: navigator.userAgent,
+        });
+        if (consentError) console.error('Failed to record lease e-signature consent:', consentError);
+      }
+
       setTenantSignature({
         imageUrl: signatureDataUrl,
         name: wizardData.tenantFullName,

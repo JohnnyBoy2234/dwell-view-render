@@ -89,15 +89,13 @@ export const EXPERIAN_URL: string =
   (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_EXPERIAN_URL) ||
   'https://up.experian.co.za';
 
-// Screening consent — bump the version whenever the wording changes; the
-// exact wording shown is snapshotted onto each consent record.
+// Screening consent — sourced from the shared consent registry so the
+// recorded version/wording can never drift from what other consent_types use.
 // NOTE: wording assumes legal sign-off; flag for POPIA/legal review before launch.
-export const CREDIT_CONSENT_VERSION = '2026-07-v2';
-export const PRIVACY_POLICY_VERSION = '2026-07';
-export const CREDIT_CONSENT_TEXT =
-  'I consent to the landlord, MzansiHomes and authorised screening providers using the ' +
-  'information I supplied to perform identity, affordability, credit, rental-history and ' +
-  'reference checks for this rental application.';
+import { CONSENT_REGISTRY, PRIVACY_POLICY_VERSION as _PRIVACY_POLICY_VERSION } from './consentRegistry';
+export const CREDIT_CONSENT_VERSION = CONSENT_REGISTRY.credit_check.version;
+export const CREDIT_CONSENT_TEXT = CONSENT_REGISTRY.credit_check.text;
+export const PRIVACY_POLICY_VERSION = _PRIVACY_POLICY_VERSION;
 
 // Landlord-risk questions. Answers are stored keyed by id, so questions can be
 // reworded/added here without schema changes.

@@ -428,10 +428,14 @@ export default function ApplicationDetail() {
                       {consent.consented ? 'Consent given' : 'Consent not given'}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Recorded {shortDateTime(consent.consented_at)} (wording {consent.consent_version})
+                      Recorded {shortDateTime(consent.created_at)} (wording {consent.consent_version})
                       {!consent.consented && viewerIsLandlord &&
                         ' — screening checks cannot be performed for this application.'}
                     </p>
+                    <details className="mt-1 text-xs text-muted-foreground">
+                      <summary className="cursor-pointer select-none">View exact wording</summary>
+                      <p className="mt-1">{consent.consent_text_snapshot}</p>
+                    </details>
                   </div>
                 </div>
               ) : (

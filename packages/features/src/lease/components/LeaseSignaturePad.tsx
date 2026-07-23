@@ -9,6 +9,7 @@ import { useESignature } from '../hooks/useESignature';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { toast } from 'sonner';
 import type { LeaseContract } from '@mzanzihomes/common/types/lease';
+import { CONSENT_REGISTRY } from '@mzanzihomes/common/constants/consentRegistry';
 
 interface LeaseSignaturePadProps {
   contract: LeaseContract;
@@ -134,7 +135,13 @@ export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: Le
       const signatureDataUrl = canvas.toDataURL('image/png');
       
       // Capture the signature
-      const success = await captureSignature(contract.id, signatureDataUrl, consentAcknowledged);
+      const success = await captureSignature(
+        contract.id,
+        signatureDataUrl,
+        consentAcknowledged,
+        CONSENT_REGISTRY.lease_esignature.text,
+        CONSENT_REGISTRY.lease_esignature.version
+      );
       
       if (success) {
         toast.success('Contract signed successfully!');
@@ -241,10 +248,7 @@ export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: Le
             onCheckedChange={(checked) => setConsentAcknowledged(checked as boolean)}
           />
           <label htmlFor="consent" className="text-sm leading-relaxed">
-            I acknowledge that I have read and understood this lease agreement in its entirety. 
-            I consent to sign this document electronically and agree that my electronic signature 
-            has the same legal effect as a handwritten signature. I understand that this creates 
-            a legally binding agreement.
+            {CONSENT_REGISTRY.lease_esignature.text}
           </label>
         </div>
 

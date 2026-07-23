@@ -527,52 +527,50 @@ export type Database = {
           },
         ]
       }
-      credit_check_consents: {
+      consents: {
         Row: {
-          application_id: string
           consent_text_snapshot: string
+          consent_type: string
           consent_version: string
           consented: boolean
-          consented_at: string
+          counterparty_id: string | null
+          created_at: string
           id: string
           privacy_policy_version: string | null
-          tenant_id: string
-          terms_version: string | null
+          subject_id: string
+          subject_type: string
           user_agent: string | null
+          user_id: string
         }
         Insert: {
-          application_id: string
           consent_text_snapshot: string
+          consent_type: string
           consent_version: string
           consented: boolean
-          consented_at?: string
+          counterparty_id?: string | null
+          created_at?: string
           id?: string
           privacy_policy_version?: string | null
-          tenant_id: string
-          terms_version?: string | null
+          subject_id: string
+          subject_type: string
           user_agent?: string | null
+          user_id: string
         }
         Update: {
-          application_id?: string
           consent_text_snapshot?: string
+          consent_type?: string
           consent_version?: string
           consented?: boolean
-          consented_at?: string
+          counterparty_id?: string | null
+          created_at?: string
           id?: string
           privacy_policy_version?: string | null
-          tenant_id?: string
-          terms_version?: string | null
+          subject_id?: string
+          subject_type?: string
           user_agent?: string | null
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "credit_check_consents_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       documents: {
         Row: {

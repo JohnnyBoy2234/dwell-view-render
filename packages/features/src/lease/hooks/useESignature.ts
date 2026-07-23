@@ -42,7 +42,9 @@ export function useESignature() {
   const captureSignature = async (
     contractId: string,
     signatureDataUrl: string,
-    consentAcknowledged: boolean
+    consentAcknowledged: boolean,
+    consentText: string,
+    consentVersion: string
   ): Promise<boolean> => {
     if (!user) return false;
 
@@ -92,7 +94,9 @@ export function useESignature() {
         ip_address: ipAddress,
         user_agent: userAgent,
         geolocation,
-        consent_acknowledged: consentAcknowledged
+        consent_acknowledged: consentAcknowledged,
+        consent_text: consentText,
+        consent_version: consentVersion
       };
 
       // Sign contract via edge function

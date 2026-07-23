@@ -121,14 +121,17 @@ export async function listEvents(applicationId: string): Promise<ApplicationEven
 export interface ConsentRecord {
   consented: boolean;
   consent_version: string;
-  consented_at: string;
+  consent_text_snapshot: string;
+  created_at: string;
 }
 
 export async function getConsentRecord(applicationId: string): Promise<ConsentRecord | null> {
-  const { data } = await table('credit_check_consents')
-    .select('consented, consent_version, consented_at')
-    .eq('application_id', applicationId)
-    .order('consented_at', { ascending: false })
+  const { data } = await table('consents')
+    .select('consented, consent_version, consent_text_snapshot, created_at')
+    .eq('subject_type', 'application')
+    .eq('subject_id', applicationId)
+    .eq('consent_type', 'credit_check')
+    .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   return (data as ConsentRecord) ?? null;

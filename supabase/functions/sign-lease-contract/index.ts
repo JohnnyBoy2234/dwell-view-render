@@ -122,12 +122,28 @@ serve(async (req) => {
       contract_id: contractId,
       action: 'contract_signed',
       actor_id: user.id,
-      details: { 
+      details: {
         signer_role: signerRole,
         signature_hash: sigHashHex,
         document_hash: documentHash
       }
     });
+
+    // Record the consent event (this is what finally persists the actual
+    // wording the signer saw, not just an acknowledged boolean).
+    if (signatureData.consent_text && signatureData.consent_version) {
+      const { error: consentError } = await supabase.from('consents').insert({
+        user_id: user.id,
+        consent_type: 'lease_esignature',
+        subject_type: 'lease',
+        subject_id: contractId,
+        consented: true,
+        consent_version: signatureData.consent_version,
+        consent_text_snapshot: signatureData.consent_text,
+        user_agent: signatureData.user_agent,
+      });
+      if (consentError) console.error('Failed to record lease e-signature consent:', consentError);
+    }
 
     // Once both parties have signed, create the tenancy — regardless of who
     // signed last (tenant-first or landlord-first). Idempotent + service role.

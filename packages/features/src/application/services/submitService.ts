@@ -129,9 +129,11 @@ export async function submitApplication({ userId, propertyId, landlordId, invite
   if (applicationId) {
     // Consent is recorded whether given or declined — it is never assumed,
     // and the landlord sees the declined state explicitly.
-    const { error: consentError } = await (supabase.from('credit_check_consents') as any).insert({
-      application_id: applicationId,
-      tenant_id: userId,
+    const { error: consentError } = await (supabase.from('consents') as any).insert({
+      subject_type: 'application',
+      subject_id: applicationId,
+      consent_type: 'credit_check',
+      user_id: userId,
       consented,
       consent_version: CREDIT_CONSENT_VERSION,
       consent_text_snapshot: CREDIT_CONSENT_TEXT,

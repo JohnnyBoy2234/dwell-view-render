@@ -13,16 +13,24 @@ import {
   type ConditionKey,
   standardChecklistItems,
 } from '@mzanzihomes/common';
+import { CONSENT_REGISTRY } from '@mzanzihomes/common/constants/consentRegistry';
 import type { TenancySummary } from './useConditionRecords';
 
 // Best-effort signing evidence: public IP (via a lightweight lookup) + UA.
-async function signMetadata(consent: string) {
+// p_consent_version is only accepted by condition_approve, not the (dead,
+// unreachable since the receipt step was skipped) condition_sign_receipt.
+async function signMetadata(consent: string, version?: string) {
   let ip: string | null = null;
   try {
     const res = await fetch('https://api.ipify.org?format=json');
     ip = (await res.json()).ip ?? null;
   } catch {}
-  return { p_ip: ip, p_ua: navigator.userAgent, p_consent: consent };
+  return {
+    p_ip: ip,
+    p_ua: navigator.userAgent,
+    p_consent: consent,
+    ...(version ? { p_consent_version: version } : {}),
+  };
 }
 
 export type PhotoWithUrl = ConditionPhoto & { url: string };
@@ -344,7 +352,10 @@ export function useConditionRecordDetail(recordId: string | null) {
     async () =>
       callRpc('condition_approve', {
         p_record_id: recordId,
-        ...(await signMetadata(record?.attestation_text ?? 'I agree the report fairly represents the condition of the property.')),
+        ...(await signMetadata(
+          record?.attestation_text ?? CONSENT_REGISTRY.condition_approval.text,
+          CONSENT_REGISTRY.condition_approval.version,
+        )),
       }),
     [callRpc, recordId, record?.attestation_text],
   );

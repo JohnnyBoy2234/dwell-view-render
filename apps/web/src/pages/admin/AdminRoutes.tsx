@@ -8,6 +8,7 @@ import DocumentReview from "@/pages/admin/DocumentReview";
 import UsersManagement from "@/pages/admin/UsersManagement";
 import KycManagement from "@/pages/admin/KycManagement";
 import AdminApplications from "@/pages/admin/AdminApplications";
+import AdminConsents from "@/pages/admin/AdminConsents";
 import AdminLeases from "@/pages/admin/AdminLeases";
 import AdminPayments from "@/pages/admin/AdminPayments";
 import { SupportMessagesAdmin } from "@/components/admin/SupportMessagesAdmin";
@@ -23,6 +24,7 @@ export default function AdminRoutes() {
       <Route path="admin-users" element={<AdminLayout><AdminManagement /></AdminLayout>} />
       <Route path="properties" element={<AdminLayout><AdminProperties /></AdminLayout>} />
       <Route path="applications" element={<AdminLayout><AdminApplications /></AdminLayout>} />
+      <Route path="consents" element={<AdminLayout><AdminConsents /></AdminLayout>} />
       <Route path="leases" element={<AdminLayout><AdminLeases /></AdminLayout>} />
       <Route path="payments" element={<AdminLayout><AdminPayments /></AdminLayout>} />
       <Route path="documents" element={<AdminLayout><DocumentReview /></AdminLayout>} />

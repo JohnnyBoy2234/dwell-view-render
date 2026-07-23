@@ -16,6 +16,7 @@ import { processLeaseTemplate, formatDate } from '../utils/leaseTemplateEngine';
 import { MASTER_LEASE_TEMPLATE } from '../templates/masterLeaseTemplate';
 import { CONDITION_REPORT_TEMPLATE } from '../templates/conditionReportTemplate';
 import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
+import { CONSENT_REGISTRY } from '@mzanzihomes/common/constants/consentRegistry';
 import { toast } from 'sonner';
 
 interface SignatureInfo {
@@ -460,8 +461,7 @@ export function LeasePreviewModal({
                 onCheckedChange={(checked) => setConsentAcknowledged(checked as boolean)}
               />
               <label htmlFor="consent" className="text-sm leading-relaxed">
-                I acknowledge that I have read this lease agreement in its entirety. I consent to sign electronically 
-                and agree that my electronic signature has the same legal effect as a handwritten signature.
+                {CONSENT_REGISTRY.lease_esignature.text}
               </label>
             </div>
           )}

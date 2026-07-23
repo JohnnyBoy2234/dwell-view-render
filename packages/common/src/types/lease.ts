@@ -142,6 +142,8 @@ export interface SignatureData {
   };
   consent_acknowledged?: boolean;
   consentAcknowledged?: boolean;
+  consent_text?: string;
+  consent_version?: string;
 }
 
 // E-signature session for managing signing flow
