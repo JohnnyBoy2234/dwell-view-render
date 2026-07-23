@@ -1,0 +1,382 @@
+<title>MzanziHomes Screenshot Studio</title>
+<style>
+  :root {
+    --bg: #eef2f9;
+    --panel: #ffffff;
+    --panel-2: #f6f8fc;
+    --text: #1b2437;
+    --muted: #5b6b86;
+    --line: rgba(15, 23, 42, 0.10);
+    --brand: #2f86ff;
+    --brand-ink: #0e2b6e;
+    --green: #16b364;
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 12px 30px -18px rgba(16,24,40,.32);
+    --radius: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a1730; --panel: #10213f; --panel-2: #0d1c37; --text: #e8eef9;
+      --muted: #9fb0cd; --line: rgba(255,255,255,0.10);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 14px 34px -18px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0a1730; --panel: #10213f; --panel-2: #0d1c37; --text: #e8eef9;
+    --muted: #9fb0cd; --line: rgba(255,255,255,0.10);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 14px 34px -18px rgba(0,0,0,.6);
+  }
+  :root[data-theme="light"] {
+    --bg: #eef2f9; --panel: #ffffff; --panel-2: #f6f8fc; --text: #1b2437;
+    --muted: #5b6b86; --line: rgba(15,23,42,0.10);
+    --shadow: 0 1px 2px rgba(16,24,40,.04), 0 12px 30px -18px rgba(16,24,40,.32);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header.top {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 22px; border-bottom: 1px solid var(--line);
+    background: var(--panel); position: sticky; top: 0; z-index: 5;
+  }
+  .logo { width: 30px; height: 30px; border-radius: 9px; background: var(--brand);
+    display: grid; place-items: center; color: #fff; font-weight: 800; flex: none; }
+  header.top h1 { font-size: 16px; font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+  header.top .sub { font-size: 12.5px; color: var(--muted); margin-left: 2px; }
+  header.top .spacer { flex: 1; }
+  .hint { font-size: 12px; color: var(--muted); }
+
+  main { display: grid; grid-template-columns: 1fr 340px; gap: 20px; padding: 20px; align-items: start; }
+  @media (max-width: 880px) { main { grid-template-columns: 1fr; } }
+
+  .stage {
+    background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 18px; display: grid; place-items: center; min-height: 60vh;
+  }
+  .stage canvas {
+    height: min(74vh, 720px); width: auto; border-radius: 14px;
+    box-shadow: 0 10px 40px -12px rgba(16,24,40,.45); background: #dfe6f2;
+  }
+  .dims { margin-top: 12px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .panel { display: flex; flex-direction: column; gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 16px; }
+  .card h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted);
+    margin: 0 0 12px; font-weight: 700; }
+
+  .drop {
+    border: 1.5px dashed var(--line); border-radius: 12px; padding: 20px 14px; text-align: center;
+    color: var(--muted); font-size: 13px; cursor: pointer; transition: border-color .15s, background .15s;
+    background: var(--panel-2);
+  }
+  .drop:hover, .drop.drag { border-color: var(--brand); color: var(--text); }
+  .drop strong { color: var(--brand); }
+
+  label.field { display: block; font-size: 12.5px; font-weight: 600; margin: 0 0 6px; }
+  textarea, input[type="text"] {
+    width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px;
+    font: inherit; font-size: 14px; background: var(--panel-2); color: var(--text); resize: vertical;
+  }
+  textarea:focus, input:focus { outline: 2px solid var(--brand); outline-offset: 1px; border-color: transparent; }
+
+  .swatches { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .sw { height: 40px; border-radius: 10px; cursor: pointer; border: 2px solid transparent; position: relative; }
+  .sw[aria-pressed="true"] { border-color: var(--text); box-shadow: 0 0 0 2px var(--panel), 0 0 0 4px var(--brand); }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
+  .row:first-child { margin-top: 0; }
+  .row span { font-size: 13px; }
+  input[type="range"] { width: 150px; accent-color: var(--brand); }
+
+  .seg { display: inline-flex; background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+  .seg button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 12.5px;
+    font-weight: 600; padding: 5px 12px; border-radius: 7px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--brand); color: #fff; }
+
+  .toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+  .toggle input { width: 16px; height: 16px; accent-color: var(--brand); }
+
+  .btn {
+    width: 100%; border: 0; border-radius: 12px; padding: 13px; font: inherit; font-size: 14.5px;
+    font-weight: 700; cursor: pointer; color: #fff; background: var(--green);
+    box-shadow: 0 10px 24px -12px rgba(22,179,100,.7); transition: transform .08s, filter .15s;
+  }
+  .btn:hover { filter: brightness(1.04); }
+  .btn:active { transform: scale(.98); }
+  .btn:disabled { background: var(--line); color: var(--muted); box-shadow: none; cursor: not-allowed; }
+  .btn.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    box-shadow: none; margin-top: 8px; }
+
+  .footnote { font-size: 11.5px; color: var(--muted); line-height: 1.5; }
+  a { color: var(--brand); }
+</style>
+
+<header class="top">
+  <div class="logo">M</div>
+  <div>
+    <h1>Screenshot Studio</h1>
+    <div class="sub">App Store frames · 1290 × 2796 (6.7")</div>
+  </div>
+  <div class="spacer"></div>
+  <div class="hint">Everything runs in your browser — nothing is uploaded.</div>
+</header>
+
+<main>
+  <section class="stage">
+    <canvas id="cv" width="1290" height="2796" aria-label="Screenshot preview"></canvas>
+    <div class="dims" id="dims">1290 × 2796 px · drop a screenshot to begin</div>
+  </section>
+
+  <aside class="panel">
+    <div class="card">
+      <h2>1 · Screenshot</h2>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Upload screenshot">
+        Drop a screenshot here or <strong>browse</strong><br>
+        <span class="footnote">A raw phone capture works best (portrait).</span>
+      </div>
+      <input type="file" id="file" accept="image/*" hidden>
+    </div>
+
+    <div class="card">
+      <h2>2 · Headline</h2>
+      <textarea id="headline" rows="2" placeholder="Find your&#10;next home">Find your
+next home</textarea>
+      <div class="row">
+        <span>Text colour</span>
+        <div class="seg" id="textColor" role="group" aria-label="Text colour">
+          <button data-c="#ffffff" aria-pressed="true">Light</button>
+          <button data-c="#12203f" aria-pressed="false">Dark</button>
+        </div>
+      </div>
+      <div class="row"><span>Size</span><input type="range" id="fontSize" min="60" max="130" value="96"></div>
+    </div>
+
+    <div class="card">
+      <h2>3 · Background</h2>
+      <div class="swatches" id="bg"></div>
+    </div>
+
+    <div class="card">
+      <h2>4 · Device</h2>
+      <label class="toggle"><input type="checkbox" id="frame" checked> Phone frame &amp; shadow</label>
+      <div class="row"><span>Screen size</span><input type="range" id="scale" min="60" max="94" value="80"></div>
+      <div class="row"><span>Position</span><input type="range" id="posY" min="480" max="820" value="640"></div>
+    </div>
+
+    <div class="card">
+      <button class="btn" id="export" disabled>Export PNG · 1290 × 2796</button>
+      <button class="btn secondary" id="reset">Reset controls</button>
+      <p class="footnote" style="margin: 12px 0 0;">Tip: your existing shots in <code>app-store/screenshots</code> are already framed — use this for new raw captures or Android sizes.</p>
+    </div>
+  </aside>
+</main>
+
+<script>
+(function () {
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = 1290, H = 2796;
+
+  const GRADIENTS = [
+    { name: 'MzanziHomes', a: '#2f86ff', b: '#0e2b6e', text: '#ffffff' },
+    { name: 'Ocean',       a: '#23b5d3', b: '#1a4e8a', text: '#ffffff' },
+    { name: 'Navy',        a: '#22335f', b: '#0a1226', text: '#ffffff' },
+    { name: 'Emerald',     a: '#19c375', b: '#0b6b45', text: '#ffffff' },
+    { name: 'Sunset',      a: '#ff8a4c', b: '#b0341f', text: '#ffffff' },
+    { name: 'Violet',      a: '#8b7cff', b: '#3b2c9c', text: '#ffffff' },
+    { name: 'Sky',         a: '#eaf2ff', b: '#c6dcff', text: '#12203f' },
+    { name: 'Slate',       a: '#4a5568', b: '#232a38', text: '#ffffff' },
+  ];
+
+  const state = {
+    img: null,
+    headline: 'Find your\nnext home',
+    textColor: '#ffffff',
+    fontSize: 96,
+    grad: GRADIENTS[0],
+    frame: true,
+    scale: 0.80,
+    posY: 640,
+  };
+
+  // Build background swatches
+  const bgWrap = document.getElementById('bg');
+  GRADIENTS.forEach((g, i) => {
+    const el = document.createElement('button');
+    el.className = 'sw';
+    el.style.background = `linear-gradient(160deg, ${g.a}, ${g.b})`;
+    el.title = g.name;
+    el.setAttribute('aria-pressed', i === 0 ? 'true' : 'false');
+    el.addEventListener('click', () => {
+      state.grad = g;
+      state.textColor = g.text;
+      [...bgWrap.children].forEach(c => c.setAttribute('aria-pressed', 'false'));
+      el.setAttribute('aria-pressed', 'true');
+      syncTextColorButtons();
+      render();
+    });
+    bgWrap.appendChild(el);
+  });
+
+  function roundRectPath(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function wrapLines(text, maxW, font) {
+    ctx.font = font;
+    const out = [];
+    text.split('\n').forEach(para => {
+      const words = para.split(' ');
+      let line = '';
+      words.forEach(word => {
+        const test = line ? line + ' ' + word : word;
+        if (ctx.measureText(test).width > maxW && line) { out.push(line); line = word; }
+        else line = test;
+      });
+      out.push(line);
+    });
+    return out;
+  }
+
+  function render() {
+    // Background
+    const g = ctx.createLinearGradient(0, 0, W * 0.25, H);
+    g.addColorStop(0, state.grad.a);
+    g.addColorStop(1, state.grad.b);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+
+    // Headline
+    const fs = state.fontSize;
+    const font = `700 ${fs}px -apple-system, "Segoe UI", Inter, Roboto, sans-serif`;
+    const lines = wrapLines(state.headline, W - 220, font);
+    ctx.font = font;
+    ctx.fillStyle = state.textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    let y = 150 + fs;
+    lines.forEach(ln => { ctx.fillText(ln, W / 2, y); y += fs * 1.16; });
+
+    // Screenshot
+    if (state.img) {
+      const tw = Math.round(W * state.scale);
+      const th = Math.round(tw * state.img.height / state.img.width);
+      const px = Math.round((W - tw) / 2);
+      const py = state.posY;
+      const rad = Math.round(tw * 0.055);
+
+      if (state.frame) {
+        ctx.save();
+        ctx.shadowColor = 'rgba(6,16,40,0.45)';
+        ctx.shadowBlur = 60; ctx.shadowOffsetY = 30;
+        ctx.fillStyle = '#0b1220';
+        roundRectPath(px - 10, py - 10, tw + 20, th + 20, rad + 8);
+        ctx.fill();
+        ctx.restore();
+      } else {
+        ctx.save();
+        ctx.shadowColor = 'rgba(6,16,40,0.4)';
+        ctx.shadowBlur = 50; ctx.shadowOffsetY = 26;
+        ctx.fillStyle = '#000';
+        roundRectPath(px, py, tw, th, rad);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      ctx.save();
+      roundRectPath(px, py, tw, th, rad);
+      ctx.clip();
+      ctx.drawImage(state.img, px, py, tw, th);
+      ctx.restore();
+
+      if (state.frame) {
+        ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+        ctx.lineWidth = 3;
+        roundRectPath(px, py, tw, th, rad);
+        ctx.stroke();
+      }
+    } else {
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.font = '500 40px -apple-system, sans-serif';
+      ctx.fillText('Drop a screenshot →', W / 2, H / 2);
+    }
+  }
+
+  function loadFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      state.img = im;
+      document.getElementById('export').disabled = false;
+      document.getElementById('dims').textContent = `1290 × 2796 px · source ${im.width}×${im.height}`;
+      URL.revokeObjectURL(url);
+      render();
+    };
+    im.src = url;
+  }
+
+  // Wiring
+  const drop = document.getElementById('drop');
+  const fileInput = document.getElementById('file');
+  drop.addEventListener('click', () => fileInput.click());
+  drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+  fileInput.addEventListener('change', e => loadFile(e.target.files[0]));
+  ['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('drag'); }));
+  drop.addEventListener('drop', e => loadFile(e.dataTransfer.files[0]));
+  window.addEventListener('paste', e => { const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/')); if (it) loadFile(it.getAsFile()); });
+
+  document.getElementById('headline').addEventListener('input', e => { state.headline = e.target.value; render(); });
+  document.getElementById('fontSize').addEventListener('input', e => { state.fontSize = +e.target.value; render(); });
+  document.getElementById('scale').addEventListener('input', e => { state.scale = +e.target.value / 100; render(); });
+  document.getElementById('posY').addEventListener('input', e => { state.posY = +e.target.value; render(); });
+  document.getElementById('frame').addEventListener('change', e => { state.frame = e.target.checked; render(); });
+
+  const textColorSeg = document.getElementById('textColor');
+  function syncTextColorButtons() {
+    [...textColorSeg.children].forEach(b => b.setAttribute('aria-pressed', b.dataset.c === state.textColor ? 'true' : 'false'));
+  }
+  textColorSeg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    state.textColor = b.dataset.c; syncTextColorButtons(); render();
+  });
+
+  document.getElementById('export').addEventListener('click', () => {
+    cv.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const slug = (state.headline.split('\n')[0] || 'screenshot').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      a.download = `${slug || 'screenshot'}-1290x2796.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    }, 'image/png');
+  });
+
+  document.getElementById('reset').addEventListener('click', () => {
+    state.headline = 'Find your\nnext home';
+    state.fontSize = 96; state.scale = 0.80; state.posY = 640; state.frame = true;
+    state.grad = GRADIENTS[0]; state.textColor = '#ffffff';
+    document.getElementById('headline').value = state.headline;
+    document.getElementById('fontSize').value = 96;
+    document.getElementById('scale').value = 80;
+    document.getElementById('posY').value = 640;
+    document.getElementById('frame').checked = true;
+    [...bgWrap.children].forEach((c, i) => c.setAttribute('aria-pressed', i === 0 ? 'true' : 'false'));
+    syncTextColorButtons();
+    render();
+  });
+
+  render();
+})();
+</script>
