@@ -24,7 +24,13 @@ workflows:
       cancel_previous_builds: true
     scripts:
       - name: Install dependencies
-        script: npm ci --legacy-peer-deps --ignore-scripts
+        script: |
+          # Match the npm that generated package-lock.json (repo pins npm@11 via
+          # packageManager); Codemagic's node 22 ships npm 10, which reads an
+          # npm-11 lockfile as "out of sync" and fails `npm ci` at this step.
+          npm i -g npm@11.6.2
+          npm --version
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
       - name: Build web assets
         script: npx turbo run build --filter=@mzanzihomes/tenant
       - name: Sync Capacitor iOS
@@ -73,7 +79,13 @@ workflows:
       cancel_previous_builds: true
     scripts:
       - name: Install dependencies
-        script: npm ci --legacy-peer-deps --ignore-scripts
+        script: |
+          # Match the npm that generated package-lock.json (repo pins npm@11 via
+          # packageManager); Codemagic's node 22 ships npm 10, which reads an
+          # npm-11 lockfile as "out of sync" and fails `npm ci` at this step.
+          npm i -g npm@11.6.2
+          npm --version
+          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
       - name: Build web assets
         script: npx turbo run build --filter=@mzanzihomes/landlord
       - name: Sync Capacitor iOS
