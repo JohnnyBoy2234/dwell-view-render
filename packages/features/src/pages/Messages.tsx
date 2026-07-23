@@ -221,17 +221,38 @@ export default function Messages() {
     };
   }, [showConversations]);
 
-  // While a chat is open the page behind it must never scroll — otherwise
-  // Safari pans the body when the input focuses (the other half of the jump).
+  // While a chat is open the page behind it must never scroll — otherwise the
+  // browser pans the body when the input focuses (the other half of the jump).
   useEffect(() => {
     if (showConversations || !isMobile) return;
+    const html = document.documentElement;
     const body = document.body;
-    const prev = { overflow: body.style.overflow, overscroll: body.style.overscrollBehavior };
+    const prev = {
+      bodyOverflow: body.style.overflow,
+      bodyOverscroll: body.style.overscrollBehavior,
+      htmlOverflow: html.style.overflow,
+    };
     body.style.overflow = 'hidden';
     body.style.overscrollBehavior = 'none';
+    html.style.overflow = 'hidden';
+
+    // The "up" half of the jump: even inside a fixed, body-locked pane, mobile
+    // Safari/Chrome still scroll the *window* up to reveal a focused input. Our
+    // pane is already sized to the visual viewport (top = offsetTop), so the
+    // composer is above the keyboard without any window scroll — force the
+    // window back to the top whenever focus lands inside the chat. The rAF pass
+    // catches the pan the browser applies on the frame after focus.
+    const pinWindow = () => {
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => window.scrollTo(0, 0));
+    };
+    window.addEventListener('focusin', pinWindow);
+
     return () => {
-      body.style.overflow = prev.overflow;
-      body.style.overscrollBehavior = prev.overscroll;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.overscrollBehavior = prev.bodyOverscroll;
+      html.style.overflow = prev.htmlOverflow;
+      window.removeEventListener('focusin', pinWindow);
     };
   }, [showConversations, isMobile]);
 
