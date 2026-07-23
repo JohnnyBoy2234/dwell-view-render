@@ -197,14 +197,33 @@ export class MobileServices {
   }
 
   // Keyboard
-  static initializeKeyboard() {
+  static async initializeKeyboard() {
     if (!this.isNative) return;
 
-    // The Capacitor Keyboard plugin is configured with resize: "body", which
-    // already shrinks the viewport to make room for the keyboard. We must NOT
-    // also translate the body up — that double-compensates and pushes fixed
-    // headers (e.g. the chat name bar) off the top of the screen. Layouts that
-    // need to react to the keyboard use the visualViewport API instead.
+    try {
+      // Stop the WebView from auto-scrolling the focused input into view. That
+      // native scroll is exactly what makes the chat jump *up then back down*
+      // when the keyboard opens — the composer is already pinned to the bottom
+      // by our flex layout, so we don't want the WebView to move the page too.
+      await Keyboard.setScroll({ isDisabled: true });
+    } catch (e) {
+      console.warn('Keyboard.setScroll not available', e);
+    }
+
+    // Expose the live keyboard height as a CSS variable so chat layouts can
+    // animate the composer in lock-step with the keyboard (WhatsApp-style)
+    // instead of reacting a frame late. `willShow`/`willHide` fire *before* the
+    // OS animation, and we mirror the keyboard's own easing + duration.
+    const root = document.documentElement;
+    root.style.setProperty('--keyboard-height', '0px');
+    Keyboard.addListener('keyboardWillShow', (info: any) => {
+      root.style.setProperty('--keyboard-height', `${info?.keyboardHeight ?? 0}px`);
+      root.classList.add('keyboard-open');
+    });
+    Keyboard.addListener('keyboardWillHide', () => {
+      root.style.setProperty('--keyboard-height', '0px');
+      root.classList.remove('keyboard-open');
+    });
   }
 
   // Haptic Feedback
