@@ -105,7 +105,22 @@ export function useSubscription() {
       return;
     }
 
-    loadSubscription(true);
+    // Warm-start from the last known plan so gated screens (e.g. Messages) open
+    // instantly instead of flashing blank while the plan re-checks in the
+    // background. Falls back to a normal spinner load when there's no cache.
+    let hadCache = false;
+    try {
+      const cached = localStorage.getItem(`sub_plan_${user.id}`);
+      if (cached) {
+        const c = JSON.parse(cached);
+        setRawPlan(c.rawPlan ?? 'free');
+        setPlanStatus(c.planStatus ?? null);
+        setPlanExpiresAt(c.planExpiresAt ?? null);
+        setLoading(false);
+        hadCache = true;
+      }
+    } catch { /* ignore bad cache */ }
+    loadSubscription(!hadCache);
 
     const profileChannel = supabase
       .channel(`profile-plan-${user.id}`)
@@ -148,6 +163,14 @@ export function useSubscription() {
   const refresh = useCallback(async () => {
     await loadSubscription(true);
   }, [loadSubscription]);
+
+  // Persist the resolved plan so the next mount can warm-start (see above).
+  useEffect(() => {
+    if (!user || loading) return;
+    try {
+      localStorage.setItem(`sub_plan_${user.id}`, JSON.stringify({ rawPlan, planStatus, planExpiresAt }));
+    } catch { /* storage full / disabled */ }
+  }, [user, loading, rawPlan, planStatus, planExpiresAt]);
 
   const plan: NormalizedPlan = normalizePlan(rawPlan);
   const isSubscriber = isActiveSubscriber({
