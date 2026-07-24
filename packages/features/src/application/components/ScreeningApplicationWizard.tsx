@@ -8,7 +8,7 @@ import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@mzanzihomes/supabase/client';
-import { AlertCircle, Check, CheckCircle2, Loader2, WifiOff } from 'lucide-react';
+import { AlertCircle, Check, CheckCircle2, WifiOff } from 'lucide-react';
 import { completionPercentage, deleteDraft } from '../services/draftService';
 import { submitApplication } from '../services/submitService';
 import { useApplicationDraft } from '../hooks/useApplicationDraft';
@@ -448,20 +448,17 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   }
 
   const SaveIndicator = () => {
-    if (saveStatus === 'idle') return null;
+    // Autosave is silent by design — no "Saving…"/"Saved" chatter. We only speak
+    // up when a save genuinely fails, so the tenant knows their progress is at
+    // risk and can retry.
+    if (saveStatus !== 'error') return null;
     const offline = typeof navigator !== 'undefined' && !navigator.onLine;
-    const content =
-      saveStatus === 'error' && offline
-        ? { icon: <WifiOff className="h-3 w-3" />, text: 'Waiting for connection' }
-        : {
-            saving: { icon: <Loader2 className="h-3 w-3 animate-spin" />, text: 'Saving…' },
-            saved: { icon: <Check className="h-3 w-3" />, text: 'Saved' },
-            error: { icon: <AlertCircle className="h-3 w-3 text-destructive" />, text: "Couldn't save" }
-          }[saveStatus];
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-muted-foreground shrink-0" role="status">
-        {content.icon}
-        {content.text}
+      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-destructive shrink-0" role="status">
+        {offline ? <WifiOff className="h-3.5 w-3.5" /> : <AlertCircle className="h-3.5 w-3.5" />}
+        {offline
+          ? "You're offline — we'll save when you reconnect."
+          : "We couldn't save your latest changes. Check your connection and try again."}
       </span>
     );
   };
@@ -492,7 +489,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle>Rental Application</CardTitle>
-            <CardDescription>Complete each step to submit your application.</CardDescription>
+            <CardDescription>Designed to take about 10 minutes to complete.</CardDescription>
           </div>
           <SaveIndicator />
         </div>
