@@ -248,8 +248,10 @@ export default function TenantPropertyViewings() {
   const pill = (status: string) => {
     const map: Record<string, { cls: string; label: string }> = {
       confirmed: { cls: 'bg-blue-100 text-blue-700', label: 'Confirmed' },
-      booked:    { cls: 'bg-blue-100 text-blue-700', label: 'Confirmed' },
-      pending:   { cls: 'bg-amber-100 text-amber-700', label: 'Pending' },
+      // A booked slot still needs the landlord to confirm — say so clearly
+      // instead of a misleading "Confirmed".
+      booked:    { cls: 'bg-amber-100 text-amber-700', label: 'Awaiting confirmation' },
+      pending:   { cls: 'bg-amber-100 text-amber-700', label: 'Awaiting confirmation' },
       completed: { cls: 'bg-emerald-100 text-emerald-700', label: 'Completed' },
       cancelled: { cls: 'bg-red-100 text-red-600', label: 'Cancelled' },
     };
