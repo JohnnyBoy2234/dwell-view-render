@@ -412,6 +412,8 @@ export const TenantApplicationsSection = () => {
     [draftRecords, applicationRecords]
   );
 
+  const activeInvites = invitationItems.filter((i) => !i.expired);
+  const hasInvite = activeInvites.length > 0;
   const visInvites = showAll ? invitationItems : invitationItems.slice(0, 3);
   const visApps = showAll ? appList : appList.slice(0, 3);
   const visRequests = showAll ? requests : requests.slice(0, 3);
@@ -424,17 +426,37 @@ export const TenantApplicationsSection = () => {
         style={{ background: 'linear-gradient(135deg,#fdeadb 0%, #fbe0cf 100%)' }}
       >
         <EnvelopeArt className="pointer-events-none absolute right-2 top-0 bottom-0 my-auto h-[150px] w-[150px] animate-soft-float" />
-        <div className="relative z-10 max-w-[58%]">
-          <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Find your next home</h2>
-          <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Track invitations, submit applications and stay updated.</p>
-          <button
-            type="button"
-            onClick={openRequestSheet}
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(249,115,22,0.8)] transition-transform active:scale-[0.97]"
-            style={{ background: ORANGE }}
-          >
-            <Plus className="h-5 w-5" /> Request an application
-          </button>
+        <div className="relative z-10 max-w-[62%]">
+          {hasInvite ? (
+            <>
+              <span className="inline-block rounded-full bg-white/70 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide text-orange-700">
+                {activeInvites.length === 1 ? 'Invitation' : `${activeInvites.length} invitations`}
+              </span>
+              <h2 className="mt-2 text-[23px] font-extrabold leading-tight text-slate-900">You've been invited to apply</h2>
+              <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">A landlord has invited you to submit a rental application. Review it to get started.</p>
+              <button
+                type="button"
+                onClick={() => changeTab('invitations')}
+                className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(249,115,22,0.8)] transition-transform active:scale-[0.97]"
+                style={{ background: ORANGE }}
+              >
+                View invitation{activeInvites.length === 1 ? '' : 's'} →
+              </button>
+            </>
+          ) : (
+            <>
+              <h2 className="text-[23px] font-extrabold leading-tight text-slate-900">Find your next home</h2>
+              <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Track invitations, submit applications and stay updated.</p>
+              <button
+                type="button"
+                onClick={openRequestSheet}
+                className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(249,115,22,0.8)] transition-transform active:scale-[0.97]"
+                style={{ background: ORANGE }}
+              >
+                <Plus className="h-5 w-5" /> Request an application
+              </button>
+            </>
+          )}
         </div>
       </div>
 
