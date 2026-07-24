@@ -21,6 +21,7 @@ import { HouseholdIncomeStep } from './steps/HouseholdIncomeStep';
 import { ConsentStep } from './steps/ConsentStep';
 import { ReferencesDocumentsStep } from './steps/ReferencesDocumentsStep';
 import { ReviewSubmitStep } from './steps/ReviewSubmitStep';
+import { applicationTheme } from '@mzanzihomes/common/constants/applicationTheme';
 
 export interface ScreeningApplicationWizardProps {
   propertyId: string;
@@ -493,15 +494,40 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           </div>
           <SaveIndicator />
         </div>
-        {/* The one and only progress indicator */}
-        <div className="pt-2">
+        {/* Slim orange progress banner — estimated remaining time (not a timer) */}
+        {(() => {
+          const stepsLeft = steps.length - (currentStep + 1);
+          const mins = Math.max(1, Math.round((stepsLeft / steps.length) * 10));
+          const label = isReviewStep
+            ? 'Almost done — just review and submit.'
+            : stepsLeft <= 1
+              ? "You're almost done — about 2 minutes remaining."
+              : `You're about ${mins} minute${mins === 1 ? '' : 's'} away from completing your application.`;
+          return (
+            <div
+              className="mt-3 flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold"
+              style={{ background: applicationTheme.primaryLight, border: `1px solid ${applicationTheme.border}`, color: applicationTheme.text }}
+            >
+              <span
+                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white text-[11px] font-bold"
+                style={{ background: applicationTheme.primary }}
+                aria-hidden="true"
+              >
+                {Math.round(((currentStep + 1) / steps.length) * 100)}
+              </span>
+              {label}
+            </div>
+          );
+        })()}
+        {/* The one and only step indicator */}
+        <div className="pt-3">
           <p className="text-sm font-medium">
             Step {currentStep + 1} of {steps.length} — {steps[currentStep].title}
           </p>
-          <div className="h-1.5 bg-muted rounded-full mt-2" role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={currentStep + 1}>
+          <div className="h-1.5 rounded-full mt-2" style={{ background: applicationTheme.primaryLight }} role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={currentStep + 1}>
             <div
-              className="h-1.5 bg-primary rounded-full transition-all"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
+              className="h-1.5 rounded-full transition-all"
+              style={{ width: `${((currentStep + 1) / steps.length) * 100}%`, background: applicationTheme.primary }}
             />
           </div>
         </div>
@@ -529,21 +555,27 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               </Button>
             )}
             <div className="ml-auto">
-              <Button
-                type="button"
-                className="min-w-40"
-                variant={isConsentStep && formData.credit.consent !== 'yes' ? 'outline' : 'default'}
-                disabled={submitting}
-                onClick={() => {
-                  if (isReviewStep) {
-                    if (validateAll()) setConfirmOpen(true);
-                  } else {
-                    goNext();
-                  }
-                }}
-              >
-                {primaryLabel}
-              </Button>
+              {(() => {
+                const isOutline = isConsentStep && formData.credit.consent !== 'yes';
+                return (
+                  <Button
+                    type="button"
+                    className="min-w-40"
+                    variant={isOutline ? 'outline' : 'default'}
+                    disabled={submitting}
+                    style={isOutline ? undefined : { background: applicationTheme.primary, color: '#fff' }}
+                    onClick={() => {
+                      if (isReviewStep) {
+                        if (validateAll()) setConfirmOpen(true);
+                      } else {
+                        goNext();
+                      }
+                    }}
+                  >
+                    {primaryLabel}
+                  </Button>
+                );
+              })()}
             </div>
           </div>
         </div>
