@@ -102,6 +102,9 @@ export default function PropertyDetail() {
   const [messageOpen, setMessageOpen] = useState(false);
   const [contactPreScreenOpen, setContactPreScreenOpen] = useState(false);
   const [contactPreScreenLoading, setContactPreScreenLoading] = useState(false);
+  // Long descriptions collapse to a preview with Read more / Show less. Expands
+  // in place — no scroll jump.
+  const [descExpanded, setDescExpanded] = useState(false);
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [landlordPlan, setLandlordPlan] = useState<PlanType>('free');
@@ -531,7 +534,27 @@ export default function PropertyDetail() {
                   </CardHeader>
                   <CardContent>
                     <div className="max-w-none px-2 md:px-0">
-                      <p className="text-muted-foreground leading-relaxed break-words">{property.description}</p>
+                      {(() => {
+                        const desc = property.description || '';
+                        const LIMIT = 280;
+                        const isLong = desc.length > LIMIT;
+                        const shown = !isLong || descExpanded ? desc : desc.slice(0, LIMIT).trimEnd() + '…';
+                        return (
+                          <>
+                            <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-line">{shown}</p>
+                            {isLong && (
+                              <button
+                                type="button"
+                                onClick={() => setDescExpanded(v => !v)}
+                                className="mt-2 text-sm font-semibold text-ocean-blue hover:text-ocean-blue-dark active:opacity-70 transition"
+                                aria-expanded={descExpanded}
+                              >
+                                {descExpanded ? 'Show less' : 'Read more'}
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
                     </div>
                     
                     <div className="flex flex-wrap gap-6 mt-6">
