@@ -53,6 +53,25 @@ export default function ListingTypePage() {
             <span className="text-green-300 text-xl">›</span>
           </button>
 
+          {/* Commercial Property — coming soon (disabled) */}
+          <div
+            aria-disabled="true"
+            className="w-full flex items-center gap-4 bg-white/70 rounded-2xl p-5 mb-3 border-2 border-dashed border-gray-200 text-left cursor-not-allowed select-none"
+          >
+            <div className="w-12 h-12 bg-gray-100 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 opacity-60">
+              🏢
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-gray-500 text-base">Commercial Property</span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700">
+                  Coming Soon
+                </span>
+              </div>
+              <div className="text-sm text-gray-400 mt-0.5">Offices, retail &amp; industrial — launching soon</div>
+            </div>
+          </div>
+
         </div>
       </div>
     </>

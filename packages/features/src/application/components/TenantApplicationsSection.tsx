@@ -20,8 +20,9 @@ import {
   trackApplicationsEvent,
 } from '../applicationPresentation';
 import { RequestApplicationSheet } from './RequestApplicationSheet';
+import { applicationTheme } from '@mzanzihomes/common/constants/applicationTheme';
 
-const ORANGE = '#f97316';
+const ORANGE = applicationTheme.primary;
 
 const APPLICATION_DOCS: { title: string; items: string[] }[] = [
   {
