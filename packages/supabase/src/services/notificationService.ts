@@ -7,11 +7,28 @@ export class NotificationService {
   /**
    * Create a notification for a specific user
    */
+  // The notifications table only has: user_id, message, link_url, type,
+  // metadata. Older callers pass title / priority / action_url, which don't
+  // exist as columns and made inserts fail ("could not find 'action_url'…").
+  // Map any incoming shape to the real columns here so every caller is fixed.
+  private static toRow(data: CreateNotificationData) {
+    const meta: Record<string, any> = { ...(data.metadata ?? {}) };
+    if ((data as any).title) meta.title = (data as any).title;
+    if ((data as any).priority) meta.priority = (data as any).priority;
+    return {
+      user_id: data.user_id,
+      message: data.message,
+      link_url: (data as any).action_url ?? (data as any).link_url ?? null,
+      type: data.type ?? 'general',
+      metadata: Object.keys(meta).length ? meta : null,
+    };
+  }
+
   static async createNotification(data: CreateNotificationData) {
     try {
       const { data: notification, error } = await supabase
         .from('notifications')
-        .insert([data])
+        .insert([this.toRow(data)])
         .select()
         .single();
 
@@ -30,7 +47,7 @@ export class NotificationService {
     try {
       const { data, error } = await supabase
         .from('notifications')
-        .insert(notifications)
+        .insert(notifications.map((n) => this.toRow(n)))
         .select();
 
       if (error) throw error;

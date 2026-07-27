@@ -257,7 +257,11 @@ export default function EnhancedLandlordDashboard() {
   });
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
   const [loadingMaintenance, setLoadingMaintenance] = useState(false);
-  
+  // Tenant "requests to apply" live in application_requests, separate from
+  // applications — count the pending ones so the Applications tile alerts the
+  // landlord that a request needs approving.
+  const [pendingRequestCount, setPendingRequestCount] = useState(0);
+
   const [properties, setProperties] = useState<PropertyWithTenant[]>([]);
   const [tenants, setTenants] = useState<TenantListItem[]>([]);
   // Starts true so the first paint is the skeleton, never a flash of empty
@@ -396,6 +400,31 @@ export default function EnhancedLandlordDashboard() {
       fetchProperties();
       fetchTenants();
     }
+  }, [user]);
+
+  // Count pending tenant "requests to apply" for the Applications tile badge,
+  // and keep it live so a new request alerts the landlord immediately.
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    const loadRequestCount = async () => {
+      const { count } = await supabase
+        .from('application_requests')
+        .select('id', { count: 'exact', head: true })
+        .eq('landlord_id', user.id)
+        .eq('status', 'pending');
+      if (active) setPendingRequestCount(count ?? 0);
+    };
+    loadRequestCount();
+    const channel = supabase
+      .channel(`landlord-app-requests-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'application_requests', filter: `landlord_id=eq.${user.id}` },
+        () => loadRequestCount(),
+      )
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(channel); };
   }, [user]);
 
   // Celebrate in real time when a tenant pays rent. generate-rent-receipt (fired
@@ -2584,7 +2613,7 @@ const renderReportsTab = () => (
     const ACTIONED_APPLICATION_STATUSES = ['accepted', 'approved', 'declined', 'rejected', 'withdrawn', 'cancelled'];
     const newApplications = applications.filter(
       (a) => !ACTIONED_APPLICATION_STATUSES.includes((a.status || '').toLowerCase())
-    ).length;
+    ).length + pendingRequestCount;
     const pendingLeaseSignatures = pendingSignatures?.length || 0;
 
     type ToolItem = {

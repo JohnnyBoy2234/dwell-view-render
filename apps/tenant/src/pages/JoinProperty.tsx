@@ -130,10 +130,9 @@ export default function JoinProperty() {
         const where = property?.location || property?.title || 'your property';
         await supabase.from('notifications').insert({
           user_id: invite.landlord_id,
-          title: 'Tenant joined 🎉',
           message: `${tenantName} accepted your invite and joined ${where}.`,
           type: 'system',
-          action_url: '/enhancedlandlorddashboard',
+          link_url: '/enhancedlandlorddashboard',
         });
       } catch (notifyErr) {
         console.error('Post-join updates failed:', notifyErr);
