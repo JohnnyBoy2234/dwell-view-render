@@ -505,6 +505,60 @@ export default function PropertyDetail() {
               </CardContent>
             </Card>
 
+            {/* Specifications — directly below the price/location, above the
+                description, so the key facts read first (§3.2) */}
+            <Card className="shadow-elegant">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">Specifications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-4">
+                  <div className="flex items-center gap-2.5">
+                    <Bed className="h-5 w-5 shrink-0 text-ocean-blue" />
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold">{property.bedrooms}</p>
+                      <p className="text-xs text-muted-foreground">Bedrooms</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Droplets className="h-5 w-5 shrink-0 text-earth-warm" />
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold">{property.bathrooms}</p>
+                      <p className="text-xs text-muted-foreground">Bathrooms</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <ParkingMeter className="h-5 w-5 shrink-0 text-success-green" />
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold">{property.parking_spaces}</p>
+                      <p className="text-xs text-muted-foreground">Parking</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Layers className="h-5 w-5 shrink-0 text-primary" />
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold">{property.size_sqm || 'N/A'}{property.size_sqm ? ' m²' : ''}</p>
+                      <p className="text-xs text-muted-foreground">Floor size</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Home className="h-5 w-5 shrink-0 text-ocean-blue" />
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold capitalize">{property.property_type}</p>
+                      <p className="text-xs text-muted-foreground">Type</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <CheckCircle className="h-5 w-5 shrink-0 text-success-green" />
+                    <div className="leading-tight">
+                      <p className="text-sm font-semibold">{property.furnished ? 'Furnished' : 'Unfurnished'}</p>
+                      <p className="text-xs text-muted-foreground">{property.pets_allowed ? 'Pet friendly' : 'No pets'}</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Property Details */}
             <Tabs defaultValue="overview" className="w-full">
               <div className="border-b border-brand-gray-200">
@@ -555,25 +609,6 @@ export default function PropertyDetail() {
                           </>
                         );
                       })()}
-                    </div>
-                    
-                    <div className="flex flex-wrap gap-6 mt-6">
-                      <div className="flex items-center gap-2">
-                        <Bed className="h-5 w-5 text-ocean-blue" />
-                        <span className="font-medium">{property.bedrooms} Bedrooms</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Droplets className="h-5 w-5 text-earth-warm" />
-                        <span className="font-medium">{property.bathrooms} Bathrooms</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <ParkingMeter className="h-5 w-5 text-success-green" />
-                        <span className="font-medium">{property.parking_spaces} Parking</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Layers className="h-5 w-5 text-primary" />
-                        <span className="font-medium">{property.size_sqm || 'N/A'} m²</span>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -845,54 +880,9 @@ export default function PropertyDetail() {
 
       </div>
 
-      {/* Mobile glass sticky action bar */}
-      {property && (
-        <div className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-white/20 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md px-3 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
-          <div className="mx-auto max-w-3xl flex items-center justify-center gap-2">
-            {isSale ? (
-              <button
-                onClick={handleContactLandlord}
-                className="rounded-xl bg-blue-600 text-white px-3 py-2 text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600/40"
-              >
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Contact Landlord
-              </button>
-            ) : (
-              <GatedViewingButton
-                propertyId={property.id}
-                landlordId={property.landlord_id}
-                propertyTitle={property.title}
-                renderStartConversation={(sc) => (
-                  <StartConversation
-                    {...sc}
-                    renderPreScreening={(ps) => <ViewingPreScreeningForm {...ps} />}
-                    renderTrigger={(onClick) => (
-                      <button
-                        onClick={onClick}
-                        className="rounded-xl bg-brand.blue text-white px-3 py-2 text-sm hover:bg-brand.blue/90 focus:outline-none focus:ring-2 focus:ring-brand.blue/40"
-                      >
-                        Request Viewing
-                      </button>
-                    )}
-                  />
-                )}
-              />
-            )}
-            <button
-              onClick={handleContactLandlord}
-              className="rounded-xl bg-white/70 dark:bg-slate-800/60 border border-white/20 text-brand.blue px-3 py-2 text-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand.blue/30"
-            >
-              Message
-            </button>
-            <button
-              onClick={handleShare}
-              className="rounded-xl bg-brand.green text-white px-3 py-2 text-sm hover:bg-brand.green/90 focus:outline-none focus:ring-2 focus:ring-brand.green/40"
-            >
-              Share
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Sticky mobile action bar removed (§3.6) — the same Request Viewing,
+          Message and Share actions live in the in-page Contact card, so the
+          detail page keeps full screen height with a clean back button. */}
 
       {property && (
         <BookViewingDialog
