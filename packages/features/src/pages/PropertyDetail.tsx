@@ -37,7 +37,6 @@ import {
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import type { PlanType } from '@mzanzihomes/supabase/hooks/useSubscription';
 import { useForm } from 'react-hook-form';
 import { useApplications } from '@mzanzihomes/features/application';
 import { useMessaging } from '@mzanzihomes/supabase/hooks/useMessaging';
@@ -107,9 +106,11 @@ export default function PropertyDetail() {
   const [descExpanded, setDescExpanded] = useState(false);
   const [userProfile, setUserProfile] = useState<{display_name: string; phone: string | null} | null>(null);
   const [bookingOpen, setBookingOpen] = useState(false);
-  const [landlordPlan, setLandlordPlan] = useState<PlanType>('free');
-  const [landlordPlanStatus, setLandlordPlanStatus] = useState<string>('inactive');
+  const [landlordSubscribed, setLandlordSubscribed] = useState(false);
   const [landlordPlanLoaded, setLandlordPlanLoaded] = useState(false);
+  // Direct phone/email popup — shown for landlords without a subscription, who
+  // only have a listing and no in-app messaging.
+  const [contactDetailsOpen, setContactDetailsOpen] = useState(false);
   
   const { activeBooking } = useViewingBooking(property?.id || '', property?.landlord_id || '');
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<MessageFormData>();
@@ -159,7 +160,7 @@ export default function PropertyDetail() {
 
       if (propertyError) throw propertyError;
 
-      // Then, fetch the landlord profile
+      // Then, fetch the landlord profile.
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('display_name, phone')
@@ -169,6 +170,17 @@ export default function PropertyDetail() {
       if (profileError && profileError.code !== 'PGRST116') {
         console.warn('Could not fetch landlord profile:', profileError);
       }
+
+      // Whether the landlord has in-app messaging (paid plan) — via a
+      // SECURITY DEFINER RPC, since RLS hides the landlord's plan from a
+      // browsing tenant. Decides message→chat vs. contact→phone/email.
+      try {
+        const { data: subbed } = await supabase.rpc('property_landlord_subscribed', { p_property_id: id });
+        setLandlordSubscribed(!!subbed);
+      } catch {
+        setLandlordSubscribed(false);
+      }
+      setLandlordPlanLoaded(true);
 
       // Combine the data
       const combinedData = {
@@ -287,6 +299,13 @@ export default function PropertyDetail() {
     if (!property) return;
 
     if (user.id === property.landlord_id) return;
+
+    // Landlord has no subscription → no in-app messaging. Show their phone/email
+    // so the tenant can reach out directly.
+    if (landlordPlanLoaded && !landlordSubscribed) {
+      setContactDetailsOpen(true);
+      return;
+    }
 
     // First contact with this landlord should collect the pre-screening info
     // (the same form the "Request Viewing" button shows) instead of dropping
@@ -749,6 +768,18 @@ export default function PropertyDetail() {
                     ) : (
                       /* Original Viewing Button for Rental Properties */
                       <>
+                        {/* Contact landlord — subscribed landlord opens the
+                            pre-screening → in-app chat; a landlord with only a
+                            listing (no subscription) shows their phone/email. */}
+                        <Button
+                          onClick={handleContactLandlord}
+                          className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-xl py-5 text-base font-semibold"
+                          size="lg"
+                        >
+                          <MessageCircle className="h-5 w-5 mr-2" />
+                          {landlordPlanLoaded && !landlordSubscribed ? 'Contact landlord' : 'Message landlord'}
+                        </Button>
+
                         <GatedViewingButton
                           propertyId={property.id}
                           landlordId={property.landlord_id}
@@ -760,9 +791,9 @@ export default function PropertyDetail() {
                             />
                           )}
                         />
-                        
+
                         {/* Application Button */}
-                        <TenantApplicationButton 
+                        <TenantApplicationButton
                           propertyId={property.id}
                           className="w-full"
                         />
@@ -888,6 +919,55 @@ export default function PropertyDetail() {
           loading={contactPreScreenLoading}
           propertyTitle={property.title}
         />
+      )}
+
+      {/* Direct contact popup — for landlords without a subscription */}
+      {property && (
+        <Dialog open={contactDetailsOpen} onOpenChange={setContactDetailsOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Contact the landlord</DialogTitle>
+              <DialogDescription>
+                Reach out directly to enquire about this property.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2.5 pt-1">
+              {(property.contact_phone || property.profiles?.phone) ? (
+                <a
+                  href={`tel:${property.contact_phone || property.profiles?.phone}`}
+                  className="flex items-center gap-3 rounded-xl border border-black/8 bg-white p-3.5 transition-colors hover:bg-slate-50"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-ocean-blue/10">
+                    <Phone className="h-5 w-5 text-ocean-blue" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-slate-900">Call landlord</p>
+                    <p className="truncate text-[12.5px] text-muted-foreground">{property.contact_phone || property.profiles?.phone}</p>
+                  </div>
+                </a>
+              ) : null}
+              {property.contact_email ? (
+                <a
+                  href={`mailto:${property.contact_email}`}
+                  className="flex items-center gap-3 rounded-xl border border-black/8 bg-white p-3.5 transition-colors hover:bg-slate-50"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-success-green/10">
+                    <Mail className="h-5 w-5 text-success-green" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-slate-900">Email landlord</p>
+                    <p className="truncate text-[12.5px] text-muted-foreground">{property.contact_email}</p>
+                  </div>
+                </a>
+              ) : null}
+              {!property.contact_phone && !property.profiles?.phone && !property.contact_email && (
+                <p className="text-[13px] text-muted-foreground">
+                  This landlord hasn't shared contact details. Please check back later.
+                </p>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

@@ -10,8 +10,12 @@ interface MiniNavbarProps {
   minimal?: boolean;
 }
 
-export function MiniNavbar({ mode = 'rent', hideLandlordActions = false, transparent = false, minimal = false }: MiniNavbarProps) {
+export function MiniNavbar({ mode = 'rent', hideLandlordActions: hideLandlordActionsProp = false, transparent = false, minimal = false }: MiniNavbarProps) {
   const { user, signOut, loading, isLandlord, isAdmin } = useAuth();
+  // Listing controls (List / Add Property) are landlord-only. Hide them for
+  // signed-in tenants by role, not just when a caller remembers to pass the
+  // prop — tenants must never see landlord listing actions (§3.1).
+  const hideLandlordActions = hideLandlordActionsProp || (!!user && !isLandlord && !isAdmin);
 
   const dashboardPath = isAdmin
     ? '/admin/dashboard'
