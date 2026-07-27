@@ -92,7 +92,7 @@ const ApplicationsWithViewings: React.FC<ApplicationsWithViewingsProps> = ({
     <Card className="overflow-hidden rounded-2xl border border-black/[0.07] shadow-sm">
       {/* Property identity band — each property gets its own clearly bounded,
           colored section instead of headings floating in a shared column. */}
-      <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-6 py-3">
+      <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-orange-500 to-orange-400 px-4 sm:px-6 py-3">
         <div className="flex items-center gap-2 min-w-0 text-white">
           <Building className="h-4 w-4 flex-shrink-0" />
           <h3 className="font-semibold truncate">{propertyTitle}</h3>

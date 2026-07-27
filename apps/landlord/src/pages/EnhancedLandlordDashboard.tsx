@@ -2989,16 +2989,11 @@ const renderReportsTab = () => (
   );
   const canInvite = pendingInviteProperties.length > 0;
 
-  const headerTitle = isBaseTab
-    ? 'Management Tools'
-    : selectedPropertyId
-      ? ''
-      : 'Property Portfolio';
-  const headerSubtitle = isBaseTab
-    ? 'Everything for managing your rentals'
-    : selectedPropertyId
-      ? undefined
-      : 'Your properties';
+  // For module tabs, leave the title empty so the layout falls back to the
+  // per-page config (Applications, Maintenance, …) instead of every page
+  // reading "Property Portfolio".
+  const headerTitle = isBaseTab ? 'Management Tools' : '';
+  const headerSubtitle = isBaseTab ? 'Everything for managing your rentals' : undefined;
 
   return (
     <VerificationGate requireVerification={true}>

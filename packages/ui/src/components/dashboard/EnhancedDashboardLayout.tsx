@@ -51,6 +51,20 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
   const pageConfig = getPageConfig(activePath, isLandlord);
   const PageIcon = pageConfig.icon;
 
+  // Header icon colour matches the module's dashboard tile colour.
+  const headerAccent = (() => {
+    const p = activePath;
+    if (p.includes('/applications')) return '#f97316';       // orange
+    if (p.includes('/maintenance')) return '#f5a623';         // gold
+    if (p.includes('/payments')) return '#14b8a6';            // teal
+    if (p.includes('/leases')) return '#22417a';              // navy
+    if (p.includes('/inventory')) return '#0f766e';           // dark teal
+    if (p.includes('/condition-records')) return '#ef4444';   // red (inspection)
+    if (p.includes('/support')) return '#f5a623';             // gold
+    if (p.includes('/swiftbooks') || p.includes('/tax-invoice')) return '#7c3aed'; // violet
+    return '#2563EB';                                         // default blue
+  })();
+
   const shouldShowBackButton = pageConfig.showBackButton || false;
 
   const handleBackClick = () => {
@@ -111,7 +125,7 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
                   <ArrowLeft className="h-4 w-4" />
                 </button>
               )}
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: '#2563EB' }}>
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style={{ background: headerAccent }}>
                 <PageIcon className="h-[18px] w-[18px] text-white" />
               </span>
               <div className="min-w-0 flex-1">
