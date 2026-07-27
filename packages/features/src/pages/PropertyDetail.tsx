@@ -629,6 +629,15 @@ export default function PropertyDetail() {
                         );
                       })()}
                     </div>
+
+                    {/* Report this listing — clear secondary action (§3.9) */}
+                    <div className="mt-5 pt-4 border-t border-black/5">
+                      <ReportPropertyModal
+                        propertyId={property.id}
+                        triggerLabel="Report this listing"
+                        triggerClassName="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100 active:scale-[0.98]"
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -640,15 +649,6 @@ export default function PropertyDetail() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <Badge variant={property.furnished ? "default" : "outline"}>
-                          {property.furnished ? "Furnished" : "Unfurnished"}
-                        </Badge>
-                        <Badge variant={property.pets_allowed ? "default" : "outline"}>
-                          {property.pets_allowed ? "Pet Friendly" : "No Pets"}
-                        </Badge>
-                      </div>
-                      
                       {property.amenities && property.amenities.length > 0 && (
                         <div>
                           <h4 className="font-semibold mb-3">Amenities</h4>
@@ -713,9 +713,6 @@ export default function PropertyDetail() {
                       </div>
                       <div>
                         <div className="font-semibold">{property.profiles.display_name}</div>
-                        {property.profiles.phone && (
-                          <div className="text-sm text-muted-foreground">{property.profiles.phone}</div>
-                        )}
                       </div>
                     </div>
                     
@@ -766,31 +763,34 @@ export default function PropertyDetail() {
                         )}
                       </div>
                     ) : (
-                      /* Original Viewing Button for Rental Properties */
+                      /* Rental: one primary action. A subscribed landlord takes
+                         viewing requests in-app ("Request a viewing" → pre-
+                         screening → chat). A landlord with only a listing (no
+                         subscription) is contacted directly ("Contact landlord"
+                         → phone/email popup). */
                       <>
-                        {/* Contact landlord — subscribed landlord opens the
-                            pre-screening → in-app chat; a landlord with only a
-                            listing (no subscription) shows their phone/email. */}
-                        <Button
-                          onClick={handleContactLandlord}
-                          className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-xl py-5 text-base font-semibold"
-                          size="lg"
-                        >
-                          <MessageCircle className="h-5 w-5 mr-2" />
-                          {landlordPlanLoaded && !landlordSubscribed ? 'Contact landlord' : 'Message landlord'}
-                        </Button>
-
-                        <GatedViewingButton
-                          propertyId={property.id}
-                          landlordId={property.landlord_id}
-                          propertyTitle={property.title}
-                          renderStartConversation={(sc) => (
-                            <StartConversation
-                              {...sc}
-                              renderPreScreening={(ps) => <ViewingPreScreeningForm {...ps} />}
-                            />
-                          )}
-                        />
+                        {landlordPlanLoaded && !landlordSubscribed ? (
+                          <Button
+                            onClick={handleContactLandlord}
+                            className="w-full bg-ocean-blue hover:bg-ocean-blue/90 text-white rounded-xl py-5 text-base font-semibold"
+                            size="lg"
+                          >
+                            <Phone className="h-5 w-5 mr-2" />
+                            Contact landlord
+                          </Button>
+                        ) : (
+                          <GatedViewingButton
+                            propertyId={property.id}
+                            landlordId={property.landlord_id}
+                            propertyTitle={property.title}
+                            renderStartConversation={(sc) => (
+                              <StartConversation
+                                {...sc}
+                                renderPreScreening={(ps) => <ViewingPreScreeningForm {...ps} />}
+                              />
+                            )}
+                          />
+                        )}
 
                         {/* Application Button */}
                         <TenantApplicationButton
@@ -887,12 +887,9 @@ export default function PropertyDetail() {
               </Card>
             )}
 
-            {/* Property Information card removed — those facts now live in the
-                Specifications section. Report property kept as a clean secondary
-                action (§3.4 / §3.9). */}
-            <div className="pt-1">
-              <ReportPropertyModal propertyId={property.id} />
-            </div>
+            {/* Property Information card removed — those facts live in the
+                Specifications section; Report this listing now sits in the
+                description card (§3.4 / §3.9). */}
           </div>
         </div>
 

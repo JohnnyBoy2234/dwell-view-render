@@ -5,13 +5,16 @@ import { Label } from '@mzanzihomes/ui/components/label';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Flag } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 
 interface ReportPropertyModalProps {
   propertyId: string;
+  /** Optional label + classes to render the trigger as a full button. */
+  triggerLabel?: string;
+  triggerClassName?: string;
 }
 
 const ISSUE_TYPES = [
@@ -23,7 +26,7 @@ const ISSUE_TYPES = [
   { id: 'other',                 label: 'Other concerns' },
 ];
 
-export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
+export function ReportPropertyModal({ propertyId, triggerLabel, triggerClassName }: ReportPropertyModalProps) {
   const [open, setOpen] = useState(false);
   const [issueType, setIssueType] = useState('');
   const [description, setDescription] = useState('');
@@ -87,9 +90,16 @@ export function ReportPropertyModal({ propertyId }: ReportPropertyModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-4 hover:underline">
-          Report this listing
-        </button>
+        {triggerClassName ? (
+          <button className={triggerClassName}>
+            <Flag className="h-4 w-4" />
+            {triggerLabel || 'Report this listing'}
+          </button>
+        ) : (
+          <button className="text-xs text-muted-foreground hover:text-destructive transition-colors underline-offset-4 hover:underline">
+            {triggerLabel || 'Report this listing'}
+          </button>
+        )}
       </DialogTrigger>
 
       <DialogContent className="w-[calc(100%-2rem)] max-w-md max-h-[90vh] overflow-y-auto rounded-2xl p-5">
