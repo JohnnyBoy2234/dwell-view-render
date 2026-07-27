@@ -477,7 +477,7 @@ export default function PropertyDetail() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
-            <Card className="bg-gradient-to-br from-card/80 via-card to-ocean-blue/5 border-ocean-blue/20 shadow-elegant">
+            <Card className="shadow-elegant">
               <CardContent className="p-0">
                 {property.images && property.images.length > 0 ? (
                   <Carousel className="w-full" opts={{ loop: true }}>
@@ -582,7 +582,7 @@ export default function PropertyDetail() {
               </div>
               
               <TabsContent value="overview">
-                <Card className="bg-gradient-to-br from-card/80 via-card to-earth-warm/5 border-earth-warm/20 shadow-elegant">
+                <Card className="shadow-elegant">
                   <CardHeader>
                     <CardTitle>Property Description</CardTitle>
                   </CardHeader>
@@ -615,7 +615,7 @@ export default function PropertyDetail() {
               </TabsContent>
               
               <TabsContent value="features">
-                <Card className="bg-gradient-to-br from-card/80 via-card to-success-green/5 border-success-green/20 shadow-elegant">
+                <Card className="shadow-elegant">
                   <CardHeader>
                     <CardTitle>Property Features</CardTitle>
                   </CardHeader>
@@ -659,7 +659,7 @@ export default function PropertyDetail() {
               </TabsContent>
               
               <TabsContent value="location">
-                <Card className="bg-gradient-to-br from-card/80 via-card to-ocean-blue/5 border-ocean-blue/20 shadow-elegant">
+                <Card className="shadow-elegant">
                   <CardHeader>
                     <CardTitle>Location</CardTitle>
                   </CardHeader>
@@ -680,7 +680,7 @@ export default function PropertyDetail() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Contact Landlord */}
-            <Card className="bg-gradient-to-br from-ocean-blue/5 via-card to-earth-warm/5 border-ocean-blue/30 shadow-elegant">
+            <Card className="shadow-elegant">
               <CardHeader>
                 <CardTitle>Contact</CardTitle>
                 <CardDescription>Message the landlord or book a viewing</CardDescription>
@@ -856,25 +856,12 @@ export default function PropertyDetail() {
               </Card>
             )}
 
-            {/* Property Info */}
-              <Card className="bg-gradient-to-br from-earth-warm/5 via-card to-earth-warm/10 border-earth-warm/30 shadow-elegant">
-                <CardHeader>
-                  <CardTitle>Property Information</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Property Type</span>
-                    <span className="font-medium">{property.property_type}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Listed</span>
-                    <span className="font-medium">{new Date(property.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <div className="pt-2 border-t border-white/20">
-                    <ReportPropertyModal propertyId={property.id} />
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Property Information card removed — those facts now live in the
+                Specifications section. Report property kept as a clean secondary
+                action (§3.4 / §3.9). */}
+            <div className="pt-1">
+              <ReportPropertyModal propertyId={property.id} />
+            </div>
           </div>
         </div>
 
