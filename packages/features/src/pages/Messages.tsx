@@ -579,7 +579,9 @@ export default function Messages() {
                 </div>
               </div>
 
-              {isLandlordInConversation ? (
+              {/* Only the landlord proposes viewings from the chat. The tenant
+                  requests viewings from the property page, so no button here. */}
+              {isLandlordInConversation && (
                 <Button
                   variant="default"
                   size="sm"
@@ -588,16 +590,6 @@ export default function Messages() {
                 >
                   <CalendarPlus className="h-3.5 w-3.5" />
                   <span className="hidden xs:inline">Viewing</span>
-                </Button>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowBookingDialog(true)}
-                  className="shrink-0 h-8 px-2.5 text-xs gap-1"
-                >
-                  <CalendarPlus className="h-3.5 w-3.5" />
-                  <span className="hidden xs:inline">Request Viewing</span>
                 </Button>
               )}
             </div>
