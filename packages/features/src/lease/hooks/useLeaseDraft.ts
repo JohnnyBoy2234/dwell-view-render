@@ -95,7 +95,7 @@ export function useLeaseDraft(opts: {
         prefill.propertyAddress = property.location || property.title || '';
         if (property.price) {
           prefill.rentAmount = Number(property.price);
-          prefill.depositAmount = Number(property.price);
+          prefill.depositAmount = Number(property.price) * 3; // default: 3 months' rent
         }
       }
     }
@@ -106,7 +106,7 @@ export function useLeaseDraft(opts: {
         .eq('property_id', propertyId).eq('tenant_id', tenantId)
         .order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (invite) {
-        if (invite.monthly_rent) { prefill.rentAmount = Number(invite.monthly_rent); prefill.depositAmount = Number(invite.monthly_rent); }
+        if (invite.monthly_rent) { prefill.rentAmount = Number(invite.monthly_rent); prefill.depositAmount = Number(invite.monthly_rent) * 3; }
         if (invite.lease_start) prefill.leaseStartDate = invite.lease_start;
         if (invite.lease_end) prefill.leaseEndDate = invite.lease_end;
       }

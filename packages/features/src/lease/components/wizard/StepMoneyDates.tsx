@@ -21,6 +21,10 @@ const rand = 'flex-1 rounded-xl border px-3 py-2.5 text-[13.5px] font-semibold t
 
 export function StepMoneyDates({ data, onUpdate }: Props) {
   const isFixed = data.leaseType === 'fixed';
+  // Deposit defaults to 3× rent and tracks the rent until the landlord edits it.
+  const [depositTouched, setDepositTouched] = React.useState(false);
+  const onRentChange = (r: number) =>
+    onUpdate({ rentAmount: r, ...(depositTouched ? {} : { depositAmount: r * 3 }) });
   const years = yearsBetween(data.leaseStartDate, data.leaseEndDate);
   const tooLong = isFixed && years != null && years > 10;
 
@@ -73,7 +77,7 @@ export function StepMoneyDates({ data, onUpdate }: Props) {
       <Card title="Rent" subtitle="Monthly amount and when it's due" icon={<Banknote className="h-4 w-4" />}>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Monthly rent (R)" required>
-            <TextInput type="number" min={0} value={data.rentAmount || ''} onChange={(e) => onUpdate({ rentAmount: Number(e.target.value) })} placeholder="9500" />
+            <TextInput type="number" min={0} value={data.rentAmount || ''} onChange={(e) => onRentChange(Number(e.target.value))} placeholder="9500" />
           </Field>
           <Field label="Rent due day" required hint="Day of the month (1–7)">
             <TextInput type="number" min={1} max={7} value={data.rentDueDay || 1} onChange={(e) => onUpdate({ rentDueDay: Math.min(7, Math.max(1, Number(e.target.value))) })} />
@@ -87,8 +91,8 @@ export function StepMoneyDates({ data, onUpdate }: Props) {
       {/* Deposit & fees */}
       <Card title="Deposit & fees" subtitle="Security deposit and late payment" icon={<Banknote className="h-4 w-4" />}>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Deposit (R)" required hint="Usually one month's rent">
-            <TextInput type="number" min={0} value={data.depositAmount || ''} onChange={(e) => onUpdate({ depositAmount: Number(e.target.value) })} placeholder="9500" />
+          <Field label="Deposit (R)" required hint="Defaults to 3 months' rent — edit if needed">
+            <TextInput type="number" min={0} value={data.depositAmount || ''} onChange={(e) => { setDepositTouched(true); onUpdate({ depositAmount: Number(e.target.value) }); }} placeholder="28500" />
           </Field>
           <Field label="Late payment fee (R)" hint="Charged if rent is late">
             <TextInput type="number" min={0} value={data.lateFeeAmount ?? 0} onChange={(e) => onUpdate({ lateFeeAmount: Number(e.target.value) })} placeholder="250" />
