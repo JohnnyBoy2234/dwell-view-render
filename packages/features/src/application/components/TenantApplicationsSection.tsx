@@ -336,17 +336,25 @@ export const TenantApplicationsSection = () => {
   // Invitations come from two sources; token invites win when both exist for
   // a property. Expired ones stay visible but are not actionable.
   const invitationItems = useMemo<InvitationItem[]>(() => {
-    const fromTokens: InvitationItem[] = invites.map((inv: InviteWithDetails) => ({
-      key: `invite-${inv.id}`,
-      propertyId: inv.property_id,
-      propertyTitle: inv.property?.title ?? 'Property',
-      location: inv.property?.location ?? null,
-      price: inv.property?.price ?? null,
-      invitedOn: inv.created_at,
-      expiresAt: inv.expires_at ?? null,
-      expired: isInviteExpired(inv),
-      startPath: `/apply/invite/${inv.token}`
-    }));
+    // Once the tenant has actually applied (a submitted/under-review application
+    // exists — status is no longer the pre-fill 'invited'), the invitation is
+    // fulfilled and should disappear from the invitations list and the hero.
+    const appliedPropertyIds = new Set(
+      applications.filter((a) => a.status && a.status !== 'invited').map((a) => a.property_id)
+    );
+    const fromTokens: InvitationItem[] = invites
+      .filter((inv: InviteWithDetails) => !appliedPropertyIds.has(inv.property_id))
+      .map((inv: InviteWithDetails) => ({
+        key: `invite-${inv.id}`,
+        propertyId: inv.property_id,
+        propertyTitle: inv.property?.title ?? 'Property',
+        location: inv.property?.location ?? null,
+        price: inv.property?.price ?? null,
+        invitedOn: inv.created_at,
+        expiresAt: inv.expires_at ?? null,
+        expired: isInviteExpired(inv),
+        startPath: `/apply/invite/${inv.token}`
+      }));
     const tokenPropertyIds = new Set(fromTokens.map((i) => i.propertyId));
 
     const fromApplications: InvitationItem[] = applications

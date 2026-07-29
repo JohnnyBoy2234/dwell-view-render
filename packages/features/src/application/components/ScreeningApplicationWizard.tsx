@@ -418,12 +418,9 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         <CardContent>
           <div className="text-center py-6 space-y-4">
             <p className="text-sm text-muted-foreground">{c.body}</p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Button onClick={() => navigate(`/application/${existingApplication.id}`)}>
-                View application
-              </Button>
-              <Button variant="outline" onClick={() => navigate('/tenant-dashboard')}>
-                Go to Dashboard
+            <div className="flex justify-center">
+              <Button onClick={() => navigate('/tenant/applications')}>
+                Back to applications
               </Button>
             </div>
           </div>
