@@ -9,6 +9,7 @@ import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { AlertCircle, Check, CheckCircle2, WifiOff } from 'lucide-react';
+import { cn } from '@mzanzihomes/common/lib/utils';
 import { completionPercentage, deleteDraft } from '../services/draftService';
 import { submitApplication } from '../services/submitService';
 import { useApplicationDraft } from '../hooks/useApplicationDraft';
@@ -557,12 +558,19 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
             <div className="ml-auto">
               {(() => {
                 const isOutline = isConsentStep && formData.credit.consent !== 'yes';
+                // Fade the button while required info is still missing so it's
+                // clear you can't continue yet. It stays clickable — tapping it
+                // reveals exactly what's outstanding and scrolls to it.
+                const hasMissing = isReviewStep
+                  ? Array.from({ length: REVIEW_STEP }, (_, i) => i).some((i) => Object.keys(validateStep(i, formData)).length > 0)
+                  : Object.keys(validateStep(currentStep, formData)).length > 0;
                 return (
                   <Button
                     type="button"
-                    className="min-w-40"
+                    className={cn('min-w-40 transition-opacity', hasMissing && 'opacity-50')}
                     variant={isOutline ? 'outline' : 'default'}
                     disabled={submitting}
+                    aria-disabled={hasMissing}
                     style={isOutline ? undefined : { background: applicationTheme.primary, color: '#fff' }}
                     onClick={() => {
                       if (isReviewStep) {
