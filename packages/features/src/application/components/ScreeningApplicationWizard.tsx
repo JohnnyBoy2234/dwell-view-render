@@ -509,11 +509,11 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               style={{ background: applicationTheme.primaryLight, border: `1px solid ${applicationTheme.border}`, color: applicationTheme.text }}
             >
               <span
-                className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-white text-[11px] font-bold"
+                className="shrink-0 rounded-full px-2 py-0.5 text-white text-[11px] font-bold tabular-nums"
                 style={{ background: applicationTheme.primary }}
-                aria-hidden="true"
+                aria-label={`${Math.round(((currentStep + 1) / steps.length) * 100)} percent complete`}
               >
-                {Math.round(((currentStep + 1) / steps.length) * 100)}
+                {Math.round(((currentStep + 1) / steps.length) * 100)}% done
               </span>
               {label}
             </div>
