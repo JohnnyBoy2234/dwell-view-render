@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Check, FileText, X } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { toast } from 'sonner';
@@ -44,6 +44,23 @@ export function LeaseWizard(props: LeaseWizardProps) {
   const [mobilePreview, setMobilePreview] = useState(false);
   const draft = useLeaseDraft({ contractId, propertyId, tenantId, onContractSaved });
   const { data, updateData, loading, saveStatus, savedContractId } = draft;
+
+  // Resume on the step the landlord left off. Persisted per-lease in
+  // localStorage so leaving and reopening the wizard keeps your place.
+  const stepRestored = useRef(false);
+  useEffect(() => {
+    if (loading || stepRestored.current) return;
+    const key = savedContractId || contractId;
+    if (!key) return;
+    const saved = Number(localStorage.getItem(`lease_wizard_step_${key}`));
+    if (Number.isFinite(saved) && saved > 0 && saved < STEPS.length) setStep(saved);
+    stepRestored.current = true;
+  }, [loading, savedContractId, contractId]);
+  useEffect(() => {
+    if (!stepRestored.current) return;
+    const key = savedContractId || contractId;
+    if (key) localStorage.setItem(`lease_wizard_step_${key}`, String(step));
+  }, [step, savedContractId, contractId]);
 
   const validateStep = (s: number): string | null => {
     if (s === 0) {

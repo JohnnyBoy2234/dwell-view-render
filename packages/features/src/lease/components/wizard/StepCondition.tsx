@@ -3,7 +3,7 @@ import React from 'react';
 import { ClipboardCheck } from 'lucide-react';
 import type { LeaseWizardData, ConditionAnswer } from '@mzanzihomes/common/types/lease';
 import { CONDITION_QUESTIONS } from '../../templates/conditionReportTemplate';
-import { Card, Field, TextArea, TextInput } from './wizardUi';
+import { Card, Field, TextArea } from './wizardUi';
 
 interface Props {
   data: LeaseWizardData;
@@ -22,11 +22,10 @@ export function StepCondition({ data, onUpdate }: Props) {
   // Skip feature-gated questions (pool/alarm) when the feature is off, matching
   // the original wizard's filter.
   const questions = CONDITION_QUESTIONS.filter((q: any) => {
-    if (q.isYearsQuestion) return false; // handled separately below
+    if (q.isYearsQuestion) return false; // "years resided" isn't asked in the short flow
     if (q.requiresFeature) return !!(data as any)[q.requiresFeature];
     return true;
   });
-  const yearsQ = CONDITION_QUESTIONS.find((q: any) => q.isYearsQuestion);
 
   const setAnswer = (key: string, value: ConditionAnswer | string) => {
     onUpdate({ conditionReport: { ...cr, [key]: value } });
@@ -88,18 +87,6 @@ export function StepCondition({ data, onUpdate }: Props) {
         </Card>
       )}
 
-      {yearsQ && (
-        <Card title="Occupancy" icon={<ClipboardCheck className="h-4 w-4" />}>
-          <Field label={yearsQ.question}>
-            <TextInput
-              value={cr[yearsQ.key] || ''}
-              onChange={(e) => setAnswer(yearsQ.key, e.target.value)}
-              placeholder="Number of years"
-              className="max-w-[160px]"
-            />
-          </Field>
-        </Card>
-      )}
     </div>
   );
 }
