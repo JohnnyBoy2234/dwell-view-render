@@ -6,6 +6,7 @@ import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { FileText } from 'lucide-react';
 import { useMonthlyBills } from '../hooks/useMonthlyBills';
 import { BillExpenseForm } from './BillExpenseForm';
 import { formatPeriod } from '../utils';
@@ -90,8 +91,15 @@ export function LandlordBillingPanel() {
                   ? <Badge className="bg-green-600 text-white">Paid</Badge>
                   : <Badge variant="secondary">Sent — awaiting payment</Badge>}
                 {bill.invoice_pdf_path ? (
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={receiptUrl(bill.invoice_pdf_path, bill)} target="_blank" rel="noreferrer">Invoice</a>
+                  <Button
+                    size="sm"
+                    asChild
+                    className="gap-1.5 font-semibold text-white shadow-sm hover:brightness-105"
+                    style={{ background: '#14b8a6' }}
+                  >
+                    <a href={receiptUrl(bill.invoice_pdf_path, bill)} target="_blank" rel="noreferrer">
+                      <FileText className="h-4 w-4" /> Invoice
+                    </a>
                   </Button>
                 ) : null}
                 {bill.status === 'paid' ? (
