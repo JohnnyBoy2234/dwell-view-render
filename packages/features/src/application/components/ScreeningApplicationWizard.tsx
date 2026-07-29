@@ -497,15 +497,12 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           </div>
           <SaveIndicator />
         </div>
-        {/* Slim orange progress banner — estimated remaining time (not a timer) */}
+        {/* Slim orange progress banner — completion percentage */}
         {(() => {
-          const stepsLeft = steps.length - (currentStep + 1);
-          const mins = Math.max(1, Math.round((stepsLeft / steps.length) * 10));
+          const pct = Math.round(((currentStep + 1) / steps.length) * 100);
           const label = isReviewStep
             ? 'Almost done — just review and submit.'
-            : stepsLeft <= 1
-              ? "You're almost done — about 2 minutes remaining."
-              : `You're about ${mins} minute${mins === 1 ? '' : 's'} away from completing your application.`;
+            : `You're ${pct}% of the way through your application.`;
           return (
             <div
               className="mt-3 flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold"
@@ -514,9 +511,9 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               <span
                 className="shrink-0 rounded-full px-2 py-0.5 text-white text-[11px] font-bold tabular-nums"
                 style={{ background: applicationTheme.primary }}
-                aria-label={`${Math.round(((currentStep + 1) / steps.length) * 100)} percent complete`}
+                aria-label={`${pct} percent complete`}
               >
-                {Math.round(((currentStep + 1) / steps.length) * 100)}% done
+                {pct}%
               </span>
               {label}
             </div>
