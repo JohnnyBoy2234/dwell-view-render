@@ -5,7 +5,11 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { toast } from 'sonner';
 import { useLeaseDraft } from '../../hooks/useLeaseDraft';
 import { StepWhoWhere } from './StepWhoWhere';
+import { StepMoneyDates } from './StepMoneyDates';
+import { StepCondition } from './StepCondition';
+import { StepReview } from './StepReview';
 import { LEASE_ACCENT } from './wizardUi';
+import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 
 interface LeaseWizardProps {
   contractId?: string;
@@ -34,20 +38,55 @@ const STEPS = [
 export function LeaseWizard(props: LeaseWizardProps) {
   const { contractId, propertyId, tenantId, onContractSaved, onComplete, onCancel } = props;
   const [step, setStep] = useState(0);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
   const draft = useLeaseDraft({ contractId, propertyId, tenantId, onContractSaved });
-  const { data, updateData, loading, saveStatus } = draft;
+  const { data, updateData, loading, saveStatus, savedContractId } = draft;
+
+  const validateStep = (s: number): string | null => {
+    if (s === 0) {
+      if (!data.propertyAddress?.trim()) return 'Add the property address';
+      if (!data.tenantFullName?.trim()) return "Add the tenant's full name";
+      if (!data.tenantEmail?.trim()) return "Add the tenant's email";
+      if (!data.tenantIdNumber?.trim()) return "Add the tenant's ID number";
+    }
+    if (s === 1) {
+      if (!data.leaseStartDate) return 'Choose a start date';
+      if (data.leaseType === 'fixed' && !data.leaseEndDate) return 'Choose an end date';
+      if (!(data.rentAmount > 0)) return 'Enter the monthly rent';
+      if (!(data.depositAmount >= 0)) return 'Enter the deposit';
+    }
+    if (s === 2) {
+      const cr = data.conditionReport as any;
+      const anyFlagged = Object.entries(cr).some(([k, v]) => k !== 'comments' && k !== 's27_yearsResided' && v === 'yes');
+      if (anyFlagged && !cr.comments?.trim()) return 'Add details for the items you flagged';
+    }
+    return null;
+  };
 
   const goNext = async () => {
-    // Per-step validation lands with each real step; Step 1 minimal check:
-    if (step === 0) {
-      if (!data.propertyAddress?.trim()) return toast.error('Add the property address');
-      if (!data.tenantFullName?.trim()) return toast.error("Add the tenant's full name");
-      if (!data.tenantEmail?.trim()) return toast.error("Add the tenant's email");
-    }
+    const err = validateStep(step);
+    if (err) return toast.error(err);
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   const goBack = () => (step === 0 ? onCancel?.() : setStep((s) => s - 1));
+
+  const handleSend = async () => {
+    for (let s = 0; s < STEPS.length - 1; s++) {
+      const err = validateStep(s);
+      if (err) { setStep(s); return toast.error(err); }
+    }
+    setSending(true);
+    try {
+      await draft.sendToTenant();
+      setSent(true);
+    } catch (e: any) {
+      toast.error(e?.message || 'Failed to send the lease');
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (loading) return <div className="flex items-center justify-center p-10 text-slate-500">Loading…</div>;
 
@@ -92,12 +131,9 @@ export function LeaseWizard(props: LeaseWizardProps) {
             onPickProperty={(id) => { window.location.href = `/lease/wizard/property/${id}`; }}
           />
         )}
-        {step > 0 && (
-          <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center">
-            <p className="text-[14px] font-semibold text-slate-600">{STEPS[step].title}</p>
-            <p className="mt-1 text-[13px] text-slate-400">Coming in the next phase.</p>
-          </div>
-        )}
+        {step === 1 && <StepMoneyDates data={data} onUpdate={updateData} />}
+        {step === 2 && <StepCondition data={data} onUpdate={updateData} />}
+        {step === 3 && <StepReview data={data} onUpdate={updateData} onSend={handleSend} sending={sending} />}
       </div>
 
       {/* Sticky nav */}
@@ -106,17 +142,28 @@ export function LeaseWizard(props: LeaseWizardProps) {
           <Button variant="outline" onClick={goBack}>
             <ChevronLeft className="mr-1 h-4 w-4" /> {step === 0 ? 'Cancel' : 'Back'}
           </Button>
-          {step < STEPS.length - 1 ? (
+          {step < STEPS.length - 1 && (
             <Button onClick={goNext} style={{ background: LEASE_ACCENT }} className="text-white">
               Next <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          ) : (
-            <Button disabled style={{ background: LEASE_ACCENT }} className="text-white opacity-60">
-              Review &amp; Send
             </Button>
           )}
         </div>
       </div>
+
+      {/* Sent confirmation */}
+      <SuccessDialog
+        open={sent}
+        onClose={() => { setSent(false); onComplete?.(savedContractId!); }}
+        icon="send"
+        title="Lease sent!"
+        subtitle={`The lease has been sent to ${data.tenantEmail || 'your tenant'} to review and sign.`}
+        nextSteps={[
+          { title: 'Tenant reviews & signs', description: 'They receive the lease to read and sign first' },
+          { title: 'You countersign', description: 'Sign it off from the Leases tab once they have' },
+        ]}
+        primaryAction={{ label: 'Done', onClick: () => { setSent(false); onComplete?.(savedContractId!); } }}
+        showConfetti
+      />
     </div>
   );
 }
