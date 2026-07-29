@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 import { ClipboardCheck, CheckCircle2, ArrowDown } from 'lucide-react';
 import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { CONDITION_QUESTIONS } from '../../templates/conditionReportTemplate';
-import { Card, Field, TextArea, TextInput, LEASE_ACCENT } from './wizardUi';
+import { Card, Field, TextInput, LEASE_ACCENT } from './wizardUi';
 import { ConditionToggle } from './ConditionToggle';
 
 interface Props {
@@ -20,39 +20,15 @@ interface Props {
  */
 export function StepCondition({ data, onUpdate }: Props) {
   const cr = (data.conditionReport || {}) as any;
-  const details = (data.conditionDetails || {}) as any;
 
   // The 29 statements minus the "years resided" numeric (item 27), which has
   // its own field below.
   const items = useMemo(() => CONDITION_QUESTIONS.filter((q: any) => !q.isYearsQuestion), []);
   const isApplicable = (q: any) => (q.requiresFeature ? !!(data as any)[q.requiresFeature] : true);
 
-  // Compose the Clause 32 block (per-item, referenced by number) from the
-  // current answers + details, and mirror it into conditionReport.comments so
-  // the lease PDF renders the explanations.
-  const composeComments = (crNext: any, detailsNext: any): string => {
-    const lines: Array<{ id: number; t: string }> = [];
-    for (const [key, val] of Object.entries(crNext)) {
-      if (val !== 'yes') continue;
-      const m = /^s(\d+)_/.exec(key);
-      if (!m) continue;
-      const c = (detailsNext[key]?.comment || '').trim();
-      lines.push({ id: Number(m[1]), t: `Item ${m[1]}: ${c || '(no details provided)'}` });
-    }
-    lines.sort((a, b) => a.id - b.id);
-    return lines.map((l) => l.t).join('\n');
-  };
-
-  const commit = (crNext: any, detailsNext: any) => {
-    onUpdate({
-      conditionReport: { ...crNext, comments: composeComments(crNext, detailsNext) },
-      conditionDetails: detailsNext,
-    });
-  };
-  const setAnswers = (patch: Record<string, string>) => commit({ ...cr, ...patch }, details);
+  const setAnswers = (patch: Record<string, string>) =>
+    onUpdate({ conditionReport: { ...cr, ...patch } });
   const setAnswer = (key: string, val: string) => setAnswers({ [key]: val });
-  const setDetail = (key: string, patch: Record<string, any>) =>
-    commit(cr, { ...details, [key]: { ...(details[key] || {}), ...patch } });
 
   // A property with no pool/alarm can't have a condition to disclose there —
   // default those statements to N/A (objectively correct, not a certification)
@@ -99,7 +75,6 @@ export function StepCondition({ data, onUpdate }: Props) {
           <span className="font-semibold text-slate-600">No</span> or{' '}
           <span className="font-semibold text-slate-600">N/A</span>. If a property is in good order, tap{' '}
           <span className="font-semibold text-slate-600">Mark all as No</span> and then flag only the exceptions.
-          Flagging “Yes” opens an optional details box if you want to add specifics.
         </p>
 
         {/* Progress + bulk action */}
@@ -168,21 +143,6 @@ export function StepCondition({ data, onUpdate }: Props) {
                   onChange={(v) => setAnswer(q.key, v)}
                   idBase={q.key}
                 />
-
-                {flagged && (
-                  <div className="mt-2.5 rounded-lg border border-amber-200 bg-white p-2.5">
-                    <Field
-                      label={`Add details for item ${q.id}`}
-                      hint="Optional — included in the lease disclosure, referenced by item number"
-                    >
-                      <TextArea
-                        value={details[q.key]?.comment || ''}
-                        onChange={(e) => setDetail(q.key, { comment: e.target.value })}
-                        placeholder="e.g. Geyser drips slightly from the pressure valve; plumber quoted for a seal kit."
-                      />
-                    </Field>
-                  </div>
-                )}
               </div>
             );
           })}
