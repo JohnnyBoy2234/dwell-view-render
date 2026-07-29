@@ -140,7 +140,15 @@ export default function ApplicationDetail() {
           .select('*')
           .eq('user_id', app.tenant_id)
           .maybeSingle();
-        setLegacyDetails(details ?? null);
+        // Decrypt the (encrypted-at-rest) ID number for display.
+        let legacy = details ?? null;
+        if (legacy) {
+          try {
+            const { data: plainId } = await supabase.rpc('get_id_number', { p_user_id: app.tenant_id, p_source: 'screening' });
+            if (plainId) legacy = { ...legacy, id_number: plainId as string };
+          } catch { /* leave as-is */ }
+        }
+        setLegacyDetails(legacy);
       }
 
       if (user.id === app.landlord_id) {

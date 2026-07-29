@@ -144,15 +144,20 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           return;
         }
 
-        // No draft — prefill what we can from the reusable tenant profile
-        const [detailsRes, profileRes, basicRes] = await Promise.all([
+        // No draft — prefill what we can from the reusable tenant profile.
+        // id_number is encrypted at rest, so decrypt it via the owner-scoped RPC
+        // rather than reading the (ciphertext) column, which would fail ID
+        // validation and block submission.
+        const [detailsRes, profileRes, basicRes, idRes] = await Promise.all([
           (supabase.from('screening_details') as any).select('*').eq('user_id', user.id).maybeSingle(),
           (supabase.from('screening_profiles') as any).select('*').eq('user_id', user.id).maybeSingle(),
-          (supabase.from('profiles') as any).select('display_name, phone').eq('user_id', user.id).maybeSingle()
+          (supabase.from('profiles') as any).select('display_name, phone').eq('user_id', user.id).maybeSingle(),
+          (supabase.rpc('get_id_number', { p_user_id: user.id, p_source: 'screening' }) as any),
         ]);
         const details = detailsRes.data;
         const profile = profileRes.data;
         const basic = basicRes.data;
+        const decryptedId = (idRes?.data as string) || '';
 
         if (details || profile || basic) {
           const displayParts: string[] = basic?.display_name?.split(' ') ?? [];
@@ -166,7 +171,7 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
             },
             identity: {
               id_type: details?.id_type || 'sa_id',
-              id_number: details?.id_number || '',
+              id_number: decryptedId,
               date_of_birth: details?.date_of_birth || '',
               nationality: details?.nationality || 'South African',
               id_expiry_date: details?.id_expiry_date || ''

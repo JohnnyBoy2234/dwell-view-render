@@ -101,11 +101,22 @@ export const useLandlordApplications = (propertyId?: string) => {
               .eq('user_id', app.tenant_id)
           ]);
 
+          // id_number is encrypted at rest; decrypt it for the landlord (allowed
+          // because they have an application relationship) so the review shows
+          // the real ID rather than ciphertext.
+          let details = screeningDetails.data || undefined;
+          if (details) {
+            try {
+              const { data: plainId } = await supabase.rpc('get_id_number', { p_user_id: app.tenant_id, p_source: 'screening' });
+              if (plainId) details = { ...details, id_number: plainId as string };
+            } catch { /* leave as-is */ }
+          }
+
           return {
             ...app,
             tenant_profile: tenantProfile.data || undefined,
             screening_profile: screeningProfile.data || undefined,
-            screening_details: screeningDetails.data || undefined,
+            screening_details: details,
             documents: documents.data || []
           } as ApplicationWithTenant;
         })
@@ -173,12 +184,20 @@ export const useLandlordApplications = (propertyId?: string) => {
               .maybeSingle()
           ]);
 
+          let details2 = screeningDetails.data || undefined;
+          if (details2) {
+            try {
+              const { data: plainId } = await supabase.rpc('get_id_number', { p_user_id: app.tenant_id, p_source: 'screening' });
+              if (plainId) details2 = { ...details2, id_number: plainId as string };
+            } catch { /* leave as-is */ }
+          }
+
           return {
             ...app,
             properties: property.data || undefined,
             tenant_profile: tenantProfile.data || undefined,
             screening_profile: screeningProfile.data || undefined,
-            screening_details: screeningDetails.data || undefined,
+            screening_details: details2,
             documents: documents.data || []
           } as ApplicationWithTenant;
         })
