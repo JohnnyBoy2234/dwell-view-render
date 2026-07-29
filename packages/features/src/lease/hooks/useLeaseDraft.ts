@@ -75,15 +75,17 @@ export function useLeaseDraft(opts: {
     prefill.landlordAddress = llScreening?.current_address || '';
 
     if (tenantId) {
-      const [{ data: tProfile }, { data: tScreening }, { data: tId }] = await Promise.all([
+      const [{ data: tProfile }, { data: tScreening }, { data: tId }, { data: tEmail }] = await Promise.all([
         supabase.from('profiles').select('display_name').eq('user_id', tenantId).maybeSingle(),
         supabase.from('screening_details').select('full_name, phone, current_address').eq('user_id', tenantId).maybeSingle(),
         supabase.rpc('get_id_number', { p_user_id: tenantId, p_source: 'screening' }),
+        supabase.rpc('get_related_user_email', { p_user_id: tenantId }),
       ]);
       prefill.tenantFullName = tScreening?.full_name || tProfile?.display_name || '';
       prefill.tenantIdNumber = (tId as string) || '';
       prefill.tenantPhone = tScreening?.phone || '';
       prefill.tenantAddress = tScreening?.current_address || '';
+      prefill.tenantEmail = (tEmail as string) || '';
     }
 
     if (propertyId) {
