@@ -206,6 +206,10 @@ export interface ConditionQuestion {
   question: string;
   requiresFeature?: 'hasPool' | 'hasAlarmSecurity';
   isYearsQuestion?: boolean;
+  // "neutral" statements are plain questions ("Do you possess the plans?"), not
+  // "I am aware of a fault" statements — so a "Yes" must NOT be coloured as a
+  // warning. Only the fault statements turn amber on "Yes".
+  neutral?: boolean;
 }
 
 export const CONDITION_QUESTIONS: ConditionQuestion[] = [
@@ -218,7 +222,7 @@ export const CONDITION_QUESTIONS: ConditionQuestion[] = [
   { id: 7, key: 's7_remoteControls', question: 'I am aware of remote controls not in working order for gate, garage door etc.' },
   { id: 8, key: 's8_alarmSecurity', question: 'I am aware of faults relating to the alarm, beams, burglar bars and/or security gates', requiresFeature: 'hasAlarmSecurity' },
   { id: 9, key: 's9_pool', question: 'I am aware of faults relating to the pool, equipment, piping and pump (incl. cracks, leaks and general operation of equipment)', requiresFeature: 'hasPool' },
-  { id: 10, key: 's10_poolRepairs', question: 'Have there been any recent repairs to any of the items specified in item 9?', requiresFeature: 'hasPool' },
+  { id: 10, key: 's10_poolRepairs', question: 'Have there been any recent repairs to any of the items specified in item 9?', requiresFeature: 'hasPool', neutral: true },
   { id: 11, key: 's11_braaiFireplace', question: 'I am aware of faults relating to the braai, fireplace or chimney' },
   { id: 12, key: 's12_blindsCurtains', question: 'I am aware of faults relating to the blinds or curtain rails' },
   { id: 13, key: 's13_dampProblems', question: 'I am aware of damp problems in any of the buildings (e.g. rising or lateral damp)' },
@@ -233,9 +237,9 @@ export const CONDITION_QUESTIONS: ConditionQuestion[] = [
   { id: 22, key: 's22_boundaryFence', question: 'I am aware of any discrepancy between the physical position of the present boundary fence/walls and the true boundary of the Property' },
   { id: 23, key: 's23_buildingRestrictions', question: 'I am aware of any building restrictions or registered servitudes on the property' },
   { id: 24, key: 's24_buildingPlans', question: 'I am aware of any discrepancy between any building improvements and solid roofed areas (e.g. carports) and the approved building plans' },
-  { id: 25, key: 's25_approvedPlans', question: 'Do you possess copies of the approved building plans?' },
+  { id: 25, key: 's25_approvedPlans', question: 'Do you possess copies of the approved building plans?', neutral: true },
   { id: 26, key: 's26_otherDefects', question: 'I am aware of any other defects' },
   { id: 27, key: 's27_yearsResided', question: 'I have resided in the property for approximately how many years?', isYearsQuestion: true },
-  { id: 28, key: 's28_existingLease', question: 'The Property is subject to a lease / has been rented' },
+  { id: 28, key: 's28_existingLease', question: 'The Property is subject to a lease / has been rented', neutral: true },
   { id: 29, key: 's29_limitedKnowledge', question: 'I have rented out the property and have limited or no knowledge of the condition of the property' },
 ];

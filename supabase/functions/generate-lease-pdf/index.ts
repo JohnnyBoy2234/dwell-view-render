@@ -662,6 +662,28 @@ function buildConditionReportVariables(conditionReport: Record<string, unknown> 
   return vars;
 }
 
+// Clause 32: one line per statement answered "Yes", referenced by item number,
+// with the landlord's explanation from conditionDetails. Falls back to the
+// legacy single comments box for older drafts. Mirrors buildClause32Comments in
+// packages/features/src/lease/utils/leaseTemplateEngine.ts — keep them in sync.
+function buildClause32Comments(d: any): string {
+  const cr = (d?.conditionReport || {}) as Record<string, unknown>;
+  const details = (d?.conditionDetails || {}) as Record<string, { comment?: string }>;
+  const lines: Array<{ id: number; text: string }> = [];
+  for (const [key, val] of Object.entries(cr)) {
+    if (val !== 'yes') continue;
+    const m = /^s(\d+)_/.exec(key);
+    if (!m) continue;
+    const id = Number(m[1]);
+    const comment = (details[key]?.comment || '').trim();
+    lines.push({ id, text: `Item ${id}: ${comment || '(no details provided)'}` });
+  }
+  lines.sort((a, b) => a.id - b.id);
+  if (lines.length) return lines.map((l) => l.text).join('\n');
+  const legacy = (cr.comments as string | undefined)?.trim();
+  return legacy || 'None';
+}
+
 // The `|| legacy` fallbacks cover contracts saved before the wizard existed,
 // whose contract_data used landlordName/bankName/deposit-style keys.
 function buildTemplateVariables(d: any): Record<string, string> {
@@ -693,7 +715,7 @@ function buildTemplateVariables(d: any): Record<string, string> {
     LATE_FEE_AMOUNT: formatZAR(d.lateFeeAmount ?? 250),
 
     EXCLUDED_ITEMS_LIST: d.excludedItemsList || 'None',
-    CLAUSE_32_COMMENTS: d.conditionReport?.comments || 'None',
+    CLAUSE_32_COMMENTS: buildClause32Comments(d),
 
     LANDLORD_BANK_NAME: d.landlordBankName || d.bankName || '',
     LANDLORD_ACCOUNT_HOLDER: d.landlordAccountHolder || d.landlordFullName || d.landlordName || '',

@@ -7,8 +7,10 @@ export type LeaseType = 'fixed' | 'month_to_month';
 // Who maintains which feature
 export type MaintenanceResponsibility = 'tenant' | 'landlord';
 
-// Condition report answer
-export type ConditionAnswer = 'yes' | 'no' | 'na';
+// Condition report answer. '' = unanswered (visually distinct from a real
+// Yes/No/N/A) — the landlord must actively answer each statement rather than
+// silently inheriting a default, which is what the PPA §67 disclosure requires.
+export type ConditionAnswer = 'yes' | 'no' | 'na' | '';
 
 // Lease status
 export type LeaseStatus = 'draft' | 'pending_tenant' | 'pending_landlord' | 'signed' | 'expired' | 'terminated';
@@ -44,8 +46,17 @@ export interface ConditionReportAnswers {
   s27_yearsResided: string;
   s28_existingLease: ConditionAnswer;
   s29_limitedKnowledge: ConditionAnswer;
-  comments: string; // For any "YES" answers (Clause 32)
+  comments: string; // Legacy single Clause 32 box — superseded by conditionDetails per-item comments, kept for back-compat.
 }
+
+// Per-statement Clause 32 detail: the required explanation and optional photo
+// evidence for any statement answered "Yes". Keyed by the sN_ statement key
+// (e.g. "s3_geyser"). Photos are storage paths, not signed URLs.
+export interface ConditionItemDetail {
+  comment?: string;
+  photos?: string[];
+}
+export type ConditionDetails = Record<string, ConditionItemDetail>;
 
 // Main wizard data structure - all variables for the template
 export interface LeaseWizardData {
@@ -100,6 +111,8 @@ export interface LeaseWizardData {
 
   // STEP 8: Condition Report (Annexure A)
   conditionReport: ConditionReportAnswers;
+  // Per-item Clause 32 explanations + photo evidence for flagged statements.
+  conditionDetails?: ConditionDetails;
 
   // STEP 9: Exclusions
   excludedItemsList: string;
@@ -179,36 +192,40 @@ export interface LeaseContract {
 }
 
 // Default values for creating a new wizard
+// Every statement starts UNANSWERED ('') — not pre-set to "No". The disclosure
+// is a legal certification, so the landlord must actively note each response
+// (fast path: one "Mark all as No" tap). Non-applicable pool/alarm items are
+// defaulted to N/A by the wizard when the property lacks that feature.
 export const DEFAULT_CONDITION_REPORT: ConditionReportAnswers = {
-  s1_electrical: 'no',
-  s2_illegalElectrical: 'no',
-  s3_geyser: 'no',
-  s4_drainage: 'no',
-  s5_leakingTaps: 'no',
-  s6_missingKeys: 'no',
-  s7_remoteControls: 'no',
-  s8_alarmSecurity: 'na',
-  s9_pool: 'na',
-  s10_poolRepairs: 'na',
-  s11_braaiFireplace: 'no',
-  s12_blindsCurtains: 'no',
-  s13_dampProblems: 'no',
-  s14_roofLeaks: 'no',
-  s15_crackedWindows: 'no',
-  s16_bathsBasins: 'no',
-  s17_floorTiles: 'no',
-  s18_structuralDefects: 'no',
-  s19_carpets: 'no',
-  s20_builtInCupboards: 'no',
-  s21_doorHandles: 'no',
-  s22_boundaryFence: 'no',
-  s23_buildingRestrictions: 'no',
-  s24_buildingPlans: 'no',
-  s25_approvedPlans: 'no',
-  s26_otherDefects: 'no',
+  s1_electrical: '',
+  s2_illegalElectrical: '',
+  s3_geyser: '',
+  s4_drainage: '',
+  s5_leakingTaps: '',
+  s6_missingKeys: '',
+  s7_remoteControls: '',
+  s8_alarmSecurity: '',
+  s9_pool: '',
+  s10_poolRepairs: '',
+  s11_braaiFireplace: '',
+  s12_blindsCurtains: '',
+  s13_dampProblems: '',
+  s14_roofLeaks: '',
+  s15_crackedWindows: '',
+  s16_bathsBasins: '',
+  s17_floorTiles: '',
+  s18_structuralDefects: '',
+  s19_carpets: '',
+  s20_builtInCupboards: '',
+  s21_doorHandles: '',
+  s22_boundaryFence: '',
+  s23_buildingRestrictions: '',
+  s24_buildingPlans: '',
+  s25_approvedPlans: '',
+  s26_otherDefects: '',
   s27_yearsResided: '',
-  s28_existingLease: 'no',
-  s29_limitedKnowledge: 'no',
+  s28_existingLease: '',
+  s29_limitedKnowledge: '',
   comments: '',
 };
 
@@ -264,7 +281,8 @@ export const DEFAULT_WIZARD_DATA: LeaseWizardData = {
   
   // Step 8
   conditionReport: DEFAULT_CONDITION_REPORT,
-  
+  conditionDetails: {},
+
   // Step 9
   excludedItemsList: '',
   

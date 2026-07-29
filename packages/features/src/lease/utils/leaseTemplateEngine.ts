@@ -62,6 +62,30 @@ function buildConditionReportVariables(data: LeaseWizardData): Record<string, st
 }
 
 /**
+ * Builds the Clause 32 comments block from the per-item disclosure details:
+ * one line per statement answered "Yes", referenced by its item number, with
+ * the landlord's explanation. Falls back to the legacy single comments box for
+ * drafts created before per-item details existed.
+ */
+export function buildClause32Comments(data: LeaseWizardData): string {
+  const cr = (data.conditionReport || {}) as Record<string, unknown>;
+  const details = (data.conditionDetails || {}) as Record<string, { comment?: string }>;
+  const lines: Array<{ id: number; text: string }> = [];
+  for (const [key, val] of Object.entries(cr)) {
+    if (val !== 'yes') continue;
+    const m = /^s(\d+)_/.exec(key);
+    if (!m) continue;
+    const id = Number(m[1]);
+    const comment = (details[key]?.comment || '').trim();
+    lines.push({ id, text: `Item ${id}: ${comment || '(no details provided)'}` });
+  }
+  lines.sort((a, b) => a.id - b.id);
+  if (lines.length) return lines.map((l) => l.text).join('\n');
+  const legacy = (cr.comments as string | undefined)?.trim();
+  return legacy || 'None';
+}
+
+/**
  * Maps wizard data to template variables
  */
 export function buildTemplateVariables(data: LeaseWizardData): Record<string, string> {
@@ -99,8 +123,8 @@ export function buildTemplateVariables(data: LeaseWizardData): Record<string, st
     // Step 9: Exclusions
     EXCLUDED_ITEMS_LIST: data.excludedItemsList || 'None',
 
-    // Condition Report Comments
-    CLAUSE_32_COMMENTS: data.conditionReport?.comments || 'None',
+    // Condition Report Comments — per-item, referenced by statement number.
+    CLAUSE_32_COMMENTS: buildClause32Comments(data),
 
     // Bank Details
     LANDLORD_BANK_NAME: data.landlordBankName || '',

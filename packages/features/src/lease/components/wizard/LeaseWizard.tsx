@@ -8,6 +8,7 @@ import { StepWhoWhere } from './StepWhoWhere';
 import { StepMoneyDates } from './StepMoneyDates';
 import { StepCondition } from './StepCondition';
 import { StepReview } from './StepReview';
+import { CONDITION_QUESTIONS } from '../../templates/conditionReportTemplate';
 import { LeaseLivePreview } from './LeaseLivePreview';
 import { LEASE_ACCENT } from './wizardUi';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
@@ -76,9 +77,16 @@ export function LeaseWizard(props: LeaseWizardProps) {
       if (!(data.depositAmount >= 0)) return 'Enter the deposit';
     }
     if (s === 2) {
-      const cr = data.conditionReport as any;
-      const anyFlagged = Object.entries(cr).some(([k, v]) => k !== 'comments' && k !== 's27_yearsResided' && v === 'yes');
-      if (anyFlagged && !cr.comments?.trim()) return 'Add details for the items you flagged';
+      const cr = (data.conditionReport || {}) as any;
+      const details = (data.conditionDetails || {}) as any;
+      const items = CONDITION_QUESTIONS.filter((q: any) => !q.isYearsQuestion);
+      const applicable = items.filter((q: any) => (q.requiresFeature ? !!(data as any)[q.requiresFeature] : true));
+      const unanswered = applicable.filter((q: any) => !cr[q.key]);
+      if (unanswered.length) {
+        return `Answer all ${applicable.length} condition items — ${unanswered.length} still open. Tap "Mark all as No" for a clean property, then flag exceptions.`;
+      }
+      const missingComment = applicable.filter((q: any) => cr[q.key] === 'yes' && !(details[q.key]?.comment || '').trim());
+      if (missingComment.length) return `Add an explanation for each item you flagged “Yes” (${missingComment.length} missing).`;
     }
     return null;
   };
@@ -164,7 +172,7 @@ export function LeaseWizard(props: LeaseWizardProps) {
           />
         )}
         {step === 1 && <StepMoneyDates data={data} onUpdate={updateData} />}
-        {step === 2 && <StepCondition data={data} onUpdate={updateData} />}
+        {step === 2 && <StepCondition data={data} onUpdate={updateData} contractId={savedContractId || contractId} />}
         {step === 3 && <StepReview data={data} onUpdate={updateData} onSend={handleSend} sending={sending} termTooLong={termTooLong} />}
       </div>
       </div>
