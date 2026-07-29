@@ -215,12 +215,13 @@ export function useLeaseDraft(opts: {
   const sendToTenant = useCallback(async () => {
     if (!savedContractId || !resolvedTenantId) throw new Error('No tenant linked to this lease yet');
     await saveNow();
-    await ensureBankingSetup();
+    // Banking / payout setup is handled separately via the Rent Collection tile,
+    // so the lease doesn't collect or touch it here.
     const { error } = await supabase.functions.invoke('send-contract-to-tenant', {
       body: { contractId: savedContractId, tenantId: resolvedTenantId },
     });
     if (error) throw error;
-  }, [savedContractId, resolvedTenantId, saveNow, ensureBankingSetup]);
+  }, [savedContractId, resolvedTenantId, saveNow]);
 
   return {
     data, updateData, loading, saveStatus,

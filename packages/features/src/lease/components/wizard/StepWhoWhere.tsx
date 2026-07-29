@@ -1,10 +1,10 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
-import { Home, User, Landmark, Building2 } from 'lucide-react';
+import { Home, User } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
-import { Card, Field, TextInput, Expander, ConfirmRow, maskId } from './wizardUi';
+import { Card, Field, TextInput, Expander, maskId } from './wizardUi';
 
 interface Props {
   data: LeaseWizardData;
@@ -119,31 +119,6 @@ export function StepWhoWhere({ data, onUpdate, propertyLocked, onPickProperty }:
         <Field label="Your address" hint="Where the tenant sends legal notices">
           <TextInput value={data.landlordAddress || ''} onChange={(e) => onUpdate({ landlordAddress: e.target.value })} />
         </Field>
-      </Expander>
-
-      {/* Payout banking — confirm-me */}
-      <Expander
-        title="Rent payout details"
-        note="Where the tenant's rent is paid. Entered once and reused."
-      >
-        <div className="mb-2 rounded-lg bg-slate-100/70 px-3 py-2">
-          <ConfirmRow label="Bank" value={data.landlordBankName} />
-          <ConfirmRow label="Account" value={data.landlordAccountNumber} />
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Bank">
-            <TextInput value={data.landlordBankName || ''} onChange={(e) => onUpdate({ landlordBankName: e.target.value })} placeholder="Standard Bank" />
-          </Field>
-          <Field label="Account holder">
-            <TextInput value={data.landlordAccountHolder || ''} onChange={(e) => onUpdate({ landlordAccountHolder: e.target.value })} />
-          </Field>
-          <Field label="Account number">
-            <TextInput value={data.landlordAccountNumber || ''} onChange={(e) => onUpdate({ landlordAccountNumber: e.target.value })} inputMode="numeric" />
-          </Field>
-          <Field label="Branch code">
-            <TextInput value={data.landlordBranchCode || ''} onChange={(e) => onUpdate({ landlordBranchCode: e.target.value })} inputMode="numeric" />
-          </Field>
-        </div>
       </Expander>
     </div>
   );
