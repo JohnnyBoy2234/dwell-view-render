@@ -29,6 +29,7 @@ import { PropertyDetail } from "@mzanzihomes/features/pages";
 import EnhancedLandlordDashboard from "@/pages/EnhancedLandlordDashboard";
 import LandlordMaintenance from "@/pages/LandlordMaintenance";
 import { LeaseBuilder } from "@/pages/LeaseBuilder";
+import { LeaseWizardPreview } from "@/pages/LeaseWizardPreview";
 import { LeaseDashboard } from "@/pages/LeaseDashboard";
 import { LeaseSignature } from '@mzanzihomes/features/pages';
 import ListProperty from "@/pages/ListProperty";
@@ -214,6 +215,28 @@ function AppRoutes() {
           <AuthenticatedRoute>
             <PlanGuard requiredPlan="pro" featureName="Lease Management">
               <LeaseBuilder />
+            </PlanGuard>
+          </AuthenticatedRoute>
+        } />
+        {/* New essentials-first Lease Wizard — parallel preview route */}
+        <Route path="/lease/wizard" element={
+          <AuthenticatedRoute>
+            <PlanGuard requiredPlan="pro" featureName="Lease Management">
+              <LeaseWizardPreview />
+            </PlanGuard>
+          </AuthenticatedRoute>
+        } />
+        <Route path="/lease/wizard/:contractId" element={
+          <AuthenticatedRoute>
+            <PlanGuard requiredPlan="pro" featureName="Lease Management">
+              <LeaseWizardPreview />
+            </PlanGuard>
+          </AuthenticatedRoute>
+        } />
+        <Route path="/lease/wizard/property/:propertyId" element={
+          <AuthenticatedRoute>
+            <PlanGuard requiredPlan="pro" featureName="Lease Management">
+              <LeaseWizardPreview />
             </PlanGuard>
           </AuthenticatedRoute>
         } />
