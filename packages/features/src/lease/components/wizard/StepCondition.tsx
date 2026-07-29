@@ -1,30 +1,24 @@
 // @ts-nocheck
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ClipboardCheck, CheckCircle2, Camera, X, Loader2, ArrowDown } from 'lucide-react';
-import { supabase } from '@mzanzihomes/supabase/client';
-import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import React, { useEffect, useMemo, useRef } from 'react';
+import { ClipboardCheck, CheckCircle2, ArrowDown } from 'lucide-react';
 import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { CONDITION_QUESTIONS } from '../../templates/conditionReportTemplate';
 import { Card, Field, TextArea, TextInput, LEASE_ACCENT } from './wizardUi';
 import { ConditionToggle } from './ConditionToggle';
 
-const PHOTO_BUCKET = 'lease-disclosure-photos';
-
 interface Props {
   data: LeaseWizardData;
   onUpdate: (u: Partial<LeaseWizardData>) => void;
-  contractId?: string | null;
 }
 
 /**
  * Step 3 — Condition disclosure (Annexure A) under the Property Practitioners
  * Act §67. Statutorily complete: every one of the 29 statements is an explicit
  * Yes / No / N/A answer (never a silent default), each "Yes" needs a Clause 32
- * explanation (+ optional photo), and the landlord can't proceed until every
- * applicable item is answered. Fast path: one "Mark all as No" tap.
+ * explanation, and the landlord can't proceed until every applicable item is
+ * answered. Fast path: one "Mark all as No" tap.
  */
-export function StepCondition({ data, onUpdate, contractId }: Props) {
-  const { user } = useAuth();
+export function StepCondition({ data, onUpdate }: Props) {
   const cr = (data.conditionReport || {}) as any;
   const details = (data.conditionDetails || {}) as any;
 
@@ -34,10 +28,8 @@ export function StepCondition({ data, onUpdate, contractId }: Props) {
   const isApplicable = (q: any) => (q.requiresFeature ? !!(data as any)[q.requiresFeature] : true);
 
   // Compose the Clause 32 block (per-item, referenced by number) from the
-  // current answers + details. We mirror it into the legacy
-  // conditionReport.comments field on every change so the *currently-deployed*
-  // lease PDF (which reads .comments) renders the explanations correctly — the
-  // new per-item PDF path lands with the photo-annexure step.
+  // current answers + details, and mirror it into conditionReport.comments so
+  // the lease PDF renders the explanations.
   const composeComments = (crNext: any, detailsNext: any): string => {
     const lines: Array<{ id: number; t: string }> = [];
     for (const [key, val] of Object.entries(crNext)) {
@@ -96,30 +88,6 @@ export function StepCondition({ data, onUpdate, contractId }: Props) {
   const jumpToNextUnanswered = () => {
     const next = applicableItems.find((q: any) => !cr[q.key]);
     if (next) rowRefs.current[next.key]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
-
-  // ── Photo upload ──────────────────────────────────────────────────────────
-  const [uploading, setUploading] = useState<string | null>(null);
-  const uploadPhoto = async (key: string, file: File) => {
-    if (!user || !file) return;
-    setUploading(key);
-    try {
-      const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = `${user.id}/${contractId || 'unsaved'}/${key}/${Date.now()}_${safe}`;
-      const { error } = await supabase.storage
-        .from(PHOTO_BUCKET)
-        .upload(path, file, { contentType: file.type || 'image/jpeg', upsert: false });
-      if (error) throw error;
-      setDetail(key, { photos: [...(details[key]?.photos || []), path] });
-    } catch (e) {
-      console.error('Disclosure photo upload failed', e);
-    } finally {
-      setUploading(null);
-    }
-  };
-  const removePhoto = (key: string, path: string) => {
-    supabase.storage.from(PHOTO_BUCKET).remove([path]).catch(() => {});
-    setDetail(key, { photos: (details[key]?.photos || []).filter((p: string) => p !== path) });
   };
 
   return (
@@ -186,7 +154,7 @@ export function StepCondition({ data, onUpdate, contractId }: Props) {
                 key={q.key}
                 ref={(el) => { rowRefs.current[q.key] = el; }}
                 className={`rounded-xl border px-3 py-2.5 transition-colors ${
-                  flagged ? 'border-amber-200 bg-amber-50/50' : val ? 'border-slate-200 bg-white' : 'border-slate-200 bg-white'
+                  flagged ? 'border-amber-200 bg-amber-50/50' : 'border-slate-200 bg-white'
                 }`}
               >
                 <div className="mb-2 flex items-start gap-2">
@@ -206,7 +174,7 @@ export function StepCondition({ data, onUpdate, contractId }: Props) {
                 />
 
                 {flagged && (
-                  <div className="mt-2.5 space-y-2 rounded-lg border border-amber-200 bg-white p-2.5">
+                  <div className="mt-2.5 rounded-lg border border-amber-200 bg-white p-2.5">
                     <Field
                       label={`Clause 32 — explain item ${q.id}`}
                       required
@@ -220,16 +188,8 @@ export function StepCondition({ data, onUpdate, contractId }: Props) {
                       />
                     </Field>
                     {needsComment && (
-                      <p className="text-[11.5px] font-medium text-rose-500">A short explanation is required for anything you flag “Yes”.</p>
+                      <p className="mt-1.5 text-[11.5px] font-medium text-rose-500">A short explanation is required for anything you flag “Yes”.</p>
                     )}
-
-                    {/* Photo evidence (optional) */}
-                    <PhotoStrip
-                      paths={details[q.key]?.photos || []}
-                      uploading={uploading === q.key}
-                      onAdd={(file) => uploadPhoto(q.key, file)}
-                      onRemove={(p) => removePhoto(q.key, p)}
-                    />
                   </div>
                 )}
               </div>
@@ -258,77 +218,6 @@ export function StepCondition({ data, onUpdate, contractId }: Props) {
           {flaggedMissingComment.length > 1 ? '' : 's'} an explanation before you can send the lease.
         </div>
       )}
-    </div>
-  );
-}
-
-/** Thumbnail strip with camera capture. Renders stored paths via signed URLs. */
-function PhotoStrip({
-  paths,
-  uploading,
-  onAdd,
-  onRemove,
-}: {
-  paths: string[];
-  uploading: boolean;
-  onAdd: (f: File) => void;
-  onRemove: (p: string) => void;
-}) {
-  const [urls, setUrls] = useState<Record<string, string>>({});
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    const missing = paths.filter((p) => !urls[p]);
-    if (!missing.length) return;
-    (async () => {
-      const next: Record<string, string> = {};
-      for (const p of missing) {
-        const { data } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(p, 3600);
-        if (data?.signedUrl) next[p] = data.signedUrl;
-      }
-      if (!cancelled && Object.keys(next).length) setUrls((u) => ({ ...u, ...next }));
-    })();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paths.join('|')]);
-
-  return (
-    <div className="flex flex-wrap items-center gap-2">
-      {paths.map((p) => (
-        <div key={p} className="relative h-14 w-14 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-          {urls[p] ? (
-            <img src={urls[p]} alt="Evidence" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center"><Loader2 className="h-4 w-4 animate-spin text-slate-400" /></div>
-          )}
-          <button
-            type="button"
-            onClick={() => onRemove(p)}
-            className="absolute right-0.5 top-0.5 rounded-full bg-black/50 p-0.5 text-white"
-            aria-label="Remove photo"
-          >
-            <X className="h-3 w-3" />
-          </button>
-        </div>
-      ))}
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        disabled={uploading}
-        className="flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-slate-300 bg-white text-slate-400 hover:bg-slate-50"
-      >
-        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-        <span className="text-[9px] font-semibold">Photo</span>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) onAdd(f); e.target.value = ''; }}
-      />
     </div>
   );
 }

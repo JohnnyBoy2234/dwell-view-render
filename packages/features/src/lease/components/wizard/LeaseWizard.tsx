@@ -172,7 +172,7 @@ export function LeaseWizard(props: LeaseWizardProps) {
           />
         )}
         {step === 1 && <StepMoneyDates data={data} onUpdate={updateData} />}
-        {step === 2 && <StepCondition data={data} onUpdate={updateData} contractId={savedContractId || contractId} />}
+        {step === 2 && <StepCondition data={data} onUpdate={updateData} />}
         {step === 3 && <StepReview data={data} onUpdate={updateData} onSend={handleSend} sending={sending} termTooLong={termTooLong} />}
       </div>
       </div>

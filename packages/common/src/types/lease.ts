@@ -49,12 +49,10 @@ export interface ConditionReportAnswers {
   comments: string; // Legacy single Clause 32 box — superseded by conditionDetails per-item comments, kept for back-compat.
 }
 
-// Per-statement Clause 32 detail: the required explanation and optional photo
-// evidence for any statement answered "Yes". Keyed by the sN_ statement key
-// (e.g. "s3_geyser"). Photos are storage paths, not signed URLs.
+// Per-statement Clause 32 detail: the required explanation for any statement
+// answered "Yes". Keyed by the sN_ statement key (e.g. "s3_geyser").
 export interface ConditionItemDetail {
   comment?: string;
-  photos?: string[];
 }
 export type ConditionDetails = Record<string, ConditionItemDetail>;
 
