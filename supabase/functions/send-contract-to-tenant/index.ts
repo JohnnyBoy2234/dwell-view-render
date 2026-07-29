@@ -31,6 +31,25 @@ serve(async (req) => {
 
     if (contractError) throw contractError;
 
+    // ── >10-year e-signature guardrail (ECTA / Alienation of Land Act) ─────────
+    // Fixed-term residential leases longer than 10 years may not be validly
+    // concluded by standard electronic signature — they must be signed in wet
+    // ink (and, over 10 years, are registrable against the title deed). Block
+    // the e-sign send and tell the landlord to sign on paper instead.
+    const cd = contract.contract_data || {};
+    if (cd.leaseType === 'fixed' && cd.leaseStartDate && cd.leaseEndDate) {
+      const years = (new Date(cd.leaseEndDate).getTime() - new Date(cd.leaseStartDate).getTime()) / (365.25 * 24 * 3600 * 1000);
+      if (years > 10) {
+        return new Response(
+          JSON.stringify({
+            error: 'LEASE_TERM_TOO_LONG',
+            message: 'Leases longer than 10 years cannot be signed electronically in South Africa. Please download the lease, sign it in wet ink with the tenant, and keep the signed original. A lease over 10 years should also be registered against the property title.',
+          }),
+          { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+        );
+      }
+    }
+
     // Get landlord profile for sender info
     const { data: landlordProfile } = await supabase
       .from('profiles')

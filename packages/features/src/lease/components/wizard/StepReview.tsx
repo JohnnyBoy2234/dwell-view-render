@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React from 'react';
-import { FileCheck, Home, Users, Wrench, Ban, Send } from 'lucide-react';
+import { FileCheck, Home, Users, Wrench, Ban, Send, AlertTriangle } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import type { LeaseWizardData, MaintenanceResponsibility } from '@mzanzihomes/common/types/lease';
 import { Card, Field, TextArea, Expander, ConfirmRow, LEASE_ACCENT } from './wizardUi';
@@ -10,6 +10,7 @@ interface Props {
   onUpdate: (u: Partial<LeaseWizardData>) => void;
   onSend: () => void;
   sending: boolean;
+  termTooLong?: boolean;
 }
 
 const zar = (v: number) => `R${(Number(v) || 0).toLocaleString('en-ZA')}`;
@@ -57,7 +58,7 @@ function MaintPicker({ label, value, onChange }: { label: string; value?: Mainte
  * title) sits behind Advanced panels pre-set to SA-standard defaults, editable
  * on demand. Sending hands off to the existing send-contract-to-tenant pipeline.
  */
-export function StepReview({ data, onUpdate, onSend, sending }: Props) {
+export function StepReview({ data, onUpdate, onSend, sending, termTooLong }: Props) {
   const cpaApplies = !!data.tenantIsIndividual && !!data.landlordActingInBusiness;
 
   return (
@@ -114,20 +115,42 @@ export function StepReview({ data, onUpdate, onSend, sending }: Props) {
         </Field>
       </Expander>
 
-      {/* Send */}
+      {/* Send / guardrail */}
       <div className="pt-1">
-        <Button
-          onClick={onSend}
-          disabled={sending}
-          className="w-full py-6 text-[15px] font-bold text-white"
-          style={{ background: LEASE_ACCENT }}
-        >
-          <Send className="mr-2 h-5 w-5" />
-          {sending ? 'Sending…' : 'Send to tenant to sign'}
-        </Button>
-        <p className="mt-2 text-center text-[12px] text-slate-400">
-          The tenant reviews and signs first; you countersign afterwards from the Leases tab.
-        </p>
+        {termTooLong ? (
+          <div className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+            <div className="flex items-start gap-2.5">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <div>
+                <p className="text-[14px] font-bold text-amber-900">This lease can't be signed electronically</p>
+                <p className="mt-1 text-[12.5px] leading-relaxed text-amber-800">
+                  Leases longer than <b>10 years</b> can't be validly signed by electronic signature under South
+                  African law — they must be signed in <b>wet ink</b>, and a lease over 10 years should be
+                  registered against the property's title deed.
+                </p>
+                <p className="mt-2 text-[12.5px] leading-relaxed text-amber-800">
+                  Download the lease, print it, sign it with the tenant in person, and keep the signed original.
+                  If you'd rather e-sign, shorten the term to 10 years or less, or use month-to-month.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <Button
+              onClick={onSend}
+              disabled={sending}
+              className="w-full py-6 text-[15px] font-bold text-white"
+              style={{ background: LEASE_ACCENT }}
+            >
+              <Send className="mr-2 h-5 w-5" />
+              {sending ? 'Sending…' : 'Send to tenant to sign'}
+            </Button>
+            <p className="mt-2 text-center text-[12px] text-slate-400">
+              The tenant reviews and signs first; you countersign afterwards from the Leases tab.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

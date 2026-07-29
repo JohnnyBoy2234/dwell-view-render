@@ -62,22 +62,26 @@ export function useLeaseDraft(opts: {
     if (!user) return;
     const prefill: Partial<LeaseWizardData> = { landlordEmail: user.email || '' };
 
-    const [{ data: llProfile }, { data: llScreening }] = await Promise.all([
+    // ID numbers are encrypted at rest — read the plaintext via the
+    // owner/relationship-scoped RPC rather than the (ciphertext) column.
+    const [{ data: llProfile }, { data: llScreening }, { data: llId }] = await Promise.all([
       supabase.from('profiles').select('display_name').eq('user_id', user.id).maybeSingle(),
-      supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', user.id).maybeSingle(),
+      supabase.from('screening_details').select('full_name, phone, current_address').eq('user_id', user.id).maybeSingle(),
+      supabase.rpc('get_id_number', { p_user_id: user.id, p_source: 'screening' }),
     ]);
     prefill.landlordFullName = llScreening?.full_name || llProfile?.display_name || user.user_metadata?.full_name || '';
-    prefill.landlordIdNumber = llScreening?.id_number || '';
+    prefill.landlordIdNumber = (llId as string) || '';
     prefill.landlordPhone = llScreening?.phone || '';
     prefill.landlordAddress = llScreening?.current_address || '';
 
     if (tenantId) {
-      const [{ data: tProfile }, { data: tScreening }] = await Promise.all([
+      const [{ data: tProfile }, { data: tScreening }, { data: tId }] = await Promise.all([
         supabase.from('profiles').select('display_name').eq('user_id', tenantId).maybeSingle(),
-        supabase.from('screening_details').select('full_name, id_number, phone, current_address').eq('user_id', tenantId).maybeSingle(),
+        supabase.from('screening_details').select('full_name, phone, current_address').eq('user_id', tenantId).maybeSingle(),
+        supabase.rpc('get_id_number', { p_user_id: tenantId, p_source: 'screening' }),
       ]);
       prefill.tenantFullName = tScreening?.full_name || tProfile?.display_name || '';
-      prefill.tenantIdNumber = tScreening?.id_number || '';
+      prefill.tenantIdNumber = (tId as string) || '';
       prefill.tenantPhone = tScreening?.phone || '';
       prefill.tenantAddress = tScreening?.current_address || '';
     }

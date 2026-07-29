@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Check, FileText, X } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { toast } from 'sonner';
 import { useLeaseDraft } from '../../hooks/useLeaseDraft';
@@ -8,6 +8,7 @@ import { StepWhoWhere } from './StepWhoWhere';
 import { StepMoneyDates } from './StepMoneyDates';
 import { StepCondition } from './StepCondition';
 import { StepReview } from './StepReview';
+import { LeaseLivePreview } from './LeaseLivePreview';
 import { LEASE_ACCENT } from './wizardUi';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 
@@ -40,6 +41,7 @@ export function LeaseWizard(props: LeaseWizardProps) {
   const [step, setStep] = useState(0);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [mobilePreview, setMobilePreview] = useState(false);
   const draft = useLeaseDraft({ contractId, propertyId, tenantId, onContractSaved });
   const { data, updateData, loading, saveStatus, savedContractId } = draft;
 
@@ -72,11 +74,18 @@ export function LeaseWizard(props: LeaseWizardProps) {
   };
   const goBack = () => (step === 0 ? onCancel?.() : setStep((s) => s - 1));
 
+  // >10-year fixed leases can't be e-signed (ECTA) — computed for the guardrail.
+  const leaseYears = (data.leaseType === 'fixed' && data.leaseStartDate && data.leaseEndDate)
+    ? (new Date(data.leaseEndDate).getTime() - new Date(data.leaseStartDate).getTime()) / (365.25 * 24 * 3600 * 1000)
+    : null;
+  const termTooLong = leaseYears != null && leaseYears > 10;
+
   const handleSend = async () => {
     for (let s = 0; s < STEPS.length - 1; s++) {
       const err = validateStep(s);
       if (err) { setStep(s); return toast.error(err); }
     }
+    if (termTooLong) { setStep(3); return; } // guardrail panel handles this
     setSending(true);
     try {
       await draft.sendToTenant();
@@ -91,7 +100,9 @@ export function LeaseWizard(props: LeaseWizardProps) {
   if (loading) return <div className="flex items-center justify-center p-10 text-slate-500">Loading…</div>;
 
   return (
-    <div className="mx-auto max-w-2xl px-4 pb-28 pt-4 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 pb-28 pt-4 sm:px-6 lg:flex lg:gap-6">
+      {/* Left: form column */}
+      <div className="min-w-0 flex-1 lg:max-w-xl">
       {/* Stepper */}
       <div className="mb-5">
         <div className="mb-2 flex items-center justify-between">
@@ -128,13 +139,53 @@ export function LeaseWizard(props: LeaseWizardProps) {
             data={data}
             onUpdate={updateData}
             propertyLocked={!!propertyId}
-            onPickProperty={(id) => { window.location.href = `/lease/wizard/property/${id}`; }}
+            onPickProperty={(id) => {
+              // Reload the current builder/wizard route with the chosen property.
+              const base = window.location.pathname.replace(/\/property\/[^/]+$/, '').replace(/\/$/, '');
+              window.location.href = `${base}?propertyId=${id}`;
+            }}
           />
         )}
         {step === 1 && <StepMoneyDates data={data} onUpdate={updateData} />}
         {step === 2 && <StepCondition data={data} onUpdate={updateData} />}
-        {step === 3 && <StepReview data={data} onUpdate={updateData} onSend={handleSend} sending={sending} />}
+        {step === 3 && <StepReview data={data} onUpdate={updateData} onSend={handleSend} sending={sending} termTooLong={termTooLong} />}
       </div>
+      </div>
+
+      {/* Right: live preview (desktop) */}
+      <div className="hidden lg:block lg:w-[440px] lg:shrink-0">
+        <div className="sticky top-4 h-[calc(100dvh-6rem)]">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Live preview</p>
+          <div className="h-[calc(100%-1.5rem)]">
+            <LeaseLivePreview data={data} />
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: floating preview button */}
+      <button
+        type="button"
+        onClick={() => setMobilePreview(true)}
+        className="fixed bottom-20 right-4 z-20 flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-bold text-white shadow-lg lg:hidden"
+        style={{ background: LEASE_ACCENT }}
+      >
+        <FileText className="h-4 w-4" /> Preview
+      </button>
+
+      {/* Mobile: full-screen preview overlay */}
+      {mobilePreview && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-white lg:hidden">
+          <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+            <span className="text-[14px] font-bold text-slate-900">Lease preview</span>
+            <button onClick={() => setMobilePreview(false)} className="rounded-full p-1.5 hover:bg-slate-100" aria-label="Close preview">
+              <X className="h-5 w-5 text-slate-500" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-hidden p-3">
+            <LeaseLivePreview data={data} />
+          </div>
+        </div>
+      )}
 
       {/* Sticky nav */}
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 12px)' }}>

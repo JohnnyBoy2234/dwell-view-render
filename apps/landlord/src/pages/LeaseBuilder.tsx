@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { SALeaseWizard } from '@mzanzihomes/features/lease';
+import { LeaseWizard } from '@mzanzihomes/features/lease';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -26,7 +26,7 @@ export function LeaseBuilder() {
         </div>
       </div>
 
-      <SALeaseWizard
+      <LeaseWizard
         contractId={contractId}
         propertyId={propertyId}
         tenantId={tenantId}
