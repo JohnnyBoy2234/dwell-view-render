@@ -70,9 +70,6 @@ export function StepCondition({ data, onUpdate }: Props) {
   const answeredCount = applicableItems.filter((q: any) => cr[q.key]).length;
   const totalCount = applicableItems.length;
   const allAnswered = answeredCount === totalCount;
-  const flaggedMissingComment = applicableItems.filter(
-    (q: any) => cr[q.key] === 'yes' && !(details[q.key]?.comment || '').trim(),
-  );
 
   const markAllNo = () => {
     const patch: Record<string, string> = {};
@@ -101,8 +98,8 @@ export function StepCondition({ data, onUpdate }: Props) {
           Answer every statement <span className="font-semibold text-slate-600">Yes</span>,{' '}
           <span className="font-semibold text-slate-600">No</span> or{' '}
           <span className="font-semibold text-slate-600">N/A</span>. If a property is in good order, tap{' '}
-          <span className="font-semibold text-slate-600">Mark all as No</span> and then flag only the exceptions —
-          each “Yes” needs a short explanation.
+          <span className="font-semibold text-slate-600">Mark all as No</span> and then flag only the exceptions.
+          Flagging “Yes” opens an optional details box if you want to add specifics.
         </p>
 
         {/* Progress + bulk action */}
@@ -148,7 +145,6 @@ export function StepCondition({ data, onUpdate }: Props) {
             const applicable = isApplicable(q);
             const val = cr[q.key] || '';
             const flagged = val === 'yes';
-            const needsComment = flagged && !(details[q.key]?.comment || '').trim();
             return (
               <div
                 key={q.key}
@@ -176,20 +172,15 @@ export function StepCondition({ data, onUpdate }: Props) {
                 {flagged && (
                   <div className="mt-2.5 rounded-lg border border-amber-200 bg-white p-2.5">
                     <Field
-                      label={`Clause 32 — explain item ${q.id}`}
-                      required
-                      hint={needsComment ? undefined : 'This goes into the lease disclosure, referenced by item number'}
+                      label={`Add details for item ${q.id}`}
+                      hint="Optional — included in the lease disclosure, referenced by item number"
                     >
                       <TextArea
                         value={details[q.key]?.comment || ''}
                         onChange={(e) => setDetail(q.key, { comment: e.target.value })}
                         placeholder="e.g. Geyser drips slightly from the pressure valve; plumber quoted for a seal kit."
-                        className={needsComment ? 'border-rose-300 focus:border-rose-400 focus:ring-rose-100' : ''}
                       />
                     </Field>
-                    {needsComment && (
-                      <p className="mt-1.5 text-[11.5px] font-medium text-rose-500">A short explanation is required for anything you flag “Yes”.</p>
-                    )}
                   </div>
                 )}
               </div>
@@ -211,13 +202,6 @@ export function StepCondition({ data, onUpdate }: Props) {
           />
         </Field>
       </Card>
-
-      {flaggedMissingComment.length > 0 && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-[12.5px] text-rose-700">
-          {flaggedMissingComment.length} flagged item{flaggedMissingComment.length > 1 ? 's' : ''} still need
-          {flaggedMissingComment.length > 1 ? '' : 's'} an explanation before you can send the lease.
-        </div>
-      )}
     </div>
   );
 }

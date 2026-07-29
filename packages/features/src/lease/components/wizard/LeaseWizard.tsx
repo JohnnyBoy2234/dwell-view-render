@@ -78,15 +78,12 @@ export function LeaseWizard(props: LeaseWizardProps) {
     }
     if (s === 2) {
       const cr = (data.conditionReport || {}) as any;
-      const details = (data.conditionDetails || {}) as any;
       const items = CONDITION_QUESTIONS.filter((q: any) => !q.isYearsQuestion);
       const applicable = items.filter((q: any) => (q.requiresFeature ? !!(data as any)[q.requiresFeature] : true));
       const unanswered = applicable.filter((q: any) => !cr[q.key]);
       if (unanswered.length) {
         return `Answer all ${applicable.length} condition items — ${unanswered.length} still open. Tap "Mark all as No" for a clean property, then flag exceptions.`;
       }
-      const missingComment = applicable.filter((q: any) => cr[q.key] === 'yes' && !(details[q.key]?.comment || '').trim());
-      if (missingComment.length) return `Add an explanation for each item you flagged “Yes” (${missingComment.length} missing).`;
     }
     return null;
   };
