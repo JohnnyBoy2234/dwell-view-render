@@ -101,6 +101,7 @@ export function StepWhoWhere({ data, onUpdate, propertyLocked, onPickProperty }:
       <Expander
         title="Your details (landlord)"
         note="Pulled from your profile. Confirm or edit."
+        defaultOpen
       >
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Full name" required>
