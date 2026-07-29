@@ -78,10 +78,13 @@ async function renderInvoicePdf(inv: InvoiceData): Promise<Uint8Array> {
     year: 'numeric',
   });
   const invoiceNo = `${inv.billId.slice(0, 8).toUpperCase()}-${inv.period}`;
+  // Left column: invoice number + date. Right column: billing period. The
+  // property already appears under "To:" above, so it's not repeated here —
+  // repeating it on the same row as the invoice number made a long address
+  // collide with the invoice number in the middle of the page.
   text(`Invoice Number: ${invoiceNo}`, M, 660, 11, bold);
   text(`Date: ${issuedLabel}`, M, 645, 11);
-  rightText(`Property: ${inv.propertyName}`, 660, 11);
-  rightText(`Billing period: ${periodLabel}`, 645, 11);
+  rightText(`Billing period: ${periodLabel}`, 660, 11);
 
   // Line-item table — grey header band, hairline row dividers
   let y = 608;
