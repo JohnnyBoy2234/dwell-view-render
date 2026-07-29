@@ -485,7 +485,10 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         : 'Continue';
 
   return (
-    <Card className="max-w-4xl mx-auto">
+    <Card
+      className="max-w-4xl mx-auto border-2"
+      style={{ borderColor: applicationTheme.primary }}
+    >
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div>
