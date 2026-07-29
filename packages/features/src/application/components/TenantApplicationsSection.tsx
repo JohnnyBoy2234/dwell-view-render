@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@mzanzihomes/u
 import { cn } from '@mzanzihomes/common/lib/utils';
 import {
   AlertCircle, ChevronRight, FileText, Inbox, Lock, Plus, RefreshCw, Send,
-  Mail, Lightbulb, User, BadgeCheck, MessageCircle,
+  Mail, Lightbulb, User, BadgeCheck, MessageCircle, Sparkles,
 } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
@@ -429,18 +429,24 @@ export const TenantApplicationsSection = () => {
         <div className="relative z-10 max-w-[62%]">
           {hasInvite ? (
             <>
-              <span className="inline-block rounded-full bg-white/70 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide text-orange-700">
-                {activeInvites.length === 1 ? 'Invitation' : `${activeInvites.length} invitations`}
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide text-orange-700">
+                <Sparkles className="h-3 w-3" /> {activeInvites.length === 1 ? "You're invited" : `${activeInvites.length} invitations`}
               </span>
               <h2 className="mt-2 text-[23px] font-extrabold leading-tight text-slate-900">You've been invited to apply</h2>
-              <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">A landlord has invited you to submit a rental application. Review it to get started.</p>
+              <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">Fill in your application now — it only takes about 10 minutes.</p>
               <button
                 type="button"
-                onClick={() => changeTab('invitations')}
+                onClick={() => {
+                  const inv = activeInvites[0];
+                  if (!inv) return changeTab('invitations');
+                  const draft = draftByPropertyId.get(inv.propertyId);
+                  trackApplicationsEvent(user?.id, draft ? 'application_continue_clicked' : 'application_start_clicked', { source: 'hero_invite' });
+                  navigate(draft ? `/rental-application/${inv.propertyId}?landlord=${draft.landlord_id}` : inv.startPath);
+                }}
                 className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(249,115,22,0.8)] transition-transform active:scale-[0.97]"
                 style={{ background: ORANGE }}
               >
-                View invitation{activeInvites.length === 1 ? '' : 's'} →
+                Fill in the form now →
               </button>
             </>
           ) : (
@@ -523,10 +529,22 @@ export const TenantApplicationsSection = () => {
                       trackApplicationsEvent(user?.id, draft ? 'application_continue_clicked' : 'application_start_clicked', { source: 'invitation' });
                       navigate(draft ? `/rental-application/${item.propertyId}?landlord=${draft.landlord_id}` : item.startPath);
                     }}
-                    className="flex w-full items-center gap-3 rounded-[24px] bg-white p-4 text-left shadow-[0_16px_34px_-26px_rgba(20,50,90,0.5)] transition-transform active:scale-[0.99] disabled:opacity-70"
+                    className={cn(
+                      'flex w-full items-center gap-3 rounded-[24px] p-4 text-left transition-transform active:scale-[0.99] disabled:opacity-70',
+                      item.expired
+                        ? 'bg-white shadow-[0_16px_34px_-26px_rgba(20,50,90,0.5)]'
+                        : 'border-2 border-orange-300 bg-orange-50 shadow-[0_18px_38px_-24px_rgba(249,115,22,0.55)]'
+                    )}
                   >
-                    <IconTile icon={Mail} />
+                    <span className={cn('flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl', item.expired ? 'bg-slate-100 text-slate-400' : 'text-white')} style={item.expired ? undefined : { background: ORANGE }}>
+                      <Mail className="h-5 w-5" />
+                    </span>
                     <div className="min-w-0 flex-1">
+                      {!item.expired && (
+                        <span className="mb-0.5 inline-block rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-700">
+                          Invited to apply
+                        </span>
+                      )}
                       <p className="truncate text-[14.5px] font-bold text-slate-900">{item.propertyTitle}</p>
                       <p className="truncate text-[12.5px] text-slate-500">{dateLine}</p>
                     </div>
