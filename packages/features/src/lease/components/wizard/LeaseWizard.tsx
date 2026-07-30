@@ -82,7 +82,7 @@ export function LeaseWizard(props: LeaseWizardProps) {
       const applicable = items.filter((q: any) => (q.requiresFeature ? !!(data as any)[q.requiresFeature] : true));
       const unanswered = applicable.filter((q: any) => !cr[q.key]);
       if (unanswered.length) {
-        return `Answer all ${applicable.length} condition items — ${unanswered.length} still open. Tap "Mark all as No" for a clean property, then flag exceptions.`;
+        return `Answer all ${applicable.length} condition items — ${unanswered.length} still open. Tap "No issues on any" for a clean property, then flag exceptions.`;
       }
     }
     return null;

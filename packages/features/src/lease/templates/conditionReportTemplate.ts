@@ -206,40 +206,46 @@ export interface ConditionQuestion {
   question: string;
   requiresFeature?: 'hasPool' | 'hasAlarmSecurity';
   isYearsQuestion?: boolean;
-  // "neutral" statements are plain questions ("Do you possess the plans?"), not
-  // "I am aware of a fault" statements — so a "Yes" must NOT be coloured as a
-  // warning. Only the fault statements turn amber on "Yes".
-  neutral?: boolean;
+  // Which ANSWER (as phrased on screen) indicates a concern — drives colouring
+  // AND the mapping to the statutory stored value. The stored s-value always
+  // uses statutory polarity ('yes' = a concern/defect exists), so the signed
+  // PDF stays the exact §67 form. On-screen questions phrased as "is the good
+  // thing true?" set concern:'no' (a "No" is the concern, and Yes/No are
+  // inverted when stored). Plain factual questions set concern:'none'.
+  //   'yes'  (default) — "Yes" = concern; stored as-is.
+  //   'no'             — "No"  = concern; Yes/No inverted on store.
+  //   'none'           — neutral; no colour, stored as-is.
+  concern?: 'yes' | 'no' | 'none';
 }
 
 export const CONDITION_QUESTIONS: ConditionQuestion[] = [
-  { id: 1, key: 's1_electrical', question: 'I am aware of electrical faults/problems relating to the electrical installation or fitted accessories.' },
-  { id: 2, key: 's2_illegalElectrical', question: 'I am aware of illegal electrical extensions, disconnections or damages or inoperative fittings or permanent appliances/equipment (e.g. Stove, extractor, oven, air conditioner, heaters, ceiling fans or illegal extensions such as light fittings, water feature, pumps etc.)' },
-  { id: 3, key: 's3_geyser', question: 'I am aware of faults relating to the geyser (e.g. leaks, faulty seal kits, low geyser pressure)' },
-  { id: 4, key: 's4_drainage', question: 'I am aware of faults relating to the drainage installation (e.g. blocked drains, sewers, storm water pipes or gutters)' },
-  { id: 5, key: 's5_leakingTaps', question: 'I am aware of problems relating to leaking taps or ruptured pipes' },
-  { id: 6, key: 's6_missingKeys', question: 'I am aware of any missing keys to all outside doors' },
-  { id: 7, key: 's7_remoteControls', question: 'I am aware of remote controls not in working order for gate, garage door etc.' },
-  { id: 8, key: 's8_alarmSecurity', question: 'I am aware of faults relating to the alarm, beams, burglar bars and/or security gates', requiresFeature: 'hasAlarmSecurity' },
-  { id: 9, key: 's9_pool', question: 'I am aware of faults relating to the pool, equipment, piping and pump (incl. cracks, leaks and general operation of equipment)', requiresFeature: 'hasPool' },
-  { id: 10, key: 's10_poolRepairs', question: 'Have there been any recent repairs to any of the items specified in item 9?', requiresFeature: 'hasPool', neutral: true },
-  { id: 11, key: 's11_braaiFireplace', question: 'I am aware of faults relating to the braai, fireplace or chimney' },
-  { id: 12, key: 's12_blindsCurtains', question: 'I am aware of faults relating to the blinds or curtain rails' },
-  { id: 13, key: 's13_dampProblems', question: 'I am aware of damp problems in any of the buildings (e.g. rising or lateral damp)' },
-  { id: 14, key: 's14_roofLeaks', question: 'I am aware of roof leaks of any kind' },
-  { id: 15, key: 's15_crackedWindows', question: 'I am aware of any cracked or broken windows' },
-  { id: 16, key: 's16_bathsBasins', question: 'I am aware of any cracks, leaks or problems with baths, basins, toilets, cisterns or showers' },
-  { id: 17, key: 's17_floorTiles', question: 'I am aware of any cracked or broken floor tiles or damage to wood/laminated floorings' },
-  { id: 18, key: 's18_structuralDefects', question: 'I am aware of any structural defects (e.g. Cracks in walls, floor slab or any settlement of any kind)' },
-  { id: 19, key: 's19_carpets', question: 'I am aware of any burns, stains, tears or badly worn areas relating to the fitted carpets' },
-  { id: 20, key: 's20_builtInCupboards', question: 'I am aware of any faults to built-in cupboards' },
-  { id: 21, key: 's21_doorHandles', question: 'I am aware of any faults to any door handles and window catches' },
-  { id: 22, key: 's22_boundaryFence', question: 'I am aware of any discrepancy between the physical position of the present boundary fence/walls and the true boundary of the Property' },
-  { id: 23, key: 's23_buildingRestrictions', question: 'I am aware of any building restrictions or registered servitudes on the property' },
-  { id: 24, key: 's24_buildingPlans', question: 'I am aware of any discrepancy between any building improvements and solid roofed areas (e.g. carports) and the approved building plans' },
-  { id: 25, key: 's25_approvedPlans', question: 'Do you possess copies of the approved building plans?', neutral: true },
-  { id: 26, key: 's26_otherDefects', question: 'I am aware of any other defects' },
-  { id: 27, key: 's27_yearsResided', question: 'I have resided in the property for approximately how many years?', isYearsQuestion: true },
-  { id: 28, key: 's28_existingLease', question: 'The Property is subject to a lease / has been rented', neutral: true },
-  { id: 29, key: 's29_limitedKnowledge', question: 'I have rented out the property and have limited or no knowledge of the condition of the property' },
+  { id: 1, key: 's1_electrical', question: 'Are there any known concerns regarding the electrical installation or fitted electrical accessories?' },
+  { id: 2, key: 's2_illegalElectrical', question: 'Are there any known alterations, extensions, disconnected fittings or electrical equipment that may require inspection, repair or confirmation of compliance?' },
+  { id: 3, key: 's3_geyser', question: 'Are there any known concerns relating to the geyser, such as leaks, pressure issues, salt deposits or other maintenance needs?' },
+  { id: 4, key: 's4_drainage', question: 'Are there any known drainage concerns, including blocked drains, sewer lines, stormwater pipes or gutters?' },
+  { id: 5, key: 's5_leakingTaps', question: 'Are there any known leaking taps, pipes or plumbing components requiring attention?' },
+  { id: 6, key: 's6_missingKeys', question: 'Are all keys for the external doors currently available?', concern: 'no' },
+  { id: 7, key: 's7_remoteControls', question: 'Are the remote controls for gates, garage doors or similar access systems functioning correctly?', concern: 'no' },
+  { id: 8, key: 's8_alarmSecurity', question: 'Are there any known concerns relating to the alarm system, beams, burglar bars or security gates?', requiresFeature: 'hasAlarmSecurity' },
+  { id: 9, key: 's9_pool', question: 'Are there any known maintenance concerns relating to the swimming pool, pool equipment, piping or pump?', requiresFeature: 'hasPool' },
+  { id: 10, key: 's10_poolRepairs', question: 'Have any recent repairs or maintenance work been carried out on the swimming pool or related equipment?', requiresFeature: 'hasPool', concern: 'none' },
+  { id: 11, key: 's11_braaiFireplace', question: 'Are there any known concerns relating to the braai, fireplace or chimney?' },
+  { id: 12, key: 's12_blindsCurtains', question: 'Are there any known concerns relating to blinds, curtain rails or similar fittings?' },
+  { id: 13, key: 's13_dampProblems', question: 'Is there any known damp or moisture-related condition in any part of the property?' },
+  { id: 14, key: 's14_roofLeaks', question: 'Are there any known roof leaks or areas that may require attention?' },
+  { id: 15, key: 's15_crackedWindows', question: 'Are there any cracked, damaged or broken windows?' },
+  { id: 16, key: 's16_bathsBasins', question: 'Are there any known concerns relating to baths, basins, toilets, cisterns or showers?' },
+  { id: 17, key: 's17_floorTiles', question: 'Are there any cracked or damaged floor tiles, or any known damage to wooden or laminated flooring?' },
+  { id: 18, key: 's18_structuralDefects', question: 'Are there any known structural concerns, such as cracks in walls or floors, or signs of settlement?' },
+  { id: 19, key: 's19_carpets', question: 'Are there any burns, stains, tears or areas of significant wear on the fitted carpets?' },
+  { id: 20, key: 's20_builtInCupboards', question: 'Are there any known concerns relating to the built-in cupboards?' },
+  { id: 21, key: 's21_doorHandles', question: 'Are there any known concerns relating to door handles, locks, catches or window fittings?' },
+  { id: 22, key: 's22_boundaryFence', question: 'Is the current position of the boundary fence or wall consistent with the recognised boundary of the property?', concern: 'no' },
+  { id: 23, key: 's23_buildingRestrictions', question: 'Are there any known building restrictions, title conditions or registered servitudes affecting the property?' },
+  { id: 24, key: 's24_buildingPlans', question: 'Are there any known differences between the existing buildings or covered structures and the approved building plans?' },
+  { id: 25, key: 's25_approvedPlans', question: 'Are copies of the approved building plans available?', concern: 'none' },
+  { id: 26, key: 's26_otherDefects', question: 'Are there any other property conditions or matters that should be disclosed?' },
+  { id: 27, key: 's27_yearsResided', question: 'Approximately how long have you lived in or personally occupied the property?', isYearsQuestion: true },
+  { id: 28, key: 's28_existingLease', question: 'Is the property currently subject to a lease, or has it previously been rented? Please provide the relevant dates where applicable.', concern: 'none' },
+  { id: 29, key: 's29_limitedKnowledge', question: 'Where the property has previously been rented out, do you have sufficient knowledge of its current condition to complete this report?', concern: 'no' },
 ];

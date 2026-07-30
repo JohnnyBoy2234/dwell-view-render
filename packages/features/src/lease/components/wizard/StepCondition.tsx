@@ -30,6 +30,14 @@ export function StepCondition({ data, onUpdate }: Props) {
     onUpdate({ conditionReport: { ...cr, ...patch } });
   const setAnswer = (key: string, val: string) => setAnswers({ [key]: val });
 
+  // Stored s-values stay in statutory polarity ('yes' = a concern exists) so the
+  // signed PDF remains the exact §67 form. Questions phrased as "is the good
+  // thing true?" (concern:'no') invert Yes/No between what's shown and what's
+  // stored; everything else maps 1:1.
+  const invert = (v: string) => (v === 'yes' ? 'no' : v === 'no' ? 'yes' : v);
+  const toStore = (q: any, disp: string) => (q.concern === 'no' ? invert(disp) : disp);
+  const toDisp = (q: any, stored: string) => (q.concern === 'no' ? invert(stored) : stored);
+
   // A property with no pool/alarm can't have a condition to disclose there —
   // default those statements to N/A (objectively correct, not a certification)
   // so only the genuinely-relevant items remain for the landlord to answer.
@@ -74,7 +82,7 @@ export function StepCondition({ data, onUpdate }: Props) {
           Answer every statement <span className="font-semibold text-slate-600">Yes</span>,{' '}
           <span className="font-semibold text-slate-600">No</span> or{' '}
           <span className="font-semibold text-slate-600">N/A</span>. If a property is in good order, tap{' '}
-          <span className="font-semibold text-slate-600">Mark all as No</span> and then flag only the exceptions.
+          <span className="font-semibold text-slate-600">No issues on any</span> and then flag only the exceptions.
         </p>
 
         {/* Progress + bulk action */}
@@ -100,7 +108,7 @@ export function StepCondition({ data, onUpdate }: Props) {
             onClick={markAllNo}
             className="rounded-full border border-emerald-300 bg-emerald-50 px-3.5 py-2 text-[12.5px] font-bold text-emerald-700 transition-colors hover:bg-emerald-100"
           >
-            Mark all as No
+            No issues on any
           </button>
         </div>
 
@@ -118,8 +126,11 @@ export function StepCondition({ data, onUpdate }: Props) {
         <div className="space-y-2">
           {items.map((q: any) => {
             const applicable = isApplicable(q);
-            const val = cr[q.key] || '';
-            const flagged = val === 'yes';
+            const stored = cr[q.key] || '';
+            // stored 'yes' = a concern exists (statutory polarity) — but neutral
+            // factual questions are never a "concern", so don't tint them.
+            const flagged = q.concern !== 'none' && stored === 'yes';
+            const val = toDisp(q, stored);
             return (
               <div
                 key={q.key}
@@ -139,8 +150,8 @@ export function StepCondition({ data, onUpdate }: Props) {
                 </div>
                 <ConditionToggle
                   value={val}
-                  polarity={q.neutral ? 'neutral' : 'fault'}
-                  onChange={(v) => setAnswer(q.key, v)}
+                  concern={q.concern || 'yes'}
+                  onChange={(v) => setAnswer(q.key, toStore(q, v))}
                   idBase={q.key}
                 />
               </div>
@@ -151,7 +162,7 @@ export function StepCondition({ data, onUpdate }: Props) {
 
       {/* Item 27 — years resided (statutory) */}
       <Card title="Occupancy" subtitle="Statutory disclosure item 27" icon={<ClipboardCheck className="h-4 w-4" />}>
-        <Field label="Approximately how many years have you resided in / owned the property?" hint="Optional — leave blank if not applicable">
+        <Field label="Approximately how long have you lived in or personally occupied the property?" hint="Optional — leave blank if not applicable">
           <TextInput
             type="number"
             min={0}

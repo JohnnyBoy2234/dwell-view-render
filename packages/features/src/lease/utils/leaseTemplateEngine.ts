@@ -77,7 +77,8 @@ export function buildClause32Comments(data: LeaseWizardData): string {
     if (!m) continue;
     const id = Number(m[1]);
     const comment = (details[key]?.comment || '').trim();
-    lines.push({ id, text: `Item ${id}: ${comment || '(no details provided)'}` });
+    if (!comment) continue; // only elaborate items the landlord actually commented on
+    lines.push({ id, text: `Item ${id}: ${comment}` });
   }
   lines.sort((a, b) => a.id - b.id);
   if (lines.length) return lines.map((l) => l.text).join('\n');
