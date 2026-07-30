@@ -75,15 +75,21 @@ export function StepCondition({ data, onUpdate }: Props) {
     <div className="space-y-4">
       <Card
         title="Property condition disclosure"
-        subtitle="Your statutory disclosure under the Property Practitioners Act §67"
         icon={<ClipboardCheck className="h-4 w-4" />}
       >
-        <p className="mb-3 rounded-xl bg-slate-50 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-slate-500">
-          Answer every statement <span className="font-semibold text-slate-600">Yes</span>,{' '}
-          <span className="font-semibold text-slate-600">No</span> or{' '}
-          <span className="font-semibold text-slate-600">N/A</span>. If a property is in good order, tap{' '}
-          <span className="font-semibold text-slate-600">No issues on any</span> and then flag only the exceptions.
-        </p>
+        <div className="mb-3 rounded-xl bg-slate-50 px-3.5 py-3 text-[12.5px] leading-relaxed text-slate-500">
+          <p>
+            This declaration is made in the utmost good faith, and the answers provided reflect a true and honest
+            appraisal of the property as I know it. I confirm that I am not aware of any material defects to the
+            property, the building or its accessories other than those disclosed below.
+          </p>
+          <p className="mt-2">
+            Please answer each statement <span className="font-semibold text-slate-600">Yes</span>,{' '}
+            <span className="font-semibold text-slate-600">No</span> or{' '}
+            <span className="font-semibold text-slate-600">N/A</span>. If the property is in good order, tap{' '}
+            <span className="font-semibold text-slate-600">No issues on any</span> and then flag only the exceptions.
+          </p>
+        </div>
 
         {/* Progress + bulk action */}
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
