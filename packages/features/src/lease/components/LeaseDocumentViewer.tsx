@@ -90,11 +90,21 @@ export function LeaseDocumentViewer({ contract }: LeaseDocumentViewerProps) {
   };
 
   const handleDownloadPDF = async () => {
+    const withTs = (u: string) => `${u}${u.includes('?') ? '&' : '?'}ts=${Date.now()}`;
     if (contract.pdf_url) {
-      const joiner = contract.pdf_url.includes('?') ? '&' : '?';
-      await downloadFileFromUrl(`${contract.pdf_url}${joiner}ts=${Date.now()}`, `lease-${contract.id}.pdf`);
-    } else {
-      handleGeneratePDF();
+      await downloadFileFromUrl(withTs(contract.pdf_url), `lease-${contract.id}.pdf`);
+      return;
+    }
+    // No PDF yet — generate it, then save the file (not just open it in a tab).
+    setGeneratingPDF(true);
+    try {
+      const pdfUrl = await generatePDF(contract.id);
+      if (pdfUrl) await downloadFileFromUrl(withTs(pdfUrl), `lease-${contract.id}.pdf`);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
+    } finally {
+      setGeneratingPDF(false);
     }
   };
 

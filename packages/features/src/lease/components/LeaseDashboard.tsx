@@ -3,7 +3,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Plus, FileText, Eye, Download, PenLine, Edit, MapPin, CalendarDays, User,
-  ChevronRight, MessageCircle, CheckCircle2,
+  ChevronRight, MessageCircle, CheckCircle2, Loader2,
 } from 'lucide-react';
 import { useLeaseContracts } from '../hooks/useLeaseContracts';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
@@ -113,10 +113,11 @@ interface LeaseDashboardProps {
 
 export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   const navigate = useNavigate();
-  const { contracts, loading } = useLeaseContracts(propertyId);
+  const { contracts, loading, generatePDF } = useLeaseContracts(propertyId);
   const { user, isLandlord } = useAuth();
   const [selectedContract, setSelectedContract] = useState<LeaseContract | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [tab, setTab] = useState<'all' | 'draft' | 'pending' | 'signed'>('all');
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -135,9 +136,22 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   const handleView = (c: LeaseContract) => setSelectedContract(c);
   const handleSign = (c: LeaseContract) => { setSelectedContract(c); setShowSignaturePad(true); };
   const handleEdit = (c: LeaseContract) => navigate(`/lease/builder/${c.id}`);
-  const handleDownload = (c: LeaseContract) => {
-    if ((c as any).pdf_url) downloadFileFromUrl((c as any).pdf_url, `${c.title || 'Lease-Agreement'}.pdf`);
-    else setSelectedContract(c); // open the viewer to generate/download the PDF
+  const handleDownload = async (c: LeaseContract) => {
+    const filename = `${c.title || 'Lease-Agreement'}.pdf`;
+    const withTs = (u: string) => `${u}${u.includes('?') ? '&' : '?'}ts=${Date.now()}`;
+    // Already has a stored PDF — save it straight away.
+    if ((c as any).pdf_url) {
+      await downloadFileFromUrl(withTs((c as any).pdf_url), filename);
+      return;
+    }
+    // No PDF yet — generate it, then save the file (rather than just opening it).
+    setDownloadingId(c.id);
+    try {
+      const url = await generatePDF(c.id);
+      if (url) await downloadFileFromUrl(withTs(url), filename);
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
   const heroAction = () => {
@@ -262,9 +276,12 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
                     <button
                       type="button"
                       onClick={() => handleDownload(c)}
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3.5 py-2 text-[13px] font-bold text-slate-600 transition-transform active:scale-95"
+                      disabled={downloadingId === c.id}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3.5 py-2 text-[13px] font-bold text-slate-600 transition-transform active:scale-95 disabled:opacity-60"
                     >
-                      <Download className="h-4 w-4" /> Download
+                      {downloadingId === c.id
+                        ? <><Loader2 className="h-4 w-4 animate-spin" /> Preparing…</>
+                        : <><Download className="h-4 w-4" /> Download</>}
                     </button>
                     {c.status === 'draft' && isLandlord && (
                       <button
