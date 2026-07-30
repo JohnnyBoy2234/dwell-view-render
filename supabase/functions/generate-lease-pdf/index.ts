@@ -764,12 +764,16 @@ function evaluateCondition(condition: string, d: any): boolean {
 }
 
 function processConditionals(template: string, d: any): string {
-  const conditionalRegex = /\[\[IF\s+([A-Z_]+)\s*\]\]([\s\S]*?)\[\[ENDIF\]\]/gi;
+  // Match the INNERMOST [[IF]]…[[ENDIF]] (content contains no nested [[IF), and
+  // collapse from the inside out. This resolves nested blocks correctly even
+  // when an outer block is false — otherwise the outer [[ENDIF]] leaks into the
+  // document.
+  const innermost = /\[\[IF\s+([A-Z0-9_]+)\s*\]\]((?:(?!\[\[IF)[\s\S])*?)\[\[ENDIF\]\]/gi;
   let result = template;
   let previousResult = '';
   while (result !== previousResult) {
     previousResult = result;
-    result = result.replace(conditionalRegex, (_match, condition, content) =>
+    result = result.replace(innermost, (_match, condition, content) =>
       evaluateCondition(condition, d) ? content : ''
     );
   }

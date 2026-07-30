@@ -186,27 +186,22 @@ export function evaluateCondition(condition: string, data: LeaseWizardData): boo
  * Handles [[IF CONDITION]]...[[ENDIF]] patterns, including nested ones
  */
 function processConditionals(template: string, data: LeaseWizardData): string {
-  // Regex to match [[IF CONDITION]] ... [[ENDIF]] blocks (non-greedy, innermost first)
-  const conditionalRegex = /\[\[IF\s+([A-Z_]+)\s*\]\]([\s\S]*?)\[\[ENDIF\]\]/gi;
-  
+  // Match the INNERMOST [[IF]]…[[ENDIF]] (its content contains no nested [[IF)
+  // and collapse from the inside out. A non-greedy `[\s\S]*?` matches the FIRST
+  // [[ENDIF]], which mis-pairs nested blocks and leaks the outer [[ENDIF]] when
+  // the outer condition is false — this innermost-first pass fixes that.
+  const innermost = /\[\[IF\s+([A-Z0-9_]+)\s*\]\]((?:(?!\[\[IF)[\s\S])*?)\[\[ENDIF\]\]/gi;
+
   let result = template;
   let previousResult = '';
-  
-  // Keep processing until no more changes (handles nested conditionals)
+
   while (result !== previousResult) {
     previousResult = result;
-    result = result.replace(conditionalRegex, (match, condition, content) => {
-      const conditionMet = evaluateCondition(condition, data);
-      if (conditionMet) {
-        // Keep the content, but it might have more conditionals to process
-        return content;
-      } else {
-        // Remove the entire block
-        return '';
-      }
-    });
+    result = result.replace(innermost, (_match, condition, content) =>
+      evaluateCondition(condition, data) ? content : ''
+    );
   }
-  
+
   return result;
 }
 
@@ -214,11 +209,13 @@ function processConditionals(template: string, data: LeaseWizardData): string {
  * Replace all {{VARIABLE_NAME}} placeholders with actual values
  */
 function replaceVariables(template: string, variables: Record<string, string>): string {
-  return template.replace(/\{\{([A-Z_]+)\}\}/g, (match, variableName) => {
+  // [A-Z0-9_] so numbered variables (S1_ANSWER, S27_YEARS, CLAUSE_32_COMMENTS)
+  // are matched. Never leave a raw {{PLACEHOLDER}} in the document — blank it.
+  return template.replace(/\{\{([A-Z0-9_]+)\}\}/g, (_match, variableName) => {
     const value = variables[variableName];
     if (value === undefined) {
       console.warn(`Unknown variable: ${variableName}`);
-      return match; // Keep the placeholder if variable not found
+      return '';
     }
     return value;
   });
