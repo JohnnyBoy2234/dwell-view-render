@@ -1043,6 +1043,40 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     y -= lineGap;
   }
 
+  // Resolve the place a party signed from the captured signing data — best
+  // effort, so the "Signed at ___" line reads like a real place. Tries the
+  // signer's IP, then browser geolocation; short timeout + graceful fallback so
+  // it never blocks or breaks PDF generation. Cached per IP within this render.
+  const placeCache = new Map<string, string>();
+  async function fetchJson(url: string): Promise<any | null> {
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 3500);
+      const res = await fetch(url, { signal: ctrl.signal });
+      clearTimeout(t);
+      return res.ok ? await res.json() : null;
+    } catch {
+      return null;
+    }
+  }
+  async function resolveSignedPlace(sigData: any): Promise<string> {
+    const ip = sigData?.ip_address || sigData?.ipAddress;
+    if (ip && ip !== 'unknown') {
+      if (placeCache.has(ip)) return placeCache.get(ip)!;
+      // ipwho.is is keyless and works server-side (ipapi.co blocks datacenter IPs).
+      const j = await fetchJson(`https://ipwho.is/${encodeURIComponent(ip)}`);
+      const place = j?.success ? [j?.city, j?.region].filter(Boolean).join(', ') : '';
+      if (place) { placeCache.set(ip, place); return place; }
+    }
+    const geo = sigData?.geolocation;
+    if (geo?.latitude && geo?.longitude) {
+      const j = await fetchJson(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${geo.latitude}&longitude=${geo.longitude}&localityLanguage=en`);
+      const place = [j?.city || j?.locality, j?.principalSubdivision].filter(Boolean).join(', ');
+      if (place) return place;
+    }
+    return '';
+  }
+
   // Signatures drawn in place at each party's "Signature:" line, with the
   // invisible anchor DocuSign uses to place its signing tab at the same spot.
   // `lineY` is the baseline of the "Signature: ____" row so the ink sits ON
@@ -1061,11 +1095,17 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     });
     const img = await embedSignatureFromDataUrl(sigData?.signature_image_url || sigData?.signatureImageUrl || null);
     if (img) {
-      const targetHeight = 24;
-      const targetWidth = img.width / img.height * targetHeight;
+      // Larger, natural signature sitting on the signature line.
+      let targetHeight = 42;
+      let targetWidth = (img.width / img.height) * targetHeight;
+      const maxWidth = 230;
+      if (targetWidth > maxWidth) {
+        targetWidth = maxWidth;
+        targetHeight = (img.height / img.width) * maxWidth;
+      }
       page.drawImage(img, {
-        x: margin + 75,
-        y: lineY - 3,
+        x: margin + 80,
+        y: lineY - 4,
         width: targetWidth,
         height: targetHeight
       });
@@ -1162,12 +1202,15 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       // signing date once the party in context has signed.
       if (/^Signed at .*day of/.test(line)) {
         const isLandlordCtx = signatureContext !== 'tenant';
+        const sigData = isLandlordCtx ? contract?.landlord_signature_data : contract?.tenant_signature_data;
         const signedAt = isLandlordCtx ? contract?.landlord_signed_at : contract?.tenant_signed_at;
         if (signedAt) {
           const dt = new Date(signedAt);
           const day = getOrdinalSuffix(dt.getDate());
           const month = dt.toLocaleDateString('en-ZA', { month: 'long' });
-          drawWrapped(`Signed electronically via MzanziHomes on this ${day} day of ${month} ${dt.getFullYear()}`);
+          const place = await resolveSignedPlace(sigData);
+          const where = place || 'online (electronic signature)';
+          drawWrapped(`Signed at ${where} on this ${day} day of ${month} ${dt.getFullYear()}.`);
         } else {
           drawWrapped(line);
         }
