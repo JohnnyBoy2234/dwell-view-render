@@ -879,13 +879,7 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       height: headerHeight,
       color: colors.brand
     });
-    p.drawText("MzanziHomes", {
-      x: margin,
-      y: bandY + headerHeight / 2 - 6,
-      size: 15,
-      font: fontBold,
-      color: rgb(1, 1, 1)
-    });
+    // Brand wordmark intentionally omitted — keep the blue band only.
     if (brandLogo) {
       const logoHeight = 24;
       const logoWidth = brandLogo.width / brandLogo.height * logoHeight;
@@ -906,7 +900,7 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       font: fontBody,
       color: colors.muted
     });
-    p.drawText(`Agreement of Lease (Residential) — MzanziHomes`, {
+    p.drawText(`Agreement of Lease (Residential)`, {
       x: margin,
       y: margin - 12,
       size: sizes.small,
