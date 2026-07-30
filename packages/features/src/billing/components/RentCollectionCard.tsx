@@ -20,7 +20,22 @@ import { Landmark, Loader2 } from 'lucide-react';
 // bank list via `list-paystack-banks` to obtain a settlement bank CODE, then
 // submit { bankName: <code>, accountNumber, accountHolderName } to
 // `create-paystack-subaccount` (which passes bankName as Paystack settlement_bank).
-export function RentCollectionCard() {
+interface RentCollectionCardProps {
+  // Prefill from banking captured elsewhere (e.g. the lease wizard) so the
+  // landlord just reviews and confirms rather than re-typing.
+  initialBankCode?: string;
+  initialAccountHolder?: string;
+  initialAccountNumber?: string;
+  // Called once the payout subaccount is created successfully.
+  onDone?: () => void;
+}
+
+export function RentCollectionCard({
+  initialBankCode = '',
+  initialAccountHolder = '',
+  initialAccountNumber = '',
+  onDone,
+}: RentCollectionCardProps = {}) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -49,9 +64,9 @@ export function RentCollectionCard() {
     },
   });
 
-  const [bankCode, setBankCode] = useState('');
-  const [accountHolder, setAccountHolder] = useState('');
-  const [accountNumber, setAccountNumber] = useState('');
+  const [bankCode, setBankCode] = useState(initialBankCode);
+  const [accountHolder, setAccountHolder] = useState(initialAccountHolder);
+  const [accountNumber, setAccountNumber] = useState(initialAccountNumber);
   const [submitting, setSubmitting] = useState(false);
 
   const canSubmit = !!bankCode && !!accountHolder.trim() && !!accountNumber.trim() && !submitting;
@@ -72,6 +87,7 @@ export function RentCollectionCard() {
 
       await queryClient.invalidateQueries({ queryKey: ['landlord-subaccount', user.id] });
       toast({ title: 'Rent collection active', description: 'Tenants can now pay rent in-app.' });
+      onDone?.();
     } catch (e: any) {
       toast({
         title: 'Could not set up rent collection',

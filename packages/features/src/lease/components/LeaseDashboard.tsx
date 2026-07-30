@@ -7,7 +7,9 @@ import {
 } from 'lucide-react';
 import { useLeaseContracts } from '../hooks/useLeaseContracts';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
+import { RentCollectionCard } from '../../billing/components/RentCollectionCard';
 import { LeaseDocumentViewer } from './LeaseDocumentViewer';
 import { LeaseSignaturePad } from './LeaseSignaturePad';
 import { CreateLeaseModal } from './CreateLeaseModal';
@@ -118,6 +120,7 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   const [selectedContract, setSelectedContract] = useState<LeaseContract | null>(null);
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [rentSetupContract, setRentSetupContract] = useState<LeaseContract | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [tab, setTab] = useState<'all' | 'draft' | 'pending' | 'signed'>('all');
   const listRef = useRef<HTMLDivElement | null>(null);
@@ -157,6 +160,27 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   const heroAction = () => {
     if (isLandlord) setShowCreateModal(true);
     else listRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  // After signing: when the landlord's countersignature completes the lease and
+  // they don't yet have a payout subaccount, prompt them to set up rent
+  // collection (prefilled from the wizard's banking). Otherwise just refresh.
+  const handleSigned = async (result: { status?: string } | undefined, contract: LeaseContract | null) => {
+    setShowSignaturePad(false);
+    const fullySigned = result?.status === 'signed';
+    if (isLandlord && fullySigned && user && contract) {
+      try {
+        const { data: prof } = await supabase
+          .from('profiles').select('paystack_subaccount_code').eq('user_id', user.id).maybeSingle();
+        if (!prof?.paystack_subaccount_code) {
+          setSelectedContract(null);
+          setRentSetupContract(contract);
+          return; // rent-collection dialog handles the refresh on close
+        }
+      } catch { /* fall through to refresh */ }
+    }
+    setSelectedContract(null);
+    window.location.reload();
   };
 
   const TABS = [
@@ -352,12 +376,35 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
           contract={selectedContract}
           open={showSignaturePad}
           onOpenChange={setShowSignaturePad}
-          onSigned={() => {
-            setShowSignaturePad(false);
-            setSelectedContract(null);
-            window.location.reload();
-          }}
+          onSigned={(result) => handleSigned(result, selectedContract)}
         />
+      )}
+
+      {/* Rent-collection setup after both parties sign (landlord, no payout account yet) */}
+      {rentSetupContract && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md">
+            <div className="mb-3 rounded-2xl bg-white p-4 text-center shadow-lg">
+              <p className="text-[15px] font-extrabold text-slate-900">Lease signed 🎉</p>
+              <p className="mt-0.5 text-[13px] text-slate-500">
+                Set up rent collection so your tenant can pay rent in-app. Review your details and confirm.
+              </p>
+            </div>
+            <RentCollectionCard
+              initialBankCode={(rentSetupContract.contract_data as any)?.landlordBankCode || ''}
+              initialAccountHolder={(rentSetupContract.contract_data as any)?.landlordAccountHolder || (rentSetupContract.contract_data as any)?.landlordFullName || ''}
+              initialAccountNumber={(rentSetupContract.contract_data as any)?.landlordAccountNumber || ''}
+              onDone={() => { setRentSetupContract(null); window.location.reload(); }}
+            />
+            <button
+              type="button"
+              onClick={() => { setRentSetupContract(null); window.location.reload(); }}
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-slate-600"
+            >
+              Not now — I'll set this up later from “Rent collection” on my dashboard
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Create lease modal (landlord) */}

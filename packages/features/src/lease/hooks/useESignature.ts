@@ -45,8 +45,8 @@ export function useESignature() {
     consentAcknowledged: boolean,
     consentText: string,
     consentVersion: string
-  ): Promise<boolean> => {
-    if (!user) return false;
+  ): Promise<{ status?: string } | null> => {
+    if (!user) return null;
 
     try {
       setSigning(true);
@@ -107,11 +107,13 @@ export function useESignature() {
       if (error) throw error;
 
       toast.success('Contract signed successfully');
-      return true;
+      // Return the sign result (incl. status: 'signed' once both parties have
+      // signed) so the caller can trigger post-signing steps like rent-collection setup.
+      return (data as { status?: string }) ?? {};
     } catch (err) {
       console.error('Error capturing signature:', err);
       toast.error('Failed to sign contract');
-      return false;
+      return null;
     } finally {
       setSigning(false);
     }

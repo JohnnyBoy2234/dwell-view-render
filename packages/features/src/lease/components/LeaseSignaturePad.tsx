@@ -15,7 +15,7 @@ interface LeaseSignaturePadProps {
   contract: LeaseContract;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSigned?: () => void;
+  onSigned?: (result?: { status?: string }) => void;
 }
 
 export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: LeaseSignaturePadProps) {
@@ -135,17 +135,16 @@ export function LeaseSignaturePad({ contract, open, onOpenChange, onSigned }: Le
       const signatureDataUrl = canvas.toDataURL('image/png');
       
       // Capture the signature
-      const success = await captureSignature(
+      const result = await captureSignature(
         contract.id,
         signatureDataUrl,
         consentAcknowledged,
         CONSENT_REGISTRY.lease_esignature.text,
         CONSENT_REGISTRY.lease_esignature.version
       );
-      
-      if (success) {
-        toast.success('Contract signed successfully!');
-        onSigned?.();
+
+      if (result) {
+        onSigned?.(result);
         onOpenChange(false);
       }
     } catch (error) {

@@ -3,6 +3,7 @@ import React from 'react';
 import { Calendar, Banknote, AlertTriangle } from 'lucide-react';
 import type { LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { Card, Field, TextInput } from './wizardUi';
+import { RentCollectionFields } from './RentCollectionFields';
 
 interface Props {
   data: LeaseWizardData;
@@ -99,6 +100,9 @@ export function StepMoneyDates({ data, onUpdate }: Props) {
           </Field>
         </div>
       </Card>
+
+      {/* Optional rent-collection banking (not printed in the lease) */}
+      <RentCollectionFields data={data} onUpdate={onUpdate} />
     </div>
   );
 }
