@@ -190,6 +190,23 @@ export function useLeaseContracts(propertyId?: string) {
     }
   }, [user, propertyId]);
 
+  // Live lease updates: a contract created/signed/updated (by either party or a
+  // server function) refreshes the list without a manual reload. No column
+  // filter — RLS already limits realtime events to contracts this user is a
+  // party to.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`lease-contracts-live-${user.id}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'lease_contracts' },
+        () => { fetchContracts(); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, propertyId]);
+
   return {
     contracts,
     templates,

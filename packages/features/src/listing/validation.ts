@@ -109,7 +109,9 @@ export function buildPublishChecklist(
   }
 
   const descLen = (data.description ?? '').trim().length;
-  if (descLen >= DESCRIPTION_MIN && descLen < DESCRIPTION_SHORT_WARNING) {
+  if (descLen < DESCRIPTION_MIN) {
+    blockers.push(`Add a description (at least ${DESCRIPTION_MIN} characters) — tap "Write with AI" here to generate one from your details.`);
+  } else if (descLen < DESCRIPTION_SHORT_WARNING) {
     warnings.push('Your description is very short — longer descriptions get more enquiries.');
   }
 

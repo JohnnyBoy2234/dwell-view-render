@@ -1,10 +1,8 @@
-import * as React from 'react';
 import { Control, FieldErrors, UseFormWatch, UseFormSetValue } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { Button } from '@mzanzihomes/ui/components/button';
 import { AddressAutocomplete } from '@mzanzihomes/ui/components/address-autocomplete';
 import {
   Select,
@@ -13,17 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@mzanzihomes/ui/components/select';
-import { MapPin, FileText, Sparkles, Loader2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@mzanzihomes/ui/components/dialog';
-import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { supabase } from '@mzanzihomes/supabase/client';
+import { MapPin, FileText } from 'lucide-react';
 import { ListingFormData } from '../types';
 import { SA_PROVINCES, isValidPostalCode, descriptionWarning, DESCRIPTION_MIN } from '../validation';
 
@@ -60,52 +48,6 @@ const parsePlace = (place: any) => {
 };
 
 export default function LocationStep({ control, errors, watch, setValue, structuredAddress }: LocationStepProps) {
-  const { toast } = useToast();
-  const [generating, setGenerating] = React.useState(false);
-  // The "Write with AI" mini-interview dialog.
-  const [aiOpen, setAiOpen] = React.useState(false);
-  const [aiFeatures, setAiFeatures] = React.useState('');
-  const [aiArea, setAiArea] = React.useState('');
-
-  const handleGenerate = async (keyFeatures?: string) => {
-    if (!watch || !setValue) return;
-    const v: any = watch();
-    if (!v.property_type && !v.location) {
-      toast({ title: 'Add a type or location first', description: 'Pick a property type and location so the AI can write a good description.', variant: 'destructive' });
-      return;
-    }
-    setGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-property-description', {
-        body: {
-          property_type: v.property_type,
-          location: v.location,
-          bedrooms: v.bedrooms,
-          bathrooms: v.bathrooms,
-          parking_spaces: v.parking_spaces,
-          furnished: v.furnished,
-          pets_allowed: v.pets_allowed,
-          amenities: v.amenities,
-          price: v.price,
-          listing_type: v.listing_type,
-          key_features: keyFeatures ?? v.ai_key_features,
-        },
-      });
-      if (error) throw error;
-      if (data?.description) {
-        setValue('description', data.description, { shouldValidate: true, shouldDirty: true });
-        setAiOpen(false);
-        toast({ title: 'Description generated ✨', description: 'Feel free to tweak it before publishing.' });
-      } else {
-        throw new Error(data?.error || 'No description was returned.');
-      }
-    } catch (e: any) {
-      toast({ title: 'Could not generate', description: e?.message || 'Please try again in a moment.', variant: 'destructive' });
-    } finally {
-      setGenerating(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -257,39 +199,17 @@ export default function LocationStep({ control, errors, watch, setValue, structu
 
         {/* Description */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between gap-2">
-            <Label htmlFor="description" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Property Description *
-            </Label>
-            {watch && setValue && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setAiFeatures((watch('ai_key_features') as string) || '');
-                  setAiOpen(true);
-                }}
-                disabled={generating}
-                className="h-8 text-xs shrink-0"
-              >
-                <Sparkles className="h-3.5 w-3.5 mr-1" />
-                Write with AI
-              </Button>
-            )}
-          </div>
+          <Label htmlFor="description" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Property Description
+          </Label>
           <Controller
             name="description"
             control={control}
-            rules={{
-              required: 'Description is required',
-              minLength: { value: DESCRIPTION_MIN, message: `Description should be at least ${DESCRIPTION_MIN} characters` }
-            }}
             render={({ field }) => (
               <Textarea
                 {...field}
-                placeholder="Write your own description here, or tap Write with AI…"
+                placeholder="Write your own description here, or let AI write it for you on the final review step — once all your details are in, it knows exactly what to say…"
                 rows={6}
                 className="text-base resize-none"
               />
@@ -317,62 +237,6 @@ export default function LocationStep({ control, errors, watch, setValue, structu
         </div>
       </div>
 
-      {/* Write-with-AI mini interview: two quick questions, then generate. */}
-      <Dialog open={aiOpen} onOpenChange={(open) => { if (!generating) setAiOpen(open); }}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4" /> Write with AI
-            </DialogTitle>
-            <DialogDescription>
-              Answer two quick questions and the AI writes your description. Both are optional.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="ai-features">What makes your place special?</Label>
-              <Textarea
-                id="ai-features"
-                value={aiFeatures}
-                onChange={(e) => setAiFeatures(e.target.value)}
-                placeholder="Pool, mountain views, renovated kitchen, prepaid electricity, fibre…"
-                rows={3}
-                className="text-base resize-none"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="ai-area">Anything nearby worth mentioning?</Label>
-              <Input
-                id="ai-area"
-                value={aiArea}
-                onChange={(e) => setAiArea(e.target.value)}
-                placeholder="Close to schools, Gautrain, shopping centre…"
-                className="text-base"
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button type="button" variant="outline" disabled={generating} onClick={() => setAiOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              disabled={generating}
-              onClick={() => {
-                const combined = [
-                  aiFeatures.trim(),
-                  aiArea.trim() ? `Nearby/area: ${aiArea.trim()}` : '',
-                ].filter(Boolean).join('; ');
-                setValue?.('ai_key_features', combined, { shouldDirty: true });
-                void handleGenerate(combined);
-              }}
-            >
-              {generating ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1" />}
-              {generating ? 'Writing…' : 'Write description'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

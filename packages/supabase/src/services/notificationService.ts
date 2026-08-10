@@ -25,15 +25,25 @@ export class NotificationService {
   }
 
   static async createNotification(data: CreateNotificationData) {
+    // Route through the SECURITY DEFINER `create_notification` RPC instead of a
+    // direct insert. A direct `.insert().select()` runs INSERT ... RETURNING,
+    // and the RETURNING is re-checked against the SELECT policy
+    // (user_id = auth.uid()). When one user creates a notification for another
+    // (e.g. a landlord approving a tenant's request), that read fails with
+    // "new row violates row-level security policy". The RPC bypasses RLS and
+    // returns void, so cross-user notifications work.
+    const row = this.toRow(data);
     try {
-      const { data: notification, error } = await supabase
-        .from('notifications')
-        .insert([this.toRow(data)])
-        .select()
-        .single();
+      const { error } = await supabase.rpc('create_notification', {
+        _user_id: row.user_id,
+        _message: row.message,
+        _link_url: row.link_url,
+        _type: row.type,
+        _metadata: row.metadata ?? {},
+      });
 
       if (error) throw error;
-      return notification;
+      return row;
     } catch (error) {
       console.error('Error creating notification:', error);
       throw error;
@@ -45,13 +55,9 @@ export class NotificationService {
    */
   static async createBulkNotifications(notifications: CreateNotificationData[]) {
     try {
-      const { data, error } = await supabase
-        .from('notifications')
-        .insert(notifications.map((n) => this.toRow(n)))
-        .select();
-
-      if (error) throw error;
-      return data;
+      return await Promise.all(
+        notifications.map((n) => this.createNotification(n))
+      );
     } catch (error) {
       console.error('Error creating bulk notifications:', error);
       throw error;

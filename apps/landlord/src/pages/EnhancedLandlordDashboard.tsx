@@ -471,6 +471,52 @@ export default function EnhancedLandlordDashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [user]);
 
+  // Live updates for the remaining dashboard tabs — maintenance, tenants,
+  // payments, and the application leads on the Applications tab. These tables
+  // were only just added to the realtime publication, so before this they only
+  // refreshed on reload/tab-switch. Subscribe and refetch on change; RLS scopes
+  // every event to this landlord's own rows. (Applications and the requests
+  // badge have their own subscriptions elsewhere.)
+  useEffect(() => {
+    if (!user) return;
+    const uid = user.id;
+    const prop = selectedPropertyId || undefined;
+    const channel = supabase
+      .channel(`landlord-dashboard-live-${uid}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'maintenance_requests', filter: `landlord_id=eq.${uid}` },
+        () => { fetchMaintenanceRequests(prop); },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'tenancies', filter: `landlord_id=eq.${uid}` },
+        () => { fetchTenants(prop); fetchProperties(); },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'monthly_bills' },
+        () => {
+          (supabase.from('monthly_bills') as any)
+            .select('*')
+            .order('period', { ascending: false })
+            .then(({ data }: any) => setTenantBills(data || []));
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'conversations', filter: `landlord_id=eq.${uid}` },
+        () => { fetchGlobalApplicationLeads(prop); },
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'application_invites', filter: `landlord_id=eq.${uid}` },
+        () => { fetchGlobalApplicationLeads(prop); },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user, selectedPropertyId]);
+
   const fetchProperties = async () => {
     if (!user) return;
 

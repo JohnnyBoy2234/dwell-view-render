@@ -89,7 +89,7 @@ function SortableTile({
         type="button"
         variant="destructive"
         size="sm"
-        className="absolute top-2 right-2 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+        className="absolute top-2 right-2 h-7 w-7 p-0 shadow-md"
         onClick={(e) => {
           e.stopPropagation();
           onRemove();
@@ -103,7 +103,7 @@ function SortableTile({
           type="button"
           variant="secondary"
           size="sm"
-          className="absolute bottom-2 left-2 h-7 text-[11px] px-2 opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity"
+          className="absolute bottom-2 left-2 h-7 text-[11px] px-2 shadow-md"
           onClick={(e) => {
             e.stopPropagation();
             onMakeCover();

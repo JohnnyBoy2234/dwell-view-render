@@ -267,7 +267,9 @@ export default function ListProperty() {
         fieldsToValidate = ['property_type'];
         break;
       case 2:
-        fieldsToValidate = ['suburb', 'city', 'province', 'postal_code', 'description'];
+        // Description is optional here — it's written (or AI-generated with full
+        // context) on the final Review step, and enforced by the publish checklist.
+        fieldsToValidate = ['suburb', 'city', 'province', 'postal_code'];
         break;
       case 3:
         fieldsToValidate = ['bedrooms', 'bathrooms'];

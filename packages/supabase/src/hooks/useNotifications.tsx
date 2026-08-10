@@ -227,23 +227,21 @@ export const useNotifications = (filters?: NotificationFilters) => {
   // Create notification (for testing or admin use)
   const createNotification = useCallback(async (data: CreateNotificationData) => {
     try {
-      const { data: notification, error } = await supabase
-        .from('notifications')
-        .insert([data])
-        .select()
-        .single();
+      // Use the SECURITY DEFINER RPC so notifications created for another user
+      // don't trip the SELECT policy via INSERT ... RETURNING (which would fail
+      // with "new row violates row-level security policy"). The realtime
+      // subscription below refreshes the list, so no optimistic insert is needed.
+      const { error } = await supabase.rpc('create_notification', {
+        _user_id: data.user_id,
+        _message: data.message,
+        _link_url: (data as any).action_url ?? (data as any).link_url ?? null,
+        _type: data.type ?? 'general',
+        _metadata: data.metadata ?? {},
+      });
 
       if (error) throw error;
 
-      // Update local state if it's for the current user
-      if (notification.user_id === user?.id && isMountedRef.current) {
-        setNotifications(prev => [notification as Notification, ...prev]);
-        if (!notification.is_read) {
-          setUnreadCount(prev => prev + 1);
-        }
-      }
-
-      return notification;
+      return data;
     } catch (err) {
       console.error('Error creating notification:', err);
       if (isMountedRef.current) {

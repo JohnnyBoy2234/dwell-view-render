@@ -281,7 +281,9 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
                   ) : (
                     <Sparkles className="h-3 w-3 mr-1" />
                   )}
-                  {regenerate.generating ? 'Writing…' : 'Rewrite with AI'}
+                  {regenerate.generating
+                    ? 'Writing…'
+                    : (description?.trim() ? 'Rewrite with AI' : 'Write with AI')}
                 </Button>
               )}
               <EditBtn step={2} />
@@ -289,7 +291,13 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">{description}</p>
+          {description?.trim() ? (
+            <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">{description}</p>
+          ) : (
+            <p className="text-sm text-muted-foreground italic">
+              No description yet — tap "Write with AI" above to generate one from your details and photos, or edit to write your own.
+            </p>
+          )}
         </CardContent>
       </Card>
 

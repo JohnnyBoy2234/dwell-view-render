@@ -100,6 +100,13 @@ const collectionsHistoryOptions = [
   { value: 'yes', label: 'Yes' },
 ];
 
+// A red asterisk marking a required field. We keep the label text its normal
+// colour (via !text-foreground on the FormLabel) so an unfilled field is shown
+// by the red star + the message line, not by turning the whole label red.
+const RequiredMark = () => (
+  <span className="text-red-500 ml-0.5" aria-hidden="true">*</span>
+);
+
 export default function ViewingPreScreeningForm({
   open,
   onOpenChange,
@@ -162,7 +169,10 @@ export default function ViewingPreScreeningForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent
+        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Pre-Screening Information</DialogTitle>
           <DialogDescription>
@@ -187,7 +197,7 @@ export default function ViewingPreScreeningForm({
               name="moveInDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel>When are you hoping to move in?</FormLabel>
+                  <FormLabel className="!text-foreground">When are you hoping to move in?<RequiredMark /></FormLabel>
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -229,7 +239,7 @@ export default function ViewingPreScreeningForm({
               name="monthlyIncome"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>What is your monthly income?</FormLabel>
+                  <FormLabel className="!text-foreground">What is your monthly income?<RequiredMark /></FormLabel>
                   <FormControl>
                     <Input
                       placeholder="R 0"
@@ -251,7 +261,7 @@ export default function ViewingPreScreeningForm({
               name="evictionHistory"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Have you ever been evicted?</FormLabel>
+                  <FormLabel className="!text-foreground">Have you ever been evicted?<RequiredMark /></FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -266,7 +276,7 @@ export default function ViewingPreScreeningForm({
                           <FormControl>
                             <RadioGroupItem value={option.value} />
                           </FormControl>
-                          <FormLabel className="font-normal cursor-pointer">
+                          <FormLabel className="font-normal cursor-pointer !text-foreground">
                             {option.label}
                           </FormLabel>
                         </FormItem>
@@ -284,7 +294,7 @@ export default function ViewingPreScreeningForm({
               name="collectionsHistory"
               render={({ field }) => (
                 <FormItem className="space-y-3">
-                  <FormLabel>Have you ever been listed in the last 3 years for non-payment or had an account referred to collections or legal recovery?</FormLabel>
+                  <FormLabel className="!text-foreground">Have you ever been listed in the last 3 years for non-payment or had an account referred to collections or legal recovery?<RequiredMark /></FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -299,7 +309,7 @@ export default function ViewingPreScreeningForm({
                           <FormControl>
                             <RadioGroupItem value={option.value} />
                           </FormControl>
-                          <FormLabel className="font-normal cursor-pointer">
+                          <FormLabel className="font-normal cursor-pointer !text-foreground">
                             {option.label}
                           </FormLabel>
                         </FormItem>
@@ -317,7 +327,7 @@ export default function ViewingPreScreeningForm({
               name="message"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Your message to the landlord</FormLabel>
+                  <FormLabel className="!text-foreground">Your message to the landlord<RequiredMark /></FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Introduce yourself and express your interest..."
