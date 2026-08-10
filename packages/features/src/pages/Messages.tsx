@@ -15,7 +15,6 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { AddViewingSlotModal } from '@mzanzihomes/features/viewing';
-import { BookViewingDialog } from '@mzanzihomes/features/viewing';
 import { WhatsAppStyleThread } from '@mzanzihomes/features/messaging';
 import { ViewingProposalCard } from '@mzanzihomes/features/viewing';
 import { ViewingReminderHeader } from '@mzanzihomes/features/viewing';
@@ -192,7 +191,6 @@ export default function Messages() {
   const [hasProcessedUrlParam, setHasProcessedUrlParam] = useState(false);
   const [sentAutoMessage, setSentAutoMessage] = useState(false);
   const [showViewingModal, setShowViewingModal] = useState(false);
-  const [showBookingDialog, setShowBookingDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [scrollToProposalFn, setScrollToProposalFn] = useState<((id: string) => void) | null>(null);
 
@@ -483,7 +481,7 @@ export default function Messages() {
                   onClick={() =>
                     window.history.length > 1
                       ? navigate(-1)
-                      : navigate(isLandlord ? '/enhancedlandlorddashboard' : '/')
+                      : navigate(isLandlord ? '/landlord/dashboard' : '/')
                   }
                   className="flex items-center justify-center w-9 h-9 rounded-full border border-white/15 bg-white/10 text-white active:scale-95 transition"
                   aria-label="Back"
@@ -648,14 +646,6 @@ export default function Messages() {
             onSuccess={handleViewingModalSuccess}
           />
         )}
-        {selectedConversation && !isLandlordInConversation && (
-          <BookViewingDialog
-            propertyId={selectedConversation.property_id}
-            landlordId={selectedConversation.landlord_id}
-            open={showBookingDialog}
-            onOpenChange={setShowBookingDialog}
-          />
-        )}
       </>
     );
   }
@@ -737,7 +727,7 @@ export default function Messages() {
                     )}
                   </div>
                 </div>
-                {isLandlordInConversation ? (
+                {isLandlordInConversation && (
                   <Button
                     variant="default"
                     size="sm"
@@ -746,16 +736,6 @@ export default function Messages() {
                   >
                     <CalendarPlus className="h-4 w-4" />
                     Create Viewing
-                  </Button>
-                ) : (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => setShowBookingDialog(true)}
-                    className="shrink-0 gap-2"
-                  >
-                    <CalendarPlus className="h-4 w-4" />
-                    Request Viewing
                   </Button>
                 )}
               </div>
@@ -826,14 +806,6 @@ export default function Messages() {
           tenantId={selectedConversation.tenant_id}
           propertyTitle={selectedConversation.properties?.title}
           onSuccess={handleViewingModalSuccess}
-        />
-      )}
-      {selectedConversation && !isLandlordInConversation && (
-        <BookViewingDialog
-          propertyId={selectedConversation.property_id}
-          landlordId={selectedConversation.landlord_id}
-          open={showBookingDialog}
-          onOpenChange={setShowBookingDialog}
         />
       )}
     </div>

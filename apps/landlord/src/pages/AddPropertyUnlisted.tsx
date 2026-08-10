@@ -382,7 +382,7 @@ export default function AddPropertyUnlisted() {
         open={showSuccessDialog}
         onClose={() => {
           setShowSuccessDialog(false);
-          navigate('/enhancedlandlorddashboard');
+          navigate('/landlord/dashboard');
         }}
         icon="check"
         title="Property Added!"
@@ -402,7 +402,7 @@ export default function AddPropertyUnlisted() {
           label: "Invite Tenant",
           onClick: () => {
             setShowSuccessDialog(false);
-            navigate(newPropertyId ? `/enhancedlandlorddashboard/tenants?property=${newPropertyId}` : '/enhancedlandlorddashboard');
+            navigate(newPropertyId ? `/landlord/dashboard/tenants?property=${newPropertyId}` : '/landlord/dashboard');
           },
         }}
         showConfetti={true}

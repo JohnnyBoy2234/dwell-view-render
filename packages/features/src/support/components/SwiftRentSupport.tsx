@@ -100,7 +100,7 @@ export function MzanziHomesSupport() {
     if (isLandlord) {
       navigate('/landlord/dashboard');
     } else {
-      navigate(`/enhancedlandlorddashboard${propertyId ? '?property=' + propertyId : ''}`);
+      navigate(`/landlord/dashboard${propertyId ? '?property=' + propertyId : ''}`);
     }
   };
 

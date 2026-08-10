@@ -55,7 +55,7 @@ export default function PaymentFailed() {
 
   const handleReturnToDashboard = () => {
     if (isLandlord) {
-      navigate('/enhancedlandlorddashboard');
+      navigate('/landlord/dashboard');
     } else {
       navigate('/enhancedtenantdashboard');
     }

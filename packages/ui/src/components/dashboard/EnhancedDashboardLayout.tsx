@@ -45,7 +45,7 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
   const navigate = useNavigate();
 
   const { pathname } = useLocation();
-  const basePath = isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard';
+  const basePath = isLandlord ? '/landlord/dashboard' : '/tenant-dashboard';
   const activePath = currentTab || pathname;
 
   const pageConfig = getPageConfig(activePath, isLandlord);
@@ -70,23 +70,23 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
   const handleBackClick = () => {
     if (isLandlord) {
       if (title === 'Generate Invoice' || activePath.includes('tax-invoice')) {
-      navigate('/enhancedlandlorddashboard');
+      navigate('/landlord/dashboard');
         return;
       }
 
-      if (activePath === '/enhancedlandlorddashboard' && selectedPropertyId) {
+      if (activePath === '/landlord/dashboard' && selectedPropertyId) {
       onBackToProperties?.();
         return;
       }
 
-      if (activePath !== '/enhancedlandlorddashboard') {
+      if (activePath !== '/landlord/dashboard') {
       const params = selectedPropertyId ? `?property=${selectedPropertyId}` : '';
-      onTabChange?.('/enhancedlandlorddashboard');
-      navigate(`/enhancedlandlorddashboard${params}`);
+      onTabChange?.('/landlord/dashboard');
+      navigate(`/landlord/dashboard${params}`);
         return;
       }
 
-      navigate('/enhancedlandlorddashboard');
+      navigate('/landlord/dashboard');
     } else {
       // Tenants: behave like a browser back button — return to wherever they
       // came from, falling back to the configured hub on a fresh session.
@@ -101,7 +101,7 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
   };
 
   const isPropertySelection = !selectedPropertyId;
-  const isLandlordDashboardRoute = activePath.startsWith('/enhancedlandlorddashboard');
+  const isLandlordDashboardRoute = activePath.startsWith('/landlord/dashboard');
 
   return (
     <div

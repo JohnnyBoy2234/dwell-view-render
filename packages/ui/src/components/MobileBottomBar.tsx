@@ -53,7 +53,7 @@ export function MobileBottomBar() {
 
   const getDeskRoute = () => {
     if (!user) return '/auth';
-    return isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+    return isLandlord ? '/landlord/dashboard' : '/enhancedtenantdashboard';
   };
 
   const navItems: NavItem[] = isLandlord
@@ -76,7 +76,7 @@ export function MobileBottomBar() {
     if (item.path === '/') return p === '/';
     if (item.path === getDeskRoute()) {
       return (
-        p.startsWith('/enhancedlandlorddashboard') ||
+        p.startsWith('/landlord/dashboard') ||
         p.startsWith('/enhancedtenantdashboard') ||
         p.startsWith('/dashboard') ||
         p.startsWith('/tenant-dashboard') ||

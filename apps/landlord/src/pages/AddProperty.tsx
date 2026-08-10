@@ -221,7 +221,7 @@ export default function AddProperty() {
       });
 
       clearAutosave();
-      navigate("/enhancedlandlorddashboard");
+      navigate("/landlord/dashboard");
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -247,7 +247,7 @@ export default function AddProperty() {
         <div className="flex flex-col items-left gap-4 mb-8">
           <Button
             variant="outline"
-            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/enhancedlandlorddashboard"))}
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate("/landlord/dashboard"))}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
@@ -514,7 +514,7 @@ export default function AddProperty() {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/enhancedlandlorddashboard")}
+              onClick={() => navigate("/landlord/dashboard")}
             >
               Cancel
             </Button>

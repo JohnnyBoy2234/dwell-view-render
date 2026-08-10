@@ -220,7 +220,7 @@ export function TaxInvoiceGenerator() {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate('/enhancedlandlorddashboard');
+    navigate('/landlord/dashboard');
   };
 
   // Handle add income/expense from nav

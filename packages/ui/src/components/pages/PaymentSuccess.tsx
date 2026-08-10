@@ -351,7 +351,7 @@ export default function PaymentSuccess() {
   const handleReturnToDashboard = () => {
     if (isRentBill) flagRentPaid();
     if (isLandlord) {
-      navigate('/enhancedlandlorddashboard');
+      navigate('/landlord/dashboard');
     } else {
       navigate('/enhancedtenantdashboard');
     }

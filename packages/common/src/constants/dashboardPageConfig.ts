@@ -205,95 +205,95 @@ for (const [suffix, config] of Object.entries(TENANT_DASHBOARD_ROUTE_CONFIG)) {
 }
 
 export const LANDLORD_PAGE_CONFIG: Record<string, PageConfig> = {
-  '/enhancedlandlorddashboard': {
+  '/landlord/dashboard': {
     title: 'Management Tools',
     icon: Home,
     showSidebar: true,
     showBackButton: false,
   },
-  '/enhancedlandlorddashboard/properties': {
+  '/landlord/dashboard/properties': {
     title: 'Property Portfolio',
     icon: Building,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/applications': {
+  '/landlord/dashboard/applications': {
     title: 'Applications',
     icon: ClipboardCheck,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/leases': {
+  '/landlord/dashboard/leases': {
     title: 'Lease Management',
     icon: FileText,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/tenants': {
+  '/landlord/dashboard/tenants': {
     title: 'Tenants',
     icon: Users,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/payments': {
+  '/landlord/dashboard/payments': {
     title: 'Payments',
     icon: CreditCard,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/maintenance': {
+  '/landlord/dashboard/maintenance': {
     title: 'Maintenance',
     icon: Wrench,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/inventory': {
+  '/landlord/dashboard/inventory': {
     title: 'Inventory',
     icon: Package,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/condition-records': {
+  '/landlord/dashboard/condition-records': {
     title: 'Inspection List',
     icon: Camera,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/swiftbooks': {
+  '/landlord/dashboard/swiftbooks': {
     title: 'SwiftBooks',
     icon: BarChart3,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/tax-invoice': {
+  '/landlord/dashboard/tax-invoice': {
     title: 'SwiftBooks',
     icon: BarChart3,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/support': {
+  '/landlord/dashboard/support': {
     title: 'Support',
     icon: Headset,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
-  '/enhancedlandlorddashboard/profile': {
+  '/landlord/dashboard/profile': {
     title: 'Profile Settings',
     icon: Settings,
     showSidebar: false,
     showBackButton: true,
-    backPath: '/enhancedlandlorddashboard',
+    backPath: '/landlord/dashboard',
   },
 };
 
@@ -306,5 +306,5 @@ export const getPageConfig = (path: string, isLandlord: boolean): PageConfig => 
     return { title: 'Maintenance Ticket', icon: Wrench, showSidebar: false, showBackButton: true, backPath: '/tenant-dashboard/maintenance' };
   }
 
-  return { title: 'Dashboard', icon: Home, showSidebar: true, showBackButton: true, backPath: isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard' };
+  return { title: 'Dashboard', icon: Home, showSidebar: true, showBackButton: true, backPath: isLandlord ? '/landlord/dashboard' : '/tenant-dashboard' };
 };

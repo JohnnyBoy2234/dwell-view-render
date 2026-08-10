@@ -190,7 +190,7 @@ export function TenantRelations({ property }: TenantRelationsProps) {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => navigate('/enhancedlandlorddashboard/messages')}
+            onClick={() => navigate('/landlord/dashboard/messages')}
             className="border-ios-gray/20 hover:bg-ios-gray/5 rounded-ios"
           >
             View All
@@ -201,7 +201,7 @@ export function TenantRelations({ property }: TenantRelationsProps) {
             <div
               key={inquiry.id}
               className="p-3 bg-ios-gray/5 rounded-ios hover:bg-ios-gray/10 transition-colors cursor-pointer"
-              onClick={() => navigate('/enhancedlandlorddashboard/messages')}
+              onClick={() => navigate('/landlord/dashboard/messages')}
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -258,7 +258,7 @@ export function TenantRelations({ property }: TenantRelationsProps) {
           </Button>
           <Button
             variant="outline"
-            onClick={() => navigate('/enhancedlandlorddashboard/messages')}
+            onClick={() => navigate('/landlord/dashboard/messages')}
             className="border-ios-gray/20 hover:bg-ios-gray/5 rounded-ios h-auto p-3 flex flex-col items-center gap-2"
           >
             <Mail className="h-4 w-4 text-ios-green" />

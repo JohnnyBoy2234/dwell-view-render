@@ -9,7 +9,7 @@ export default function Applications() {
   useEffect(() => {
     // Redirect to appropriate dashboard based on user role
     if (isLandlord) {
-      navigate('/enhancedlandlorddashboard', { replace: true });
+      navigate('/landlord/dashboard', { replace: true });
     } else {
       navigate('/enhancedtenantdashboard', { replace: true });
     }

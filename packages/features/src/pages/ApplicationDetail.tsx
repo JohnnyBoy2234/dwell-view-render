@@ -93,7 +93,7 @@ export default function ApplicationDetail() {
   const [responses, setResponses] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
-  const dashboard = isLandlord ? '/enhancedlandlorddashboard' : '/enhancedtenantdashboard';
+  const dashboard = isLandlord ? '/landlord/dashboard' : '/enhancedtenantdashboard';
 
   const load = useCallback(async () => {
     if (!id || !user) return;

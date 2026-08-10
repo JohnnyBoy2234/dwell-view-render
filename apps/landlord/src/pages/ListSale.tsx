@@ -475,7 +475,7 @@ export default function ListSale() {
           open={showSuccessDialog}
           onClose={() => {
             setShowSuccessDialog(false);
-            navigate('/enhancedlandlorddashboard');
+            navigate('/landlord/dashboard');
           }}
           icon="home"
           title="Property Listed for Sale Successfully!"
@@ -489,7 +489,7 @@ export default function ListSale() {
             label: "View My Properties",
             onClick: () => {
               setShowSuccessDialog(false);
-              navigate('/enhancedlandlorddashboard');
+              navigate('/landlord/dashboard');
             }
           }}
           secondaryAction={{
@@ -511,7 +511,7 @@ export default function ListSale() {
               // Property is already saved as an unlisted draft; leave the wizard
               // so re-submitting can't create a duplicate.
               setPaywallPropertyId(null);
-              navigate('/enhancedlandlorddashboard');
+              navigate('/landlord/dashboard');
             }
           }}
           propertyId={paywallPropertyId}

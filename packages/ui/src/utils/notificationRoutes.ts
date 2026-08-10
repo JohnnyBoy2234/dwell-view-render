@@ -46,7 +46,7 @@ export const getNotificationTargetUrl = (
     redirect_url,
   } = metadata;
 
-  const landlordBase = '/enhancedlandlorddashboard';
+  const landlordBase = '/landlord/dashboard';
   const tenantBase = '/tenant-dashboard';
 
   // Helper: append ?property=xxx to a landlord path when we have propertyId
@@ -164,7 +164,7 @@ function isValidRoute(url: string, isLandlord: boolean): boolean {
   if (shared.some(p => p.test(path))) return true;
 
   if (isLandlord) {
-    return /^\/enhancedlandlorddashboard(\/(applications|maintenance|payments|leases|inventory|properties|profile|condition-records|swiftbooks|notifications))?$/.test(path);
+    return /^\/landlord\/dashboard(\/(applications|maintenance|payments|leases|inventory|properties|profile|condition-records|swiftbooks|notifications))?$/.test(path);
   }
   // Tenant dashboard base + its real sub-routes (note: proof-of-payment, not payments)
   return /^\/(tenant-dashboard|enhancedtenantdashboard)$/.test(path)
@@ -184,31 +184,31 @@ export const NotificationUrls = {
   maintenance: (ticketId: string) => `/maintenance/${ticketId}`,
   maintenanceDashboard: (isLandlord: boolean) =>
     isLandlord
-      ? '/enhancedlandlorddashboard/maintenance'
+      ? '/landlord/dashboard/maintenance'
       : '/tenant-dashboard/maintenance',
 
   viewing: (viewingId: string, isLandlord: boolean) =>
     isLandlord
-      ? `/enhancedlandlorddashboard/applications?tab=viewings&viewingId=${viewingId}`
+      ? `/landlord/dashboard/applications?tab=viewings&viewingId=${viewingId}`
       : `/tenant-dashboard/viewings?id=${viewingId}`,
   viewingList: (isLandlord: boolean) =>
     isLandlord
-      ? '/enhancedlandlorddashboard/applications?tab=viewings'
+      ? '/landlord/dashboard/applications?tab=viewings'
       : '/tenant-dashboard/viewings',
 
   inventory: (inventoryId: string, isLandlord: boolean) =>
     isLandlord
-      ? `/enhancedlandlorddashboard/inventory?id=${inventoryId}`
+      ? `/landlord/dashboard/inventory?id=${inventoryId}`
       : `/tenant-dashboard/inventory?id=${inventoryId}`,
 
   conditionRecord: (isLandlord: boolean) =>
     isLandlord
-      ? '/enhancedlandlorddashboard/condition-records'
+      ? '/landlord/dashboard/condition-records'
       : '/tenant-dashboard/condition-records',
 
   payment: (isLandlord: boolean) =>
     isLandlord
-      ? '/enhancedlandlorddashboard/payments'
+      ? '/landlord/dashboard/payments'
       : '/tenant-dashboard/payments',
 
   messages: (conversationId?: string) =>
@@ -218,5 +218,5 @@ export const NotificationUrls = {
   verifyId: () => '/verify-id',
 
   dashboard: (isLandlord: boolean) =>
-    isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard',
+    isLandlord ? '/landlord/dashboard' : '/tenant-dashboard',
 };

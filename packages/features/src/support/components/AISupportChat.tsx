@@ -22,7 +22,7 @@ const HIDDEN_ROUTE_PREFIXES = [
   '/application/',
   '/tenant/applications',
   '/tenant-dashboard/applications',
-  '/enhancedlandlorddashboard/applications',
+  '/landlord/dashboard/applications',
 ];
 const HIDDEN_ROUTE_PATTERNS = [
   /\/leases\/.+\/sign/,

@@ -222,7 +222,7 @@ export default function Notifications() {
                 onClick={() =>
                   window.history.length > 1
                     ? navigate(-1)
-                    : navigate(isLandlord ? '/enhancedlandlorddashboard' : '/tenant-dashboard')
+                    : navigate(isLandlord ? '/landlord/dashboard' : '/tenant-dashboard')
                 }
                 aria-label="Back"
                 className="mt-0.5 w-9 h-9 rounded-full flex items-center justify-center text-foreground/70 hover:text-foreground hover:bg-muted transition-colors"

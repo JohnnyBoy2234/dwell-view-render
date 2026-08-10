@@ -250,10 +250,10 @@ export default function EnhancedLandlordDashboard() {
   const [currentTab, setCurrentTab] = useState(() => {
     // Initialize currentTab from the current URL path
     const path = location.pathname;
-    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
+    if (path !== '/landlord/dashboard' && path.startsWith('/landlord/dashboard')) {
       return path;
     }
-    return '/enhancedlandlorddashboard';
+    return '/landlord/dashboard';
   });
   const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRequest[]>([]);
   const [loadingMaintenance, setLoadingMaintenance] = useState(false);
@@ -331,7 +331,7 @@ export default function EnhancedLandlordDashboard() {
     
     // Sync currentTab with the current URL path
     const path = location.pathname;
-    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
+    if (path !== '/landlord/dashboard' && path.startsWith('/landlord/dashboard')) {
       setCurrentTab(path);
     }
 
@@ -355,7 +355,7 @@ export default function EnhancedLandlordDashboard() {
     const path = location.pathname;
     console.log('[Dashboard] Current path:', path, 'Current tab:', currentTab);
 
-    if (path !== '/enhancedlandlorddashboard' && path.startsWith('/enhancedlandlorddashboard')) {
+    if (path !== '/landlord/dashboard' && path.startsWith('/landlord/dashboard')) {
       if (currentTab !== path) {
         console.log('[Dashboard] Setting current tab to:', path);
         setCurrentTab(path);
@@ -365,7 +365,7 @@ export default function EnhancedLandlordDashboard() {
 
   // Add a useEffect to handle tab-specific data fetching when currentTab changes
   useEffect(() => {
-    if (currentTab === '/enhancedlandlorddashboard/maintenance') {
+    if (currentTab === '/landlord/dashboard/maintenance') {
       try {
         fetchMaintenanceRequests();
       } catch (error) {
@@ -373,7 +373,7 @@ export default function EnhancedLandlordDashboard() {
         // Maintenance will show sample data from the function
       }
     }
-    if (currentTab === '/enhancedlandlorddashboard/swiftbooks') {
+    if (currentTab === '/landlord/dashboard/swiftbooks') {
       try {
         fetchLandlordSettings();
         fetchAdditionalCosts();
@@ -383,10 +383,10 @@ export default function EnhancedLandlordDashboard() {
         console.log('Error loading reports data:', error);
       }
     }
-    if (currentTab === '/enhancedlandlorddashboard/inventory') {
+    if (currentTab === '/landlord/dashboard/inventory') {
       void fetchLandlordInventory(selectedPropertyId || undefined);
     }
-    if (currentTab === '/enhancedlandlorddashboard/payments') {
+    if (currentTab === '/landlord/dashboard/payments') {
       (supabase.from('monthly_bills') as any)
         .select('*')
         .order('period', { ascending: false })
@@ -1008,9 +1008,9 @@ export default function EnhancedLandlordDashboard() {
 
   const handleSelectProperty = (propertyId: string) => {
     setSelectedPropertyId(propertyId);
-    setCurrentTab('/enhancedlandlorddashboard');
+    setCurrentTab('/landlord/dashboard');
     setSearchParams({ property: propertyId });
-    navigate(`/enhancedlandlorddashboard?property=${propertyId}`);
+    navigate(`/landlord/dashboard?property=${propertyId}`);
     // Refetch data for the selected property
     fetchTenants(propertyId);
     fetchMaintenanceRequests(propertyId);
@@ -1028,7 +1028,7 @@ export default function EnhancedLandlordDashboard() {
     return properties.find(p => p.id === selectedPropertyId);
   };
 
-  const isBaseTab = currentTab === '/enhancedlandlorddashboard';
+  const isBaseTab = currentTab === '/landlord/dashboard';
 
   const renderProfileTab = () => {
     const displayName =
@@ -1184,8 +1184,8 @@ export default function EnhancedLandlordDashboard() {
     // Inspection List (formerly Condition Records) renders in-shell, exactly
     // like the other tools, instead of breaking out to a separate route. The
     // detail path carries the record id, so match by prefix before the switch.
-    if (currentTab.startsWith('/enhancedlandlorddashboard/condition-records')) {
-      const rest = currentTab.slice('/enhancedlandlorddashboard/condition-records'.length);
+    if (currentTab.startsWith('/landlord/dashboard/condition-records')) {
+      const rest = currentTab.slice('/landlord/dashboard/condition-records'.length);
       const recordId = rest.startsWith('/') ? rest.slice(1) : '';
       return (
         <div className="min-h-screen bg-white pb-8 w-full">
@@ -1198,22 +1198,22 @@ export default function EnhancedLandlordDashboard() {
     }
 
     switch (currentTab) {
-      case '/enhancedlandlorddashboard/properties':
+      case '/landlord/dashboard/properties':
         console.log('[Dashboard] Rendering properties tab');
         return renderPropertiesTab();
-      case '/enhancedlandlorddashboard/applications':
+      case '/landlord/dashboard/applications':
         console.log('[Dashboard] Rendering applications tab');
         return renderApplicationsTab();
-      case '/enhancedlandlorddashboard/leases':
+      case '/landlord/dashboard/leases':
         console.log('[Dashboard] Rendering leases tab');
         return renderLeasesTab();
-      case '/enhancedlandlorddashboard/tenants':
+      case '/landlord/dashboard/tenants':
         console.log('[Dashboard] Rendering tenants tab');
         return renderTenantsTab();
-      case '/enhancedlandlorddashboard/payments':
+      case '/landlord/dashboard/payments':
         console.log('[Dashboard] Rendering payments tab');
         return renderPaymentsTab();
-      case '/enhancedlandlorddashboard/swiftbooks':
+      case '/landlord/dashboard/swiftbooks':
         console.log('[Dashboard] Rendering swiftbooks tab');
         return (
           <div className="min-h-screen bg-white pb-8 w-full">
@@ -1222,13 +1222,13 @@ export default function EnhancedLandlordDashboard() {
             </div>
           </div>
         );
-      case '/enhancedlandlorddashboard/inventory':
+      case '/landlord/dashboard/inventory':
         console.log('[Dashboard] Rendering inventory tab');
         return renderInventoryTab();
-      case '/enhancedlandlorddashboard/maintenance':
+      case '/landlord/dashboard/maintenance':
         console.log('[Dashboard] Rendering maintenance tab');
         return renderMaintenanceTab();
-      case '/enhancedlandlorddashboard/profile':
+      case '/landlord/dashboard/profile':
         console.log('[Dashboard] Rendering profile tab');
         return renderProfileTab();
       default:
@@ -1413,7 +1413,7 @@ export default function EnhancedLandlordDashboard() {
                   <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                     You haven't received any rental applications yet. Once tenants start applying or chatting about your properties, they'll appear here.
                   </p>
-                  <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+                  <Button onClick={() => navigate('/landlord/dashboard/properties')}>
                     <Building className="h-4 w-4 mr-2" />
                     View Your Properties
                   </Button>
@@ -1463,7 +1463,7 @@ export default function EnhancedLandlordDashboard() {
           <p className="text-muted-foreground mb-4">
             {description}
           </p>
-          <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+          <Button onClick={() => navigate('/landlord/dashboard/properties')}>
             <Building className="h-4 w-4 mr-2" />
             View Properties
           </Button>
@@ -1494,7 +1494,7 @@ export default function EnhancedLandlordDashboard() {
               <p className="text-muted-foreground mb-6">
                 Tenants will appear here once they sign leases and move into your properties.
               </p>
-              <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+              <Button onClick={() => navigate('/landlord/dashboard/properties')}>
                 <Building className="h-4 w-4 mr-2" />
                 View Properties
               </Button>
@@ -1601,7 +1601,7 @@ export default function EnhancedLandlordDashboard() {
             <p className="text-muted-foreground mb-6">
               Once tenants sign leases, you'll be able to track rent payments here.
             </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+            <Button onClick={() => navigate('/landlord/dashboard/properties')}>
               <Building className="h-4 w-4 mr-2" />
               View Properties
             </Button>
@@ -1775,7 +1775,7 @@ const renderReportsTab = () => (
     <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 w-full">
       {/* Back Button */}
       <BackButton 
-        defaultPath="/enhancedlandlorddashboard"
+        defaultPath="/landlord/dashboard"
         className="mt-4"
       />
       
@@ -1798,7 +1798,7 @@ const renderReportsTab = () => (
             <p className="text-muted-foreground mb-4">
               Financial SwiftBooks will be available once you have active tenants and rental income.
             </p>
-            <Button onClick={() => navigate('/enhancedlandlorddashboard/properties')}>
+            <Button onClick={() => navigate('/landlord/dashboard/properties')}>
               <Building className="h-4 w-4 mr-2" />
               View Properties
             </Button>
@@ -2243,7 +2243,7 @@ const renderReportsTab = () => (
                 You need active tenants to generate invoices. Add properties and tenants first.
               </p>
               <Button 
-                onClick={() => navigate('/enhancedlandlorddashboard/properties')}
+                onClick={() => navigate('/landlord/dashboard/properties')}
                 variant="outline"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -2630,14 +2630,14 @@ const renderReportsTab = () => (
       { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
       ...(canInvite ? [{ title: 'Invite Tenant', subtitle: 'Onboard your tenant', icon: UserPlus, action: () => setShowInviteModal(true) }] : []),
       { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
-      { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: ClipboardCheck, tab: '/enhancedlandlorddashboard/applications', count: newApplications },
-      { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/enhancedlandlorddashboard/maintenance', count: activeMaintenanceRequests },
-      { title: 'Payments',       subtitle: 'Track rent',                         icon: CreditCard,    tab: '/enhancedlandlorddashboard/payments' },
+      { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: ClipboardCheck, tab: '/landlord/dashboard/applications', count: newApplications },
+      { title: 'Maintenance',    subtitle: `${activeMaintenanceRequests} open`,  icon: Wrench,        tab: '/landlord/dashboard/maintenance', count: activeMaintenanceRequests },
+      { title: 'Payments',       subtitle: 'Track rent',                         icon: CreditCard,    tab: '/landlord/dashboard/payments' },
       ...(properties.length > 0 ? [{ title: 'Rent collection', subtitle: 'Bank details for payouts', icon: Landmark, action: () => setShowRentCollectionModal(true) }] : []),
-      { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/enhancedlandlorddashboard/leases', count: pendingLeaseSignatures },
-      { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Package,       tab: '/enhancedlandlorddashboard/inventory' },
-      { title: 'Inspection List',   subtitle: 'Photos, notes & sign-off',          icon: Camera,        tab: '/enhancedlandlorddashboard/condition-records' },
-      { title: 'Support',        subtitle: 'Help & resources',                   icon: Headset,       path: '/enhancedlandlorddashboard/support' },
+      { title: 'Leases',         subtitle: pendingLeaseSignatures > 0 ? `${pendingLeaseSignatures} to sign` : 'Contracts', icon: FileText, tab: '/landlord/dashboard/leases', count: pendingLeaseSignatures },
+      { title: 'Inventory',      subtitle: 'Furniture & items',                  icon: Package,       tab: '/landlord/dashboard/inventory' },
+      { title: 'Inspection List',   subtitle: 'Photos, notes & sign-off',          icon: Camera,        tab: '/landlord/dashboard/condition-records' },
+      { title: 'Support',        subtitle: 'Help & resources',                   icon: Headset,       path: '/landlord/dashboard/support' },
     ];
 
     return (
@@ -3077,7 +3077,7 @@ const renderReportsTab = () => (
             <div className="flex justify-center gap-2 pt-1">
               <Button
                 variant="outline"
-                onClick={() => { setRentPaidPopup(null); navigate('/enhancedlandlorddashboard/payments'); }}
+                onClick={() => { setRentPaidPopup(null); navigate('/landlord/dashboard/payments'); }}
               >
                 View payments
               </Button>

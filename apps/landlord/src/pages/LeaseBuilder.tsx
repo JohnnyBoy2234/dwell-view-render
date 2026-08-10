@@ -36,7 +36,7 @@ export function LeaseBuilder() {
             title: "Contract Completed",
             description: "Lease contract has been created and sent for tenant signature.",
           });
-          navigate('/enhancedlandlorddashboard/leases');
+          navigate('/landlord/dashboard/leases');
         }}
         onCancel={() => navigate(-1)}
       />

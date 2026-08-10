@@ -7,7 +7,7 @@ export default function AccountingDashboard() {
     <EnhancedDashboardLayout 
       title="SwiftBooks"
       subtitle="Track your property finances"
-      currentTab="/enhancedlandlorddashboard/swiftbooks"
+      currentTab="/landlord/dashboard/swiftbooks"
     >
       <AccountingOverview />
     </EnhancedDashboardLayout>

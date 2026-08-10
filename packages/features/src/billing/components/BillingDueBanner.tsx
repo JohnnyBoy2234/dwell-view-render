@@ -79,12 +79,12 @@ export function BillingDueBanner() {
   const first = bills[0];
   const propertyName = first.properties?.title || first.properties?.location || 'your property';
   const monthName = new Date(`${first.period}-01`).toLocaleDateString('en-ZA', { month: 'long' });
-  const onPaymentsPage = location.pathname.startsWith('/enhancedlandlorddashboard/payments');
+  const onPaymentsPage = location.pathname.startsWith('/landlord/dashboard/payments');
 
   return (
     <button
       ref={bannerRef}
-      onClick={() => { if (!onPaymentsPage) navigate('/enhancedlandlorddashboard/payments'); }}
+      onClick={() => { if (!onPaymentsPage) navigate('/landlord/dashboard/payments'); }}
       className="sticky top-0 z-50 flex w-full items-center justify-between gap-3 bg-amber-500 px-4 py-2.5 text-left text-white"
       aria-label={`Billing due for ${propertyName} — prepare and send the bill`}
     >

@@ -48,56 +48,56 @@ const tenantItems: SidebarItem[] = [
 const landlordItems: SidebarItem[] = [
   { 
     title: 'Landlord Dashboard', 
-    url: '/enhancedlandlorddashboard', 
+    url: '/landlord/dashboard', 
     icon: Home,
     description: 'Your property management dashboard',
     requiredPlan: 'free'
   },
   { 
     title: 'Applications', 
-    url: '/enhancedlandlorddashboard/applications', 
+    url: '/landlord/dashboard/applications', 
     icon: Inbox,
     description: 'View and manage rental applications',
     requiredPlan: 'pro'
   },
   { 
     title: 'Lease System', 
-    url: '/enhancedlandlorddashboard/leases', 
+    url: '/landlord/dashboard/leases', 
     icon: FileText,
     description: 'Create and manage lease agreements',
     requiredPlan: 'pro'
   },
   { 
     title: 'Tenants', 
-    url: '/enhancedlandlorddashboard/tenants', 
+    url: '/landlord/dashboard/tenants', 
     icon: Users,
     description: 'Manage your tenants',
     requiredPlan: 'pro'
   },
   { 
     title: 'Payments', 
-    url: '/enhancedlandlorddashboard/payments', 
+    url: '/landlord/dashboard/payments', 
     icon: RIcon,
     description: 'Track and manage rent payments',
     requiredPlan: 'pro'
   },
   { 
     title: 'Maintenance', 
-    url: '/enhancedlandlorddashboard/maintenance', 
+    url: '/landlord/dashboard/maintenance', 
     icon: Wrench,
     description: 'Handle maintenance requests',
     requiredPlan: 'premium'
   },
   {
     title: 'Inspection List',
-    url: '/enhancedlandlorddashboard/condition-records',
+    url: '/landlord/dashboard/condition-records',
     icon: Camera,
     description: 'Photos, notes and sign-off at move-in and move-out',
     requiredPlan: 'free'
   },
   { 
     title: 'SwiftBooks', 
-    url: '/enhancedlandlorddashboard/swiftbooks', 
+    url: '/landlord/dashboard/swiftbooks', 
     icon: BarChart3,
     description: 'Financial reports and accounting',
     requiredPlan: 'premium'
@@ -164,7 +164,7 @@ export function EnhancedSidebar({ currentTab, onTabChange }: EnhancedSidebarProp
       return currentTab === path;
     }
     // Only exact match for the dashboard root to avoid double-highlighting
-    if (path === '/enhancedlandlorddashboard' || path === '/enhancedtenantdashboard') {
+    if (path === '/landlord/dashboard' || path === '/enhancedtenantdashboard') {
       return currentPath === path;
     }
     return currentPath === path || currentPath.startsWith(path + '/');

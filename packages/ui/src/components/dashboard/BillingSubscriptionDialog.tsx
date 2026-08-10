@@ -143,7 +143,7 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
                   style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
                   onClick={() => {
                     onOpenChange(false);
-                    navigate('/enhancedlandlorddashboard/profile');
+                    navigate('/landlord/dashboard/profile');
                   }}
                 >
                   Subscribe

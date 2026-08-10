@@ -4,7 +4,7 @@ import { Toaster } from "@mzanzihomes/ui/components/toaster";
 import { Toaster as Sonner } from "@mzanzihomes/ui/components/sonner";
 import { TooltipProvider } from "@mzanzihomes/ui/components/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@mzanzihomes/ui/components/RouteGuard";
 import { AuthenticatedRoute } from "@mzanzihomes/ui/components/AuthenticatedRoute";
@@ -18,7 +18,6 @@ import { PaymentRedirectHandler } from "@mzanzihomes/features/payments";
 import { SidebarProvider } from "@mzanzihomes/ui/components/sidebar";
 import { EnhancedDashboardLayout } from "@mzanzihomes/ui/components/dashboard/EnhancedDashboardLayout";
 import { EnhancedSidebar } from "@mzanzihomes/ui/components/dashboard/EnhancedSidebar";
-import LandlordDashboardRoutes from "@/components/dashboard/LandlordDashboardRoutes";
 import { PlanGuard } from "@mzanzihomes/ui/components/PlanGuard";
 import Index from "@/pages/Index";
 import Auth from "@/pages/Auth";
@@ -68,6 +67,13 @@ function ScrollToTop() {
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [pathname]);
   return null;
+}
+
+// Old dashboard base path, kept working for links already sent in emails/push notifications.
+function LegacyLandlordDashboardRedirect() {
+  const { pathname, search } = useLocation();
+  const rest = pathname.slice('/enhancedlandlorddashboard'.length);
+  return <Navigate to={`/landlord/dashboard${rest}${search}`} replace />;
 }
 
 function DashboardShell({
@@ -154,7 +160,7 @@ function AppRoutes() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Homepage */}
+        {/* Landlord root — no marketing page, straight into the dashboard */}
         <Route path="/" element={<Index />} />
         <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
@@ -169,22 +175,23 @@ function AppRoutes() {
         <Route path="/list-sale" element={<AuthenticatedRoute><ListSale /></AuthenticatedRoute>} />
 
         {/* Landlord dashboard */}
-        <Route path="/enhancedlandlorddashboard/*" element={
+        <Route path="/landlord/dashboard/*" element={
           <AuthenticatedRoute>
             <EnhancedLandlordDashboard />
           </AuthenticatedRoute>
         } />
         {/* Inspection List renders in-shell inside EnhancedLandlordDashboard's
             renderTabContent (like every other tool), so no special route here. */}
-        <Route path="/enhancedlandlorddashboard/support" element={
+        <Route path="/landlord/dashboard/support" element={
           <AuthenticatedRoute>
-            <DashboardShell title="Support" subtitle="Get help with your account and properties" currentTab="/enhancedlandlorddashboard/support">
+            <DashboardShell title="Support" subtitle="Get help with your account and properties" currentTab="/landlord/dashboard/support">
               <LandlordSupport />
             </DashboardShell>
           </AuthenticatedRoute>
         } />
-        <Route path="/enhancedlandlorddashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
-        <Route path="/landlord-dashboard/*" element={<LandlordDashboardRoutes />} />
+        <Route path="/landlord/dashboard/add-property" element={<RouteGuard><ListProperty /></RouteGuard>} />
+        {/* Old base path, kept working for links already sent in emails/push notifications */}
+        <Route path="/enhancedlandlorddashboard/*" element={<LegacyLandlordDashboardRedirect />} />
 
         {/* Inventory */}
         <Route path="/inventory/start" element={<InventoryStart />} />

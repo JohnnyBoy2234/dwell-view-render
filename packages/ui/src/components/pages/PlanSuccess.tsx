@@ -10,7 +10,7 @@ interface PlanSuccessProps {
 }
 
 export function PlanSuccess({
-  dashboardPath = '/enhancedlandlorddashboard',
+  dashboardPath = '/landlord/dashboard',
   dashboardLabel = 'Go to dashboard',
 }: PlanSuccessProps) {
   const navigate = useNavigate();

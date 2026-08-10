@@ -277,7 +277,7 @@ export default function ProfilePage() {
 
   const handleBackToDashboard = () => {
     if (isLandlord) {
-      navigate(`/enhancedlandlorddashboard${propertyId ? '?property=' + propertyId : ''}`);
+      navigate(`/landlord/dashboard${propertyId ? '?property=' + propertyId : ''}`);
     }
   };
 

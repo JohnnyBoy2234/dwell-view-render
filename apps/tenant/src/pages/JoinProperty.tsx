@@ -132,7 +132,7 @@ export default function JoinProperty() {
           user_id: invite.landlord_id,
           message: `${tenantName} accepted your invite and joined ${where}.`,
           type: 'system',
-          link_url: '/enhancedlandlorddashboard',
+          link_url: '/landlord/dashboard',
         });
       } catch (notifyErr) {
         console.error('Post-join updates failed:', notifyErr);

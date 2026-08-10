@@ -104,7 +104,7 @@ export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = 
               <DropdownMenuSeparator />
             </>
           ) : null}
-          <DropdownMenuItem className="gap-2.5 py-2" onClick={go(isLandlord ? '/enhancedlandlorddashboard/profile' : '/tenant/profile')}>
+          <DropdownMenuItem className="gap-2.5 py-2" onClick={go(isLandlord ? '/landlord/dashboard/profile' : '/tenant/profile')}>
             <User className="w-4 h-4 text-muted-foreground" /> My Account
           </DropdownMenuItem>
           <DropdownMenuItem className="gap-2.5 py-2" onClick={go('/settings')}>
@@ -121,7 +121,7 @@ export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = 
           <DropdownMenuItem className="gap-2.5 py-2" onClick={go('/terms')}>
             <FileText className="w-4 h-4 text-muted-foreground" /> Terms &amp; Conditions
           </DropdownMenuItem>
-          <DropdownMenuItem className="gap-2.5 py-2" onClick={go(isLandlord ? '/enhancedlandlorddashboard/support' : '/tenant/support')}>
+          <DropdownMenuItem className="gap-2.5 py-2" onClick={go(isLandlord ? '/landlord/dashboard/support' : '/tenant/support')}>
             <HelpCircle className="w-4 h-4 text-muted-foreground" /> Contact Support
           </DropdownMenuItem>
           <DropdownMenuSeparator />
