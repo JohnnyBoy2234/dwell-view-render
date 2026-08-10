@@ -56,7 +56,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
     if (!file) return;
     const problem = fileProblem(file, DOCUMENT_TYPES.ID_DOCUMENT);
     if (problem) {
-      toast({ title: 'Could not use this file', description: problem, variant: 'destructive' });
+      toast({ title: 'Please try another file', description: problem });
       return;
     }
     setScanning(true);
@@ -71,7 +71,7 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
       // isn't supported (older browsers).
       const normalized = await normalizeAndAssess(file);
       if (normalized && normalized.verdict !== 'ok') {
-        toast({ title: 'Could not read this photo', description: QUALITY_MESSAGES[normalized.verdict], variant: 'destructive' });
+        toast({ title: 'Could not read this photo', description: QUALITY_MESSAGES[normalized.verdict] });
         return;
       }
       const ocrInput: File | Blob = normalized?.blob ?? file;

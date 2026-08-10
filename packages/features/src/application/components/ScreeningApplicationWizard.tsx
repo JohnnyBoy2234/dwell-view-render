@@ -82,6 +82,9 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [errors, setErrors] = useState<FieldErrors>({});
+  // Only true once the tenant has tried to move on — we never scold them about
+  // fields they simply haven't reached yet.
+  const [showSummary, setShowSummary] = useState(false);
   const [declared, setDeclared] = useState(false);
   const [showWelcomeBack, setShowWelcomeBack] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -230,8 +233,17 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
 
   const goToStep = (idx: number) => {
     setErrors({});
+    setShowSummary(false);
     setCurrentStep(idx);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Error keys are the field ids, so the first one takes us straight to the input.
+  const focusFirstError = (errs: FieldErrors) => {
+    const el = document.getElementById(Object.keys(errs)[0] ?? '');
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.focus({ preventScroll: true });
   };
 
   const goNext = () => {
@@ -245,11 +257,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     const stepErrors = validateStep(currentStep, data);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
-      toast({
-        title: 'Missing information',
-        description: 'Please complete the highlighted fields before continuing.',
-        variant: 'destructive'
-      });
+      setShowSummary(true);
+      focusFirstError(stepErrors);
       return;
     }
     const nextCompleted = completedSteps.includes(currentStep) ? completedSteps : [...completedSteps, currentStep];
@@ -291,11 +300,8 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     }
     if (Object.keys(allErrors).length > 0) {
       setErrors(allErrors);
-      toast({
-        title: 'Application incomplete',
-        description: 'Some sections still need attention — use Edit on the incomplete sections.',
-        variant: 'destructive'
-      });
+      setShowSummary(true);
+      focusFirstError(allErrors);
       return false;
     }
     return true;
@@ -477,6 +483,18 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
     onUploadComplete
   };
 
+  // Recomputed on every render so the notice empties itself as fields get filled.
+  const outstandingErrors = (): FieldErrors => {
+    const errs: FieldErrors = {};
+    if (isReviewStep) {
+      for (let i = 0; i < steps.length; i++) Object.assign(errs, validateStep(i, formData));
+      if (!declared) errs.declaration = 'Please confirm the declaration above before submitting.';
+    } else {
+      Object.assign(errs, validateStep(currentStep, formData));
+    }
+    return errs;
+  };
+
   const primaryLabel = isReviewStep
     ? 'Submit application'
     : isConsentStep
@@ -496,32 +514,9 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
         <div className="flex items-start justify-between gap-2">
           <div>
             <CardTitle>Rental Application</CardTitle>
-            <CardDescription>Designed to take about 10 minutes to complete.</CardDescription>
           </div>
           <SaveIndicator />
         </div>
-        {/* Slim orange progress banner — completion percentage */}
-        {(() => {
-          const pct = Math.round(((currentStep + 1) / steps.length) * 100);
-          const label = isReviewStep
-            ? 'Almost done — just review and submit.'
-            : `You're ${pct}% of the way through your application.`;
-          return (
-            <div
-              className="mt-3 flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-[13px] font-semibold"
-              style={{ background: applicationTheme.primaryLight, border: `1px solid ${applicationTheme.border}`, color: applicationTheme.text }}
-            >
-              <span
-                className="shrink-0 rounded-full px-2 py-0.5 text-white text-[11px] font-bold tabular-nums"
-                style={{ background: applicationTheme.primary }}
-                aria-label={`${pct} percent complete`}
-              >
-                {pct}%
-              </span>
-              {label}
-            </div>
-          );
-        })()}
         {/* The one and only step indicator */}
         <div className="pt-3">
           <p className="text-sm font-medium">
@@ -550,6 +545,28 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               setDeclared={setDeclared}
             />
           )}
+
+          {showSummary && (() => {
+            const outstanding = Object.entries(outstandingErrors());
+            if (outstanding.length === 0) return null;
+            return (
+              <div
+                role="status"
+                className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-sm text-amber-900"
+              >
+                <p className="font-semibold">
+                  {isReviewStep
+                    ? 'Almost there — a few things still need your attention:'
+                    : 'Before you continue, we just need:'}
+                </p>
+                <ul className="mt-1.5 list-disc space-y-0.5 pl-5">
+                  {outstanding.map(([field, message]) => (
+                    <li key={field}>{message}</li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
 
           <div className="flex gap-3 pt-6">
             {currentStep > 0 && (

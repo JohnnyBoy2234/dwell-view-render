@@ -119,7 +119,7 @@ export function DocumentUpload({
     if (!file) return;
     const problem = fileProblem(file, documentType);
     if (problem) {
-      toast({ title: 'Could not upload', description: problem, variant: 'destructive' });
+      toast({ title: 'Please try another file', description: problem });
       return;
     }
     setUploading(true);

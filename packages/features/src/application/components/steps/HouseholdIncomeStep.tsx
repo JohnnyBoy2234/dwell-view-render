@@ -60,7 +60,8 @@ export function HouseholdIncomeStep({ data, update, errors }: StepProps) {
           <p className="text-sm text-muted-foreground">
             How many people (including you) will be living here?
           </p>
-          <div className="grid grid-cols-2 gap-4 max-w-sm">
+          {/* items-end keeps both inputs on one line when a label wraps. */}
+          <div className="grid grid-cols-2 items-end gap-4 max-w-sm">
             <Field id="adults" label="Adults" required error={errors.adults}>
               {textInput('adults', h.adults, (v) => update('household', { adults: v }), { inputMode: 'numeric', placeholder: 'e.g. 2' })}
             </Field>

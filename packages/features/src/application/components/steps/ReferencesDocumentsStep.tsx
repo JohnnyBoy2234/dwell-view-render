@@ -172,10 +172,10 @@ export function ReferencesDocumentsStep({ data, update, errors, userId, onUpload
                   <p className="text-sm text-muted-foreground">
                     You can get your credit report free from Experian, then upload it here.
                   </p>
-                  <Button asChild variant="outline" size="sm">
+                  <Button asChild variant="outline" size="sm" className="max-w-full">
                     <a href={EXPERIAN_URL} target="_blank" rel="noopener noreferrer">
-                      Get your free Experian credit report
-                      <ExternalLink className="h-4 w-4 ml-2" />
+                      <span className="truncate">Get free Experian report</span>
+                      <ExternalLink className="h-4 w-4 ml-2 shrink-0" />
                     </a>
                   </Button>
                 </>
@@ -184,7 +184,7 @@ export function ReferencesDocumentsStep({ data, update, errors, userId, onUpload
                 documentType={item.documentType}
                 userId={userId}
                 accept={item.documentType === DOCUMENT_TYPES.ID_DOCUMENT ? '.pdf,.jpg,.jpeg,.png,.webp' : '.pdf,.jpg,.jpeg,.png'}
-                label={uploaded && (item.key === 'id' || isCreditReport) ? `Replace ${item.label.toLowerCase()}` : `Upload ${item.label.toLowerCase()}`}
+                label={uploaded && (item.key === 'id' || isCreditReport) ? 'Replace file' : 'Upload file'}
                 camera
                 onUploaded={handlers.onUploaded}
                 onUploadComplete={onUploadComplete}
