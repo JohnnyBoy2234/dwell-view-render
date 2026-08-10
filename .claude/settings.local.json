@@ -116,7 +116,10 @@
       "Bash(npm -g config get prefix)",
       "Read(//home/caleb/**)",
       "Bash(curl -s --max-time 15 https://downloads.claude.ai/claude-code-releases/latest)",
-      "Bash(xargs -I{} date -d @{} +%F)"
+      "Bash(xargs -I{} date -d @{} +%F)",
+      "Bash(ln -s AGENTS.md CLAUDE.md)",
+      "Artifact",
+      "Bash(sort -t: -k1,1)"
     ]
   },
   "enabledMcpjsonServers": [
