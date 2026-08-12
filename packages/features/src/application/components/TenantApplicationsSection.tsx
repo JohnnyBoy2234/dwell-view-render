@@ -426,6 +426,17 @@ export const TenantApplicationsSection = () => {
   const visApps = showAll ? appList : appList.slice(0, 3);
   const visRequests = showAll ? requests : requests.slice(0, 3);
 
+  // Workflow-aware hero status for a tenant who already has application(s) and
+  // no pending invite — instead of the generic "Find your next home" message.
+  const appStatuses = applicationRecords.map((a) => a.status);
+  const heroStatus = appStatuses.includes('accepted')
+    ? { pill: 'Approved', title: 'Application approved', body: 'Great news — a landlord approved your application. Check your applications for next steps.' }
+    : appStatuses.some((s) => ['pending', 'submitted', 'pending_credit_check', 'more_info_requested'].includes(s))
+      ? { pill: 'Under review', title: 'Application submitted', body: "Awaiting landlord review — we'll notify you the moment there's an update." }
+      : appStatuses.includes('declined')
+        ? { pill: 'Update', title: 'Application not approved', body: "One of your applications wasn't successful this time. Keep exploring other homes." }
+        : { pill: 'In progress', title: 'Your applications', body: 'Track the status of your applications here.' };
+
   return (
     <section className="mx-auto w-full max-w-2xl pb-28 md:pb-10 animate-fade-in" aria-label="Your applications">
       {/* Hero */}
@@ -455,6 +466,22 @@ export const TenantApplicationsSection = () => {
                 style={{ background: ORANGE }}
               >
                 Fill in the form now →
+              </button>
+            </>
+          ) : applicationRecords.length > 0 ? (
+            <>
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/80 px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide text-orange-700">
+                {heroStatus.pill}
+              </span>
+              <h2 className="mt-2 text-[23px] font-extrabold leading-tight text-slate-900">{heroStatus.title}</h2>
+              <p className="mt-1.5 text-[13.5px] leading-snug text-slate-600">{heroStatus.body}</p>
+              <button
+                type="button"
+                onClick={() => changeTab('applications')}
+                className="mt-5 inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-[14px] font-bold text-white shadow-[0_14px_26px_-10px_rgba(249,115,22,0.8)] transition-transform active:scale-[0.97]"
+                style={{ background: ORANGE }}
+              >
+                View my applications →
               </button>
             </>
           ) : (

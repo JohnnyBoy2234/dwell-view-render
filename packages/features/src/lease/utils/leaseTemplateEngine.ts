@@ -132,7 +132,7 @@ export function buildTemplateVariables(data: LeaseWizardData): Record<string, st
     LANDLORD_ACCOUNT_HOLDER: data.landlordAccountHolder || data.landlordFullName || '',
     LANDLORD_BRANCH_CODE: data.landlordBranchCode || '',
     LANDLORD_ACCOUNT_NUMBER: data.landlordAccountNumber || '',
-    LANDLORD_REFERENCE: data.landlordReference || '',
+    LANDLORD_REFERENCE: data.landlordReference || data.tenantFullName || '',
 
     // Occupants
     OCCUPANTS_LIST: data.occupantsList || 'As per application',
@@ -153,6 +153,8 @@ export function evaluateCondition(condition: string, data: LeaseWizardData): boo
   const trimmedCondition = condition.trim().toUpperCase();
   
   switch (trimmedCondition) {
+    case 'BANK_DETAILS_PROVIDED':
+      return !!data.landlordAccountNumber;
     case 'CPA_APPLIES':
       return data.cpaApplies;
     case 'TENANT_IS_JURISTIC':

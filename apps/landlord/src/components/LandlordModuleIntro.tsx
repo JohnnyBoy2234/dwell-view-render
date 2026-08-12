@@ -31,7 +31,7 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
   maintenance: {
     color: '#16a34a',
     gradient: 'linear-gradient(135deg, #e3f6e9 0%, #d1eed8 100%)',
-    illustration: floatImg(maintenanceToolbox, 'right-2 bottom-0 h-[150px] w-auto'),
+    illustration: floatImg(maintenanceToolbox, 'right-2 bottom-0 max-h-[150px] w-auto max-w-[40%]'),
     title: 'Maintenance requests',
     subtitle: 'Review and resolve the repair requests your tenants submit.',
     tipsTitle: 'Managing maintenance',
@@ -58,7 +58,7 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
   inventory: {
     color: '#14b39a',
     gradient: 'linear-gradient(135deg, #e6f6f2 0%, #d3eee8 100%)',
-    illustration: floatImg(inventoryFurniture, 'right-2 top-0 bottom-0 my-auto h-[148px] w-auto'),
+    illustration: floatImg(inventoryFurniture, 'right-2 top-0 bottom-0 my-auto max-h-[148px] w-auto max-w-[40%]'),
     title: 'Property inventory',
     subtitle: 'Record the furniture, appliances and items supplied with each property.',
     tipsTitle: 'Managing inventory',
@@ -72,7 +72,7 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
   inspection: {
     color: '#ef4444',
     gradient: 'linear-gradient(135deg, #fdecec 0%, #fbe0e1 100%)',
-    illustration: floatImg(inspectionHouseCamera, 'right-1 top-0 bottom-0 my-auto h-[150px] w-auto'),
+    illustration: floatImg(inspectionHouseCamera, 'right-1 top-0 bottom-0 my-auto max-h-[150px] w-auto max-w-[40%]'),
     title: 'Inspection list',
     subtitle: 'Document the property condition with photos, notes and sign-off.',
     tipsTitle: 'Running inspections',
@@ -86,7 +86,7 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
   payments: {
     color: '#14b8a6',
     gradient: 'linear-gradient(135deg,#e9faf6 0%,#d6f3ec 100%)',
-    illustration: floatImg(paymentsWallet, 'right-2 top-0 bottom-0 my-auto h-[140px] w-auto'),
+    illustration: floatImg(paymentsWallet, 'right-2 top-0 bottom-0 my-auto max-h-[140px] w-auto max-w-[40%]'),
     title: 'Payments',
     subtitle: 'Collect rent, send invoices and track every payment.',
     tipsTitle: 'Managing payments',
@@ -114,7 +114,7 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
   support: {
     color: '#f5a623',
     gradient: 'linear-gradient(135deg, #fdf3d9 0%, #faedcb 100%)',
-    illustration: floatImg(supportHeadset, 'right-1 top-0 bottom-0 my-auto h-[138px] w-auto'),
+    illustration: floatImg(supportHeadset, 'right-1 top-0 bottom-0 my-auto max-h-[138px] w-auto max-w-[40%]'),
     title: 'Support',
     subtitle: 'Get help managing your account, listings and rentals.',
     tipsTitle: 'Getting help',
@@ -126,43 +126,69 @@ const CONFIG: Record<ModuleKey, ModuleConfig> = {
   },
 };
 
-/** Tenant-style hero + tailored tips for a landlord module page. */
-export function LandlordModuleIntro({ module }: { module: ModuleKey }) {
+/** Tenant-style hero + tailored tips for a landlord module page.
+ *  `statusMessage`, when provided, replaces the generic static subtitle with a
+ *  live, workflow-aware status (e.g. "Review application").
+ *  `section` controls what renders: 'all' (default), 'hero' only, or 'tips'
+ *  only — so a page can put the hero at the top and the tips at the bottom
+ *  (matching the contracts/lease layout). */
+export function LandlordModuleIntro({
+  module,
+  statusMessage,
+  section = 'all',
+}: {
+  module: ModuleKey;
+  statusMessage?: string;
+  section?: 'all' | 'hero' | 'tips';
+}) {
   const c = CONFIG[module];
   return (
     <div className="mx-auto w-full max-w-2xl space-y-5">
       {/* Hero */}
-      <div
-        className="relative min-h-[172px] overflow-hidden rounded-[24px] p-5 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.45)]"
-        style={{ background: c.gradient }}
-      >
-        {c.illustration}
-        <div className="relative z-10 max-w-[58%]">
-          <h2 className="text-[21px] font-extrabold leading-tight text-slate-900">{c.title}</h2>
-          <p className="mt-1.5 text-[13px] leading-snug text-slate-600">{c.subtitle}</p>
+      {section !== 'tips' && (
+        <div
+          className="relative min-h-[172px] overflow-hidden rounded-[24px] p-5 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.45)]"
+          style={{ background: c.gradient }}
+        >
+          {c.illustration}
+          <div className="relative z-10 max-w-[58%]">
+            <h2 className="text-[21px] font-extrabold leading-tight text-slate-900">{c.title}</h2>
+            {statusMessage ? (
+              <span
+                className="mt-2 inline-flex items-center rounded-full bg-white/75 px-3 py-1 text-[12.5px] font-bold text-slate-800 shadow-sm backdrop-blur-sm"
+                style={{ color: c.color }}
+              >
+                {statusMessage}
+              </span>
+            ) : (
+              <p className="mt-1.5 text-[13px] leading-snug text-slate-600">{c.subtitle}</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Tips */}
-      <div className="rounded-[24px] bg-white p-5 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
-        <div className="flex items-center gap-2">
-          <Lightbulb className="h-5 w-5" style={{ color: c.color }} />
-          <h3 className="text-[16px] font-extrabold text-slate-900">{c.tipsTitle}</h3>
-        </div>
-        <div className="mt-4 space-y-3.5">
-          {c.tips.map((t, i) => (
-            <div key={i} className="flex items-start gap-3">
-              <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${c.color}1a` }}>
-                <CheckCircle2 className="h-4 w-4" style={{ color: c.color }} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-[13.5px] font-bold text-slate-900">{t.title}</p>
-                <p className="mt-0.5 text-[12.5px] leading-snug text-slate-500">{t.desc}</p>
+      {section !== 'hero' && (
+        <div className="rounded-[24px] bg-white p-5 shadow-[0_18px_38px_-26px_rgba(20,50,90,0.4)]">
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5" style={{ color: c.color }} />
+            <h3 className="text-[16px] font-extrabold text-slate-900">{c.tipsTitle}</h3>
+          </div>
+          <div className="mt-4 space-y-3.5">
+            {c.tips.map((t, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl" style={{ background: `${c.color}1a` }}>
+                  <CheckCircle2 className="h-4 w-4" style={{ color: c.color }} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[13.5px] font-bold text-slate-900">{t.title}</p>
+                  <p className="mt-0.5 text-[12.5px] leading-snug text-slate-500">{t.desc}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

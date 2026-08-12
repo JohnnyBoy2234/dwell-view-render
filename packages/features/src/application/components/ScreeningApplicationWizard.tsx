@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
+import { WizardProgress } from '@mzanzihomes/ui/components/WizardProgress';
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
 } from '@mzanzihomes/ui/components/dialog';
@@ -517,17 +518,9 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
           </div>
           <SaveIndicator />
         </div>
-        {/* The one and only step indicator */}
+        {/* The one and only step indicator — shared lease-wizard style */}
         <div className="pt-3">
-          <p className="text-sm font-medium">
-            Step {currentStep + 1} of {steps.length} — {steps[currentStep].title}
-          </p>
-          <div className="h-1.5 rounded-full mt-2" style={{ background: applicationTheme.primaryLight }} role="progressbar" aria-valuemin={1} aria-valuemax={steps.length} aria-valuenow={currentStep + 1}>
-            <div
-              className="h-1.5 rounded-full transition-all"
-              style={{ width: `${((currentStep + 1) / steps.length) * 100}%`, background: applicationTheme.primary }}
-            />
-          </div>
+          <WizardProgress steps={steps} current={currentStep} accent={applicationTheme.primary} />
         </div>
       </CardHeader>
       <CardContent>

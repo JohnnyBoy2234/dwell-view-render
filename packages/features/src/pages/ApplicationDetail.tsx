@@ -7,24 +7,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/compon
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
 } from '@mzanzihomes/ui/components/dialog';
-import { Input } from '@mzanzihomes/ui/components/input';
-import { Label } from '@mzanzihomes/ui/components/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
-import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 import { documentTypeLabel } from '@mzanzihomes/common/constants/applicationConstants';
-import { ArrowLeft, Download, FileText, History, ShieldCheck, ShieldOff } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Download, FileText } from 'lucide-react';
 import { mergeDraft } from '../application/types';
 import { summaryGroups, type GroupStatus } from '../application/summary';
 import { applicationStatusPresentation } from '../application/applicationPresentation';
-import {
-  addNote, createInfoRequest, getConsentRecord, listEvents, listInfoRequests, listNotes,
-  respondToInfoRequest, withdrawApplication,
-  type ApplicationEvent, type ApplicationNote, type ConsentRecord, type InfoRequest
-} from '../application/services/reviewService';
+import { withdrawApplication } from '../application/services/reviewService';
 
 const ACTIVE_STATUSES = ['pending', 'submitted', 'pending_credit_check', 'more_info_requested'];
 
@@ -33,38 +25,6 @@ const STATUS_CHIP: Record<GroupStatus, { label: string; className: string }> = {
   missing: { label: 'Missing information', className: 'bg-amber-100 text-amber-800 hover:bg-amber-100' },
   na: { label: 'Not applicable', className: 'bg-gray-100 text-gray-800 hover:bg-gray-100' }
 };
-
-const REQUEST_ITEM_SUGGESTIONS = [
-  'Missing document',
-  'Clearer copy of a document',
-  'Updated bank statement',
-  'Updated credit report',
-  'Income explanation',
-  'Reference information',
-  'Guarantor information',
-  'Correction to your details',
-  'Explanation of an answer'
-];
-
-const EVENT_LABELS: Record<string, string> = {
-  submitted: 'Application submitted',
-  status_changed: 'Status changed',
-  info_requested: 'More information requested',
-  info_response: 'Applicant responded to a request'
-};
-
-const shortDateTime = (value: string) =>
-  new Date(value).toLocaleString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-function eventDescription(e: ApplicationEvent): string {
-  if (e.event_type === 'status_changed' && e.detail?.from && e.detail?.to) {
-    return `Status changed from ${String(e.detail.from).replace(/_/g, ' ')} to ${String(e.detail.to).replace(/_/g, ' ')}`;
-  }
-  if ((e.event_type === 'info_requested' || e.event_type === 'info_response') && e.detail?.item) {
-    return `${EVENT_LABELS[e.event_type]}: ${e.detail.item}`;
-  }
-  return EVENT_LABELS[e.event_type] || e.event_type.replace(/_/g, ' ');
-}
 
 export default function ApplicationDetail() {
   const { id } = useParams<{ id: string }>();
@@ -77,20 +37,11 @@ export default function ApplicationDetail() {
   const [property, setProperty] = useState<any>(null);
   const [applicantName, setApplicantName] = useState('');
   const [documents, setDocuments] = useState<any[]>([]);
-  const [consent, setConsent] = useState<ConsentRecord | null>(null);
-  const [infoRequests, setInfoRequests] = useState<InfoRequest[]>([]);
-  const [notes, setNotes] = useState<ApplicationNote[]>([]);
-  const [events, setEvents] = useState<ApplicationEvent[]>([]);
   const [legacyDetails, setLegacyDetails] = useState<any>(null);
 
   const [decision, setDecision] = useState<'accepted' | 'declined' | null>(null);
-  const [requestOpen, setRequestOpen] = useState(false);
-  const [requestItem, setRequestItem] = useState('');
-  const [requestMessage, setRequestMessage] = useState('');
-  const [requestDue, setRequestDue] = useState('');
+  const [approvedOpen, setApprovedOpen] = useState(false);
   const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [newNote, setNewNote] = useState('');
-  const [responses, setResponses] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
 
   const dashboard = isLandlord ? '/landlord/dashboard' : '/enhancedtenantdashboard';
@@ -109,7 +60,7 @@ export default function ApplicationDetail() {
       }
       setApplication(app);
 
-      const [propRes, profileRes, docsRes, consentRes, requestsRes, eventsRes] = await Promise.all([
+      const [propRes, profileRes, docsRes] = await Promise.all([
         (supabase.from('properties') as any)
           .select('id, title, location, price, images')
           .eq('id', app.property_id)
@@ -120,10 +71,7 @@ export default function ApplicationDetail() {
           .maybeSingle(),
         (supabase.from('documents') as any)
           .select('id, document_type, file_path, file_type, uploaded_at, application_id')
-          .eq('user_id', app.tenant_id),
-        getConsentRecord(app.id),
-        listInfoRequests(app.id),
-        listEvents(app.id)
+          .eq('user_id', app.tenant_id)
       ]);
       setProperty(propRes.data ?? null);
       setApplicantName(profileRes.data?.display_name ?? '');
@@ -131,9 +79,6 @@ export default function ApplicationDetail() {
       const allDocs = docsRes.data ?? [];
       const linked = allDocs.filter((d: any) => d.application_id === app.id);
       setDocuments(linked.length > 0 ? linked : allDocs);
-      setConsent(consentRes);
-      setInfoRequests(requestsRes);
-      setEvents(eventsRes);
 
       if (!app.snapshot) {
         const { data: details } = await (supabase.from('screening_details') as any)
@@ -149,10 +94,6 @@ export default function ApplicationDetail() {
           } catch { /* leave as-is */ }
         }
         setLegacyDetails(legacy);
-      }
-
-      if (user.id === app.landlord_id) {
-        setNotes(await listNotes(app.id));
       }
     } catch (error: any) {
       console.error('Error loading application', error);
@@ -196,19 +137,24 @@ export default function ApplicationDetail() {
 
   const recordDecision = async () => {
     if (!decision || !application) return;
+    const chosen = decision;
     setBusy(true);
     try {
       const { error } = await (supabase.from('applications') as any)
-        .update({ status: decision })
+        .update({ status: chosen })
         .eq('id', application.id)
         .eq('landlord_id', user?.id);
       if (error) throw error;
       setDecision(null);
-      await load();
-      toast({
-        title: decision === 'accepted' ? 'Application approved' : 'Application declined',
-        description: 'The applicant has been notified.'
-      });
+      // Redirect the landlord away from the review page. On approval, surface a
+      // clear "generate a lease" prompt; on decline, a toast + straight to the
+      // dashboard.
+      if (chosen === 'accepted') {
+        setApprovedOpen(true);
+      } else {
+        toast({ title: 'Application declined', description: 'The applicant has been notified.' });
+        navigate(dashboard);
+      }
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Could not record the decision', description: error.message });
     } finally {
@@ -216,47 +162,9 @@ export default function ApplicationDetail() {
     }
   };
 
-  const sendInfoRequest = async () => {
-    if (!application || !requestItem.trim()) return;
-    setBusy(true);
-    try {
-      await createInfoRequest({
-        applicationId: application.id,
-        landlordId: application.landlord_id,
-        tenantId: application.tenant_id,
-        item: requestItem.trim(),
-        message: requestMessage.trim() || undefined,
-        dueDate: requestDue || undefined
-      });
-      setRequestOpen(false);
-      setRequestItem('');
-      setRequestMessage('');
-      setRequestDue('');
-      await load();
-      toast({ title: 'Request sent', description: 'The applicant has been asked for more information.' });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Could not send the request', description: error.message });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const submitResponse = async (request: InfoRequest) => {
-    const response = (responses[request.id] || '').trim();
-    if (!response) {
-      toast({ variant: 'destructive', title: 'Please write a response first' });
-      return;
-    }
-    setBusy(true);
-    try {
-      await respondToInfoRequest(request, response);
-      await load();
-      toast({ title: 'Response sent', description: 'The landlord has been notified.' });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Could not send your response', description: error.message });
-    } finally {
-      setBusy(false);
-    }
+  const startLease = () => {
+    if (!application) return;
+    navigate(`/lease/builder?tenantId=${application.tenant_id}&propertyId=${application.property_id}`);
   };
 
   const handleWithdraw = async () => {
@@ -265,24 +173,10 @@ export default function ApplicationDetail() {
     try {
       await withdrawApplication(application.id);
       setWithdrawOpen(false);
-      await load();
       toast({ title: 'Application withdrawn' });
+      navigate(dashboard);
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Could not withdraw', description: error.message });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const saveNote = async () => {
-    if (!application || !newNote.trim()) return;
-    setBusy(true);
-    try {
-      const note = await addNote(application.id, application.landlord_id, newNote.trim());
-      setNotes((prev) => [note, ...prev]);
-      setNewNote('');
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Could not save the note', description: error.message });
     } finally {
       setBusy(false);
     }
@@ -314,7 +208,23 @@ export default function ApplicationDetail() {
   const active = ACTIVE_STATUSES.includes(application.status);
   const snapshotData = application.snapshot ? mergeDraft(application.snapshot) : null;
   const groups = snapshotData ? summaryGroups(snapshotData) : [];
-  const openRequests = infoRequests.filter((r) => r.status === 'open');
+
+  // Role-aware status line under the title, driven by the current workflow state.
+  const statusMessage = viewerIsLandlord
+    ? (active
+        ? 'New application — review and decide'
+        : application.status === 'accepted'
+          ? 'Approved — generate a lease for this applicant'
+          : application.status === 'declined'
+            ? 'You declined this application'
+            : presentation.label)
+    : (active
+        ? 'Application submitted — awaiting landlord review'
+        : application.status === 'accepted'
+          ? 'Application approved'
+          : application.status === 'declined'
+            ? 'Application not approved'
+            : presentation.description);
 
   const decisionBanner =
     application.status === 'accepted'
@@ -347,6 +257,7 @@ export default function ApplicationDetail() {
               {presentation.label}
             </Badge>
           </div>
+          <p className="text-sm font-medium text-primary">{statusMessage}</p>
           <p className="text-muted-foreground text-sm">
             {property?.title ? `${property.title} · ` : ''}
             Submitted {new Date(application.submitted_at || application.created_at).toLocaleDateString()} · Ref{' '}
@@ -363,95 +274,7 @@ export default function ApplicationDetail() {
           </Card>
         )}
 
-        {/* Open information requests */}
-        {infoRequests.length > 0 && (
-          <Card className="mb-6 border-amber-300">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Information requests</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {infoRequests.map((r) => (
-                <div key={r.id} className="border rounded-lg p-3 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-sm font-medium">{r.item}</p>
-                    <Badge
-                      className={
-                        r.status === 'open'
-                          ? 'bg-amber-100 text-amber-800 hover:bg-amber-100'
-                          : 'bg-green-100 text-green-800 hover:bg-green-100'
-                      }
-                    >
-                      {r.status === 'open' ? 'Waiting for response' : 'Responded'}
-                    </Badge>
-                  </div>
-                  {r.message && <p className="text-sm text-muted-foreground">{r.message}</p>}
-                  {r.due_date && (
-                    <p className="text-xs text-muted-foreground">
-                      Requested by {new Date(r.due_date).toLocaleDateString()}
-                    </p>
-                  )}
-                  {r.response && (
-                    <div className="rounded bg-muted p-2 text-sm">
-                      <span className="text-muted-foreground">Response: </span>
-                      {r.response}
-                    </div>
-                  )}
-                  {!viewerIsLandlord && r.status === 'open' && (
-                    <div className="space-y-2 pt-1">
-                      <Label htmlFor={`response_${r.id}`} className="text-xs">
-                        Your response
-                      </Label>
-                      <Textarea
-                        id={`response_${r.id}`}
-                        value={responses[r.id] || ''}
-                        onChange={(e) => setResponses((prev) => ({ ...prev, [r.id]: e.target.value }))}
-                      />
-                      <Button size="sm" disabled={busy} onClick={() => submitResponse(r)}>
-                        Send response
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
         <div className="space-y-4">
-          {/* Consent status — always explicit, never assumed */}
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Screening consent</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {consent ? (
-                <div className="flex items-start gap-2 text-sm">
-                  {consent.consented ? (
-                    <ShieldCheck className="h-4 w-4 text-green-600 shrink-0 mt-0.5" aria-hidden="true" />
-                  ) : (
-                    <ShieldOff className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" aria-hidden="true" />
-                  )}
-                  <div>
-                    <p className="font-medium">
-                      {consent.consented ? 'Consent given' : 'Consent not given'}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Recorded {shortDateTime(consent.created_at)} (wording {consent.consent_version})
-                      {!consent.consented && viewerIsLandlord &&
-                        ' — screening checks cannot be performed for this application.'}
-                    </p>
-                    <details className="mt-1 text-xs text-muted-foreground">
-                      <summary className="cursor-pointer select-none">View exact wording</summary>
-                      <p className="mt-1">{consent.consent_text_snapshot}</p>
-                    </details>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">No consent record for this application.</p>
-              )}
-            </CardContent>
-          </Card>
-
           {/* Submitted answers */}
           {groups.map((group) => {
             const chip = STATUS_CHIP[group.status];
@@ -537,80 +360,37 @@ export default function ApplicationDetail() {
             </CardContent>
           </Card>
 
-          {/* Landlord decision + tools */}
-          {viewerIsLandlord && (
-            <>
-              {active && (
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base">Your decision</CardTitle>
-                  </CardHeader>
-                  <CardContent className="flex flex-wrap gap-2">
-                    <Button onClick={() => setDecision('accepted')} disabled={busy}>
-                      Approve application
-                    </Button>
-                    <Button variant="destructive" onClick={() => setDecision('declined')} disabled={busy}>
-                      Decline application
-                    </Button>
-                    <Button variant="outline" onClick={() => setRequestOpen(true)} disabled={busy}>
-                      Request more information
-                    </Button>
-                  </CardContent>
-                </Card>
-              )}
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-base">Private notes</CardTitle>
-                  <p className="text-xs text-muted-foreground">Only you can see these.</p>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex gap-2">
-                    <Textarea
-                      aria-label="Add a private note"
-                      rows={2}
-                      value={newNote}
-                      onChange={(e) => setNewNote(e.target.value)}
-                      placeholder="e.g. called the reference, checking payslip"
-                    />
-                  </div>
-                  <Button size="sm" variant="outline" onClick={saveNote} disabled={busy || !newNote.trim()}>
-                    Add note
-                  </Button>
-                  {notes.map((n) => (
-                    <div key={n.id} className="text-sm border rounded-lg p-2">
-                      <p className="break-words">{n.note}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{shortDateTime(n.created_at)}</p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </>
+          {/* Landlord decision */}
+          {viewerIsLandlord && active && (
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Your decision</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-2">
+                <Button onClick={() => setDecision('accepted')} disabled={busy}>
+                  Approve application
+                </Button>
+                <Button variant="destructive" onClick={() => setDecision('declined')} disabled={busy}>
+                  Decline application
+                </Button>
+              </CardContent>
+            </Card>
           )}
 
-          {/* Audit trail */}
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <History className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                <CardTitle className="text-base">History</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {events.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No events recorded yet.</p>
-              ) : (
-                <div className="space-y-2">
-                  {events.map((e) => (
-                    <div key={e.id} className="text-sm flex justify-between gap-2">
-                      <span className="break-words">{eventDescription(e)}</span>
-                      <span className="text-xs text-muted-foreground shrink-0">{shortDateTime(e.created_at)}</span>
-                    </div>
-                  ))}
+          {/* Landlord shortcut to lease creation once approved */}
+          {viewerIsLandlord && application.status === 'accepted' && (
+            <Card className="border-primary/30">
+              <CardContent className="p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+                <div>
+                  <p className="font-semibold">Application approved — generate a lease now</p>
+                  <p className="text-sm text-muted-foreground">
+                    Create the lease for {applicantName || 'this applicant'} to get things moving.
+                  </p>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+                <Button className="shrink-0" onClick={startLease}>Generate lease</Button>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Tenant withdrawal */}
           {!viewerIsLandlord && active && (
@@ -632,12 +412,12 @@ export default function ApplicationDetail() {
             </DialogTitle>
             <DialogDescription>
               {decision === 'accepted'
-                ? 'The applicant will be notified that you approved their rental application. This ends the application process.'
+                ? 'The applicant will be notified that you approved their rental application. You can then generate a lease for them.'
                 : 'The applicant will be notified that you decided not to proceed. This ends the application process.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setDecision(null)} disabled={busy}>
+            <Button variant="secondary" onClick={() => setDecision(null)} disabled={busy}>
               Cancel
             </Button>
             <Button variant={decision === 'declined' ? 'destructive' : 'default'} onClick={recordDecision} disabled={busy}>
@@ -647,53 +427,24 @@ export default function ApplicationDetail() {
         </DialogContent>
       </Dialog>
 
-      {/* Request more information */}
-      <Dialog open={requestOpen} onOpenChange={setRequestOpen}>
+      {/* Approved — generate a lease. Closing this returns to the dashboard. */}
+      <Dialog open={approvedOpen} onOpenChange={(open) => { if (!open) navigate(dashboard); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Request more information</DialogTitle>
-            <DialogDescription>
-              The applicant will be notified and can respond securely. The original application
-              stays unchanged.
+            <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+              <CheckCircle2 className="h-6 w-6 text-green-600" />
+            </div>
+            <DialogTitle className="text-center">Application approved — generate a lease now</DialogTitle>
+            <DialogDescription className="text-center">
+              You've approved {applicantName || 'the applicant'}
+              {property?.title ? ` for ${property.title}` : ''}. Start their lease to keep the momentum going.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="request_item">What do you need? *</Label>
-              <Select value={requestItem} onValueChange={setRequestItem}>
-                <SelectTrigger id="request_item">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {REQUEST_ITEM_SUGGESTIONS.map((s) => (
-                    <SelectItem key={s} value={s}>
-                      {s}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="request_message">Details for the applicant</Label>
-              <Textarea
-                id="request_message"
-                value={requestMessage}
-                onChange={(e) => setRequestMessage(e.target.value)}
-                placeholder="Explain exactly what you need"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="request_due">Needed by (optional)</Label>
-              <Input id="request_due" type="date" value={requestDue} onChange={(e) => setRequestDue(e.target.value)} />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setRequestOpen(false)} disabled={busy}>
-              Cancel
+          <DialogFooter className="gap-2 sm:justify-center">
+            <Button variant="secondary" onClick={() => navigate(dashboard)}>
+              Go to dashboard
             </Button>
-            <Button onClick={sendInfoRequest} disabled={busy || !requestItem.trim()}>
-              {busy ? 'Sending…' : 'Send request'}
-            </Button>
+            <Button onClick={startLease}>Generate lease</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -709,7 +460,7 @@ export default function ApplicationDetail() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setWithdrawOpen(false)} disabled={busy}>
+            <Button variant="secondary" onClick={() => setWithdrawOpen(false)} disabled={busy}>
               Keep my application
             </Button>
             <Button variant="destructive" onClick={handleWithdraw} disabled={busy}>

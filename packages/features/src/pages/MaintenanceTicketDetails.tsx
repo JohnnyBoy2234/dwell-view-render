@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/compon
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { ArrowLeft, Calendar, Building, Wrench, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Building, Wrench, CheckCircle2, Hash, FileText } from 'lucide-react';
 import type { MaintenanceRequest, MaintenanceStatus } from '@mzanzihomes/common/types/maintenance';
 
 const priorityColors = {
@@ -108,7 +108,13 @@ export default function MaintenanceTicketDetails() {
 
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
-      <p className="text-sm text-muted-foreground">Request #{ticket.id.slice(0, 8)}</p>
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <Hash className="h-3 w-3" />
+          <span className="font-mono">{ticket.id.slice(0, 8)}</span>
+        </span>
+        <span className="text-xs text-muted-foreground">Maintenance request</span>
+      </div>
 
       {/* The request */}
       <Card>
@@ -129,10 +135,14 @@ export default function MaintenanceTicketDetails() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label className="text-sm font-medium">Description</Label>
-            <p className="mt-1 text-sm text-muted-foreground leading-relaxed break-words">
-              {ticket.description}
-            </p>
+            <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <FileText className="h-3.5 w-3.5" /> Description
+            </Label>
+            <div className="mt-1.5 rounded-xl border bg-muted/30 p-3.5">
+              <p className="text-sm leading-relaxed text-foreground/90 break-words whitespace-pre-wrap">
+                {ticket.description?.trim() || 'No description provided.'}
+              </p>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">

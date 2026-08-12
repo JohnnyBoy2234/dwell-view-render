@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useEffect, useRef } from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import { useUnpaidBill } from '../hooks/useUnpaidBill';
 import { BillDetailSheet } from './BillDetailSheet';
 
@@ -37,6 +37,12 @@ export function RentDueBanner() {
   const { data: bill } = useUnpaidBill();
   const [open, setOpen] = useState(false);
   const [payNow, setPayNow] = useState(false);
+  // Let the tenant dismiss the banner so it doesn't stay pinned the whole
+  // session. Keyed by bill period, so it reappears next session or when a new
+  // month's bill is raised — never permanently hidden.
+  const [dismissedPeriod, setDismissedPeriod] = useState<string | null>(() => {
+    try { return sessionStorage.getItem('rentBannerDismissed'); } catch { return null; }
+  });
 
   // Green success flash right after a rent payment (flag set on PaymentSuccess).
   // The banner is mounted at the app root and never unmounts on SPA navigation,
@@ -60,7 +66,8 @@ export function RentDueBanner() {
     };
   }, []);
 
-  const bannerRef = useBannerHeightVar(justPaid || !!bill, justPaid ? 'paid' : 'due');
+  const isDismissed = !!bill && dismissedPeriod === bill.period;
+  const bannerRef = useBannerHeightVar(justPaid || (!!bill && !isDismissed), justPaid ? 'paid' : 'due');
 
   if (justPaid) {
     return (
@@ -75,30 +82,48 @@ export function RentDueBanner() {
     );
   }
 
-  if (!bill) return null;
+  if (!bill || isDismissed) return null;
   const monthName = new Date(`${bill.period}-01`).toLocaleDateString('en-ZA', { month: 'long' });
+
+  const dismiss = () => {
+    setDismissedPeriod(bill.period);
+    try { sessionStorage.setItem('rentBannerDismissed', bill.period); } catch { /* ignore */ }
+  };
 
   return (
     <>
-      <button
+      <div
         ref={bannerRef}
-        onClick={() => { setPayNow(false); setOpen(true); }}
-        className="sticky top-0 z-50 flex w-full items-center justify-between gap-3 bg-red-600 px-4 py-2.5 text-left text-white"
-        aria-label={`Rent due ${fmtR(Number(bill.total_amount))} — view bill`}
+        className="sticky top-0 z-50 flex w-full items-center justify-between gap-2 bg-red-600 px-4 py-2.5 text-white"
       >
-        <span className="min-w-0">
-          <span className="block truncate text-sm font-bold leading-tight">
-            {monthName} rent &amp; utilities
-          </span>
-          <span className="block truncate text-xs opacity-90">{fmtR(Number(bill.total_amount))} outstanding</span>
-        </span>
-        <span
-          onClick={(e) => { e.stopPropagation(); setPayNow(true); setOpen(true); }}
-          className="shrink-0 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-red-600"
+        <button
+          type="button"
+          onClick={() => { setPayNow(false); setOpen(true); }}
+          className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+          aria-label={`Rent due ${fmtR(Number(bill.total_amount))} — view bill`}
         >
-          Pay now
-        </span>
-      </button>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-bold leading-tight">
+              {monthName} rent &amp; utilities
+            </span>
+            <span className="block truncate text-xs opacity-90">{fmtR(Number(bill.total_amount))} outstanding</span>
+          </span>
+          <span
+            onClick={(e) => { e.stopPropagation(); setPayNow(true); setOpen(true); }}
+            className="shrink-0 rounded-full bg-white px-4 py-1.5 text-xs font-bold text-red-600"
+          >
+            Pay now
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={dismiss}
+          className="shrink-0 rounded-full p-1 text-white/80 transition-colors hover:bg-white/15 hover:text-white"
+          aria-label="Dismiss rent reminder"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      </div>
       <BillDetailSheet bill={bill} open={open} onOpenChange={setOpen} autoPay={payNow} />
     </>
   );

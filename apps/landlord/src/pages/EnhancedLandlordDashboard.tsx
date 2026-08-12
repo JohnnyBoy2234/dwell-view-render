@@ -1236,8 +1236,9 @@ export default function EnhancedLandlordDashboard() {
       return (
         <div className="min-h-screen bg-white pb-8 w-full">
           <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
-            {!recordId && <LandlordModuleIntro module="inspection" />}
+            {!recordId && <LandlordModuleIntro module="inspection" section="hero" />}
             {recordId ? <ConditionRecordDetail recordId={recordId} /> : <ConditionRecordsPage />}
+            {!recordId && <LandlordModuleIntro module="inspection" section="tips" />}
           </div>
         </div>
       );
@@ -1314,7 +1315,7 @@ export default function EnhancedLandlordDashboard() {
   const renderInventoryTab = () => (
     <div className="min-h-screen bg-white pb-8">
       <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4">
-        <LandlordModuleIntro module="inventory" />
+        <LandlordModuleIntro module="inventory" section="hero" />
         <PropertyInventoryManager
           properties={properties.map((p: any) => ({ id: p.id, title: p.title }))}
           initialPropertyId={selectedPropertyId}
@@ -1384,6 +1385,8 @@ export default function EnhancedLandlordDashboard() {
             description: 'Inventory report generation is coming soon.',
           })}
         />
+
+        <LandlordModuleIntro module="inventory" section="tips" />
       </div>
     </div>
   );
@@ -1415,10 +1418,27 @@ export default function EnhancedLandlordDashboard() {
       (p) => propertyIdsWithApps.has(p.id) || (prospectsByProperty[p.id]?.length ?? 0) > 0
     );
 
+    // Role-aware, workflow-driven hero status instead of a static message.
+    const reviewCount =
+      applications.filter((a: any) =>
+        ['pending', 'submitted', 'pending_credit_check', 'more_info_requested'].includes(a.status)
+      ).length + pendingRequestCount;
+    const approvedCount = applications.filter((a: any) => a.status === 'accepted').length;
+    const applicationsStatus =
+      reviewCount > 0
+        ? reviewCount === 1
+          ? 'Review application — 1 awaiting your review'
+          : `Review applications — ${reviewCount} awaiting your review`
+        : approvedCount > 0
+          ? approvedCount === 1
+            ? '1 approved — generate a lease'
+            : `${approvedCount} approved — generate a lease`
+          : 'No applications yet — invite tenants to apply';
+
     return (
       <div className="min-h-screen bg-white pb-8 w-full">
         <div className="mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-4 w-full">
-          <LandlordModuleIntro module="applications" />
+          <LandlordModuleIntro module="applications" statusMessage={applicationsStatus} />
           {/* Application Requests Section */}
           <ApplicationRequestsManager propertyId={selectedPropertyId || undefined} />
 
@@ -2599,7 +2619,7 @@ const renderReportsTab = () => (
     return (
       <div className="min-h-screen bg-white pb-8">
         <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-8 space-y-6 pt-8 w-full">
-        <LandlordModuleIntro module="maintenance" />
+        <LandlordModuleIntro module="maintenance" section="hero" />
         {loadingMaintenance ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -2630,6 +2650,7 @@ const renderReportsTab = () => (
             ))}
           </div>
         )}
+        <LandlordModuleIntro module="maintenance" section="tips" />
         </div>
       </div>
     );

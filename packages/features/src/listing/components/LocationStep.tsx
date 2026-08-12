@@ -203,6 +203,10 @@ export default function LocationStep({ control, errors, watch, setValue, structu
             <FileText className="h-4 w-4" />
             Property Description
           </Label>
+          <p className="rounded-lg bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+            ✨ Prefer to let AI do it? You can leave this blank — on the final <span className="font-medium text-foreground">Review</span> step you can tap
+            <span className="font-medium text-foreground"> Write with AI</span>, and once all your property details are filled in it will write the full description for you.
+          </p>
           <Controller
             name="description"
             control={control}

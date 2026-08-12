@@ -133,6 +133,16 @@ FINANCIAL DETAILS
 Deposit Amount: {{DEPOSIT_AMOUNT}}
 Late Payment Fee: {{LATE_FEE_AMOUNT}}
 
+[[IF BANK_DETAILS_PROVIDED]]
+PAYMENT DETAILS (RENT COLLECTION)
+Rent is payable by electronic transfer to the following account:
+Account Holder: {{LANDLORD_ACCOUNT_HOLDER}}
+Bank: {{LANDLORD_BANK_NAME}}
+Branch Code: {{LANDLORD_BRANCH_CODE}}
+Account Number: {{LANDLORD_ACCOUNT_NUMBER}}
+Payment Reference: {{LANDLORD_REFERENCE}}
+
+[[ENDIF]]
 OCCUPANTS
 {{OCCUPANTS_LIST}}
 
@@ -715,7 +725,7 @@ function buildTemplateVariables(d: any): Record<string, string> {
     LANDLORD_ACCOUNT_HOLDER: d.landlordAccountHolder || d.landlordFullName || d.landlordName || '',
     LANDLORD_BRANCH_CODE: d.landlordBranchCode || d.branchCode || '',
     LANDLORD_ACCOUNT_NUMBER: d.landlordAccountNumber || d.accountNumber || '',
-    LANDLORD_REFERENCE: d.landlordReference || d.paymentReference || '',
+    LANDLORD_REFERENCE: d.landlordReference || d.paymentReference || d.tenantFullName || d.tenantName || '',
 
     OCCUPANTS_LIST: d.occupantsList || 'As per application',
 
@@ -727,6 +737,8 @@ function buildTemplateVariables(d: any): Record<string, string> {
 
 function evaluateCondition(condition: string, d: any): boolean {
   switch (condition.trim().toUpperCase()) {
+    case 'BANK_DETAILS_PROVIDED':
+      return !!(d.landlordAccountNumber || d.accountNumber);
     case 'CPA_APPLIES':
       // Wizard default is true; old contract_data lacks the flag entirely
       return d.cpaApplies !== false;
@@ -1126,6 +1138,9 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
       if (/^=+$/.test(line)) {
         const title = (lines[i + 1] || '').trim();
         if (title && !/^=+$/.test(title) && /^=+$/.test((lines[i + 2] || '').trim())) {
+          // Start the signatures on a fresh page so the landlord + tenant
+          // signature/date blocks stay together on one page.
+          if (title === 'SIGNATURES') newPage();
           ensureSpace(sizes.h2 + 3 * lineGap);
           y -= lineGap;
           page.drawText(title, { x: margin, y, size: sizes.h2, font: fontBold, color: colors.brand });

@@ -90,8 +90,8 @@ export function ConditionRecordsPage() {
       {!list.error && list.records.length === 0 && (
         <Card className="border-dashed">
           <CardContent className="py-12 text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50">
-              <Camera className="h-6 w-6 text-blue-500" aria-hidden="true" />
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
+              <Camera className="h-6 w-6 text-red-500" aria-hidden="true" />
             </div>
             <p className="font-semibold">No inspections yet</p>
             <p className="mx-auto mt-1 max-w-sm text-sm text-muted-foreground">
@@ -127,8 +127,8 @@ function RecordCard({ item, onOpen }: { item: ConditionRecordListItem; onOpen: (
       onClick={onOpen}
     >
       <CardContent className="flex items-start gap-3 p-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-          <Camera className="h-5 w-5 text-blue-500" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-50">
+          <Camera className="h-5 w-5 text-red-500" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="break-words font-semibold">
@@ -273,7 +273,10 @@ export function ConditionRecordDetail({ recordId }: { recordId: string | null })
   const locked = state === 'locked';
   const otherParty: ConditionParty = d.myParty === 'landlord' ? 'tenant' : 'landlord';
   // Notes are editable only while the record is open.
-  const canEdit = state === 'open' && !!d.myParty;
+  // Notes stay editable (for either party, incl. the tenant) until the record
+  // locks — set_condition_notes only blocks once locked, so tenants can still
+  // add notes while the inspection is awaiting approval, not just while open.
+  const canEdit = state !== 'locked' && !!d.myParty;
   const myAttestedAt =
     d.myParty === 'tenant' ? d.record.tenant_attested_at : d.record.landlord_attested_at;
   // Either party can keep adding their own photos until THEY sign off, so both

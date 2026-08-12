@@ -1,8 +1,8 @@
 // @ts-nocheck
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Plus, FileText, Eye, Download, PenLine, Edit, MapPin, CalendarDays, User,
+  Plus, FileText, Download, PenLine, Edit, MapPin, CalendarDays, User,
   ChevronRight, MessageCircle, CheckCircle2, Loader2,
 } from 'lucide-react';
 import { useLeaseContracts } from '../hooks/useLeaseContracts';
@@ -10,7 +10,6 @@ import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 import { RentCollectionCard } from '../../billing/components/RentCollectionCard';
-import { LeaseDocumentViewer } from './LeaseDocumentViewer';
 import { LeaseSignaturePad } from './LeaseSignaturePad';
 import { CreateLeaseModal } from './CreateLeaseModal';
 import type { LeaseContract } from '@mzanzihomes/common/types/lease';
@@ -129,6 +128,52 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   const pending = useMemo(() => contracts.filter((c) => c.status === 'pending_tenant' || c.status === 'pending_landlord'), [contracts]);
   const signed = useMemo(() => contracts.filter((c) => c.status === 'signed'), [contracts]);
 
+  // Approved applicants who don't yet have a lease — the landlord picks one to
+  // generate their lease. Fetched here so the Lease tab is a natural next step
+  // after approving an application.
+  const [approved, setApproved] = useState<any[]>([]);
+  useEffect(() => {
+    if (!isLandlord || !user) return;
+    let active = true;
+    (async () => {
+      let q = (supabase.from('applications') as any)
+        .select('id, tenant_id, property_id, status, created_at, properties(title, location)')
+        .eq('landlord_id', user.id)
+        .in('status', ['accepted', 'approved'])
+        .order('created_at', { ascending: false });
+      if (propertyId) q = q.eq('property_id', propertyId);
+      const { data } = await q;
+      const rows = data || [];
+      const ids = Array.from(new Set(rows.map((r: any) => r.tenant_id)));
+      const names: Record<string, string> = {};
+      if (ids.length) {
+        const { data: profs } = await (supabase.from('profiles') as any)
+          .select('user_id, display_name')
+          .in('user_id', ids);
+        (profs || []).forEach((p: any) => { names[p.user_id] = p.display_name; });
+      }
+      if (active) {
+        setApproved(rows.map((r: any) => ({
+          id: r.id,
+          tenant_id: r.tenant_id,
+          property_id: r.property_id,
+          property_title: r.properties?.title,
+          tenant_name: names[r.tenant_id],
+        })));
+      }
+    })();
+    return () => { active = false; };
+  }, [isLandlord, user, propertyId, contracts.length]);
+
+  const contractKeys = useMemo(
+    () => new Set(contracts.map((c: any) => `${c.tenant_id}:${c.property_id}`)),
+    [contracts]
+  );
+  const approvedNeedingLease = useMemo(
+    () => approved.filter((a) => !contractKeys.has(`${a.tenant_id}:${a.property_id}`)),
+    [approved, contractKeys]
+  );
+
   const canSign = (contract: LeaseContract) => {
     // Tenant signs first; the landlord countersigns once the tenant has signed.
     if (isLandlord) return !!contract.tenant_signed_at && !contract.landlord_signed_at;
@@ -136,7 +181,6 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
     return false;
   };
 
-  const handleView = (c: LeaseContract) => setSelectedContract(c);
   const handleSign = (c: LeaseContract) => { setSelectedContract(c); setShowSignaturePad(true); };
   const handleEdit = (c: LeaseContract) => navigate(`/lease/builder/${c.id}`);
   const handleDownload = async (c: LeaseContract) => {
@@ -167,6 +211,18 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
   // collection (prefilled from the wizard's banking). Otherwise just refresh.
   const handleSigned = async (result: { status?: string } | undefined, contract: LeaseContract | null) => {
     setShowSignaturePad(false);
+    // Signing writes the signature to the contract row but does NOT rebuild the
+    // PDF, so the stored document would still show blank signature lines on
+    // download. Regenerate it now (force) so the just-added signature + date
+    // land on the dedicated lines. Non-fatal if it fails — download regenerates
+    // on demand.
+    if (contract?.id) {
+      try {
+        await supabase.functions.invoke('generate-lease-pdf', {
+          body: { contractId: contract.id, force: true, ts: Date.now() },
+        });
+      } catch { /* ignore — on-demand download will regenerate */ }
+    }
     const fullySigned = result?.status === 'signed';
     if (isLandlord && fullySigned && user && contract) {
       try {
@@ -185,7 +241,6 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
 
   const TABS = [
     { key: 'all' as const, label: 'All', count: contracts.length },
-    { key: 'draft' as const, label: 'Draft', count: drafts.length },
     { key: 'pending' as const, label: 'Pending', count: pending.length },
     { key: 'signed' as const, label: 'Signed', count: signed.length },
   ];
@@ -221,6 +276,35 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
           </button>
         </div>
       </div>
+
+      {/* Approved applicants ready for a lease */}
+      {isLandlord && approvedNeedingLease.length > 0 && (
+        <div className="mt-4 rounded-[24px] bg-white p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+            <h3 className="text-[15px] font-extrabold text-slate-900">Approved applicants — ready for a lease</h3>
+          </div>
+          <p className="mt-1 text-[12.5px] text-slate-500">Pick an approved applicant to generate their lease.</p>
+          <div className="mt-3 space-y-2">
+            {approvedNeedingLease.map((a) => (
+              <div key={a.id} className="flex items-center justify-between gap-3 rounded-2xl border border-slate-100 p-3">
+                <div className="min-w-0">
+                  <p className="truncate text-[14px] font-semibold text-slate-900">{a.tenant_name || 'Applicant'}</p>
+                  <p className="truncate text-[12.5px] text-slate-500">{a.property_title || 'Property'}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => navigate(`/lease/builder?tenantId=${a.tenant_id}&propertyId=${a.property_id}`)}
+                  className="shrink-0 inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-[13px] font-bold text-white shadow-[0_10px_20px_-10px_rgba(99,102,241,0.8)] transition-transform active:scale-[0.97]"
+                  style={{ background: PURPLE }}
+                >
+                  <Plus className="h-4 w-4" /> Generate lease
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="mt-4 flex rounded-2xl bg-white p-1.5 shadow-sm">
@@ -292,13 +376,6 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
                   <div className="mt-3.5 flex flex-wrap gap-2 border-t border-slate-100 pt-3">
                     <button
                       type="button"
-                      onClick={() => handleView(c)}
-                      className="inline-flex items-center gap-1.5 rounded-xl border border-indigo-200 px-3.5 py-2 text-[13px] font-bold text-indigo-600 transition-transform active:scale-95"
-                    >
-                      <Eye className="h-4 w-4" /> View contract
-                    </button>
-                    <button
-                      type="button"
                       onClick={() => handleDownload(c)}
                       disabled={downloadingId === c.id}
                       className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-3.5 py-2 text-[13px] font-bold text-slate-600 transition-transform active:scale-95 disabled:opacity-60"
@@ -350,24 +427,6 @@ export function LeaseDashboard({ propertyId }: LeaseDashboardProps = {}) {
           </div>
           <span className="shrink-0 rounded-full border border-indigo-300 px-3 py-1.5 text-[12.5px] font-bold text-indigo-600">Open Messages</span>
         </button>
-      )}
-
-      {/* Contract details modal */}
-      {selectedContract && !showSignaturePad && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-4xl overflow-y-auto">
-            <div className="mb-4 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setSelectedContract(null)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700"
-              >
-                Close
-              </button>
-            </div>
-            <LeaseDocumentViewer contract={selectedContract} />
-          </div>
-        </div>
       )}
 
       {/* Signature pad modal */}

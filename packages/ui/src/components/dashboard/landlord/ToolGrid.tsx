@@ -5,7 +5,7 @@ import { GlossyIcon, GLOSSY_TONES } from '../../GlossyIcon';
 // Glossy candy-button tone per tool, matching the tenant home's tile tones.
 const TONE_BY_TITLE: Record<string, keyof typeof GLOSSY_TONES> = {
   Applications: 'orange',
-  Maintenance: 'gold',
+  Maintenance: 'green',
   Payments: 'teal',
   Leases: 'navy',
   Inventory: 'darkteal',
@@ -31,12 +31,12 @@ export interface ToolItem {
 // Design token colours per tool — aligned with the ios-* CSS variables in index.css
 const TOOL_COLORS: Record<string, { bg: string; iconColor: string; glow: string }> = {
   Applications: { bg: 'hsl(235 85% 60% / 0.12)', iconColor: 'hsl(235 85% 50%)',  glow: 'hsl(235 85% 60% / 0.22)' },
-  Maintenance:  { bg: 'hsl(25 95% 53% / 0.12)',  iconColor: 'hsl(25 95% 42%)',   glow: 'hsl(25 95% 53% / 0.28)' },
+  Maintenance:  { bg: 'hsl(142 72% 44% / 0.12)', iconColor: 'hsl(142 72% 34%)',  glow: 'hsl(142 72% 44% / 0.28)' },
   Payments:     { bg: 'hsl(142 72% 44% / 0.12)', iconColor: 'hsl(142 72% 34%)',  glow: 'hsl(142 72% 44% / 0.22)' },
   SwiftBooks:   { bg: 'hsl(275 84% 67% / 0.12)', iconColor: 'hsl(275 84% 52%)',  glow: 'hsl(275 84% 67% / 0.22)' },
   Leases:       { bg: 'hsl(214 100% 59% / 0.12)', iconColor: 'hsl(214 100% 44%)', glow: 'hsl(214 100% 59% / 0.22)' },
   Inventory:    { bg: 'hsl(174 72% 56% / 0.12)', iconColor: 'hsl(174 72% 36%)',  glow: 'hsl(174 72% 56% / 0.22)' },
-  'Inspection List': { bg: 'hsl(38 95% 52% / 0.12)', iconColor: 'hsl(38 95% 38%)', glow: 'hsl(38 95% 52% / 0.25)' },
+  'Inspection List': { bg: 'hsl(0 84% 60% / 0.12)', iconColor: 'hsl(0 72% 45%)', glow: 'hsl(0 84% 60% / 0.25)' },
   Support:        { bg: 'hsl(220 9% 46% / 0.09)',  iconColor: 'hsl(220 9% 34%)',   glow: 'hsl(220 9% 46% / 0.18)' },
   'Invite Tenant':{ bg: 'hsl(214 100% 59% / 0.12)', iconColor: 'hsl(214 100% 44%)', glow: 'hsl(214 100% 59% / 0.22)' },
   'List Property':{ bg: 'hsl(270 80% 60% / 0.12)', iconColor: 'hsl(270 80% 44%)',  glow: 'hsl(270 80% 60% / 0.22)' },

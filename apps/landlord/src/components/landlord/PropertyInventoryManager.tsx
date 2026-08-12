@@ -7,7 +7,7 @@ import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from '@mzanzihomes/ui/components/dialog';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
@@ -353,37 +353,50 @@ export function PropertyInventoryManager({
       </CardContent>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+        <DialogContent className="max-w-lg max-h-[88vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'Edit item' : 'Add item'}</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-100 text-teal-600">
+                <Package className="h-4 w-4" />
+              </span>
+              {editingId ? 'Edit item' : 'Add inventory item'}
+            </DialogTitle>
+            <DialogDescription>
+              Record what's supplied with the property, its condition and photos — so nothing is disputed later.
+            </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3">
-            <div className="space-y-1">
-              <Label htmlFor="inv-room">Room or category *</Label>
-              <Input id="inv-room" list="inv-room-suggestions" value={form.room} onChange={setField('room')} placeholder="e.g. Living room" />
-              <datalist id="inv-room-suggestions">
-                {ROOM_SUGGESTIONS.map((r) => <option key={r} value={r} />)}
-              </datalist>
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-name">Item name *</Label>
-              <Input id="inv-name" value={form.name} onChange={setField('name')} placeholder="e.g. Couch" />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-qty">Quantity</Label>
-              <Input id="inv-qty" type="number" min={1} value={form.quantity} onChange={setField('quantity')} />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
+
+          <div className="space-y-5">
+            {/* Basics */}
+            <div className="rounded-2xl border bg-muted/20 p-4 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">The basics</p>
               <div className="space-y-1">
-                <Label>Condition</Label>
-                <Select value={form.condition} onValueChange={(v) => setForm((prev) => ({ ...prev, condition: v }))}>
-                  <SelectTrigger><SelectValue placeholder="Condition" /></SelectTrigger>
-                  <SelectContent>
-                    {CONDITION_CHOICES.map((c) => (
-                      <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="inv-room">Room or area <span className="text-red-500">*</span></Label>
+                <Input id="inv-room" list="inv-room-suggestions" value={form.room} onChange={setField('room')} placeholder="e.g. Living room" />
+                <datalist id="inv-room-suggestions">
+                  {ROOM_SUGGESTIONS.map((r) => <option key={r} value={r} />)}
+                </datalist>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="inv-name">Item name <span className="text-red-500">*</span></Label>
+                <Input id="inv-name" value={form.name} onChange={setField('name')} placeholder="e.g. Couch" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="inv-qty">Quantity</Label>
+                  <Input id="inv-qty" type="number" min={1} value={form.quantity} onChange={setField('quantity')} />
+                </div>
+                <div className="space-y-1">
+                  <Label>Condition</Label>
+                  <Select value={form.condition} onValueChange={(v) => setForm((prev) => ({ ...prev, condition: v }))}>
+                    <SelectTrigger><SelectValue placeholder="Condition" /></SelectTrigger>
+                    <SelectContent>
+                      {CONDITION_CHOICES.map((c) => (
+                        <SelectItem key={c.value} value={c.value}>{c.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="space-y-1">
                 <Label>Category</Label>
@@ -398,34 +411,52 @@ export function PropertyInventoryManager({
                 </Select>
               </div>
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-desc">Description</Label>
-              <Input id="inv-desc" value={form.description} onChange={setField('description')} placeholder="e.g. 3-seater, grey fabric" />
+
+            {/* Details */}
+            <div className="rounded-2xl border bg-muted/20 p-4 space-y-3">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Details <span className="normal-case font-normal">(optional)</span></p>
+              <div className="space-y-1">
+                <Label htmlFor="inv-desc">Description</Label>
+                <Input id="inv-desc" value={form.description} onChange={setField('description')} placeholder="e.g. 3-seater, grey fabric" />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <Label htmlFor="inv-brand">Brand or model</Label>
+                  <Input id="inv-brand" value={form.brand_model} onChange={setField('brand_model')} placeholder="e.g. Samsung" />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="inv-serial">Serial number</Label>
+                  <Input id="inv-serial" value={form.serial_number} onChange={setField('serial_number')} />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="inv-note">Note</Label>
+                <Textarea id="inv-note" rows={2} value={form.note} onChange={setField('note')} placeholder="Any existing marks, wear or details worth recording" />
+              </div>
             </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-brand">Brand or model</Label>
-              <Input id="inv-brand" value={form.brand_model} onChange={setField('brand_model')} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-serial">Serial number</Label>
-              <Input id="inv-serial" value={form.serial_number} onChange={setField('serial_number')} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-note">Note</Label>
-              <Textarea id="inv-note" rows={2} value={form.note} onChange={setField('note')} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="inv-photos" className="flex items-center gap-1">
+
+            {/* Photos */}
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <Camera className="h-4 w-4" /> Photos
               </Label>
-              <Input
-                id="inv-photos"
-                type="file"
-                accept="image/*"
-                multiple
-                capture="environment"
-                onChange={(e) => setNewFiles((prev) => [...prev, ...Array.from(e.target.files || [])])}
-              />
+              <label
+                htmlFor="inv-photos"
+                className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-muted-foreground/25 bg-muted/20 px-4 py-6 text-center transition-colors hover:border-teal-400 hover:bg-teal-50/40"
+              >
+                <Camera className="h-6 w-6 text-teal-500" />
+                <span className="text-sm font-medium text-foreground">Tap to add photos</span>
+                <span className="text-xs text-muted-foreground">Take a photo or choose from your gallery</span>
+                <Input
+                  id="inv-photos"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  capture="environment"
+                  className="sr-only"
+                  onChange={(e) => setNewFiles((prev) => [...prev, ...Array.from(e.target.files || [])])}
+                />
+              </label>
               {(existingImages.length > 0 || newFiles.length > 0) && (
                 <div className="flex flex-wrap gap-2 pt-1">
                   {existingImages.map((url) => (

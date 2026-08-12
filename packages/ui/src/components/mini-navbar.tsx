@@ -20,7 +20,7 @@ export function MiniNavbar({ mode = 'rent', hideLandlordActions: hideLandlordAct
   const dashboardPath = isAdmin
     ? '/admin/dashboard'
     : isLandlord
-    ? '/enhancedlandlorddashboard'
+    ? '/landlord/dashboard'
     : '/tenant-dashboard';
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);

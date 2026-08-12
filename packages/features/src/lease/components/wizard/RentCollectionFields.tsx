@@ -11,11 +11,12 @@ interface Props {
 }
 
 /**
- * Optional "Rent collection" banking on the lease wizard. Captures the Paystack
- * settlement bank CODE + account details so the payout subaccount can be created
- * after both parties sign. Nothing here is printed in the lease PDF, and it does
- * NOT create the subaccount — that happens post-signing with a confirm step. A
- * landlord who skips this is pointed to the dashboard "Rent collection" tile.
+ * "Rent collection" banking on the lease wizard. Captures the Paystack settlement
+ * bank CODE + human-readable bank name + account holder + account number + branch
+ * code. These payout details are shown in the generated lease's Payment Details
+ * section and used to create the payout subaccount post-signing. Collected during
+ * lease creation (required with an explicit skip), so the landlord is set up
+ * before the lease is finalised rather than chasing it later.
  */
 export function RentCollectionFields({ data, onUpdate }: Props) {
   const [banks, setBanks] = useState<Array<{ name: string; code: string }>>([]);
@@ -38,14 +39,14 @@ export function RentCollectionFields({ data, onUpdate }: Props) {
 
   return (
     <Card
-      title="Rent collection"
-      subtitle="Optional — where rent gets paid out. Set up now or later."
+      title="Get paid on time, from day one"
+      subtitle="Add your payout bank account"
       icon={<Landmark className="h-4 w-4" />}
     >
       <p className="mb-3 rounded-xl bg-slate-50 px-3.5 py-2.5 text-[12.5px] leading-relaxed text-slate-500">
-        Add your bank account so tenants can pay rent in-app once the lease is signed. This isn't printed
-        in the lease. You can also set it up anytime from <span className="font-semibold text-slate-600">Rent
-        collection</span> on your dashboard.
+        Take a minute to add your bank account now and make rent collection effortless once the lease is
+        signed. Your tenant can pay securely in-app, helping you avoid payment delays and unnecessary
+        follow-ups.
       </p>
 
       <div className="grid gap-3 sm:grid-cols-2">
@@ -68,11 +69,19 @@ export function RentCollectionFields({ data, onUpdate }: Props) {
             placeholder={data.landlordFullName || 'Account holder name'}
           />
         </Field>
-        <Field label="Account number" className="sm:col-span-2">
+        <Field label="Account number">
           <TextInput
             value={data.landlordAccountNumber || ''}
             onChange={(e) => onUpdate({ landlordAccountNumber: e.target.value })}
             placeholder="1234567890"
+            inputMode="numeric"
+          />
+        </Field>
+        <Field label="Branch code">
+          <TextInput
+            value={data.landlordBranchCode || ''}
+            onChange={(e) => onUpdate({ landlordBranchCode: e.target.value })}
+            placeholder="250655"
             inputMode="numeric"
           />
         </Field>

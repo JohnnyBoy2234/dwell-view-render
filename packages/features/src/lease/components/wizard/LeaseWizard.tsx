@@ -2,6 +2,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Check, FileText, X } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle
+} from '@mzanzihomes/ui/components/dialog';
 import { toast } from 'sonner';
 import { useLeaseDraft } from '../../hooks/useLeaseDraft';
 import { StepWhoWhere } from './StepWhoWhere';
@@ -43,6 +46,7 @@ export function LeaseWizard(props: LeaseWizardProps) {
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [mobilePreview, setMobilePreview] = useState(false);
+  const [bankPrompt, setBankPrompt] = useState(false);
   const draft = useLeaseDraft({ contractId, propertyId, tenantId, onContractSaved });
   const { data, updateData, loading, saveStatus, savedContractId } = draft;
 
@@ -102,12 +106,16 @@ export function LeaseWizard(props: LeaseWizardProps) {
     : null;
   const termTooLong = leaseYears != null && leaseYears > 10;
 
-  const handleSend = async () => {
-    for (let s = 0; s < STEPS.length - 1; s++) {
-      const err = validateStep(s);
-      if (err) { setStep(s); return toast.error(err); }
-    }
-    if (termTooLong) { setStep(3); return; } // guardrail panel handles this
+  // Payout banking is a required-with-skip step: the landlord is nudged to add
+  // it before finishing (so rent collection is ready and the details print on
+  // the lease), but can explicitly choose "set up later".
+  const bankingComplete = !!(
+    (data.landlordAccountHolder?.trim()) &&
+    (data.landlordAccountNumber?.trim()) &&
+    (data.landlordBankName?.trim() || data.landlordBankCode?.trim())
+  );
+
+  const doSend = async () => {
     setSending(true);
     try {
       await draft.sendToTenant();
@@ -117,6 +125,16 @@ export function LeaseWizard(props: LeaseWizardProps) {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleSend = async () => {
+    for (let s = 0; s < STEPS.length - 1; s++) {
+      const err = validateStep(s);
+      if (err) { setStep(s); return toast.error(err); }
+    }
+    if (termTooLong) { setStep(3); return; } // guardrail panel handles this
+    if (!bankingComplete && !data.bankingSkipped) { setBankPrompt(true); return; }
+    await doSend();
   };
 
   if (loading) return <div className="flex items-center justify-center p-10 text-slate-500">Loading…</div>;
@@ -222,6 +240,35 @@ export function LeaseWizard(props: LeaseWizardProps) {
           )}
         </div>
       </div>
+
+      {/* Payout banking gate — required with an explicit skip */}
+      <Dialog open={bankPrompt} onOpenChange={setBankPrompt}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add your payout bank details?</DialogTitle>
+            <DialogDescription>
+              Add your bank account so rent can be paid to you and your payment details appear on the
+              lease. You can set it up later, but rent collection won't be ready until you do.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="secondary"
+              disabled={sending}
+              onClick={() => { updateData({ bankingSkipped: true }); setBankPrompt(false); void doSend(); }}
+            >
+              Set up later
+            </Button>
+            <Button
+              className="text-white"
+              style={{ background: LEASE_ACCENT }}
+              onClick={() => { setBankPrompt(false); setStep(1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+            >
+              Add bank details
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Sent confirmation */}
       <SuccessDialog

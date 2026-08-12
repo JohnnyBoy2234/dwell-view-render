@@ -48,6 +48,16 @@ FINANCIAL DETAILS
 Deposit Amount: {{DEPOSIT_AMOUNT}}
 Late Payment Fee: {{LATE_FEE_AMOUNT}}
 
+[[IF BANK_DETAILS_PROVIDED]]
+PAYMENT DETAILS (RENT COLLECTION)
+Rent is payable by electronic transfer to the following account:
+Account Holder: {{LANDLORD_ACCOUNT_HOLDER}}
+Bank: {{LANDLORD_BANK_NAME}}
+Branch Code: {{LANDLORD_BRANCH_CODE}}
+Account Number: {{LANDLORD_ACCOUNT_NUMBER}}
+Payment Reference: {{LANDLORD_REFERENCE}}
+
+[[ENDIF]]
 OCCUPANTS
 {{OCCUPANTS_LIST}}
 
