@@ -17,6 +17,7 @@ import { mergeDraft } from '../application/types';
 import { summaryGroups, type GroupStatus } from '../application/summary';
 import { applicationStatusPresentation } from '../application/applicationPresentation';
 import { withdrawApplication } from '../application/services/reviewService';
+import { AffordabilityLandlordReport, AffordabilityTenantFlow } from '../affordability';
 
 const ACTIVE_STATUSES = ['pending', 'submitted', 'pending_credit_check', 'more_info_requested'];
 
@@ -359,6 +360,13 @@ export default function ApplicationDetail() {
               )}
             </CardContent>
           </Card>
+
+          {/* Affordability assessment (decision-support). Landlord sees the full
+              report; the tenant sees the consent → upload → processing → summary
+              flow. Kept separate from the Approve/Decline decision below. */}
+          {viewerIsLandlord
+            ? <AffordabilityLandlordReport applicationId={application.id} />
+            : <AffordabilityTenantFlow applicationId={application.id} />}
 
           {/* Landlord decision */}
           {viewerIsLandlord && active && (
