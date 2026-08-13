@@ -12,6 +12,7 @@ import { extractPdf } from "./extract.ts";
 import { detectBank, findParser } from "./banks.ts";
 import { analyse, type Rules } from "./analyse.ts";
 import "./parsers/capitec.ts"; // self-registers the Capitec parser
+import "./parsers/standardbank.ts"; // self-registers the Standard Bank parser
 
 const BUCKET = 'affordability-statements';
 

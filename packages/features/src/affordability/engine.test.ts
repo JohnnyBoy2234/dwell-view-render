@@ -5,6 +5,7 @@ import path from 'node:path';
 // The deterministic engine + parser live with the edge pipeline (Deno), but are
 // pure TypeScript with no Deno/HTTP imports, so they run under Vitest too.
 import { capitecParser } from '../../../../supabase/functions/_shared/affordability/parsers/capitec.ts';
+import { standardBankParser } from '../../../../supabase/functions/_shared/affordability/parsers/standardbank.ts';
 import { analyse } from '../../../../supabase/functions/_shared/affordability/analyse.ts';
 
 const RULES = {
@@ -62,5 +63,34 @@ describe('affordability engine', () => {
   it('reports high confidence for a clean, reconciling statement', () => {
     expect(result.confidence).toBe('high');
     expect(result.reasonCodes.some((r) => r.polarity === 'positive')).toBe(true);
+  });
+});
+
+describe('Standard Bank parser', () => {
+  const sb = readFileSync(
+    path.join(here, '../../../../supabase/functions/_shared/affordability/fixtures/standardbank-employed.txt'),
+    'utf8'
+  );
+
+  it('detects the bank, DD/MM/YYYY dates and brought/carried-forward balances', () => {
+    expect(standardBankParser.matches(sb)).toBe(true);
+    const parsed = standardBankParser.parse([{ page_number: 1, text: sb }], sb);
+    expect(parsed.bank).toBe('Standard Bank');
+    expect(parsed.opening_balance).toBe(5000);
+    expect(parsed.closing_balance).toBe(26003);
+    expect(parsed.transactions).toHaveLength(18);
+    const salary = parsed.transactions.filter((t) => /salary/i.test(t.description));
+    expect(salary).toHaveLength(3);
+    expect(salary[0].direction).toBe('credit');
+    expect(salary[0].amount).toBe(18500);
+  });
+
+  it('runs the engine end-to-end and reconciles', () => {
+    const parsed = standardBankParser.parse([{ page_number: 1, text: sb }], sb);
+    const result = analyse(parsed, 6000, RULES);
+    expect(result.reconciles).toBe(true);
+    expect(result.metrics.verified_monthly_income).toBe(18500);
+    expect(result.metrics.statement_coverage_months).toBe(3);
+    expect(result.confidence).toBe('high');
   });
 });

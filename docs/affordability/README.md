@@ -144,10 +144,11 @@ Computed by the engine from `_shared/affordability/fixtures/capitec-employed.txt
 
 - **OCR for scanned statements is not implemented** — image-only pages are flagged
   and routed to manual review (pluggable OCR worker is a future stage).
-- **One parser (Capitec) implemented**, validated against a synthetic fixture — a
-  real redacted sample should tune it before production. FNB / ABSA / Standard
-  Bank / Nedbank are registered extension points but not yet implemented →
-  "This statement format is not currently supported…".
+- **Two parsers implemented — Capitec and Standard Bank** — each validated
+  against a synthetic fixture. Feed a real redacted statement to tune the
+  header/date/row regexes before production. FNB / ABSA / Nedbank are registered
+  extension points but not yet implemented → "This statement format is not
+  currently supported…".
 - **Virus scanning is a hook** (files are type/size validated at upload but not yet
   AV-scanned; real ClamAV belongs with the OCR worker).
 - Multi-document statements are parsed as one page stream (balance continuity
