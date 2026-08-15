@@ -1,9 +1,22 @@
 // Standard Bank statement parser.
 //
-// Built against the common Standard Bank layout (labels "Balance Brought/Carried
-// Forward", DD/MM/YYYY dates). Direction + amount come from the running-balance
-// delta, so it tolerates single- vs split debit/credit columns. Validate against
-// a real redacted statement and tune the header/date regexes as needed.
+// Tuned against a real Standard Bank "3 month statement" (MyMoAcc) PDF text layer.
+// The layout that this parser handles (and that the single-line generic parser did
+// NOT):
+//   - Two amount columns — Payments (printed negative) and Deposits (positive) —
+//     which the PDF text layer flattens into one "<amount> <balance>" line.
+//   - Dates are "DD Mon YY" (2-digit year). The branch-stamp date "DD Mon YYYY"
+//     (4-digit year) must NOT be mistaken for a transaction date.
+//   - Each transaction spans 2–3 extracted lines:
+//         "<DD Mon YY> <main description>"
+//         "<subtitle / wrapped description>"      (0..n lines)
+//         "<amount> <balance>"                     (closes the transaction)
+//   - Opening balance from "STATEMENT OPENING BALANCE <balance>".
+//   - Amounts use commas as thousands separators; balances may be negative.
+//
+// Direction comes from the printed sign of the amount and is cross-checked against
+// the running-balance delta to score per-row confidence (a mismatch is a strong
+// signal that a row was mis-parsed and should not be trusted).
 import { registerParser } from "../banks.ts";
 import type { ParsedStatement, ParsedTransaction, StatementPage, StatementParser } from "../banks.ts";
 
@@ -13,29 +26,40 @@ const MONTHS: Record<string, string> = {
 };
 
 const num = (s: string | undefined | null): number | null => {
-  if (!s) return null;
-  const n = Number(s.replace(/[\s,]/g, ''));
+  if (s == null) return null;
+  const n = Number(String(s).replace(/[\sR,]/g, ''));
   return Number.isFinite(n) ? n : null;
 };
 
-// Accepts YYYY/MM/DD, YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY, "DD Mon YYYY", "DD Month YYYY".
+// "DD Mon YY" (2-digit year) → ISO. Also tolerates "DD Mon YYYY" and DD/MM/YYYY.
 function toISO(d: string): string | null {
   d = d.trim();
-  let m = /^(\d{4})[-/](\d{2})[-/](\d{2})$/.exec(d);
-  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  let m = /^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/.exec(d);
+  if (m) { const mon = MONTHS[m[2].slice(0, 3).toLowerCase()]; if (mon) return `${m[3]}-${mon}-${m[1].padStart(2, '0')}`; }
+  m = /^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{2})$/.exec(d);
+  if (m) { const mon = MONTHS[m[2].slice(0, 3).toLowerCase()]; if (mon) return `20${m[3]}-${mon}-${m[1].padStart(2, '0')}`; }
   m = /^(\d{2})[-/](\d{2})[-/](\d{4})$/.exec(d);
   if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-  m = /^(\d{1,2})\s+([A-Za-z]{3,})\s+(\d{4})$/.exec(d);
-  if (m) {
-    const mon = MONTHS[m[2].slice(0, 3).toLowerCase()];
-    if (mon) return `${m[3]}-${mon}-${m[1].padStart(2, '0')}`;
-  }
   return null;
 }
 
-const DATE = '(\\d{4}[-/]\\d{2}[-/]\\d{2}|\\d{2}[-/]\\d{2}[-/]\\d{4}|\\d{1,2}\\s+[A-Za-z]{3,}\\s+\\d{4})';
-// Date, description, then 1–3 trailing money amounts (last = balance).
-const ROW = new RegExp(`^(${DATE})\\s+(.+?)((?:\\s+-?[\\d,]+\\.\\d{2}){1,3})\\s*$`);
+// A transaction row starts with "DD Mon YY" (2-digit year NOT followed by a third
+// digit — this excludes the "DD Mon YYYY" branch-stamp date).
+const DATE_START = /^(\d{1,2}\s[A-Za-z]{3}\s\d{2})(?!\d)\s*(.*)$/;
+// The line that closes a transaction: "<amount> <balance>" (both signed decimals).
+const AMOUNT_BAL = /^(-?[\d,]+\.\d{2})\s+(-?[\d,]+\.\d{2})$/;
+
+// Fixed page furniture that can appear between transactions. Kept deliberately
+// specific so it never swallows a real (often all-caps) transaction subtitle such
+// as "IB TRANSFER FROM" or "DEBIT CARD PURCHASE FROM".
+const NOISE = [
+  /customer care/i, /standardbank\.co\.za/i, /^website:/i, /^3 month statement/i,
+  /^from:\s*\d/i, /^to:\s*\d/i, /^account\s*(number|holder)/i, /^product name/i,
+  /reg\.?\s*no/i, /we subscribe/i, /ombudsman/i, /^pg\s*\d+\s*of\s*\d+/i,
+  /^transaction details/i, /available balance/i, /^date\s+description/i,
+  /statement summary/i, /please verify all/i, /today's debits/i,
+];
+const isNoise = (line: string) => NOISE.some((re) => re.test(line));
 
 const field = (text: string, re: RegExp) => { const m = re.exec(text); return m ? m[1].trim() : null; };
 
@@ -44,51 +68,73 @@ const standardBankParser: StatementParser = {
   matches: (fullText) => /standard\s*bank/i.test(fullText),
 
   parse(pages: StatementPage[], fullText: string): ParsedStatement {
-    const account_holder = field(fullText, /Account\s*Holder\s*:?\s*([A-Za-z ,.'-]+)/i);
-    const rawAcct = field(fullText, /Account\s*(?:Number|No\.?)\s*:?\s*([\dxX*\s-]+)/i);
+    // Capture the holder name only, stopping before the address digits (the PDF
+    // flattens the right-hand address block onto the account-holder line).
+    const account_holder = field(fullText, /Account\s*holder\s*:?\s*([A-Za-z.][A-Za-z. ']+?)(?=\s+\d|\s{2,}|\n|$)/i);
+    const rawAcct = field(fullText, /Account\s*number\s*:?\s*(\d[\d ]*\d)/i);
     const masked_account = rawAcct ? rawAcct.replace(/\s/g, '').replace(/.(?=.{4})/g, '*') : null;
 
-    const period = new RegExp(`(?:Statement\\s*Period|From)\\s*:?\\s*(${DATE})\\s*(?:to|-|–|until)\\s*(${DATE})`, 'i').exec(fullText);
-    const period_start = period ? toISO(period[1]) : null;
-    const period_end = period ? toISO(period[3] ?? period[2]) : null;
+    const from = field(fullText, /From:\s*(\d{1,2}\s[A-Za-z]{3}\s\d{2,4})/i);
+    const to = field(fullText, /To:\s*(\d{1,2}\s[A-Za-z]{3}\s\d{2,4})/i);
+    const period_start = from ? toISO(from) : null;
+    const period_end = to ? toISO(to) : null;
 
-    const opening_balance = num(field(fullText, /(?:Opening\s*Balance|Balance\s*Brought\s*Forward)\s*:?\s*(-?[\d\s,]+\.\d{2})/i));
-    const closing_balance = num(field(fullText, /(?:Closing\s*Balance|Balance\s*Carried\s*Forward)\s*:?\s*(-?[\d\s,]+\.\d{2})/i));
+    const opening_balance = num(field(fullText, /STATEMENT\s+OPENING\s+BALANCE\s+(-?[\d,]+\.\d{2})/i));
 
     const transactions: ParsedTransaction[] = [];
     let prevBalance = opening_balance;
 
+    // Line-based state machine: accumulate description lines from a date line up to
+    // the "<amount> <balance>" line that closes the transaction.
+    let pending: { date: string; page: number; desc: string[] } | null = null;
+    const flushRow = (amountRaw: number, balance: number) => {
+      if (!pending) return;
+      const description = pending.desc.join(' ').replace(/\s+/g, ' ').trim().slice(0, 300);
+      const direction: ParsedTransaction['direction'] = amountRaw < 0 ? 'debit' : 'credit';
+      const amount = Math.abs(amountRaw);
+      // Cross-check the printed amount against the balance movement.
+      let confidence = 0.85;
+      if (prevBalance != null) {
+        const delta = Math.round((balance - prevBalance) * 100) / 100;
+        confidence = Math.abs(delta - amountRaw) <= 0.02 ? 0.98 : 0.6;
+      }
+      transactions.push({
+        txn_date: pending.date, value_date: pending.date, description,
+        amount, direction, balance_after: balance,
+        source_page: pending.page,
+        raw_text: `${description} ${amountRaw.toFixed(2)} ${balance.toFixed(2)}`.slice(0, 300),
+        confidence_score: confidence,
+      });
+      prevBalance = balance;
+      pending = null;
+    };
+
     for (const page of pages) {
       for (const rawLine of page.text.split('\n')) {
         const line = rawLine.trim();
-        const m = ROW.exec(line);
-        if (!m) continue;
-        const date = toISO(m[1]);
-        if (!date) continue;
-        const description = m[3].replace(/\s+/g, ' ').trim();
-        const nums = (m[4].match(/-?[\d,]+\.\d{2}/g) || []).map((x) => num(x)).filter((n): n is number => n != null);
-        if (nums.length === 0) continue;
-        const balance_after = nums[nums.length - 1];
-        const printed = nums.length >= 2 ? Math.abs(nums[nums.length - 2]) : null;
+        if (!line) continue;
 
-        let amount: number | null = printed;
-        let direction: ParsedTransaction['direction'] = 'unknown';
-        let confidence = printed != null ? 0.7 : 0.5;
-        if (balance_after != null && prevBalance != null) {
-          const delta = Math.round((balance_after - prevBalance) * 100) / 100;
-          amount = Math.abs(delta);
-          direction = delta >= 0 ? 'credit' : 'debit';
-          confidence = printed != null && Math.abs(amount - printed) <= 0.02 ? 0.98 : 0.75;
+        // A date line always begins a new transaction (dropping any previous
+        // pending row that never found its amount line — defensive).
+        const ds = DATE_START.exec(line);
+        if (ds) {
+          const iso = toISO(ds[1]);
+          if (iso) { pending = { date: iso, page: page.page_number, desc: ds[2] ? [ds[2]] : [] }; continue; }
         }
 
-        transactions.push({
-          txn_date: date, value_date: date, description, amount, direction,
-          balance_after, source_page: page.page_number, raw_text: line.slice(0, 300),
-          confidence_score: confidence,
-        });
-        if (balance_after != null) prevBalance = balance_after;
+        if (pending) {
+          const ab = AMOUNT_BAL.exec(line);
+          if (ab) { flushRow(num(ab[1])!, num(ab[2])!); continue; }
+          if (!isNoise(line)) pending.desc.push(line);
+          continue;
+        }
+        // Outside a transaction and not a date line → page furniture; ignore.
       }
     }
+
+    const closing_balance = transactions.length
+      ? transactions[transactions.length - 1].balance_after
+      : num(field(fullText, /Available\s*Balance\s*:?\s*-?R\s*([\d,]+\.\d{2})/i));
 
     const highConf = transactions.filter((t) => t.confidence_score >= 0.9).length;
     return {

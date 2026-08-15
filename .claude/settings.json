@@ -90,7 +90,11 @@
       "Bash(Write-Host \"Done\")",
       "Bash(python3 -c \"import json,sys; p=json.load\\(sys.stdin\\); print\\('scripts:', json.dumps\\(p.get\\('scripts',{}\\), indent=2\\)\\)\")",
       "Read(//c/Users/Jonathan D Theron/.gradle/**)",
-      "PowerShell(Select-String -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\tenant\\\\android\\\\app\\\\build.gradle\" -Pattern \"signing|keystore|KEYSTORE|externalOverride\" -CaseSensitive:$false)"
+      "PowerShell(Select-String -Path \"C:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\\\\apps\\\\tenant\\\\android\\\\app\\\\build.gradle\" -Pattern \"signing|keystore|KEYSTORE|externalOverride\" -CaseSensitive:$false)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\Jonathan D Theron\\\\dwell-view-render\" -Force)",
+      "Bash(Select-Object Name, Mode)",
+      "Bash(find apps/tenant apps/landlord -maxdepth 1 -iname \"capacitor.config.*\")",
+      "Bash(ls apps *)"
     ]
   }
 }
