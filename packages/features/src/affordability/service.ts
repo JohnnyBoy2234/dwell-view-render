@@ -197,6 +197,25 @@ export async function getAffordabilityReport(applicationId: string) {
   };
 }
 
+/** AI plain-language explanation of the deterministic assessment (landlord/admin
+ *  only). The AI explains the engine's result — it never makes the decision and
+ *  never introduces figures the engine did not compute. Cached server-side;
+ *  pass force to regenerate. */
+export async function getAffordabilitySummary(
+  applicationId: string,
+  opts: { force?: boolean; cachedOnly?: boolean } = {}
+): Promise<{ summary: string | null; model: string | null; cached: boolean; createdAt?: string }> {
+  const { data, error } = await supabase.functions.invoke('affordability-summary', {
+    body: { applicationId, force: !!opts.force, cachedOnly: !!opts.cachedOnly },
+  });
+  if (error) {
+    const ctx = await (error as any)?.context?.json?.().catch(() => null);
+    throw new Error(ctx?.error || error.message || 'Could not generate the summary');
+  }
+  if ((data as any)?.error) throw new Error((data as any).error);
+  return data as any;
+}
+
 /** Tenant/landlord correction request, or tenant human-review request. */
 export async function submitAffordabilityCorrection(
   applicationId: string,

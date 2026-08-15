@@ -9,8 +9,8 @@ import {
 } from '@mzanzihomes/ui/components/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mzanzihomes/ui/components/select';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
-import { ChevronDown, ChevronRight, Loader2, CheckCircle2, Info, Clock } from 'lucide-react';
-import { getAffordabilityReport, submitAffordabilityReview } from '../service';
+import { ChevronDown, ChevronRight, Loader2, CheckCircle2, Info, Clock, Sparkles, RefreshCw } from 'lucide-react';
+import { getAffordabilityReport, submitAffordabilityReview, getAffordabilitySummary } from '../service';
 
 const fmtR = (n) => (n == null ? '—' : new Intl.NumberFormat('en-ZA', { style: 'currency', currency: 'ZAR', maximumFractionDigits: 0 }).format(n));
 const fmtPct = (r) => (r == null ? '—' : `${Math.round(r * 100)}%`);
@@ -66,6 +66,8 @@ export function AffordabilityLandlordReport({ applicationId }) {
   const [overrideReason, setOverrideReason] = useState('');
   const [requestOpen, setRequestOpen] = useState(null); // 'request_more_info' | 'request_another_statement'
   const [requestMsg, setRequestMsg] = useState('');
+  const [summary, setSummary] = useState(null);
+  const [summaryBusy, setSummaryBusy] = useState(false);
 
   const load = async () => setReport(await getAffordabilityReport(applicationId));
   useEffect(() => {
@@ -83,6 +85,25 @@ export function AffordabilityLandlordReport({ applicationId }) {
     try { await submitAffordabilityReview(applicationId, payload); toast({ title: successMsg }); await load(); }
     catch (e) { toast({ variant: 'destructive', title: 'Action failed', description: e?.message }); }
     finally { setBusy(false); }
+  };
+
+  // Auto-load an existing (cached) plain-language summary without generating one.
+  const status = report?.assessment?.status;
+  useEffect(() => {
+    if (status !== 'assessment_ready' && status !== 'manual_review_required') return;
+    let active = true;
+    (async () => {
+      try { const r = await getAffordabilitySummary(applicationId, { cachedOnly: true }); if (active && r?.summary) setSummary(r); }
+      catch { /* summary is optional — silent */ }
+    })();
+    return () => { active = false; };
+  }, [applicationId, status]);
+
+  const genSummary = async (force) => {
+    setSummaryBusy(true);
+    try { const r = await getAffordabilitySummary(applicationId, { force }); setSummary(r); }
+    catch (e) { toast({ variant: 'destructive', title: 'Could not generate the summary', description: e?.message }); }
+    finally { setSummaryBusy(false); }
   };
 
   if (loading) return <div className="flex items-center justify-center py-12 text-muted-foreground"><Loader2 className="h-6 w-6 animate-spin" /></div>;
@@ -177,6 +198,42 @@ export function AffordabilityLandlordReport({ applicationId }) {
                 </div>
               )}
               <p className="text-xs text-muted-foreground">This report is an assessment aid and not an automatic approval or rejection.</p>
+            </CardContent>
+          </Card>
+
+          {/* AI plain-language summary (explains the deterministic result; never decides) */}
+          <Card className="border-primary/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="h-4 w-4 text-primary" /> Plain-language summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {summary?.summary ? (
+                <>
+                  <p className="whitespace-pre-line text-sm leading-relaxed">{summary.summary}</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      AI-generated explanation of the figures above — not a decision or a guarantee.
+                    </p>
+                    <Button size="sm" variant="ghost" disabled={summaryBusy} onClick={() => genSummary(true)}>
+                      {summaryBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                      <span className="ml-1">Regenerate</span>
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    Get a short, plain-English explanation of what these figures mean for the proposed rent.
+                    It explains the assessment above — it does not make the decision.
+                  </p>
+                  <Button size="sm" disabled={summaryBusy} onClick={() => genSummary(false)}>
+                    {summaryBusy ? <Loader2 className="mr-1 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1 h-4 w-4" />}
+                    Explain this assessment
+                  </Button>
+                </>
+              )}
             </CardContent>
           </Card>
 

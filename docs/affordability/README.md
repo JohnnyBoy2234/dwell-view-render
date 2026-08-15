@@ -98,9 +98,15 @@ automatically. In addition:
   scheduler must send as the `x-cron-secret` header when calling
   `affordability-retention`. Set with:
   `supabase secrets set AFFORDABILITY_CRON_SECRET=<random-value>`
-- Optional AI gateway key — only if the (not-yet-built) plain-language layer is
-  enabled. AI is used only to explain results/categorise ambiguous descriptions,
-  never to invent or override financial values.
+- **`LOVABLE_API_KEY`** (required for the plain-language summary) — the same AI
+  gateway key the listing "Write with AI" feature uses. The `affordability-summary`
+  function uses it to turn the **deterministic** result into a plain-English
+  explanation for the landlord. The AI receives only the engine's computed outputs
+  (recommendation, confidence, metrics, reason codes, aggregated income/expense
+  categories) — never the raw statement, account number, holder name, or individual
+  transactions — and is instructed never to invent figures or output an
+  approve/reject verdict. If the key is absent the rest of the feature works; only
+  the summary button is unavailable.
 
 No online-banking credentials are ever collected or stored.
 
@@ -181,6 +187,7 @@ Computed by the engine from `_shared/affordability/fixtures/capitec-employed.txt
 - `affordability-documents` — signed-URL preview (audited), delete-before-submit, submit (creates job).
 - `affordability-process` — idempotent job runner; runs the pipeline in the background.
 - `affordability-review` — landlord/admin note / mark reviewed / override-with-reason / request info.
+- `affordability-summary` — landlord/admin-only AI plain-language explanation of the deterministic result (explains, never decides; cached in a staff-only table).
 - `affordability-correction` — tenant/landlord correction + tenant human-review request.
 - `affordability-retention` — secret-protected retention purge (files + raw data).
 - `_shared/affordability/extract.ts` — digital-PDF text extraction (unpdf).
