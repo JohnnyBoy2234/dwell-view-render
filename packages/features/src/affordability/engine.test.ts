@@ -66,6 +66,87 @@ describe('affordability engine', () => {
   });
 });
 
+// Build a ParsedStatement from concise transaction tuples for engine unit tests.
+type Tup = [date: string, desc: string, dir: 'credit' | 'debit', amount: number, bal: number];
+function statement(opening: number, closing: number, rows: Tup[]) {
+  return {
+    bank: 'Test Bank', account_holder: null, masked_account: null,
+    period_start: rows[0][0], period_end: rows[rows.length - 1][0],
+    opening_balance: opening, closing_balance: closing,
+    transactions: rows.map(([txn_date, description, direction, amount, bal], i) => ({
+      txn_date, value_date: txn_date, description, amount, direction,
+      balance_after: bal, source_page: 1, raw_text: description, confidence_score: 0.98,
+    })),
+    confidence: 1,
+  };
+}
+
+describe('income quality — transfer/deposit-only income', () => {
+  // Income arrives only as inbound EFTs (no identifiable payroll), balances healthy.
+  const parsed = statement(1000, 16000, [
+    ['2026-02-02', 'DEDDIE IB PAYMENT FROM', 'credit', 8000, 9000],
+    ['2026-02-03', 'CHECKERS GROCERIES', 'debit', 2000, 7000],
+    ['2026-02-05', 'DL UBER', 'debit', 1000, 6000],
+    ['2026-03-02', 'DEDDIE IB PAYMENT FROM', 'credit', 8000, 14000],
+    ['2026-03-03', 'CHECKERS GROCERIES', 'debit', 2000, 12000],
+    ['2026-03-05', 'DL UBER', 'debit', 1000, 11000],
+    ['2026-04-02', 'DEDDIE IB PAYMENT FROM', 'credit', 8000, 19000],
+    ['2026-04-03', 'CHECKERS GROCERIES', 'debit', 2000, 17000],
+    ['2026-04-05', 'DL UBER', 'debit', 1000, 16000],
+  ]);
+  const result = analyse(parsed, 2000, RULES);
+
+  it('counts the income but never as identifiable payroll', () => {
+    expect(result.metrics.verified_monthly_income).toBe(8000);
+    expect(result.metrics.income_is_payroll_verified).toBe(0);
+    expect(result.metrics.soft_income_monthly).toBe(8000);
+    expect(result.metrics.strong_income_monthly).toBe(0);
+  });
+
+  it('caps confidence below high and flags the source', () => {
+    expect(result.confidence).not.toBe('high');
+    expect(result.recommendation).not.toBe('strong');
+    expect(result.reasonCodes.some((r) => r.code === 'income_from_transfers')).toBe(true);
+    expect(result.reasonCodes.some((r) => r.code === 'payroll_income_identified')).toBe(false);
+  });
+});
+
+describe('account health — frequent stress + negative balance', () => {
+  const rows: Tup[] = [
+    ['2026-02-02', 'DEDDIE IB PAYMENT FROM', 'credit', 8000, 9000],
+    ['2026-02-03', 'CHECKERS GROCERIES', 'debit', 2000, 7000],
+    ['2026-02-06', 'ADOBE FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 6991.5],
+    ['2026-02-07', 'UBER FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 6983],
+    ['2026-02-08', 'AMAZON FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 6974.5],
+    ['2026-03-02', 'DEDDIE IB PAYMENT FROM', 'credit', 8000, 14974.5],
+    ['2026-03-03', 'CHECKERS GROCERIES', 'debit', 2000, 12974.5],
+    ['2026-03-06', 'ADOBE FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 12966],
+    ['2026-03-07', 'UBER FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 12957.5],
+    ['2026-03-08', 'AMAZON FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 12949],
+    ['2026-04-02', 'DEDDIE IB PAYMENT FROM', 'credit', 8000, 20949],
+    ['2026-04-03', 'CHECKERS GROCERIES', 'debit', 2000, 18949],
+    ['2026-04-06', 'ADOBE FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 18940.5],
+    ['2026-04-07', 'UBER FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 18932],
+    ['2026-04-08', 'AMAZON FEE- POS DECLINED INSUFF FUNDS', 'debit', 8.5, 18923.5],
+    ['2026-04-09', 'U*TICKETMASTE DEBIT CARD PURCHASE FROM', 'debit', 19000, -76.5],
+  ];
+  const parsed = statement(1000, -76.5, rows);
+  const result = analyse(parsed, 2000, RULES);
+
+  it('detects the stress events and the negative balance', () => {
+    expect(result.metrics.account_stress_events).toBe(9);
+    expect(result.metrics.lowest_monthly_balance).toBeLessThan(0);
+    expect(result.warnings.some((w) => w.code === 'account_stress')).toBe(true);
+    expect(result.warnings.some((w) => w.code === 'negative_balance')).toBe(true);
+  });
+
+  it('caps the recommendation to further_review or worse', () => {
+    expect(['further_review', 'insufficient']).toContain(result.recommendation);
+    expect(result.reasonCodes.some((r) => r.code === 'frequent_account_stress')).toBe(true);
+    expect(result.reasonCodes.some((r) => r.code === 'negative_balance_periods')).toBe(true);
+  });
+});
+
 describe('Standard Bank parser', () => {
   const sb = readFileSync(
     path.join(here, '../../../../supabase/functions/_shared/affordability/fixtures/standardbank-employed.txt'),

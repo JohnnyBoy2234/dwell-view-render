@@ -40,12 +40,20 @@ function categorise(t: ParsedTransaction): {
 
   if (t.direction === 'credit') {
     if (has(d, /\b(loan|credit advance|cash advance)\b/)) return { category: 'loan_or_credit_advance', subcategory: null, own: false, excluded: true, reason: 'loan_advance' };
-    if (has(d, /\b(salary|salaris|sal\b|wages|payroll)\b/)) return { category: 'employment_income', subcategory: 'salary', own: false, excluded: false, reason: null };
+    if (has(d, /\b(salary|salaris|sal\b|wages|payroll|remuneration)\b/)) return { category: 'employment_income', subcategory: 'salary', own: false, excluded: false, reason: null };
     if (has(d, /\bpension\b/)) return { category: 'pension', subcategory: null, own: false, excluded: false, reason: null };
-    if (has(d, /\b(sassa|grant)\b/)) return { category: 'government_grant', subcategory: null, own: false, excluded: false, reason: null };
+    if (has(d, /\b(sassa|grant|uif)\b/)) return { category: 'government_grant', subcategory: null, own: false, excluded: false, reason: null };
     if (has(d, /\binterest\b/)) return { category: 'interest_income', subcategory: null, own: false, excluded: false, reason: null };
     if (has(d, /\b(rent received|rental income)\b/)) return { category: 'rental_income', subcategory: null, own: false, excluded: false, reason: null };
-    return { category: 'other_recurring_income', subcategory: null, own: false, excluded: false, reason: null };
+    // Third-party inbound money — real income candidates, but lower certainty than
+    // payroll because the source is not an identifiable employer. These reach here
+    // only if they were NOT caught as own-account transfers above.
+    if (has(d, /\bteletransmission\b|\binward\b/)) return { category: 'deposit_income', subcategory: 'international_inward', own: false, excluded: false, reason: null };
+    if (has(d, /\b(cash deposit|instant payment)\b/)) return { category: 'deposit_income', subcategory: 'cash_deposit', own: false, excluded: false, reason: null };
+    if (has(d, /\b(magtape|acb credit|eft credit|credit transfer)\b/)) return { category: 'deposit_income', subcategory: 'eft_credit', own: false, excluded: false, reason: null };
+    if (has(d, /\bpayshap\b/)) return { category: 'transfer_income', subcategory: 'payshap_inbound', own: false, excluded: false, reason: null };
+    if (has(d, /\bpayment from\b/)) return { category: 'transfer_income', subcategory: 'eft_inbound', own: false, excluded: false, reason: null };
+    return { category: 'other_income', subcategory: null, own: false, excluded: false, reason: null };
   }
 
   // Debits
@@ -70,6 +78,10 @@ function categorise(t: ParsedTransaction): {
 const ESSENTIAL = new Set(['rent_or_bond', 'utilities', 'groceries', 'transport', 'insurance', 'medical', 'education', 'childcare']);
 const DEBT = new Set(['credit_card_payment', 'loan_repayment']);
 const COMMITMENTS = new Set(['debit_order', 'subscriptions']);
+// Income the engine can attribute to an identifiable, reliable source.
+const STRONG_INCOME = new Set(['employment_income', 'pension', 'government_grant', 'rental_income']);
+// Income that is real but lower-certainty (source not identifiable as an employer).
+const SOFT_INCOME = new Set(['transfer_income', 'deposit_income', 'interest_income', 'other_income']);
 const normDesc = (d: string) => (d || '').toLowerCase().replace(/[0-9]/g, '').replace(/\s+/g, ' ').trim().split(' ').slice(0, 3).join(' ');
 const mean = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
 const stdev = (xs: number[]) => { if (xs.length < 2) return 0; const m = mean(xs); return Math.sqrt(mean(xs.map((x) => (x - m) ** 2))); };
@@ -149,6 +161,14 @@ export function analyse(parsed: ParsedStatement, proposedRent: number | null, ru
   const income_consistency = round2(Math.max(0, Math.min(1, 1 - cv)));
   const income_source_count = incomeSources.filter((s) => s.is_verified_recurring).length;
 
+  // Income quality: distinguish identifiable payroll-grade income from recurring
+  // but lower-certainty transfer/deposit income. Both are counted toward income,
+  // but transfer-only income should never read as high confidence.
+  const verifiedSources = incomeSources.filter((s) => s.is_verified_recurring);
+  const strong_income_monthly = round2(verifiedSources.filter((s) => STRONG_INCOME.has(s.category)).reduce((a, s) => a + s.average_monthly_amount, 0));
+  const soft_income_monthly = round2(verifiedSources.filter((s) => SOFT_INCOME.has(s.category)).reduce((a, s) => a + s.average_monthly_amount, 0));
+  const income_is_payroll_verified = strong_income_monthly > 0 ? 1 : 0;
+
   const avgMonthlyBy = (pred: (t: AnalysedTransaction) => boolean) =>
     round2(txns.filter((t) => t.direction === 'debit' && !t.is_excluded && pred(t)).reduce((a, t) => a + (t.amount ?? 0), 0) / Math.max(coverage, 1));
   const essential_monthly_expenses = avgMonthlyBy((t) => ESSENTIAL.has(t.category));
@@ -167,8 +187,9 @@ export function analyse(parsed: ParsedStatement, proposedRent: number | null, ru
   }).filter((b): b is number => b != null);
   const average_closing_balance = round2(mean(closingByMonth));
 
-  const returned_debit_order_count = txns.filter((t) => has((t.description || '').toLowerCase(), /\b(returned|unpaid|rd\b|debit order return)\b/)).length;
-  const insufficient_funds_count = txns.filter((t) => has((t.description || '').toLowerCase(), /\b(insufficient funds|declined|nsf)\b/)).length;
+  const returned_debit_order_count = txns.filter((t) => has((t.description || '').toLowerCase(), /\b(returned|unpaid|weiering|rd\b|debit order return)\b/)).length;
+  const insufficient_funds_count = txns.filter((t) => has((t.description || '').toLowerCase(), /\b(insufficient funds|insuff funds|declined insuff|declined|nsf)\b/)).length;
+  const account_stress_events = returned_debit_order_count + insufficient_funds_count;
 
   const rent = proposedRent ?? 0;
   const rent_to_income_ratio = verified_monthly_income > 0 ? round2(rent / verified_monthly_income) : 0;
@@ -190,6 +211,9 @@ export function analyse(parsed: ParsedStatement, proposedRent: number | null, ru
   if (lowConfCount) warnings.push({ code: 'low_confidence_transactions', severity: 'warning', message: `${lowConfCount} transaction(s) had low extraction confidence.` });
   if (coverage < rules.required_months) warnings.push({ code: 'short_period', severity: 'warning', message: `The statement covers ${coverage} month(s); ${rules.required_months} are recommended.` });
   if (verified_monthly_income <= 0) warnings.push({ code: 'no_verified_recurring_income', severity: 'unable_to_verify', message: 'No reliable recurring income was detected.' });
+  if (verified_monthly_income > 0 && income_is_payroll_verified === 0) warnings.push({ code: 'income_source_unverified', severity: 'unable_to_verify', message: 'Recurring income appears to come from transfers or deposits rather than an identifiable employer — verify the source and stability of this income.' });
+  if (account_stress_events > coverage) warnings.push({ code: 'account_stress', severity: 'warning', message: `${account_stress_events} insufficient-funds or returned-debit event(s) were detected across ${coverage} month(s).` });
+  if (lowest_monthly_balance < 0) warnings.push({ code: 'negative_balance', severity: 'warning', message: 'The account balance went negative during the statement period.' });
 
   // 6) Confidence.
   let confidence: AnalysisResult['confidence'] = 'high';
@@ -207,8 +231,16 @@ export function analyse(parsed: ParsedStatement, proposedRent: number | null, ru
     average_monthly_disposable_income > 0 ? band(rent_to_disposable_income_ratio, rules.rent_to_disposable) : 0,
     confRank,
     coverage >= rules.required_months ? 3 : coverage === rules.required_months - 1 ? 2 : 1,
-    income_consistency >= rules.min_income_consistency ? 3 : 1
+    income_consistency >= rules.min_income_consistency ? 3 : 1,
+    // Income the engine cannot tie to an employer caps the recommendation at
+    // "acceptable" — it never reads as a strong, payroll-backed applicant.
+    income_is_payroll_verified === 1 ? 3 : verified_monthly_income > 0 ? 2 : 0
   );
+  // Account-health caps: frequent bounced debits / insufficient funds and negative
+  // balances are strong risk signals regardless of gross income.
+  if (account_stress_events > coverage) rank = Math.min(rank, 1);
+  if (account_stress_events > coverage * 3) rank = 0;
+  if (lowest_monthly_balance < 0 && account_stress_events > coverage) rank = 0;
   if (confidence === 'unable_to_assess') rank = 0;
   const recommendation = (['insufficient', 'further_review', 'acceptable', 'strong'] as const)[rank];
 
@@ -216,6 +248,10 @@ export function analyse(parsed: ParsedStatement, proposedRent: number | null, ru
   const reasonCodes: AnalysisResult['reasonCodes'] = [];
   const push = (code: string, message: string, polarity: string) => reasonCodes.push({ code, message, polarity });
   if (income_source_count > 0) push('recurring_income_detected', `Recurring income was detected in ${incomeSources.find((s) => s.is_verified_recurring)?.months_present ?? 0} of ${coverage} statement months.`, 'positive');
+  if (income_is_payroll_verified === 1) push('payroll_income_identified', 'Income from an identifiable employer/payroll was detected.', 'positive');
+  if (verified_monthly_income > 0 && income_is_payroll_verified === 0) push('income_from_transfers', 'Recurring income is from transfers/deposits rather than identifiable payroll — treat as lower certainty and verify the source.', 'review');
+  if (account_stress_events > coverage) push('frequent_account_stress', `${account_stress_events} insufficient-funds / returned-debit event(s) across ${coverage} month(s).`, 'negative');
+  if (lowest_monthly_balance < 0) push('negative_balance_periods', 'The account went into a negative balance during the statement period.', 'review');
   if (reconciles && parsed.opening_balance != null) push('balances_reconciled', 'No material balance mismatch was detected.', 'positive');
   if (income_consistency < rules.min_income_consistency) push('income_varies', `Income varied significantly between months (consistency ${Math.round(income_consistency * 100)}%).`, 'review');
   if (coverage < rules.required_months) push('short_statement', `The statement covers only ${coverage} month(s).`, 'review');
@@ -228,9 +264,11 @@ export function analyse(parsed: ParsedStatement, proposedRent: number | null, ru
     transactions: txns,
     metrics: {
       verified_monthly_income, average_monthly_income, income_consistency, income_source_count,
+      income_is_payroll_verified, strong_income_monthly, soft_income_monthly,
       essential_monthly_expenses, recurring_debt_obligations, recurring_financial_commitments,
       average_monthly_disposable_income, lowest_monthly_balance, average_closing_balance,
-      returned_debit_order_count, insufficient_funds_count, statement_coverage_months: coverage,
+      returned_debit_order_count, insufficient_funds_count, account_stress_events,
+      statement_coverage_months: coverage,
       proposed_rent: rent, rent_to_income_ratio, rent_to_disposable_income_ratio,
     },
     incomeSources,
