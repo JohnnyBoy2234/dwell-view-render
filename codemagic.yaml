@@ -1,110 +1,111 @@
+# Codemagic CI/CD — build both MzanziHomes iOS apps and publish to TestFlight.
+# Lets you release from Windows: Codemagic runs the build on its own macOS machines.
+#
+# ── ONE-TIME SETUP in the Codemagic UI (Team settings) ───────────────────────
+# 1. Connect this GitHub repo.
+# 2. Integrations → App Store Connect: add an API key (Issuer ID + Key ID + .p8
+#    from App Store Connect → Users and Access → Integrations). Name it exactly
+#    "MzanziHomes ASC" (or change `app_store_connect:` below to match).
+# 3. Create the two app records in App Store Connect first (bundle IDs
+#    com.mzanzihomes.app and com.mzanzihomes.landlord) — Codemagic uploads to
+#    existing records, it does not create them.
+# 4. Environment variables → add a GROUP named "mzanzihomes_env" holding your
+#    PRODUCTION web build vars (mark them Secure):
+#       VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, and any other VITE_* your
+#       apps read. These get baked into the web build.
+# 5. In the Apple Developer portal, enable the **Push Notifications** capability
+#    on BOTH App IDs. The apps now ship an aps-environment entitlement, so the
+#    provisioning profile must include Push or code-signing will fail.
+#
+# Build numbers auto-increment via Codemagic's $BUILD_NUMBER, so every upload is
+# unique (TestFlight requires this). Set the marketing version (1.0.0, 1.1.0…)
+# in Xcode's MARKETING_VERSION when you cut a release.
+
+definitions:
+  scripts:
+    - &npm_install
+      name: Install dependencies (workspace root)
+      script: npm ci
+  base_env: &base_env
+    node: 20
+    xcode: latest
+    cocoapods: default
+    groups:
+      - mzanzihomes_env
+  base_publishing: &base_publishing
+    app_store_connect:
+      auth: integration
+      submit_to_testflight: true
+      # beta_groups:            # uncomment + name a group to auto-add external testers
+      #   - Pilot testers
+
 workflows:
+  # ────────────────────────────────── TENANT ────────────────────────────────
   tenant-ios:
-    name: MzanziHomes - Tenant
-    max_build_duration: 60
+    name: Tenant app → TestFlight
     instance_type: mac_mini_m2
+    max_build_duration: 60
     integrations:
-      app_store_connect: "Codemagic CI"
+      app_store_connect: MzanziHomes ASC
     environment:
+      <<: *base_env
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.mzanzihomes.app
       vars:
-        XCODE_WORKSPACE: "apps/tenant/ios/App/App.xcworkspace"
-        XCODE_SCHEME: "App"
-      node: 22
-      xcode: latest
-      cocoapods: default
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-      cancel_previous_builds: true
+        APP_DIR: apps/tenant
+        XCODE_WORKSPACE: apps/tenant/ios/App/App.xcworkspace
+        XCODE_SCHEME: App
     scripts:
-      - name: Install dependencies
-        script: |
-          # Match the npm that generated package-lock.json (repo pins npm@11 via
-          # packageManager); Codemagic's node 22 ships npm 10, which reads an
-          # npm-11 lockfile as "out of sync" and fails `npm ci` at this step.
-          npm i -g npm@11.6.2
-          npm --version
-          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
-      - name: Build web assets
-        script: npx turbo run build --filter=@mzanzihomes/tenant
-      - name: Sync Capacitor iOS
-        script: cd apps/tenant && npx cap sync ios
-      - name: Install CocoaPods dependencies
-        script: cd apps/tenant/ios/App && pod install
-      - name: Set up code signing
-        script: xcode-project use-profiles
+      - *npm_install
+      - name: Build web bundle
+        script: npm run build --workspace $APP_DIR
+      - name: Capacitor sync (copy web build into iOS)
+        script: cd $APP_DIR && npx cap sync ios
       - name: Set unique build number
-        script: cd apps/tenant/ios/App && agvtool new-version -all "$BUILD_NUMBER"
-      - name: Build .ipa
+        script: cd $APP_DIR/ios/App && agvtool new-version -all $BUILD_NUMBER
+      - name: Install CocoaPods
+        script: cd $APP_DIR/ios/App && pod install
+      - name: Build signed IPA
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          xcode-project use-profiles
+          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
+    publishing: *base_publishing
 
+  # ───────────────────────────────── LANDLORD ───────────────────────────────
   landlord-ios:
-    name: MzanziHomes - Landlord
-    max_build_duration: 60
+    name: Landlord app → TestFlight
     instance_type: mac_mini_m2
+    max_build_duration: 60
     integrations:
-      app_store_connect: "Codemagic CI"
+      app_store_connect: MzanziHomes ASC
     environment:
+      <<: *base_env
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.mzanzihomes.landlord
       vars:
-        XCODE_WORKSPACE: "apps/landlord/ios/App/App.xcworkspace"
-        XCODE_SCHEME: "App"
-      node: 22
-      xcode: latest
-      cocoapods: default
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-      cancel_previous_builds: true
+        APP_DIR: apps/landlord
+        XCODE_WORKSPACE: apps/landlord/ios/App/App.xcworkspace
+        XCODE_SCHEME: App
     scripts:
-      - name: Install dependencies
-        script: |
-          # Match the npm that generated package-lock.json (repo pins npm@11 via
-          # packageManager); Codemagic's node 22 ships npm 10, which reads an
-          # npm-11 lockfile as "out of sync" and fails `npm ci` at this step.
-          npm i -g npm@11.6.2
-          npm --version
-          npm ci --legacy-peer-deps || npm install --legacy-peer-deps
-      - name: Build web assets
-        script: npx turbo run build --filter=@mzanzihomes/landlord
-      - name: Sync Capacitor iOS
-        script: cd apps/landlord && npx cap sync ios
-      - name: Install CocoaPods dependencies
-        script: cd apps/landlord/ios/App && pod install
-      - name: Set up code signing
-        script: xcode-project use-profiles
+      - *npm_install
+      - name: Build web bundle
+        script: npm run build --workspace $APP_DIR
+      - name: Capacitor sync (copy web build into iOS)
+        script: cd $APP_DIR && npx cap sync ios
       - name: Set unique build number
-        script: cd apps/landlord/ios/App && agvtool new-version -all "$BUILD_NUMBER"
-      - name: Build .ipa
+        script: cd $APP_DIR/ios/App && agvtool new-version -all $BUILD_NUMBER
+      - name: Install CocoaPods
+        script: cd $APP_DIR/ios/App && pod install
+      - name: Build signed IPA
         script: |
-          xcode-project build-ipa \
-            --workspace "$XCODE_WORKSPACE" \
-            --scheme "$XCODE_SCHEME"
+          xcode-project use-profiles
+          xcode-project build-ipa --workspace "$XCODE_WORKSPACE" --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: true
+    publishing: *base_publishing
