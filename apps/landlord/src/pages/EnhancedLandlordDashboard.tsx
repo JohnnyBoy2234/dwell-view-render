@@ -56,7 +56,7 @@ import { LandlordContractsTips } from '@/components/LandlordContractsTips';
 // Per-tool color palette — each tile gets its own tinted icon bg
 const LANDLORD_TOOL_COLORS: Record<string, { bg: string; icon: string; border: string }> = {
   'Applications': { bg: 'bg-indigo-100',  icon: 'text-indigo-600',  border: 'group-hover:border-indigo-200'  },
-  'Maintenance':  { bg: 'bg-orange-100',  icon: 'text-orange-500',  border: 'group-hover:border-orange-200'  },
+  'Maintenance':  { bg: 'bg-green-100',   icon: 'text-green-600',   border: 'group-hover:border-green-200'   },
   'Payments':     { bg: 'bg-emerald-100', icon: 'text-emerald-600', border: 'group-hover:border-emerald-200' },
   'SwiftBooks':   { bg: 'bg-violet-100',  icon: 'text-violet-600',  border: 'group-hover:border-violet-200'  },
   'Leases':       { bg: 'bg-blue-100',    icon: 'text-blue-600',    border: 'group-hover:border-blue-200'    },
