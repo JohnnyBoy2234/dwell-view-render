@@ -68,6 +68,7 @@ export function AffordabilityLandlordReport({ applicationId }) {
   const [requestMsg, setRequestMsg] = useState('');
   const [summary, setSummary] = useState(null);
   const [summaryBusy, setSummaryBusy] = useState(false);
+  const [summaryError, setSummaryError] = useState(null);
 
   const load = async () => setReport(await getAffordabilityReport(applicationId));
   useEffect(() => {
@@ -87,22 +88,29 @@ export function AffordabilityLandlordReport({ applicationId }) {
     finally { setBusy(false); }
   };
 
-  // Auto-load an existing (cached) plain-language summary without generating one.
+  // As soon as the assessment is ready, show the plain-language summary
+  // automatically — returning the cached one, or generating it if none exists.
+  // The landlord should never have to click to get their explanation.
   const status = report?.assessment?.status;
   useEffect(() => {
     if (status !== 'assessment_ready' && status !== 'manual_review_required') return;
+    if (summary?.summary) return; // already have it
     let active = true;
+    setSummaryBusy(true);
+    setSummaryError(null);
     (async () => {
-      try { const r = await getAffordabilitySummary(applicationId, { cachedOnly: true }); if (active && r?.summary) setSummary(r); }
-      catch { /* summary is optional — silent */ }
+      try { const r = await getAffordabilitySummary(applicationId); if (active) setSummary(r); }
+      catch (e) { if (active) setSummaryError(e?.message || 'Could not generate the summary'); }
+      finally { if (active) setSummaryBusy(false); }
     })();
     return () => { active = false; };
   }, [applicationId, status]);
 
   const genSummary = async (force) => {
     setSummaryBusy(true);
+    setSummaryError(null);
     try { const r = await getAffordabilitySummary(applicationId, { force }); setSummary(r); }
-    catch (e) { toast({ variant: 'destructive', title: 'Could not generate the summary', description: e?.message }); }
+    catch (e) { setSummaryError(e?.message || 'Could not generate the summary'); toast({ variant: 'destructive', title: 'Could not generate the summary', description: e?.message }); }
     finally { setSummaryBusy(false); }
   };
 
@@ -221,6 +229,19 @@ export function AffordabilityLandlordReport({ applicationId }) {
                       <span className="ml-1">Regenerate</span>
                     </Button>
                   </div>
+                </>
+              ) : summaryBusy ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Writing a plain-language explanation of the figures above…
+                </div>
+              ) : summaryError ? (
+                <>
+                  <p className="text-sm text-muted-foreground">{summaryError}</p>
+                  <Button size="sm" disabled={summaryBusy} onClick={() => genSummary(false)}>
+                    <RefreshCw className="mr-1 h-4 w-4" />
+                    Try again
+                  </Button>
                 </>
               ) : (
                 <>
