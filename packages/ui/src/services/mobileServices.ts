@@ -12,10 +12,14 @@ import { supabase } from '@mzanzihomes/supabase/client';
 export class MobileServices {
   static isNative = Capacitor.isNativePlatform();
   private static pendingPushToken: string | null = null;
+  // Bundle id of the running app, set by each app at initialize(). On iOS this
+  // is the APNs topic the backend delivers to; on Android it is unused.
+  private static bundleId: string | null = null;
 
-  // Upsert the FCM device token against the signed-in user. If nobody is
-  // signed in yet (registration fires at app boot), the token is held and
-  // synced on the next sign-in.
+  // Upsert the device token against the signed-in user. On Android this is an
+  // FCM token; on iOS it is the raw APNs token (delivered direct to Apple). If
+  // nobody is signed in yet (registration fires at app boot), the token is held
+  // and synced on the next sign-in.
   static async savePushToken(token: string) {
     this.pendingPushToken = token;
     try {
@@ -27,6 +31,7 @@ export class MobileServices {
           user_id: user.id,
           token,
           platform: Capacitor.getPlatform(),
+          app_id: this.bundleId,
           updated_at: new Date().toISOString(),
         },
         { onConflict: 'token' }
@@ -37,8 +42,10 @@ export class MobileServices {
     }
   }
 
-  // Initialize mobile services
-  static async initialize() {
+  // Initialize mobile services. Pass the app's bundle id so iOS push tokens
+  // record their APNs topic (e.g. 'com.mzanzihomes.landlord').
+  static async initialize(opts?: { bundleId?: string }) {
+    if (opts?.bundleId) this.bundleId = opts.bundleId;
     if (!this.isNative) return;
 
     try {

@@ -148,7 +148,7 @@ function LandlordRoleGuard({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   useEffect(() => {
     import("@mzanzihomes/ui/services/mobileServices").then(({ MobileServices }) => {
-      MobileServices.initialize();
+      MobileServices.initialize({ bundleId: "com.mzanzihomes.landlord" });
     });
   }, []);
 

@@ -101,7 +101,7 @@ function TenantRoleGuard({ children }: { children: React.ReactNode }) {
 
 function AppRoutes() {
   useEffect(() => {
-    MobileServices.initialize();
+    MobileServices.initialize({ bundleId: "com.mzanzihomes.app" });
   }, []);
 
   return (

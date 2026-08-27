@@ -1,12 +1,16 @@
-// Universal push: fires an FCM push (Android + iOS via APNs) for ANY row
-// inserted into public.notifications. Invoked by the notifications_push DB
-// trigger (pg_net). Because every notification type (maintenance, payments,
-// applications, KYC, viewings, …) flows through create_notification(), this
-// one function delivers push for all of them.
-// Requires the FIREBASE_SERVICE_ACCOUNT secret (same one send-message-push uses).
+// Universal push for ANY row inserted into public.notifications. Invoked by the
+// notifications_push DB trigger (pg_net). Because every notification type
+// (maintenance, payments, applications, KYC, viewings, …) flows through
+// create_notification(), this one function delivers push for all of them.
+//
+// iOS tokens are delivered DIRECT to Apple (APNs); Android via FCM — split by
+// the push_tokens.platform column.
+// Requires: FIREBASE_SERVICE_ACCOUNT (Android) and APNS_AUTH_KEY / APNS_KEY_ID /
+// APNS_TEAM_ID (iOS — see _shared/apns/send.ts).
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { SignJWT, importPKCS8 } from "https://deno.land/x/jose@v5.2.0/index.ts";
+import { sendApns } from "../_shared/apns/send.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -66,7 +70,7 @@ serve(async (req) => {
     if (nErr || !n) throw new Error("Notification not found");
 
     const { data: tokens } = await supabase
-      .from("push_tokens").select("id, token").eq("user_id", n.user_id);
+      .from("push_tokens").select("id, token, platform, app_id").eq("user_id", n.user_id);
     if (!tokens || tokens.length === 0) {
       return new Response(JSON.stringify({ skipped: "no tokens" }), {
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -75,49 +79,68 @@ serve(async (req) => {
 
     const title = (n.metadata as any)?.title || TITLE_BY_TYPE[n.type ?? ""] || "MzanziHomes";
     const body = String(n.message || "").slice(0, 180);
+    const data = {
+      type: String(n.type ?? ""),
+      link_url: String(n.link_url ?? ""),
+      notification_id: String(n.id),
+    };
 
-    const rawAccount = Deno.env.get("FIREBASE_SERVICE_ACCOUNT");
-    if (!rawAccount) throw new Error("FIREBASE_SERVICE_ACCOUNT secret not configured");
-    const serviceAccount = JSON.parse(rawAccount);
-    const accessToken = await getFcmAccessToken(serviceAccount);
+    // iOS goes direct to Apple (APNs); everything else goes via FCM.
+    const iosTokens = tokens.filter((t) => t.platform === "ios");
+    const otherTokens = tokens.filter((t) => t.platform !== "ios");
 
-    const results = await Promise.all(
-      tokens.map(async (t) => {
-        const res = await fetch(
-          `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
-          {
-            method: "POST",
-            headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              message: {
-                token: t.token,
-                notification: { title, body },
-                data: {
-                  type: String(n.type ?? ""),
-                  link_url: String(n.link_url ?? ""),
-                  notification_id: String(n.id),
-                },
-                android: { priority: "HIGH", notification: { sound: "default" } },
-                apns: {
-                  headers: { "apns-priority": "10", "apns-push-type": "alert" },
-                  payload: { aps: { sound: "default", badge: 1 } },
-                },
-              },
-            }),
-          },
-        );
-        if (!res.ok) {
-          const text = await res.text();
-          if (text.includes("UNREGISTERED") || text.includes("INVALID_ARGUMENT")) {
-            await supabase.from("push_tokens").delete().eq("id", t.id);
-          }
-          return { ok: false, status: res.status };
-        }
-        return { ok: true };
+    const prune = async (id: string) => { await supabase.from("push_tokens").delete().eq("id", id); };
+
+    // --- iOS: direct APNs ---
+    const iosResults = await Promise.all(
+      iosTokens.map(async (t) => {
+        const r = await sendApns({ token: t.token, topic: t.app_id, title, body, data, badge: 1 });
+        if (!r.ok) console.error(`APNs send failed: status=${r.status} topic=${t.app_id} pruned=${r.prune} reason=${r.reason}`);
+        if (r.prune) await prune(t.id);
+        return r;
       }),
     );
 
-    return new Response(JSON.stringify({ sent: results.filter((r) => r.ok).length, total: tokens.length }), {
+    // --- Android / other: FCM ---
+    let fcmResults: { ok: boolean }[] = [];
+    if (otherTokens.length > 0) {
+      const rawAccount = Deno.env.get("FIREBASE_SERVICE_ACCOUNT");
+      if (!rawAccount) throw new Error("FIREBASE_SERVICE_ACCOUNT secret not configured");
+      const serviceAccount = JSON.parse(rawAccount);
+      const accessToken = await getFcmAccessToken(serviceAccount);
+
+      fcmResults = await Promise.all(
+        otherTokens.map(async (t) => {
+          const res = await fetch(
+            `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`,
+            {
+              method: "POST",
+              headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify({
+                message: {
+                  token: t.token,
+                  notification: { title, body },
+                  data,
+                  android: { priority: "HIGH", notification: { sound: "default" } },
+                },
+              }),
+            },
+          );
+          if (!res.ok) {
+            const text = await res.text();
+            if (text.includes("UNREGISTERED") || text.includes("INVALID_ARGUMENT")) {
+              await prune(t.id);
+            }
+            return { ok: false };
+          }
+          return { ok: true };
+        }),
+      );
+    }
+
+    const sent = iosResults.filter((r) => r.ok).length + fcmResults.filter((r) => r.ok).length;
+    console.log(`push sent=${sent}/${tokens.length} ios=${iosTokens.length} android=${otherTokens.length}`);
+    return new Response(JSON.stringify({ sent, total: tokens.length }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error) {
