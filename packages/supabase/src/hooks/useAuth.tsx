@@ -37,19 +37,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // the code for a session (PKCE verifier is in storage from signInWithOAuth),
     // and close the in-app browser. Web uses detectSessionInUrl instead.
     let removeUrlListener: (() => void) | undefined;
-    const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
-    if (cap?.isNativePlatform?.()) {
-      cap.Plugins.App.addListener('appUrlOpen', async ({ url }: { url: string }) => {
-        if (!url || !url.includes('login-callback')) return;
-        try {
-          const code = new URL(url).searchParams.get('code');
-          if (code) await supabase.auth.exchangeCodeForSession(code);
-        } catch (e) {
-          console.warn('OAuth code exchange failed:', e);
-        } finally {
-          try { await cap.Plugins.Browser.close(); } catch {}
-        }
-      }).then((handle: any) => { removeUrlListener = () => handle.remove(); });
+    // Guard every hop: on a build where @capacitor/app isn't present,
+    // cap.Plugins.App is undefined — never let that crash app startup.
+    try {
+      const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
+      const appPlugin = cap?.Plugins?.App;
+      if (cap?.isNativePlatform?.() && appPlugin?.addListener) {
+        const registration = appPlugin.addListener('appUrlOpen', async ({ url }: { url: string }) => {
+          if (!url || !url.includes('login-callback')) return;
+          try {
+            const code = new URL(url).searchParams.get('code');
+            if (code) await supabase.auth.exchangeCodeForSession(code);
+          } catch (e) {
+            console.warn('OAuth code exchange failed:', e);
+          } finally {
+            try { await cap?.Plugins?.Browser?.close?.(); } catch {}
+          }
+        });
+        Promise.resolve(registration).then((handle: any) => {
+          removeUrlListener = () => { try { handle?.remove?.(); } catch {} };
+        }).catch(() => {});
+      }
+    } catch (e) {
+      console.warn('Native OAuth listener setup skipped:', e);
     }
 
     // Set up auth state listener FIRST
@@ -251,14 +261,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionStorage.setItem('pendingOAuthRole', role);
 
     const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
-    const isNative = !!cap?.isNativePlatform?.();
+    // Only take the native path if the Browser plugin is actually present;
+    // otherwise fall through to the web flow rather than throwing.
+    const canNative = !!cap?.isNativePlatform?.() && !!cap?.Plugins?.Browser?.open;
 
-    if (isNative) {
+    if (canNative) {
       // Native flow: redirect back into the app via a custom-scheme deep link
       // (the app's bundle id), open the provider in an in-app browser, and let
       // the appUrlOpen listener (below) exchange the returned code for a session.
       let bundleId = 'app';
-      try { bundleId = (await cap.Plugins.App.getInfo()).id || bundleId; } catch {}
+      try { bundleId = (await cap.Plugins?.App?.getInfo?.())?.id || bundleId; } catch {}
       const redirectTo = `${bundleId}://login-callback`;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
