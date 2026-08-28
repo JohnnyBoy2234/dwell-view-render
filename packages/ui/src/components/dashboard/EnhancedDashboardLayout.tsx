@@ -112,8 +112,8 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
       {!hideHeader && (
         <>
           <div
-            className="px-4 pb-12"
-            style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)' }}
+            className="px-4 pb-12 pt-3.5"
+            style={{ background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)' }}
           >
             <div className="flex items-center gap-3">
               {shouldShowBackButton && (
@@ -145,10 +145,11 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
         </>
       )}
 
-      {/* Main Content */}
+      {/* Main Content. The status-bar/home-indicator insets are applied globally
+          on #root, so pages don't add their own here. */}
       <main
         className={`flex-1 w-full overflow-x-hidden ${isLandlordDashboardRoute || hideHeader ? 'p-0' : 'p-3 sm:p-5 lg:p-7'}`}
-        style={{ background: hideHeader ? undefined : '#f6f8fc', contain: 'layout style paint' }}
+        style={{ background: hideHeader ? undefined : '#f6f8fc', contain: 'layout style' }}
       >
         {children}
       </main>

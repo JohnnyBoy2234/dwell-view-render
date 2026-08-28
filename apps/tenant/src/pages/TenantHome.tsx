@@ -128,7 +128,7 @@ export default function TenantHome() {
 
   return (
     <div className="min-h-screen" style={{ background: PAGE_BG, minHeight: '100dvh' }}>
-      <div className="px-5" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 14px)', paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
+      <div className="px-5" style={{ paddingTop: '14px', paddingBottom: '2rem' }}>
 
         {/* Top row — brand · bell · account (clean white) */}
         <div className="flex items-center justify-between">

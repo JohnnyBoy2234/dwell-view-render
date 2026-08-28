@@ -317,14 +317,23 @@ All colors MUST be HSL.
 
   body {
     @apply text-foreground;
-    background: linear-gradient(135deg, 
-      hsl(var(--background)) 0%, 
-      hsl(210 40% 96%) 25%, 
-      hsl(210 40% 94%) 50%, 
-      hsl(210 40% 96%) 75%, 
+    background: linear-gradient(135deg,
+      hsl(var(--background)) 0%,
+      hsl(210 40% 96%) 25%,
+      hsl(210 40% 94%) 50%,
+      hsl(210 40% 96%) 75%,
       hsl(var(--background)) 100%
     );
     min-height: 100vh;
+  }
+
+  /* Global iOS safe-area inset so no screen renders under the status bar/notch
+     or the home indicator. Pages must NOT add their own env(safe-area-inset-*)
+     top padding on top of this (would double). env() is 0 on web. */
+  #root {
+    min-height: 100dvh;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* Enhanced text contrast for better readability */

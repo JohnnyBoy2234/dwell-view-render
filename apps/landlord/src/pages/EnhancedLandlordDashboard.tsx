@@ -3069,7 +3069,7 @@ const renderReportsTab = () => (
           <div className="hidden lg:flex lg:w-64 lg:flex-shrink-0">
             <EnhancedSidebar currentTab={currentTab} onTabChange={handleTabChange} />
           </div>
-          <div className="flex-1 min-w-0 flex flex-col" style={{ contain: 'layout style paint' }}>
+          <div className="flex-1 min-w-0 flex flex-col" style={{ contain: 'layout style' }}>
             <EnhancedDashboardLayout
               title={headerTitle}
               subtitle={headerSubtitle}
