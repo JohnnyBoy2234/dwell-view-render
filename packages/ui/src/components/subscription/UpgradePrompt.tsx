@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Lock, Sparkles, Loader2, Check } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
+import { openCheckoutUrl } from '../../utils/nativeBrowser';
 
 const FEATURES = [
   'Unlimited live listings',
@@ -36,7 +37,9 @@ export function UpgradePrompt({ featureName }: UpgradePromptProps) {
       if (!data?.success || !data?.authorization_url) {
         throw new Error(data?.error || 'Could not start checkout');
       }
-      window.location.href = data.authorization_url;
+      // Web: full redirect. Native: in-app browser, refresh on return.
+      const outcome = await openCheckoutUrl(data.authorization_url);
+      if (outcome === 'closed') window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Could not start checkout');
       setStarting(false);

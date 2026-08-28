@@ -6,6 +6,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { supabase } from '@mzanzihomes/supabase/client';
+import { openCheckoutUrl } from '@mzanzihomes/ui/utils/nativeBrowser';
 import { formatPeriod } from '../utils';
 import { FileText } from 'lucide-react';
 
@@ -34,10 +35,11 @@ export function BillDetailSheet({ bill, open, onOpenChange, autoPay }: Props) {
       if (error) throw error;
       if (!data?.success) throw new Error(data?.error || 'Could not start payment');
       setTestMode(!!data.test_mode);
-      // Paystack checkout is a full-page redirect flow; the callback returns via
-      // PaymentRedirectHandler on the `reference` query param. This matches the app's
-      // existing full-navigation redirect pattern (e.g. DocuSign callback, auth redirects).
-      window.location.href = data.authorization_url;
+      // Web: full-page redirect; the callback returns via PaymentRedirectHandler
+      // on the `reference` query param. Native: open the gateway in the in-app
+      // browser and refresh on return so the webhook-confirmed bill status shows.
+      const outcome = await openCheckoutUrl(data.authorization_url);
+      if (outcome === 'closed') window.location.reload();
     } catch (e) {
       toast({ title: 'Payment failed to start', description: (e as Error).message, variant: 'destructive' });
       setPaying(false);

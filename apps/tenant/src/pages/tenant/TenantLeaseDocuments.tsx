@@ -7,6 +7,7 @@ import { Button } from '@mzanzihomes/ui/components/button';
 import { Badge } from '@mzanzihomes/ui/components/badge';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
 import { downloadFileFromUrl, openUrlInNewTab } from '@mzanzihomes/common/lib/download';
+import { openExternalUrl } from '@mzanzihomes/ui/utils/nativeBrowser';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -51,7 +52,8 @@ export default function TenantLeaseDocuments() {
   const handleView = (url?: string) => {
     if (url) {
       const joiner = url.includes('?') ? '&' : '?';
-      window.open(`${url}${joiner}ts=${Date.now()}`, '_blank');
+      // In-app browser on native (window.open no-ops in a Capacitor webview).
+      void openExternalUrl(`${url}${joiner}ts=${Date.now()}`);
     }
   };
 

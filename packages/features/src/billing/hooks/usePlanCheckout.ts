@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '@mzanzihomes/supabase/client';
+import { openCheckoutUrl } from '@mzanzihomes/ui/utils/nativeBrowser';
 
 export type CheckoutPurpose = 'subscription' | 'listing_fee';
 
@@ -23,7 +24,10 @@ export function usePlanCheckout() {
       if (!data?.success || !data?.authorization_url) {
         throw new Error(data?.error || 'Could not start checkout');
       }
-      window.location.href = data.authorization_url;
+      // Web: full-page redirect. Native: in-app browser, then refresh on return
+      // so the webhook-confirmed subscription/listing state shows.
+      const outcome = await openCheckoutUrl(data.authorization_url);
+      if (outcome === 'closed') window.location.reload();
     } catch (e: any) {
       setError(e.message || 'Could not start checkout');
       setStarting(false);

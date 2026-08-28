@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@mzanzihomes/ui/components/RouteGuard";
+import { isNativeApp } from "@mzanzihomes/ui/utils/nativeBrowser";
 import { AuthenticatedRoute } from "@mzanzihomes/ui/components/AuthenticatedRoute";
 import { AuthBootstrap } from "@mzanzihomes/ui/components/AuthBootstrap";
 import { ErrorBoundary } from "@mzanzihomes/ui/components/ErrorBoundary";
@@ -125,12 +126,14 @@ function LandlordRoleGuard({ children }: { children: React.ReactNode }) {
             This app is for landlords. Please download{" "}
             <strong>MzanziHomes</strong> to browse and rent properties.
           </p>
-          <button
-            onClick={() => window.open("https://play.google.com/store/apps/details?id=com.mzanzihomes.tenant", "_blank")}
-            className="mt-4 w-full rounded-ios-button bg-primary py-3 px-6 text-sm font-semibold text-primary-foreground"
-          >
-            Get MzanziHomes
-          </button>
+          {!isNativeApp() && (
+            <button
+              onClick={() => window.open("https://play.google.com/store/apps/details?id=com.mzanzihomes.tenant", "_blank")}
+              className="mt-4 w-full rounded-ios-button bg-primary py-3 px-6 text-sm font-semibold text-primary-foreground"
+            >
+              Get MzanziHomes
+            </button>
+          )}
           <button
             onClick={() => signOut()}
             className="w-full rounded-ios-button border border-border py-3 px-6 text-sm font-medium text-muted-foreground"
