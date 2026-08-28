@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { Separator } from '@mzanzihomes/ui/components/separator';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
@@ -326,8 +325,8 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/5 flex overflow-y-auto p-4">
+      <div className="m-auto w-full max-w-sm">
         {/* Floating card */}
         <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border/50">
 
@@ -458,53 +457,27 @@ export default function Auth() {
             {/* Sign Up tab */}
             {activeTab === 'signup' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs"
-                    onClick={() => handleGoogleSignIn('tenant')}
-                    disabled={signUpLoading}
-                  >
-                    <GoogleIcon />
-                    Tenant
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs"
-                    onClick={() => handleGoogleSignIn('landlord')}
-                    disabled={signUpLoading}
-                  >
-                    <GoogleIcon />
-                    Landlord
-                  </Button>
-                </div>
-                <p className="text-center text-xs text-muted-foreground -mt-2">Continue with Google as…</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleGoogleSignIn('tenant')}
+                  disabled={signUpLoading}
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </Button>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs bg-black text-white hover:bg-black/90 hover:text-white border-black"
-                    onClick={() => handleAppleSignIn('tenant')}
-                    disabled={signUpLoading}
-                  >
-                    <AppleIcon />
-                    Tenant
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs bg-black text-white hover:bg-black/90 hover:text-white border-black"
-                    onClick={() => handleAppleSignIn('landlord')}
-                    disabled={signUpLoading}
-                  >
-                    <AppleIcon />
-                    Landlord
-                  </Button>
-                </div>
-                <p className="text-center text-xs text-muted-foreground -mt-2">Continue with Apple as…</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-black text-white hover:bg-black/90 hover:text-white border-black"
+                  onClick={() => handleAppleSignIn('tenant')}
+                  disabled={signUpLoading}
+                >
+                  <AppleIcon />
+                  Continue with Apple
+                </Button>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -608,30 +581,6 @@ export default function Auth() {
                         <AlertCircle className="h-3 w-3" />Passwords don't match
                       </p>
                     )}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>I am a…</Label>
-                    <RadioGroup
-                      value={signUpData.role}
-                      onValueChange={(value) => setSignUpData({ ...signUpData, role: value as 'tenant' | 'landlord' })}
-                      className="flex gap-3"
-                    >
-                      <label className={`flex-1 flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer transition-colors ${signUpData.role === 'tenant' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'}`}>
-                        <RadioGroupItem value="tenant" id="tenant" />
-                        <div>
-                          <p className="text-sm font-medium">Tenant</p>
-                          <p className="text-xs text-muted-foreground">Find a home</p>
-                        </div>
-                      </label>
-                      <label className={`flex-1 flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer transition-colors ${signUpData.role === 'landlord' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'}`}>
-                        <RadioGroupItem value="landlord" id="landlord" />
-                        <div>
-                          <p className="text-sm font-medium">Landlord</p>
-                          <p className="text-xs text-muted-foreground">List a property</p>
-                        </div>
-                      </label>
-                    </RadioGroup>
                   </div>
 
                   <label className="flex items-start gap-2.5 cursor-pointer select-none">

@@ -32,6 +32,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    // Native OAuth return: the provider redirects to our custom-scheme deep link
+    // (e.g. com.mzanzihomes.landlord://login-callback?code=…). Catch it, exchange
+    // the code for a session (PKCE verifier is in storage from signInWithOAuth),
+    // and close the in-app browser. Web uses detectSessionInUrl instead.
+    let removeUrlListener: (() => void) | undefined;
+    const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
+    if (cap?.isNativePlatform?.()) {
+      cap.Plugins.App.addListener('appUrlOpen', async ({ url }: { url: string }) => {
+        if (!url || !url.includes('login-callback')) return;
+        try {
+          const code = new URL(url).searchParams.get('code');
+          if (code) await supabase.auth.exchangeCodeForSession(code);
+        } catch (e) {
+          console.warn('OAuth code exchange failed:', e);
+        } finally {
+          try { await cap.Plugins.Browser.close(); } catch {}
+        }
+      }).then((handle: any) => { removeUrlListener = () => handle.remove(); });
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -93,7 +113,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      subscription.unsubscribe();
+      if (removeUrlListener) removeUrlListener();
+    };
   }, []);
 
   const checkUserRole = async (userId: string, createdAt?: string) => {
@@ -223,8 +246,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' = 'tenant') => {
     // Apple/Google don't round-trip our own params back through the OAuth redirect,
     // so the chosen role is stashed here and applied in checkUserRole if this turns
-    // out to be a brand-new signup with no role yet.
+    // out to be a brand-new signup with no role yet. The app webview stays alive
+    // while the system browser handles OAuth, so this survives the round-trip.
     sessionStorage.setItem('pendingOAuthRole', role);
+
+    const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
+    const isNative = !!cap?.isNativePlatform?.();
+
+    if (isNative) {
+      // Native flow: redirect back into the app via a custom-scheme deep link
+      // (the app's bundle id), open the provider in an in-app browser, and let
+      // the appUrlOpen listener (below) exchange the returned code for a session.
+      let bundleId = 'app';
+      try { bundleId = (await cap.Plugins.App.getInfo()).id || bundleId; } catch {}
+      const redirectTo = `${bundleId}://login-callback`;
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo, skipBrowserRedirect: true, queryParams: { role, is_signup: 'true' } },
+      });
+      if (error) return { error };
+      try { await cap.Plugins.Browser.open({ url: data.url }); } catch (e) { return { error: e }; }
+      return { error: null };
+    }
+
+    // Web flow
     const redirectUrl = `${window.location.origin}/`;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
