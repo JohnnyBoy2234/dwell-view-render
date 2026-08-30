@@ -54,6 +54,9 @@ const queryClient = new QueryClient();
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
+    // #root is the scroll container (see index.css), not the window.
+    const root = document.getElementById('root');
+    if (root) root.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
     window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
   }, [pathname]);
   return null;

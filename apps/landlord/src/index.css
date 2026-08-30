@@ -337,11 +337,21 @@ All colors MUST be HSL.
     min-height: 100vh;
   }
 
-  /* Global iOS safe-area inset so no screen renders under the status bar/notch
-     or the home indicator. Pages must NOT add their own env(safe-area-inset-*)
-     top padding on top of this (would double). env() is 0 on web. */
+  /* Capacitor/iOS scroll: don't rely on the WKWebView document to scroll (flaky
+     with viewport-fit=cover + user-scalable=no). Lock the body to the viewport
+     and make #root the explicit, momentum-scrolling container. Also carries the
+     safe-area insets so no screen renders under the status bar/home indicator.
+     Pages must NOT add their own env(safe-area-inset-*) top padding (would
+     double). env() is 0 on web, where this simply moves the scrollbar to #root. */
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
   #root {
-    min-height: 100dvh;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: none;
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -407,10 +417,11 @@ All colors MUST be HSL.
   display: none;
 }
 
-/* When the mobile bottom bar is present, add safe padding at the bottom */
+/* When the mobile bottom bar is present, keep scroll content clear of it.
+   #root is the scroll container, so the padding goes there (not body). */
 @media (max-width: 768px) {
-  body.has-mobile-bottom-bar {
-    padding-bottom: 72px; /* height of bottom bar plus a bit of spacing */
+  body.has-mobile-bottom-bar #root {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
   }
 }
 
