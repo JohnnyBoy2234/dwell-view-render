@@ -136,10 +136,10 @@ export class MobileServices {
       const permission = await PushNotifications.requestPermissions();
       
       if (permission.receive === 'granted') {
-        // Register for push notifications
-        await PushNotifications.register();
-
-        // Listen for registration
+        // IMPORTANT: attach listeners BEFORE register(). On iOS the
+        // 'registration' event can fire before a listener added afterwards is
+        // attached, so the token would be lost and never saved (empty
+        // push_tokens table = no push ever arrives).
         PushNotifications.addListener('registration', (token) => {
           console.log('Push registration success');
           void this.savePushToken(token.value);
@@ -174,6 +174,9 @@ export class MobileServices {
             void (supabase as any).from('push_tokens').delete().eq('token', this.pendingPushToken);
           }
         });
+
+        // Now that all listeners are attached, register with APNs/FCM.
+        await PushNotifications.register();
       }
     } catch (error) {
       console.error('Push notification initialization error:', error);
