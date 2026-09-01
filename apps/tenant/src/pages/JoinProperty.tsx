@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
-import { AlertCircle, CheckCircle2, Home, Loader2, PartyPopper, Sparkles, Calendar, Coins, KeyRound } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Home, Loader2, PartyPopper, Sparkles, Calendar, Coins, KeyRound, MessageCircle } from 'lucide-react';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -37,6 +37,7 @@ export default function JoinProperty() {
   const [accepting, setAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [convId, setConvId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -112,7 +113,8 @@ export default function JoinProperty() {
         .eq('id', invite.id);
 
       // 3) Give the tenant a real display name (from the invite) if theirs is
-      //    still a placeholder / email-derived handle, then notify the landlord.
+      //    still a placeholder / email-derived handle.
+      let tenantName = 'Your tenant';
       try {
         const invitedName = (invite.invitee_name || '').trim();
         const { data: me } = await supabase
@@ -126,16 +128,66 @@ export default function JoinProperty() {
         if (invitedName && (!current || !current.includes(' '))) {
           await supabase.from('profiles').update({ display_name: invitedName }).eq('user_id', user.id);
         }
-        const tenantName = invitedName || current || 'Your tenant';
-        const where = property?.location || property?.title || 'your property';
-        await supabase.from('notifications').insert({
-          user_id: invite.landlord_id,
-          message: `${tenantName} accepted your invite and joined ${where}.`,
-          type: 'system',
-          link_url: '/landlord/dashboard',
-        });
+        tenantName = invitedName || current || 'Your tenant';
+      } catch (e) {
+        console.error('Profile name update failed:', e);
+      }
+
+      // 4) Open the messaging channel automatically (get-or-create), so both
+      //    sides land in Messages already connected.
+      let conversationId: string | null = null;
+      try {
+        const { data: existingConv } = await supabase
+          .from('conversations')
+          .select('id')
+          .eq('property_id', invite.property_id)
+          .eq('landlord_id', invite.landlord_id)
+          .eq('tenant_id', user.id)
+          .maybeSingle();
+        if (existingConv?.id) {
+          conversationId = existingConv.id;
+        } else {
+          const { data: newConv, error: convErr } = await supabase
+            .from('conversations')
+            .insert({ property_id: invite.property_id, landlord_id: invite.landlord_id, tenant_id: user.id })
+            .select('id')
+            .single();
+          if (convErr && convErr.code !== '23505') throw convErr;
+          conversationId = newConv?.id ?? null;
+        }
+        setConvId(conversationId);
+      } catch (convErr) {
+        console.error('Could not open the messaging channel:', convErr);
+      }
+
+      // 5) Notify BOTH sides that they can now message each other. The
+      //    create_notification RPC is SECURITY DEFINER (can notify another user)
+      //    and its insert fires the push trigger, so each gets a push too.
+      try {
+        const where = property?.title || property?.location || 'your rental';
+        const link = conversationId ? `/messages?c=${conversationId}` : '/messages';
+        // Landlord's display name for the tenant's notification.
+        const { data: ll } = await supabase
+          .from('profiles').select('display_name').eq('user_id', invite.landlord_id).maybeSingle();
+        const landlordName = (ll?.display_name || '').trim() || 'your landlord';
+        await Promise.all([
+          supabase.rpc('create_notification', {
+            _user_id: invite.landlord_id,
+            _message: `${tenantName} accepted your invite for ${where}. You can now message each other in the app.`,
+            _link_url: link,
+            _type: 'message',
+            _metadata: { title: 'You’re connected' },
+          }),
+          supabase.rpc('create_notification', {
+            _user_id: user.id,
+            _message: `You’re connected with ${landlordName} for ${where}. You can now message each other in the app.`,
+            _link_url: link,
+            _type: 'message',
+            _metadata: { title: 'You’re connected' },
+          }),
+        ]);
       } catch (notifyErr) {
-        console.error('Post-join updates failed:', notifyErr);
+        console.error('Connection notifications failed:', notifyErr);
       }
 
       // Tell the dashboard to greet them with a first-time welcome.
@@ -186,11 +238,19 @@ export default function JoinProperty() {
             <PartyPopper className="absolute -top-1 -right-1 w-8 h-8 text-amber-400 drop-shadow animate-bounce" />
           </div>
           <h1 className="text-2xl font-extrabold mb-1">Welcome home! 🏡</h1>
-          <p className="text-sm text-muted-foreground mb-6">
-            You're connected to your rental. Manage rent, messages and everything else from your dashboard.
+          <p className="text-sm text-muted-foreground mb-4">
+            You're connected to your rental — you and your landlord can now message
+            each other right here in the app.
           </p>
           <Button
             className="w-full h-12 text-base rounded-xl font-semibold shadow-lg"
+            onClick={() => navigate(convId ? `/messages?c=${convId}` : '/messages')}
+          >
+            <MessageCircle className="h-5 w-5 mr-2" /> Message your landlord
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full h-12 text-base rounded-xl font-semibold mt-2"
             onClick={() => navigate('/tenant-dashboard')}
           >
             <KeyRound className="h-5 w-5 mr-2" /> Go to my dashboard
