@@ -33,6 +33,7 @@ import JoinProperty from "@/pages/JoinProperty";
 import ApplyInvite from "@/pages/ApplyInvite";
 import ResetPassword from "@mzanzihomes/ui/components/pages/ResetPassword";
 import TenantMessages from "@/pages/TenantMessages";
+import TenantSupport from "@/pages/tenant/TenantSupport";
 import DocumentViewer from "@/pages/DocumentViewer";
 import Notifications from "@mzanzihomes/ui/components/pages/Notifications";
 import { PrivacyPolicyScreen, TermsOfServiceScreen } from "@mzanzihomes/ui/components/pages/legal/LegalScreens";
@@ -157,6 +158,9 @@ function AppRoutes() {
             <RentalApplication />
           </RouteGuard>
         } />
+
+        {/* Support */}
+        <Route path="/tenant/support" element={<AuthenticatedRoute requireVerification={false}><TenantSupport /></AuthenticatedRoute>} />
 
         {/* Messages */}
         <Route path="/tenant/messages" element={<RouteGuard><TenantMessages /></RouteGuard>} />

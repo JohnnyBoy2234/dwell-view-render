@@ -11,6 +11,7 @@ import SupportTicketForm from './SupportTicketForm';
 // messages, leases, payments) where the corner button overlaps CTAs.
 const SHOWN_ROUTES = new Set<string>([
   '/',                             // tenant home + landlord index
+  '/tenant/support',               // tenant support
   '/landlord/dashboard',           // landlord dashboard landing
   '/landlord/dashboard/support',   // landlord support
 ]);
