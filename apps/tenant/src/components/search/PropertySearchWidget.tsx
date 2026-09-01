@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { cn } from "@mzanzihomes/common/lib/utils";
 import type { PropertySearchFilters } from "@mzanzihomes/ui/hooks/usePropertySearchFilters";
+import { getAreaPredictions } from "@mzanzihomes/ui/utils/googleMaps";
 
 const SA_LOCATIONS = [
   // Cape Town
@@ -217,18 +218,32 @@ export function PropertySearchWidget({
     onSearch();
   };
 
+  const staticMatches = (value: string) => {
+    const lower = value.toLowerCase();
+    return SA_LOCATIONS.filter((loc) => loc.toLowerCase().includes(lower)).slice(0, 6);
+  };
+
   const handleLocationChange = (value: string) => {
     onFiltersChange({ searchTerm: value });
-    if (value.trim().length >= 2) {
-      const lower = value.toLowerCase();
-      const matches = SA_LOCATIONS.filter((loc) =>
-        loc.toLowerCase().includes(lower),
-      ).slice(0, 6);
-      setLocationSuggestions(matches);
-      setShowSuggestions(matches.length > 0);
-    } else {
+    if (value.trim().length < 2) {
       setShowSuggestions(false);
+      return;
     }
+    // Live Google area suggestions (suburbs/towns), with the built-in SA list as
+    // an instant + offline fallback when Maps isn't available.
+    const fallback = staticMatches(value);
+    setLocationSuggestions(fallback);
+    setShowSuggestions(fallback.length > 0);
+    getAreaPredictions(value)
+      .then((preds) => {
+        // Ignore stale responses if the box was cleared meanwhile.
+        if (value.trim().length < 2) return;
+        if (preds.length > 0) {
+          setLocationSuggestions(preds.map((p) => p.description).slice(0, 6));
+          setShowSuggestions(true);
+        }
+      })
+      .catch(() => { /* keep the static fallback */ });
   };
 
   const pickSuggestion = (loc: string) => {

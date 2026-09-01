@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { MapPin } from 'lucide-react';
+import { loadGoogleMaps } from '@mzanzihomes/ui/utils/googleMaps';
 
 interface AddressAutocompleteProps {
   value: string;
@@ -29,51 +30,16 @@ export function AddressAutocomplete({
   onPlaceSelectRef.current = onPlaceSelect;
 
   useEffect(() => {
-    const loadGoogleMapsScript = () => {
-      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-      
-      console.log('Checking for Google Maps API key...', apiKey ? 'Found' : 'Not found');
-      
-      if (!apiKey) {
-        console.error('Google Maps API key not found. Please restart the application after adding VITE_GOOGLE_MAPS_API_KEY to Supabase environment variables.');
-        return;
-      }
-
-      if (window.google && window.google.maps) {
-        console.log('Google Maps already loaded');
-        setIsLoaded(true);
-        return;
-      }
-
-      if (document.querySelector('script[src*="maps.googleapis.com"]')) {
-        console.log('Google Maps script already exists, waiting for load...');
-        const checkGoogle = setInterval(() => {
-          if (window.google && window.google.maps) {
-            console.log('Google Maps loaded successfully');
-            setIsLoaded(true);
-            clearInterval(checkGoogle);
-          }
-        }, 100);
-        return;
-      }
-
-      console.log('Loading Google Maps script...');
-      window.initGoogleMaps = () => {
-        console.log('Google Maps callback triggered');
-        setIsLoaded(true);
-      };
-
-      const script = document.createElement('script');
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&callback=initGoogleMaps`;
-      script.async = true;
-      script.defer = true;
-      script.onerror = () => {
-        console.error('Failed to load Google Maps script. Check your API key and internet connection.');
-      };
-      document.head.appendChild(script);
-    };
-
-    loadGoogleMapsScript();
+    let active = true;
+    loadGoogleMaps()
+      .then(() => { if (active) setIsLoaded(true); })
+      .catch((e) => {
+        // Missing key or load failure — the field still works as a plain text
+        // input; suggestions just won't appear. VITE_GOOGLE_MAPS_API_KEY must be
+        // set at build time (.env / CI env), not in Supabase.
+        console.error('Address autocomplete unavailable:', e?.message || e);
+      });
+    return () => { active = false; };
   }, []);
 
   useEffect(() => {
