@@ -67,13 +67,26 @@ export function loadGoogleMaps(): Promise<any> {
  */
 export async function getAreaPredictions(input: string): Promise<Array<{ description: string; placeId: string }>> {
   if (!input || input.trim().length < 2) return [];
-  const google = await loadGoogleMaps();
+  let google: any;
+  try {
+    google = await loadGoogleMaps();
+  } catch (e) {
+    // Most common: key missing at build time, or script blocked. Surface it so
+    // "no suggestions" isn't silent.
+    console.warn('[places] Google Maps not loaded:', (e as Error)?.message || e);
+    return [];
+  }
   const service = new google.maps.places.AutocompleteService();
   return await new Promise((resolve) => {
     service.getPlacePredictions(
       { input, componentRestrictions: { country: 'za' }, types: ['(regions)'] },
       (predictions: any[], status: string) => {
-        if (status !== google.maps.places.PlacesServiceStatus.OK || !predictions) {
+        const S = google.maps.places.PlacesServiceStatus;
+        if (status === S.ZERO_RESULTS) { resolve([]); return; }
+        if (status !== S.OK || !predictions) {
+          // REQUEST_DENIED => key restriction or the (legacy) Places API isn't
+          // enabled; OVER_QUERY_LIMIT => billing/quota. Log the exact status.
+          console.warn('[places] getPlacePredictions status:', status);
           resolve([]);
           return;
         }
