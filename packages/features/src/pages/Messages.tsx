@@ -472,7 +472,9 @@ export default function Messages() {
             <div
               className="sticky top-0 z-20 px-4 pb-4 flex items-center justify-between gap-3"
               style={{
-                paddingTop: 'calc(env(safe-area-inset-top) + 14px)',
+                // #root already applies the status-bar inset globally; only add
+                // the visual padding here (adding env() again double-spaced it).
+                paddingTop: '14px',
                 background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)',
               }}
             >

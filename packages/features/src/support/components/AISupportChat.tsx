@@ -1,38 +1,37 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation } from 'react-router-dom';
-import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
+import { X, Send, Loader2, Sparkles } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import SupportTicketForm from './SupportTicketForm';
 
-// Routes where the chat bubble should be hidden. Application routes are
-// included because the launcher's corner position overlaps card CTAs and the
-// wizard's Next/Submit buttons; support stays reachable via the Support page.
-const HIDDEN_ROUTE_PREFIXES = [
-  '/messages',
-  '/tenant/messages',
-  '/admin',
-  '/MzanziHomes-lease/',
-  '/lease/builder',
-  '/lease/wizard',
-  '/lease/sign',
-  '/rental-application',
-  '/apply/invite',
-  '/application/',
-  '/tenant/applications',
-  '/tenant-dashboard/applications',
-  '/landlord/dashboard/applications',
-];
-const HIDDEN_ROUTE_PATTERNS = [
-  /\/leases\/.+\/sign/,
-  /\/contracts\/.+\/sign/,
-  /\/sign$/,
-];
+// The chat launcher only shows on the home hub / dashboard landing and the
+// Support page — never during task flows (invites, applications, listing,
+// messages, leases, payments) where the corner button overlaps CTAs.
+const SHOWN_ROUTES = new Set<string>([
+  '/',                             // tenant home + landlord index
+  '/landlord/dashboard',           // landlord dashboard landing
+  '/landlord/dashboard/support',   // landlord support
+]);
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+}
+
+// The model sometimes replies in markdown; we render plain text, so strip the
+// syntax (```fences```, `code`, **bold**, ### headings) and keep bullets as •
+// so answers read cleanly instead of showing raw markup.
+function toPlainText(md: string): string {
+  return md
+    .replace(/```[a-z]*\n?/gi, '')      // code-fence openers/closers
+    .replace(/`([^`]+)`/g, '$1')         // inline code
+    .replace(/\*\*([^*]+)\*\*/g, '$1')   // bold
+    .replace(/(^|\s)\*([^*\n]+)\*/g, '$1$2') // italic
+    .replace(/^#{1,6}\s+/gm, '')         // headings
+    .replace(/^\s*[-*]\s+/gm, '• ')      // list markers → bullets
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1'); // links → text
 }
 
 const QUICK_REPLIES = [
@@ -48,9 +47,8 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as strin
 
 export function AISupportChat() {
   const { pathname } = useLocation();
-  const isHidden =
-    HIDDEN_ROUTE_PREFIXES.some(p => pathname === p || pathname.startsWith(p + '/') || pathname.startsWith(p)) ||
-    HIDDEN_ROUTE_PATTERNS.some(r => r.test(pathname));
+  const normalized = pathname !== '/' && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  const isHidden = !SHOWN_ROUTES.has(normalized);
 
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -176,7 +174,7 @@ export function AISupportChat() {
           )}
           size="icon"
         >
-          <MessageCircle className="h-6 w-6" />
+          <Sparkles className="h-6 w-6" />
         </Button>
       )}
 
@@ -267,7 +265,11 @@ export function AISupportChat() {
                           : 'bg-muted rounded-bl-sm'
                       )}
                     >
-                      {msg.content || (
+                      {msg.content ? (
+                        <span className="whitespace-pre-wrap">
+                          {msg.role === 'assistant' ? toPlainText(msg.content) : msg.content}
+                        </span>
+                      ) : (
                         <span className="flex gap-1 items-center h-4">
                           <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:0ms]" />
                           <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/50 animate-bounce [animation-delay:150ms]" />
