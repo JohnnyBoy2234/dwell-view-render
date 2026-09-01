@@ -22,6 +22,7 @@ import {
   PaginationPrevious,
 } from '@mzanzihomes/ui/components/pagination';
 import { ArrowLeft, X } from 'lucide-react';
+import { AreaMultiSelect } from '@mzanzihomes/ui/components/AreaMultiSelect';
 
 interface Property {
   id: string;
@@ -67,6 +68,7 @@ export default function Properties() {
 
   // Read filters from URL
   const searchTerm   = searchParams.get('search') || searchParams.get('location') || '';
+  const areas        = searchParams.get('areas')?.split(',').map(a => a.trim()).filter(Boolean) || [];
   const propertyType = searchParams.get('propertyType') || searchParams.get('type') || 'Any';
   const minPrice     = searchParams.get('minPrice') || '';
   const maxPrice     = searchParams.get('maxPrice') || '';
@@ -85,18 +87,33 @@ export default function Properties() {
     setSearchParams(next);
   };
 
+  // Multi-area chips (Property24-style) live in the `areas` URL param.
+  const updateAreas = (nextAreas: string[]) => {
+    const next = new URLSearchParams(searchParams.toString());
+    next.delete('search');
+    next.delete('location');
+    if (nextAreas.length > 0) next.set('areas', nextAreas.join(','));
+    else next.delete('areas');
+    setCurrentPage(1);
+    setSearchParams(next);
+  };
+
   const handleClearFilters = () => {
     setCurrentPage(1);
     navigate('/properties');
   };
 
   const hasActiveFilters =
-    searchTerm || propertyType !== 'Any' || minPrice || maxPrice || bedrooms !== 'Any' || bathrooms !== 'Any';
+    searchTerm || areas.length > 0 || propertyType !== 'Any' || minPrice || maxPrice || bedrooms !== 'Any' || bathrooms !== 'Any';
 
   // Client-side filter after fetch
   const filteredProperties = properties.filter(p => {
     if (p.listing_type === 'sale') return false;
-    if (searchTerm) {
+    // Multi-area: keep a property if its location matches ANY selected area.
+    if (areas.length > 0) {
+      const loc = p.location.toLowerCase();
+      if (!areas.some(a => loc.includes(a.toLowerCase().trim()))) return false;
+    } else if (searchTerm) {
       const needle = searchTerm.toLowerCase().trim();
       if (!p.location.toLowerCase().includes(needle)) return false;
     }
@@ -214,7 +231,7 @@ export default function Properties() {
 
   return (
     <div className="min-h-screen" style={{ background: 'hsl(214 60% 97%)' }}>
-      <div className="container mx-auto px-4 sm:px-6 pb-12">
+      <div className="container mx-auto px-4 sm:px-6 pt-4 pb-12">
 
         {/* ── Page heading ──────────────────────────────────── */}
         <div className="flex items-baseline justify-between mb-5 animate-in fade-in duration-300">
@@ -229,16 +246,29 @@ export default function Properties() {
             </button>
             <div>
               <h1 className="text-xl font-bold text-foreground tracking-tight">Properties</h1>
-              {searchTerm && (
+              {areas.length > 0 ? (
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  in <span className="font-medium text-foreground">{areas.join(', ')}</span>
+                </p>
+              ) : searchTerm ? (
                 <p className="text-xs text-muted-foreground mt-0.5">
                   in <span className="font-medium text-foreground">{searchTerm}</span>
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
           <span className="text-xs text-muted-foreground tabular-nums">
             {filteredProperties.length} result{filteredProperties.length !== 1 ? 's' : ''}
           </span>
+        </div>
+
+        {/* ── Area search (multi-area chips) ────────────────── */}
+        <div className="mb-3 rounded-2xl bg-white border border-black/[0.08] px-3 py-2.5 shadow-sm">
+          <AreaMultiSelect
+            areas={areas}
+            onChange={updateAreas}
+            placeholder="Search areas — add as many as you like…"
+          />
         </div>
 
         {/* ── Filter bar ────────────────────────────────────── */}

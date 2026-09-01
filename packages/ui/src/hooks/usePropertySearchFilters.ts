@@ -5,12 +5,13 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 export interface PropertySearchFilters {
   // Main search bar filters
   searchTerm: string;
+  areas: string[];        // Property24-style multi-area search
   propertyType: string;
   minPrice: string;
   maxPrice: string;
   bedrooms: string;
   bathrooms: string;
-  
+
   // Advanced modal filters
   propertyTypes: string[];
   amenities: string[];
@@ -19,6 +20,7 @@ export interface PropertySearchFilters {
 
 const defaultFilters: PropertySearchFilters = {
   searchTerm: '',
+  areas: [],
   propertyType: 'Any',
   minPrice: '',
   maxPrice: '',
@@ -37,6 +39,7 @@ export function usePropertySearchFilters() {
   const [filters, setFilters] = useState<PropertySearchFilters>(() => {
     return {
       searchTerm: searchParams.get('search') || searchParams.get('location') || '',
+      areas: searchParams.get('areas')?.split(',').map(a => a.trim()).filter(Boolean) || [],
       propertyType: searchParams.get('propertyType') || searchParams.get('type') || 'Any',
       minPrice: searchParams.get('minPrice') || '',
       maxPrice: searchParams.get('maxPrice') || '',
@@ -63,10 +66,12 @@ export function usePropertySearchFilters() {
     const params = new URLSearchParams();
     
     // Only add non-empty/non-default values to URL
-    if (filters.searchTerm.trim()) {
+    if (filters.areas.length > 0) {
+      params.set('areas', filters.areas.join(','));
+    } else if (filters.searchTerm.trim()) {
       params.set('search', filters.searchTerm.trim());
     }
-    
+
     if (filters.minPrice && filters.minPrice !== '0') {
       params.set('minPrice', filters.minPrice);
     }
@@ -107,6 +112,7 @@ export function usePropertySearchFilters() {
   const hasActiveFilters = () => {
     return (
       filters.searchTerm.trim() !== '' ||
+      filters.areas.length > 0 ||
       filters.propertyType !== 'Any' ||
       (filters.minPrice && filters.minPrice !== '0') ||
       filters.maxPrice !== '' ||

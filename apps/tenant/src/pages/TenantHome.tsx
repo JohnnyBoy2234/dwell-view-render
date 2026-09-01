@@ -20,6 +20,7 @@ import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import { MoreFiltersModal } from '@mzanzihomes/ui/components/search/MoreFiltersModal';
 import { usePropertySearchFilters } from '@mzanzihomes/ui/hooks/usePropertySearchFilters';
+import { AreaMultiSelect } from '@mzanzihomes/ui/components/AreaMultiSelect';
 import HomeCarousel from '@/components/HomeCarousel';
 import heroHouse from '@/assets/hero-house.jpg';
 
@@ -65,7 +66,6 @@ export default function TenantHome() {
   const { upcomingViewings, hasSignedLease } = useTenantDashboard();
   const { filters, updateFilters, clearFilters, executeSearch } = usePropertySearchFilters();
 
-  const [searchLocation, setSearchLocation] = useState('');
   const [dealType, setDealType] = useState<'rent' | 'buy'>('rent');
   const [pressedTile, setPressedTile] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -107,8 +107,7 @@ export default function TenantHome() {
   const badgeFor = (kind?: string) =>
     !kind ? 0 : kind === 'message' ? (unreadCount || 0) : (unreadByKind[kind] || 0);
 
-  const runSearch = () =>
-    navigate(`/properties${searchLocation.trim() ? `?q=${encodeURIComponent(searchLocation.trim())}` : ''}`);
+  const runSearch = () => executeSearch();
 
   // Opening a tile clears its notifications (mark-as-read), like tapping into
   // the item from the landlord dashboard would.
@@ -213,35 +212,33 @@ export default function TenantHome() {
           </div>
         </div>
 
-        {/* Search card — location · more filters · search, in one row */}
-        <div className="relative mt-7 flex items-center gap-2 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
-          <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-0.5">
-            <GlossyIcon tone={GLOSSY_TONES.sky} icon={MapPin} size={40} />
-            <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
-              <input
-                value={searchLocation}
-                onChange={(e) => setSearchLocation(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') runSearch(); }}
+        {/* Search card — multi-area location · more filters · search */}
+        <div className="relative mt-7 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+          <p className="mb-1.5 pl-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1 pl-0.5">
+              <AreaMultiSelect
+                areas={filters.areas}
+                onChange={(areas) => updateFilters({ areas })}
+                onSubmit={runSearch}
                 placeholder="City, suburb or area…"
-                className="w-full bg-transparent text-[13px] text-slate-700 placeholder:text-slate-400 focus:outline-none"
               />
             </div>
+            <button
+              onClick={() => setFiltersOpen(true)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
+              aria-label="More filters"
+            >
+              <SlidersHorizontal className="h-[18px] w-[18px] text-slate-600" />
+            </button>
+            <button
+              onClick={runSearch}
+              className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+              style={{ background: '#2563EB' }}
+            >
+              <Search className="h-4 w-4" /> Search
+            </button>
           </div>
-          <button
-            onClick={() => { updateFilters({ searchTerm: searchLocation }); setFiltersOpen(true); }}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
-            aria-label="More filters"
-          >
-            <SlidersHorizontal className="h-[18px] w-[18px] text-slate-600" />
-          </button>
-          <button
-            onClick={runSearch}
-            className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
-            style={{ background: '#2563EB' }}
-          >
-            <Search className="h-4 w-4" /> Search
-          </button>
         </div>
 
         {/* Feature grid — heading depends on whether a lease exists yet */}

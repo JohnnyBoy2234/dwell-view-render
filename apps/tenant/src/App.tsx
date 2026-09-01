@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { RouteGuard } from "@mzanzihomes/ui/components/RouteGuard";
 import { isNativeApp } from "@mzanzihomes/ui/utils/nativeBrowser";
-import { MiniNavbar } from "@/components/ui/mini-navbar";
 import TenantHome from "@/pages/TenantHome";
 import { MobileBottomBar } from "@mzanzihomes/ui/components/MobileBottomBar";
 import { MobileServices } from "@mzanzihomes/ui/services/mobileServices";
@@ -118,7 +117,7 @@ function AppRoutes() {
         {/* Public browsing — the one-page hub is the landing for everyone,
             signed-out visitors included. */}
         <Route path="/" element={<TenantHome />} />
-        <Route path="/properties" element={<><MiniNavbar hideLandlordActions minimal /><div className="pt-28 sm:pt-24"><Properties /></div></>} />
+        <Route path="/properties" element={<Properties />} />
         <Route path="/property/:id" element={<PropertyDetail />} />
         <Route path="/apply/invite/:token" element={<ApplyInvite />} />
         <Route path="/apply/:id" element={<PropertyDetail />} />
