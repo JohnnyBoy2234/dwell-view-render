@@ -470,11 +470,10 @@ export default function Messages() {
           <div className="min-h-screen bg-background">
             {/* Mobile header */}
             <div
-              className="sticky top-0 z-20 px-4 pb-4 flex items-center justify-between gap-3"
+              className="status-bar-bleed sticky top-0 z-20 px-4 pb-4 flex items-center justify-between gap-3"
               style={{
-                // #root already applies the status-bar inset globally; only add
-                // the visual padding here (adding env() again double-spaced it).
-                paddingTop: '14px',
+                // Bleed the navy up under the status bar so there's no light
+                // strip above the header (see .status-bar-bleed in index.css).
                 background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)',
               }}
             >

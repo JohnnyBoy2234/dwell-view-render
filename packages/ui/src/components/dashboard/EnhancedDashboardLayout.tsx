@@ -112,7 +112,7 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
       {!hideHeader && (
         <>
           <div
-            className="px-4 pb-12 pt-3.5"
+            className="status-bar-bleed px-4 pb-12"
             style={{ background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)' }}
           >
             <div className="flex items-center gap-3">

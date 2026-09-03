@@ -346,6 +346,15 @@ All colors MUST be HSL.
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* A coloured page header (navy dashboard/tile/messages headers) should paint
+     the status-bar area too — not leave a light strip above it. This pulls the
+     header up over #root's top inset and re-adds it as padding, so the header
+     colour bleeds under the status bar while its content stays clear of it. */
+  .status-bar-bleed {
+    margin-top: calc(-1 * env(safe-area-inset-top));
+    padding-top: calc(env(safe-area-inset-top) + 14px);
+  }
+
   /* Enhanced text contrast for better readability */
   .text-foreground {
     color: hsl(215 25% 10%) !important;

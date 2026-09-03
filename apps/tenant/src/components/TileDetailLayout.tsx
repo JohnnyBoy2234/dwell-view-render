@@ -30,7 +30,7 @@ export default function TileDetailLayout({ title, subtitle, icon: Icon, accent =
   return (
     <div className="min-h-screen" style={{ minHeight: '100dvh', background: '#0a1f45' }}>
       {/* Navy header */}
-      <div className="px-4 pb-12 pt-3.5" style={{ background: NAVY }}>
+      <div className="status-bar-bleed px-4 pb-12" style={{ background: NAVY }}>
         <div className="flex items-center gap-3">
           <button
             onClick={goBack}
