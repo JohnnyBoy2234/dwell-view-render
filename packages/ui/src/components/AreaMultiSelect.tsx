@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MapPin, X } from 'lucide-react';
 import { cn } from '@mzanzihomes/common/lib/utils';
 import { getAreaPredictions } from '@mzanzihomes/ui/utils/googleMaps';
+import { matchSaAreas } from '@mzanzihomes/ui/lib/saAreas';
 
 interface AreaMultiSelectProps {
   areas: string[];
@@ -46,15 +47,21 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
       setOpen(false);
       return;
     }
+    // Show the built-in SA list instantly (works with no Google key, like the
+    // web search), then upgrade to live Google predictions if they come back.
+    const fallback = matchSaAreas(value);
+    setSuggestions(fallback);
+    setOpen(fallback.length > 0);
     const mine = ++seq.current;
     getAreaPredictions(value)
       .then((preds) => {
         if (mine !== seq.current) return; // ignore stale
+        if (preds.length === 0) return;    // keep the fallback list
         const list = preds.map((p) => p.description).slice(0, 6);
         setSuggestions(list);
-        setOpen(list.length > 0);
+        setOpen(true);
       })
-      .catch(() => { setSuggestions([]); setOpen(false); });
+      .catch(() => { /* keep the fallback list */ });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
