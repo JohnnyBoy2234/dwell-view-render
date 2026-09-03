@@ -183,7 +183,8 @@ export default function Properties() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // #root is the scroll container (see index.css), not the window.
+    document.getElementById('root')?.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const renderPaginationItems = () => {
