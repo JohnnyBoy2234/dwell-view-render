@@ -467,13 +467,16 @@ export default function Messages() {
       <>
         {/* Conversations list */}
         {showConversations && (
-          <div className="min-h-screen bg-background">
+          <div className="flex flex-col bg-background" style={{ height: '100%' }}>
             {/* Mobile header */}
             <div
-              className="status-bar-bleed sticky top-0 z-20 px-4 pb-4 flex items-center justify-between gap-3"
+              className="status-bar-bleed z-20 px-4 pb-4 flex items-center justify-between gap-3"
               style={{
                 // Bleed the navy up under the status bar so there's no light
                 // strip above the header (see .status-bar-bleed in index.css).
+                // NOT sticky: sticky clamps to #root's content-box top (below the
+                // safe-area inset) and cancels the bleed. The conversation list
+                // scrolls in its own inner container, so the header stays put.
                 background: 'linear-gradient(180deg, #12315f 0%, #0a1f45 100%)',
               }}
             >
@@ -501,11 +504,9 @@ export default function Messages() {
               </div>
             </div>
 
-            {/* List */}
-            <div
-              className="overflow-auto"
-              style={{ height: 'calc(100vh - 60px - env(safe-area-inset-bottom))' }}
-            >
+            {/* List — fills the remaining height and scrolls internally so the
+                header stays fixed above it. */}
+            <div className="flex-1 overflow-auto">
               {renderConversationList(true)}
             </div>
           </div>
