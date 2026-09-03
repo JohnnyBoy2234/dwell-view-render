@@ -6,7 +6,9 @@ import type {
 } from "@mzanzihomes/ui/components/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 1000000
+// How long a toast stays before it auto-dismisses. (The stock shadcn value was
+// 1000000ms — effectively never — which is why toasts only closed on the X.)
+const TOAST_REMOVE_DELAY = 4000
 
 type ToasterToast = ToastProps & {
   id: string

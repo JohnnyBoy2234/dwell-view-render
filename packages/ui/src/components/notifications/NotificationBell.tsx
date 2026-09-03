@@ -20,7 +20,7 @@ import { getNotificationTargetUrl } from '@mzanzihomes/ui/utils/notificationRout
 
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; bg: string; color: string }> = {
   application: { icon: Home,          bg: 'bg-indigo-100 dark:bg-indigo-900/40', color: 'text-indigo-600 dark:text-indigo-400' },
-  maintenance:  { icon: Wrench,        bg: 'bg-orange-100 dark:bg-orange-900/40', color: 'text-orange-600 dark:text-orange-400' },
+  maintenance:  { icon: Wrench,        bg: 'bg-green-100 dark:bg-green-900/40', color: 'text-green-600 dark:text-green-400' },
   payment:      { icon: CreditCard,    bg: 'bg-emerald-100 dark:bg-emerald-900/40', color: 'text-emerald-600 dark:text-emerald-400' },
   viewing:      { icon: Calendar,      bg: 'bg-blue-100 dark:bg-blue-900/40',    color: 'text-blue-600 dark:text-blue-400' },
   lease:        { icon: FileText,      bg: 'bg-violet-100 dark:bg-violet-900/40', color: 'text-violet-600 dark:text-violet-400' },
