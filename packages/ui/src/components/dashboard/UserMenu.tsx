@@ -11,6 +11,7 @@ import {
   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from '@mzanzihomes/ui/components/dropdown-menu';
 import { BillingSubscriptionDialog } from './BillingSubscriptionDialog';
+import { isNativeApp, openExternalUrl } from '@mzanzihomes/ui/utils/nativeBrowser';
 
 // Avatar in the dashboard header's top-right corner (Slack/Google style).
 // Replaces the old separate Profile tab — account actions live in this menu.
@@ -50,16 +51,23 @@ export function UserMenu({ variant = 'dark' }: { variant?: 'dark' | 'light' } = 
 
   // The admin panel is served only by the web app (mzanzihomes.com). The JT menu
   // also renders in the landlord/tenant apps (separate deployments with no /admin
-  // route), so from there we jump to the web app's absolute URL instead of an
+  // route), so from there we open the web app's absolute URL instead of an
   // in-app navigation that would 404.
+  //
+  // Native builds report hostname 'localhost' too, so we must exclude native
+  // BEFORE trusting the hostname — otherwise the native landlord app thinks it's
+  // the web app and SPA-navigates to a route it doesn't have (404). On native we
+  // open the admin panel in the in-app browser.
   const goAdmin = () => {
     const host = window.location.hostname;
     const isWebApp =
-      host === 'mzanzihomes.com' || host === 'www.mzanzihomes.com' ||
-      host === 'rentlekker.com' || host === 'www.rentlekker.com' ||
-      host === 'localhost' || host === '127.0.0.1';
+      !isNativeApp() && (
+        host === 'mzanzihomes.com' || host === 'www.mzanzihomes.com' ||
+        host === 'rentlekker.com' || host === 'www.rentlekker.com' ||
+        host === 'localhost' || host === '127.0.0.1'
+      );
     if (isWebApp) navigate('/admin/dashboard');
-    else window.location.href = 'https://mzanzihomes.com/admin/dashboard';
+    else openExternalUrl('https://mzanzihomes.com/admin/dashboard');
   };
 
   return (
