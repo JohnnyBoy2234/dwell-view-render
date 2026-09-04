@@ -376,7 +376,24 @@ export function ScreeningApplicationWizard({ propertyId, landlordId, inviteId, o
               will notify you if they do, and when a decision is made.
             </p>
           </div>
+
+          {/* Affordability assessment — an optional next step that lives on the
+              application itself. Surfaced here so tenants actually reach it
+              instead of it sitting unseen on the application detail page. */}
+          <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
+            <p className="text-sm font-semibold">Strengthen your application (optional)</p>
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              Complete an affordability assessment: give consent and upload a recent bank
+              statement so the landlord can see you can comfortably afford the rent. It can
+              speed up their decision. You can also do this later from your application.
+            </p>
+            <Button className="mt-3 w-full" onClick={() => navigate(`/application/${submittedId}`)}>
+              Continue to affordability assessment
+            </Button>
+          </div>
+
           <Button
+            variant="outline"
             className="w-full"
             onClick={() => {
               if (onSubmissionComplete) onSubmissionComplete();
