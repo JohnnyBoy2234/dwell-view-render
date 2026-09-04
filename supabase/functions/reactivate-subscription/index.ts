@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const logStep = (step: string, details?: unknown) => {
-  console.log(`[CANCEL-SUBSCRIPTION] ${step}${details ? ` - ${JSON.stringify(details)}` : ''}`);
+  console.log(`[REACTIVATE-SUBSCRIPTION] ${step}${details ? ` - ${JSON.stringify(details)}` : ''}`);
 };
 
 async function paystackGet(path: string, secretKey: string) {
@@ -18,6 +18,10 @@ async function paystackGet(path: string, secretKey: string) {
   return { ok: res.ok && body?.status, data: body?.data, message: body?.message };
 }
 
+// Re-enables a subscription the landlord previously cancelled while it was still
+// inside its paid period (Paystack status 'non-renewing'). Mirrors
+// cancel-subscription but hits /subscription/enable and flips the local state
+// back to active so billing resumes at the next cycle.
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
@@ -47,36 +51,39 @@ serve(async (req) => {
       .maybeSingle();
     if (subError) throw new Error(`Could not load subscription: ${subError.message}`);
     if (!sub) throw new Error('No subscription found for this account');
-    if (sub.status === 'cancelled') throw new Error('Subscription is already cancelled');
 
-    // Paystack's disable endpoint needs the subscription code AND its email_token.
-    // The token isn't stored locally, so fetch the subscription from Paystack.
+    // Find the subscription code + email_token, exactly as cancel does.
     let subscriptionCode: string | null = sub.paystack_subscription_code ?? null;
     let emailToken: string | null = null;
+    let paystackStatus: string | null = null;
 
     if (subscriptionCode) {
       const { ok, data } = await paystackGet(`/subscription/${subscriptionCode}`, paystackSecretKey);
-      if (ok) emailToken = data?.email_token ?? null;
-      else logStep('Subscription lookup by code failed', { subscriptionCode });
+      if (ok) {
+        emailToken = data?.email_token ?? null;
+        paystackStatus = data?.status ?? null;
+      } else {
+        logStep('Subscription lookup by code failed', { subscriptionCode });
+      }
     }
 
     if (!emailToken && sub.paystack_customer_code) {
-      // Fall back to the customer record: covers subscriptions activated by
-      // charge.success before subscription.create stored the code.
       const { ok, data } = await paystackGet(`/customer/${sub.paystack_customer_code}`, paystackSecretKey);
       if (ok) {
-        const active = (data?.subscriptions ?? []).find(
-          (s: any) => s.status === 'active' || s.status === 'non-renewing' || s.status === 'attention'
+        const s = (data?.subscriptions ?? []).find(
+          (x: any) => x.status === 'non-renewing' || x.status === 'attention' || x.status === 'active'
         );
-        if (active) {
-          subscriptionCode = active.subscription_code;
-          emailToken = active.email_token ?? null;
+        if (s) {
+          subscriptionCode = s.subscription_code;
+          emailToken = s.email_token ?? null;
+          paystackStatus = s.status ?? null;
         }
       }
     }
 
-    if (subscriptionCode && emailToken) {
-      const res = await fetch('https://api.paystack.co/subscription/disable', {
+    // If Paystack already shows it active, nothing to enable — just sync local.
+    if (subscriptionCode && emailToken && paystackStatus !== 'active') {
+      const res = await fetch('https://api.paystack.co/subscription/enable', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${paystackSecretKey}`,
@@ -86,33 +93,28 @@ serve(async (req) => {
       });
       const body = await res.json().catch(() => null);
       if (!res.ok || !body?.status) {
-        throw new Error(body?.message || 'Paystack could not disable the subscription');
+        throw new Error(body?.message || 'Paystack could not reactivate the subscription');
       }
-      logStep('Paystack subscription disabled', { subscriptionCode });
-    } else {
-      // Nothing to disable on Paystack (e.g. subscription record without a
-      // Paystack counterpart) — still cancel locally so the account isn't stuck.
-      logStep('No Paystack subscription found; cancelling locally only');
+      logStep('Paystack subscription enabled', { subscriptionCode });
+    } else if (!subscriptionCode || !emailToken) {
+      // No live Paystack subscription to re-enable (e.g. it already lapsed).
+      // The landlord must start a fresh subscription via checkout.
+      throw new Error('Your subscription has ended and can no longer be reactivated. Please subscribe again.');
     }
 
-    // Cancelling stops the subscription renewing but keeps the access the
-    // landlord already paid for until the end of the current period. We mark it
-    // 'non-renewing' (NOT 'free'/'cancelled') so access continues and the
-    // subscription can be reactivated; entitlement lapses on its own once
-    // plan_expires_at passes (isActiveSubscriber / is_active_subscriber()).
     const { error: updateError } = await supabase
       .from('billing_subscriptions')
-      .update({ status: 'non-renewing' })
+      .update({ status: 'active' })
       .eq('user_id', user.id);
     if (updateError) throw new Error(`Failed to update subscription: ${updateError.message}`);
 
     const { error: profileError } = await supabase
       .from('profiles')
-      .update({ plan_status: 'non-renewing', plan_last_synced: new Date().toISOString() })
+      .update({ plan: 'subscriber', plan_status: 'active', plan_last_synced: new Date().toISOString() })
       .eq('user_id', user.id);
     if (profileError) throw new Error(`Failed to update profile: ${profileError.message}`);
 
-    logStep('Subscription cancelled', { userId: user.id });
+    logStep('Subscription reactivated', { userId: user.id });
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

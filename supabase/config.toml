@@ -112,5 +112,8 @@ verify_jwt = true
 [functions.cancel-subscription]
 verify_jwt = true
 
+[functions.reactivate-subscription]
+verify_jwt = true
+
 [functions.ocr-process]
 verify_jwt = true

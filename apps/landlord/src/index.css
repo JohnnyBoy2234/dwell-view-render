@@ -12,6 +12,29 @@
   padding-top: var(--navbar-h);
 }
 
+/* Native-app feel: kill the blue tap-highlight flash and accidental text
+   selection that WKWebView shows when you tap/long-press buttons, cards and
+   labels. Inputs and anything explicitly selectable keep normal text selection
+   so users can still copy reference numbers, etc. */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+html {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input,
+textarea,
+select,
+[contenteditable="true"],
+[contenteditable=""],
+.select-text {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */

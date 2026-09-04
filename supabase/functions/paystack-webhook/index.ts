@@ -358,10 +358,14 @@ serve(async (req) => {
       const customerCode = event.data?.customer?.customer_code;
       const userId = customerCode ? await resolveUserByCustomerCode(supabase, customerCode) : null;
       if (userId) {
-        await supabase.from("billing_subscriptions").update({ status: "cancelled" }).eq("user_id", userId);
+        // Disabling stops renewal but the landlord keeps the access they paid
+        // for until plan_expires_at, after which is_active_subscriber() lapses
+        // them automatically. We keep the plan and mark it non-renewing (mirrors
+        // subscription.not_renew) rather than dropping to free immediately — so
+        // access isn't yanked mid-period and the subscription can be reactivated.
+        await supabase.from("billing_subscriptions").update({ status: "non-renewing" }).eq("user_id", userId);
         await supabase.from("profiles").update({
-          plan: "free",
-          plan_status: "cancelled",
+          plan_status: "non-renewing",
           plan_last_synced: new Date().toISOString(),
         }).eq("user_id", userId);
         // Paid R99 listings stay live: we never touch is_listed here.

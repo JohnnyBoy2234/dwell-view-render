@@ -23,12 +23,24 @@ export class MobileServices {
   static async savePushToken(token: string) {
     this.pendingPushToken = token;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      // Prefer the locally-restored session (no network, reliable at boot) and
+      // fall back to getUser(). getSession() returns the returning user even
+      // before any SIGNED_IN event fires.
+      let userId: string | undefined;
+      const { data: { session } } = await supabase.auth.getSession();
+      userId = session?.user?.id;
+      if (!userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        userId = user?.id;
+      }
+      if (!userId) {
+        console.log('Push token held — no user yet, will save on sign-in');
+        return;
+      }
       // push_tokens is newer than the generated Database types
-      await (supabase as any).from('push_tokens').upsert(
+      const { error } = await (supabase as any).from('push_tokens').upsert(
         {
-          user_id: user.id,
+          user_id: userId,
           token,
           platform: Capacitor.getPlatform(),
           app_id: this.bundleId,
@@ -36,7 +48,9 @@ export class MobileServices {
         },
         { onConflict: 'token' }
       );
-      console.log('Push token saved for user', user.id);
+      if (error) { console.error('Push token upsert rejected:', error.message ?? error); return; }
+      this.pendingPushToken = null;
+      console.log('Push token saved for user', userId);
     } catch (error) {
       console.error('Failed to save push token:', error);
     }
@@ -164,14 +178,20 @@ export class MobileServices {
           }
         });
 
-        // Registration can beat sign-in at app boot: sync the held token
-        // whenever a user signs in, and drop their token on sign-out.
-        supabase.auth.onAuthStateChange((event) => {
-          if (event === 'SIGNED_IN' && this.pendingPushToken) {
-            void this.savePushToken(this.pendingPushToken);
+        // Registration can beat sign-in at app boot: sync the held token once a
+        // session exists, and drop it on sign-out. We must handle
+        // INITIAL_SESSION (returning user whose session is restored from
+        // storage) as well as SIGNED_IN — otherwise an already-logged-in user's
+        // token is captured but never saved (empty push_tokens table).
+        supabase.auth.onAuthStateChange((event, session) => {
+          if (event === 'SIGNED_OUT') {
+            if (this.pendingPushToken) {
+              void (supabase as any).from('push_tokens').delete().eq('token', this.pendingPushToken);
+            }
+            return;
           }
-          if (event === 'SIGNED_OUT' && this.pendingPushToken) {
-            void (supabase as any).from('push_tokens').delete().eq('token', this.pendingPushToken);
+          if (session?.user && this.pendingPushToken) {
+            void this.savePushToken(this.pendingPushToken);
           }
         });
 

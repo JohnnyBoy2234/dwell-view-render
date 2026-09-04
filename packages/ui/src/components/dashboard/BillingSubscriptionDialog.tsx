@@ -46,6 +46,7 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
   const navigate = useNavigate();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
   const nonRenewing = planStatus === 'non-renewing';
   const expiryDate = planExpiresAt
@@ -74,6 +75,27 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
       toast({ title: 'Could not close your office', description: (e as Error).message, variant: 'destructive' });
     } finally {
       setClosing(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    setReactivating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('reactivate-subscription', { body: {} });
+      if (error) {
+        const body = await (error as any).context?.json?.().catch(() => null);
+        throw new Error(body?.error || error.message);
+      }
+      if (data && data.success === false) throw new Error(data.error || 'Could not reactivate subscription');
+      await refresh();
+      toast({
+        title: 'Subscription reactivated',
+        description: 'Your Digital Property Office stays open and will renew as normal.',
+      });
+    } catch (e) {
+      toast({ title: 'Could not reactivate', description: (e as Error).message, variant: 'destructive' });
+    } finally {
+      setReactivating(false);
     }
   };
 
@@ -128,7 +150,16 @@ export function BillingSubscriptionDialog({ open, onOpenChange }: Props) {
               </div>
 
               {isSubscriber ? (
-                !nonRenewing && (
+                nonRenewing ? (
+                  <Button
+                    className="w-full rounded-xl"
+                    style={{ background: 'hsl(214,100%,59%)', color: '#fff' }}
+                    disabled={reactivating}
+                    onClick={handleReactivate}
+                  >
+                    {reactivating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Reactivate subscription'}
+                  </Button>
+                ) : (
                   <Button
                     variant="outline"
                     className="w-full rounded-xl text-red-600 border-red-300 hover:bg-red-50 hover:text-red-700 hover:border-red-400"
