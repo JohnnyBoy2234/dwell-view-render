@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Info } from 'lucide-react';
+import { Info } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import {
@@ -25,13 +25,6 @@ import {
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
-import { Calendar } from '@mzanzihomes/ui/components/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@mzanzihomes/ui/components/popover';
-import { cn } from '@mzanzihomes/common/lib/utils';
 
 const preScreeningSchema = z.object({
   moveInDate: z.date({
@@ -198,36 +191,16 @@ export default function ViewingPreScreeningForm({
               render={({ field }) => (
                 <FormItem className="flex flex-col">
                   <FormLabel className="!text-foreground">When are you hoping to move in?<RequiredMark /></FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            'w-full pl-3 text-left font-normal',
-                            !field.value && 'text-muted-foreground'
-                          )}
-                        >
-                          {field.value ? (
-                            format(field.value, 'PPP')
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <FormControl>
+                    <Input
+                      type="date"
+                      value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                      min={format(new Date(), 'yyyy-MM-dd')}
+                      onChange={(e) =>
+                        field.onChange(e.target.value ? new Date(`${e.target.value}T00:00:00`) : undefined)
+                      }
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

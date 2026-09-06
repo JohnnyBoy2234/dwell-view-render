@@ -6,8 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@mzan
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@mzanzihomes/ui/components/dialog";
 import { Label } from "@mzanzihomes/ui/components/label";
 import { Input } from "@mzanzihomes/ui/components/input";
-import { Calendar } from "@mzanzihomes/ui/components/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@mzanzihomes/ui/components/popover";
 import { cn } from "@mzanzihomes/common/lib/utils";
 import { Calendar as CalendarIcon, Clock, PlusCircle, User } from "lucide-react";
 import { useAuth } from "@mzanzihomes/supabase/hooks/useAuth";
@@ -251,24 +249,17 @@ export function ViewingSlotsManager({ propertyId }: ViewingSlotsManagerProps) {
             </DialogHeader>
             <div className="grid gap-4 py-2">
               <div className="grid gap-2">
-                <Label>Date</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("justify-start font-normal", !date && "text-muted-foreground")}> 
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {date ? format(date, "PPP") : <span>Pick a date</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar 
-                      mode="single" 
-                      selected={date} 
-                      onSelect={setDate} 
-                      initialFocus 
-                      className={cn("p-3 pointer-events-auto")} 
-                    />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="slot-date">Date</Label>
+                <Input
+                  id="slot-date"
+                  type="date"
+                  value={date ? format(date, "yyyy-MM-dd") : ""}
+                  min={format(new Date(), "yyyy-MM-dd")}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setDate(v ? new Date(`${v}T00:00:00`) : undefined);
+                  }}
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">

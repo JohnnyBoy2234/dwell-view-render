@@ -81,10 +81,14 @@ export function Step10ReviewGenerate({
           {isSending ? 'Sending...' : 'Send to Tenant to Sign'}
         </Button>
 
-        <Button onClick={onPreviewAndSign} disabled={isGenerating} variant="outline" className="flex-1">
-          <Eye className="h-4 w-4 mr-2" />
-          {landlordHasSigned ? 'View Signed Lease' : 'Preview Lease'}
-        </Button>
+        {/* The plain "Preview Lease" button was removed — it looked out of place
+            here. The signed lease stays viewable once the landlord has signed. */}
+        {landlordHasSigned && (
+          <Button onClick={onPreviewAndSign} disabled={isGenerating} variant="outline" className="flex-1">
+            <Eye className="h-4 w-4 mr-2" />
+            View Signed Lease
+          </Button>
+        )}
       </div>
       <p className="text-xs text-muted-foreground text-center pt-2">
         Your tenant reviews and signs first — you'll sign last from your Leases tab.
