@@ -131,17 +131,19 @@ describe('validateSection', () => {
 });
 
 describe('documentChecklist', () => {
-  it('requires ID, bank statements and payslips for an employed applicant', () => {
+  it('requires ID and payslips for an employed applicant (bank statements handled by affordability)', () => {
     const items = documentChecklist(filled());
     const required = items.filter((i) => i.requirement === 'required').map((i) => i.key);
-    expect(required).toEqual(['id', 'bank_statements', 'payslips']);
+    expect(required).toEqual(['id', 'payslips']);
+    // Bank statements are no longer collected in the application.
+    expect(items.find((i) => i.key === 'bank_statements')).toBeUndefined();
   });
 
-  it('lets informal earners submit alternative evidence instead of bank statements', () => {
+  it('lets informal earners submit alternative evidence', () => {
     const d = filled();
     d.employment.status = 'informal';
     const items = documentChecklist(d);
-    expect(items.find((i) => i.key === 'bank_statements')?.requirement).toBe('recommended');
+    expect(items.find((i) => i.key === 'bank_statements')).toBeUndefined();
     expect(items.find((i) => i.key === 'income_evidence')?.requirement).toBe('required');
   });
 
@@ -155,9 +157,9 @@ describe('documentChecklist', () => {
 
   it('blocks submission only on missing required documents', () => {
     const d = filled();
-    expect(Object.keys(validateDocuments(d)).sort()).toEqual(['doc_bank_statements', 'doc_id', 'doc_payslips']);
+    expect(Object.keys(validateDocuments(d)).sort()).toEqual(['doc_id', 'doc_payslips']);
     d.identity.document = doc('id');
-    d.employment.income_documents = [doc('bank_statement'), doc('payslip')];
+    d.employment.income_documents = [doc('payslip')];
     expect(validateDocuments(d)).toEqual({});
   });
 

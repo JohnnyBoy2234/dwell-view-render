@@ -30,7 +30,6 @@ const APPLICATION_DOCS: { title: string; items: string[] }[] = [
     items: [
       'South African ID (or Passport + Visa/Permit if applicable)',
       'Proof of income (latest payslip or employment letter)',
-      'Recent bank statements (last 3 months)',
       'Proof of current address',
       'Free credit report (if requested)',
     ],
@@ -38,7 +37,7 @@ const APPLICATION_DOCS: { title: string; items: string[] }[] = [
   {
     title: 'If self-employed',
     items: [
-      'Bank statements (last 3–6 months)',
+      'Business income evidence (invoices, accountant letter or tax documents)',
       'Business registration (if applicable)',
     ],
   },

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
@@ -593,13 +593,13 @@ export default function Auth() {
                     />
                     <span className="text-xs text-muted-foreground leading-snug">
                       I have read and agree to the{' '}
-                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                      <Link to="/terms" className="text-primary underline underline-offset-2 hover:text-primary/80">
                         Terms of Service
-                      </a>{' '}
+                      </Link>{' '}
                       and{' '}
-                      <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                      <Link to="/privacy-policy" className="text-primary underline underline-offset-2 hover:text-primary/80">
                         Privacy Policy
-                      </a>
+                      </Link>
                     </span>
                   </label>
 
@@ -614,9 +614,9 @@ export default function Auth() {
 
         <p className="text-center text-xs text-muted-foreground mt-4">
           By signing in you agree to our{' '}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Terms of Service</a>
+          <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms of Service</Link>
           {' '}and{' '}
-          <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</a>
+          <Link to="/privacy-policy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>
         </p>
       </div>
     </div>

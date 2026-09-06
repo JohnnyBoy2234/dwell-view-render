@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Label } from '@mzanzihomes/ui/components/label';
@@ -43,9 +44,9 @@ export function ConsentStep({ data, update, errors }: StepProps) {
           </ul>
           <p className="text-xs text-muted-foreground">
             You can read more in our{' '}
-            <a href="/privacy-policy" target="_blank" rel="noopener" className="underline">
+            <Link to="/privacy-policy" className="underline">
               Privacy Policy
-            </a>
+            </Link>
             .
           </p>
         </CardContent>

@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
@@ -175,9 +176,9 @@ export function YourDetailsStep({ data, update, errors, userId, onUploadComplete
           <p className="text-xs text-muted-foreground">
             We use this document to complete and verify the information in your rental application.
             Your information is handled according to our{' '}
-            <a href="/privacy-policy" target="_blank" rel="noopener" className="underline">
+            <Link to="/privacy-policy" className="underline">
               Privacy Policy
-            </a>
+            </Link>
             .
           </p>
         </CardContent>

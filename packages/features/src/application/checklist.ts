@@ -42,15 +42,10 @@ export function documentChecklist(data: ApplicationFormData): ChecklistItem[] {
       documentType: DOCUMENT_TYPES.PROOF_OF_ADDRESS,
       requirement: 'recommended',
       docs: data.address.proof_document ? [data.address.proof_document] : []
-    },
-    {
-      key: 'bank_statements',
-      label: 'Bank statements',
-      helper: 'Normally your most recent three months.',
-      documentType: DOCUMENT_TYPES.BANK_STATEMENT,
-      requirement: informal ? 'recommended' : 'required',
-      docs: incomeDocs(data, DOCUMENT_TYPES.BANK_STATEMENT)
     }
+    // Bank statements are no longer collected here. They are handled by the
+    // separate, consent-gated affordability assessment on the application, so
+    // asking for them again in the application form was redundant.
   ];
 
   if (employed) {
