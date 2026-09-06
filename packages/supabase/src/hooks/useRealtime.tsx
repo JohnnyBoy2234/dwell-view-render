@@ -22,6 +22,18 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     callbacksRef.current = callbacks;
   }, [callbacks]);
 
+  // A realtime channel topic must be UNIQUE per client connection. Several
+  // hooks subscribe to the same tables (e.g. NotificationBell mounts
+  // useNotifications + useTenantNotifications + useLandlordNotifications, all
+  // wanting notifications), so static names like 'notifications-realtime'
+  // collided — the duplicate joins errored out and realtime silently stopped
+  // delivering, so lists only refreshed on navigation. Suffix every channel
+  // with a per-instance id so each subscription is its own topic.
+  const instanceId = useRef(
+    (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36).slice(2))
+  );
+  const chan = (name: string) => `${name}-${instanceId.current}`;
+
   const setupRealtimeSubscriptions = useCallback(() => {
     if (!user) return () => {};
 
@@ -30,7 +42,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Notifications real-time subscription
     if (callbacksRef.current.onNotificationChange) {
       const notificationChannel = supabase
-        .channel('notifications-realtime')
+        .channel(chan('notifications-realtime'))
         .on(
           'postgres_changes',
           {
@@ -56,7 +68,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Messages real-time subscription
     if (callbacksRef.current.onMessageChange) {
       const messageChannel = supabase
-        .channel('messages-realtime')
+        .channel(chan('messages-realtime'))
         .on(
           'postgres_changes',
           {
@@ -81,7 +93,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Viewing proposals real-time subscription
     if (callbacksRef.current.onViewingProposalChange) {
       const viewingChannel = supabase
-        .channel('viewing-proposals-realtime')
+        .channel(chan('viewing-proposals-realtime'))
         .on(
           'postgres_changes',
           {
@@ -106,7 +118,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Applications real-time subscription
     if (callbacksRef.current.onApplicationChange) {
       const applicationChannel = supabase
-        .channel('applications-realtime')
+        .channel(chan('applications-realtime'))
         .on(
           'postgres_changes',
           {
@@ -131,7 +143,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Maintenance requests real-time subscription
     if (callbacksRef.current.onMaintenanceChange) {
       const maintenanceChannel = supabase
-        .channel('maintenance-realtime')
+        .channel(chan('maintenance-realtime'))
         .on(
           'postgres_changes',
           {
@@ -156,7 +168,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Leases real-time subscription
     if (callbacksRef.current.onLeaseChange) {
       const leaseChannel = supabase
-        .channel('leases-realtime')
+        .channel(chan('leases-realtime'))
         .on(
           'postgres_changes',
           {
@@ -182,7 +194,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Properties real-time subscription
     if (callbacksRef.current.onPropertyChange) {
       const propertyChannel = supabase
-        .channel('properties-realtime')
+        .channel(chan('properties-realtime'))
         .on(
           'postgres_changes',
           {
@@ -207,7 +219,7 @@ export function useRealtime(callbacks: RealtimeCallbacks = {}) {
     // Tenancies real-time subscription
     if (callbacksRef.current.onTenancyChange) {
       const tenancyChannel = supabase
-        .channel('tenancies-realtime')
+        .channel(chan('tenancies-realtime'))
         .on(
           'postgres_changes',
           {
