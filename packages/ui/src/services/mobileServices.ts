@@ -8,6 +8,7 @@ import { Network } from '@capacitor/network';
 import { SplashScreen } from '@capacitor/splash-screen';
 import { Capacitor } from '@capacitor/core';
 import { supabase } from '@mzanzihomes/supabase/client';
+import { getNotificationTargetUrl } from '@mzanzihomes/ui/utils/notificationRoutes';
 
 export class MobileServices {
   static isNative = Capacitor.isNativePlatform();
@@ -74,6 +75,44 @@ export class MobileServices {
         detail: detail ?? null,
       });
     } catch { /* swallow */ }
+  }
+
+  // Resolve where a tapped push should take the user and navigate there. Uses
+  // the shared notification-routing logic so it lands on the exact item
+  // (application, maintenance ticket, conversation, rent, …) rather than the
+  // dashboard. Role is inferred from which app is running (bundle id).
+  static async routeFromPushData(data: any) {
+    try {
+      const isLandlord = (this.bundleId || '').includes('landlord');
+
+      // Chat carries the conversation directly.
+      if (data?.type === 'chat_message' && data?.conversation_id) {
+        window.location.href = `/messages?c=${encodeURIComponent(data.conversation_id)}`;
+        return;
+      }
+
+      // For everything else, look up the full notification (its metadata holds
+      // the ids needed for precise deep links) and route like the bell does.
+      if (data?.notification_id) {
+        const { data: n } = await (supabase as any)
+          .from('notifications')
+          .select('type, link_url, metadata')
+          .eq('id', data.notification_id)
+          .maybeSingle();
+        if (n) {
+          const target = getNotificationTargetUrl(
+            { type: n.type, link_url: n.link_url, metadata: n.metadata },
+            isLandlord,
+          );
+          if (target) { window.location.href = target; return; }
+        }
+      }
+
+      // Last resort: a link_url carried on the push payload.
+      if (data?.link_url) { window.location.href = String(data.link_url); return; }
+    } catch (e) {
+      console.error('Push tap routing failed:', e);
+    }
   }
 
   // Initialize mobile services. Pass the app's bundle id so iOS push tokens
@@ -187,12 +226,11 @@ export class MobileServices {
           this.vibrate();
         });
 
-        // Tapping a chat notification opens that conversation
+        // Tapping a notification deep-links to the exact screen (not just the
+        // dashboard), using the same routing the in-app bell uses.
         PushNotifications.addListener('pushNotificationActionPerformed', (action) => {
           const data: any = action.notification?.data || {};
-          if (data.type === 'chat_message' && data.conversation_id) {
-            window.location.href = `/messages?c=${encodeURIComponent(data.conversation_id)}`;
-          }
+          void this.routeFromPushData(data);
         });
 
         // Registration can beat sign-in at app boot: sync the held token once a
