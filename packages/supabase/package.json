@@ -9,5 +9,11 @@
     "./types": "./src/types.ts",
     "./hooks/*": "./src/hooks/*.tsx",
     "./services/*": "./src/services/*.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.15"
   }
 }

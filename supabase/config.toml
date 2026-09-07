@@ -53,13 +53,16 @@ enable_signup = true
 double_confirm_changes = true
 enable_confirmations = true
 
-# Email provider settings (using Ethereal for testing)
-[auth.email.smtp]
-host = "smtp.ethereal.email"
-port = 587
-user = "ethereal.email@ethereal.email"
-pass = "ethereal_password"
-admin_email = "admin@example.com"
+# Local auth emails are delivered to the bundled Inbucket (see [inbucket] above),
+# viewable at http://127.0.0.1:54324 and consumed by the Playwright signup e2e.
+# Re-enable and configure [auth.email.smtp] to use a real SMTP provider instead.
+# NOTE: changing this requires `npm run supabase -- stop && npm run supabase -- start`.
+# [auth.email.smtp]
+# host = "smtp.ethereal.email"
+# port = 587
+# user = "ethereal.email@ethereal.email"
+# pass = "ethereal_password"
+# admin_email = "admin@example.com"
 
 [functions.kyc-admin-approve-minimal]
 verify_jwt = false

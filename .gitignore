@@ -41,3 +41,7 @@ android/app/*.jks
 
 # turbo build cache
 .turbo/
+
+# Playwright e2e artifacts
+/playwright-report/
+/test-results/

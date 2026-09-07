@@ -1,7 +1,55 @@
-// @ts-nocheck
-import { createContext, useContext, useEffect, useState } from 'react';
-import { User, Session } from '@supabase/supabase-js';
+/// <reference types="vite/client" />
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { type User, type Session, type SupabaseClient } from '@supabase/supabase-js';
 import { supabase } from '../client';
+
+// The generated Database types mis-resolve public.user_roles (the query builder
+// collapses to SelectQueryError and rejects its own columns), so this one table
+// is read/written through an untyped view of the same client. Runtime columns:
+// user_id (uuid), role (text). All other tables and auth calls stay fully typed.
+const untypedClient = supabase as unknown as SupabaseClient;
+
+// Cross-account-safe localStorage keys preserved across sign-out (theme, cookie
+// consent, language). Everything else is cleared so the next account never sees
+// the previous user's cached data.
+const PRESERVED_ON_SIGNOUT = /theme|cookie|consent|lang|i18n/i;
+
+// Shape shared by supabase AuthError, PostgrestError, and our synthetic errors —
+// consumers only ever read `.message`.
+interface AuthActionError {
+  message?: string;
+  status?: number;
+  code?: string;
+}
+
+type AuthResult = { error: AuthActionError | null };
+
+// Minimal typing for the optional Capacitor native bridge injected at runtime.
+interface CapacitorListenerHandle {
+  remove?: () => void;
+}
+interface CapacitorBridge {
+  isNativePlatform?: () => boolean;
+  Plugins?: {
+    App?: {
+      addListener?: (
+        event: string,
+        cb: (data: { url: string }) => void,
+      ) => CapacitorListenerHandle | Promise<CapacitorListenerHandle>;
+      getInfo?: () => Promise<{ id?: string }>;
+    };
+    Browser?: {
+      open?: (options: { url: string }) => Promise<void>;
+      close?: () => Promise<void>;
+    };
+  };
+}
+
+declare global {
+  interface Window {
+    Capacitor?: CapacitorBridge;
+  }
+}
 
 interface AuthContextType {
   user: User | null;
@@ -9,12 +57,12 @@ interface AuthContextType {
   loading: boolean; // true until auth AND roles are resolved
   authLoading: boolean;
   rolesLoading: boolean;
-  signUp: (email: string, password: string, role?: 'tenant' | 'landlord') => Promise<{ error: any; isNewUser?: boolean }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signInWithGoogle: (role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
-  signInWithApple: (role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
-  signInWithProvider: (provider: 'google' | 'apple' | 'facebook', role?: 'tenant' | 'landlord') => Promise<{ error: any }>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, role?: 'tenant' | 'landlord') => Promise<{ error: AuthActionError | null; isNewUser?: boolean }>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signInWithGoogle: (role?: 'tenant' | 'landlord') => Promise<AuthResult>;
+  signInWithApple: (role?: 'tenant' | 'landlord') => Promise<AuthResult>;
+  signInWithProvider: (provider: 'google' | 'apple' | 'facebook', role?: 'tenant' | 'landlord') => Promise<AuthResult>;
+  resetPassword: (email: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
   isLandlord: boolean;
   isAdmin: boolean;
@@ -23,7 +71,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -40,7 +88,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Guard every hop: on a build where @capacitor/app isn't present,
     // cap.Plugins.App is undefined — never let that crash app startup.
     try {
-      const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
+      const cap = typeof window !== 'undefined' ? window.Capacitor : undefined;
       const appPlugin = cap?.Plugins?.App;
       if (cap?.isNativePlatform?.() && appPlugin?.addListener) {
         const registration = appPlugin.addListener('appUrlOpen', async ({ url }: { url: string }) => {
@@ -54,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try { await cap?.Plugins?.Browser?.close?.(); } catch {}
           }
         });
-        Promise.resolve(registration).then((handle: any) => {
+        Promise.resolve(registration).then((handle: CapacitorListenerHandle) => {
           removeUrlListener = () => { try { handle?.remove?.(); } catch {} };
         }).catch(() => {});
       }
@@ -65,11 +113,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email_confirmed_at);
-        
+        if (import.meta.env.DEV) console.log('Auth state changed:', event, session?.user?.email_confirmed_at);
+
         // If user is not verified, sign them out
         if (session?.user && !session.user.email_confirmed_at) {
-          console.log('User not verified, signing out');
+          if (import.meta.env.DEV) console.log('User not verified, signing out');
           await supabase.auth.signOut();
           setUser(null);
           setSession(null);
@@ -79,7 +127,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setRolesLoading(false);
           return;
         }
-        
+
         setSession(session);
         setUser(session?.user ?? null);
         setAuthLoading(false);
@@ -98,11 +146,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session check:', session?.user?.email_confirmed_at);
-      
+      if (import.meta.env.DEV) console.log('Initial session check:', session?.user?.email_confirmed_at);
+
       // If user is not verified, clear session
       if (session?.user && !session.user.email_confirmed_at) {
-        console.log('Initial session not verified, clearing');
+        if (import.meta.env.DEV) console.log('Initial session not verified, clearing');
         supabase.auth.signOut();
         setUser(null);
         setSession(null);
@@ -110,7 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setRolesLoading(false);
         return;
       }
-      
+
       setSession(session);
       setUser(session?.user ?? null);
       setAuthLoading(false);
@@ -140,15 +188,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const cached = localStorage.getItem(`sr_roles_${userId}`);
       if (cached) {
         try {
-          const parsed = JSON.parse(cached);
-          if (typeof parsed.isLandlord === 'boolean') setIsLandlord(parsed.isLandlord);
-          if (typeof parsed.isAdmin === 'boolean') setIsAdmin(parsed.isAdmin);
-          hadCache = typeof parsed.isLandlord === 'boolean' || typeof parsed.isAdmin === 'boolean';
+          const parsed: unknown = JSON.parse(cached);
+          if (parsed && typeof parsed === 'object') {
+            if ('isLandlord' in parsed && typeof parsed.isLandlord === 'boolean') setIsLandlord(parsed.isLandlord);
+            if ('isAdmin' in parsed && typeof parsed.isAdmin === 'boolean') setIsAdmin(parsed.isAdmin);
+            hadCache =
+              ('isLandlord' in parsed && typeof parsed.isLandlord === 'boolean') ||
+              ('isAdmin' in parsed && typeof parsed.isAdmin === 'boolean');
+          }
         } catch {}
       }
 
       // Simple role fetch without retries to avoid loops
-      const { data: roles, error } = await supabase
+      const { data: roles, error } = await untypedClient
         .from('user_roles')
         .select('role')
         .eq('user_id', userId);
@@ -165,35 +217,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      let userRoles = roles?.map(r => r.role) || [];
+      let userRoles = roles?.map((r) => r.role) || [];
 
-      // A DB trigger always writes a default 'tenant' role on signup, since Apple/Google
-      // don't round-trip our own params back through the OAuth redirect. The role chosen
-      // on the sign-in button is stashed in sessionStorage just before the redirect; if
-      // this account was created moments ago (a brand-new signup, not a returning user)
-      // and only has the trigger's default role, correct it to what was actually chosen.
+      // Role assignment is server-authoritative. The DB trigger writes the default
+      // 'tenant' role on signup; the client never writes user_roles directly (RLS
+      // forbids it anyway). The one self-service elevation — tenant → landlord — goes
+      // through the SECURITY DEFINER promote_to_landlord() RPC (authenticated-only).
+      // The chosen role is stashed in sessionStorage before the OAuth redirect; apply
+      // it only for a brand-new signup that isn't already a landlord.
       const pendingRole = sessionStorage.getItem('pendingOAuthRole');
       if (pendingRole === 'landlord' || pendingRole === 'tenant') {
         sessionStorage.removeItem('pendingOAuthRole');
         const isFreshSignup = !!createdAt && (Date.now() - new Date(createdAt).getTime()) < 2 * 60 * 1000;
-        const onlyHasDefaultTenantRole = userRoles.length === 1 && userRoles[0] === 'tenant';
-
-        if (isFreshSignup && onlyHasDefaultTenantRole && pendingRole !== userRoles[0]) {
-          const { error: updateError } = await supabase
-            .from('user_roles')
-            .update({ role: pendingRole })
-            .eq('user_id', userId)
-            .eq('role', 'tenant');
-          if (!updateError) {
-            userRoles = [pendingRole];
-          }
-        } else if (isFreshSignup && userRoles.length === 0) {
-          const { error: insertError } = await supabase
-            .from('user_roles')
-            .insert({ user_id: userId, role: pendingRole });
-          if (!insertError) {
-            userRoles = [pendingRole];
-          }
+        if (isFreshSignup && pendingRole === 'landlord' && !userRoles.includes('landlord')) {
+          const { error: promoteError } = await supabase.rpc('promote_to_landlord');
+          if (!promoteError) userRoles = [...userRoles, 'landlord'];
         }
       }
 
@@ -201,9 +239,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAdmin(userRoles.includes('admin'));
 
       // Cache roles
-      localStorage.setItem(`sr_roles_${userId}` , JSON.stringify({
+      localStorage.setItem(`sr_roles_${userId}`, JSON.stringify({
         isLandlord: userRoles.includes('landlord'),
-        isAdmin: userRoles.includes('admin')
+        isAdmin: userRoles.includes('admin'),
       }));
     } catch (error) {
       console.warn('Role check failed:', error);
@@ -218,16 +256,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signUp = async (email: string, password: string, role: 'tenant' | 'landlord' = 'tenant') => {
+  const signUp = async (
+    email: string,
+    password: string,
+    role: 'tenant' | 'landlord' = 'tenant',
+  ): Promise<{ error: AuthActionError | null; isNewUser?: boolean }> => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: { role },
-        emailRedirectTo: `${window.location.origin}/auth`
-      }
+        emailRedirectTo: `${window.location.origin}/auth`,
+      },
     });
-    
+
     if (error) {
       return { error, isNewUser: false };
     }
@@ -238,17 +280,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Attempting them now would 401 (no session yet) and 409 (trigger already ran).
       return { error: null, isNewUser: true };
     }
-    
+
     // If email is already confirmed (unlikely with new signup)
     return { error: null, isNewUser: false };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
-    
+
     if (error) {
       return { error };
     }
@@ -256,24 +298,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Check if email is verified
     if (data.user && !data.user.email_confirmed_at) {
       await supabase.auth.signOut();
-      return { 
-        error: { 
-          message: "Please verify your email before signing in. Check your inbox for a verification code." 
-        } 
+      return {
+        error: {
+          message: 'Please verify your email before signing in. Check your inbox for the verification link.',
+        },
       };
     }
-    
+
     return { error: null };
   };
 
-  const signInWithProvider = async (provider: 'google' | 'apple' | 'facebook', role: 'tenant' | 'landlord' = 'tenant') => {
+  const signInWithProvider = async (
+    provider: 'google' | 'apple' | 'facebook',
+    role: 'tenant' | 'landlord' = 'tenant',
+  ): Promise<AuthResult> => {
     // Apple/Google don't round-trip our own params back through the OAuth redirect,
     // so the chosen role is stashed here and applied in checkUserRole if this turns
     // out to be a brand-new signup with no role yet. The app webview stays alive
     // while the system browser handles OAuth, so this survives the round-trip.
     sessionStorage.setItem('pendingOAuthRole', role);
 
-    const cap = typeof window !== 'undefined' ? (window as any).Capacitor : undefined;
+    const cap = typeof window !== 'undefined' ? window.Capacitor : undefined;
     // Only take the native path if the Browser plugin is actually present;
     // otherwise fall through to the web flow rather than throwing.
     const canNative = !!cap?.isNativePlatform?.() && !!cap?.Plugins?.Browser?.open;
@@ -283,14 +328,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // (the app's bundle id), open the provider in an in-app browser, and let
       // the appUrlOpen listener (below) exchange the returned code for a session.
       let bundleId = 'app';
-      try { bundleId = (await cap.Plugins?.App?.getInfo?.())?.id || bundleId; } catch {}
+      try { bundleId = (await cap?.Plugins?.App?.getInfo?.())?.id || bundleId; } catch {}
       const redirectTo = `${bundleId}://login-callback`;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider,
         options: { redirectTo, skipBrowserRedirect: true, queryParams: { role, is_signup: 'true' } },
       });
       if (error) return { error };
-      try { await cap.Plugins.Browser.open({ url: data.url }); } catch (e) { return { error: e }; }
+      try { await cap?.Plugins?.Browser?.open?.({ url: data.url }); } catch (e) { return { error: { message: e instanceof Error ? e.message : String(e) } }; }
       return { error: null };
     }
 
@@ -302,25 +347,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         redirectTo: redirectUrl,
         queryParams: {
           role: role,
-          is_signup: 'true'
-        }
-      }
+          is_signup: 'true',
+        },
+      },
     });
     return { error };
   };
 
-  const signInWithGoogle = async (role: 'tenant' | 'landlord' = 'tenant') => signInWithProvider('google', role);
-  const signInWithApple = async (role: 'tenant' | 'landlord' = 'tenant') => signInWithProvider('apple', role);
+  const signInWithGoogle = async (role: 'tenant' | 'landlord' = 'tenant'): Promise<AuthResult> =>
+    signInWithProvider('google', role);
+  const signInWithApple = async (role: 'tenant' | 'landlord' = 'tenant'): Promise<AuthResult> =>
+    signInWithProvider('apple', role);
 
-  const resetPassword = async (email: string) => {
+  const resetPassword = async (email: string): Promise<AuthResult> => {
     // Use the current domain for password reset to ensure proper routing
     const redirectUrl = `${window.location.origin}/reset-password`;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl
+      redirectTo: redirectUrl,
     });
     return { error };
   };
-
 
   const redirectAfterAuth = (path: string) => {
     if (path) {
@@ -339,26 +385,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAdmin(false);
       setAuthLoading(false);
       setRolesLoading(false);
-      
+
       // Clear ALL cached user data from localStorage so the next account that
       // signs in never briefly sees the previous account's data (messages,
       // conversations, drafts, roles, etc.). Only cross-account-safe keys
       // (theme, cookie consent, language) are preserved.
       try {
-        const keep = (k: string) => /theme|cookie|consent|lang|i18n/i.test(k);
-        Object.keys(localStorage).forEach((k) => {
-          if (!keep(k)) localStorage.removeItem(k);
-        });
+        for (const k of Object.keys(localStorage)) {
+          if (!PRESERVED_ON_SIGNOUT.test(k)) localStorage.removeItem(k);
+        }
       } catch (e) {
         console.warn('Failed to clear cached data on sign out', e);
       }
-      
+
       // Then sign out from server
-      const { error } = await supabase.auth.signOut({ scope: 'local' });
+      const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) {
         console.error('Sign out error:', error);
       }
-      
+
       // Force redirect to home page
       window.location.href = '/';
     } catch (err) {
@@ -368,7 +413,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = {
+  const value: AuthContextType = {
     user,
     session,
     loading: authLoading || rolesLoading,
@@ -383,7 +428,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     isLandlord,
     isAdmin,
-    redirectAfterAuth
+    redirectAfterAuth,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@mzanzihomes/supabase/hooks/useAuth';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { RadioGroup, RadioGroupItem } from '@mzanzihomes/ui/components/radio-group';
 import { Separator } from '@mzanzihomes/ui/components/separator';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
 import { Alert, AlertDescription } from '@mzanzihomes/ui/components/alert';
 import { AlertCircle, CheckCircle2, Eye, EyeOff, ArrowLeft, Mail, Home } from 'lucide-react';
-import EmailVerification from '@/components/auth/EmailVerification';
+import EmailVerification from './EmailVerification';
 import { supabase } from '@mzanzihomes/supabase/client';
 
 import { PASSWORD_CRITERIA, validateEmail, validatePassword } from '@mzanzihomes/common/utils/authValidation';
-import { takeReturnTo } from '@mzanzihomes/common/utils/authRedirect';
+import { takeReturnTo, crossAppUrl } from '@mzanzihomes/common/utils/authRedirect';
+import { isNativeApp } from '@mzanzihomes/ui/utils/nativeBrowser';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 mr-2 shrink-0" viewBox="0 0 24 24">
@@ -30,8 +30,15 @@ const AppleIcon = () => (
   </svg>
 );
 
-export default function Auth() {
-  const { user, signUp, signIn, signInWithGoogle, signInWithApple, resetPassword, loading } = useAuth();
+interface AuthPageProps {
+  /** Which app is hosting this page; drives default signup role and role-guard. */
+  appRole: 'tenant' | 'landlord';
+  /** Where a correctly-roled user lands after auth. */
+  homePath: string;
+}
+
+export default function AuthPage({ appRole, homePath }: AuthPageProps) {
+  const { user, signUp, signIn, signInWithGoogle, signInWithApple, resetPassword, loading, isLandlord, isAdmin } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -39,7 +46,7 @@ export default function Auth() {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'tenant' as 'tenant' | 'landlord'
+    role: appRole
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [signInData, setSignInData] = useState({ email: '', password: '' });
@@ -59,8 +66,18 @@ export default function Auth() {
 
   useEffect(() => {
     if (!user || loading) return;
-    navigate(takeReturnTo() ?? '/');
-  }, [user, loading, navigate]);
+    // Wrong app for this account's role: hand off to the sibling app on web (when
+    // a URL is configured), otherwise fall through to '/' where the RouteGuard shows
+    // the "Wrong App" screen — the native path too, so we never yank the webview to a URL.
+    const wrongRole = appRole === 'tenant' ? (isLandlord && !isAdmin) : (!isLandlord && !isAdmin);
+    if (wrongRole) {
+      const url = crossAppUrl(appRole === 'tenant' ? 'landlord' : 'tenant');
+      if (url && !isNativeApp()) window.location.href = url;
+      else navigate('/');
+      return;
+    }
+    navigate(takeReturnTo() ?? homePath);
+  }, [user, loading, isLandlord, isAdmin, navigate, appRole, homePath]);
 
   const validateEmailInput = (email: string, isSignUp: boolean = false) => {
     const validation = validateEmail(email);
@@ -145,7 +162,8 @@ export default function Auth() {
     }
 
     toast({ title: "Welcome back!", description: "You've been signed in successfully." });
-    // Post-auth routing is owned by the effect above.
+    // Post-auth routing is owned by the effect above; it runs once roles resolve,
+    // so we don't navigate here and race a premature redirect before isLandlord is known.
     setSignInLoading(false);
   };
 
@@ -290,8 +308,8 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/5 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-accent/5 flex overflow-y-auto p-4">
+      <div className="m-auto w-full max-w-sm">
         {/* Floating card */}
         <div className="rounded-2xl overflow-hidden shadow-2xl ring-1 ring-border/50">
 
@@ -340,7 +358,7 @@ export default function Auth() {
                   type="button"
                   variant="outline"
                   className="w-full"
-                  onClick={() => handleGoogleSignIn('tenant')}
+                  onClick={() => handleGoogleSignIn(appRole)}
                   disabled={signInLoading}
                 >
                   <GoogleIcon />
@@ -351,7 +369,7 @@ export default function Auth() {
                   type="button"
                   variant="outline"
                   className="w-full bg-black text-white hover:bg-black/90 hover:text-white border-black"
-                  onClick={() => handleAppleSignIn('tenant')}
+                  onClick={() => handleAppleSignIn(appRole)}
                   disabled={signInLoading}
                 >
                   <AppleIcon />
@@ -422,53 +440,27 @@ export default function Auth() {
             {/* Sign Up tab */}
             {activeTab === 'signup' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs"
-                    onClick={() => handleGoogleSignIn('tenant')}
-                    disabled={signUpLoading}
-                  >
-                    <GoogleIcon />
-                    Tenant
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs"
-                    onClick={() => handleGoogleSignIn('landlord')}
-                    disabled={signUpLoading}
-                  >
-                    <GoogleIcon />
-                    Landlord
-                  </Button>
-                </div>
-                <p className="text-center text-xs text-muted-foreground -mt-2">Continue with Google as…</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => handleGoogleSignIn(appRole)}
+                  disabled={signUpLoading}
+                >
+                  <GoogleIcon />
+                  Continue with Google
+                </Button>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs bg-black text-white hover:bg-black/90 hover:text-white border-black"
-                    onClick={() => handleAppleSignIn('tenant')}
-                    disabled={signUpLoading}
-                  >
-                    <AppleIcon />
-                    Tenant
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full text-xs bg-black text-white hover:bg-black/90 hover:text-white border-black"
-                    onClick={() => handleAppleSignIn('landlord')}
-                    disabled={signUpLoading}
-                  >
-                    <AppleIcon />
-                    Landlord
-                  </Button>
-                </div>
-                <p className="text-center text-xs text-muted-foreground -mt-2">Continue with Apple as…</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full bg-black text-white hover:bg-black/90 hover:text-white border-black"
+                  onClick={() => handleAppleSignIn(appRole)}
+                  disabled={signUpLoading}
+                >
+                  <AppleIcon />
+                  Continue with Apple
+                </Button>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
@@ -574,30 +566,6 @@ export default function Auth() {
                     )}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>I am a…</Label>
-                    <RadioGroup
-                      value={signUpData.role}
-                      onValueChange={(value) => setSignUpData({ ...signUpData, role: value as 'tenant' | 'landlord' })}
-                      className="flex gap-3"
-                    >
-                      <label className={`flex-1 flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer transition-colors ${signUpData.role === 'tenant' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'}`}>
-                        <RadioGroupItem value="tenant" id="tenant" />
-                        <div>
-                          <p className="text-sm font-medium">Tenant</p>
-                          <p className="text-xs text-muted-foreground">Find a home</p>
-                        </div>
-                      </label>
-                      <label className={`flex-1 flex items-center gap-2 border rounded-xl px-3 py-2.5 cursor-pointer transition-colors ${signUpData.role === 'landlord' ? 'border-primary bg-primary/5' : 'border-border hover:border-muted-foreground'}`}>
-                        <RadioGroupItem value="landlord" id="landlord" />
-                        <div>
-                          <p className="text-sm font-medium">Landlord</p>
-                          <p className="text-xs text-muted-foreground">List a property</p>
-                        </div>
-                      </label>
-                    </RadioGroup>
-                  </div>
-
                   <label className="flex items-start gap-2.5 cursor-pointer select-none">
                     <input
                       type="checkbox"
@@ -607,13 +575,13 @@ export default function Auth() {
                     />
                     <span className="text-xs text-muted-foreground leading-snug">
                       I have read and agree to the{' '}
-                      <a href="/terms" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                      <Link to="/terms" className="text-primary underline underline-offset-2 hover:text-primary/80">
                         Terms of Service
-                      </a>{' '}
+                      </Link>{' '}
                       and{' '}
-                      <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                      <Link to="/privacy-policy" className="text-primary underline underline-offset-2 hover:text-primary/80">
                         Privacy Policy
-                      </a>
+                      </Link>
                     </span>
                   </label>
 
@@ -628,9 +596,9 @@ export default function Auth() {
 
         <p className="text-center text-xs text-muted-foreground mt-4">
           By signing in you agree to our{' '}
-          <a href="/terms" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Terms of Service</a>
+          <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">Terms of Service</Link>
           {' '}and{' '}
-          <a href="/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</a>
+          <Link to="/privacy-policy" className="underline underline-offset-2 hover:text-foreground">Privacy Policy</Link>
         </p>
       </div>
     </div>
