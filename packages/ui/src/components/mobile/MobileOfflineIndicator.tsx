@@ -29,7 +29,12 @@ export function MobileOfflineIndicator() {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background">
+    <div
+      className="fixed top-0 left-0 right-0 z-50 bg-background"
+      // Clear the status bar / notch so the banner text isn't jammed against
+      // the very top of the screen on iOS.
+      style={{ paddingTop: 'env(safe-area-inset-top)' }}
+    >
       <Alert className="rounded-none border-l-0 border-r-0 border-t-0 border-destructive bg-destructive/10">
         <WifiOff className="h-4 w-4" />
         <AlertDescription className="flex items-center justify-between w-full">

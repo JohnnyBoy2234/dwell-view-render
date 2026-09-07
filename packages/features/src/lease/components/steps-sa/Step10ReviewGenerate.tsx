@@ -32,6 +32,13 @@ export function Step10ReviewGenerate({
         </p>
       </div>
 
+      {/* Preview the full lease document, placed neatly at the top of the last
+          step rather than as a stray button next to Send. */}
+      <Button onClick={onPreviewAndSign} disabled={isGenerating} variant="outline" className="w-full">
+        <Eye className="h-4 w-4 mr-2" />
+        {landlordHasSigned ? 'View signed lease' : 'Preview full lease'}
+      </Button>
+
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader className="pb-2"><CardTitle className="text-sm">Lease Terms</CardTitle></CardHeader>
@@ -75,20 +82,13 @@ export function Step10ReviewGenerate({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4 pt-4">
-        <Button onClick={onSendToTenant} disabled={isSending} className="flex-1">
+      {/* Preview lives at the top of the step now — the bottom is just the
+          primary send action. */}
+      <div className="pt-4">
+        <Button onClick={onSendToTenant} disabled={isSending} className="w-full">
           <Send className="h-4 w-4 mr-2" />
           {isSending ? 'Sending...' : 'Send to Tenant to Sign'}
         </Button>
-
-        {/* The plain "Preview Lease" button was removed — it looked out of place
-            here. The signed lease stays viewable once the landlord has signed. */}
-        {landlordHasSigned && (
-          <Button onClick={onPreviewAndSign} disabled={isGenerating} variant="outline" className="flex-1">
-            <Eye className="h-4 w-4 mr-2" />
-            View Signed Lease
-          </Button>
-        )}
       </div>
       <p className="text-xs text-muted-foreground text-center pt-2">
         Your tenant reviews and signs first — you'll sign last from your Leases tab.

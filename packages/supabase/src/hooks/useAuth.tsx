@@ -130,6 +130,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const checkUserRole = async (userId: string, createdAt?: string) => {
+    // Whether we already have known-good roles cached from a previous online
+    // session. If a role fetch fails (e.g. the device is offline), we must NOT
+    // clobber these with `false` — doing so wrongly boots a landlord to the
+    // "Wrong App" screen the moment they lose connectivity.
+    let hadCache = false;
     try {
       // Fast hydration from localStorage
       const cached = localStorage.getItem(`sr_roles_${userId}`);
@@ -138,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const parsed = JSON.parse(cached);
           if (typeof parsed.isLandlord === 'boolean') setIsLandlord(parsed.isLandlord);
           if (typeof parsed.isAdmin === 'boolean') setIsAdmin(parsed.isAdmin);
+          hadCache = typeof parsed.isLandlord === 'boolean' || typeof parsed.isAdmin === 'boolean';
         } catch {}
       }
 
@@ -149,9 +155,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.warn('Could not fetch user roles:', error.message);
-        // Set defaults and continue - don't retry
-        setIsLandlord(false);
-        setIsAdmin(false);
+        // Offline / transient failure — keep the cached roles. Only fall back to
+        // defaults when we have nothing cached to trust.
+        if (!hadCache) {
+          setIsLandlord(false);
+          setIsAdmin(false);
+        }
         setRolesLoading(false);
         return;
       }
@@ -197,9 +206,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         isAdmin: userRoles.includes('admin')
       }));
     } catch (error) {
-      console.warn('Role check failed, using defaults:', error);
-      setIsLandlord(false);
-      setIsAdmin(false);
+      console.warn('Role check failed:', error);
+      // Same rule as above: never downgrade a cached landlord/admin to false on
+      // a failed (likely offline) check.
+      if (!hadCache) {
+        setIsLandlord(false);
+        setIsAdmin(false);
+      }
     } finally {
       setRolesLoading(false);
     }
