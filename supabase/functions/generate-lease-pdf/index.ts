@@ -1094,12 +1094,16 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
   // `lineY` is the baseline of the "Signature: ____" row so the ink sits ON
   // the line rather than floating below it.
   let signatureContext: 'landlord' | 'tenant' | null = null;
-  async function drawSignatureBlock(lineY: number) {
+  // `lineY` is the baseline of the "Signature: ____" row; `lineX` is where the
+  // underscore line starts. The ink is centred vertically on that line so it
+  // sits ON it, and is kept short enough (and anchored at the line's x) that it
+  // never rides up into the "Signed at … date" row printed just above.
+  async function drawSignatureBlock(lineY: number, lineX: number) {
     const isLandlord = signatureContext !== 'tenant';
     const anchor = isLandlord ? 'MzanziHomes_SIGN_LANDLORD' : 'MzanziHomes_SIGN_TENANT_1';
     const sigData = isLandlord ? contract?.landlord_signature_data : contract?.tenant_signature_data;
     page.drawText(anchor, {
-      x: margin + 120,
+      x: lineX,
       y: lineY,
       size: 8,
       font: fontBody,
@@ -1107,17 +1111,19 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
     });
     const img = await embedSignatureFromDataUrl(sigData?.signature_image_url || sigData?.signatureImageUrl || null);
     if (img) {
-      // Larger, natural signature sitting on the signature line.
-      let targetHeight = 42;
+      // Height capped so the top stays below the date row (~lineGap+body above).
+      let targetHeight = 30;
       let targetWidth = (img.width / img.height) * targetHeight;
-      const maxWidth = 230;
+      const maxWidth = 200;
       if (targetWidth > maxWidth) {
         targetWidth = maxWidth;
         targetHeight = (img.height / img.width) * maxWidth;
       }
+      // Centre the ink on the underscore line: pdf-lib places images from their
+      // bottom-left, so drop the bottom to lineY - targetHeight/2.
       page.drawImage(img, {
-        x: margin + 80,
-        y: lineY - 4,
+        x: lineX + 4,
+        y: lineY - targetHeight / 2,
         width: targetWidth,
         height: targetHeight
       });
@@ -1236,11 +1242,13 @@ async function generatePDFDocument(contract: any, requestOrigin: string | undefi
         if (kv[1] === 'Signature') {
           // Reserve room up front so the row and its signature never split
           // across a page break, then remember the row's baseline so the ink
-          // lands on the signature line itself.
+          // lands on the signature line itself. The line starts right after the
+          // "Signature:" label — align the ink to the same x.
           ensureSpace(90);
           const rowY = y;
+          const lineX = margin + fontBold.widthOfTextAtSize(kv[1], sizes.body) + 10;
           drawFormRow(kv[1], kv[2]);
-          await drawSignatureBlock(rowY);
+          await drawSignatureBlock(rowY, lineX);
           continue;
         }
         drawFormRow(kv[1], kv[2]);
