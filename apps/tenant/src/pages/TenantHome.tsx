@@ -213,10 +213,10 @@ export default function TenantHome() {
         </div>
 
         {/* Search card — multi-area location · more filters · search */}
-        <div className="relative mt-7 rounded-[24px] bg-white p-3 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
-          <p className="mb-1.5 pl-1 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
-          <div className="flex items-start gap-2">
-            <div className="min-w-0 flex-1 pl-0.5">
+        <div className="relative mt-7 rounded-[22px] bg-white p-2.5 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+          <p className="mb-1 pl-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
+          <div className="flex items-center gap-2">
+            <div className="min-w-0 flex-1 pl-1">
               <AreaMultiSelect
                 areas={filters.areas}
                 onChange={(areas) => updateFilters({ areas })}
@@ -226,14 +226,14 @@ export default function TenantHome() {
             </div>
             <button
               onClick={() => setFiltersOpen(true)}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 active:opacity-70"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600 transition active:scale-95 active:opacity-70"
               aria-label="More filters"
             >
-              <SlidersHorizontal className="h-[18px] w-[18px] text-slate-600" />
+              <SlidersHorizontal className="h-[17px] w-[17px]" />
             </button>
             <button
               onClick={runSearch}
-              className="flex shrink-0 items-center gap-1.5 rounded-full px-4 py-3 text-[14px] font-bold text-white shadow-[0_10px_20px_-8px_rgba(37,99,235,0.7)] active:scale-[0.98]"
+              className="flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[14px] font-bold text-white shadow-[0_8px_18px_-8px_rgba(37,99,235,0.7)] transition active:scale-95"
               style={{ background: '#2563EB' }}
             >
               <Search className="h-4 w-4" /> Search

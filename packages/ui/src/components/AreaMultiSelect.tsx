@@ -103,19 +103,19 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
     // z-30 while open lifts the whole control (and its dropdown) above sibling
     // rows like the filter bar, which otherwise paint over the suggestions.
     <div ref={wrapRef} className={cn('relative w-full', open && 'z-30', className)}>
-      <div className="flex flex-wrap items-center gap-1.5">
-        <Search className="h-4 w-4 shrink-0 text-slate-400" />
+      <div className="flex min-h-[36px] flex-wrap items-center gap-1.5">
+        <Search className="h-[18px] w-[18px] shrink-0 text-slate-400" />
         {areas.map((area) => (
           <span
             key={area}
-            className="inline-flex items-center gap-1 rounded-full bg-ocean-blue/10 py-1 pl-2.5 pr-1 text-[13px] font-medium text-ocean-blue"
+            className="inline-flex items-center gap-1 rounded-full bg-ocean-blue/10 py-[3px] pl-2.5 pr-1 text-[12.5px] font-semibold leading-none text-ocean-blue"
           >
             {area}
             <button
               type="button"
               aria-label={`Remove ${area}`}
               onClick={() => removeArea(area)}
-              className="flex h-4 w-4 items-center justify-center rounded-full text-ocean-blue/70 hover:bg-ocean-blue/20 hover:text-ocean-blue"
+              className="flex h-[18px] w-[18px] items-center justify-center rounded-full text-ocean-blue/60 transition hover:bg-ocean-blue/20 hover:text-ocean-blue"
             >
               <X className="h-3 w-3" />
             </button>
@@ -129,7 +129,7 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
           onKeyDown={handleKeyDown}
           onFocus={() => runQuery(query)}
           placeholder={areas.length === 0 ? placeholder : 'Add another…'}
-          className="min-w-[110px] flex-1 bg-transparent text-[14px] leading-6 text-slate-800 outline-none placeholder:text-slate-400"
+          className="min-w-[90px] flex-1 bg-transparent text-[15px] text-slate-800 outline-none placeholder:text-slate-400"
           autoComplete="off"
         />
       </div>
