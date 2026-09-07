@@ -11,6 +11,7 @@ import { LeasePreviewModal } from '@mzanzihomes/features/lease';
 import { SuccessDialog } from '@mzanzihomes/ui/components/SuccessDialog';
 import { DEFAULT_WIZARD_DATA, type LeaseWizardData } from '@mzanzihomes/common/types/lease';
 import { CONSENT_REGISTRY } from '@mzanzihomes/common/constants/consentRegistry';
+import { downloadFileFromUrl } from '@mzanzihomes/common/lib/download';
 
 interface SignatureInfo {
   imageUrl: string;
@@ -193,7 +194,9 @@ export function LeaseSignature() {
       toast.error('PDF not yet available');
       return;
     }
-    window.open(contract.pdf_url, '_blank');
+    // Native-aware: opens the in-app browser on device (window.open is a no-op
+    // in WKWebView), normal download/new-tab on web.
+    await downloadFileFromUrl(contract.pdf_url, `lease-${contractId}.pdf`);
   };
 
   if (isLoading) {
