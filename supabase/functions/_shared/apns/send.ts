@@ -48,10 +48,17 @@ export interface ApnsMessage {
   token: string;               // hex APNs device token
   topic: string;               // the app's bundle id (apns-topic)
   title: string;
+  subtitle?: string;           // optional second line under the title
   body: string;
   data?: Record<string, string>;
   badge?: number;
   sound?: string;
+  // Groups related notifications together on the lock screen / banner stack
+  // (e.g. one thread per conversation, or per notification type).
+  threadId?: string;
+  // 'active' (default), 'time-sensitive' (breaks through Focus/DND — needs the
+  // Time Sensitive Notifications capability on the app), 'passive', 'critical'.
+  interruptionLevel?: 'active' | 'time-sensitive' | 'passive' | 'critical';
 }
 
 export interface ApnsResult {
@@ -64,8 +71,14 @@ export interface ApnsResult {
 async function post(host: string, m: ApnsMessage, jwt: string): Promise<Response> {
   const payload = {
     aps: {
-      alert: { title: m.title, body: m.body },
+      alert: {
+        title: m.title,
+        ...(m.subtitle ? { subtitle: m.subtitle } : {}),
+        body: m.body,
+      },
       sound: m.sound ?? "default",
+      "interruption-level": m.interruptionLevel ?? "active",
+      ...(m.threadId ? { "thread-id": m.threadId } : {}),
       ...(m.badge !== undefined ? { badge: m.badge } : {}),
     },
     ...(m.data ?? {}),

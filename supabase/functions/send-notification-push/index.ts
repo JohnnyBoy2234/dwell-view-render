@@ -79,11 +79,17 @@ serve(async (req) => {
 
     const title = (n.metadata as any)?.title || TITLE_BY_TYPE[n.type ?? ""] || "MzanziHomes";
     const body = String(n.message || "").slice(0, 180);
+    const type = String(n.type ?? "");
     const data = {
-      type: String(n.type ?? ""),
+      type,
       link_url: String(n.link_url ?? ""),
       notification_id: String(n.id),
     };
+    // Group notifications of the same kind together, and let genuinely
+    // time-bound ones (rent/payment) break through Focus.
+    const threadId = type || "general";
+    const interruptionLevel: "active" | "time-sensitive" =
+      type === "payment" ? "time-sensitive" : "active";
 
     // iOS goes direct to Apple (APNs); everything else goes via FCM.
     const iosTokens = tokens.filter((t) => t.platform === "ios");
@@ -94,7 +100,7 @@ serve(async (req) => {
     // --- iOS: direct APNs ---
     const iosResults = await Promise.all(
       iosTokens.map(async (t) => {
-        const r = await sendApns({ token: t.token, topic: t.app_id, title, body, data, badge: 1 });
+        const r = await sendApns({ token: t.token, topic: t.app_id, title, body, data, badge: 1, threadId, interruptionLevel });
         if (!r.ok) console.error(`APNs send failed: status=${r.status} topic=${t.app_id} pruned=${r.prune} reason=${r.reason}`);
         if (r.prune) await prune(t.id);
         return r;

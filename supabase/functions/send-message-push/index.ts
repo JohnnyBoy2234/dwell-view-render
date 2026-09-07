@@ -116,7 +116,8 @@ serve(async (req) => {
         ? String(message.content || "").slice(0, 140)
         : "Sent an attachment";
 
-    const title = propertyTitle ? `${senderName} · ${propertyTitle}` : senderName;
+    const title = senderName;
+    const subtitle = propertyTitle || undefined;
     const data = { type: "chat_message", conversation_id: message.conversation_id };
 
     // iOS goes direct to Apple (APNs); everything else goes via FCM.
@@ -127,7 +128,11 @@ serve(async (req) => {
     // --- iOS: direct APNs ---
     const iosResults = await Promise.all(
       iosTokens.map(async (t) => {
-        const r = await sendApns({ token: t.token, topic: t.app_id, title, body, data });
+        const r = await sendApns({
+          token: t.token, topic: t.app_id, title, subtitle, body, data, badge: 1,
+          threadId: `chat_${message.conversation_id}`,   // stack a conversation's messages together
+          interruptionLevel: "time-sensitive",           // chat should surface promptly
+        });
         if (!r.ok) console.error(`APNs send failed: status=${r.status} topic=${t.app_id} pruned=${r.prune} reason=${r.reason}`);
         if (r.prune) await prune(t.id);
         return r;
