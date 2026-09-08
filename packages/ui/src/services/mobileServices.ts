@@ -57,26 +57,6 @@ export class MobileServices {
     }
   }
 
-  // TEMP diagnostic: report a push-setup step to the server so we can see why
-  // iOS isn't producing a token without needing the device console. Best-effort;
-  // never throws. Remove once push is confirmed working.
-  static async logPushDiag(event: string, detail?: string) {
-    try {
-      let userId: string | undefined;
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        userId = session?.user?.id;
-      } catch {}
-      await (supabase as any).from('push_diagnostics').insert({
-        user_id: userId ?? null,
-        platform: Capacitor.getPlatform(),
-        app_id: this.bundleId,
-        event,
-        detail: detail ?? null,
-      });
-    } catch { /* swallow */ }
-  }
-
   // Resolve where a tapped push should take the user and navigate there. Uses
   // the shared notification-routing logic so it lands on the exact item
   // (application, maintenance ticket, conversation, rent, …) rather than the
@@ -127,7 +107,6 @@ export class MobileServices {
     try { await this.initializeStatusBar(); } catch (e) { console.error('StatusBar init failed:', e); }
     try { await this.initializePushNotifications(); } catch (e) {
       console.error('Push init failed:', e);
-      void this.logPushDiag('init_threw', String(e));
     }
     try { this.initializeKeyboard(); } catch (e) { console.error('Keyboard init failed:', e); }
     console.log('Mobile services initialized');
@@ -197,11 +176,9 @@ export class MobileServices {
   static async initializePushNotifications() {
     if (!this.isNative) return;
 
-    void this.logPushDiag('init_start');
     try {
       // Request permission
       const permission = await PushNotifications.requestPermissions();
-      void this.logPushDiag('permission', permission?.receive ?? 'unknown');
 
       if (permission.receive === 'granted') {
         // IMPORTANT: attach listeners BEFORE register(). On iOS the
@@ -210,14 +187,12 @@ export class MobileServices {
         // push_tokens table = no push ever arrives).
         PushNotifications.addListener('registration', (token) => {
           console.log('Push registration success');
-          void this.logPushDiag('registration_success', `token_len=${token?.value?.length ?? 0}`);
           void this.savePushToken(token.value);
         });
 
         // Listen for registration errors
         PushNotifications.addListener('registrationError', (error) => {
           console.error('Push registration error: ', error);
-          void this.logPushDiag('registration_error', (() => { try { return JSON.stringify(error); } catch { return String(error); } })());
         });
 
         // Listen for push notifications
@@ -251,14 +226,10 @@ export class MobileServices {
         });
 
         // Now that all listeners are attached, register with APNs/FCM.
-        void this.logPushDiag('register_called');
         await PushNotifications.register();
-      } else {
-        void this.logPushDiag('permission_not_granted', permission?.receive ?? 'unknown');
       }
     } catch (error) {
       console.error('Push notification initialization error:', error);
-      void this.logPushDiag('init_catch', String(error));
     }
   }
 
