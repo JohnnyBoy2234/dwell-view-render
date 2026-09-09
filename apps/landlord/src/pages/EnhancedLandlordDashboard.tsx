@@ -2568,10 +2568,10 @@ const renderReportsTab = () => (
     const renderMaintenanceCard = (request: any) => {
       const border = (request.priority === 'urgent' && request.status !== 'completed') ? 'border-l-red-500'
         : request.status === 'in_progress' ? 'border-l-blue-500'
-        : request.status === 'submitted' ? 'border-l-yellow-500' : 'border-l-gray-300';
+        : request.status === 'submitted' ? 'border-l-green-500' : 'border-l-gray-300';
       const iconBg = request.priority === 'urgent' ? 'bg-red-500'
         : request.status === 'in_progress' ? 'bg-blue-500'
-        : request.priority === 'high' ? 'bg-orange-500' : 'bg-yellow-500';
+        : request.priority === 'high' ? 'bg-orange-500' : 'bg-green-500';
       return (
         <Card key={request.id} className={`${PROPERTY_CARD_STYLES.CARD} border-l-4 ${border}`}>
           <CardContent className="p-4">
