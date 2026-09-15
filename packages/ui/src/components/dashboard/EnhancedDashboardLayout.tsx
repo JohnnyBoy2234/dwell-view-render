@@ -55,7 +55,7 @@ export function EnhancedDashboardLayout({ children, title, subtitle, actions, cu
   const headerAccent = (() => {
     const p = activePath;
     if (p.includes('/applications')) return '#f97316';       // orange
-    if (p.includes('/maintenance')) return '#f5a623';         // gold
+    if (p.includes('/maintenance')) return '#16a34a';         // green (matches tile)
     if (p.includes('/payments')) return '#14b8a6';            // teal
     if (p.includes('/leases')) return '#22417a';              // navy
     if (p.includes('/inventory')) return '#0f766e';           // dark teal
