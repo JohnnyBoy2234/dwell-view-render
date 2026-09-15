@@ -2,16 +2,17 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Required at build/serve time — no hardcoded fallback, so a misconfigured
-// environment fails fast instead of silently talking to the wrong project.
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Env vars win (web/CI/other projects can override), but fall back to the
+// production project so the native (Capacitor) builds work without a .env on
+// the build machine. The anon/publishable key is public by design and is
+// already baked into the shipped app binary, so this is safe — and it fixed a
+// white-screen boot crash where a missing .env made this module throw.
+const PROD_SUPABASE_URL = 'https://rsfrvjaqxhoqavvscvwf.supabase.co';
+const PROD_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzZnJ2amFxeGhvcWF2dnNjdndmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzMDIzOTYsImV4cCI6MjA2OTg3ODM5Nn0.3yeCVbJs6twyx62wYh9BxCUoqpqiMt-174JmdRyhJig';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase configuration: set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.',
-  );
-}
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || PROD_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || PROD_SUPABASE_ANON_KEY;
 
 const functionsUrl = supabaseUrl.replace('.supabase.co', '.functions.supabase.co');
 
