@@ -104,6 +104,15 @@ serve(async (req) => {
       });
     }
 
+    // Badge = recipient's real unread count (chat messages create unread
+    // notification rows too), so the icon shows 1, 2, 3… Cleared on app open.
+    const { count: unreadCount } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", recipientId)
+      .eq("is_read", false);
+    const badge = typeof unreadCount === "number" && unreadCount >= 0 ? unreadCount : 1;
+
     const { data: senderProfile } = await supabase
       .from("profiles")
       .select("display_name")
@@ -129,7 +138,7 @@ serve(async (req) => {
     const iosResults = await Promise.all(
       iosTokens.map(async (t) => {
         const r = await sendApns({
-          token: t.token, topic: t.app_id, title, subtitle, body, data, badge: 1,
+          token: t.token, topic: t.app_id, title, subtitle, body, data, badge,
           threadId: `chat_${message.conversation_id}`,   // stack a conversation's messages together
           interruptionLevel: "time-sensitive",           // chat should surface promptly
         });

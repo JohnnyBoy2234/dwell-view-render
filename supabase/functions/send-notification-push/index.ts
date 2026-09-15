@@ -77,6 +77,16 @@ serve(async (req) => {
       });
     }
 
+    // Badge = the recipient's real unread count, so the icon shows 1, 2, 3… as
+    // notifications pile up (instead of a hardcoded 1). Cleared to 0 on the app
+    // opening (AppDelegate). Falls back to 1 if the count can't be read.
+    const { count: unreadCount } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", n.user_id)
+      .eq("is_read", false);
+    const badge = typeof unreadCount === "number" && unreadCount >= 0 ? unreadCount : 1;
+
     const title = (n.metadata as any)?.title || TITLE_BY_TYPE[n.type ?? ""] || "MzanziHomes";
     const body = String(n.message || "").slice(0, 180);
     const type = String(n.type ?? "");
