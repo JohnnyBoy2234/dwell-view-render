@@ -41,7 +41,7 @@ import { useListingDraft, SaveStatusIndicator, deriveResumeStep } from '@mzanzih
 import { composeLocation, buildPublishChecklist, MIN_PHOTOS } from '@mzanzihomes/features/listing';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import type { ListingFormData } from '@mzanzihomes/features/listing';
+import type { ListingFormData, OwnershipStatus } from '@mzanzihomes/features/listing';
 
 const DEFAULT_FORM_VALUES: ListingFormData = {
   property_type: '',
@@ -137,10 +137,22 @@ export default function ListProperty() {
   const [declarationChecked, setDeclarationChecked] = useState(false);
   const [ownershipUploading, setOwnershipUploading] = useState(false);
   const [ownershipUploadError, setOwnershipUploadError] = useState<string | null>(null);
+  // Local mirror of the property's ownership_status/ownership_decline_reason.
+  // existingProperty only loads when resuming via ?propertyId=, so a
+  // same-session new listing never gets it from there; this state is seeded
+  // from existingProperty when present and updated optimistically right after
+  // uploadTitleDeed's DB write succeeds, so the Review step reflects the
+  // upload immediately instead of waiting on a refetch that may never happen.
+  const [ownershipStatus, setOwnershipStatus] = useState<OwnershipStatus>('not_submitted');
+  const [ownershipDeclineReason, setOwnershipDeclineReason] = useState<string | null | undefined>(null);
   // Synchronous re-entrancy guard: handleSubmit runs async validation before
   // onSubmit sets publishStage, so the button's disabled state alone leaves a
   // window where a double-click/Enter-repeat could fire onSubmit twice.
   const submittingRef = useRef(false);
+  // Same pattern as submittingRef, for uploadTitleDeed: ownershipUploading
+  // state doesn't take effect until the next render, leaving a window where a
+  // double-click/drop could fire the upload twice.
+  const ownershipUploadingRef = useRef(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { propertyId, property: existingProperty } = useExistingProperty();
@@ -210,10 +222,12 @@ export default function ListProperty() {
   };
 
   const uploadTitleDeed = async (file: File) => {
+    if (ownershipUploadingRef.current) return;
     if (!draft.draftId) {
       setOwnershipUploadError('Save your progress first by filling in the earlier steps.');
       return;
     }
+    ownershipUploadingRef.current = true;
     setOwnershipUploading(true);
     setOwnershipUploadError(null);
     try {
@@ -226,10 +240,16 @@ export default function ListProperty() {
         .update({ title_deed_path: path, ownership_status: 'submitted', ownership_decline_reason: null })
         .eq('id', draft.draftId);
       if (updateErr) throw updateErr;
+      // Optimistic update: existingProperty won't refetch itself (it's only
+      // fetched once, on mount, when resuming via ?propertyId=), so without
+      // this the Review step would keep showing the empty upload dropzone.
+      setOwnershipStatus('submitted');
+      setOwnershipDeclineReason(null);
       toast({ title: 'Title deed submitted', description: "We'll review it and notify you once it's verified." });
     } catch (err: any) {
       setOwnershipUploadError(err?.message || 'Could not upload the title deed. Please try again.');
     } finally {
+      ownershipUploadingRef.current = false;
       setOwnershipUploading(false);
     }
   };
@@ -240,7 +260,7 @@ export default function ListProperty() {
   }
 
   const progress = (currentStep / steps.length) * 100;
-  const checklist = buildPublishChecklist(formData, profile?.phone ?? null, existingProperty?.ownership_status ?? 'not_submitted');
+  const checklist = buildPublishChecklist(formData, profile?.phone ?? null, ownershipStatus);
 
   // Clear the legacy localStorage draft slot once — server drafts replace it.
   useEffect(() => {
@@ -258,6 +278,8 @@ export default function ListProperty() {
   useEffect(() => {
     if (!existingProperty) return;
     reset(rowToForm(existingProperty));
+    setOwnershipStatus(existingProperty.ownership_status ?? 'not_submitted');
+    setOwnershipDeclineReason(existingProperty.ownership_decline_reason ?? null);
   }, [existingProperty, reset]);
 
   // Autosave: debounced by the hook, only once a draft row exists.
@@ -390,6 +412,7 @@ export default function ListProperty() {
       const { error: publishErr } = await supabase.from('properties').update({ is_listed: true }).eq('id', id);
       if (publishErr) {
         if (publishErr.message?.includes('OWNERSHIP_NOT_VERIFIED')) {
+          // draft saved; the trigger aborts only the is_listed UPDATE, so nothing is lost
           toast({
             variant: 'destructive',
             title: 'Title deed not verified yet',
@@ -398,6 +421,7 @@ export default function ListProperty() {
           return;
         }
         if (publishErr.message?.includes('IDENTITY_NOT_VERIFIED')) {
+          // draft saved; the trigger aborts only the is_listed UPDATE, so nothing is lost
           toast({
             variant: 'destructive',
             title: 'Identity verification required',
@@ -459,8 +483,8 @@ export default function ListProperty() {
             contact={{ phone: profile?.phone ?? null, saving: savingPhone, onSavePhone: savePhone }}
             regenerate={{ onRegenerate: regenerateDescription, generating: regenerating }}
             ownership={{
-              status: existingProperty?.ownership_status ?? 'not_submitted',
-              declineReason: existingProperty?.ownership_decline_reason,
+              status: ownershipStatus,
+              declineReason: ownershipDeclineReason,
               uploading: ownershipUploading,
               uploadError: ownershipUploadError,
               onUpload: uploadTitleDeed,
