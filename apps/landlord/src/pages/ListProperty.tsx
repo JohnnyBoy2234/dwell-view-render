@@ -135,6 +135,8 @@ export default function ListProperty() {
   const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
   const [returnToReview, setReturnToReview] = useState(false);
   const [declarationChecked, setDeclarationChecked] = useState(false);
+  const [ownershipUploading, setOwnershipUploading] = useState(false);
+  const [ownershipUploadError, setOwnershipUploadError] = useState<string | null>(null);
   // Synchronous re-entrancy guard: handleSubmit runs async validation before
   // onSubmit sets publishStage, so the button's disabled state alone leaves a
   // window where a double-click/Enter-repeat could fire onSubmit twice.
@@ -207,13 +209,38 @@ export default function ListProperty() {
     }
   };
 
+  const uploadTitleDeed = async (file: File) => {
+    if (!draft.draftId) {
+      setOwnershipUploadError('Save your progress first by filling in the earlier steps.');
+      return;
+    }
+    setOwnershipUploading(true);
+    setOwnershipUploadError(null);
+    try {
+      const ext = file.name.split('.').pop() || 'pdf';
+      const path = `${draft.draftId}/deed.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from('title-deeds').upload(path, file, { upsert: true });
+      if (uploadErr) throw uploadErr;
+      const { error: updateErr } = await supabase
+        .from('properties')
+        .update({ title_deed_path: path, ownership_status: 'submitted', ownership_decline_reason: null })
+        .eq('id', draft.draftId);
+      if (updateErr) throw updateErr;
+      toast({ title: 'Title deed submitted', description: "We'll review it and notify you once it's verified." });
+    } catch (err: any) {
+      setOwnershipUploadError(err?.message || 'Could not upload the title deed. Please try again.');
+    } finally {
+      setOwnershipUploading(false);
+    }
+  };
+
   if (!user) {
     navigate('/auth');
     return null;
   }
 
   const progress = (currentStep / steps.length) * 100;
-  const checklist = buildPublishChecklist(formData, profile?.phone ?? null);
+  const checklist = buildPublishChecklist(formData, profile?.phone ?? null, existingProperty?.ownership_status ?? 'not_submitted');
 
   // Clear the legacy localStorage draft slot once — server drafts replace it.
   useEffect(() => {
@@ -362,6 +389,23 @@ export default function ListProperty() {
       setPublishStage('publishing');
       const { error: publishErr } = await supabase.from('properties').update({ is_listed: true }).eq('id', id);
       if (publishErr) {
+        if (publishErr.message?.includes('OWNERSHIP_NOT_VERIFIED')) {
+          toast({
+            variant: 'destructive',
+            title: 'Title deed not verified yet',
+            description: 'Upload your title deed in the review step, or wait for review to finish, before publishing.',
+          });
+          return;
+        }
+        if (publishErr.message?.includes('IDENTITY_NOT_VERIFIED')) {
+          toast({
+            variant: 'destructive',
+            title: 'Identity verification required',
+            description: 'Complete ID verification before publishing your first listing.',
+          });
+          navigate('/verify-id');
+          return;
+        }
         if (publishErr.message?.includes('PUBLISH_PAYWALL')) {
           setPaywallPropertyId(id);
           setShowPaywall(true);
@@ -414,6 +458,13 @@ export default function ListProperty() {
             declaration={{ checked: declarationChecked, onChange: setDeclarationChecked }}
             contact={{ phone: profile?.phone ?? null, saving: savingPhone, onSavePhone: savePhone }}
             regenerate={{ onRegenerate: regenerateDescription, generating: regenerating }}
+            ownership={{
+              status: existingProperty?.ownership_status ?? 'not_submitted',
+              declineReason: existingProperty?.ownership_decline_reason,
+              uploading: ownershipUploading,
+              uploadError: ownershipUploadError,
+              onUpload: uploadTitleDeed,
+            }}
           />
         );
       default:
