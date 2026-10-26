@@ -72,10 +72,11 @@ export interface PublishChecklist {
   warnings: string[];
 }
 
-// `data` is the wizard form data; `profilePhone` is the landlord's profile
-// phone (null/'' when missing). Photos count only URL strings (uploaded).
 export type OwnershipStatus = 'not_submitted' | 'submitted' | 'verified' | 'declined';
 
+// `data` is the wizard form data; `profilePhone` is the landlord's profile
+// phone (null/'' when missing). Photos count only URL strings (uploaded).
+// `ownershipStatus` is the property's title-deed status; omitted/undefined is treated as 'not_submitted'.
 export function buildPublishChecklist(
   data: {
     suburb?: string;

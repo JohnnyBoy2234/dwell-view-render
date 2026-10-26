@@ -127,15 +127,15 @@ describe('buildPublishChecklist', () => {
     expect(r.warnings).toHaveLength(0);
   });
   it('blocks under 5 photos', () => {
-    const r = buildPublishChecklist({ ...complete, images: ['u1'] }, '0821234567');
+    const r = buildPublishChecklist({ ...complete, images: ['u1'] }, '0821234567', 'verified');
     expect(r.blockers.some((b) => /photo/i.test(b))).toBe(true);
   });
   it('blocks missing address fields', () => {
-    const r = buildPublishChecklist({ ...complete, province: '' }, '0821234567');
+    const r = buildPublishChecklist({ ...complete, province: '' }, '0821234567', 'verified');
     expect(r.blockers.some((b) => /address/i.test(b))).toBe(true);
   });
   it('blocks a missing profile phone', () => {
-    const r = buildPublishChecklist(complete, null);
+    const r = buildPublishChecklist(complete, null, 'verified');
     expect(r.blockers.some((b) => /phone/i.test(b))).toBe(true);
   });
   it('blocks when the title deed has not been submitted', () => {
