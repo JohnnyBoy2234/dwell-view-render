@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User, AlertTriangle, Pencil, ShieldCheck, XCircle, Sparkles, Loader2 } from 'lucide-react';
+import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User, AlertTriangle, Pencil, ShieldCheck, XCircle, Sparkles, Loader2, Clock } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Input } from '@mzanzihomes/ui/components/input';
@@ -389,13 +389,13 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
             ) : (
               <>
                 {ownership.status === 'submitted' && (
-                  <p className="text-sm text-muted-foreground">
-                    Your title deed is under review. We'll notify you once it's verified.
+                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 shrink-0" /> Your title deed is under review. We'll notify you once it's verified.
                   </p>
                 )}
                 {ownership.status === 'declined' && (
-                  <p className="text-sm text-destructive">
-                    Declined: {ownership.declineReason || 'Please re-upload a clearer copy of your title deed.'}
+                  <p className="flex items-center gap-2 text-sm text-destructive">
+                    <XCircle className="h-4 w-4 shrink-0" /> Declined: {ownership.declineReason || 'Please re-upload a clearer copy of your title deed.'}
                   </p>
                 )}
                 <FileUploadZone
@@ -406,6 +406,8 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
                   isUploading={ownership.uploading}
                   uploadError={ownership.uploadError ?? undefined}
                   onFileSelect={ownership.onUpload}
+                  // Removal isn't supported yet — no currentFile/previewUrl is passed in,
+                  // so the remove button never renders; re-uploading replaces the deed.
                   onFileRemove={() => {}}
                 />
               </>

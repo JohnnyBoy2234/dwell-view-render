@@ -20,6 +20,33 @@ interface FileUploadZoneProps {
   description: string;
 }
 
+// Friendly display names for known file extensions. Unknown extensions fall
+// back to their uppercased form so this stays correct for any `accept` prop
+// a caller passes, rather than hardcoding one caller's expected file types.
+const EXTENSION_LABELS: Record<string, string> = {
+  pdf: 'PDF',
+  jpg: 'JPEG',
+  jpeg: 'JPEG',
+  png: 'PNG',
+  webp: 'WebP'
+};
+
+function describeAcceptedTypes(accept: Record<string, string[]>): string {
+  const labels = Array.from(
+    new Set(
+      Object.values(accept)
+        .flat()
+        .map((ext) => ext.replace(/^\./, '').toLowerCase())
+        .map((ext) => EXTENSION_LABELS[ext] ?? ext.toUpperCase())
+    )
+  );
+
+  if (labels.length === 0) return 'files';
+  if (labels.length === 1) return labels[0];
+  if (labels.length === 2) return `${labels[0]} or ${labels[1]}`;
+  return `${labels.slice(0, -1).join(', ')}, or ${labels[labels.length - 1]}`;
+}
+
 export function FileUploadZone({
   onFileSelect,
   onFileRemove,
@@ -38,16 +65,18 @@ export function FileUploadZone({
   description
 }: FileUploadZoneProps) {
   const [dragError, setDragError] = useState<string>('');
+  const acceptedTypesLabel = describeAcceptedTypes(accept);
+  const maxSizeMb = Math.round((maxSize / 1024 / 1024) * 10) / 10;
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
     setDragError('');
-    
+
     if (rejectedFiles.length > 0) {
       const error = rejectedFiles[0].errors[0];
       if (error.code === 'file-too-large') {
-        setDragError('File is too large. Maximum size is 10MB.');
+        setDragError(`File is too large. Maximum size is ${maxSizeMb}MB.`);
       } else if (error.code === 'file-invalid-type') {
-        setDragError('Invalid file type. Please upload JPEG, PNG, or WebP images.');
+        setDragError(`Invalid file type. Please upload ${acceptedTypesLabel} files.`);
       } else {
         setDragError('File upload error. Please try again.');
       }
@@ -57,7 +86,7 @@ export function FileUploadZone({
     if (acceptedFiles.length > 0) {
       onFileSelect(acceptedFiles[0]);
     }
-  }, [onFileSelect]);
+  }, [onFileSelect, acceptedTypesLabel, maxSizeMb]);
 
   const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
     onDrop,
@@ -130,7 +159,7 @@ export function FileUploadZone({
                 {isDragActive ? 'Drop the file here' : 'Drag & drop a file here'}
               </p>
               <p className="text-xs text-muted-foreground">
-                or click to browse (JPEG, PNG, WebP - max 10MB)
+                or click to browse ({acceptedTypesLabel} - max {maxSizeMb}MB)
               </p>
             </>
           )}
