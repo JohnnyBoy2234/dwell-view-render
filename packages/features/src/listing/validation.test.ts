@@ -122,7 +122,7 @@ describe('buildPublishChecklist', () => {
   } as any;
 
   it('passes a complete listing with a phone on file', () => {
-    const r = buildPublishChecklist(complete, '0821234567');
+    const r = buildPublishChecklist(complete, '0821234567', 'verified');
     expect(r.blockers).toHaveLength(0);
     expect(r.warnings).toHaveLength(0);
   });
@@ -137,6 +137,22 @@ describe('buildPublishChecklist', () => {
   it('blocks a missing profile phone', () => {
     const r = buildPublishChecklist(complete, null);
     expect(r.blockers.some((b) => /phone/i.test(b))).toBe(true);
+  });
+  it('blocks when the title deed has not been submitted', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'not_submitted');
+    expect(r.blockers.some((b) => /title deed/i.test(b))).toBe(true);
+  });
+  it('blocks while the title deed is pending review', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'submitted');
+    expect(r.blockers.some((b) => /review/i.test(b))).toBe(true);
+  });
+  it('blocks when the title deed was declined', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'declined');
+    expect(r.blockers.some((b) => /declined/i.test(b))).toBe(true);
+  });
+  it('does not block when the title deed is verified', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'verified');
+    expect(r.blockers.some((b) => /title deed/i.test(b))).toBe(false);
   });
   it('warns on short description, no parking info, no amenities', () => {
     const r = buildPublishChecklist(

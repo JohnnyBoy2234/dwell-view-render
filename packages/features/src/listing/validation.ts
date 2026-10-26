@@ -74,6 +74,8 @@ export interface PublishChecklist {
 
 // `data` is the wizard form data; `profilePhone` is the landlord's profile
 // phone (null/'' when missing). Photos count only URL strings (uploaded).
+export type OwnershipStatus = 'not_submitted' | 'submitted' | 'verified' | 'declined';
+
 export function buildPublishChecklist(
   data: {
     suburb?: string;
@@ -85,10 +87,19 @@ export function buildPublishChecklist(
     amenities: string[];
     images: (File | string)[];
   },
-  profilePhone: string | null | undefined
+  profilePhone: string | null | undefined,
+  ownershipStatus?: OwnershipStatus
 ): PublishChecklist {
   const blockers: string[] = [];
   const warnings: string[] = [];
+
+  if (ownershipStatus === 'not_submitted' || ownershipStatus == null) {
+    blockers.push('Upload your title deed so we can verify you own this property.');
+  } else if (ownershipStatus === 'submitted') {
+    blockers.push('Your title deed is still under review — we’ll notify you once it’s verified.');
+  } else if (ownershipStatus === 'declined') {
+    blockers.push('Your title deed was declined — re-upload it before publishing.');
+  }
 
   const uploaded = (data.images ?? []).filter((i) => typeof i === 'string');
   if (uploaded.length < MIN_PHOTOS) {
