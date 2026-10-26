@@ -88,6 +88,7 @@ serve(async (req) => {
         ownership_status: 'declined',
         ownership_reviewed_by: user.id,
         ownership_decline_reason: reason.trim(),
+        ownership_verified_at: null,
       })
       .eq('id', property_id);
 
