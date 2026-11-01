@@ -201,7 +201,13 @@ serve(async (req) => {
       .from('rent-receipts')
       .upload(fileName, pdfBytes, { contentType: 'application/pdf', upsert: true });
     if (uploadError) throw uploadError;
-    const { data: urlData } = supabase.storage.from('rent-receipts').getPublicUrl(fileName);
+    // Bucket is private — email links need a long-lived signed URL rather
+    // than a public one (the recipient has no Supabase session when they
+    // click it, possibly weeks later).
+    const { data: urlData, error: urlError } = await supabase.storage
+      .from('rent-receipts')
+      .createSignedUrl(fileName, 60 * 60 * 24 * 30);
+    if (urlError || !urlData) throw urlError ?? new Error('Failed to sign receipt URL');
 
     // Persist receipt_pdf_path (load-bearing for idempotency)
     const { error: pathError } = await supabase
@@ -255,9 +261,9 @@ serve(async (req) => {
       const from = `MzanziHomes <${Deno.env.get('RESEND_FROM_EMAIL') || 'noreply@MzanziHomes.co'}>`;
       const subject = `Rent receipt — ${propertyName}, ${bill.period}`;
       const invoiceUrl = invoicePath
-        ? supabase.storage.from('rent-receipts').getPublicUrl(invoicePath).data.publicUrl
+        ? (await supabase.storage.from('rent-receipts').createSignedUrl(invoicePath, 60 * 60 * 24 * 30)).data?.signedUrl
         : null;
-      const html = `<p>Payment of <strong>${fmtR(bill.total_amount)}</strong> for ${propertyName} (${bill.period}) has been received.</p><p><a href="${urlData.publicUrl}">Download receipt (PDF)</a></p>${invoiceUrl ? `<p><a href="${invoiceUrl}">Download invoice (PDF)</a></p>` : ''}`;
+      const html = `<p>Payment of <strong>${fmtR(bill.total_amount)}</strong> for ${propertyName} (${bill.period}) has been received.</p><p><a href="${urlData.signedUrl}">Download receipt (PDF)</a></p>${invoiceUrl ? `<p><a href="${invoiceUrl}">Download invoice (PDF)</a></p>` : ''}`;
       for (const to of [tenantEmail, landlordEmail]) {
         if (!to) continue;
         const { error: emailError } = await resend.emails.send({ from, to: [to], subject, html });
@@ -295,7 +301,7 @@ serve(async (req) => {
     if (txnError) logStep('SwiftBooks insert failed (non-fatal)', { error: txnError.message });
 
     logStep('Receipt complete', { billId, fileName });
-    return new Response(JSON.stringify({ success: true, receipt_url: urlData.publicUrl }), {
+    return new Response(JSON.stringify({ success: true, receipt_url: urlData.signedUrl }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

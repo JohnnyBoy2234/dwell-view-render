@@ -1786,8 +1786,11 @@ export default function EnhancedLandlordDashboard() {
                   {/* Per-tenant payment history: month, paid date, invoice + receipt */}
                   {expandedTenantBills === tenant.id && (() => {
                     const bills = tenantBills.filter((b) => b.tenancy_id === tenant.id);
-                    const docUrl = (path: string, bill: any) =>
-                      `${supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl}?v=${encodeURIComponent(bill?.updated_at ?? '')}`;
+                    const openDoc = async (path: string) => {
+                      const { data, error } = await supabase.storage.from('rent-receipts').createSignedUrl(path, 60 * 10);
+                      if (error || !data?.signedUrl) return;
+                      window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+                    };
                     return (
                       <div className="mt-4 border-t pt-3 space-y-2">
                         {bills.length === 0 ? (
@@ -1806,15 +1809,11 @@ export default function EnhancedLandlordDashboard() {
                               </div>
                               <div className="flex items-center gap-2 shrink-0">
                                 {bill.invoice_pdf_path ? (
-                                  <Button variant="outline" size="sm" asChild>
-                                    <a href={docUrl(bill.invoice_pdf_path, bill)} target="_blank" rel="noreferrer">Invoice</a>
-                                  </Button>
+                                  <Button variant="outline" size="sm" onClick={() => openDoc(bill.invoice_pdf_path)}>Invoice</Button>
                                 ) : null}
                                 {bill.status === 'paid' ? (
                                   bill.receipt_pdf_path ? (
-                                    <Button variant="outline" size="sm" asChild>
-                                      <a href={docUrl(bill.receipt_pdf_path, bill)} target="_blank" rel="noreferrer">Receipt</a>
-                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => openDoc(bill.receipt_pdf_path)}>Receipt</Button>
                                   ) : (
                                     <span className="text-xs text-muted-foreground">Receipt generating…</span>
                                   )

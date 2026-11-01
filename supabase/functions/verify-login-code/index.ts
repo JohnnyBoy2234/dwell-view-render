@@ -7,6 +7,20 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// listUsers() is paginated (default 50/page); without walking pages this
+// silently fails to find any user past page 1 once the user base grows.
+async function findUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
+  const perPage = 200;
+  for (let page = 1; page <= 25; page++) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    const match = data?.users?.find((u) => u.email === email);
+    if (match) return match;
+    if (!data?.users || data.users.length < perPage) return null; // last page
+  }
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -26,23 +40,16 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Find user by email using listUsers
-    const { data: { users }, error: listUsersError } = await adminClient.auth.admin.listUsers();
-    
-    if (listUsersError) {
-      throw listUsersError;
-    }
+    const user = await findUserByEmail(adminClient, email);
 
-    const userRes = users?.find(u => u.email === email);
-    
-    if (!userRes) {
-      return new Response(JSON.stringify({ error: "No account found for this email" }), {
-        status: 404,
+    if (!user) {
+      // Same response shape as a wrong code — don't reveal whether this
+      // email has an account.
+      return new Response(JSON.stringify({ error: "Invalid code", attemptsLeft: 2 }), {
+        status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-
-    const user = userRes;
 
     const nowIso = new Date().toISOString();
     const { data: latest, error: selectError } = await adminClient

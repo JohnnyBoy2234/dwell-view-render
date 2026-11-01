@@ -47,12 +47,14 @@ export default function JoinProperty() {
         return;
       }
       try {
-        const { data, error: inviteErr } = await supabase
-          .from('property_invites')
-          .select('*')
-          .eq('token', token)
+        // Looked up via RPC (not a direct table select) so an anonymous
+        // visitor who already holds the link's token can see just this one
+        // invite, without the table being broadly readable.
+        const { data: rows, error: inviteErr } = await supabase
+          .rpc('get_invite_by_token', { p_token: token })
           .maybeSingle();
         if (inviteErr) throw inviteErr;
+        const data = rows;
         if (!data) {
           setError('This invitation could not be found. Please ask your landlord for a new link.');
           setLoading(false);

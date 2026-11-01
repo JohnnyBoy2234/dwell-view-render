@@ -1,9 +1,10 @@
 // @ts-nocheck
+import { useEffect, useState } from 'react';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@mzanzihomes/supabase/client';
 
-// In-app viewer for receipt/invoice PDFs stored in the public rent-receipts
+// In-app viewer for receipt/invoice PDFs stored in the private rent-receipts
 // bucket. Documents used to open via target="_blank", which strands the user
 // inside the Capacitor WebView with no way back — this page keeps them in the
 // app with a real back button.
@@ -13,13 +14,25 @@ export default function DocumentViewer() {
 
   const path = searchParams.get('path') || '';
   const title = searchParams.get('title') || 'Document';
-  // PDFs are upserted at stable paths — the `v` param (bill.updated_at) keeps
-  // browsers/CDN from serving a stale copy after a regeneration.
-  const version = searchParams.get('v') || '';
 
-  const url = path
-    ? `${supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl}${version ? `?v=${encodeURIComponent(version)}` : ''}`
-    : null;
+  // The bucket is private, so the URL must be a short-lived signed URL
+  // (minted fresh per visit) rather than a stable public URL — this also
+  // means the old `?v=` cache-busting param is no longer needed.
+  const [url, setUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!path) {
+      setUrl(null);
+      return;
+    }
+    supabase.storage.from('rent-receipts').createSignedUrl(path, 60 * 10).then(({ data, error }) => {
+      if (error) {
+        console.error('Failed to sign document URL:', error);
+        setUrl(null);
+        return;
+      }
+      setUrl(data?.signedUrl ?? null);
+    });
+  }, [path]);
 
   // Android WebViews can't render PDFs inline; Google's viewer wraps the
   // public URL into an embeddable HTML page that works everywhere.

@@ -37,10 +37,16 @@ export function LandlordBillingPanel() {
 
   const propertyName = (b: any) => b.properties?.title || b.properties?.location || 'Property';
 
-  // PDFs are upserted at stable paths, so a regenerated file keeps the same
-  // URL — version by updated_at so browsers/CDN don't serve a stale copy.
-  const receiptUrl = (path: string, bill: any) =>
-    `${supabase.storage.from('rent-receipts').getPublicUrl(path).data.publicUrl}?v=${encodeURIComponent(bill?.updated_at ?? '')}`;
+  // The bucket is private, so each open mints a fresh short-lived signed URL
+  // rather than reusing a stable public one.
+  const openReceipt = async (path: string) => {
+    const { data, error } = await supabase.storage.from('rent-receipts').createSignedUrl(path, 60 * 10);
+    if (error || !data?.signedUrl) {
+      toast({ title: 'Could not open document', description: error?.message, variant: 'destructive' });
+      return;
+    }
+    window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <div className="space-y-6">
@@ -93,19 +99,17 @@ export function LandlordBillingPanel() {
                 {bill.invoice_pdf_path ? (
                   <Button
                     size="sm"
-                    asChild
                     className="gap-1.5 font-semibold text-white shadow-sm hover:brightness-105"
                     style={{ background: '#14b8a6' }}
+                    onClick={() => openReceipt(bill.invoice_pdf_path)}
                   >
-                    <a href={receiptUrl(bill.invoice_pdf_path, bill)} target="_blank" rel="noreferrer">
-                      <FileText className="h-4 w-4" /> Invoice
-                    </a>
+                    <FileText className="h-4 w-4" /> Invoice
                   </Button>
                 ) : null}
                 {bill.status === 'paid' ? (
                   bill.receipt_pdf_path ? (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={receiptUrl(bill.receipt_pdf_path, bill)} target="_blank" rel="noreferrer">Receipt</a>
+                    <Button variant="outline" size="sm" onClick={() => openReceipt(bill.receipt_pdf_path)}>
+                      Receipt
                     </Button>
                   ) : (
                     <span className="text-xs text-muted-foreground">Receipt generating…</span>

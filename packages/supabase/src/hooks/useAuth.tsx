@@ -261,16 +261,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     password: string,
     role: 'tenant' | 'landlord' = 'tenant',
   ): Promise<{ error: AuthActionError | null; isNewUser?: boolean }> => {
+    // Role is never trusted from signup metadata — the handle_new_user()
+    // trigger always inserts 'tenant' regardless of what's sent here (anyone
+    // can set arbitrary metadata on a signUp() call). The chosen role is
+    // instead stashed the same way the OAuth flow does, and applied via the
+    // SECURITY DEFINER promote_to_landlord() RPC once a session exists.
+    if (role === 'landlord') {
+      sessionStorage.setItem('pendingOAuthRole', 'landlord');
+    }
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { role },
         emailRedirectTo: `${window.location.origin}/auth`,
       },
     });
 
     if (error) {
+      sessionStorage.removeItem('pendingOAuthRole');
       return { error, isNewUser: false };
     }
 
@@ -278,6 +287,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // User created but email not verified — profile/role are created by
       // database triggers on auth.users insert, so no manual inserts needed here.
       // Attempting them now would 401 (no session yet) and 409 (trigger already ran).
+      // pendingOAuthRole stays in sessionStorage and is applied once the user
+      // verifies their email and a session is established.
       return { error: null, isNewUser: true };
     }
 

@@ -9,8 +9,25 @@ const corsHeaders = {
 };
 
 function generateCode(): string {
-  // 6-digit numeric code
-  return Math.floor(100000 + Math.random() * 900000).toString();
+  // 6-digit numeric code — crypto.getRandomValues, not Math.random(), since
+  // this code grants a sign-in magic link.
+  const buf = new Uint32Array(1);
+  crypto.getRandomValues(buf);
+  return (100000 + (buf[0] % 900000)).toString();
+}
+
+// listUsers() is paginated (default 50/page); without walking pages this
+// silently fails to find any user past page 1 once the user base grows.
+async function findUserByEmail(adminClient: ReturnType<typeof createClient>, email: string) {
+  const perPage = 200;
+  for (let page = 1; page <= 25; page++) {
+    const { data, error } = await adminClient.auth.admin.listUsers({ page, perPage });
+    if (error) throw error;
+    const match = data?.users?.find((u) => u.email === email);
+    if (match) return match;
+    if (!data?.users || data.users.length < perPage) return null; // last page
+  }
+  return null;
 }
 
 serve(async (req) => {
@@ -33,23 +50,16 @@ serve(async (req) => {
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
-    // Find user by email using listUsers
-    const { data: { users }, error: listUsersError } = await adminClient.auth.admin.listUsers();
-    
-    if (listUsersError) {
-      throw listUsersError;
-    }
+    const user = await findUserByEmail(adminClient, email);
 
-    const userRes = users?.find(u => u.email === email);
-    
-    if (!userRes) {
-      return new Response(JSON.stringify({ error: "No account found for this email" }), {
-        status: 404,
+    if (!user) {
+      // Don't reveal whether this email has an account — respond exactly as
+      // a real send would, just without sending anything.
+      return new Response(JSON.stringify({ sent: true, expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() }), {
+        status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
     }
-
-    const user = userRes;
 
     // Rate limit: 30 seconds between sends per user
     const { data: latest } = await adminClient
@@ -71,7 +81,9 @@ serve(async (req) => {
     }
 
     const code = generateCode();
-    const code_hash = await bcrypt.hash(code, "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy");
+    // A fresh salt per code — a hardcoded salt would let every code ever
+    // issued be cracked via one precomputed table instead of one each.
+    const code_hash = await bcrypt.hash(code, await bcrypt.genSalt(10));
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
 
     const { error: insertError } = await adminClient.from("verification_codes").insert({
