@@ -47,7 +47,6 @@ export default function SalesPricingStep({ control, errors }: SalesPricingStepPr
                     type="number"
                     min="50000"
                     max="50000000"
-                    placeholder="1,250,000"
                     className="pl-8 text-lg h-12"
                     onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
                   />

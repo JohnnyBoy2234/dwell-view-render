@@ -57,7 +57,6 @@ export default function PricingStep({ control, errors, watch }: PricingStepProps
                     type="number"
                     min={PRICE_MIN}
                     max={PRICE_MAX}
-                    placeholder="12,000"
                     className="pl-8 text-lg h-12"
                     onChange={(e) => field.onChange(e.target.value === '' ? '' : Number(e.target.value))}
                   />

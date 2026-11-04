@@ -49,7 +49,6 @@ export function ContactStep({ control, errors }: ContactStepProps) {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    placeholder="John Doe"
                     className={errors.contact_name ? 'border-red-500' : ''}
                   />
                 )}
@@ -78,7 +77,6 @@ export function ContactStep({ control, errors }: ContactStepProps) {
                 render={({ field }) => (
                   <Input
                     {...field}
-                    placeholder="+27 21 123 4567"
                     className={errors.contact_phone ? 'border-red-500' : ''}
                   />
                 )}
@@ -108,7 +106,6 @@ export function ContactStep({ control, errors }: ContactStepProps) {
                   <Input
                     {...field}
                     type="email"
-                    placeholder="john@example.com"
                     className={errors.contact_email ? 'border-red-500' : ''}
                   />
                 )}

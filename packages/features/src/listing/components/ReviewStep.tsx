@@ -44,7 +44,6 @@ function PhoneSaver({ saving, onSave }: { saving: boolean; onSave: (phone: strin
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         inputMode="tel"
-        placeholder="082 123 4567"
         className="text-base"
       />
       <Button type="button" disabled={!valid || saving} onClick={() => onSave(phone)}>

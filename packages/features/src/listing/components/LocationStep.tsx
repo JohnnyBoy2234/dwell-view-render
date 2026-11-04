@@ -88,7 +88,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
                   name="street_address"
                   control={control}
                   render={({ field }) => (
-                    <Input {...field} value={field.value || ''} id="street_address" placeholder="12 Protea Road" className="text-base" />
+                    <Input {...field} value={field.value || ''} id="street_address" className="text-base" />
                   )}
                 />
                 <p className="text-xs text-muted-foreground">Not shown publicly until you choose to share it.</p>
@@ -101,7 +101,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
                   control={control}
                   rules={{ required: 'Suburb is required' }}
                   render={({ field }) => (
-                    <Input {...field} value={field.value || ''} id="suburb" placeholder="Sandton" className="text-base" />
+                    <Input {...field} value={field.value || ''} id="suburb" className="text-base" />
                   )}
                 />
                 {errors.suburb && <p className="text-sm text-destructive">{errors.suburb.message}</p>}
@@ -114,7 +114,7 @@ export default function LocationStep({ control, errors, watch, setValue, structu
                   control={control}
                   rules={{ required: 'City is required' }}
                   render={({ field }) => (
-                    <Input {...field} value={field.value || ''} id="city" placeholder="Johannesburg" className="text-base" />
+                    <Input {...field} value={field.value || ''} id="city" className="text-base" />
                   )}
                 />
                 {errors.city && <p className="text-sm text-destructive">{errors.city.message}</p>}
@@ -158,7 +158,6 @@ export default function LocationStep({ control, errors, watch, setValue, structu
                       id="postal_code"
                       inputMode="numeric"
                       maxLength={4}
-                      placeholder="2196"
                       className="text-base"
                     />
                   )}
