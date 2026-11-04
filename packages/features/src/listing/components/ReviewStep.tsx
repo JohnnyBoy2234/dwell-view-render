@@ -268,41 +268,41 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
         </Card>
       </div>
 
-      {/* Description */}
-      <Card>
+      {/* Description — given a distinct accent + a prominent primary button
+          for Write with AI, since both were easy to miss sitting flat among
+          every other plain white card on this page. */}
+      <Card className="border-primary/30 bg-primary/5">
         <CardHeader>
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <CardTitle>Description</CardTitle>
-            <div className="flex flex-wrap items-center gap-1">
-              {regenerate && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-7 text-xs"
-                  disabled={regenerate.generating}
-                  onClick={regenerate.onRegenerate}
-                >
-                  {regenerate.generating ? (
-                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                  ) : (
-                    <Sparkles className="h-3 w-3 mr-1" />
-                  )}
-                  {regenerate.generating
-                    ? 'Writing…'
-                    : (description?.trim() ? 'Rewrite with AI' : 'Write with AI')}
-                </Button>
-              )}
-              <EditBtn step={2} />
-            </div>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" /> Description
+            </CardTitle>
+            <EditBtn step={2} />
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          {regenerate && (
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              disabled={regenerate.generating}
+              onClick={regenerate.onRegenerate}
+            >
+              {regenerate.generating ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="h-4 w-4 mr-2" />
+              )}
+              {regenerate.generating
+                ? 'Writing…'
+                : (description?.trim() ? 'Rewrite with AI' : 'Write with AI')}
+            </Button>
+          )}
           {description?.trim() ? (
             <p className="text-muted-foreground leading-relaxed break-words whitespace-pre-wrap">{description}</p>
           ) : (
             <p className="text-sm text-muted-foreground italic">
-              No description yet — tap "Write with AI" above to generate one from your details and photos, or edit to write your own.
+              No description yet — tap "Write with AI" above, or edit to write your own.
             </p>
           )}
         </CardContent>
@@ -385,21 +385,27 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
               <p className="flex items-center gap-2 text-sm text-success">
                 <ShieldCheck className="h-4 w-4" /> Title deed verified.
               </p>
+            ) : ownership.status === 'submitted' ? (
+              // Once submitted, swap the upload widget for a confirmation —
+              // leaving the dropzone visible made a successful upload look
+              // like nothing had happened.
+              <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
+                <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">Thanks — your title deed is submitted.</p>
+                  <p className="text-sm text-muted-foreground">We'll verify it and let you know.</p>
+                </div>
+              </div>
             ) : (
               <>
-                {ownership.status === 'submitted' && (
-                  <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4 shrink-0" /> Your title deed is under review. We'll notify you once it's verified.
-                  </p>
-                )}
                 {ownership.status === 'declined' && (
                   <p className="flex items-center gap-2 text-sm text-destructive">
-                    <XCircle className="h-4 w-4 shrink-0" /> Declined: {ownership.declineReason || 'Please re-upload a clearer copy of your title deed.'}
+                    <XCircle className="h-4 w-4 shrink-0" /> Declined: {ownership.declineReason || 'Please re-upload a clearer copy.'}
                   </p>
                 )}
                 <FileUploadZone
                   label="Title deed"
-                  description="Upload a photo or PDF of your title deed so we can verify you own this property."
+                  description="Photo or PDF, so we can verify you own this property."
                   accept={{ 'application/pdf': ['.pdf'], 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'] }}
                   maxSize={10 * 1024 * 1024}
                   isUploading={ownership.uploading}
