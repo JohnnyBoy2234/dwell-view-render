@@ -282,6 +282,31 @@ export default function ListProperty() {
     setOwnershipDeclineReason(existingProperty.ownership_decline_reason ?? null);
   }, [existingProperty, reset]);
 
+  // Keep the ownership mirror in sync with the server once a draft row
+  // exists, independent of whether it arrived via ?propertyId= or was
+  // created mid-session by ensureDraft/adoptDraft — existingProperty only
+  // ever loads for the URL-param case, so without this a remount (page
+  // refresh, closing/reopening the tab) would reset the mirror to its
+  // 'not_submitted' default even though the deed was already accepted
+  // server-side, making an uploaded deed look "missing" again.
+  useEffect(() => {
+    if (!draft.draftId) return;
+    let cancelled = false;
+    supabase
+      .from('properties')
+      .select('ownership_status, ownership_decline_reason')
+      .eq('id', draft.draftId)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled || error || !data) return;
+        setOwnershipStatus(data.ownership_status ?? 'not_submitted');
+        setOwnershipDeclineReason(data.ownership_decline_reason ?? null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [draft.draftId]);
+
   // Autosave: debounced by the hook, only once a draft row exists.
   // Edits still pending in the debounce window are flushed by the hook on unmount.
   useEffect(() => {
@@ -503,7 +528,7 @@ export default function ListProperty() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
-      <div className="container mx-auto p-6 max-w-4xl pb-32 md:pb-6">
+      <div className="container mx-auto px-4 py-6 md:px-8 max-w-6xl pb-32 md:pb-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-8">
           <Button variant="outline" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))} className="self-start">
