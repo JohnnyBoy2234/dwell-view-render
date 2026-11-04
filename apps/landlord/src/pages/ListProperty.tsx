@@ -92,9 +92,16 @@ const rowToForm = (p) => ({
   property_type: p.property_type || '',
   location: p.location || '',
   description: p.description || '',
-  bedrooms: p.bedrooms ?? undefined,
+  // bedrooms/bathrooms/parking_spaces/price are all NOT NULL DEFAULT 0 in
+  // the DB, so a freshly-created draft row always has 0 in these columns
+  // before the user has touched them — there's no way to tell that apart
+  // from a genuinely-entered 0 at the data layer. Treat stored 0 as unset
+  // on resume (consistent with bathrooms/price below) rather than show a
+  // "0" the user never actually typed; a real studio (0 bedrooms) or
+  // no-parking (0 spaces) listing just needs re-confirming on resume.
+  bedrooms: p.bedrooms > 0 ? p.bedrooms : undefined,
   bathrooms: p.bathrooms > 0 ? p.bathrooms : undefined,
-  parking_spaces: p.parking_spaces ?? undefined,
+  parking_spaces: p.parking_spaces > 0 ? p.parking_spaces : undefined,
   size_sqm: p.size_sqm ?? undefined,
   furnished: !!p.furnished,
   pets_allowed: !!p.pets_allowed,
