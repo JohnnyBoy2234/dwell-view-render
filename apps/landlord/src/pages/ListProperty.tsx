@@ -331,15 +331,19 @@ export default function ListProperty() {
     }
   }, [currentStep, draft.draftId]);
 
-  // Jump to the top of the page on every step change. Previously this was
-  // called inline inside nextStep/prevStep/editFromReview with
-  // behavior: 'smooth', fired *before* the new step's content had rendered —
-  // a smooth scroll racing a layout change (the new step is often a very
-  // different height) frequently got interrupted mid-animation and never
-  // actually reached the top. Running it as an effect keyed on currentStep
-  // guarantees it fires after the new step is in the DOM, and an instant
-  // jump can't be interrupted the way an animated one can.
+  // Jump to the top of the page on every step change. #root is the real
+  // scroll container on this app, not the window — html/body are locked to
+  // overflow: hidden for Capacitor/iOS (see index.css), the same reason
+  // App.tsx's route-level ScrollToTop targets #root instead of window.
+  // The wizard's steps are internal state, not routes, so that component
+  // never fires for a step change; this effect covers that gap. Previously
+  // this called window.scrollTo({ behavior: 'smooth' }) inline inside
+  // nextStep/prevStep/editFromReview, which did nothing (wrong element) and
+  // would have been flaky even on the right element (smooth-scroll racing a
+  // layout change can get interrupted mid-animation).
   useEffect(() => {
+    const root = document.getElementById('root');
+    if (root) root.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
     window.scrollTo(0, 0);
   }, [currentStep]);
 
