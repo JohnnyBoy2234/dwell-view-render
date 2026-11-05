@@ -94,12 +94,17 @@ export function buildPublishChecklist(
   const blockers: string[] = [];
   const warnings: string[] = [];
 
+  // These are warnings, not blockers — the DB trigger (enforce_publish_paywall)
+  // is the actual enforcement point and will reject the publish attempt with
+  // OWNERSHIP_NOT_VERIFIED if it isn't verified yet. Keeping the Publish
+  // button clickable here lets that attempt happen, which shows a proper
+  // "Under Review" popup instead of a disabled button with no explanation.
   if (ownershipStatus === 'not_submitted' || ownershipStatus == null) {
-    blockers.push('Upload your title deed so we can verify you own this property.');
+    warnings.push('Upload your title deed so we can verify you own this property.');
   } else if (ownershipStatus === 'submitted') {
-    blockers.push('Your title deed is still under review — we’ll notify you once it’s verified.');
+    warnings.push('Your title deed is still under review — we’ll notify you once it’s verified.');
   } else if (ownershipStatus === 'declined') {
-    blockers.push('Your title deed was declined — re-upload it before publishing.');
+    warnings.push('Your title deed was declined — re-upload it before publishing.');
   }
 
   const uploaded = (data.images ?? []).filter((i) => typeof i === 'string');

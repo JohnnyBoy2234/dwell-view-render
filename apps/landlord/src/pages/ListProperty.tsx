@@ -689,21 +689,20 @@ export default function ListProperty() {
             know" message, matching the Success Dialog's visual language. */}
         <SuccessDialog
           open={showUnderReviewDialog}
-          onClose={() => setShowUnderReviewDialog(false)}
+          onClose={() => {
+            setShowUnderReviewDialog(false);
+            navigate('/landlord/dashboard');
+          }}
           icon="file"
           title="Your Property Is Under Review"
           subtitle="We're verifying your title deed to confirm you own this property. We'll notify you as soon as it's approved — then you can publish."
           nextSteps={[
             { title: "We verify your title deed", description: "An admin checks it against the property details you provided" },
             { title: "You get notified", description: "We'll let you know the moment it's approved" },
-            { title: "Publish your listing", description: "Come back here and hit Publish once it's verified" }
+            { title: "Publish your listing", description: "Come back from the notification and hit Publish again once it's verified" }
           ]}
           primaryAction={{
-            label: "Got it",
-            onClick: () => setShowUnderReviewDialog(false)
-          }}
-          secondaryAction={{
-            label: "View My Properties",
+            label: "Back to Dashboard",
             onClick: () => {
               setShowUnderReviewDialog(false);
               navigate('/landlord/dashboard');

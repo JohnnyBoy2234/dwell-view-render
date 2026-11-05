@@ -138,21 +138,24 @@ describe('buildPublishChecklist', () => {
     const r = buildPublishChecklist(complete, null, 'verified');
     expect(r.blockers.some((b) => /phone/i.test(b))).toBe(true);
   });
-  it('blocks when the title deed has not been submitted', () => {
+  it('warns when the title deed has not been submitted, without blocking', () => {
     const r = buildPublishChecklist(complete, '0821234567', 'not_submitted');
-    expect(r.blockers.some((b) => /title deed/i.test(b))).toBe(true);
-  });
-  it('blocks while the title deed is pending review', () => {
-    const r = buildPublishChecklist(complete, '0821234567', 'submitted');
-    expect(r.blockers.some((b) => /review/i.test(b))).toBe(true);
-  });
-  it('blocks when the title deed was declined', () => {
-    const r = buildPublishChecklist(complete, '0821234567', 'declined');
-    expect(r.blockers.some((b) => /declined/i.test(b))).toBe(true);
-  });
-  it('does not block when the title deed is verified', () => {
-    const r = buildPublishChecklist(complete, '0821234567', 'verified');
+    expect(r.warnings.some((w) => /title deed/i.test(w))).toBe(true);
     expect(r.blockers.some((b) => /title deed/i.test(b))).toBe(false);
+  });
+  it('warns while the title deed is pending review, without blocking', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'submitted');
+    expect(r.warnings.some((w) => /review/i.test(w))).toBe(true);
+    expect(r.blockers.some((b) => /review/i.test(b))).toBe(false);
+  });
+  it('warns when the title deed was declined, without blocking', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'declined');
+    expect(r.warnings.some((w) => /declined/i.test(w))).toBe(true);
+    expect(r.blockers.some((b) => /declined/i.test(b))).toBe(false);
+  });
+  it('does not warn when the title deed is verified', () => {
+    const r = buildPublishChecklist(complete, '0821234567', 'verified');
+    expect(r.warnings.some((w) => /title deed/i.test(w))).toBe(false);
   });
   it('warns on short description, no parking info, no amenities', () => {
     const r = buildPublishChecklist(

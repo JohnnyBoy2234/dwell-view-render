@@ -11,7 +11,7 @@ import { Badge } from '@mzanzihomes/ui/components/badge';
 import { Textarea } from '@mzanzihomes/ui/components/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@mzanzihomes/ui/components/dialog';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { Eye, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
+import { Eye, Download, CheckCircle, XCircle, Clock, FileText } from 'lucide-react';
 import { Skeleton } from '@mzanzihomes/ui/components/skeleton';
 import { supabase } from '@mzanzihomes/supabase/client';
 import { useToast } from '@mzanzihomes/ui/hooks/use-toast';
@@ -122,6 +122,31 @@ export default function DocumentReview() {
     load();
   }, []);
 
+  // The signed URL is on a different origin (Supabase storage), so a plain
+  // <a download> is silently ignored by the browser there — it just
+  // navigates instead of saving. Fetching the bytes ourselves and saving
+  // via a blob URL works regardless of origin.
+  const downloadDeed = async (doc: PendingDeed) => {
+    const url = signedUrls[doc.id];
+    if (!url) return;
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Could not fetch the file');
+      const blob = await res.blob();
+      const ext = doc.title_deed_path.split('.').pop() || 'pdf';
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `${doc.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}-title-deed.${ext}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(objectUrl);
+    } catch (err: any) {
+      toast({ variant: 'destructive', title: 'Could not download', description: err?.message });
+    }
+  };
+
   const approve = async (propertyId: string) => {
     setBusyId(propertyId);
     try {
@@ -229,11 +254,16 @@ export default function DocumentReview() {
               </CardHeader>
               <CardContent className="flex items-center justify-between gap-3">
                 {signedUrls[doc.id] ? (
-                  <a href={signedUrls[doc.id]} target="_blank" rel="noreferrer">
-                    <Button type="button" variant="outline" size="sm">
-                      <Eye className="h-4 w-4 mr-2" /> View title deed
+                  <div className="flex items-center gap-2">
+                    <a href={signedUrls[doc.id]} target="_blank" rel="noreferrer">
+                      <Button type="button" variant="outline" size="sm">
+                        <Eye className="h-4 w-4 mr-2" /> View
+                      </Button>
+                    </a>
+                    <Button type="button" variant="outline" size="sm" onClick={() => downloadDeed(doc)}>
+                      <Download className="h-4 w-4 mr-2" /> Download
                     </Button>
-                  </a>
+                  </div>
                 ) : failedUrls[doc.id] ? (
                   <span className="text-sm text-destructive flex items-center gap-2">
                     <FileText className="h-4 w-4" /> Document unavailable
