@@ -330,6 +330,18 @@ export default function ListProperty() {
     }
   }, [currentStep, draft.draftId]);
 
+  // Jump to the top of the page on every step change. Previously this was
+  // called inline inside nextStep/prevStep/editFromReview with
+  // behavior: 'smooth', fired *before* the new step's content had rendered —
+  // a smooth scroll racing a layout change (the new step is often a very
+  // different height) frequently got interrupted mid-animation and never
+  // actually reached the top. Running it as an effect keyed on currentStep
+  // guarantees it fires after the new step is in the DOM, and an instant
+  // jump can't be interrupted the way an animated one can.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
   const handleResume = () => {
     const row = draft.resumeDraft;
     draft.adoptDraft(row);
@@ -383,19 +395,16 @@ export default function ListProperty() {
     } else if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const editFromReview = (step: number) => {
     setReturnToReview(true);
     setCurrentStep(step);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
