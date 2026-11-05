@@ -66,7 +66,7 @@ serve(async (req) => {
     console.log('🔍 Fetching property:', property_id);
     const { data: property, error: propertyError } = await supabaseAdmin
       .from('properties')
-      .select('id, ownership_status, title_deed_path')
+      .select('id, ownership_status, title_deed_path, is_listed, landlord_id')
       .eq('id', property_id)
       .single();
 
@@ -100,18 +100,54 @@ serve(async (req) => {
     }
     console.log('✅ Property ownership_status updated to verified');
 
+    // Ownership was the landlord-facing "Under Review" gate — once it's
+    // verified, automatically attempt to go live too, so the landlord
+    // doesn't have to come back and click Publish again. This is a plain
+    // attempt, not a guarantee: enforce_publish_paywall still runs on this
+    // UPDATE and will reject it with IDENTITY_NOT_VERIFIED or
+    // PUBLISH_PAYWALL if those gates aren't satisfied yet, in which case we
+    // just leave the property unpublished — approving ownership itself has
+    // already succeeded above regardless of this outcome.
+    let autoPublished = false;
+    if (!property.is_listed) {
+      console.log('📝 Attempting auto-publish now that ownership is verified');
+      const { data: publishedRow, error: publishError } = await supabaseAdmin
+        .from('properties')
+        .update({ is_listed: true })
+        .eq('id', property_id)
+        .select('title')
+        .single();
+      if (publishError) {
+        console.log('ℹ️ Auto-publish not possible yet:', publishError.message);
+      } else {
+        autoPublished = true;
+        console.log('✅ Property auto-published');
+        // A distinct notification from the ownership-verified one above, so
+        // the landlord's dashboard can tell "deed verified, still need other
+        // steps" apart from "it's actually live now" and show the right
+        // popup for each (see landlord-property-published-popup channel).
+        await supabaseAdmin.rpc('create_notification', {
+          _user_id: property.landlord_id,
+          _message: `Your property "${publishedRow?.title || 'listing'}" is now live on MzanziHomes!`,
+          _link_url: '/landlord/dashboard',
+          _type: 'system',
+          _metadata: { property_id, auto_published: true },
+        });
+      }
+    }
+
     console.log('📊 Logging telemetry event');
     await supabaseAdmin.rpc('log_event', {
       _user_id: user.id,
       _name: 'property_ownership_verified',
-      _properties: { property_id, reviewed_by: user.id },
+      _properties: { property_id, reviewed_by: user.id, auto_published: autoPublished },
     });
     console.log('✅ Telemetry event logged');
 
     console.log('🎉 Property ownership approval process completed successfully');
 
     return new Response(
-      JSON.stringify({ success: true, message: 'Ownership verified', property_id }),
+      JSON.stringify({ success: true, message: 'Ownership verified', property_id, auto_published: autoPublished }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
 

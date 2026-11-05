@@ -220,6 +220,9 @@ export default function EnhancedLandlordDashboard() {
 
   // Celebratory popup when a tenant pays rent (realtime notifications INSERT).
   const [rentPaidPopup, setRentPaidPopup] = useState<string | null>(null);
+  // Same pattern, for when an admin approves a title deed and the property
+  // auto-publishes as a result (see admin-approve-property-ownership).
+  const [propertyPublishedPopup, setPropertyPublishedPopup] = useState<string | null>(null);
 
   const handleAddPropertyByAddress = async () => {
     if (!addressInput.trim() || !user) return;
@@ -446,6 +449,36 @@ export default function EnhancedLandlordDashboard() {
           const n = payload?.new;
           if (n?.type === 'payment' && n?.message) {
             setRentPaidPopup(n.message);
+          }
+        }
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
+  // Celebrate in real time when a title deed is approved and the property
+  // auto-publishes as a result (admin-approve-property-ownership inserts a
+  // notification with metadata.auto_published=true specifically for this).
+  // Only fires while the landlord is actually on this page — there's no way
+  // for a popup to appear if the app isn't open when the admin approves it;
+  // that's what the regular notification bell (and eventually a push alert)
+  // is for.
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel(`landlord-property-published-popup-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          const n = payload?.new;
+          if (n?.metadata?.auto_published === true && n?.message) {
+            setPropertyPublishedPopup(n.message);
           }
         }
       )
@@ -3148,6 +3181,22 @@ const renderReportsTab = () => (
                 View payments
               </Button>
               <Button onClick={() => setRentPaidPopup(null)}>Nice!</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Celebratory popup when a title deed is approved and the property auto-publishes */}
+        <Dialog open={!!propertyPublishedPopup} onOpenChange={(open) => { if (!open) setPropertyPublishedPopup(null); }}>
+          <DialogContent className="max-w-sm text-center">
+            <DialogHeader>
+              <div className="mx-auto mb-2 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
+                <Home className="h-8 w-8 text-primary" />
+              </div>
+              <DialogTitle>🎉 Your property has been published!</DialogTitle>
+              <DialogDescription>{propertyPublishedPopup}</DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center gap-2 pt-1">
+              <Button onClick={() => setPropertyPublishedPopup(null)}>Nice!</Button>
             </div>
           </DialogContent>
         </Dialog>

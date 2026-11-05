@@ -699,11 +699,11 @@ export default function ListProperty() {
           }}
           icon="file"
           title="Your Property Is Under Review"
-          subtitle="We're verifying your title deed to confirm you own this property. We'll notify you as soon as it's approved — then you can publish."
+          subtitle="We're verifying your title deed to confirm you own this property. Once it's approved, your listing will be automatically published."
           nextSteps={[
             { title: "We verify your title deed", description: "An admin checks it against the property details you provided" },
-            { title: "You get notified", description: "We'll let you know the moment it's approved" },
-            { title: "Publish your listing", description: "Come back from the notification and hit Publish again once it's verified" }
+            { title: "It's automatically published", description: "No need to come back and publish it yourself — it goes live as soon as it's approved" },
+            { title: "You get notified", description: "We'll let you know once it's live" }
           ]}
           primaryAction={{
             label: "Back to Dashboard",
