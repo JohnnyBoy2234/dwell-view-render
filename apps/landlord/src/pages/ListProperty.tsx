@@ -138,6 +138,7 @@ export default function ListProperty() {
   const [currentStep, setCurrentStep] = useState(1);
   const [publishStage, setPublishStage] = useState<'verifying' | 'finalising' | 'publishing' | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [showUnderReviewDialog, setShowUnderReviewDialog] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallPropertyId, setPaywallPropertyId] = useState<string | null>(null);
   const [returnToReview, setReturnToReview] = useState(false);
@@ -454,11 +455,7 @@ export default function ListProperty() {
       if (publishErr) {
         if (publishErr.message?.includes('OWNERSHIP_NOT_VERIFIED')) {
           // draft saved; the trigger aborts only the is_listed UPDATE, so nothing is lost
-          toast({
-            variant: 'destructive',
-            title: 'Title deed not verified yet',
-            description: 'Upload your title deed in the review step, or wait for review to finish, before publishing.',
-          });
+          setShowUnderReviewDialog(true);
           return;
         }
         if (publishErr.message?.includes('IDENTITY_NOT_VERIFIED')) {
@@ -684,6 +681,34 @@ export default function ListProperty() {
             }
           }}
           showConfetti={true}
+        />
+
+        {/* Under Review Dialog — shown when publishing is blocked because the
+            title deed hasn't been verified yet. Replaces a destructive-styled
+            toast with a calmer, explicit "this is expected, we'll let you
+            know" message, matching the Success Dialog's visual language. */}
+        <SuccessDialog
+          open={showUnderReviewDialog}
+          onClose={() => setShowUnderReviewDialog(false)}
+          icon="file"
+          title="Your Property Is Under Review"
+          subtitle="We're verifying your title deed to confirm you own this property. We'll notify you as soon as it's approved — then you can publish."
+          nextSteps={[
+            { title: "We verify your title deed", description: "An admin checks it against the property details you provided" },
+            { title: "You get notified", description: "We'll let you know the moment it's approved" },
+            { title: "Publish your listing", description: "Come back here and hit Publish once it's verified" }
+          ]}
+          primaryAction={{
+            label: "Got it",
+            onClick: () => setShowUnderReviewDialog(false)
+          }}
+          secondaryAction={{
+            label: "View My Properties",
+            onClick: () => {
+              setShowUnderReviewDialog(false);
+              navigate('/landlord/dashboard');
+            }
+          }}
         />
 
         {/* Publish Paywall */}
