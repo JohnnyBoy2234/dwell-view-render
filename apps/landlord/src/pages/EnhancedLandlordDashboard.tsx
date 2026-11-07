@@ -48,6 +48,7 @@ import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import heroHome from '@/assets/hero-house.jpg';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
+import { NotificationBell } from '@mzanzihomes/ui/components/notifications/NotificationBell';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import HomeCarousel from '@/components/HomeCarousel';
 import { LandlordModuleIntro } from '@/components/LandlordModuleIntro';
@@ -2756,7 +2757,10 @@ const renderReportsTab = () => (
             </div>
             <span className="text-[23px] font-extrabold tracking-tight text-foreground">MzanziHomes</span>
           </div>
-          <UserMenu variant="light" />
+          <div className="flex items-center gap-2.5">
+            <NotificationBell />
+            <UserMenu variant="light" />
+          </div>
         </div>
 
         {/* Hero — portfolio banner in the tenant-home style. Same image size as
