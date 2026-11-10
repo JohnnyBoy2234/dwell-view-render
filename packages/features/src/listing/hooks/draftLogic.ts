@@ -17,6 +17,9 @@ export function deriveResumeStep(row: Record<string, any>): number {
   if (!row.bathrooms || Number(row.bathrooms) < 1) return 3;
   if (!row.price || Number(row.price) <= 0) return 4;
   if (!row.images || row.images.length < MIN_PHOTOS) return 5;
+  // Steps 6 (ownership) and 7 (payment) are soft steps — nothing in the row
+  // blocks on them, so a draft with all required fields lands on step 6 and
+  // the landlord clicks through from there.
   return 6;
 }
 

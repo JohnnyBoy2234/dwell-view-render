@@ -3,6 +3,8 @@ export { default as LocationStep } from './components/LocationStep';
 export { default as DetailsStep } from './components/DetailsStep';
 export { default as PricingStep } from './components/PricingStep';
 export { default as PhotosStep } from './components/PhotosStep';
+export { default as OwnershipStep } from './components/OwnershipStep';
+export { default as PaymentStep } from './components/PaymentStep';
 export { default as ReviewStep } from './components/ReviewStep';
 export { default as ContactStep } from './components/ContactStep';
 export { default as SalesPricingStep } from './components/SalesPricingStep';

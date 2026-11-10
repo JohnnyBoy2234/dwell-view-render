@@ -1,13 +1,12 @@
 import * as React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@mzanzihomes/ui/components/card';
 import { Badge } from '@mzanzihomes/ui/components/badge';
-import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User, AlertTriangle, Pencil, ShieldCheck, XCircle, Sparkles, Loader2, Clock } from 'lucide-react';
+import { MapPin, Home, Bed, Bath, Car, Ruler, Calendar, Camera, Phone, Mail, User, AlertTriangle, Pencil, ShieldCheck, XCircle, Sparkles, Loader2 } from 'lucide-react';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Checkbox } from '@mzanzihomes/ui/components/checkbox';
 import { Input } from '@mzanzihomes/ui/components/input';
 import { Label } from '@mzanzihomes/ui/components/label';
-import { isValidSaPhone, type PublishChecklist, type OwnershipStatus } from '../validation';
-import { FileUploadZone } from '../../kyc/components/FileUploadZone';
+import { isValidSaPhone, type PublishChecklist } from '../validation';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-lg`}>
@@ -26,13 +25,6 @@ interface ReviewStepProps {
   declaration?: { checked: boolean; onChange: (v: boolean) => void };
   contact?: { phone: string | null; saving: boolean; onSavePhone: (phone: string) => void };
   regenerate?: { onRegenerate: () => void; generating: boolean };
-  ownership?: {
-    status: OwnershipStatus;
-    declineReason?: string | null;
-    uploading: boolean;
-    uploadError?: string | null;
-    onUpload: (file: File) => void;
-  };
 }
 
 function PhoneSaver({ saving, onSave }: { saving: boolean; onSave: (phone: string) => void }) {
@@ -53,7 +45,7 @@ function PhoneSaver({ saving, onSave }: { saving: boolean; onSave: (phone: strin
   );
 }
 
-export default function ReviewStep({ formData, isSale, onEdit, checklist, declaration, contact, regenerate, ownership }: ReviewStepProps) {
+export default function ReviewStep({ formData, isSale, onEdit, checklist, declaration, contact, regenerate }: ReviewStepProps) {
   const EditBtn = ({ step }: { step: number }) =>
     onEdit ? (
       <Button type="button" variant="ghost" size="sm" className="h-7 text-xs" onClick={() => onEdit(step)}>
@@ -369,54 +361,6 @@ export default function ReviewStep({ formData, isSale, onEdit, checklist, declar
           <CardContent className="p-5 space-y-3">
             <p className="text-sm font-medium">Add a phone number to your profile before publishing.</p>
             <PhoneSaver saving={contact.saving} onSave={contact.onSavePhone} />
-          </CardContent>
-        </Card>
-      )}
-
-      {ownership && !isSale && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShieldCheck className="h-5 w-5" /> Proof of ownership
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {ownership.status === 'verified' ? (
-              <p className="flex items-center gap-2 text-sm text-success">
-                <ShieldCheck className="h-4 w-4" /> Title deed verified.
-              </p>
-            ) : ownership.status === 'submitted' ? (
-              // Once submitted, swap the upload widget for a confirmation —
-              // leaving the dropzone visible made a successful upload look
-              // like nothing had happened.
-              <div className="flex items-start gap-3 rounded-lg border border-primary/20 bg-primary/5 p-4">
-                <Clock className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">Thanks — your title deed is submitted.</p>
-                  <p className="text-sm text-muted-foreground">We'll verify it and let you know.</p>
-                </div>
-              </div>
-            ) : (
-              <>
-                {ownership.status === 'declined' && (
-                  <p className="flex items-center gap-2 text-sm text-destructive">
-                    <XCircle className="h-4 w-4 shrink-0" /> Declined: {ownership.declineReason || 'Please re-upload a clearer copy.'}
-                  </p>
-                )}
-                <FileUploadZone
-                  label="Title deed"
-                  description="Photo or PDF, so we can verify you own this property."
-                  accept={{ 'application/pdf': ['.pdf'], 'image/jpeg': ['.jpg', '.jpeg'], 'image/png': ['.png'] }}
-                  maxSize={10 * 1024 * 1024}
-                  isUploading={ownership.uploading}
-                  uploadError={ownership.uploadError ?? undefined}
-                  onFileSelect={ownership.onUpload}
-                  // Removal isn't supported yet — no currentFile/previewUrl is passed in,
-                  // so the remove button never renders; re-uploading replaces the deed.
-                  onFileRemove={() => {}}
-                />
-              </>
-            )}
           </CardContent>
         </Card>
       )}

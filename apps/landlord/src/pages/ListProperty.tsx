@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Card, CardContent } from '@mzanzihomes/ui/components/card';
 import { Progress } from '@mzanzihomes/ui/components/progress';
-import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Home, MapPin, Camera, Settings, CheckCircle, ShieldCheck, CreditCard } from 'lucide-react';
 // Simple R icon for South African Rand
 const RIcon = ({ className }: { className?: string }) => (
   <div className={`${className} flex items-center justify-center font-bold text-xs leading-none`}>
@@ -35,6 +35,8 @@ import { LocationStep } from '@mzanzihomes/features/listing';
 import { DetailsStep } from '@mzanzihomes/features/listing';
 import { PricingStep } from '@mzanzihomes/features/listing';
 import { PhotosStep } from '@mzanzihomes/features/listing';
+import { OwnershipStep } from '@mzanzihomes/features/listing';
+import { PaymentStep } from '@mzanzihomes/features/listing';
 import { ReviewStep } from '@mzanzihomes/features/listing';
 import { useExistingProperty } from '@mzanzihomes/features/listing';
 import { useListingDraft, SaveStatusIndicator, deriveResumeStep } from '@mzanzihomes/features/listing';
@@ -129,12 +131,14 @@ const steps = [
   { id: 3, title: 'Details', icon: Settings, description: 'Property specifications' },
   { id: 4, title: 'Pricing', icon: RIcon, description: 'Set your price' },
   { id: 5, title: 'Photos', icon: Camera, description: 'Add beautiful photos' },
-  { id: 6, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
+  { id: 6, title: 'Ownership', icon: ShieldCheck, description: 'Verify you own it' },
+  { id: 7, title: 'Payment', icon: CreditCard, description: 'Subscribe or pay once-off' },
+  { id: 8, title: 'Review', icon: CheckCircle, description: 'Review and publish' },
 ];
 
 export default function ListProperty() {
   const { user, isLandlord } = useAuth();
-  const { plan, planStatus } = useSubscription();
+  const { isSubscriber } = useSubscription();
   const [currentStep, setCurrentStep] = useState(1);
   const [publishStage, setPublishStage] = useState<'verifying' | 'finalising' | 'publishing' | null>(null);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -517,6 +521,18 @@ export default function ListProperty() {
         );
       case 6:
         return (
+          <OwnershipStep
+            status={ownershipStatus}
+            declineReason={ownershipDeclineReason}
+            uploading={ownershipUploading}
+            uploadError={ownershipUploadError}
+            onUpload={uploadTitleDeed}
+          />
+        );
+      case 7:
+        return <PaymentStep propertyId={draft.draftId} isSubscriber={isSubscriber} />;
+      case 8:
+        return (
           <ReviewStep
             formData={formData}
             onEdit={editFromReview}
@@ -524,13 +540,6 @@ export default function ListProperty() {
             declaration={{ checked: declarationChecked, onChange: setDeclarationChecked }}
             contact={{ phone: profile?.phone ?? null, saving: savingPhone, onSavePhone: savePhone }}
             regenerate={{ onRegenerate: regenerateDescription, generating: regenerating }}
-            ownership={{
-              status: ownershipStatus,
-              declineReason: ownershipDeclineReason,
-              uploading: ownershipUploading,
-              uploadError: ownershipUploadError,
-              onUpload: uploadTitleDeed,
-            }}
           />
         );
       default:
@@ -568,7 +577,7 @@ export default function ListProperty() {
           <Progress value={progress} className="h-2" />
           
           {/* Step indicators */}
-          <div className="grid grid-cols-6 gap-1 mt-4">
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 mt-4">
             {steps.map((step) => {
               const IconComponent = step.icon;
               const isActive = currentStep === step.id;

@@ -119,7 +119,10 @@
       "Bash(xargs -I{} date -d @{} +%F)",
       "Bash(ln -s AGENTS.md CLAUDE.md)",
       "Artifact",
-      "Bash(sort -t: -k1,1)"
+      "Bash(sort -t: -k1,1)",
+      "Bash(printf 'v2.114.0')",
+      "Bash(git checkout *)",
+      "Bash(gh repo *)"
     ]
   },
   "enabledMcpjsonServers": [
