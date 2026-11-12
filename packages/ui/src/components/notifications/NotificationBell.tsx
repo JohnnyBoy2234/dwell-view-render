@@ -110,9 +110,8 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
       {isOpen && (
         <div className="absolute right-0 top-full mt-2 w-[360px] z-50 animate-in fade-in slide-in-from-top-2 duration-200">
           <div
-            className="rounded-2xl border border-border/50 overflow-hidden"
+            className="rounded-2xl border border-border/50 bg-popover overflow-hidden"
             style={{
-              background: 'rgba(var(--card-rgb, 255,255,255), 0.96)',
               backdropFilter: 'blur(24px) saturate(180%)',
               WebkitBackdropFilter: 'blur(24px) saturate(180%)',
               boxShadow: '0 20px 60px rgba(0,0,0,0.14), 0 4px 16px rgba(0,0,0,0.08)',
@@ -165,12 +164,17 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                     const cfg = getTypeConfig(notification.type);
                     const Icon = cfg.icon;
                     const isUnread = !notification.is_read;
+                    // create_notification() never sets a title, so almost every
+                    // row has none — fall back to the message itself as the
+                    // headline instead of a placeholder repeated on every item.
+                    const headline = notification.title || notification.message || 'Notification';
+                    const showMessageLine = !!notification.title && !!notification.message;
 
                     return (
                       <div
                         key={notification.id}
                         className={`
-                          flex items-start gap-3 px-3 py-3 mx-1 my-0.5 rounded-xl cursor-pointer
+                          group flex items-start gap-3 px-3 py-3 mx-1 my-0.5 rounded-xl cursor-pointer
                           transition-colors duration-150
                           ${isUnread ? 'bg-primary/5 hover:bg-primary/8' : 'hover:bg-muted/60'}
                         `}
@@ -184,8 +188,8 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                         {/* Content */}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-1">
-                            <p className={`text-[13px] leading-snug ${isUnread ? 'font-semibold text-foreground' : 'font-medium text-foreground/80'}`}>
-                              {notification.title || 'Notification'}
+                            <p className={`text-[13px] leading-snug line-clamp-2 ${isUnread ? 'font-semibold text-foreground' : 'font-medium text-foreground/80'}`}>
+                              {headline}
                             </p>
                             <div className="flex items-center gap-1.5 flex-shrink-0">
                               {isUnread && (
@@ -196,7 +200,7 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-6 w-6 p-0 rounded-full hover:bg-muted opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="h-6 w-6 p-0 rounded-full hover:bg-muted"
                                     onClick={e => e.stopPropagation()}
                                   >
                                     <MoreVertical className="h-3 w-3" />
@@ -225,7 +229,7 @@ export const NotificationBell = ({ className }: NotificationBellProps) => {
                               </DropdownMenu>
                             </div>
                           </div>
-                          {notification.message && (
+                          {showMessageLine && (
                             <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-2 leading-relaxed">
                               {notification.message}
                             </p>

@@ -141,9 +141,9 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
               key={s}
               type="button"
               onMouseDown={(e) => { e.preventDefault(); addArea(s); }}
-              className="flex w-full items-center gap-2.5 px-3.5 py-2 text-left text-[13.5px] text-slate-700 transition-colors hover:bg-ocean-blue/[0.07]"
+              className="flex w-full items-center gap-2.5 px-3.5 py-3 text-left text-[16px] text-slate-700 transition-colors hover:bg-ocean-blue/[0.07]"
             >
-              <MapPin className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+              <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
               <span className="truncate">{s}</span>
             </button>
           ))}
