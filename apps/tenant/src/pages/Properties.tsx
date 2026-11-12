@@ -264,7 +264,7 @@ export default function Properties() {
         </div>
 
         {/* ── Area search (multi-area chips) ────────────────── */}
-        <div className="mb-3 rounded-2xl bg-white border border-black/[0.08] px-3 py-2.5 shadow-sm">
+        <div className="relative z-20 mb-3 rounded-2xl bg-white border border-black/[0.08] px-3 py-2.5 shadow-sm">
           <AreaMultiSelect
             areas={areas}
             onChange={updateAreas}

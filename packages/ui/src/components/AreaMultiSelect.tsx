@@ -21,18 +21,36 @@ interface AreaMultiSelectProps {
  * come from getAreaPredictions with a static SA-suburb fallback (works with no
  * Maps key) — typed text still works via Enter.
  */
+interface Suggestion {
+  /** Full string stored as the chip/filter value — unchanged behaviour. */
+  value: string;
+  /** Area/suburb name — the bold, primary line (Property24-style). */
+  primary: string;
+  /** City/province context — the smaller, secondary line. */
+  secondary?: string;
+}
+
+// Static-list entries are "Suburb, City" (or just "City" with no comma) — split
+// on the first comma so the dropdown can show the same two-line layout the
+// live Google predictions get from structured_formatting.
+const splitStaticArea = (full: string): Suggestion => {
+  const idx = full.indexOf(',');
+  if (idx === -1) return { value: full, primary: full };
+  return { value: full, primary: full.slice(0, idx).trim(), secondary: full.slice(idx + 1).trim() };
+};
+
 export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…', className, onSubmit }: AreaMultiSelectProps) {
   const [query, setQuery] = useState('');
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const seq = useRef(0);
 
   // Drop anything already picked, so the list never shows a dead/duplicate row.
-  const dedupe = (list: string[]) => {
+  const dedupe = (list: Suggestion[]) => {
     const chosen = new Set(areas.map((a) => a.toLowerCase()));
-    return list.filter((s) => !chosen.has(s.toLowerCase()));
+    return list.filter((s) => !chosen.has(s.value.toLowerCase()));
   };
 
   const addArea = (raw: string) => {
@@ -57,7 +75,7 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
     }
     // Show the built-in SA list instantly (works with no Google key, like the
     // web search), then upgrade to live Google predictions if they come back.
-    const fallback = dedupe(matchSaAreas(value, 8));
+    const fallback = dedupe(matchSaAreas(value, 8).map(splitStaticArea));
     setSuggestions(fallback);
     setOpen(fallback.length > 0);
     const mine = ++seq.current;
@@ -65,7 +83,9 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
       .then((preds) => {
         if (mine !== seq.current) return; // ignore stale
         if (preds.length === 0) return;    // keep the fallback list
-        const list = dedupe(preds.map((p) => p.description)).slice(0, 8);
+        const list = dedupe(
+          preds.map((p) => ({ value: p.description, primary: p.mainText, secondary: p.secondaryText }))
+        ).slice(0, 8);
         if (list.length === 0) return;
         setSuggestions(list);
         setOpen(true);
@@ -135,16 +155,21 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
       </div>
 
       {open && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-[300] overflow-hidden rounded-xl border border-slate-100 bg-white py-1 shadow-[0_12px_36px_-8px_rgba(20,50,90,0.28)]">
+        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-[300] max-h-[320px] overflow-y-auto overscroll-contain rounded-xl border border-slate-100 bg-white py-1 shadow-[0_12px_36px_-8px_rgba(20,50,90,0.28)]">
           {suggestions.map((s) => (
             <button
-              key={s}
+              key={s.value}
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); addArea(s); }}
-              className="flex w-full items-center gap-2.5 px-3.5 py-3 text-left text-[16px] text-slate-700 transition-colors hover:bg-ocean-blue/[0.07]"
+              onMouseDown={(e) => { e.preventDefault(); addArea(s.value); }}
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-ocean-blue/[0.07]"
             >
-              <MapPin className="h-4 w-4 shrink-0 text-slate-400" />
-              <span className="truncate">{s}</span>
+              <MapPin className="h-[18px] w-[18px] shrink-0 text-slate-400" />
+              <span className="min-w-0">
+                <span className="block truncate text-[17px] font-semibold leading-tight text-slate-800">{s.primary}</span>
+                {s.secondary && (
+                  <span className="block truncate text-[13px] leading-tight text-slate-500">{s.secondary}</span>
+                )}
+              </span>
             </button>
           ))}
         </div>

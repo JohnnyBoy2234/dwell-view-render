@@ -63,9 +63,13 @@ export function loadGoogleMaps(): Promise<any> {
 /**
  * Return area/place predictions (suburbs, towns, regions) for a query,
  * restricted to South Africa. Returns [] if Maps isn't available so callers can
- * fall back to a static list. Each item's `description` is the display string.
+ * fall back to a static list. `description` is the full display string;
+ * `mainText`/`secondaryText` split it Property24-style (area name, then
+ * city/province) using Google's own structured_formatting.
  */
-export async function getAreaPredictions(input: string): Promise<Array<{ description: string; placeId: string }>> {
+export async function getAreaPredictions(
+  input: string
+): Promise<Array<{ description: string; placeId: string; mainText: string; secondaryText?: string }>> {
   if (!input || input.trim().length < 2) return [];
   let google: any;
   try {
@@ -90,7 +94,12 @@ export async function getAreaPredictions(input: string): Promise<Array<{ descrip
           resolve([]);
           return;
         }
-        resolve(predictions.map((p) => ({ description: p.description, placeId: p.place_id })));
+        resolve(predictions.map((p) => ({
+          description: p.description,
+          placeId: p.place_id,
+          mainText: p.structured_formatting?.main_text || p.description,
+          secondaryText: p.structured_formatting?.secondary_text || undefined,
+        })));
       },
     );
   });

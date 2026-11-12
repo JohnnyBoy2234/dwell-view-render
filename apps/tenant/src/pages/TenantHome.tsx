@@ -196,7 +196,7 @@ export default function TenantHome() {
         </div>
 
         {/* Search card — multi-area location · more filters · search */}
-        <div className="relative mt-7 rounded-[22px] bg-white p-2.5 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
+        <div className="relative z-20 mt-7 rounded-[22px] bg-white p-2.5 shadow-[0_20px_44px_-22px_rgba(20,50,90,0.4)]">
           <p className="mb-1 pl-2 text-[10px] font-bold uppercase tracking-wider" style={{ color: '#2563EB' }}>Location</p>
           <div className="flex items-center gap-2">
             <div className="min-w-0 flex-1 pl-1">
