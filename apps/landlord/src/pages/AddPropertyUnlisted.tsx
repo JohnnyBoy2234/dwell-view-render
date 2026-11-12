@@ -40,6 +40,11 @@ const LOCAL_STORAGE_KEY = 'add_unlisted_property_draft';
 const DEFAULT_FORM_VALUES: ListingFormData = {
   property_type: '',
   location: '',
+  street_address: '',
+  suburb: '',
+  city: '',
+  province: '',
+  postal_code: '',
   description: '',
   bedrooms: undefined,
   bathrooms: undefined,
@@ -238,7 +243,7 @@ export default function AddPropertyUnlisted() {
       case 1:
         return <PropertyTypeStep control={control} errors={errors} />;
       case 2:
-        return <LocationStep control={control} errors={errors} />;
+        return <LocationStep control={control} errors={errors} watch={watch} setValue={setValue} structuredAddress />;
       case 3:
         return <DetailsStep control={control} errors={errors} setValue={setValue} watch={watch} />;
       case 4:
