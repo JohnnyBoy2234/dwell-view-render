@@ -60,7 +60,7 @@ export function MobileBottomBar() {
     ? [
         { path: getDeskRoute(), icon: Building, label: 'Dashboard' },
         { path: '/properties', icon: Search, label: 'Find' },
-        { path: '/listing-type', icon: Plus, label: 'List' },
+        { path: '/list-property', icon: Plus, label: 'List' },
         { path: '/messages', icon: MessageSquare, label: 'Chat', badge: messageUnread || 0 },
         { path: '/notifications', icon: Bell, label: 'Alerts', badge: totalNotifications },
       ]

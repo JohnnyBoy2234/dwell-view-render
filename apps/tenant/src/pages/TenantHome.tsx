@@ -4,7 +4,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useUnreadMessages } from '@mzanzihomes/supabase/hooks/useUnreadMessages';
 import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
 import { useTenantDashboard } from '@/hooks/useTenantDashboard';
-import { cn } from '@mzanzihomes/common/lib/utils';
 import { Button } from '@mzanzihomes/ui/components/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@mzanzihomes/ui/components/dialog';
 import {
@@ -66,7 +65,6 @@ export default function TenantHome() {
   const { upcomingViewings, hasSignedLease } = useTenantDashboard();
   const { filters, updateFilters, clearFilters, executeSearch } = usePropertySearchFilters();
 
-  const [dealType, setDealType] = useState<'rent' | 'buy'>('rent');
   const [pressedTile, setPressedTile] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
@@ -194,21 +192,6 @@ export default function TenantHome() {
             <p className="mt-4 max-w-[16.5rem] text-[13.5px] leading-relaxed text-slate-500">
               South Africa&apos;s smarter rental platform connecting verified landlords and tenants through seamless digital experiences every day.
             </p>
-
-            <div className="mt-6 inline-flex rounded-full bg-white p-1 shadow-[0_6px_18px_-8px_rgba(20,50,90,0.35)]">
-              <button
-                onClick={() => setDealType('rent')}
-                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'rent' ? 'bg-blue-600 text-white' : 'text-slate-500')}
-              >
-                Rent
-              </button>
-              <button
-                onClick={() => setDealType('buy')}
-                className={cn('rounded-full px-7 py-2 text-sm font-bold transition', dealType === 'buy' ? 'bg-blue-600 text-white' : 'text-slate-500')}
-              >
-                Buy
-              </button>
-            </div>
           </div>
         </div>
 

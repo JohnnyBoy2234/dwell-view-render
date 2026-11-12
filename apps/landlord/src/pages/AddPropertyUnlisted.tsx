@@ -395,7 +395,7 @@ export default function AddPropertyUnlisted() {
           label: "List Property",
           onClick: () => {
             setShowSuccessDialog(false);
-            navigate(newPropertyId ? `/listing-type?propertyId=${newPropertyId}` : '/listing-type');
+            navigate(newPropertyId ? `/list-property?propertyId=${newPropertyId}` : '/list-property');
           },
         }}
         secondaryAction={{

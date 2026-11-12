@@ -10,7 +10,6 @@ import {
   Trees,
   DoorOpen,
   GraduationCap,
-  Store,
   PenLine,
   Layers,
 } from 'lucide-react';
@@ -45,10 +44,9 @@ const groups = [
     ],
   },
   {
+    // Commercial Property removed for now — residential-only listings.
     heading: 'Other',
-    options: [
-      { value: 'Commercial Property', label: 'Commercial Property', description: 'Office, retail or industrial space', icon: Store },
-    ],
+    options: [],
   },
 ];
 

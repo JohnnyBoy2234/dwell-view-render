@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const RAW_DIR = path.resolve(__dirname, '..', 'raw', 'landlord');
+const TENANT_RAW_DIR = path.resolve(__dirname, '..', 'raw', 'tenant');
 const OUT_DIR = __dirname;
 
 function toFileUrl(p) {
@@ -66,6 +67,57 @@ const screens = [
     headline: 'Keep track of every item',
     sub: 'A clear record of furniture and appliances at each property',
     from: '#14b8a6', to: '#134e4a', bar: '#0e2a52',
+  },
+];
+
+const tenantScreens = [
+  {
+    out: 'tenant-01-home.html',
+    rawDir: TENANT_RAW_DIR,
+    file: 'Screenshot 2026-11-11 091945.png',
+    headline: 'Find your perfect home',
+    sub: 'Search verified listings and manage your rental, all in one app',
+    from: '#2563EB', to: '#0a1f45', bar: '#eef2f9',
+  },
+  {
+    out: 'tenant-02-viewings.html',
+    rawDir: TENANT_RAW_DIR,
+    file: 'Screenshot 2026-11-11 092000.png',
+    headline: 'Book and track viewings',
+    sub: 'See every scheduled viewing and get tips before you go',
+    from: '#0ea5e9', to: '#075985', bar: '#0e2a52',
+  },
+  {
+    out: 'tenant-03-maintenance.html',
+    rawDir: TENANT_RAW_DIR,
+    file: 'Screenshot 2026-11-11 092015.png',
+    headline: 'Report issues in seconds',
+    sub: "Tell your landlord what's wrong and track it to resolved",
+    from: '#22c55e', to: '#14532d', bar: '#0e2a52',
+  },
+  {
+    out: 'tenant-04-applications.html',
+    rawDir: TENANT_RAW_DIR,
+    file: 'Screenshot 2026-11-11 092029.png',
+    headline: 'Track every application',
+    sub: 'See invitations, applications and requests in one place',
+    from: '#f59e0b', to: '#9a3412', bar: '#0e2a52',
+  },
+  {
+    out: 'tenant-05-payments.html',
+    rawDir: TENANT_RAW_DIR,
+    file: 'Screenshot 2026-11-11 092206.png',
+    headline: 'Pay rent with confidence',
+    sub: 'View statements, payment history and download receipts anytime',
+    from: '#10b981', to: '#065f46', bar: '#0e2a52',
+  },
+  {
+    out: 'tenant-06-contracts.html',
+    rawDir: TENANT_RAW_DIR,
+    file: 'Screenshot 2026-11-11 092217.png',
+    headline: 'Sign leases from your phone',
+    sub: 'View, sign and store your rental agreements securely',
+    from: '#1e3a8a', to: '#0f172a', bar: '#0e2a52',
   },
 ];
 
@@ -223,7 +275,7 @@ const template = (s) => `<!DOCTYPE html>
       <div class="btn power"></div>
       <div class="screen">
         <div class="statusbar"><div class="island"></div></div>
-        <div class="shot"><img src="${toFileUrl(path.join(RAW_DIR, s.file))}" /></div>
+        <div class="shot"><img src="${toFileUrl(path.join(s.rawDir || RAW_DIR, s.file))}" /></div>
       </div>
     </div>
   </div>
@@ -231,7 +283,7 @@ const template = (s) => `<!DOCTYPE html>
 </html>
 `;
 
-for (const s of screens) {
+for (const s of [...screens, ...tenantScreens]) {
   fs.writeFileSync(path.join(OUT_DIR, s.out), template(s), 'utf8');
   console.log('wrote', s.out);
 }

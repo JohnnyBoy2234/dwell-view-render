@@ -2727,7 +2727,7 @@ const renderReportsTab = () => (
     };
 
     const tools: ToolItem[] = [
-      { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/listing-type') },
+      { title: 'List Property',  subtitle: 'Add a new listing',                  icon: Tag,           action: () => navigate('/list-property') },
       ...(canInvite ? [{ title: 'Invite Tenant', subtitle: 'Onboard your tenant', icon: UserPlus, action: () => setShowInviteModal(true) }] : []),
       { title: 'Messages',       subtitle: unreadMessages > 0 ? `${unreadMessages} unread` : 'Chat with tenants', icon: MessageCircle, path: '/messages', count: unreadMessages },
       { title: 'Applications',   subtitle: newApplications > 0 ? `${newApplications} new` : `${applications.length} total`, icon: ClipboardCheck, tab: '/landlord/dashboard/applications', count: newApplications },
@@ -3005,7 +3005,7 @@ const renderReportsTab = () => (
                         className="bg-purple-600 hover:bg-purple-700 text-white text-xs px-2"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/listing-type?propertyId=${property.id}`);
+                          navigate(`/list-property?propertyId=${property.id}`);
                         }}
                       >
                         ✦ Publish
