@@ -48,7 +48,7 @@ import { SubscribeGateDialog } from '@/components/SubscribeGateDialog';
 import { useSubscription } from '@mzanzihomes/supabase/hooks/useSubscription';
 import heroHome from '@/assets/hero-house.jpg';
 import { UserMenu } from '@mzanzihomes/ui/components/dashboard/UserMenu';
-import { NotificationBell } from '@mzanzihomes/ui/components/notifications/NotificationBell';
+import { useNotifications } from '@mzanzihomes/supabase/hooks/useNotifications';
 import { GlossyIcon, GLOSSY_TONES } from '@mzanzihomes/ui/components/GlossyIcon';
 import HomeCarousel from '@/components/HomeCarousel';
 import { LandlordModuleIntro } from '@/components/LandlordModuleIntro';
@@ -171,6 +171,8 @@ export default function EnhancedLandlordDashboard() {
 
   const { applications, loading: applicationsLoading, fetchAllApplications, updateApplicationStatus } = useLandlordApplications(selectedPropertyId || undefined);
   const { pendingSignatures } = useLandlordNotifications();
+  const { notifications: allNotifications } = useNotifications();
+  const totalUnread = (allNotifications || []).filter((n: any) => !n.is_read).length;
   const { unreadCount: unreadMessages } = useUnreadMessages();
 
   // Monetization plan state
@@ -2758,7 +2760,18 @@ const renderReportsTab = () => (
             <span className="text-[23px] font-extrabold tracking-tight text-foreground">MzanziHomes</span>
           </div>
           <div className="flex items-center gap-2.5">
-            <NotificationBell />
+            <button
+              onClick={() => navigate('/notifications')}
+              className="relative flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-sm active:scale-95"
+              aria-label="Notifications"
+            >
+              <Bell className="h-5 w-5 text-slate-700" />
+              {totalUnread > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-[1.25rem] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style={{ background: '#2563EB' }}>
+                  {totalUnread > 9 ? '9+' : totalUnread}
+                </span>
+              )}
+            </button>
             <UserMenu variant="light" />
           </div>
         </div>
