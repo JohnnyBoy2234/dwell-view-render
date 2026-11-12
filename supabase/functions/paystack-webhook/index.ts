@@ -212,7 +212,7 @@ serve(async (req) => {
           }
           await supabase.rpc("create_notification", {
             _user_id: landlordId,
-            _message: "Payment received — your listing is now live on MzanziHomes.",
+            _message: "Payment received — your property is now published on MzanziHomes.",
             _link_url: "/enhancedlandlorddashboard",
             _type: "billing",
             _metadata: { property_id: propertyId, reference },

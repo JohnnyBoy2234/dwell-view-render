@@ -155,7 +155,7 @@ export function AreaMultiSelect({ areas, onChange, placeholder = 'Add an area…
       </div>
 
       {open && suggestions.length > 0 && (
-        <div className="absolute left-0 right-0 top-[calc(100%+6px)] z-[300] max-h-[320px] overflow-y-auto overscroll-contain rounded-xl border border-slate-100 bg-white py-1 shadow-[0_12px_36px_-8px_rgba(20,50,90,0.28)]">
+        <div className="absolute -left-3 -right-3 top-[calc(100%+6px)] z-[300] max-h-[320px] overflow-y-auto overscroll-contain rounded-xl border border-slate-100 bg-white py-1 shadow-[0_12px_36px_-8px_rgba(20,50,90,0.28)]">
           {suggestions.map((s) => (
             <button
               key={s.value}

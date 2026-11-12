@@ -66,7 +66,7 @@ serve(async (req) => {
     console.log('🔍 Fetching property:', property_id);
     const { data: property, error: propertyError } = await supabaseAdmin
       .from('properties')
-      .select('id, ownership_status, title_deed_path, is_listed, landlord_id')
+      .select('id, title, ownership_status, title_deed_path, is_listed, landlord_id')
       .eq('id', property_id)
       .single();
 
@@ -108,17 +108,36 @@ serve(async (req) => {
     // PUBLISH_PAYWALL if those gates aren't satisfied yet, in which case we
     // just leave the property unpublished — approving ownership itself has
     // already succeeded above regardless of this outcome.
+    const title = property.title || 'listing';
     let autoPublished = false;
-    if (!property.is_listed) {
+    if (property.is_listed) {
+      // Already live from an earlier approval/payment race — no gate left to
+      // attempt, and no "it's live" notification needed since it already is.
+      autoPublished = true;
+    } else {
       console.log('📝 Attempting auto-publish now that ownership is verified');
-      const { data: publishedRow, error: publishError } = await supabaseAdmin
+      const { error: publishError } = await supabaseAdmin
         .from('properties')
         .update({ is_listed: true })
-        .eq('id', property_id)
-        .select('title')
-        .single();
+        .eq('id', property_id);
       if (publishError) {
         console.log('ℹ️ Auto-publish not possible yet:', publishError.message);
+        // The deed was still verified — the landlord must hear that now,
+        // not silently find out later. Give them the precise next step
+        // instead of a generic "still pending" message.
+        const reason = publishError.message || '';
+        const nextStep = reason.includes('IDENTITY_NOT_VERIFIED')
+          ? 'Complete your ID verification to publish it.'
+          : reason.includes('PUBLISH_PAYWALL')
+          ? 'Complete payment to publish it.'
+          : 'Finish the remaining steps to publish it.';
+        await supabaseAdmin.rpc('create_notification', {
+          _user_id: property.landlord_id,
+          _message: `Your title deed for "${title}" has been verified! ${nextStep}`,
+          _link_url: '/landlord/dashboard',
+          _type: 'system',
+          _metadata: { property_id, ownership_verified: true },
+        });
       } else {
         autoPublished = true;
         console.log('✅ Property auto-published');
@@ -128,7 +147,7 @@ serve(async (req) => {
         // popup for each (see landlord-property-published-popup channel).
         await supabaseAdmin.rpc('create_notification', {
           _user_id: property.landlord_id,
-          _message: `Your property "${publishedRow?.title || 'listing'}" is now live on MzanziHomes!`,
+          _message: `Your property "${title}" is now published on MzanziHomes!`,
           _link_url: '/landlord/dashboard',
           _type: 'system',
           _metadata: { property_id, auto_published: true },
